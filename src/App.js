@@ -1,7 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+import { RecoilRoot } from "recoil";
+import Onboarding from "./pages/Onboarding";
+import AuthCallback from "./pages/login/AuthCallback";
+import SignUpPageSocial from "./pages/SignUpPageSocial";
 import MainPage from "./pages/MainPage";
 import QuestionPage from "./pages/QuestionPage";
 import NoticePage from "./pages/NoticePage";
@@ -13,20 +15,23 @@ import ProblemSolvePage from "./pages/AssignmentPage/ProblemSolvePage";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/" element={<MainPage />} />
-        <Route path="/questions" element={<QuestionPage />} />
-        <Route path="/notices" element={<NoticePage />} />
-        <Route path="/mypage/info" element={<MyInfoPage />} />
-        <Route path="/mypage/assignments" element={<MyAssignmentsPage />} />
-        <Route path="/assignments/:week" element={<AssignmentListPage />} />
-        <Route path="/assignments/:week/detail" element={<AssignmentDetailPage />} />
-        <Route path="/assignments/:week/problem/:problemId" element={<ProblemSolvePage />} />
-      </Routes>
-    </Router>
+    <RecoilRoot>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Onboarding />} />
+          <Route path="/auth" element={<AuthCallback />} />
+          <Route path="/signup" element={<SignUpPageSocial />} />
+          <Route path="/main" element={<MainPage />} />
+          <Route path="/questions" element={<QuestionPage />} />
+          <Route path="/notices" element={<NoticePage />} />
+          <Route path="/mypage/info" element={<MyInfoPage />} />
+          <Route path="/mypage/assignments" element={<MyAssignmentsPage />} />
+          <Route path="/assignments" element={<AssignmentListPage />} />
+          <Route path="/assignments/:week/detail" element={<AssignmentDetailPage />} />
+          <Route path="/assignments/:week/problem/:problemId" element={<ProblemSolvePage />} />
+        </Routes>
+      </Router>
+    </RecoilRoot>
   );
 }
 
