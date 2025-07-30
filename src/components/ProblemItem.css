@@ -1,0 +1,77 @@
+.problem-item-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.problem-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: white;
+  border-bottom: 1px solid #f1f3f4;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.problem-item:hover {
+  background-color: #f8f9fa;
+}
+
+.problem-item:last-child {
+  border-bottom: none;
+}
+
+.problem-info {
+  flex: 1;
+}
+
+.problem-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3436;
+  margin: 0 0 0.5rem 0;
+}
+
+.problem-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.problem-level {
+  font-size: 0.85rem;
+  color: #636e72;
+  font-weight: 500;
+}
+
+.problem-completed {
+  font-size: 0.85rem;
+  color: #636e72;
+  font-weight: 500;
+}
+
+.problem-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-icon {
+  font-size: 0.8rem;
+}
+
+.language-icon {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.tag-icon {
+  font-size: 0.8rem;
+  color: #636e72;
+} 

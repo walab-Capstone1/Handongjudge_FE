@@ -1,0 +1,82 @@
+.main-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.main-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 2rem;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+.avatar-icon {
+  font-size: 20px;
+  color: white;
+}
+
+.content-section {
+  padding: 0 2rem 2rem;
+}
+
+.class-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.class-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2d3436;
+  margin: 0;
+}
+
+.more-link {
+  color: #0984e3;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.more-link:hover {
+  text-decoration: underline;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+}
+
+@media (max-width: 768px) {
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .class-title {
+    font-size: 2rem;
+  }
+  
+  .content-section {
+    padding: 0 1rem 1rem;
+  }
+} 
