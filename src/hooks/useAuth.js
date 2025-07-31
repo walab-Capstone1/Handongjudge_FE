@@ -1,9 +1,36 @@
 import { useRecoilState } from 'recoil';
 import { authState } from '../recoil/atoms';
 import APIService from '../services/APIService';
+import tokenManager from '../utils/tokenManager';
+import { useEffect } from 'react';
 
 export const useAuth = () => {
   const [auth, setAuth] = useRecoilState(authState);
+
+  // 토큰 갱신 콜백 설정
+  useEffect(() => {
+    tokenManager.setCallbacks(
+      // 토큰 갱신 성공 시
+      (tokens) => {
+        setAuth(prev => ({
+          ...prev,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        }));
+      },
+      // 토큰 만료 시
+      () => {
+        setAuth({
+          isAuthenticated: false,
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          loading: false,
+          error: null,
+        });
+      }
+    );
+  }, [setAuth]);
 
   // 로그인 함수
   const login = async (email, password) => {
@@ -11,7 +38,7 @@ export const useAuth = () => {
       setAuth(prev => ({ ...prev, loading: true, error: null }));
       
       const response = await APIService.login(email, password);
-      
+
       setAuth({
         isAuthenticated: true,
         user: response.user,
@@ -66,6 +93,9 @@ export const useAuth = () => {
       
       await APIService.logout();
       
+      // 토큰 제거
+      tokenManager.clearTokens();
+      
       setAuth({
         isAuthenticated: false,
         user: null,
@@ -77,6 +107,7 @@ export const useAuth = () => {
     } catch (error) {
       console.error('Logout error:', error);
       // 로그아웃 실패해도 로컬 상태는 초기화
+      tokenManager.clearTokens();
       setAuth({
         isAuthenticated: false,
         user: null,
@@ -91,7 +122,7 @@ export const useAuth = () => {
   // 토큰 갱신 함수
   const refreshToken = async () => {
     try {
-      const response = await APIService.refreshToken();
+      const response = await tokenManager.refreshToken();
       
       setAuth(prev => ({
         ...prev,
@@ -175,6 +206,67 @@ export const useAuth = () => {
     }
   };
 
+  // 인증 상태 복원 함수 (앱 시작 시)
+  const restoreAuth = async () => {
+    try {
+      console.log('인증 상태 복원 시작');
+      setAuth(prev => ({ ...prev, loading: true }));
+      
+      const tokens = await tokenManager.restoreTokens();
+      console.log('토큰 복원 결과:', tokens ? '성공' : '실패');
+      
+      if (tokens) {
+        // 토큰이 유효하면 사용자 정보 조회
+        console.log('사용자 정보 조회 시작');
+        try {
+          const userInfo = await APIService.getUserInfo();
+          console.log('사용자 정보 조회 성공:', userInfo);
+          
+          setAuth({
+            isAuthenticated: true,
+            user: userInfo,
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            loading: false,
+            error: null,
+          });
+        } catch (userError) {
+          console.error('사용자 정보 조회 실패:', userError);
+          // 사용자 정보 조회 실패 시 토큰 제거
+          tokenManager.clearTokens();
+          setAuth({
+            isAuthenticated: false,
+            user: null,
+            accessToken: null,
+            refreshToken: null,
+            loading: false,
+            error: null,
+          });
+        }
+      } else {
+        console.log('토큰이 없거나 유효하지 않음');
+        setAuth({
+          isAuthenticated: false,
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          loading: false,
+          error: null,
+        });
+      }
+    } catch (error) {
+      console.error('인증 상태 복원 실패:', error);
+      setAuth({
+        isAuthenticated: false,
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        loading: false,
+        error: null,
+      });
+    }
+  };
+
   // 에러 초기화 함수
   const clearError = () => {
     setAuth(prev => ({ ...prev, error: null }));
@@ -197,6 +289,7 @@ export const useAuth = () => {
     checkAuthStatus,
     requestPasswordReset,
     resetPassword,
+    restoreAuth,
     clearError,
   };
 };
