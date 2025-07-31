@@ -1,0 +1,23 @@
+.question-page {
+  min-height: 100vh;
+  background-color: white;
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-container h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2d3436;
+  margin: 0 0 2rem 0;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 1rem;
+  }
+} 

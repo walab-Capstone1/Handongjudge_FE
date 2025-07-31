@@ -92,25 +92,25 @@ const AssignmentListPage = () => {
   return (
     <MainLayout>
       <div className="assignment-list-page">
-        <div className="page-header">
-          <h1 className="page-title">수업 선택 페이지(AssignmentListPage)</h1>
-        </div>
+      
         
         <div className="content-area">
-          <div className="class-info">
-            <div className="class-details">
-              <h2 className="class-title">A Class (section 2)</h2>
-              <p className="class-description">
-                class descriptions class descriptions class descriptions class descriptions class descriptions
-              </p>
+          <div className="assignment-section-container">
+            <div className="class-info">
+              <div className="class-details">
+                <h2 className="class-title">A Class (section 2)</h2>
+                <p className="class-description">
+                  class descriptions class descriptions class descriptions class descriptions class descriptions
+                </p>
+              </div>
+              <div className="class-icon">📚</div>
             </div>
-            <div className="class-icon">📚</div>
-          </div>
-          
-          <div className="weeks-grid">
-            {weeks.map((week) => (
-              <WeekCard key={week.id} week={week} />
-            ))}
+            
+            <div className="weeks-grid">
+              {weeks.map((week) => (
+                <WeekCard key={week.id} week={week} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

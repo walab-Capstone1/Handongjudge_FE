@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Split from "react-split";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
@@ -32,11 +33,31 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const ProblemSolvePage = () => {
+  const { week, problemId } = useParams();
+  const navigate = useNavigate();
   const [language, setLanguage] = useState("cpp");
   const [theme, setTheme] = useState("light");
   const [code, setCode] = useState(getDefaultCode("cpp"));
   const [submissionResult, setSubmissionResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 문제 데이터 (실제로는 API에서 가져올 데이터)
+  const problemData = {
+    "1": {
+      "1": { title: "완주하지 못한 선수", description: "완주하지 못한 선수 문제 설명..." },
+      "2": { title: "N Queens", description: "N-Queens 문제 설명..." },
+      "3": { title: "전화번호 목록", description: "전화번호 목록 문제 설명..." }
+    },
+    "2": {
+      "1": { title: "의상", description: "의상 문제 설명..." },
+      "2": { title: "베스트앨범", description: "베스트앨범 문제 설명..." }
+    }
+  };
+
+  const currentProblem = problemData[week]?.[problemId] || { 
+    title: "알 수 없는 문제", 
+    description: "문제를 찾을 수 없습니다." 
+  };
 
   function getDefaultCode(lang) {
     switch (lang) {
@@ -119,26 +140,23 @@ const ProblemSolvePage = () => {
     }, 2000);
   };
 
-  const problemDescription = `
-# N-Queens 문제
+  const problemDescription = currentProblem.description || `
+# ${currentProblem.title}
 
 ## 문제 설명
-N×N 체스판에 N개의 퀸을 서로 공격할 수 없도록 배치하는 문제입니다.
+이 문제는 ${currentProblem.title}에 대한 설명입니다.
 
 ## 제한사항
-- 1 ≤ N ≤ 12
-- 퀸은 가로, 세로, 대각선으로 이동할 수 있습니다.
-- 서로 다른 퀸이 같은 행, 열, 대각선에 있으면 안 됩니다.
+- 문제에 대한 제한사항을 확인하세요.
 
 ## 입출력 예시
 \`\`\`
-입력: N = 4
-출력: 2
+입력: 예시 입력
+출력: 예시 출력
 \`\`\`
 
 ## 힌트
-- 백트래킹 알고리즘을 사용해보세요.
-- 각 행에 하나씩 퀸을 배치하는 방식으로 접근해보세요.
+- 문제 해결을 위한 힌트를 참고하세요.
 `;
 
   const gutterStyle = () => ({
@@ -165,8 +183,15 @@ N×N 체스판에 N개의 퀸을 서로 공격할 수 없도록 배치하는 문
       <StyledPage $theme={theme}>
         <StyledHeader $theme={theme}>
           <div className="breadcrumb">
-            <span>A Class › Week 1 › </span>
-            <strong>N Queens</strong>
+            <BreadcrumbLink onClick={() => navigate("/assignments")}>
+              A Class
+            </BreadcrumbLink>
+            <span> › </span>
+            <BreadcrumbLink onClick={() => navigate(`/assignments/${week}/detail`)}>
+             {week}
+            </BreadcrumbLink>
+            <span> › </span>
+            <strong>{currentProblem.title}</strong>
           </div>
           <div className="controls">
             <ThemeButton onClick={() => setTheme("light")} $active={theme === "light"}>
@@ -277,6 +302,16 @@ const StyledHeader = styled.div`
   align-items: center;
 `;
 
+const BreadcrumbLink = styled.span`
+  color: ${({ $theme }) => ($theme === "dark" ? "#58a6ff" : "#0969da")};
+  cursor: pointer;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const ThemeButton = styled.button`
   padding: 4px 10px;
   margin-right: 4px;
@@ -321,7 +356,6 @@ const StyledEditorHeader = styled.div`
   padding-top: 8px;
   color: ${({ $theme }) => ($theme === "dark" ? "#8b949e" : "#333")};
 `;
-
 
 const EditorScrollArea = styled.div`
   flex: 1;
@@ -372,4 +406,5 @@ const StyledSubmitButton = styled.button`
     background-color: #1f6feb;
   }
 `;
+
 export default ProblemSolvePage;

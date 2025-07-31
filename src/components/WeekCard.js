@@ -12,6 +12,15 @@ const WeekCard = ({ week }) => {
     }
   };
 
+  const getDeadlineText = (frequency) => {
+    switch (frequency) {
+      case "높음": return "D-3";
+      case "보통": return "D-7";
+      case "낮음": return "D-14";
+      default: return "D-7";
+    }
+  };
+
   return (
     <Link to={`/assignments/${week.title.replace(' ', '')}/detail`} className="week-card-link">
       <div className="week-card">
@@ -24,9 +33,9 @@ const WeekCard = ({ week }) => {
         
         <div className="week-metrics">
           <div className="metric">
-            <span className="metric-label">출제빈도</span>
-            <span className="metric-value">
-              {getLevelIcon(week.frequency)} {week.frequency}
+            <span className="metric-label">과제 기한</span>
+            <span className="metric-value deadline">
+              {getDeadlineText(week.frequency)}
             </span>
           </div>
           

@@ -1,10 +1,15 @@
 import React from "react";
 import MainLayout from "../../layouts/MainLayout";
+import "./MyAssignmentsPage.css";
 
 const MyAssignmentsPage = () => (
   <MainLayout>
-    <h2>내가 푼 과제리스트 정보 페이지</h2>
-    {/* TODO: 내가 푼 과제 리스트 표시 */}
+    <div className="my-assignments-page">
+      <div className="page-container">
+        <h2>내 과제 페이지</h2>
+        {/* TODO: 사용자 과제 목록 구현 */}
+      </div>
+    </div>
   </MainLayout>
 );
 

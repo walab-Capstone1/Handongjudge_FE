@@ -6,7 +6,7 @@ import "./AssignmentDetailPage.css";
 
 const AssignmentDetailPage = () => {
   const { week } = useParams();
-  const [selectedFilter, setSelectedFilter] = useState("frequency");
+  const [selectedFilter, setSelectedFilter] = useState("deadline");
 
   const problems = [
     {
@@ -63,37 +63,26 @@ const AssignmentDetailPage = () => {
   return (
     <MainLayout>
       <div className="assignment-detail-page">
-        <div className="page-header">
-          <h1 className="page-title">과제 리스트 페이지 (AssignmentDetailPage)</h1>
-        </div>
+      
         
         <div className="content-area">
           <div className="week-header">
             <div className="week-info">
-              <h2 className="week-title">Week {week}</h2>
+              <h2 className="week-title">{week}</h2>
               <p className="week-description">
                 {weekDescriptions[week] || "해당 주차의 문제들을 풀어보세요."}
               </p>
+              <div className="assignment-deadline">
+                <span className="deadline-label">과제 기한:</span>
+                <span className="deadline-date">2024년 1월 31일까지</span>
+              </div>
             </div>
             <Link to="/mypage/info" className="profile-avatar">
               <div className="avatar-icon">🐦</div>
             </Link>
           </div>
           
-          <div className="filter-tabs">
-            <button 
-              className={`filter-tab ${selectedFilter === "frequency" ? "active" : ""}`}
-              onClick={() => setSelectedFilter("frequency")}
-            >
-              출제빈도 높을
-            </button>
-            <button 
-              className={`filter-tab ${selectedFilter === "score" ? "active" : ""}`}
-              onClick={() => setSelectedFilter("score")}
-            >
-              평균 점수 모듬
-            </button>
-          </div>
+         
           
           <div className="problems-list">
             {problems.map((problem) => (
