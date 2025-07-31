@@ -1,0 +1,5 @@
+---
+description: 코드 바꾸기전에 먼저 설명하고 어떻게 바꿀건지 제안을 하고, 수락하면 바꿔줘
+globs:
+alwaysApply: true
+---
