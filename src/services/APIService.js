@@ -1,22 +1,8 @@
-import { decodeJWT, isTokenExpired, shouldRefreshToken } from '../utils/jwt';
+import tokenManager from '../utils/tokenManager';
 
 class APIService {
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-    this.accessToken = null;
-    this.refreshToken = null;
-  }
-
-  // 토큰 설정
-  setTokens(accessToken, refreshToken) {
-    this.accessToken = accessToken;
-    this.refreshToken = refreshToken;
-  }
-
-  // 토큰 초기화
-  clearTokens() {
-    this.accessToken = null;
-    this.refreshToken = null;
+    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
   }
 
   // HTTP 요청 헬퍼 함수
@@ -32,21 +18,28 @@ class APIService {
     };
 
     // 액세스 토큰이 있으면 헤더에 추가
-    if (this.accessToken) {
-      config.headers.Authorization = `Bearer ${this.accessToken}`;
+    const accessToken = tokenManager.getAccessToken();
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
     try {
       const response = await fetch(url, config);
       
       // 401 에러이고 리프레시 토큰이 있으면 토큰 갱신 시도
-      if (response.status === 401 && this.refreshToken) {
-        const refreshed = await this.refreshToken();
-        if (refreshed) {
+      if (response.status === 401 && tokenManager.getRefreshToken()) {
+        try {
+          await tokenManager.refreshToken();
           // 토큰 갱신 성공 시 원래 요청 재시도
-          config.headers.Authorization = `Bearer ${this.accessToken}`;
-          const retryResponse = await fetch(url, config);
-          return this.handleResponse(retryResponse);
+          const newAccessToken = tokenManager.getAccessToken();
+          if (newAccessToken) {
+            config.headers.Authorization = `Bearer ${newAccessToken}`;
+            const retryResponse = await fetch(url, config);
+            return this.handleResponse(retryResponse);
+          }
+        } catch (refreshError) {
+          // 토큰 갱신 실패 시 원래 에러 반환
+          console.error('토큰 갱신 실패:', refreshError);
         }
       }
 
@@ -73,8 +66,9 @@ class APIService {
       body: JSON.stringify({ email, password }),
     });
 
-    if (response.accessToken && response.refreshToken) {
-      this.setTokens(response.accessToken, response.refreshToken);
+    // 토큰 저장
+    if (response.accessToken) {
+      tokenManager.setTokens(response.accessToken, response.refreshToken);
     }
 
     return response;
@@ -87,47 +81,24 @@ class APIService {
       body: JSON.stringify({ provider, token }),
     });
 
-    if (response.accessToken && response.refreshToken) {
-      this.setTokens(response.accessToken, response.refreshToken);
+    // 토큰 저장 (소셜 로그인의 경우 refresh token이 없을 수 있음)
+    if (response.accessToken) {
+      tokenManager.setTokens(response.accessToken, response.refreshToken);
     }
 
     return response;
   }
 
-  // 토큰 갱신
+  // 토큰 갱신 (TokenManager로 위임)
   async refreshToken() {
-    if (!this.refreshToken) {
-      throw new Error('리프레시 토큰이 없습니다.');
-    }
-
-    try {
-      const response = await fetch(`${this.baseURL}/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken: this.refreshToken }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        this.setTokens(data.accessToken, data.refreshToken);
-        return true;
-      } else {
-        this.clearTokens();
-        return false;
-      }
-    } catch (error) {
-      console.error('토큰 갱신 오류:', error);
-      this.clearTokens();
-      return false;
-    }
+    return await tokenManager.refreshToken();
   }
 
   // 로그아웃
   async logout() {
     try {
-      if (this.accessToken) {
+      const accessToken = tokenManager.getAccessToken();
+      if (accessToken) {
         await this.request('/auth/logout', {
           method: 'POST',
         });
@@ -135,18 +106,20 @@ class APIService {
     } catch (error) {
       console.error('로그아웃 오류:', error);
     } finally {
-      this.clearTokens();
+      tokenManager.clearTokens();
     }
   }
 
   // 사용자 정보 조회
   async getUserInfo() {
-    return await this.request('/auth/me');
+    const response = await this.request('/user/me');
+    return response.data; // UserController에서 data 필드로 반환
   }
 
   // 인증 상태 확인
   async checkAuthStatus() {
-    if (!this.accessToken) {
+    const accessToken = tokenManager.getAccessToken();
+    if (!accessToken) {
       return { isAuthenticated: false, user: null };
     }
 
@@ -154,7 +127,7 @@ class APIService {
       const user = await this.getUserInfo();
       return { isAuthenticated: true, user };
     } catch (error) {
-      this.clearTokens();
+      tokenManager.clearTokens();
       return { isAuthenticated: false, user: null };
     }
   }
@@ -177,25 +150,24 @@ class APIService {
 
   // 토큰 유효성 검사
   isTokenValid() {
-    if (!this.accessToken) return false;
-    return !isTokenExpired(this.accessToken);
+    return tokenManager.isTokenValid();
   }
 
   // 토큰 갱신 필요 여부 확인
   shouldRefresh() {
-    if (!this.accessToken) return false;
-    return shouldRefreshToken(this.accessToken);
+    return tokenManager.shouldRefresh();
   }
 
   // 현재 액세스 토큰 반환
   getAccessToken() {
-    return this.accessToken;
+    return tokenManager.getAccessToken();
   }
 
   // 현재 리프레시 토큰 반환
   getRefreshToken() {
-    return this.refreshToken;
+    return tokenManager.getRefreshToken();
   }
 }
 
-export default new APIService();
+const apiService = new APIService();
+export default apiService;

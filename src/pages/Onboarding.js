@@ -42,14 +42,10 @@ const Onboarding = () => {
     });
   };
 
+  // Onboarding.jsx
   const handleSocialLogin = (provider) => {
-    // 소셜 로그인은 AuthCallback에서 처리
-    navigate("/auth/callback", { 
-      state: { 
-        type: "social", 
-        provider 
-      } 
-    });
+    // 직접 백엔드 OAuth URL로 이동
+    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
   };
 
   const handleSignup = () => {
