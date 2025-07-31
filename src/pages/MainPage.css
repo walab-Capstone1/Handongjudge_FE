@@ -1,12 +1,14 @@
 .main-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: white;
 }
 
 .main-header {
   display: flex;
   justify-content: flex-end;
   padding: 1rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .profile-avatar {
@@ -32,7 +34,9 @@
 }
 
 .content-section {
-  padding: 0 2rem 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .class-header {
@@ -40,10 +44,12 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
 }
 
 .class-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: bold;
   color: #2d3436;
   margin: 0;
@@ -53,30 +59,25 @@
   color: #0984e3;
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.1rem;
+  transition: color 0.2s ease;
 }
 
 .more-link:hover {
-  text-decoration: underline;
+  color: #0652DD;
 }
 
 .courses-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
-  max-width: 1200px;
 }
 
 @media (max-width: 768px) {
+  .content-section {
+    padding: 1rem;
+  }
+  
   .courses-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .class-title {
-    font-size: 2rem;
-  }
-  
-  .content-section {
-    padding: 0 1rem 1rem;
   }
 } 

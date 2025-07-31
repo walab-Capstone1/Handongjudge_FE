@@ -83,4 +83,14 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+.metric-value.deadline {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.metric-value.deadline:before {
+  content: "⏰ ";
+  margin-right: 0.25rem;
 } 

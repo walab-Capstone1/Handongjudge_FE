@@ -3,20 +3,18 @@
   background-color: white;
 }
 
-.page-header {
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #eee;
-}
-
-.page-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #2d3436;
-  margin: 0;
-}
-
 .content-area {
   padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.assignment-section-container {
+  background-color: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .class-info {
@@ -24,9 +22,6 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2rem;
-  padding: 1.5rem;
-  background-color: #f8f9fa;
-  border-radius: 12px;
 }
 
 .class-details {
