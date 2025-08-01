@@ -15,7 +15,6 @@ export const useAuth = () => {
         setAuth(prev => ({
           ...prev,
           accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
         }));
       },
       // 토큰 만료 시
@@ -24,7 +23,6 @@ export const useAuth = () => {
           isAuthenticated: false,
           user: null,
           accessToken: null,
-          refreshToken: null,
           loading: false,
           error: null,
         });
@@ -43,7 +41,6 @@ export const useAuth = () => {
         isAuthenticated: true,
         user: response.user,
         accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
         loading: false,
         error: null,
       });
@@ -70,7 +67,6 @@ export const useAuth = () => {
         isAuthenticated: true,
         user: response.user,
         accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
         loading: false,
         error: null,
       });
@@ -93,48 +89,23 @@ export const useAuth = () => {
       
       await APIService.logout();
       
-      // 토큰 제거
-      tokenManager.clearTokens();
-      
       setAuth({
         isAuthenticated: false,
         user: null,
         accessToken: null,
-        refreshToken: null,
         loading: false,
         error: null,
       });
     } catch (error) {
       console.error('Logout error:', error);
       // 로그아웃 실패해도 로컬 상태는 초기화
-      tokenManager.clearTokens();
       setAuth({
         isAuthenticated: false,
         user: null,
         accessToken: null,
-        refreshToken: null,
         loading: false,
         error: null,
       });
-    }
-  };
-
-  // 토큰 갱신 함수
-  const refreshToken = async () => {
-    try {
-      const response = await tokenManager.refreshToken();
-      
-      setAuth(prev => ({
-        ...prev,
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
-      }));
-
-      return response;
-    } catch (error) {
-      // 토큰 갱신 실패 시 로그아웃
-      await logout();
-      throw error;
     }
   };
 
@@ -153,28 +124,6 @@ export const useAuth = () => {
       setAuth(prev => ({
         ...prev,
         error: error.message || '사용자 정보 조회에 실패했습니다.',
-      }));
-      throw error;
-    }
-  };
-
-  // 인증 상태 확인 함수
-  const checkAuthStatus = async () => {
-    try {
-      const status = await APIService.checkAuthStatus();
-      
-      setAuth(prev => ({
-        ...prev,
-        isAuthenticated: status.isAuthenticated,
-        user: status.user,
-      }));
-
-      return status;
-    } catch (error) {
-      setAuth(prev => ({
-        ...prev,
-        isAuthenticated: false,
-        user: null,
       }));
       throw error;
     }
@@ -206,65 +155,10 @@ export const useAuth = () => {
     }
   };
 
-  // 인증 상태 복원 함수 (앱 시작 시)
+  // 인증 상태 복원 함수 (더 이상 사용하지 않음 - 토큰은 메모리에만 저장)
   const restoreAuth = async () => {
-    try {
-      console.log('인증 상태 복원 시작');
-      setAuth(prev => ({ ...prev, loading: true }));
-      
-      const tokens = await tokenManager.restoreTokens();
-      console.log('토큰 복원 결과:', tokens ? '성공' : '실패');
-      
-      if (tokens) {
-        // 토큰이 유효하면 사용자 정보 조회
-        console.log('사용자 정보 조회 시작');
-        try {
-          const userInfo = await APIService.getUserInfo();
-          console.log('사용자 정보 조회 성공:', userInfo);
-          
-          setAuth({
-            isAuthenticated: true,
-            user: userInfo,
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            loading: false,
-            error: null,
-          });
-        } catch (userError) {
-          console.error('사용자 정보 조회 실패:', userError);
-          // 사용자 정보 조회 실패 시 토큰 제거
-          tokenManager.clearTokens();
-          setAuth({
-            isAuthenticated: false,
-            user: null,
-            accessToken: null,
-            refreshToken: null,
-            loading: false,
-            error: null,
-          });
-        }
-      } else {
-        console.log('토큰이 없거나 유효하지 않음');
-        setAuth({
-          isAuthenticated: false,
-          user: null,
-          accessToken: null,
-          refreshToken: null,
-          loading: false,
-          error: null,
-        });
-      }
-    } catch (error) {
-      console.error('인증 상태 복원 실패:', error);
-      setAuth({
-        isAuthenticated: false,
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        loading: false,
-        error: null,
-      });
-    }
+    console.log('인증 상태 복원 - 토큰은 메모리에만 저장되므로 복원 불필요');
+    return null;
   };
 
   // 에러 초기화 함수
@@ -284,9 +178,7 @@ export const useAuth = () => {
     login,
     socialLogin,
     logout,
-    refreshToken,
     getUserInfo,
-    checkAuthStatus,
     requestPasswordReset,
     resetPassword,
     restoreAuth,

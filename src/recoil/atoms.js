@@ -7,7 +7,6 @@ export const authState = atom({
     isAuthenticated: false,
     user: null,
     accessToken: null,
-    refreshToken: null,
     loading: false,
     error: null,
   },
@@ -20,15 +19,5 @@ export const onboardingState = atom({
     currentStep: 0,
     isCompleted: false,
     userPreferences: {},
-  },
-});
-
-// UI 상태 atom
-export const uiState = atom({
-  key: 'uiState',
-  default: {
-    sidebarOpen: false,
-    theme: 'light',
-    language: 'ko',
   },
 });

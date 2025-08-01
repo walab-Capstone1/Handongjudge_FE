@@ -26,11 +26,13 @@ const AuthCallback = () => {
         if (accessToken) {
           // OAuth 콜백으로 들어온 경우
           setStatus("소셜 로그인 처리 중...");
+          console.log("Received access token:", accessToken);
 
           try {
             // 토큰을 직접 저장하고 인증 상태 설정
             const tokenManager = await import("../../utils/tokenManager");
-            tokenManager.default.setTokens(accessToken, refreshToken);
+            tokenManager.default.setAccessToken(accessToken);
+            console.log("Access token saved to memory");
 
             // 사용자 정보 조회
             const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080/api'}/user/me`, {

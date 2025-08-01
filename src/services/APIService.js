@@ -10,6 +10,7 @@ class APIService {
     const url = `${this.baseURL}${endpoint}`;
     
     const config = {
+      credentials: 'include', // 쿠키 포함
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
@@ -17,7 +18,7 @@ class APIService {
       ...options,
     };
 
-    // 액세스 토큰이 있으면 헤더에 추가
+    // Access Token이 있으면 헤더에 추가
     const accessToken = tokenManager.getAccessToken();
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -26,8 +27,8 @@ class APIService {
     try {
       const response = await fetch(url, config);
       
-      // 401 에러이고 리프레시 토큰이 있으면 토큰 갱신 시도
-      if (response.status === 401 && tokenManager.getRefreshToken()) {
+      // 401 에러 시 토큰 갱신 시도
+      if (response.status === 401) {
         try {
           await tokenManager.refreshToken();
           // 토큰 갱신 성공 시 원래 요청 재시도
@@ -66,9 +67,9 @@ class APIService {
       body: JSON.stringify({ email, password }),
     });
 
-    // 토큰 저장
+    // Access Token 저장 (Refresh Token은 쿠키에서 처리)
     if (response.accessToken) {
-      tokenManager.setTokens(response.accessToken, response.refreshToken);
+      tokenManager.setAccessToken(response.accessToken);
     }
 
     return response;
@@ -81,28 +82,20 @@ class APIService {
       body: JSON.stringify({ provider, token }),
     });
 
-    // 토큰 저장 (소셜 로그인의 경우 refresh token이 없을 수 있음)
+    // Access Token 저장
     if (response.accessToken) {
-      tokenManager.setTokens(response.accessToken, response.refreshToken);
+      tokenManager.setAccessToken(response.accessToken);
     }
 
     return response;
   }
 
-  // 토큰 갱신 (TokenManager로 위임)
-  async refreshToken() {
-    return await tokenManager.refreshToken();
-  }
-
   // 로그아웃
   async logout() {
     try {
-      const accessToken = tokenManager.getAccessToken();
-      if (accessToken) {
-        await this.request('/auth/logout', {
-          method: 'POST',
-        });
-      }
+      await this.request('/auth/logout', {
+        method: 'POST',
+      });
     } catch (error) {
       console.error('로그아웃 오류:', error);
     } finally {
@@ -113,21 +106,15 @@ class APIService {
   // 사용자 정보 조회
   async getUserInfo() {
     const response = await this.request('/user/me');
-    return response.data; // UserController에서 data 필드로 반환
+    return response.data || response;
   }
 
   // 인증 상태 확인
   async checkAuthStatus() {
-    const accessToken = tokenManager.getAccessToken();
-    if (!accessToken) {
-      return { isAuthenticated: false, user: null };
-    }
-
     try {
       const user = await this.getUserInfo();
       return { isAuthenticated: true, user };
     } catch (error) {
-      tokenManager.clearTokens();
       return { isAuthenticated: false, user: null };
     }
   }
@@ -153,19 +140,9 @@ class APIService {
     return tokenManager.isTokenValid();
   }
 
-  // 토큰 갱신 필요 여부 확인
-  shouldRefresh() {
-    return tokenManager.shouldRefresh();
-  }
-
   // 현재 액세스 토큰 반환
   getAccessToken() {
     return tokenManager.getAccessToken();
-  }
-
-  // 현재 리프레시 토큰 반환
-  getRefreshToken() {
-    return tokenManager.getRefreshToken();
   }
 }
 
