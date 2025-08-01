@@ -56,31 +56,7 @@ export const useAuth = () => {
     }
   };
 
-  // 소셜 로그인 함수
-  const socialLogin = async (provider, token) => {
-    try {
-      setAuth(prev => ({ ...prev, loading: true, error: null }));
-      
-      const response = await APIService.socialLogin(provider, token);
-      
-      setAuth({
-        isAuthenticated: true,
-        user: response.user,
-        accessToken: response.accessToken,
-        loading: false,
-        error: null,
-      });
 
-      return response;
-    } catch (error) {
-      setAuth(prev => ({
-        ...prev,
-        loading: false,
-        error: error.message || '소셜 로그인에 실패했습니다.',
-      }));
-      throw error;
-    }
-  };
 
   // 로그아웃 함수
   const logout = async () => {
@@ -176,7 +152,6 @@ export const useAuth = () => {
     
     // 함수
     login,
-    socialLogin,
     logout,
     getUserInfo,
     requestPasswordReset,
