@@ -8,6 +8,8 @@ const CourseCard = ({ course }) => {
       case "purple": return "purple";
       case "orange": return "orange";
       case "red": return "red";
+      case "blue": return "blue";
+      case "green": return "green";
       default: return "blue";
     }
   };
@@ -21,13 +23,20 @@ const CourseCard = ({ course }) => {
     }
   };
 
+  // sectionId가 있으면 해당 section의 과제 페이지로, 없으면 기본 과제 페이지로
+  const getLinkPath = () => {
+    if (course.sectionId) {
+      return `/assignments?section=${course.sectionId}`;
+    }
+    return "/assignments";
+  };
+
   return (
-    <Link to="/assignments" className="course-card-link">
+    <Link to={getLinkPath()} className="course-card-link">
       <div className="course-card">
         <div className={`card-header ${getColorClass(course.color)}`}>
           <div className="card-title">
             <h3>{course.title}</h3>
-            <p className="subtitle">{course.subtitle}</p>
           </div>
           <div className="batch-badge">{course.batch}</div>
         </div>
@@ -43,7 +52,7 @@ const CourseCard = ({ course }) => {
             ))}
           </div>
           
-          <p className="instructor">{course.instructor}</p>
+          <p className="instructor">{course.instructor} 교수님</p>
         </div>
       </div>
     </Link>
