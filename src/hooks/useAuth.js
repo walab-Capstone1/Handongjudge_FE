@@ -30,6 +30,50 @@ export const useAuth = () => {
     );
   }, [setAuth]);
 
+  // 인증 상태 복원
+  useEffect(() => {
+    const restoreAuthState = async () => {
+      try {
+        const restoredTokens = await tokenManager.restoreAuth();
+        if (restoredTokens) {
+          setAuth(prev => ({
+            ...prev,
+            isAuthenticated: true,
+            accessToken: restoredTokens.accessToken,
+            loading: false,
+          }));
+          
+          // 사용자 정보도 함께 가져오기
+          try {
+            const userInfo = await APIService.getUserInfo();
+            setAuth(prev => ({
+              ...prev,
+              user: userInfo,
+            }));
+          } catch (userError) {
+            console.error('사용자 정보 조회 실패:', userError);
+            // 사용자 정보 조회 실패해도 인증 상태는 유지
+          }
+        } else {
+          setAuth(prev => ({
+            ...prev,
+            isAuthenticated: false,
+            loading: false,
+          }));
+        }
+      } catch (error) {
+        console.error('인증 상태 복원 실패:', error);
+        setAuth(prev => ({
+          ...prev,
+          isAuthenticated: false,
+          loading: false,
+        }));
+      }
+    };
+
+    restoreAuthState();
+  }, [setAuth]);
+
   // 로그인 함수
   const login = async (email, password) => {
     try {
