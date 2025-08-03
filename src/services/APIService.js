@@ -117,6 +117,18 @@ class APIService {
     });
   }
 
+  // 유저별 수강 중인 section 조회 (현재 백엔드 API에 맞춤)
+  async getUserEnrolledSections() {
+    return await this.request('/user/dashboard');
+  }
+
+  // 공지사항 확인 처리
+  async markNoticeAsRead(noticeId) {
+    return await this.request(`/notices/${noticeId}/read`, {
+      method: 'POST',
+    });
+  }
+
 
 }
 

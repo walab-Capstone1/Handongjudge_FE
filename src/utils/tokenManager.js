@@ -1,9 +1,9 @@
-// 단순화된 토큰 매니저
-// Access Token은 메모리에만 저장, Refresh Token은 httpOnly 쿠키에서 처리
+// 토큰 매니저
+// Access Token은 localStorage에 저장, Refresh Token은 httpOnly 쿠키에서 처리
 
 class TokenManager {
   constructor() {
-    this.accessToken = null;
+    this.accessToken = this.getStoredAccessToken();
     this.onTokenRefresh = null;
     this.onTokenExpired = null;
   }
@@ -14,9 +14,33 @@ class TokenManager {
     this.onTokenExpired = onTokenExpired;
   }
 
-  // Access Token 설정 (메모리에만 저장)
+  // localStorage에서 토큰 가져오기
+  getStoredAccessToken() {
+    try {
+      return localStorage.getItem('accessToken');
+    } catch (error) {
+      console.error('localStorage 접근 오류:', error);
+      return null;
+    }
+  }
+
+  // localStorage에 토큰 저장
+  setStoredAccessToken(token) {
+    try {
+      if (token) {
+        localStorage.setItem('accessToken', token);
+      } else {
+        localStorage.removeItem('accessToken');
+      }
+    } catch (error) {
+      console.error('localStorage 저장 오류:', error);
+    }
+  }
+
+  // Access Token 설정 (localStorage에 저장)
   setAccessToken(token) {
     this.accessToken = token;
+    this.setStoredAccessToken(token);
   }
 
   // Access Token 반환
@@ -27,6 +51,7 @@ class TokenManager {
   // 토큰 제거
   clearTokens() {
     this.accessToken = null;
+    this.setStoredAccessToken(null);
   }
 
   // 토큰 유효성 검사
@@ -104,9 +129,13 @@ class TokenManager {
     }
   }
 
-  // 인증 상태 복원 (더 이상 사용하지 않음 - 토큰은 메모리에만 저장)
+  // 인증 상태 복원
   async restoreAuth() {
-    console.log('토큰 매니저 - 인증 상태 복원 불필요 (토큰은 메모리에만 저장)');
+    const token = this.getStoredAccessToken();
+    if (token && !this.isTokenExpired(token)) {
+      this.accessToken = token;
+      return { accessToken: token };
+    }
     return null;
   }
 }
