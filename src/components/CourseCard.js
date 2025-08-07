@@ -23,10 +23,10 @@ const CourseCard = ({ course }) => {
     }
   };
 
-  // sectionId가 있으면 해당 section의 과제 페이지로, 없으면 기본 과제 페이지로
+  // sectionId가 있으면 해당 section의 과제 페이지로 라우팅
   const getLinkPath = () => {
     if (course.sectionId) {
-      return `/assignments?section=${course.sectionId}`;
+      return `/sections/${course.sectionId}/assignments`;
     }
     return "/assignments";
   };

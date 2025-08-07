@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Split from "react-split";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
@@ -8,6 +8,7 @@ import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
 import ReactMarkdown from "react-markdown";
 import styled, { createGlobalStyle } from "styled-components";
+import apiService from "../../services/APIService";
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -33,31 +34,50 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const ProblemSolvePage = () => {
-  const { week, problemId } = useParams();
+  const { assignmentId,problemId } = useParams();
+  //const {} = useParams();    
+  const location = useLocation();
   const navigate = useNavigate();
   const [language, setLanguage] = useState("cpp");
   const [theme, setTheme] = useState("light");
   const [code, setCode] = useState(getDefaultCode("cpp"));
   const [submissionResult, setSubmissionResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentProblem, setCurrentProblem] = useState({ 
+    title: "로딩 중...", 
+    description: "문제를 불러오는 중입니다." 
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 문제 데이터 (실제로는 API에서 가져올 데이터)
-  const problemData = {
-    "1": {
-      "1": { title: "완주하지 못한 선수", description: "완주하지 못한 선수 문제 설명..." },
-      "2": { title: "N Queens", description: "N-Queens 문제 설명..." },
-      "3": { title: "전화번호 목록", description: "전화번호 목록 문제 설명..." }
-    },
-    "2": {
-      "1": { title: "의상", description: "의상 문제 설명..." },
-      "2": { title: "베스트앨범", description: "베스트앨범 문제 설명..." }
-    }
-  };
+  // 문제 정보 로드
+  useEffect(() => {
+    const loadProblemInfo = async () => {
+      if (!problemId) {
+        return;
+      }
 
-  const currentProblem = problemData[week]?.[problemId] || { 
-    title: "알 수 없는 문제", 
-    description: "문제를 찾을 수 없습니다." 
-  };
+      try {
+        setIsLoading(true);
+        console.log('문제 정보 로드 시작:', { problemId });
+        
+        // getProblemInfo API 호출 (problemId만 전달)
+        const problemInfo = await apiService.getProblemInfo(problemId);
+        console.log('문제 정보 로드 성공:', problemInfo);
+        
+        setCurrentProblem(problemInfo.data || problemInfo);
+      } catch (error) {
+        console.error('문제 정보 로드 실패:', error);
+        setCurrentProblem({ 
+          title: "오류", 
+          description: "문제를 불러오는데 실패했습니다." 
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProblemInfo();
+  }, [problemId]);
 
   function getDefaultCode(lang) {
     switch (lang) {
@@ -89,55 +109,70 @@ const ProblemSolvePage = () => {
     }
   };
 
+  // DOMjudge 결과 코드를 한글로 변환
+  const getResultText = (result) => {
+    switch (result) {
+      case 'AC':
+        return '정답 (Accepted)';
+      case 'WA':
+        return '오답 (Wrong Answer)';
+      case 'TLE':
+        return '시간 초과 (Time Limit Exceeded)';
+      case 'MLE':
+        return '메모리 초과 (Memory Limit Exceeded)';
+      case 'RE':
+        return '런타임 에러 (Runtime Error)';
+      case 'CE':
+        return '컴파일 에러 (Compilation Error)';
+      case 'PE':
+        return '출력 형식 오류 (Presentation Error)';
+      default:
+        return result || '알 수 없는 결과';
+    }
+  };
+
   const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
     setCode(getDefaultCode(newLang));
   };
 
   const handleSubmit = async () => {
+    if (!code.trim()) {
+      alert('코드를 작성해주세요.');
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
+    setSubmissionResult(null);
+
+    try {
+      console.log('코드 제출 시작:', { assignmentId, problemId, language });
+      
+      // 1. 코드 제출 (assignmentId를 weekId로 사용)
+      const submissionResponse = await apiService.submitCode(assignmentId, problemId, code, language);
+      console.log('코드 제출 응답:', submissionResponse);
+      
+      // 백엔드에서 즉시 결과를 반환하므로 폴링이 필요 없음
+      if (submissionResponse) {
+        setSubmissionResult({
+          status: 'completed',
+          result: submissionResponse.result,
+          submissionId: submissionResponse.submissionId,
+          submittedAt: submissionResponse.submittedAt,
+          language: submissionResponse.language
+        });
+      } else {
+        throw new Error('제출 응답을 받지 못했습니다.');
+      }
+    } catch (error) {
+      console.error('코드 제출 실패:', error);
       setSubmissionResult({
-        status: "completed",
-        testCases: [
-          {
-            id: 1,
-            status: "passed",
-            input: "테스트케이스 1",
-            output: "예상 출력",
-            actual: "실제 출력",
-            time: "2ms",
-            memory: "15MB",
-          },
-          {
-            id: 2,
-            status: "passed",
-            input: "테스트케이스 2",
-            output: "예상 출력",
-            actual: "실제 출력",
-            time: "1ms",
-            memory: "15MB",
-          },
-          {
-            id: 3,
-            status: "failed",
-            input: "테스트케이스 3",
-            output: "예상 출력",
-            actual: "잘못된 출력",
-            time: "3ms",
-            memory: "15MB",
-          },
-        ],
-        summary: {
-          total: 3,
-          passed: 2,
-          failed: 1,
-          totalTime: "6ms",
-          totalMemory: "15MB",
-        },
+        status: 'error',
+        message: error.message || '코드 제출에 실패했습니다.'
       });
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   const problemDescription = currentProblem.description || `
@@ -183,12 +218,12 @@ const ProblemSolvePage = () => {
       <StyledPage $theme={theme}>
         <StyledHeader $theme={theme}>
           <div className="breadcrumb">
-            <BreadcrumbLink onClick={() => navigate("/assignments")}>
+            <BreadcrumbLink onClick={() => navigate("/main")}>
               A Class
             </BreadcrumbLink>
             <span> › </span>
-            <BreadcrumbLink onClick={() => navigate(`/assignments/${week}/detail`)}>
-             {week}
+            <BreadcrumbLink onClick={() => navigate(`/assignments/${assignmentId}/detail`)}>
+             과제 {assignmentId}
             </BreadcrumbLink>
             <span> › </span>
             <strong>{currentProblem.title}</strong>
@@ -219,7 +254,11 @@ const ProblemSolvePage = () => {
             style={{ display: "flex", width: "100%" }}
           >
             <StyledDescription $theme={theme}>
-              <ReactMarkdown>{problemDescription}</ReactMarkdown>
+              {isLoading ? (
+                <div style={{ opacity: 0.6 }}>문제를 불러오는 중...</div>
+              ) : (
+                <ReactMarkdown>{problemDescription}</ReactMarkdown>
+              )}
             </StyledDescription>
 
             <Split
@@ -247,24 +286,39 @@ const ProblemSolvePage = () => {
 
               <StyledResultArea>
                 <h4>채점 결과</h4>
-                {submissionResult ? (
+                {isSubmitting ? (
+                  <div style={{ opacity: 0.6 }}>코드를 채점하고 있습니다...</div>
+                ) : submissionResult ? (
                   <>
-                    <StyledSummary $failed={submissionResult.summary.failed > 0}>
-                      <strong>
-                        {submissionResult.summary.passed}/{submissionResult.summary.total} 테스트케이스 통과
-                      </strong>
-                      <br />
-                      총 실행시간: {submissionResult.summary.totalTime} | 메모리: {submissionResult.summary.totalMemory}
-                    </StyledSummary>
-                    {submissionResult.testCases.map((tc) => (
-                      <StyledTestCase key={tc.id} $status={tc.status}>
-                        <div><strong>테스트케이스 {tc.id}: {tc.status === "passed" ? "통과" : "실패"}</strong></div>
-                        <div>입력: {tc.input}</div>
-                        <div>예상 출력: {tc.output}</div>
-                        <div>실제 출력: {tc.actual}</div>
-                        <div>실행시간: {tc.time} | 메모리: {tc.memory}</div>
-                      </StyledTestCase>
-                    ))}
+                    {submissionResult.status === 'error' ? (
+                      <StyledErrorMessage>
+                        <strong>오류</strong>
+                        <br />
+                        {submissionResult.message}
+                      </StyledErrorMessage>
+                    ) : submissionResult.status === 'completed' ? (
+                      <>
+                        <StyledSummary $failed={submissionResult.result !== 'AC'}>
+                          <strong>
+                            {submissionResult.result === 'AC' ? '정답' : '오답'}
+                          </strong>
+                          <br />
+                          제출 ID: {submissionResult.submissionId}
+                          <br />
+                          언어: {submissionResult.language}
+                          <br />
+                          제출 시간: {submissionResult.submittedAt ? new Date(submissionResult.submittedAt).toLocaleString() : 'N/A'}
+                        </StyledSummary>
+                        <StyledResultDetail $result={submissionResult.result}>
+                          <div><strong>결과: {getResultText(submissionResult.result)}</strong></div>
+                          {submissionResult.result !== 'AC' && (
+                            <div>문제를 다시 확인해보세요.</div>
+                          )}
+                        </StyledResultDetail>
+                      </>
+                    ) : (
+                      <div style={{ opacity: 0.6 }}>처리 중...</div>
+                    )}
                   </>
                 ) : (
                   <div style={{ opacity: 0.6 }}>제출 후 결과가 여기에 표시됩니다.</div>
@@ -381,6 +435,51 @@ const StyledTestCase = styled.div`
   background-color: ${({ $status }) => ($status === "passed" ? "#e6ffed" : "#ffeef0")};
   border-radius: 4px;
   font-size: 13px;
+`;
+
+const StyledResultDetail = styled.div`
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: ${({ $result }) => {
+    switch ($result) {
+      case 'AC':
+        return '#d4edda';
+      case 'WA':
+      case 'TLE':
+      case 'MLE':
+      case 'RE':
+      case 'CE':
+      case 'PE':
+        return '#f8d7da';
+      default:
+        return '#fff3cd';
+    }
+  }};
+  color: ${({ $result }) => {
+    switch ($result) {
+      case 'AC':
+        return '#155724';
+      case 'WA':
+      case 'TLE':
+      case 'MLE':
+      case 'RE':
+      case 'CE':
+      case 'PE':
+        return '#721c24';
+      default:
+        return '#856404';
+    }
+  }};
+  font-size: 13px;
+`;
+
+const StyledErrorMessage = styled.div`
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: #f8d7da;
+  color: #721c24;
 `;
 
 const StyledSubmitSection = styled.div`
