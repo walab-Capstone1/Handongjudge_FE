@@ -8,6 +8,7 @@ import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
 import ReactMarkdown from "react-markdown";
 import styled, { createGlobalStyle } from "styled-components";
+import { EditorView } from "@codemirror/view";
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -149,6 +150,80 @@ const ProblemSolvePage = () => {
         return [javascript()];
     }
   };
+
+  // 커스텀 다크 테마 생성 (고대비)
+  const customDarkTheme = EditorView.theme({
+    "&": {
+      color: "#ffffff !important",
+      backgroundColor: "#000000 !important"
+    },
+    ".cm-content": {
+      caretColor: "#ffffff !important",
+      color: "#ffffff !important"
+    },
+    ".cm-line": {
+      color: "#ffffff !important"
+    },
+    "&.cm-focused .cm-cursor": {
+      borderLeftColor: "#ffffff"
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+      backgroundColor: "#0066cc"
+    },
+    ".cm-activeLine": {
+      backgroundColor: "#1a1a1a"
+    },
+    ".cm-gutters": {
+      backgroundColor: "#000000",
+      color: "#ffffff",
+      border: "none"
+    },
+    ".cm-lineNumbers .cm-gutterElement": {
+      color: "#ffffff"
+    },
+    ".cm-foldGutter .cm-gutterElement": {
+      color: "#ffffff"
+    },
+    ".cm-tooltip": {
+      backgroundColor: "#000000",
+      color: "#ffffff",
+      border: "1px solid #333"
+    },
+    // 구문 강조 색상 (모두 하얀색)
+    ".cm-keyword": { color: "#ffffff !important" },
+    ".cm-operator": { color: "#ffffff !important" },
+    ".cm-variable": { color: "#ffffff !important" },
+    ".cm-variable-2": { color: "#ffffff !important" },
+    ".cm-variable-3": { color: "#ffffff !important" },
+    ".cm-property": { color: "#ffffff !important" },
+    ".cm-definition": { color: "#ffffff !important" },
+    ".cm-type": { color: "#ffffff !important" },
+    ".cm-string": { color: "#ffffff !important" },
+    ".cm-string-2": { color: "#ffffff !important" },
+    ".cm-number": { color: "#ffffff !important" },
+    ".cm-comment": { color: "#ffffff !important" },
+    ".cm-attribute": { color: "#ffffff !important" },
+    ".cm-meta": { color: "#ffffff !important" },
+    ".cm-builtin": { color: "#ffffff !important" },
+    ".cm-tag": { color: "#ffffff !important" },
+    ".cm-header": { color: "#ffffff !important" },
+    ".cm-hr": { color: "#ffffff !important" },
+    ".cm-link": { color: "#ffffff !important" },
+    ".cm-url": { color: "#ffffff !important" },
+    ".cm-formatting": { color: "#ffffff !important" },
+    ".cm-formatting-link": { color: "#ffffff !important" },
+    ".cm-formatting-list": { color: "#ffffff !important" },
+    ".cm-formatting-quote": { color: "#ffffff !important" },
+    ".cm-formatting-strong": { color: "#ffffff !important" },
+    ".cm-formatting-em": { color: "#ffffff !important" },
+    ".cm-formatting-header": { color: "#ffffff !important" },
+    ".cm-formatting-header-1": { color: "#ffffff !important" },
+    ".cm-formatting-header-2": { color: "#ffffff !important" },
+    ".cm-formatting-header-3": { color: "#ffffff !important" },
+    ".cm-formatting-header-4": { color: "#ffffff !important" },
+    ".cm-formatting-header-5": { color: "#ffffff !important" },
+    ".cm-formatting-header-6": { color: "#ffffff !important" }
+  }, { dark: true });
 
   const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
@@ -304,12 +379,16 @@ const ProblemSolvePage = () => {
                   <CodeMirror
                     value={code}
                     height="100%"
-                    extensions={getLanguageExtension(language)}
+                    extensions={[
+                      ...getLanguageExtension(language),
+                      theme === "dark" ? customDarkTheme : []
+                    ]}
                     theme={theme}
                     onChange={(value) => setCode(value)}
                     style={{
-                      backgroundColor: theme === "dark" ? "#161b22" : "#ffffff",
-                      height: "100%"
+                      backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                      height: "100%",
+                      color: theme === "dark" ? "#ffffff" : "#000000"
                     }}
                     options={{
                       theme: theme,
@@ -437,11 +516,10 @@ const StyledEditorWrapper = styled.div`
   flex-direction: column;
   background: ${({ $theme }) => 
     $theme === "dark" 
-      ? "#161b22" 
+      ? "#000000" 
       : "#ffffff"
   };
-  border-bottom: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-  box-shadow: ${({ $theme }) => $theme === "dark" ? "inset 0 0 10px rgba(0,0,0,0.2)" : "inset 0 0 10px rgba(0,0,0,0.03)"};
+  border-bottom: 1px solid ${({ $theme }) => ($theme === "dark" ? "#15181C" : "#e1e4e8")};
 `;
 
 const StyledEditorHeader = styled.div`
@@ -462,7 +540,7 @@ const StyledEditorHeader = styled.div`
 const EditorScrollArea = styled.div`
   flex: 1;
   overflow: auto;
-  background-color: ${({ $theme }) => ($theme === "dark" ? "#161b22" : "#ffffff")};
+  background-color: ${({ $theme }) => ($theme === "dark" ? "#000000" : "#ffffff")};
 `;
 
 const StyledResultArea = styled.div`
@@ -492,7 +570,7 @@ const StyledSummary = styled.div`
   color: ${({ $failed, $theme }) => 
     $theme === "dark" 
       ? ($failed ? "#ff6b6b" : "#6bff6b") 
-      : ($failed ? "#721c24" : "#155724")
+      : ($failed ? "#FF3D50" : "#155724")
   };
 `;
 
