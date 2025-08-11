@@ -28,7 +28,7 @@ function App() {
             <Route path="/mypage/assignments" element={<MyAssignmentsPage />} />
             <Route path="/sections/:sectionId/assignments" element={<AssignmentListPage />} />
             <Route path="/sections/:sectionId/assignments/:assignmentId/detail" element={<AssignmentDetailPage />} />
-            <Route path="/assignments/:assignmentId/problem/:problemId" element={<ProblemSolvePage />} />
+            <Route path="/sections/:sectionId/assignments/:assignmentId/detail/problems/:problemId" element={<ProblemSolvePage />} />
           </Routes>
         </Router>
       </RecoilRoot>
