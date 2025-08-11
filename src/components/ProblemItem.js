@@ -12,8 +12,7 @@ const ProblemItem = ({ problem, assignmentId }) => {
 
   return (
     <Link 
-      to={`/assignments/${assignmentId}/problem/${problem.id}`} 
-      state={{ sectionId: sectionId }}
+      to={`/sections/${sectionId}/assignments/${assignmentId}/detail/problems/${problem.id}`} 
       className="problem-item-link"
     >
       <div className="problem-item">
