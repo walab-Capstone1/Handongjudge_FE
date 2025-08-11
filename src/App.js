@@ -21,14 +21,14 @@ function App() {
             <Route path="/" element={<Onboarding />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />
-            <Route path="/main" element={<MainPage />} />
+            <Route path="/main" element={<MainPage />} /> 
             <Route path="/questions" element={<QuestionPage />} />
             <Route path="/notices" element={<NoticePage />} />
             <Route path="/mypage/info" element={<MyInfoPage />} />
             <Route path="/mypage/assignments" element={<MyAssignmentsPage />} />
-            <Route path="/assignments" element={<AssignmentListPage />} />
-            <Route path="/assignments/:week/detail" element={<AssignmentDetailPage />} />
-            <Route path="/assignments/:week/problem/:problemId" element={<ProblemSolvePage />} />
+            <Route path="/sections/:sectionId/assignments" element={<AssignmentListPage />} />
+            <Route path="/sections/:sectionId/assignments/:assignmentId/detail" element={<AssignmentDetailPage />} />
+            <Route path="/sections/:sectionId/assignments/:assignmentId/detail/problems/:problemId" element={<ProblemSolvePage />} />
           </Routes>
         </Router>
       </RecoilRoot>

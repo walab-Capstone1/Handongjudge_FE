@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Split from "react-split";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
@@ -7,120 +7,60 @@ import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
 import ReactMarkdown from "react-markdown";
-import styled, { createGlobalStyle } from "styled-components";
 import { EditorView } from "@codemirror/view";
-
-const GlobalStyle = createGlobalStyle`
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: ${({ $theme }) =>
-      $theme === "dark" ? "#555 #1e1e1e" : "#ccc #fff"};
-  }
-
-  *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  *::-webkit-scrollbar-track {
-    background: ${({ $theme }) => ($theme === "dark" ? "#1e1e1e" : "#f1f1f1")};
-  }
-
-  *::-webkit-scrollbar-thumb {
-    background-color: ${({ $theme }) =>
-      $theme === "dark" ? "#444" : "#bbb"};
-    border-radius: 10px;
-  }
-
-  .gutter {
-    position: relative;
-    transition: background-color 0.2s ease;
-    z-index: 10;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-  }
-
-  .gutter:hover {
-    background-color: ${({ $theme }) => 
-      $theme === "dark" ? "#1aad6b" : "#1f6feb"} !important;
-  }
-
-  .gutter::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: ${({ $theme }) => ($theme === "dark" ? "#151028" : "#ffffff")};
-    border-radius: 1px;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-  }
-
-  .gutter:hover::after {
-    opacity: 1;
-  }
-
-  .gutter.gutter-horizontal::after {
-    width: 2px;
-    height: 20px;
-  }
-
-  .gutter.gutter-vertical::after {
-    width: 20px;
-    height: 2px;
-  }
-
-  .gutter.gutter-horizontal {
-    cursor: col-resize !important;
-    border-left: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-    border-right: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-  }
-
-  .gutter.gutter-vertical {
-    cursor: row-resize !important;
-    border-top: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-    border-bottom: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-  }
-
-  .gutter:active {
-    background-color: ${({ $theme }) => 
-      $theme === "dark" ? "#1aad6b" : "#1f6feb"} !important;
-  }
-`;
+import apiService from "../../services/APIService";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import "./ProblemSolvePage.css";
 
 const ProblemSolvePage = () => {
-  const { week, problemId } = useParams();
+  const { assignmentId, problemId, sectionId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
+  
+  // State management
   const [language, setLanguage] = useState("cpp");
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState("dark");
   const [code, setCode] = useState(getDefaultCode("cpp"));
   const [submissionResult, setSubmissionResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentProblem, setCurrentProblem] = useState({
+    title: "Loading...",
+    description: "Loading..."
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
   const [verticalSizes, setVerticalSizes] = useState([70, 30]);
 
-  // 문제 데이터 (실제로는 API에서 가져올 데이터)
-  const problemData = {
-    "1": {
-      "1": { title: "완주하지 못한 선수", description: "완주하지 못한 선수 문제 설명..." },
-      "2": { title: "N Queens", description: "N-Queens 문제 설명..." },
-      "3": { title: "전화번호 목록", description: "전화번호 목록 문제 설명..." }
-    },
-    "2": {
-      "1": { title: "의상", description: "의상 문제 설명..." },
-      "2": { title: "베스트앨범", description: "베스트앨범 문제 설명..." }
-    }
-  };
+  // Load problem information
+  useEffect(() => {
+    const loadProblemInfo = async () => {
+      if (!problemId) {
+        return;
+      }
 
-  const currentProblem = problemData[week]?.[problemId] || { 
-    title: "알 수 없는 문제", 
-    description: "문제를 찾을 수 없습니다." 
-  };
+      try {
+        setIsLoading(true);
+        console.log('문제 정보 로드 시작:', { problemId });
+        
+        const problemInfo = await apiService.getProblemInfo(problemId);
+        console.log('문제 정보 로드 성공:', problemInfo);
+        
+        setCurrentProblem(problemInfo.data || problemInfo);
+      } catch (error) {
+        console.error('문제 정보 로드 실패:', error);
+        setCurrentProblem({ 
+          title: "오류", 
+          description: "문제를 불러오는데 실패했습니다." 
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    loadProblemInfo();
+  }, [problemId]);
+
+  // Helper functions
   function getDefaultCode(lang) {
     switch (lang) {
       case "javascript":
@@ -151,7 +91,7 @@ const ProblemSolvePage = () => {
     }
   };
 
-  // 커스텀 다크 테마 생성 (고대비)
+  // Custom dark theme for CodeMirror
   const customDarkTheme = EditorView.theme({
     "&": {
       color: "#ffffff !important",
@@ -189,7 +129,7 @@ const ProblemSolvePage = () => {
       color: "#ffffff",
       border: "1px solid #333"
     },
-    // 구문 강조 색상 (모두 하얀색)
+    // Syntax highlighting colors (all white)
     ".cm-keyword": { color: "#ffffff !important" },
     ".cm-operator": { color: "#ffffff !important" },
     ".cm-variable": { color: "#ffffff !important" },
@@ -225,57 +165,89 @@ const ProblemSolvePage = () => {
     ".cm-formatting-header-6": { color: "#ffffff !important" }
   }, { dark: true });
 
+  // Event handlers
   const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
     setCode(getDefaultCode(newLang));
   };
 
   const handleSubmit = async () => {
+    if (!code.trim()) {
+      alert('코드를 작성해주세요.');
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
+    setSubmissionResult(null);
+
+    try {
+      console.log('코드 제출 시작:', { sectionId, problemId, language });
+      
+      const submissionResponse = await apiService.submitCode(sectionId, problemId, code, language);
+      console.log('코드 제출 응답:', submissionResponse);
+      
+      if (submissionResponse) {
+        const { result, submissionId, submittedAt, language: submittedLanguage } = submissionResponse;
+        
+        // Result mapping
+        const resultMapping = {
+          'AC': { status: 'success', message: '정답 (Accepted)', color: '#28a745' },
+          'WA': { status: 'error', message: '오답 (Wrong Answer)', color: '#dc3545' },
+          'TLE': { status: 'error', message: '시간 초과 (Time Limit Exceeded)', color: '#ffc107' },
+          'MLE': { status: 'error', message: '메모리 초과 (Memory Limit Exceeded)', color: '#fd7e14' },
+          'RE': { status: 'error', message: '런타임 에러 (Runtime Error)', color: '#e83e8c' },
+          'CE': { status: 'error', message: '컴파일 에러 (Compilation Error)', color: '#6f42c1' },
+          'PE': { status: 'error', message: '출력 형식 오류 (Presentation Error)', color: '#17a2b8' },
+          'NO': { status: 'error', message: '출력 없음 (No Output)', color: '#6c757d' }
+        };
+
+        const resultInfo = resultMapping[result] || { 
+          status: 'unknown', 
+          message: `알 수 없는 결과: ${result}`, 
+          color: '#6c757d' 
+        };
+
+        setSubmissionResult({
+          status: 'completed',
+          result: result,
+          resultInfo: resultInfo,
+          submissionId: submissionId,
+          submittedAt: submittedAt,
+          language: submittedLanguage,
+          code: code
+        });
+      } else {
+        throw new Error('제출 응답을 받지 못했습니다.');
+      }
+    } catch (error) {
+      console.error('코드 제출 실패:', error);
       setSubmissionResult({
-        status: "completed",
-        testCases: [
-          {
-            id: 1,
-            status: "passed",
-            input: "테스트케이스 1",
-            output: "예상 출력",
-            actual: "실제 출력",
-            time: "2ms",
-            memory: "15MB",
-          },
-          {
-            id: 2,
-            status: "passed",
-            input: "테스트케이스 2",
-            output: "예상 출력",
-            actual: "실제 출력",
-            time: "1ms",
-            memory: "15MB",
-          },
-          {
-            id: 3,
-            status: "failed",
-            input: "테스트케이스 3",
-            output: "예상 출력",
-            actual: "잘못된 출력",
-            time: "3ms",
-            memory: "15MB",
-          },
-        ],
-        summary: {
-          total: 3,
-          passed: 2,
-          failed: 1,
-          totalTime: "6ms",
-          totalMemory: "15MB",
-        },
+        status: 'error',
+        message: error.message || '코드 제출에 실패했습니다.',
+        resultInfo: { status: 'error', message: '제출 실패', color: '#dc3545' }
       });
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
+  const handleHorizontalDragEnd = (sizes) => {
+    console.log('Horizontal split sizes changed:', sizes);
+    setHorizontalSizes(sizes);
+  };
+
+  const handleVerticalDragEnd = (sizes) => {
+    console.log('Vertical split sizes changed:', sizes);
+    setVerticalSizes(sizes);
+  };
+
+  const renderGutter = (direction) => {
+    return () => ({
+      backgroundColor: theme === "dark" ? "#139F59" : "#0969da",
+    });
+  };
+
+  // Problem description
   const problemDescription = currentProblem.description || `
 # ${currentProblem.title}
 
@@ -295,352 +267,179 @@ const ProblemSolvePage = () => {
 - 문제 해결을 위한 힌트를 참고하세요.
 `;
 
-  const renderGutter = (direction) => {
-    return () => ({
-      backgroundColor: theme === "dark" ? "#139F59" : "#0969da",
-    });
-  };
-
-  const handleHorizontalDragEnd = (sizes) => {
-    console.log('Horizontal split sizes changed:', sizes);
-    setHorizontalSizes(sizes);
-  };
-
-  const handleVerticalDragEnd = (sizes) => {
-    console.log('Vertical split sizes changed:', sizes);
-    setVerticalSizes(sizes);
-  };
-
-
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className={`problem-solve-page ${theme}`}>
+        <div className="loading-container">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <GlobalStyle $theme={theme} />
-      <StyledPage $theme={theme}>
-        <StyledHeader $theme={theme}>
-          <div className="breadcrumb">
-            <BreadcrumbLink onClick={() => navigate("/assignments")}>
-              A Class
-            </BreadcrumbLink>
-            <span> › </span>
-            <BreadcrumbLink onClick={() => navigate(`/assignments/${week}/detail`)}>
-             {week}
-            </BreadcrumbLink>
-            <span> › </span>
-            <strong>{currentProblem.title}</strong>
-          </div>
-          <div className="controls">
-            <ThemeButton onClick={() => setTheme("light")} $active={theme === "light"}>
-              Light
-            </ThemeButton>
-            <ThemeButton onClick={() => setTheme("dark")} $active={theme === "dark"}>
-              Dark
-            </ThemeButton>
-            <LanguageSelect value={language} onChange={(e) => handleLanguageChange(e.target.value)} $theme={theme}>
-              <option value="javascript">JavaScript</option>
-              <option value="python">Python</option>
-              <option value="java">Java</option>
-              <option value="cpp">C++</option>
-            </LanguageSelect>
-          </div>
-        </StyledHeader>
-
-        <MainSplit>
-          <Split
-            sizes={horizontalSizes}
-            direction="horizontal"
-            minSize={200}
-            gutterSize={12}
-            gutterStyle={renderGutter("horizontal")}
-            onDragEnd={handleHorizontalDragEnd}
-            style={{ display: "flex", width: "100%" }}
+    <div className={`problem-solve-page ${theme}`}>
+      {/* Header */}
+      <div className="problem-solve-header">
+        <div className="breadcrumb">
+          <span 
+            className="breadcrumb-link"
+            onClick={() => navigate("/main")}
           >
-            <StyledDescription $theme={theme}>
-              <StyledDescriptionHeader $theme={theme}>문제 설명</StyledDescriptionHeader>
-              <div>
-                <ReactMarkdown>{problemDescription}</ReactMarkdown>
+            A Class
+          </span>
+          <span> › </span>
+          <span 
+            className="breadcrumb-link"
+            onClick={() => navigate(`/sections/${sectionId}/assignments`)}
+          >
+            섹션 {sectionId}
+          </span>
+          <span> › </span>
+          <span 
+            className="breadcrumb-link"
+            onClick={() => navigate(`/sections/${sectionId}/assignments/${assignmentId}/detail`)}
+          >
+            과제 {assignmentId}
+          </span>
+          <span> › </span>
+          <strong>{currentProblem.title}</strong>
+        </div>
+        <div className="controls">
+          <button 
+            className={`theme-button ${theme === "light" ? "active" : ""}`}
+            onClick={() => setTheme("light")}
+          >
+            Light
+          </button>
+          <button 
+            className={`theme-button ${theme === "dark" ? "active" : ""}`}
+            onClick={() => setTheme("dark")}
+          >
+            Dark
+          </button>
+          <select 
+            className="language-select"
+            value={language} 
+            onChange={(e) => handleLanguageChange(e.target.value)}
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Main Split */}
+      <div className="main-split">
+        <Split
+          sizes={horizontalSizes}
+          direction="horizontal"
+          minSize={200}
+          gutterSize={12}
+          gutterStyle={renderGutter("horizontal")}
+          onDragEnd={handleHorizontalDragEnd}
+          style={{ display: "flex", width: "100%" }}
+        >
+          {/* Description Area */}
+          <div className="description-area">
+            <div className="description-header">문제 설명</div>
+            <div>
+              <ReactMarkdown>{problemDescription}</ReactMarkdown>
+            </div>
+          </div>
+
+          {/* Editor and Result Split */}
+          <Split
+            sizes={verticalSizes}
+            direction="vertical"
+            minSize={100}
+            gutterSize={12}
+            gutterStyle={renderGutter("vertical")}
+            onDragEnd={handleVerticalDragEnd}
+            style={{ display: "flex", flexDirection: "column", height: "100%" }}
+          >
+            {/* Editor Area */}
+            <div className="editor-wrapper">
+              <div className="editor-header">
+                solution.{language === "javascript" ? "js" : language}
               </div>
-            </StyledDescription>
+              <div className="editor-scroll-area">
+                <CodeMirror
+                  value={code}
+                  height="100%"
+                  extensions={[
+                    ...getLanguageExtension(language),
+                    theme === "dark" ? customDarkTheme : []
+                  ]}
+                  theme={theme}
+                  onChange={(value) => setCode(value)}
+                  style={{
+                    backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                    height: "100%",
+                    color: theme === "dark" ? "#ffffff" : "#000000"
+                  }}
+                  options={{
+                    theme: theme,
+                    lineNumbers: true,
+                    foldGutter: true,
+                    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+                  }}
+                />
+              </div>
+            </div>
 
-            <Split
-              sizes={verticalSizes}
-              direction="vertical"
-              minSize={100}
-              gutterSize={12}
-              gutterStyle={renderGutter("vertical")}
-              onDragEnd={handleVerticalDragEnd}
-              style={{ display: "flex", flexDirection: "column", height: "100%" }}
-            >
-              <StyledEditorWrapper $theme={theme}>
-                <StyledEditorHeader $theme={theme}>
-                  solution.{language === "javascript" ? "js" : language}
-                </StyledEditorHeader>
-                <EditorScrollArea $theme={theme}>
-                  <CodeMirror
-                    value={code}
-                    height="100%"
-                    extensions={[
-                      ...getLanguageExtension(language),
-                      theme === "dark" ? customDarkTheme : []
-                    ]}
-                    theme={theme}
-                    onChange={(value) => setCode(value)}
-                    style={{
-                      backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
-                      height: "100%",
-                      color: theme === "dark" ? "#ffffff" : "#000000"
-                    }}
-                    options={{
-                      theme: theme,
-                      lineNumbers: true,
-                      foldGutter: true,
-                      gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-                    }}
-                  />
-                </EditorScrollArea>
-              </StyledEditorWrapper>
-
-              <StyledResultArea $theme={theme}>
-                <StyledResultHeader $theme={theme}>채점 결과</StyledResultHeader>
-                <div>
-                  {submissionResult ? (
-                    <>
-                      <StyledSummary $failed={submissionResult.summary.failed > 0} $theme={theme}>
-                        <strong>
-                          {submissionResult.summary.passed}/{submissionResult.summary.total} 테스트케이스 통과
-                        </strong>
-                        <br />
-                        총 실행시간: {submissionResult.summary.totalTime} | 메모리: {submissionResult.summary.totalMemory}
-                      </StyledSummary>
-                      {submissionResult.testCases.map((tc) => (
-                        <StyledTestCase key={tc.id} $status={tc.status} $theme={theme}>
-                          <div><strong>테스트케이스 {tc.id}: {tc.status === "passed" ? "통과" : "실패"}</strong></div>
-                          <div>입력: {tc.input}</div>
-                          <div>예상 출력: {tc.output}</div>
-                          <div>실제 출력: {tc.actual}</div>
-                          <div>실행시간: {tc.time} | 메모리: {tc.memory}</div>
-                        </StyledTestCase>
-                      ))}
-                    </>
-                  ) : (
-                    <div style={{ opacity: 0.6 }}>제출 후 결과가 여기에 표시됩니다.</div>
-                  )}
-                </div>
-              </StyledResultArea>
-            </Split>
+            {/* Result Area */}
+            <div className="result-area">
+              <div className="result-header">채점 결과</div>
+              <div>
+                {isSubmitting ? (
+                  <div className="result-loading">
+                    <LoadingSpinner />
+                    <span>제출 중...</span>
+                  </div>
+                ) : submissionResult ? (
+                  <>
+                    <div 
+                      className={`result-summary ${submissionResult.resultInfo.status === 'error' ? 'error' : ''}`}
+                      style={{ color: submissionResult.resultInfo.color }}
+                    >
+                      <strong>{submissionResult.resultInfo.message}</strong>
+                      <br />
+                      제출 ID: {submissionResult.submissionId} | 
+                      언어: {submissionResult.language} | 
+                      제출 시간: {new Date(submissionResult.submittedAt).toLocaleString('ko-KR')}
+                    </div>
+                    
+                    {submissionResult.status === 'error' && (
+                      <div className="error-message">
+                        <strong>오류:</strong> {submissionResult.message}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ opacity: 0.6 }}>제출 후 결과가 여기에 표시됩니다.</div>
+                )}
+              </div>
+            </div>
           </Split>
-        </MainSplit>
+        </Split>
+      </div>
 
-        <StyledSubmitSection $theme={theme}>
-          <StyledSubmitButton onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "제출 중..." : "제출하기"}
-          </StyledSubmitButton>
-        </StyledSubmitSection>
-      </StyledPage>
-    </>
+      {/* Submit Section */}
+      <div className="submit-section">
+        <button 
+          className="submit-button"
+          onClick={handleSubmit} 
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "제출 중..." : "제출하기"}
+        </button>
+      </div>
+    </div>
   );
 };
-
-// styled-components 정의 (위에서 참조됨)
-const StyledPage = styled.div`
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: ${({ $theme }) => ($theme === "dark" ? "#161b22" : "#ffffff")};
-  color: ${({ $theme }) => ($theme === "dark" ? "#EFF5F2" : "#000000")};
-`;
-
-const StyledHeader = styled.div`
-  padding: 12px 24px;
-  border-bottom: 1px solid #30363d;
-  background-color: ${({ $theme }) => ($theme === "dark" ? "#161b22" : "#ffffff")};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const BreadcrumbLink = styled.span`
-  color: ${({ $theme }) => ($theme === "dark" ? "#58a6ff" : "#0969da")};
-  cursor: pointer;
-  text-decoration: none;
-  
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const ThemeButton = styled.button`
-  padding: 4px 10px;
-  margin-right: 4px;
-  background-color: ${({ $active }) => ($active ? "#2f81f7" : "#21262d")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#c9d1d9")};
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  cursor: pointer;
-`;
-
-const LanguageSelect = styled.select`
-  padding: 4px 10px;
-  border-radius: 4px;
-  background-color: ${({ $theme }) => ($theme === "dark" ? "#21262d" : "#ffffff")};
-  color: ${({ $theme }) => ($theme === "dark" ? "#c9d1d9" : "#000000")};
-  border: 1px solid #30363d;
-`;
-
-const MainSplit = styled.div`
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  min-height: 0;
-`;
-
-const StyledDescription = styled.div`
-  padding: 0 0 24px 0;
-  overflow: auto;
-  background: ${({ $theme }) => 
-    $theme === "dark" 
-      ? "linear-gradient(135deg, #0d1117 0%, #161b22 100%)" 
-      : "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)"
-  };
-  border-right: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-  box-shadow: ${({ $theme }) => $theme === "dark" ? "inset 0 0 10px rgba(0,0,0,0.3)" : "inset 0 0 10px rgba(0,0,0,0.05)"};
-  
-  > div {
-    padding: 0 24px;
-  }
-`;
-
-const StyledEditorWrapper = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: ${({ $theme }) => 
-    $theme === "dark" 
-      ? "#000000" 
-      : "#ffffff"
-  };
-  border-bottom: 1px solid ${({ $theme }) => ($theme === "dark" ? "#15181C" : "#e1e4e8")};
-`;
-
-const StyledEditorHeader = styled.div`
-  margin: 0;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 12px 16px;
-  color: ${({ $theme }) => ($theme === "dark" ? "#58a6ff" : "#0969da")};
-  background: ${({ $theme }) => 
-    $theme === "dark" 
-      ? "linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(88, 166, 255, 0.05) 100%)" 
-      : "linear-gradient(90deg, rgba(9, 105, 218, 0.1) 0%, rgba(9, 105, 218, 0.05) 100%)"
-  };
-  border-bottom: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-  border-radius: 6px 6px 0 0;
-`;
-
-const EditorScrollArea = styled.div`
-  flex: 1;
-  overflow: auto;
-  background-color: ${({ $theme }) => ($theme === "dark" ? "#000000" : "#ffffff")};
-`;
-
-const StyledResultArea = styled.div`
-  padding: 0 0 8px 0;
-  overflow: auto;
-  background: ${({ $theme }) => 
-    $theme === "dark" 
-      ? "linear-gradient(135deg, #0d1117 0%, #161b22 100%)" 
-      : "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)"
-  };
-  box-shadow: ${({ $theme }) => $theme === "dark" ? "inset 0 0 10px rgba(0,0,0,0.3)" : "inset 0 0 10px rgba(0,0,0,0.05)"};
-  
-  > div {
-    padding: 0 16px;
-  }
-`;
-
-const StyledSummary = styled.div`
-  margin-bottom: 12px;
-  padding: 12px;
-  border-radius: 4px;
-  background-color: ${({ $failed, $theme }) => 
-    $theme === "dark" 
-      ? ($failed ? "#3d1a1a" : "#1a3d1a") 
-      : ($failed ? "#f8d7da" : "#d4edda")
-  };
-  color: ${({ $failed, $theme }) => 
-    $theme === "dark" 
-      ? ($failed ? "#ff6b6b" : "#6bff6b") 
-      : ($failed ? "#FF3D50" : "#155724")
-  };
-`;
-
-const StyledTestCase = styled.div`
-  margin-bottom: 8px;
-  padding: 8px;
-  background-color: ${({ $status, $theme }) => 
-    $theme === "dark" 
-      ? ($status === "passed" ? "#1a3d1a" : "#3d1a1a") 
-      : ($status === "passed" ? "#e6ffed" : "#ffeef0")
-  };
-  border-radius: 4px;
-  font-size: 13px;
-  color: ${({ $theme }) => ($theme === "dark" ? "#2B2C2E" : "#24292e")};
-`;
-
-const StyledSubmitSection = styled.div`
-  border-top: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-  background-color: ${({ $theme }) => ($theme === "dark" ? "#161b22" : "#f6f8fa")};
-  padding: 8px 24px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-`;
-
-const StyledSubmitButton = styled.button`
-  padding: 10px 20px;
-  background-color: #2f81f7;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
-  
-  &:hover {
-    background-color: #1f6feb;
-  }
-`;
-
-
-
-const StyledResultHeader = styled.h4`
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 12px 16px;
-  color: ${({ $theme }) => ($theme === "dark" ? "#58a6ff" : "#0969da")};
-  background: ${({ $theme }) => 
-    $theme === "dark" 
-      ? "linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(88, 166, 255, 0.05) 100%)" 
-      : "linear-gradient(90deg, rgba(9, 105, 218, 0.1) 0%, rgba(9, 105, 218, 0.05) 100%)"
-  };
-  border-bottom: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-  border-radius: 6px 6px 0 0;
-`;
-
-const StyledDescriptionHeader = styled.h3`
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 12px 16px;
-  color: ${({ $theme }) => ($theme === "dark" ? "#58a6ff" : "#0969da")};
-  background: ${({ $theme }) => 
-    $theme === "dark" 
-      ? "linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(88, 166, 255, 0.05) 100%)" 
-      : "linear-gradient(90deg, rgba(9, 105, 218, 0.1) 0%, rgba(9, 105, 218, 0.05) 100%)"
-  };
-  border-bottom: 1px solid ${({ $theme }) => ($theme === "dark" ? "#30363d" : "#e1e4e8")};
-  border-radius: 6px 6px 0 0;
-`;
 
 export default ProblemSolvePage;

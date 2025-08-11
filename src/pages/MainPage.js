@@ -121,7 +121,6 @@ const MainPage = () => {
             <h1 className="class-title">
               {user?.name || '사용자'}'s class
             </h1>
-            <a href="/assignments" className="more-link">More &gt;</a>
           </div>
           
           {transformedSections.length === 0 ? (

@@ -3,69 +3,112 @@
   background-color: white;
 }
 
-.page-header {
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #eee;
-  background-color: white;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.page-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #2d3436;
-  margin: 0;
-}
-
 .content-area {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.week-header {
+.assignment-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
 }
 
-.week-info {
+.assignment-info {
   flex: 1;
 }
 
-.week-title {
+.assignment-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.assignment-title {
   font-size: 2rem;
   font-weight: bold;
   color: #2d3436;
-  margin: 0 0 0.5rem 0;
+  margin: 0;
 }
 
-.week-description {
+.deadline-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 70px;
+}
+
+.deadline-badge.normal {
+  background: #d4edda;
+  color: #155724;
+}
+
+.deadline-badge.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.deadline-badge.urgent {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.deadline-badge.expired {
+  background: #e2e3e5;
+  color: #6c757d;
+}
+
+.assignment-description {
   color: #636e72;
   font-size: 1rem;
   margin: 0 0 1rem 0;
   line-height: 1.5;
 }
 
-.assignment-deadline {
+.assignment-dates {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 1rem;
 }
 
-.deadline-label {
-  font-size: 0.9rem;
-  color: #636e72;
+.date-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.date-label {
+  color: #6c757d;
   font-weight: 500;
 }
 
-.deadline-date {
-  font-size: 0.9rem;
-  color: #e74c3c;
+.date-value {
+  color: #495057;
+  font-weight: 500;
+}
+
+.date-value.urgent {
+  color: #dc3545;
   font-weight: 600;
+}
+
+.date-value.warning {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.date-value.expired {
+  color: #6c757d;
+  text-decoration: line-through;
 }
 
 .profile-avatar {
@@ -90,33 +133,48 @@
   color: white;
 }
 
-.filter-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+.no-problems {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
 }
 
-.filter-tab {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #e1e8ed;
-  background: white;
-  border-radius: 25px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #636e72;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.no-problems h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #495057;
 }
 
-.filter-tab:hover {
-  border-color: #0984e3;
-  color: #0984e3;
+.no-problems p {
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
-.filter-tab.active {
-  background: #0984e3;
-  border-color: #0984e3;
+.error-message {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #dc3545;
+}
+
+.error-message h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.error-message button {
+  background: #007bff;
   color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.error-message button:hover {
+  background: #0056b3;
 }
 
 .problems-list {
@@ -135,17 +193,25 @@
     padding: 1rem;
   }
   
-  .week-header {
+  .assignment-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
   
-  .filter-tabs {
+  .assignment-title-section {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
   
-  .filter-tab {
-    text-align: center;
+  .assignment-title {
+    font-size: 1.5rem;
+  }
+  
+  .date-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 } 

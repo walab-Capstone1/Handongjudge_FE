@@ -129,6 +129,60 @@ class APIService {
     });
   }
 
+  // 과제 목록 조회
+  async getAssignments(sectionId) {
+    return await this.request(`/sections/${sectionId}/assignments`,{
+      method: 'GET',
+    });  
+  }
+  // 과제 문제 목록 조회
+  async getAssignmentProblems(sectionId,assignmentId) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/problems`,{ 
+      method: 'GET',
+    });
+  }
+
+  // 과제 정보 조회 (assignmentId만으로 조회)
+  async getAssignmentInfo(assignmentId) {
+    return await this.request(`/assignments/${assignmentId}`, {
+      method: 'GET',
+    });     
+  }
+
+
+  // 과제 생성
+
+  // 코드 제출 API
+  async submitCode(sectionId, problemId, code, language) {
+    // 먼저 과제 정보를 조회하여 sectionId를 얻습니다
+    
+    console.log('SubmitCode sectionId', sectionId);
+    return await this.request('/submissions/submitAndGetResult', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        problemId: parseInt(problemId),
+        sectionId: parseInt(sectionId),
+        language,
+        codeString : code
+      }),
+    });
+  }
+
+  // 제출 결과 조회 API (현재 백엔드에서 즉시 결과를 반환하므로 사용하지 않음)
+  // async getSubmissionResult(submissionId) {
+  //   return await this.request(`/submissions/${submissionId}`);
+  // }
+
+  // 문제 정보 조회 API
+  async getProblemInfo(problemId) {
+    return await this.request(`/problems/${problemId}`);
+  }
+
+
+
 
 }
 
