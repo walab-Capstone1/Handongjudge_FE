@@ -153,18 +153,20 @@ class APIService {
   // 과제 생성
 
   // 코드 제출 API
-  async submitCode(assignmentId, problemId, code, language) {
+  async submitCode(sectionId, problemId, code, language) {
     // 먼저 과제 정보를 조회하여 sectionId를 얻습니다
-    const assignmentInfo = await this.getAssignmentInfo(assignmentId);
-    const sectionId = assignmentInfo.sectionId;
     
-    return await this.request('/submissions', {
+    console.log('SubmitCode sectionId', sectionId);
+    return await this.request('/submissions/submitAndGetResult', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         problemId: parseInt(problemId),
         sectionId: parseInt(sectionId),
         language,
-        code
+        codeString : code
       }),
     });
   }
