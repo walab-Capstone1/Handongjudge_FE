@@ -1,8 +1,9 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./AssignmentCard.css";
 
 const AssignmentCard = ({ assignment, formatDate, getDeadlineStatus }) => {
+  const navigate = useNavigate();
   const location = useLocation();
   const deadlineStatus = getDeadlineStatus(assignment.endDate);
 
@@ -11,11 +12,16 @@ const AssignmentCard = ({ assignment, formatDate, getDeadlineStatus }) => {
   const sectionIndex = urlParts.indexOf('sections');
   const sectionId = sectionIndex !== -1 ? urlParts[sectionIndex + 1] : null;
 
+  const handleCardClick = () => {
+    console.log('과제 카드 클릭:', { sectionId, assignmentId: assignment.id });
+    navigate(`/sections/${sectionId}/assignments/${assignment.id}/detail`);
+  };
+
   return (
-    <Link 
-      to={`/assignments/${assignment.id}/detail`} 
-      state={{ sectionId: sectionId }}
+    <div 
       className="assignment-card-link"
+      onClick={handleCardClick}
+      style={{ cursor: 'pointer' }}
     >
       <div className="assignment-card">
         <div className="assignment-header">
@@ -49,7 +55,7 @@ const AssignmentCard = ({ assignment, formatDate, getDeadlineStatus }) => {
           <div className="expand-icon">▶</div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

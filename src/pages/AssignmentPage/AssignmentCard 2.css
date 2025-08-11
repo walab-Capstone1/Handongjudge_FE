@@ -1,0 +1,182 @@
+.assignment-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.assignment-card {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.assignment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #007bff;
+}
+
+.assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.assignment-number {
+  background: #f8f9fa;
+  color: #6c757d;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.deadline-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 60px;
+}
+
+.deadline-badge.normal {
+  background: #d4edda;
+  color: #155724;
+}
+
+.deadline-badge.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.deadline-badge.urgent {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.deadline-badge.expired {
+  background: #e2e3e5;
+  color: #6c757d;
+}
+
+.assignment-content {
+  margin-bottom: 16px;
+}
+
+.assignment-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.assignment-description {
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.assignment-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.date-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.date-label {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.date-value {
+  color: #495057;
+  font-weight: 500;
+}
+
+.date-value.urgent {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.date-value.warning {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.date-value.expired {
+  color: #6c757d;
+  text-decoration: line-through;
+}
+
+.assignment-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.expand-icon {
+  color: #6c757d;
+  font-size: 0.875rem;
+  transition: transform 0.2s ease;
+}
+
+.assignment-card:hover .expand-icon {
+  transform: translateX(4px);
+  color: #007bff;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .assignment-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .assignment-title {
+    font-size: 1.1rem;
+  }
+  
+  .assignment-description {
+    font-size: 0.9rem;
+  }
+  
+  .date-item {
+    font-size: 0.8rem;
+  }
+}
+
+/* 그리드 레이아웃 */
+.assignments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .assignments-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+} 
