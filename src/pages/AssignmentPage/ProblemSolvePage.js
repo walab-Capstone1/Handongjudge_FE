@@ -6,7 +6,6 @@ import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
-import ReactMarkdown from "react-markdown";
 import { EditorView } from "@codemirror/view";
 import apiService from "../../services/APIService";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -346,9 +345,10 @@ const ProblemSolvePage = () => {
           {/* Description Area */}
           <div className="description-area">
             <div className="description-header">문제 설명</div>
-            <div>
-              <ReactMarkdown>{problemDescription}</ReactMarkdown>
-            </div>
+            <div 
+              className="description-content"
+              dangerouslySetInnerHTML={{ __html: currentProblem.description || problemDescription }}
+            />
           </div>
 
           {/* Editor and Result Split */}
