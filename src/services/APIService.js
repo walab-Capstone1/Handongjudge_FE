@@ -180,6 +180,76 @@ class APIService {
     return await this.request(`/problems/${problemId}`);
   }
 
+  // ==================== 문제 관리 API ====================
+  
+  // 모든 문제 목록 조회
+  async getAllProblems() {
+    return await this.request('/problems');
+  }
+
+  // 문제 생성
+  async createProblem(formData) {
+    const url = `${this.baseURL}/problems`;
+    
+    const config = {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+      // FormData 사용 시 Content-Type 헤더를 설정하지 않음 (브라우저가 자동 설정)
+    };
+
+    // Access Token이 있으면 헤더에 추가
+    const accessToken = tokenManager.getAccessToken();
+    if (accessToken) {
+      config.headers = {
+        Authorization: `Bearer ${accessToken}`,
+      };
+    }
+
+    try {
+      const response = await fetch(url, config);
+      
+      // 401 에러 시 토큰 갱신 시도
+      if (response.status === 401) {
+        console.log('토큰 만료, 갱신 시도 중...');
+        try {
+          await tokenManager.refreshToken();
+          const newAccessToken = tokenManager.getAccessToken();
+          if (newAccessToken) {
+            config.headers = {
+              Authorization: `Bearer ${newAccessToken}`,
+            };
+            const retryResponse = await fetch(url, config);
+            return this.handleResponse(retryResponse);
+          }
+        } catch (refreshError) {
+          console.error('토큰 갱신 실패:', refreshError);
+          tokenManager.clearTokens();
+          throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+        }
+      }
+
+      return this.handleResponse(response);
+    } catch (error) {
+      console.error('문제 생성 API 요청 오류:', error);
+      throw error;
+    }
+  }
+
+  // 과제에 문제 추가
+  async addProblemToAssignment(assignmentId, problemId) {
+    return await this.request(`/assignments/${assignmentId}/${problemId}`, {
+      method: 'POST',
+    });
+  }
+
+  // 과제에서 문제 제거 (백엔드 API 필요)
+  async removeProblemFromAssignment(assignmentId, problemId) {
+    return await this.request(`/assignments/${assignmentId}/${problemId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // ==================== 관리자 API ====================
   
   // 대시보드 통계 조회
