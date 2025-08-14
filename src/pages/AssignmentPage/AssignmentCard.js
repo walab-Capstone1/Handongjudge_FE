@@ -1,8 +1,9 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import APIService from "../../services/APIService";
 import "./AssignmentCard.css";
 
-const AssignmentCard = ({ assignment, formatDate, getDeadlineStatus }) => {
+const AssignmentCard = ({ assignment, formatDate, getDeadlineStatus, onAssignmentRead }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const deadlineStatus = getDeadlineStatus(assignment.endDate);
@@ -12,8 +13,23 @@ const AssignmentCard = ({ assignment, formatDate, getDeadlineStatus }) => {
   const sectionIndex = urlParts.indexOf('sections');
   const sectionId = sectionIndex !== -1 ? urlParts[sectionIndex + 1] : null;
 
-  const handleCardClick = () => {
+  const handleCardClick = async () => {
     console.log('과제 카드 클릭:', { sectionId, assignmentId: assignment.id });
+    
+    // 새로운 과제인 경우 읽음 처리
+    if (assignment.isNew) {
+      try {
+        await APIService.markAssignmentAsRead(assignment.id);
+        console.log('과제 읽음 처리 완료:', assignment.id);
+        // 부모 컴포넌트에 읽음 처리 완료 알림
+        if (onAssignmentRead) {
+          onAssignmentRead(assignment.id);
+        }
+      } catch (error) {
+        console.error('과제 읽음 처리 실패:', error);
+      }
+    }
+    
     navigate(`/sections/${sectionId}/assignments/${assignment.id}/detail`);
   };
 

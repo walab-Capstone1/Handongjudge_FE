@@ -26,27 +26,53 @@ const ProblemSolvePage = () => {
     title: "Loading...",
     description: "Loading..."
   });
+  const [sectionInfo, setSectionInfo] = useState({
+    courseTitle: "Loading...",
+    sectionNumber: 0,
+    instructorName: "Loading..."
+  });
+  const [assignmentInfo, setAssignmentInfo] = useState({
+    title: "Loading...",
+    assignmentNumber: ""
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
   const [verticalSizes, setVerticalSizes] = useState([70, 30]);
 
-  // Load problem information
+  // Load problem, section, assignment information
   useEffect(() => {
-    const loadProblemInfo = async () => {
-      if (!problemId) {
+    const loadAllInfo = async () => {
+      if (!problemId || !sectionId || !assignmentId) {
         return;
       }
 
       try {
         setIsLoading(true);
-        console.log('문제 정보 로드 시작:', { problemId });
+        console.log('정보 로드 시작:', { problemId, sectionId, assignmentId });
         
-        const problemInfo = await apiService.getProblemInfo(problemId);
+        // 병렬로 모든 정보 조회
+        const [problemInfo, sectionInfoRes, assignmentInfoRes] = await Promise.all([
+          apiService.getProblemInfo(problemId),
+          apiService.getSectionInfo(sectionId),
+          apiService.getAssignmentInfo(sectionId, assignmentId)
+        ]);
+        
         console.log('문제 정보 로드 성공:', problemInfo);
+        console.log('섹션 정보 로드 성공:', sectionInfoRes);
+        console.log('과제 정보 로드 성공:', assignmentInfoRes);
         
-        setCurrentProblem(problemInfo.data || problemInfo);
+        const problemData = problemInfo.data || problemInfo;
+        const sectionData = sectionInfoRes.data || sectionInfoRes;
+        const assignmentData = assignmentInfoRes.data || assignmentInfoRes;
+        
+        console.log('🔍 섹션 데이터 상세:', sectionData);
+        console.log('🔍 과제 데이터 상세:', assignmentData);
+        
+        setCurrentProblem(problemData);
+        setSectionInfo(sectionData);
+        setAssignmentInfo(assignmentData);
       } catch (error) {
-        console.error('문제 정보 로드 실패:', error);
+        console.error('정보 로드 실패:', error);
         setCurrentProblem({ 
           title: "오류", 
           description: "문제를 불러오는데 실패했습니다." 
@@ -56,8 +82,8 @@ const ProblemSolvePage = () => {
       }
     };
 
-    loadProblemInfo();
-  }, [problemId]);
+    loadAllInfo();
+  }, [problemId, sectionId, assignmentId]);
 
   // Helper functions
   function getDefaultCode(lang) {
@@ -286,21 +312,21 @@ const ProblemSolvePage = () => {
             className="breadcrumb-link"
             onClick={() => navigate("/main")}
           >
-            A Class
+            {sectionInfo.courseTitle}
           </span>
           <span> › </span>
           <span 
             className="breadcrumb-link"
             onClick={() => navigate(`/sections/${sectionId}/assignments`)}
           >
-            섹션 {sectionId}
+            {sectionInfo.sectionNumber}분반
           </span>
           <span> › </span>
           <span 
             className="breadcrumb-link"
             onClick={() => navigate(`/sections/${sectionId}/assignments/${assignmentId}/detail`)}
           >
-            과제 {assignmentId}
+            {assignmentInfo.title}
           </span>
           <span> › </span>
           <strong>{currentProblem.title}</strong>

@@ -1,0 +1,151 @@
+.admin-layout {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.admin-container {
+  display: flex;
+  max-width: none;
+  margin: 0;
+  min-height: calc(100vh - 80px);
+  background: white;
+}
+
+.admin-sidebar {
+  width: 250px;
+  background: #f1f3f4;
+  color: #2d3436;
+  padding: 2rem 0;
+  border-right: 1px solid #e1e8ed;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 80px);
+}
+
+.sidebar-header {
+  padding: 0 2rem 2rem 2rem;
+  border-bottom: 1px solid #e1e8ed;
+  margin-bottom: 2rem;
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-icon {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  color: #2d3436;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  margin: 0 1rem;
+}
+
+.sidebar-item:hover {
+  background-color: #e1e8ed;
+  color: #0984e3;
+}
+
+.sidebar-item.active {
+  background: #0984e3;
+  color: white;
+  font-weight: 600;
+}
+
+.sidebar-icon {
+  font-size: 1.3rem;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-label {
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.admin-content {
+  background: white;
+  padding: 2rem;
+  min-height: calc(100vh - 200px);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .admin-container {
+    flex-direction: column;
+  }
+  
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+  }
+  
+  .sidebar-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 1rem 1rem 1rem;
+  }
+  
+  .sidebar-item {
+    min-width: max-content;
+    white-space: nowrap;
+  }
+  
+  .admin-main {
+    padding: 1rem;
+  }
+  
+  .admin-content {
+    padding: 1.5rem;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-title {
+    font-size: 1.3rem;
+  }
+  
+  .sidebar-item {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .sidebar-icon {
+    font-size: 1.1rem;
+  }
+  
+  .admin-content {
+    padding: 1rem;
+  }
+}

@@ -25,6 +25,7 @@ const MainPage = () => {
         setError(null);
         
         const response = await APIService.getUserEnrolledSections();
+        console.log('🔥 메인 페이지 대시보드 응답:', response);
         setEnrolledSections(response.data || response);
       } catch (err) {
         console.error('수강 중인 section 조회 실패:', err);
@@ -37,14 +38,26 @@ const MainPage = () => {
     fetchEnrolledSections();
   }, [isAuthenticated]);
 
+  // 상태 업데이트 콜백 (공지사항/과제 읽음 처리 후 대시보드 새로고침)
+  const handleStatusUpdate = async () => {
+    console.log('🔥 상태 업데이트 콜백 호출됨 - 대시보드 새로고침');
+    try {
+      const response = await APIService.getUserEnrolledSections();
+      console.log('🔥 대시보드 새로고침 응답:', response);
+      setEnrolledSections(response.data || response);
+    } catch (err) {
+      console.error('🔥 대시보드 새로고침 실패:', err);
+    }
+  };
+
   // API 응답 데이터를 CourseCard 컴포넌트에 맞는 형태로 변환
   const transformSectionData = (section) => {
     return {
       id: section.sectionId,
       title: section.courseTitle,
       subtitle: `강의 ID: ${section.courseId}`,
-      batch: `Section ${section.sectionId}`,
-      courseName: `[${section.courseTitle}] Section ${section.sectionId}`,
+      batch: `${section.sectionNumber}분반`,
+      courseName: `[${section.courseTitle}] ${section.sectionNumber}분반`,
       status: generateStatus(section),
       instructor: section.instructorName,
       color: getRandomColor(section.sectionId),
@@ -57,13 +70,21 @@ const MainPage = () => {
   const generateStatus = (section) => {
     const status = [];
     
+    console.log('🔥 섹션 상태 생성:', {
+      sectionId: section.sectionId,
+      newNoticeCount: section.newNoticeCount,
+      newAssignmentCount: section.newAssignmentCount
+    });
+    
     // 새로운 공지사항이 있으면 추가
     if (section.newNoticeCount > 0) {
       status.push({ type: "announcement", text: `새로운 공지`, color: "green" });
     }
     
-    // 현재는 과제 정보가 없으므로 기본 상태만 표시
-    // 향후 과제 정보가 추가되면 여기에 로직 추가
+    // 새로운 과제가 있으면 추가
+    if (section.newAssignmentCount > 0) {
+      status.push({ type: "assignment", text: `새로운 과제`, color: "blue" });
+    }
     
     return status;
   };
@@ -130,7 +151,11 @@ const MainPage = () => {
           ) : (
             <div className="courses-grid">
               {transformedSections.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onStatusUpdate={handleStatusUpdate}
+                />
               ))}
             </div>
           )}
