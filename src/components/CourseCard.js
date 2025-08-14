@@ -1,8 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import APIService from "../services/APIService";
 import "./CourseCard.css";
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ course, onStatusUpdate }) => {
+  const navigate = useNavigate();
+  
   const getColorClass = (color) => {
     switch (color) {
       case "purple": return "purple";
@@ -31,6 +34,33 @@ const CourseCard = ({ course }) => {
     return "/assignments";
   };
 
+  // 상태 배지 클릭 처리
+  const handleStatusClick = async (e, status) => {
+    e.preventDefault(); // Link 이벤트 방지
+    e.stopPropagation();
+    
+    if (status.type === "announcement") {
+      // 공지사항 페이지로 이동
+      navigate(`/notices?sectionId=${course.sectionId}`);
+      
+      // 상태 업데이트 콜백 호출 (메인 페이지에서 대시보드 새로고침)
+      if (onStatusUpdate) {
+        setTimeout(() => {
+          console.log('🔥 공지사항 배지 클릭 후 대시보드 업데이트 시작');
+          onStatusUpdate();
+        }, 2000); // 2초 후 업데이트 (읽음 처리 완료 대기)
+      }
+    } else if (status.type === "assignment") {
+      // 과제 페이지로 이동
+      navigate(getLinkPath());
+      
+      // 상태 업데이트 콜백 호출
+      if (onStatusUpdate) {
+        setTimeout(() => onStatusUpdate(), 1000);
+      }
+    }
+  };
+
   return (
     <Link to={getLinkPath()} className="course-card-link">
       <div className="course-card">
@@ -46,7 +76,12 @@ const CourseCard = ({ course }) => {
           
           <div className="status-tags">
             {course.status.map((status, index) => (
-              <span key={index} className={`status-tag ${getStatusColor(status.color)}`}>
+              <span 
+                key={index} 
+                className={`status-tag ${getStatusColor(status.color)}`}
+                onClick={(e) => handleStatusClick(e, status)}
+                style={{ cursor: 'pointer' }}
+              >
                 {status.text}
               </span>
             ))}

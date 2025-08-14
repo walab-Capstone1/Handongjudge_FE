@@ -12,20 +12,24 @@ const AssignmentListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sectionInfo, setSectionInfo] = useState({
-    title: "Loading...",
-    description: "Loading..."
+    courseTitle: "Loading...",
+    sectionNumber: 0,
+    instructorName: "Loading..."
   });
 
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
         setLoading(true);
-        const response = await APIService.getAssignments(sectionId);
-        setAssignments(response.data || response);
         
-        // 섹션 정보도 함께 가져오기 (API가 있다면)
-        // const sectionResponse = await APIService.getSection(sectionId);
-        // setSectionInfo(sectionResponse.data);
+        // 병렬로 과제 목록과 섹션 정보 조회
+        const [assignmentsResponse, sectionResponse] = await Promise.all([
+          APIService.getAssignments(sectionId),
+          APIService.getSectionInfo(sectionId)
+        ]);
+        
+        setAssignments(assignmentsResponse.data || assignmentsResponse);
+        setSectionInfo(sectionResponse.data || sectionResponse);
         
       } catch (err) {
         console.error("과제 목록 조회 실패:", err);
@@ -101,9 +105,9 @@ const AssignmentListPage = () => {
           <div className="assignment-section-container">
             <div className="class-info">
               <div className="class-details">
-                <h2 className="class-title">Section {sectionId}</h2>
+                <h2 className="class-title">{sectionInfo.courseTitle} - {sectionInfo.sectionNumber}분반</h2>
                 <p className="class-description">
-                  {sectionInfo.description || "과제 목록을 확인하세요."}
+                  과제 목록을 확인하세요.
                 </p>
               </div>
               <div className="class-icon">📚</div>
@@ -122,6 +126,12 @@ const AssignmentListPage = () => {
                     assignment={assignment}
                     formatDate={formatDate}
                     getDeadlineStatus={getDeadlineStatus}
+                    onAssignmentRead={(assignmentId) => {
+                      // 읽음 처리 후 과제 상태 업데이트
+                      setAssignments(prev => prev.map(a => 
+                        a.id === assignmentId ? { ...a, isNew: false } : a
+                      ));
+                    }}
                   />
                 ))}
               </div>

@@ -96,7 +96,13 @@ class APIService {
   // 사용자 정보 조회
   async getUserInfo() {
     const response = await this.request('/user/me');
-    return response.data || response;
+    console.log('APIService - getUserInfo 응답:', response);
+    
+    // 응답 데이터 구조에 따라 적절히 반환
+    const userData = response.data || response;
+    console.log('APIService - 처리된 사용자 데이터:', userData);
+    
+    return userData;
   }
 
 
@@ -120,13 +126,6 @@ class APIService {
   // 유저별 수강 중인 section 조회 (현재 백엔드 API에 맞춤)
   async getUserEnrolledSections() {
     return await this.request('/user/dashboard');
-  }
-
-  // 공지사항 확인 처리
-  async markNoticeAsRead(noticeId) {
-    return await this.request(`/notices/${noticeId}/read`, {
-      method: 'POST',
-    });
   }
 
   // 과제 목록 조회
@@ -181,8 +180,237 @@ class APIService {
     return await this.request(`/problems/${problemId}`);
   }
 
+  // ==================== 관리자 API ====================
+  
+  // 대시보드 통계 조회
+  async getAdminStats() {
+    return await this.request('/admin/dashboard/stats');
+  }
 
+  // 최근 활동 조회
+  async getRecentActivity() {
+    return await this.request('/admin/dashboard/activity');
+  }
 
+  // ==================== 교수 관련 API (기존 API 활용) ====================
+  
+  // 교수 대시보드 데이터 (기존 dashboard API 활용)
+  async getInstructorDashboard() {
+    return await this.request('/user/dashboard');
+  }
+
+  // 교수별 담당 학생 조회
+  async getInstructorStudents() {
+    return await this.request('/user/instructor/students');
+  }
+
+  // 특정 분반 학생 조회
+  async getSectionStudents(sectionId) {
+    return await this.request(`/user/sections/${sectionId}/students`);
+  }
+
+  // 특정 분반의 과제 목록 (기존 API 활용)
+  async getAssignmentsBySection(sectionId) {
+    return await this.request(`/sections/${sectionId}/assignments`);
+  }
+
+  // 특정 과제의 문제 목록 조회
+  async getAssignmentProblems(sectionId, assignmentId) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/problems`);
+  }
+
+  // ==================== 공지사항 관련 API ====================
+
+  // 공지사항 생성
+  async createNotice(noticeData) {
+    return await this.request('/notices', {
+      method: 'POST',
+      body: JSON.stringify(noticeData)
+    });
+  }
+
+  // 교수의 모든 공지사항 조회
+  async getInstructorNotices() {
+    return await this.request('/notices/instructor/my');
+  }
+
+  // 특정 분반의 공지사항 조회
+  async getSectionNotices(sectionId) {
+    return await this.request(`/notices/section/${sectionId}`);
+  }
+
+  // 공지사항 수정
+  async updateNotice(noticeId, noticeData) {
+    return await this.request(`/notices/${noticeId}`, {
+      method: 'PUT',
+      body: JSON.stringify(noticeData)
+    });
+  }
+
+  // 공지사항 삭제
+  async deleteNotice(noticeId) {
+    return await this.request(`/notices/${noticeId}`, {
+      method: 'DELETE'
+    });
+  }
+
+      // 공지사항 읽음 처리
+    async markNoticeAsRead(noticeId) {
+        return await this.request(`/user/read/notice/${noticeId}`, {
+            method: 'POST'
+        });
+    }
+
+    // 과제 읽음 처리
+    async markAssignmentAsRead(assignmentId) {
+        return await this.request(`/user/read/assignment/${assignmentId}`, {
+            method: 'POST'
+        });
+    }
+
+    // 섹션 정보 조회
+    async getSectionInfo(sectionId) {
+        return await this.request(`/sections/${sectionId}`);
+    }
+
+    // 과제 정보 조회 (기존 API 사용)
+    async getAssignmentInfo(sectionId, assignmentId) {
+        return await this.request(`/sections/${sectionId}/assignments/${assignmentId}`);
+    }
+
+    // 특정 분반의 공지사항 목록 조회
+    async getSectionNotices(sectionId) {
+        return await this.request(`/notices?sectionId=${sectionId}`);
+    }
+
+  // ==================== 강의 관리 API ====================
+  
+  // 모든 강의 조회 (관리자)
+  async getAllCourses() {
+    return await this.request('/admin/courses');
+  }
+
+  // 강의 생성
+  async createCourse(courseData) {
+    return await this.request('/admin/courses', {
+      method: 'POST',
+      body: JSON.stringify(courseData),
+    });
+  }
+
+  // 강의 수정
+  async updateCourse(courseId, courseData) {
+    return await this.request(`/admin/courses/${courseId}`, {
+      method: 'PUT',
+      body: JSON.stringify(courseData),
+    });
+  }
+
+  // 강의 삭제
+  async deleteCourse(courseId) {
+    return await this.request(`/admin/courses/${courseId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // 강의별 섹션 조회
+  async getCourseSections(courseId) {
+    return await this.request(`/admin/courses/${courseId}/sections`);
+  }
+
+  // ==================== 과제 관리 API ====================
+  
+  // 모든 과제 조회 (관리자)
+  async getAllAssignments() {
+    return await this.request('/admin/assignments');
+  }
+
+  // 과제 생성
+  async createAssignment(assignmentData) {
+    return await this.request('/admin/assignments', {
+      method: 'POST',
+      body: JSON.stringify(assignmentData),
+    });
+  }
+
+  // 과제 수정
+  async updateAssignment(assignmentId, assignmentData) {
+    return await this.request(`/admin/assignments/${assignmentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(assignmentData),
+    });
+  }
+
+  // 과제 삭제
+  async deleteAssignment(assignmentId) {
+    return await this.request(`/admin/assignments/${assignmentId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // 과제별 제출 현황 조회
+  async getAssignmentSubmissions(assignmentId) {
+    return await this.request(`/admin/assignments/${assignmentId}/submissions`);
+  }
+
+  // ==================== 사용자 관리 API ====================
+  
+  // 모든 사용자 조회 (관리자)
+  async getAllUsers() {
+    return await this.request('/admin/users');
+  }
+
+  // 사용자 생성
+  async createUser(userData) {
+    return await this.request('/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  // 사용자 수정
+  async updateUser(userId, userData) {
+    return await this.request(`/admin/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  // 사용자 삭제
+  async deleteUser(userId) {
+    return await this.request(`/admin/users/${userId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // 사용자 상태 변경 (활성/비활성)
+  async toggleUserStatus(userId, status) {
+    return await this.request(`/admin/users/${userId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  // 사용자별 강의 등록 현황 조회
+  async getUserEnrollments(userId) {
+    return await this.request(`/admin/users/${userId}/enrollments`);
+  }
+
+  // 사용자를 강의에 등록
+  async enrollUserToCourse(userId, courseId) {
+    return await this.request(`/admin/users/${userId}/enroll`, {
+      method: 'POST',
+      body: JSON.stringify({ courseId }),
+    });
+  }
+
+  // 사용자를 강의에서 제외
+  async unenrollUserFromCourse(userId, courseId) {
+    return await this.request(`/admin/users/${userId}/unenroll`, {
+      method: 'POST',
+      body: JSON.stringify({ courseId }),
+    });
+  }
 
 }
 
