@@ -556,6 +556,213 @@
   background: #f8f9fa;
   border-radius: 8px;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* 문제 관리 관련 스타일 */
+.problems-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.btn-add-problem {
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-add-problem:hover {
+  background: linear-gradient(135deg, #00a085, #00b7b3);
+  transform: translateY(-1px);
+}
+
+.btn-add-first-problem {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-add-first-problem:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  transform: translateY(-2px);
+}
+
+.btn-remove-problem {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.btn-remove-problem:hover {
+  background: #ff5252;
+  transform: scale(1.05);
+}
+
+/* 문제 선택 모달 스타일 */
+.problem-modal {
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+}
+
+.problem-modal-content {
+  padding: 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.problem-search-section {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.btn-create-new {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-create-new:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  transform: translateY(-2px);
+}
+
+.available-problems {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.available-problem-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.available-problem-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.available-problem-item .problem-info {
+  flex: 1;
+  margin-right: 1rem;
+}
+
+.available-problem-item .problem-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3436;
+  margin: 0 0 0.5rem 0;
+}
+
+.available-problem-item .problem-description {
+  color: #636e72;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+  max-height: 3rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.available-problem-item .problem-difficulty {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.available-problem-item .problem-created {
+  font-size: 0.8rem;
+  color: #95a5a6;
+}
+
+.btn-select-problem {
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-select-problem:hover {
+  background: linear-gradient(135deg, #00a085, #00b7b3);
+  transform: translateY(-2px);
+}
+
+.no-available-problems {
+  text-align: center;
+  padding: 3rem;
+  color: #636e72;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* 문제 생성 폼 스타일 */
+.problem-form {
+  padding: 1.5rem;
+}
+
+.file-input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px dashed #e9ecef;
+  border-radius: 8px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-input:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.file-help {
+  display: block;
+  color: #636e72;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
 }
 
 /* 모달 스타일 */
