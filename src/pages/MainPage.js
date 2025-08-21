@@ -133,7 +133,7 @@ const MainPage = () => {
       <div className="main-page">
         <div className="main-header">
           <Link to="/mypage/info" className="profile-avatar">
-            <div className="avatar-icon">🐦</div>
+            <div className="avatar-icon"></div>
           </Link>
         </div>
         

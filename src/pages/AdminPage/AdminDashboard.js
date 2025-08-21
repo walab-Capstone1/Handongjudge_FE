@@ -71,13 +71,9 @@ const AdminDashboard = () => {
               <div className="section-header">
                 <div className="section-info">
                   <h3 className="section-title">{section.courseTitle}</h3>
-                  <p className="section-details">{section.sectionId}분반</p>
+                  <p className="section-details">{section.sectionNumber}분반</p>
                 </div>
-                <div className="section-actions">
-                  <button className="btn-icon-small view" title="상세 보기">
-                    👁️
-                  </button>
-                </div>
+
               </div>
 
               <div className="section-stats">
@@ -103,7 +99,8 @@ const AdminDashboard = () => {
                   className="btn-secondary"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate('/admin/notices');
+                    console.log('카드에서 공지사항 관리 클릭:', section);
+                    navigate(`/admin/notices/section/${section.sectionId}`);
                   }}
                 >
                   공지사항 관리
@@ -112,7 +109,8 @@ const AdminDashboard = () => {
                   className="btn-secondary"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate('/admin/users');
+                    console.log('카드에서 수강생 관리 클릭:', section);
+                    navigate(`/admin/users/section/${section.sectionId}`);
                   }}
                 >
                   수강생 관리
@@ -121,7 +119,8 @@ const AdminDashboard = () => {
                   className="btn-primary"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate('/admin/assignments');
+                    console.log('카드에서 과제 관리 클릭:', section);
+                    navigate(`/admin/assignments/section/${section.sectionId}`);
                   }}
                 >
                   과제 관리
@@ -144,7 +143,7 @@ const AdminDashboard = () => {
           <div className="modal-overlay">
             <div className="modal-content">
               <div className="modal-header">
-                <h2>{selectedSection.courseTitle} - {selectedSection.sectionId}분반</h2>
+                <h2>{selectedSection.courseTitle} - {selectedSection.sectionNumber}분반</h2>
                 <button 
                   className="modal-close"
                   onClick={handleCloseModal}
@@ -173,7 +172,7 @@ const AdminDashboard = () => {
                     <span className="detail-stat-icon">📚</span>
                     <div className="detail-stat-content">
                       <span className="detail-stat-label">분반</span>
-                      <span className="detail-stat-value">{selectedSection.sectionId}</span>
+                      <span className="detail-stat-value">{selectedSection.sectionNumber}분반</span>
                     </div>
                   </div>
                 </div>
@@ -182,42 +181,48 @@ const AdminDashboard = () => {
                   <button 
                     className="btn-detail"
                     onClick={() => {
+                      console.log('공지사항 관리 클릭:', selectedSection);
+                      console.log('이동할 URL:', `/admin/notices/section/${selectedSection.sectionId}`);
                       handleCloseModal();
-                      navigate('/admin/notices');
+                      navigate(`/admin/notices/section/${selectedSection.sectionId}`);
                     }}
                   >
                     <span className="btn-icon">📢</span>
                     <div className="btn-content">
                       <h4>공지사항 관리</h4>
-                      <p>분반 공지사항을 작성하고 관리합니다</p>
+                      <p>이 분반의 공지사항을 작성하고 관리합니다</p>
                     </div>
                   </button>
                   
                   <button 
                     className="btn-detail"
                     onClick={() => {
+                      console.log('수강생 관리 클릭:', selectedSection);
+                      console.log('이동할 URL:', `/admin/users/section/${selectedSection.sectionId}`);
                       handleCloseModal();
-                      navigate('/admin/users');
+                      navigate(`/admin/users/section/${selectedSection.sectionId}`);
                     }}
                   >
                     <span className="btn-icon">👥</span>
                     <div className="btn-content">
                       <h4>수강생 관리</h4>
-                      <p>수강생 목록을 확인하고 관리합니다</p>
+                      <p>이 분반의 수강생 목록을 확인하고 관리합니다</p>
                     </div>
                   </button>
                   
                   <button 
                     className="btn-detail primary"
                     onClick={() => {
+                      console.log('과제 관리 클릭:', selectedSection);
+                      console.log('이동할 URL:', `/admin/assignments/section/${selectedSection.sectionId}`);
                       handleCloseModal();
-                      navigate('/admin/assignments');
+                      navigate(`/admin/assignments/section/${selectedSection.sectionId}`);
                     }}
                   >
                     <span className="btn-icon">📝</span>
                     <div className="btn-content">
                       <h4>과제 관리</h4>
-                      <p>과제를 생성하고 관리합니다</p>
+                      <p>이 분반의 과제를 생성하고 관리합니다</p>
                     </div>
                   </button>
                   

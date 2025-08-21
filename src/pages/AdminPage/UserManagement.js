@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
+import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
 import "./UserManagement.css";
 
 const UserManagement = () => {
+  const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [sections, setSections] = useState([]);
+  const [currentSection, setCurrentSection] = useState(null);
   const [loading, setLoading] = useState(true);
   // 모달 관련 상태 제거됨
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,6 +31,14 @@ const UserManagement = () => {
       // 분반 정보도 함께 가져오기
       const dashboardResponse = await APIService.getInstructorDashboard();
       const sectionsData = dashboardResponse?.data || [];
+      
+      // 현재 분반 정보 설정
+      if (sectionId) {
+        const currentSectionData = sectionsData.find(section => 
+          section.sectionId === parseInt(sectionId)
+        );
+        setCurrentSection(currentSectionData);
+      }
       
       setStudents(studentsData);
       setSections(sectionsData);
@@ -95,6 +108,14 @@ const UserManagement = () => {
 
   return (
     <AdminLayout>
+      {/* 분반별 페이지인 경우 네비게이션 표시 */}
+      {sectionId && currentSection && (
+        <SectionNavigation 
+          sectionId={sectionId}
+          sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
+        />
+      )}
+      
       <div className="user-management">
         <div className="page-header">
           <h1 className="page-title">학생 관리</h1>
@@ -155,7 +176,7 @@ const UserManagement = () => {
                   <td>{student.teamId || '-'}</td>
                   <td>
                     <span className="section-badge">
-                      {student.sectionNumber || student.sectionId}분반
+                      {student.sectionNumber}분반
                     </span>
                   </td>
                   <td>{student.courseTitle}</td>
@@ -172,14 +193,14 @@ const UserManagement = () => {
                         onClick={() => console.log('학생 상세 보기:', student.userId)}
                         title="상세 보기"
                       >
-                        👁️
+                        보기
                       </button>
                       <button 
                         className="btn-icon-small message"
                         onClick={() => console.log('메시지 보내기:', student.userId)}
                         title="메시지"
                       >
-                        💬
+                        메시지
                       </button>
                     </div>
                   </td>
@@ -189,7 +210,7 @@ const UserManagement = () => {
                   <tr>
                     <td colSpan="8" className="no-data">
                       <div className="no-data-message">
-                        <span className="no-data-icon">👨‍🎓</span>
+                        <span className="no-data-icon"></span>
                         <div>
                           {students.length === 0 ? (
                             <>
