@@ -393,6 +393,9 @@
   background: linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(88, 166, 255, 0.05) 100%);
   border-bottom: 1px solid #30363d;
   border-radius: 6px 6px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .problem-solve-page.light .editor-header {
@@ -484,39 +487,31 @@
   color: #FF3D50;
 }
 
-/* Submit Section */
-.submit-section {
-  border-top: 1px solid #30363d;
-  background-color: #161b22;
-  padding: 8px 24px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
 
-.problem-solve-page.light .submit-section {
-  border-top: 1px solid #e1e4e8;
-  background-color: #f6f8fa;
-}
 
-.submit-button {
-  padding: 10px 20px;
+
+
+/* Inline Submit Button */
+.submit-button-inline {
+  padding: 6px 12px;
   background-color: #2f81f7;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 4px;
+  font-size: 12px;
   cursor: pointer;
-  opacity: 1;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
-.submit-button:hover {
+.submit-button-inline:hover {
   background-color: #1f6feb;
 }
 
-.submit-button:disabled {
+.submit-button-inline:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background-color: #2f81f7;
 }
 
 /* Loading Container */
