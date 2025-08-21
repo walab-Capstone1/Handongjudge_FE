@@ -28,35 +28,39 @@
 }
 
 .card-header.purple {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f8f9fa;
+  border-bottom: 3px solid #6c5ce7;
 }
 
 .card-header.orange {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: #f8f9fa;
+  border-bottom: 3px solid #fd79a8;
 }
 
 .card-header.red {
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  background: #f8f9fa;
+  border-bottom: 3px solid #e84393;
 }
 
 .card-header.blue {
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  background: #f8f9fa;
+  border-bottom: 3px solid #0984e3;
 }
 
 .card-header.green {
-  background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+  background: #f8f9fa;
+  border-bottom: 3px solid #00b894;
 }
 
 .card-title h3 {
-  color: white;
+  color: #2d3436;
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0 0 0.5rem 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.9);
+  color: #636e72;
   font-size: 0.9rem;
   margin: 0;
   font-weight: 500;
@@ -66,8 +70,8 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
+  background: #e9ecef;
+  color: #495057;
   padding: 0.25rem 0.5rem;
   border-radius: 12px;
   font-size: 0.75rem;

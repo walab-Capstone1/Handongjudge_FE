@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
 import APIService from "../../services/APIService";
 import "./CourseManagement.css";
 
 const CourseManagement = () => {
+  const navigate = useNavigate();
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,16 +74,9 @@ const CourseManagement = () => {
               <div className="section-header">
                 <div className="section-info">
                   <h3 className="section-title">{section.courseTitle}</h3>
-                  <p className="section-details">분반 {section.sectionId}</p>
+                  <p className="section-details">{section.sectionNumber}분반</p>
                 </div>
-                <div className="section-actions">
-                  <button className="btn-icon-small view" title="상세 보기">
-                    👁️
-                  </button>
-                  <button className="btn-icon-small settings" title="설정">
-                    ⚙️
-                  </button>
-                </div>
+
               </div>
 
               <div className="section-stats">
@@ -98,14 +93,29 @@ const CourseManagement = () => {
                 <div className="stat-item">
                   <span className="stat-icon">📚</span>
                   <span className="stat-label">분반</span>
-                  <span className="stat-value">{section.sectionId}</span>
+                  <span className="stat-value">{section.sectionNumber}분반</span>
                 </div>
               </div>
 
               <div className="section-actions-bottom">
-                <button className="btn-secondary">공지사항 관리</button>
-                <button className="btn-secondary">수강생 관리</button>
-                <button className="btn-primary">과제 관리</button>
+                <button 
+                  className="btn-secondary"
+                  onClick={() => navigate(`/admin/notices/section/${section.sectionId}`)}
+                >
+                  공지사항 관리
+                </button>
+                <button 
+                  className="btn-secondary"
+                  onClick={() => navigate(`/admin/users/section/${section.sectionId}`)}
+                >
+                  수강생 관리
+                </button>
+                <button 
+                  className="btn-primary"
+                  onClick={() => navigate(`/admin/assignments/section/${section.sectionId}`)}
+                >
+                  과제 관리
+                </button>
               </div>
             </div>
           ))}
