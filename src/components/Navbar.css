@@ -77,6 +77,7 @@
 .nav-right {
   display: flex;
   align-items: center;
+  gap: 1rem;
   flex: 0 0 auto;
 }
 
@@ -94,6 +95,37 @@
 .settings-button:hover {
   background-color: #e1e8ed;
   color: #0984e3;
+}
+
+.user-info {
+  color: #2d3436;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+  transform: translateY(-1px);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
 }
 
 /* 큰 화면에서 최대 너비 제한 */
@@ -126,5 +158,15 @@
   
   .nav-right {
     justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .user-info {
+    font-size: 0.8rem;
+  }
+  
+  .logout-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
   }
 } 

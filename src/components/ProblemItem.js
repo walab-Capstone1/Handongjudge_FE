@@ -25,10 +25,10 @@ const ProblemItem = ({ problem, assignmentId }) => {
         </div>
         
         <div className="problem-icons">
-          <div className="status-icon">🟢</div>
+          <div className="status-icon solved"></div>
           <div className="language-icon">{problem.language || "JS"}</div>
           {problem.tags && problem.tags.map((tag, index) => (
-            <div key={index} className="tag-icon">📝</div>
+            <div key={index} className="tag-icon"></div>
           ))}
         </div>
       </div>

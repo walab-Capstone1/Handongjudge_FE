@@ -390,7 +390,14 @@ const ProblemSolvePage = () => {
             {/* Editor Area */}
             <div className="editor-wrapper">
               <div className="editor-header">
-                solution.{language === "javascript" ? "js" : language}
+                <span>solution.{language === "javascript" ? "js" : language}</span>
+                <button 
+                  className="submit-button-inline"
+                  onClick={handleSubmit} 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "제출 중..." : "제출하기"}
+                </button>
               </div>
               <div className="editor-scroll-area">
                 <CodeMirror
@@ -454,16 +461,7 @@ const ProblemSolvePage = () => {
         </Split>
       </div>
 
-      {/* Submit Section */}
-      <div className="submit-section">
-        <button 
-          className="submit-button"
-          onClick={handleSubmit} 
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "제출 중..." : "제출하기"}
-        </button>
-      </div>
+
     </div>
   );
 };

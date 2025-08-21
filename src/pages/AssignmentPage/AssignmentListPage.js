@@ -110,7 +110,7 @@ const AssignmentListPage = () => {
                   과제 목록을 확인하세요.
                 </p>
               </div>
-              <div className="class-icon">📚</div>
+              <div className="class-icon"></div>
             </div>
             
             {assignments.length === 0 ? (

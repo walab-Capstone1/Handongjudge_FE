@@ -26,10 +26,10 @@ const CourseCard = ({ course, onStatusUpdate }) => {
     }
   };
 
-  // sectionId가 있으면 해당 section의 과제 페이지로 라우팅
+  // sectionId가 있으면 해당 section의 상세 페이지로 라우팅
   const getLinkPath = () => {
     if (course.sectionId) {
-      return `/sections/${course.sectionId}/assignments`;
+      return `/sections/${course.sectionId}`;
     }
     return "/assignments";
   };
@@ -40,8 +40,8 @@ const CourseCard = ({ course, onStatusUpdate }) => {
     e.stopPropagation();
     
     if (status.type === "announcement") {
-      // 공지사항 페이지로 이동
-      navigate(`/notices?sectionId=${course.sectionId}`);
+      // 분반 상세 페이지의 공지사항 탭으로 이동
+      navigate(`/sections/${course.sectionId}?tab=notices`);
       
       // 상태 업데이트 콜백 호출 (메인 페이지에서 대시보드 새로고침)
       if (onStatusUpdate) {
@@ -51,8 +51,8 @@ const CourseCard = ({ course, onStatusUpdate }) => {
         }, 2000); // 2초 후 업데이트 (읽음 처리 완료 대기)
       }
     } else if (status.type === "assignment") {
-      // 과제 페이지로 이동
-      navigate(getLinkPath());
+      // 분반 상세 페이지의 과제 탭으로 이동
+      navigate(`/sections/${course.sectionId}?tab=assignments`);
       
       // 상태 업데이트 콜백 호출
       if (onStatusUpdate) {

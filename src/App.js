@@ -6,7 +6,8 @@ import AuthCallback from "./pages/login/AuthCallback";
 import SignUpPageSocial from "./pages/SignUpPageSocial";
 import MainPage from "./pages/MainPage";
 import QuestionPage from "./pages/QuestionPage";
-import NoticePage from "./pages/NoticePage";
+import SectionDetailPage from "./pages/SectionDetailPage";
+import NoticeDetailPage from "./pages/NoticeDetailPage";
 import MyInfoPage from "./pages/MyPage/MyInfoPage";
 import MyAssignmentsPage from "./pages/MyPage/MyAssignmentsPage";
 import AssignmentListPage from "./pages/AssignmentPage/AssignmentListPage";
@@ -17,7 +18,6 @@ import CourseManagement from "./pages/AdminPage/CourseManagement";
 import AssignmentManagement from "./pages/AdminPage/AssignmentManagement";
 import UserManagement from "./pages/AdminPage/UserManagement";
 import NoticeManagement from "./pages/AdminPage/NoticeManagement";
-import NoticeList from "./pages/NoticePage/NoticeList";
 import AdminRoute from "./components/AdminRoute";
 
 function App() {
@@ -30,7 +30,8 @@ function App() {
             <Route path="/signup" element={<SignUpPageSocial />} />
             <Route path="/main" element={<MainPage />} /> 
             <Route path="/questions" element={<QuestionPage />} />
-            <Route path="/notices" element={<NoticeList />} />
+            <Route path="/sections/:sectionId" element={<SectionDetailPage />} />
+            <Route path="/sections/:sectionId/notices/:noticeId" element={<NoticeDetailPage />} />
             <Route path="/mypage/info" element={<MyInfoPage />} />
             <Route path="/mypage/assignments" element={<MyAssignmentsPage />} />
             <Route path="/sections/:sectionId/assignments" element={<AssignmentListPage />} />
@@ -39,8 +40,11 @@ function App() {
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/courses" element={<AdminRoute><CourseManagement /></AdminRoute>} />
             <Route path="/admin/assignments" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
+            <Route path="/admin/assignments/section/:sectionId" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
             <Route path="/admin/notices" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
+            <Route path="/admin/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+            <Route path="/admin/users/section/:sectionId" element={<AdminRoute><UserManagement /></AdminRoute>} />
           </Routes>
         </Router>
       </RecoilRoot>

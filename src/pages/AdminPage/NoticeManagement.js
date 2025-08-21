@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
+import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
 import "./NoticeManagement.css";
 
 const NoticeManagement = () => {
+  const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기
+  const navigate = useNavigate();
   const [notices, setNotices] = useState([]);
   const [sections, setSections] = useState([]);
+  const [currentSection, setCurrentSection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
@@ -14,22 +19,29 @@ const NoticeManagement = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    sectionId: '',
-    difficulty: ''
+    sectionId: ''
   });
 
   useEffect(() => {
     fetchNotices();
     fetchSections();
-  }, []);
+  }, [sectionId]); // sectionId가 변경될 때마다 다시 조회
 
   const fetchNotices = async () => {
     try {
       setLoading(true);
-      console.log('🔍 공지사항 조회 시작...');
-      const response = await APIService.getInstructorNotices();
-      console.log('📋 API 응답:', response);
-      console.log('📋 응답 데이터:', response?.data || response);
+      console.log('🔍 공지사항 조회 시작...', { sectionId });
+      
+      let response;
+      if (sectionId) {
+        // 특정 분반의 공지사항만 조회
+        response = await APIService.getSectionNotices(sectionId);
+        console.log('📋 분반별 공지사항 API 응답:', response);
+      } else {
+        // 교수의 모든 공지사항 조회
+        response = await APIService.getInstructorNotices();
+        console.log('📋 전체 공지사항 API 응답:', response);
+      }
       
       // 응답 구조에 따라 데이터 추출
       const noticesData = response?.data || response || [];
@@ -49,6 +61,14 @@ const NoticeManagement = () => {
       const dashboardResponse = await APIService.getInstructorDashboard();
       const sectionsData = dashboardResponse?.data || [];
       setSections(sectionsData);
+      
+      // 현재 분반 정보 설정
+      if (sectionId) {
+        const currentSectionData = sectionsData.find(section => 
+          section.sectionId === parseInt(sectionId)
+        );
+        setCurrentSection(currentSectionData);
+      }
     } catch (error) {
       console.error('분반 정보 조회 실패:', error);
       setSections([]);
@@ -66,8 +86,7 @@ const NoticeManagement = () => {
     setFormData({
       title: notice.title,
       content: notice.content,
-      sectionId: notice.sectionId,
-      difficulty: notice.difficulty || ''
+      sectionId: notice.sectionId
     });
     setShowModal(true);
   };
@@ -95,8 +114,7 @@ const NoticeManagement = () => {
     setFormData({
       title: '',
       content: '',
-      sectionId: '',
-      difficulty: ''
+      sectionId: ''
     });
   };
 
@@ -135,23 +153,7 @@ const NoticeManagement = () => {
     }
   };
 
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty?.toLowerCase()) {
-      case 'easy': return '#27ae60';
-      case 'medium': return '#f39c12';
-      case 'hard': return '#e74c3c';
-      default: return '#636e72';
-    }
-  };
 
-  const getDifficultyLabel = (difficulty) => {
-    switch (difficulty?.toLowerCase()) {
-      case 'easy': return '쉬움';
-      case 'medium': return '보통';
-      case 'hard': return '어려움';
-      default: return '일반';
-    }
-  };
 
   const filteredNotices = notices.filter(notice => {
     const matchesSearch = notice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -179,9 +181,19 @@ const NoticeManagement = () => {
 
   return (
     <AdminLayout>
+      {/* 분반별 페이지인 경우 네비게이션 표시 */}
+      {sectionId && currentSection && (
+        <SectionNavigation 
+          sectionId={sectionId}
+          sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
+        />
+      )}
+      
       <div className="notice-management">
         <div className="page-header">
-          <h1 className="page-title">공지사항 관리</h1>
+          <h1 className="page-title">
+            {sectionId ? '분반별 공지사항 관리' : '전체 공지사항 관리'}
+          </h1>
           <div className="header-actions">
             <div className="header-stats">
               <span className="stat-badge">총 {notices.length}개</span>
@@ -191,7 +203,6 @@ const NoticeManagement = () => {
               className="btn-primary"
               onClick={handleCreateNotice}
             >
-              <span>📢</span>
               새 공지사항 작성
             </button>
           </div>
@@ -206,7 +217,7 @@ const NoticeManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            <span className="search-icon">🔍</span>
+            <span className="search-icon"></span>
           </div>
           
           <div className="filter-dropdown">
@@ -236,14 +247,7 @@ const NoticeManagement = () => {
                     <span className="notice-date">
                       {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
                     </span>
-                    {notice.difficulty && (
-                      <span 
-                        className="notice-difficulty"
-                        style={{ color: getDifficultyColor(notice.difficulty) }}
-                      >
-                        {getDifficultyLabel(notice.difficulty)}
-                      </span>
-                    )}
+
                     {notice.isNew && (
                       <span className="notice-new-badge">NEW</span>
                     )}
@@ -256,14 +260,14 @@ const NoticeManagement = () => {
                     onClick={() => handleEditNotice(notice)}
                     title="수정"
                   >
-                    ✏️
+                    <span className="edit-icon"></span>
                   </button>
                   <button
                     className="btn-icon delete"
                     onClick={() => handleDeleteNotice(notice.id)}
                     title="삭제"
                   >
-                    🗑️
+                    <span className="delete-icon"></span>
                   </button>
                 </div>
               </div>
@@ -336,27 +340,14 @@ const NoticeManagement = () => {
                       <option value="">분반을 선택하세요</option>
                       {sections.map((section) => (
                         <option key={section.sectionId} value={section.sectionId}>
-                          {section.courseTitle} ({section.sectionId}분반)
+                          {section.courseTitle} ({section.sectionNumber}분반)
                         </option>
                       ))}
                     </select>
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="difficulty">중요도</label>
-                  <select
-                    id="difficulty"
-                    name="difficulty"
-                    value={formData.difficulty}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">일반</option>
-                    <option value="EASY">쉬움</option>
-                    <option value="MEDIUM">보통</option>
-                    <option value="HARD">중요</option>
-                  </select>
-                </div>
+
 
                 <div className="form-group">
                   <label htmlFor="content">공지사항 내용 *</label>

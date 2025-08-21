@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
 import APIService from "../../services/APIService";
 import "./AssignmentManagement.css";
 
 const AssignmentManagement = () => {
+  const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기
   const [assignments, setAssignments] = useState([]);
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,11 +30,19 @@ const AssignmentManagement = () => {
     descriptionFile: null,
     zipFile: null
   });
+  const [submissionStats, setSubmissionStats] = useState({});
+  const [currentSection, setCurrentSection] = useState(null);
 
   useEffect(() => {
     fetchAssignments();
     fetchSections();
-  }, []);
+  }, [sectionId]); // sectionId가 변경될 때마다 다시 조회
+
+  useEffect(() => {
+    if (assignments.length > 0) {
+      fetchSubmissionStats();
+    }
+  }, [assignments]); // 과제 목록이 변경될 때마다 제출 통계 조회
 
   const fetchAssignments = async () => {
     try {
@@ -43,48 +53,101 @@ const AssignmentManagement = () => {
       const sectionsData = dashboardResponse?.data || [];
       setSections(sectionsData);
       
-      // 2. 각 분반의 과제들을 개별적으로 조회하고 문제 수도 함께 조회
+      // 현재 분반 정보 설정
+      if (sectionId) {
+        const currentSectionData = sectionsData.find(section => 
+          section.sectionId === parseInt(sectionId)
+        );
+        setCurrentSection(currentSectionData);
+      }
+      
+      // 2. 과제 조회 (분반별 또는 전체)
       let allAssignments = [];
-      for (const section of sectionsData) {
+      
+      if (sectionId) {
+        // 분반별 과제 관리: 해당 분반의 과제만 조회
         try {
-          const sectionAssignments = await APIService.getAssignmentsBySection(section.sectionId);
-          
-          // 각 과제의 문제 수 조회
-          const assignmentsWithDetails = await Promise.all(
-            (sectionAssignments || []).map(async (assignment) => {
-              try {
-                const problems = await APIService.getAssignmentProblems(section.sectionId, assignment.id);
-                return {
-                  ...assignment,
-                  sectionName: section.courseTitle,
-                  sectionId: section.sectionId,
-                  problemCount: problems?.length || 0,
-                  problems: problems || [],
-                  // API 응답에서 endDate를 dueDate로 매핑
-                  dueDate: assignment.endDate,
-                  // 임시 제출 통계 (실제로는 별도 API 필요)
-                  submissionCount: 0,
-                  totalStudents: 25 // 임시값
-                };
-              } catch (error) {
-
-                return {
-                  ...assignment,
-                  sectionName: section.courseTitle,
-                  sectionId: section.sectionId,
-                  problemCount: 0,
-                  problems: [],
-                  dueDate: assignment.endDate,
-                  submissionCount: 0,
-                  totalStudents: 25
-                };
-              }
-            })
-          );
-          
-          allAssignments = [...allAssignments, ...assignmentsWithDetails];
+          const currentSection = sectionsData.find(section => section.sectionId === parseInt(sectionId));
+          if (currentSection) {
+            const sectionAssignments = await APIService.getAssignmentsBySection(parseInt(sectionId));
+            
+            // 각 과제의 문제 수 조회
+            const assignmentsWithDetails = await Promise.all(
+              (sectionAssignments || []).map(async (assignment) => {
+                try {
+                  const problems = await APIService.getAssignmentProblems(parseInt(sectionId), assignment.id);
+                  
+                  return {
+                    ...assignment,
+                    sectionName: currentSection.courseTitle,
+                    sectionId: parseInt(sectionId),
+                    problemCount: problems?.length || 0,
+                    problems: problems || [],
+                    dueDate: assignment.endDate,
+                    submissionCount: 0,
+                    totalStudents: currentSection.totalStudents || 0
+                  };
+                } catch (error) {
+                  return {
+                    ...assignment,
+                    sectionName: currentSection.courseTitle,
+                    sectionId: parseInt(sectionId),
+                    problemCount: 0,
+                    problems: [],
+                    dueDate: assignment.endDate,
+                    submissionCount: 0,
+                    totalStudents: currentSection.totalStudents || 0
+                  };
+                }
+              })
+            );
+            
+            allAssignments = assignmentsWithDetails;
+          }
         } catch (error) {
-          // 분반 과제 조회 실패 시 무시
+          console.error('분반별 과제 조회 실패:', error);
+        }
+      } else {
+        // 전체 과제 관리: 모든 분반의 과제 조회
+        for (const section of sectionsData) {
+          try {
+            const sectionAssignments = await APIService.getAssignmentsBySection(section.sectionId);
+            
+            // 각 과제의 문제 수 조회
+            const assignmentsWithDetails = await Promise.all(
+              (sectionAssignments || []).map(async (assignment) => {
+                try {
+                  const problems = await APIService.getAssignmentProblems(section.sectionId, assignment.id);
+                  
+                  return {
+                    ...assignment,
+                    sectionName: section.courseTitle,
+                    sectionId: section.sectionId,
+                    problemCount: problems?.length || 0,
+                    problems: problems || [],
+                    dueDate: assignment.endDate,
+                    submissionCount: 0,
+                    totalStudents: section.totalStudents || 0
+                  };
+                } catch (error) {
+                  return {
+                    ...assignment,
+                    sectionName: section.courseTitle,
+                    sectionId: section.sectionId,
+                    problemCount: 0,
+                    problems: [],
+                    dueDate: assignment.endDate,
+                    submissionCount: 0,
+                    totalStudents: section.totalStudents || 0
+                  };
+                }
+              })
+            );
+            
+            allAssignments = [...allAssignments, ...assignmentsWithDetails];
+          } catch (error) {
+            // 분반 과제 조회 실패 시 무시
+          }
         }
       }
       
@@ -98,6 +161,68 @@ const AssignmentManagement = () => {
 
   const fetchSections = async () => {
     // fetchAssignments에서 이미 처리됨
+  };
+
+  const fetchSubmissionStats = async () => {
+    try {
+      console.log('제출 통계 조회 시작:', { assignments: assignments.length, sectionId });
+      console.log('과제 목록:', assignments);
+      const stats = {};
+      
+      for (const assignment of assignments) {
+        console.log(`과제 ${assignment.id} 처리 중:`, assignment);
+        
+        if (sectionId) {
+          // 분반별 과제 제출 통계
+          console.log(`분반별 과제 ${assignment.id} 제출 통계 조회 중...`);
+          const response = await APIService.getAssignmentSubmissionStats(assignment.id, sectionId);
+          console.log(`과제 ${assignment.id} 응답:`, response);
+          
+          // API 응답이 있으면 사용, 없으면 기본값 설정
+          if (response) {
+            console.log(`과제 ${assignment.id} 응답 데이터:`, {
+              totalStudents: response.totalStudents,
+              problemStats: response.problemStats
+            });
+            
+            // 백엔드에서 이미 정확한 데이터를 제공하므로 그대로 사용
+            stats[assignment.id] = response;
+          } else {
+            console.log(`과제 ${assignment.id} API 응답 없음`);
+            // 백엔드 API 응답이 없으면 해당 과제는 통계에서 제외
+          }
+        } else {
+          // 전체 과제 제출 통계 (교수용) - 분반별로 개별 호출
+          console.log(`전체 과제 ${assignment.id} 제출 통계 조회 중...`);
+          console.log(`과제 ${assignment.id}의 sectionId:`, assignment.sectionId);
+          
+          if (!assignment.sectionId) {
+            console.error(`과제 ${assignment.id}의 sectionId가 없습니다!`);
+            continue; // 이 과제는 건너뛰기
+          }
+          
+          const response = await APIService.getAssignmentSubmissionStats(assignment.id, assignment.sectionId);
+          
+          if (response) {
+            console.log(`과제 ${assignment.id} 전체 통계 데이터:`, response);
+            
+            // 백엔드에서 이미 정확한 데이터를 제공하므로 그대로 사용
+            stats[assignment.id] = response;
+          } else {
+            console.log(`과제 ${assignment.id} 전체 통계 데이터 없음`);
+            // 백엔드 API 응답이 없으면 해당 과제는 통계에서 제외
+          }
+        }
+      }
+      
+      console.log('최종 제출 통계:', stats);
+      setSubmissionStats(stats);
+    } catch (error) {
+      console.error('제출 통계 조회 실패:', error);
+      
+      // 에러 발생 시 빈 통계 설정
+      setSubmissionStats({});
+    }
   };
 
   const handleInputChange = (e) => {
@@ -392,8 +517,15 @@ const AssignmentManagement = () => {
                 <div className="stat-item">
                   <span className="stat-label">제출률:</span>
                   <span className="stat-value submission-rate">
-                    {assignment.submissionCount || 0}/{assignment.totalStudents || 0} 
-                    ({getSubmissionRate(assignment.submissionCount || 0, assignment.totalStudents || 0)}%)
+                    {submissionStats[assignment.id] ? (
+                      <>
+                        {submissionStats[assignment.id].submittedStudents}/{submissionStats[assignment.id].totalStudents}
+                      </>
+                    ) : (
+                      <>
+                        0/{assignment.totalStudents || 0}
+                      </>
+                    )}
                   </span>
                 </div>
               </div>
@@ -413,19 +545,42 @@ const AssignmentManagement = () => {
                   {assignment.problems && assignment.problems.length > 0 ? (
                     assignment.problems.map((problem, index) => (
                       <div key={problem.id || index} className="problem-item">
-                        <span className="problem-number">{index + 1}.</span>
-                        <span className="problem-title">{problem.title}</span>
-                        {problem.difficulty && (
-                          <span 
-                            className="problem-difficulty"
-                            style={{ color: getDifficultyColor(problem.difficulty) }}
-                          >
-                            [{problem.difficulty}]
-                          </span>
-                        )}
-                        {problem.domjudgeProblemId && (
-                          <span className="problem-id">ID: {problem.domjudgeProblemId}</span>
-                        )}
+                        <div className="problem-item-left">
+                          <span className="problem-number">{index + 1}.</span>
+                          <span className="problem-title">{problem.title}</span>
+                          {problem.difficulty && (
+                            <span 
+                              className="problem-difficulty"
+                              style={{ color: getDifficultyColor(problem.difficulty) }}
+                            >
+                              [{problem.difficulty}]
+                            </span>
+                          )}
+                          {problem.domjudgeProblemId && (
+                            <span className="problem-id">ID: {problem.domjudgeProblemId}</span>
+                          )}
+                        </div>
+                        
+                        {/* 문제별 제출률 표시 */}
+                        <span className="problem-submission-rate">
+                          {submissionStats[assignment.id]?.problemStats ? (
+                            (() => {
+                              const problemStat = submissionStats[assignment.id].problemStats.find(
+                                stat => stat.problemId === problem.id
+                              );
+                              return problemStat ? (
+                                <>
+                                  제출률: {problemStat.submittedStudents}/{problemStat.totalStudents}
+                                </>
+                              ) : (
+                                `제출률: 0/${assignment.totalStudents || 0}`
+                              );
+                            })()
+                          ) : (
+                            `제출률: 0/${assignment.totalStudents || 0}`
+                          )}
+                        </span>
+                        
                         <button 
                           className="btn-remove-problem"
                           onClick={() => handleRemoveProblem(assignment.id, problem.id)}
@@ -453,7 +608,7 @@ const AssignmentManagement = () => {
                 <div 
                   className="progress-fill"
                   style={{ 
-                    width: `${getSubmissionRate(assignment.submissionCount, assignment.totalStudents)}%` 
+                    width: `${submissionStats[assignment.id]?.submissionRate || 0}%` 
                   }}
                 ></div>
               </div>

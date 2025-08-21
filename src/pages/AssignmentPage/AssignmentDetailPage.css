@@ -97,13 +97,18 @@
 }
 
 .date-value.urgent {
-  color: #dc3545;
+  color: #6c757d;
   font-weight: 600;
 }
 
 .date-value.warning {
-  color: #ffc107;
+  color: #6c757d;
   font-weight: 600;
+}
+
+.date-value.normal {
+  color: #6c757d;
+  font-weight: 500;
 }
 
 .date-value.expired {

@@ -125,8 +125,34 @@
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.2rem;
-  color: #636e72;
+  width: 16px;
+  height: 16px;
+  background: #636e72;
+  border-radius: 50%;
+}
+
+.search-icon::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+.search-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 6px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  transform-origin: bottom right;
 }
 
 .section-filter {
@@ -471,8 +497,37 @@
 }
 
 .no-data-icon {
-  font-size: 3rem;
+  width: 48px;
+  height: 48px;
+  background: #e9ecef;
+  border-radius: 50%;
   opacity: 0.5;
+  position: relative;
+  margin: 0 auto;
+}
+
+.no-data-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+}
+
+.no-data-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 12px;
+  background: white;
+  border-radius: 6px;
 }
 
 .section-info {

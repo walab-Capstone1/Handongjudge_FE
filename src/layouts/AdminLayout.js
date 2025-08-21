@@ -8,11 +8,11 @@ const AdminLayout = ({ children }) => {
   const location = useLocation();
 
   const menuItems = [
-    { path: "/admin", label: "대시보드", icon: "📊" },
-    { path: "/admin/courses", label: "수업 관리", icon: "📚" },
-    { path: "/admin/assignments", label: "과제 관리", icon: "📝" },
-    { path: "/admin/notices", label: "공지사항 관리", icon: "📢" },
-    { path: "/admin/users", label: "학생 관리", icon: "👥" },
+    { path: "/admin", label: "대시보드", icon: "dashboard" },
+    { path: "/admin/courses", label: "수업 관리", icon: "courses" },
+    { path: "/admin/assignments", label: "과제 관리", icon: "assignments" },
+    { path: "/admin/notices", label: "공지사항 관리", icon: "notices" },
+    { path: "/admin/users", label: "학생 관리", icon: "users" },
   ];
 
   return (
@@ -22,7 +22,7 @@ const AdminLayout = ({ children }) => {
         <aside className="admin-sidebar">
           <div className="sidebar-header">
             <h2 className="sidebar-title">
-              <span className="admin-icon">👨‍🏫</span>
+              <span className="admin-icon"></span>
               관리 페이지
             </h2>
           </div>
@@ -35,7 +35,7 @@ const AdminLayout = ({ children }) => {
                   location.pathname === item.path ? "active" : ""
                 }`}
               >
-                <span className="sidebar-icon">{item.icon}</span>
+                <span className={`sidebar-icon ${item.icon}`}></span>
                 <span className="sidebar-label">{item.label}</span>
               </Link>
             ))}

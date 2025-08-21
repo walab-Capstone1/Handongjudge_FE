@@ -38,8 +38,23 @@
 }
 
 .admin-icon {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #0984e3 0%, #74b9ff 100%);
+  border-radius: 6px;
+  position: relative;
+}
+
+.admin-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 2px;
 }
 
 .sidebar-nav {
@@ -74,11 +89,160 @@
 }
 
 .sidebar-icon {
-  font-size: 1.3rem;
-  min-width: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* Dashboard Icon */
+.sidebar-icon.dashboard {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+}
+
+.sidebar-icon.dashboard::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 1px;
+}
+
+.sidebar-icon.dashboard::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 10px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+}
+
+/* Courses Icon */
+.sidebar-icon.courses {
+  background: linear-gradient(135deg, #00b894 0%, #55efc4 100%);
+}
+
+.sidebar-icon.courses::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+}
+
+.sidebar-icon.courses::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  height: 8px;
+  background: white;
+  border-radius: 1px;
+}
+
+/* Assignments Icon */
+.sidebar-icon.assignments {
+  background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
+}
+
+.sidebar-icon.assignments::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+}
+
+.sidebar-icon.assignments::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 1px;
+}
+
+/* Notices Icon */
+.sidebar-icon.notices {
+  background: linear-gradient(135deg, #e17055 0%, #fab1a0 100%);
+}
+
+.sidebar-icon.notices::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 6px solid white;
+}
+
+.sidebar-icon.notices::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 3px;
+  right: 3px;
+  height: 8px;
+  background: white;
+  border-radius: 1px;
+}
+
+/* Users Icon */
+.sidebar-icon.users {
+  background: linear-gradient(135deg, #0984e3 0%, #74b9ff 100%);
+}
+
+.sidebar-icon.users::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+}
+
+.sidebar-icon.users::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  right: 3px;
+  height: 6px;
+  background: white;
+  border-radius: 3px;
+}
+
+/* Active state icon colors */
+.sidebar-item.active .sidebar-icon {
+  background: white !important;
+}
+
+.sidebar-item.active .sidebar-icon::before,
+.sidebar-item.active .sidebar-icon::after {
+  background: #0984e3 !important;
+  border-color: #0984e3 !important;
 }
 
 .sidebar-label {

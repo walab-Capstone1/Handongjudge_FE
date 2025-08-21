@@ -289,6 +289,30 @@ class APIService {
     return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/problems`);
   }
 
+  // 과제별 제출 통계 조회 (분반별)
+  async getAssignmentSubmissionStats(assignmentId, sectionId) {
+    try {
+      console.log(`API 호출: /sections/${sectionId}/assignments/${assignmentId}/submission-stats`);
+      const response = await this.request(`/sections/${sectionId}/assignments/${assignmentId}/submission-stats`);
+      console.log(`API 응답:`, response);
+      return response;
+    } catch (error) {
+      console.error('과제 제출 통계 조회 실패:', error);
+      return null;
+    }
+  }
+
+  // 전체 과제 제출 통계 조회 (교수용) - 백엔드에 해당 엔드포인트가 없어서 주석 처리
+  // async getAllAssignmentsSubmissionStats() {
+  //   try {
+  //     const response = await this.request('/assignments/instructor/all-submission-stats');
+  //     return response;
+  //   } catch (error) {
+  //     console.error('전체 과제 제출 통계 조회 실패:', error);
+  //     return [];
+  //   }
+  // }
+
   // ==================== 공지사항 관련 API ====================
 
   // 공지사항 생성
@@ -306,7 +330,7 @@ class APIService {
 
   // 특정 분반의 공지사항 조회
   async getSectionNotices(sectionId) {
-    return await this.request(`/notices/section/${sectionId}`);
+    return await this.request(`/notices?sectionId=${sectionId}`);
   }
 
   // 공지사항 수정
@@ -348,10 +372,7 @@ class APIService {
         return await this.request(`/sections/${sectionId}/assignments/${assignmentId}`);
     }
 
-    // 특정 분반의 공지사항 목록 조회
-    async getSectionNotices(sectionId) {
-        return await this.request(`/notices?sectionId=${sectionId}`);
-    }
+
 
   // ==================== 강의 관리 API ====================
   

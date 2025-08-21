@@ -35,7 +35,7 @@ const NoticeList = () => {
       console.log('🔥 분반 수:', sectionsData.length);
       for (const section of sectionsData) {
         try {
-          console.log('🔥 분반 공지사항 조회 시작 - sectionId:', section.sectionId);
+          console.log('🔥 분반 공지사항 조회 시작 - sectionNumber:', section.sectionNumber, 'sectionId:', section.sectionId);
           const sectionNotices = await APIService.getSectionNotices(section.sectionId);
           console.log('🔥 분반 공지사항 응답:', sectionNotices);
           console.log('🔥 개별 공지사항 isNew 상태:', sectionNotices.map(n => ({id: n.id, title: n.title, isNew: n.isNew, new: n.new})));
@@ -49,7 +49,7 @@ const NoticeList = () => {
           
           allNotices = [...allNotices, ...noticesWithSectionInfo];
         } catch (error) {
-          console.error(`🔥 분반 ${section.sectionId} 공지사항 조회 실패:`, error);
+          console.error(`🔥 분반 ${section.sectionNumber}분반 (ID: ${section.sectionId}) 공지사항 조회 실패:`, error);
         }
       }
       
@@ -143,23 +143,7 @@ const NoticeList = () => {
     setSelectedNotice(null);
   };
 
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty?.toLowerCase()) {
-      case 'easy': return '#27ae60';
-      case 'medium': return '#f39c12';
-      case 'hard': return '#e74c3c';
-      default: return '#636e72';
-    }
-  };
 
-  const getDifficultyLabel = (difficulty) => {
-    switch (difficulty?.toLowerCase()) {
-      case 'easy': return '쉬움';
-      case 'medium': return '보통';
-      case 'hard': return '중요';
-      default: return '일반';
-    }
-  };
 
   const filteredNotices = notices.filter(notice => {
     const matchesSearch = notice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -252,14 +236,7 @@ const NoticeList = () => {
                   {(notice.new || notice.isNew) && (
                     <span className="new-badge">NEW</span>
                   )}
-                  {notice.difficulty && (
-                    <span 
-                      className="difficulty-badge"
-                      style={{ backgroundColor: getDifficultyColor(notice.difficulty) }}
-                    >
-                      {getDifficultyLabel(notice.difficulty)}
-                    </span>
-                  )}
+
                 </div>
                 <span className="notice-date">
                   {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
@@ -321,14 +298,7 @@ const NoticeList = () => {
                         minute: '2-digit'
                       })}
                     </span>
-                    {selectedNotice.difficulty && (
-                      <span 
-                        className="modal-difficulty"
-                        style={{ color: getDifficultyColor(selectedNotice.difficulty) }}
-                      >
-                        {getDifficultyLabel(selectedNotice.difficulty)}
-                      </span>
-                    )}
+
                   </div>
                 </div>
                 <button
