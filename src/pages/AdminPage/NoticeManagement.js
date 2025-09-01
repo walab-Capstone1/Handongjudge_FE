@@ -195,10 +195,6 @@ const NoticeManagement = () => {
             {sectionId ? '분반별 공지사항 관리' : '전체 공지사항 관리'}
           </h1>
           <div className="header-actions">
-            <div className="header-stats">
-              <span className="stat-badge">총 {notices.length}개</span>
-              <span className="stat-badge active">{uniqueSections.length}개 분반</span>
-            </div>
             <button
               className="btn-primary"
               onClick={handleCreateNotice}
@@ -208,33 +204,36 @@ const NoticeManagement = () => {
           </div>
         </div>
 
-        <div className="filters-section">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="제목, 내용, 분반으로 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-            <span className="search-icon"></span>
+        {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
+        {!sectionId && (
+          <div className="filters-section">
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="제목, 내용, 분반으로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+              <span className="search-icon"></span>
+            </div>
+            
+            <div className="filter-dropdown">
+              <select
+                value={filterSection}
+                onChange={(e) => setFilterSection(e.target.value)}
+                className="filter-select"
+              >
+                <option value="ALL">모든 분반</option>
+                {uniqueSections.map((section) => (
+                  <option key={section.id} value={section.id}>
+                    {section.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          
-          <div className="filter-dropdown">
-            <select
-              value={filterSection}
-              onChange={(e) => setFilterSection(e.target.value)}
-              className="filter-select"
-            >
-              <option value="ALL">모든 분반</option>
-              {uniqueSections.map((section) => (
-                <option key={section.id} value={section.id}>
-                  {section.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        )}
 
         <div className="notices-list">
           {filteredNotices.map((notice) => (

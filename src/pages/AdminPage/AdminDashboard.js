@@ -90,7 +90,7 @@ const AdminDashboard = () => {
                 <div className="stat-item">
                   <span className="stat-icon">📚</span>
                   <span className="stat-label">분반</span>
-                  <span className="stat-value">{section.sectionId}</span>
+                  <span className="stat-value">{section.sectionNumber}</span>
                 </div>
               </div>
 

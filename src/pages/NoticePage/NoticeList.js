@@ -35,11 +35,8 @@ const NoticeList = () => {
       console.log('🔥 분반 수:', sectionsData.length);
       for (const section of sectionsData) {
         try {
-          console.log('🔥 분반 공지사항 조회 시작 - sectionNumber:', section.sectionNumber, 'sectionId:', section.sectionId);
           const sectionNotices = await APIService.getSectionNotices(section.sectionId);
-          console.log('🔥 분반 공지사항 응답:', sectionNotices);
-          console.log('🔥 개별 공지사항 isNew 상태:', sectionNotices.map(n => ({id: n.id, title: n.title, isNew: n.isNew, new: n.new})));
-          console.log('🔥 공지사항 원본 데이터:', sectionNotices);
+       
           
           // 각 공지사항에 분반 정보 추가
           const noticesWithSectionInfo = sectionNotices.map(notice => ({

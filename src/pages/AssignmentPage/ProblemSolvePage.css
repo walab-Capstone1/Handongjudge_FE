@@ -295,6 +295,62 @@
   color: #24292e;
 }
 
+.problem-solve-page.light .due-date-info {
+  background: rgba(255, 107, 107, 0.1);
+  border-left-color: #ff6b6b;
+}
+
+.problem-solve-page.light .due-date-content {
+  color: #333333;
+}
+
+.problem-solve-page.light .due-date-content.overdue {
+  color: #d63384;
+}
+
+.description-content pre {
+  background-color: #0d1117;
+}
+
+/* Due Date Info */
+.due-date-info {
+  margin: 16px 0;
+  padding: 16px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #ff6b6b;
+}
+
+.due-date-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #ff6b6b;
+  margin-bottom: 8px;
+}
+
+.due-date-icon {
+  font-size: 16px;
+}
+
+.due-date-content {
+  font-size: 14px;
+  color: #e0e0e0;
+}
+
+.due-date-content.overdue {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.overdue-warning {
+  color: #ff6b6b;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
 .description-content pre {
   background-color: #0d1117;
   color: #e1e4e8;
@@ -511,7 +567,8 @@
 .submit-button-inline:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background-color: #2f81f7;
+  background-color: #6c757d;
+  color: #ffffff;
 }
 
 /* Loading Container */
@@ -520,7 +577,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #161b22;
+  background-color: white;
 }
 
 .problem-solve-page.light .loading-container {

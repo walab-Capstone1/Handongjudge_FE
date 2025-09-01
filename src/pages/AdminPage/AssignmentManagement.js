@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
+import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
 import "./AssignmentManagement.css";
 
@@ -433,14 +434,20 @@ const AssignmentManagement = () => {
 
   return (
     <AdminLayout>
+      {/* 분반별 페이지인 경우 네비게이션 표시 */}
+      {sectionId && currentSection && (
+        <SectionNavigation 
+          sectionId={sectionId}
+          sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
+        />
+      )}
+      
       <div className="assignment-management">
         <div className="page-header">
-          <h1 className="page-title">과제 관리</h1>
+          <h1 className="page-title">
+            {sectionId ? '분반별 과제 관리' : '전체 과제 관리'}
+          </h1>
           <div className="header-actions">
-            <div className="header-stats">
-              <span className="stat-badge">총 {assignments.length}개</span>
-              <span className="stat-badge active">{uniqueSections.length}개 분반</span>
-            </div>
             <button 
               className="btn-primary"
               onClick={handleAddAssignment}
@@ -451,29 +458,32 @@ const AssignmentManagement = () => {
           </div>
         </div>
 
-        <div className="filters-section">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="과제명, 설명으로 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-            <span className="search-icon">🔍</span>
+        {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
+        {!sectionId && (
+          <div className="filters-section">
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="과제명, 설명으로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+              <span className="search-icon">🔍</span>
+            </div>
+            
+            <select
+              value={filterSection}
+              onChange={(e) => setFilterSection(e.target.value)}
+              className="section-filter"
+            >
+              <option value="ALL">모든 분반</option>
+              {uniqueSections.map((section, index) => (
+                <option key={index} value={section}>{section}</option>
+              ))}
+            </select>
           </div>
-          
-          <select
-            value={filterSection}
-            onChange={(e) => setFilterSection(e.target.value)}
-            className="section-filter"
-          >
-            <option value="ALL">모든 분반</option>
-            {uniqueSections.map((section, index) => (
-              <option key={index} value={section}>{section}</option>
-            ))}
-          </select>
-        </div>
+        )}
 
         <div className="assignments-list">
           {filteredAssignments.map((assignment) => (
@@ -515,7 +525,7 @@ const AssignmentManagement = () => {
                   <span className="stat-value">{assignment.problemCount || 0}개</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-label">제출률:</span>
+                  <span className="stat-label">제출 현황:</span>
                   <span className="stat-value submission-rate">
                     {submissionStats[assignment.id] ? (
                       <>
@@ -570,14 +580,14 @@ const AssignmentManagement = () => {
                               );
                               return problemStat ? (
                                 <>
-                                  제출률: {problemStat.submittedStudents}/{problemStat.totalStudents}
+                                  제출 현황: {problemStat.submittedStudents}/{problemStat.totalStudents}
                                 </>
                               ) : (
-                                `제출률: 0/${assignment.totalStudents || 0}`
+                                `제출 현황: 0/${assignment.totalStudents || 0}`
                               );
                             })()
                           ) : (
-                            `제출률: 0/${assignment.totalStudents || 0}`
+                            `제출 현황: 0/${assignment.totalStudents || 0}`
                           )}
                         </span>
                         

@@ -33,16 +33,15 @@ const SectionNavigation = ({ sectionId, sectionName }) => {
       <div className="section-nav-header">
         <div className="section-info">
           <h2 className="section-title">{sectionName}</h2>
+          <button 
+            className="back-to-dashboard"
+            onClick={handleBackToDashboard}
+            title="대시보드로 돌아가기"
+          >
+            <span className="back-icon">←</span>
+            대시보드
+          </button>
         </div>
-        
-        <button 
-          className="back-to-dashboard"
-          onClick={handleBackToDashboard}
-          title="대시보드로 돌아가기"
-        >
-          <span className="back-icon">←</span>
-          대시보드
-        </button>
       </div>
       
       <div className="section-nav-tabs">

@@ -9,6 +9,7 @@
   justify-content: center;
   min-height: 400px;
   gap: 1rem;
+  background-color: white;
 }
 
 .loading-spinner {

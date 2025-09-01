@@ -33,7 +33,9 @@ const ProblemSolvePage = () => {
   });
   const [assignmentInfo, setAssignmentInfo] = useState({
     title: "Loading...",
-    assignmentNumber: ""
+    assignmentNumber: "",
+    dueDate: null,
+    endDate: null
   });
   const [isLoading, setIsLoading] = useState(true);
   const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
@@ -67,6 +69,7 @@ const ProblemSolvePage = () => {
         
         console.log('🔍 섹션 데이터 상세:', sectionData);
         console.log('🔍 과제 데이터 상세:', assignmentData);
+        console.log('🔍 과제 마감일 확인:', assignmentData.dueDate);
         
         setCurrentProblem(problemData);
         setSectionInfo(sectionData);
@@ -86,6 +89,25 @@ const ProblemSolvePage = () => {
   }, [problemId, sectionId, assignmentId]);
 
   // Helper functions
+  const isAssignmentOverdue = () => {
+    const deadline = assignmentInfo.dueDate || assignmentInfo.endDate;
+    if (!deadline) {
+      console.log('🔍 마감일 정보 없음');
+      return false;
+    }
+    const now = new Date();
+    const dueDate = new Date(deadline);
+    const isOverdue = now > dueDate;
+    console.log('🔍 마감일 체크:', {
+      현재시간: now.toISOString(),
+      마감일: dueDate.toISOString(),
+      마감여부: isOverdue,
+      사용된필드: assignmentInfo.dueDate ? 'dueDate' : 'endDate',
+      과제정보: assignmentInfo
+    });
+    return isOverdue;
+  };
+
   function getDefaultCode(lang) {
     switch (lang) {
       case "javascript":
@@ -375,6 +397,28 @@ const ProblemSolvePage = () => {
               className="description-content"
               dangerouslySetInnerHTML={{ __html: currentProblem.description || problemDescription }}
             />
+            
+            {/* Assignment Due Date Info */}
+            {(assignmentInfo.dueDate || assignmentInfo.endDate) && (
+              <div className="due-date-info">
+                <div className="due-date-header">
+                  <span className="due-date-icon">⏰</span>
+                  과제 마감일
+                </div>
+                <div className={`due-date-content ${isAssignmentOverdue() ? 'overdue' : ''}`}>
+                  {new Date(assignmentInfo.dueDate || assignmentInfo.endDate).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                  {isAssignmentOverdue() && (
+                    <span className="overdue-warning"> (마감일이 지났습니다)</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Editor and Result Split */}
@@ -394,9 +438,9 @@ const ProblemSolvePage = () => {
                 <button 
                   className="submit-button-inline"
                   onClick={handleSubmit} 
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isAssignmentOverdue()}
                 >
-                  {isSubmitting ? "제출 중..." : "제출하기"}
+                  {isSubmitting ? "제출 중..." : isAssignmentOverdue() ? "과제 마감" : "제출하기"}
                 </button>
               </div>
               <div className="editor-scroll-area">
