@@ -119,35 +119,35 @@ const UserManagement = () => {
       <div className="user-management">
         <div className="page-header">
           <h1 className="page-title">학생 관리</h1>
-          <div className="header-stats">
-            <span className="stat-badge">총 {students.length}명</span>
-            <span className="stat-badge active">활성 {students.filter(s => s.status !== 'INACTIVE').length}명</span>
-          </div>
+          
         </div>
 
-        <div className="filters-section">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="이름, 이메일, 팀ID로 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-            <span className="search-icon">🔍</span>
+        {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
+        {!sectionId && (
+          <div className="filters-section">
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="이름, 이메일, 팀ID로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+              <span className="search-icon">🔍</span>
+            </div>
+            
+            <select
+              value={filterSection}
+              onChange={(e) => setFilterSection(e.target.value)}
+              className="section-filter"
+            >
+              <option value="ALL">모든 분반</option>
+              {uniqueSections.map((section, index) => (
+                <option key={index} value={section}>{section}</option>
+              ))}
+            </select>
           </div>
-          
-          <select
-            value={filterSection}
-            onChange={(e) => setFilterSection(e.target.value)}
-            className="section-filter"
-          >
-            <option value="ALL">모든 분반</option>
-            {uniqueSections.map((section, index) => (
-              <option key={index} value={section}>{section}</option>
-            ))}
-          </select>
-        </div>
+        )}
 
         <div className="users-table-container">
           <table className="users-table">
@@ -189,18 +189,11 @@ const UserManagement = () => {
                   <td>
                     <div className="action-buttons">
                       <button 
-                        className="btn-icon-small view"
+                        className="btn-detail-view"
                         onClick={() => console.log('학생 상세 보기:', student.userId)}
                         title="상세 보기"
                       >
-                        보기
-                      </button>
-                      <button 
-                        className="btn-icon-small message"
-                        onClick={() => console.log('메시지 보내기:', student.userId)}
-                        title="메시지"
-                      >
-                        메시지
+                        상세 보기
                       </button>
                     </div>
                   </td>

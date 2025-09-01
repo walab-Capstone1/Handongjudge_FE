@@ -9,6 +9,7 @@
   justify-content: center;
   min-height: 400px;
   gap: 1rem;
+  background-color: white;
 }
 
 .loading-spinner {
@@ -199,6 +200,10 @@
   letter-spacing: 0.5px;
 }
 
+.users-table th:last-child {
+  text-align: center;
+}
+
 .users-table td {
   padding: 1rem;
   border-bottom: 1px solid #f1f3f4;
@@ -283,6 +288,8 @@
 .action-buttons {
   display: flex;
   gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn-icon-small {
@@ -293,6 +300,31 @@
   padding: 0.5rem;
   border-radius: 8px;
   transition: all 0.2s ease;
+}
+
+.btn-detail-view {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.btn-detail-view:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-detail-view:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
 }
 
 .btn-icon-small.edit:hover {

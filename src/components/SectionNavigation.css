@@ -10,6 +10,8 @@
   justify-content: space-between;
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #f1f3f4;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .back-to-dashboard {
@@ -38,7 +40,10 @@
 }
 
 .section-info {
-  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .section-title {
