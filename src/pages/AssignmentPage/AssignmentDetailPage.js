@@ -20,6 +20,7 @@ const AssignmentDetailPage = () => {
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [submissionStats, setSubmissionStats] = useState(null);
 
   useEffect(() => {
     const fetchAssignmentData = async () => {
@@ -37,6 +38,16 @@ const AssignmentDetailPage = () => {
         const problemsData = problemsResponse.data || problemsResponse;
         console.log('problemsData:', problemsData);
         setProblems(problemsData.problems || problemsData);
+        
+        // 과제 제출 통계 조회
+        try {
+          const statsResponse = await APIService.getAssignmentSubmissionStats(assignmentId, sectionId);
+          console.log('제출 통계:', statsResponse);
+          setSubmissionStats(statsResponse);
+        } catch (statsError) {
+          console.error('제출 통계 조회 실패:', statsError);
+          setSubmissionStats(null);
+        }
         
       } catch (err) {
         console.error("과제 데이터 조회 실패:", err);
@@ -103,6 +114,7 @@ const AssignmentDetailPage = () => {
           <ProblemsList 
             problems={problems || []} 
             assignmentId={assignmentId} 
+            submissionStats={submissionStats}
           />
         </div>
       </div>

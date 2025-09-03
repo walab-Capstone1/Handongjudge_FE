@@ -5,9 +5,10 @@ import ProblemItem from './ProblemItem';
  * 문제 목록 컴포넌트
  * @param {Array} problems - 문제 목록
  * @param {string} assignmentId - 과제 ID
+ * @param {Object} submissionStats - 제출 통계
  * @returns {JSX.Element} 문제 목록 JSX
  */
-const ProblemsList = ({ problems, assignmentId }) => {
+const ProblemsList = ({ problems, assignmentId, submissionStats }) => {
   if (problems.length === 0) {
     return (
       <div className="no-problems">
@@ -24,6 +25,7 @@ const ProblemsList = ({ problems, assignmentId }) => {
           key={problem.id} 
           problem={problem} 
           assignmentId={assignmentId}
+          submissionStats={submissionStats}
         />
       ))}
     </div>
