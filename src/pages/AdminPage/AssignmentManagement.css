@@ -33,8 +33,15 @@
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #e1e8ed;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 1rem;
+  min-width: 0;
+}
+
+.page-title {
+  flex-shrink: 0;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .header-actions {
@@ -875,6 +882,177 @@
   color: #636e72;
   font-size: 0.8rem;
   margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.file-selected {
+  color: #28a745;
+  font-weight: 600;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.optional {
+  color: #999;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.info-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.info-box p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.info-box p:first-child {
+  margin-bottom: 0.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.header-actions button {
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: fit-content;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+
+.header-actions button span {
+  margin-right: 0.5rem;
+}
+
+/* 반응형을 위한 미디어 쿼리 */
+@media (max-width: 1024px) {
+  .page-header {
+    flex-wrap: wrap;
+  }
+  
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-actions button {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* 대량 문제 생성 모달 스타일 */
+.large-modal {
+  max-width: 900px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.bulk-problems-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.bulk-problem-row {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #f8f9fa;
+}
+
+.bulk-problem-row:last-child {
+  margin-bottom: 0;
+}
+
+.problem-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.problem-row-header h4 {
+  margin: 0;
+  color: #495057;
+}
+
+.btn-remove-row {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove-row:hover {
+  background: #c82333;
+}
+
+.problem-row-content .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.bulk-actions {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.btn-add-row {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.btn-add-row:hover {
+  background: #218838;
+}
+
+@media (max-width: 768px) {
+  .problem-row-content .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .large-modal {
+    width: 95vw;
+  }
 }
 
 /* 모달 스타일 */

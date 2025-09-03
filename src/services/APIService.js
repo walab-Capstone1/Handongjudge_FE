@@ -60,7 +60,20 @@ class APIService {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
     }
-    return response.json();
+    
+    // Content-Type 확인하여 적절한 파싱 방법 선택
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    } else {
+      // JSON이 아닌 경우 텍스트로 반환 (숫자 등)
+      const text = await response.text();
+      // 숫자인지 확인하고 숫자로 변환
+      if (/^\d+$/.test(text.trim())) {
+        return parseInt(text.trim(), 10);
+      }
+      return text;
+    }
   }
 
   // 일반 로그인
@@ -191,19 +204,24 @@ class APIService {
   async createProblem(formData) {
     const url = `${this.baseURL}/problems`;
     
+    // Access Token 가져오기
+    const accessToken = tokenManager.getAccessToken();
+    console.log('문제 생성 API 호출 - 토큰 상태:', {
+      hasToken: !!accessToken,
+      tokenLength: accessToken ? accessToken.length : 0
+    });
+    
     const config = {
       method: 'POST',
       credentials: 'include',
+      headers: {},
       body: formData,
       // FormData 사용 시 Content-Type 헤더를 설정하지 않음 (브라우저가 자동 설정)
     };
 
     // Access Token이 있으면 헤더에 추가
-    const accessToken = tokenManager.getAccessToken();
     if (accessToken) {
-      config.headers = {
-        Authorization: `Bearer ${accessToken}`,
-      };
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
     try {
@@ -216,9 +234,7 @@ class APIService {
           await tokenManager.refreshToken();
           const newAccessToken = tokenManager.getAccessToken();
           if (newAccessToken) {
-            config.headers = {
-              Authorization: `Bearer ${newAccessToken}`,
-            };
+            config.headers.Authorization = `Bearer ${newAccessToken}`;
             const retryResponse = await fetch(url, config);
             return this.handleResponse(retryResponse);
           }
@@ -238,6 +254,14 @@ class APIService {
 
   // 과제에 문제 추가
   async addProblemToAssignment(assignmentId, problemId) {
+    console.log('🔗 과제에 문제 추가 API 호출:', {
+      assignmentId,
+      problemId,
+      url: `/assignments/${assignmentId}/${problemId}`,
+      assignmentIdType: typeof assignmentId,
+      problemIdType: typeof problemId
+    });
+    
     return await this.request(`/assignments/${assignmentId}/${problemId}`, {
       method: 'POST',
     });
