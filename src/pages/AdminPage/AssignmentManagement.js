@@ -13,6 +13,8 @@ const AssignmentManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showProblemModal, setShowProblemModal] = useState(false);
   const [showCreateProblemModal, setShowCreateProblemModal] = useState(false);
+  const [showStandaloneProblemModal, setShowStandaloneProblemModal] = useState(false);
+  const [showBulkProblemModal, setShowBulkProblemModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
   const [selectedAssignment, setSelectedAssignment] = useState(null);
@@ -30,6 +32,9 @@ const AssignmentManagement = () => {
     title: '',
     descriptionFile: null,
     zipFile: null
+  });
+  const [bulkProblemData, setBulkProblemData] = useState({
+    problems: [{ title: '', descriptionFile: null, zipFile: null }]
   });
   const [submissionStats, setSubmissionStats] = useState({});
   const [currentSection, setCurrentSection] = useState(null);
@@ -335,9 +340,38 @@ const AssignmentManagement = () => {
   const handleProblemInputChange = (e) => {
     const { name, value, files } = e.target;
     if (files) {
+      const file = files[0];
+      
+      // 파일 타입 검증
+      if (name === 'descriptionFile') {
+        const allowedTypes = ['.md', '.txt'];
+        const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+        if (!allowedTypes.includes(fileExtension)) {
+          alert('문제 설명 파일은 .md 또는 .txt 형식만 업로드 가능합니다.');
+          e.target.value = '';
+          return;
+        }
+      }
+      
+      if (name === 'zipFile') {
+        if (!file.name.toLowerCase().endsWith('.zip')) {
+          alert('문제 파일은 .zip 형식만 업로드 가능합니다.');
+          e.target.value = '';
+          return;
+        }
+        
+        // 파일 크기 검증 (50MB 제한)
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        if (file.size > maxSize) {
+          alert('파일 크기는 50MB를 초과할 수 없습니다.');
+          e.target.value = '';
+          return;
+        }
+      }
+      
       setProblemFormData(prev => ({
         ...prev,
-        [name]: files[0]
+        [name]: file
       }));
     } else {
       setProblemFormData(prev => ({
@@ -349,30 +383,69 @@ const AssignmentManagement = () => {
 
   const handleCreateProblemSubmit = async (e) => {
     e.preventDefault();
+    
+    // 필수 필드 검증
+    if (!problemFormData.title.trim()) {
+      alert('문제 제목을 입력해주세요.');
+      return;
+    }
+    
+    if (!problemFormData.zipFile) {
+      alert('문제 파일(.zip)을 업로드해주세요.');
+      return;
+    }
+    
     try {
+      // 디버깅: 현재 인증 상태 확인
+      const currentToken = localStorage.getItem('accessToken');
+      console.log('🔐 현재 인증 상태:', {
+        hasLocalStorageToken: !!currentToken,
+        tokenPreview: currentToken ? currentToken.substring(0, 20) + '...' : null
+      });
+      
+      // 로딩 상태 표시를 위한 상태 추가 (필요시)
+      console.log('문제 생성 시작:', {
+        title: problemFormData.title,
+        hasDescriptionFile: !!problemFormData.descriptionFile,
+        hasZipFile: !!problemFormData.zipFile,
+        zipFileSize: problemFormData.zipFile?.size
+      });
+      
       const formData = new FormData();
       formData.append('title', problemFormData.title);
+      
       if (problemFormData.descriptionFile) {
         formData.append('descriptionFile', problemFormData.descriptionFile);
       }
+      
       if (problemFormData.zipFile) {
         formData.append('zipFile', problemFormData.zipFile);
       }
 
-      const problemId = await APIService.createProblem(formData);
+      // 문제 생성
+      const response = await APIService.createProblem(formData);
+      // 백엔드에서 단순히 숫자(Long)를 반환하므로 직접 사용
+      const problemId = response;
       
-      // 생성된 문제를 바로 과제에 추가
-      if (selectedAssignment) {
-        await APIService.addProblemToAssignment(selectedAssignment.id, problemId);
-      }
+      console.log('문제 생성 성공, ID:', problemId, typeof problemId);
       
-      alert('문제가 성공적으로 생성되고 과제에 추가되었습니다.');
+      alert('문제가 성공적으로 생성되었습니다. 문제 목록에서 원하는 과제에 추가할 수 있습니다.');
       setShowCreateProblemModal(false);
       resetProblemForm();
       fetchAssignments(); // 목록 새로고침
     } catch (error) {
       console.error('문제 생성 실패:', error);
-      alert('문제 생성에 실패했습니다.');
+      
+      // 에러 메시지 개선
+      let errorMessage = '문제 생성에 실패했습니다.';
+      if (error.message) {
+        errorMessage += `\n오류: ${error.message}`;
+      }
+      if (error.response?.data?.message) {
+        errorMessage += `\n서버 오류: ${error.response.data.message}`;
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -390,6 +463,207 @@ const AssignmentManagement = () => {
     setSelectedAssignment(null);
     setProblemSearchTerm('');
     resetProblemForm();
+  };
+
+  // 독립적인 문제 생성 관련 함수들
+  const handleStandaloneProblemCreate = () => {
+    setShowStandaloneProblemModal(true);
+    resetProblemForm();
+  };
+
+  const closeStandaloneProblemModal = () => {
+    setShowStandaloneProblemModal(false);
+    resetProblemForm();
+  };
+
+  const handleStandaloneProblemSubmit = async (e) => {
+    e.preventDefault();
+    
+    // 필수 필드 검증
+    if (!problemFormData.title.trim()) {
+      alert('문제 제목을 입력해주세요.');
+      return;
+    }
+    
+    if (!problemFormData.descriptionFile) {
+      alert('문제 설명 파일(.md)을 업로드해주세요.');
+      return;
+    }
+    
+    if (!problemFormData.zipFile) {
+      alert('문제 파일(.zip)을 업로드해주세요.');
+      return;
+    }
+    
+    try {
+      console.log('독립적인 문제 생성 시작:', {
+        title: problemFormData.title,
+        hasDescriptionFile: !!problemFormData.descriptionFile,
+        hasZipFile: !!problemFormData.zipFile,
+        zipFileSize: problemFormData.zipFile?.size
+      });
+      
+      const formData = new FormData();
+      formData.append('title', problemFormData.title);
+      
+      if (problemFormData.descriptionFile) {
+        formData.append('descriptionFile', problemFormData.descriptionFile);
+      }
+      
+      if (problemFormData.zipFile) {
+        formData.append('zipFile', problemFormData.zipFile);
+      }
+
+      // 문제 생성 (과제에 자동 추가하지 않음)
+      const response = await APIService.createProblem(formData);
+      const problemId = response;
+      
+      console.log('독립적인 문제 생성 성공, ID:', problemId);
+      
+      alert(`문제가 성공적으로 생성되었습니다.\n문제 ID: ${problemId}\n\n이제 원하는 과제에서 "문제 추가" 버튼을 통해 이 문제를 추가할 수 있습니다.`);
+      closeStandaloneProblemModal();
+      // 필요시 문제 목록 새로고침을 위해 availableProblems 업데이트
+      fetchAvailableProblems();
+    } catch (error) {
+      console.error('독립적인 문제 생성 실패:', error);
+      
+      let errorMessage = '문제 생성에 실패했습니다.';
+      if (error.message) {
+        errorMessage += `\n오류: ${error.message}`;
+      }
+      
+      alert(errorMessage);
+    }
+  };
+
+  // 대량 문제 생성 관련 함수들
+  const handleBulkProblemCreate = () => {
+    setShowBulkProblemModal(true);
+    setBulkProblemData({
+      problems: [{ title: '', descriptionFile: null, zipFile: null }]
+    });
+  };
+
+  const closeBulkProblemModal = () => {
+    setShowBulkProblemModal(false);
+    setBulkProblemData({
+      problems: [{ title: '', descriptionFile: null, zipFile: null }]
+    });
+  };
+
+  const addProblemRow = () => {
+    setBulkProblemData(prev => ({
+      ...prev,
+      problems: [...prev.problems, { title: '', descriptionFile: null, zipFile: null }]
+    }));
+  };
+
+  const removeProblemRow = (index) => {
+    if (bulkProblemData.problems.length > 1) {
+      setBulkProblemData(prev => ({
+        ...prev,
+        problems: prev.problems.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const handleBulkProblemInputChange = (index, field, value) => {
+    setBulkProblemData(prev => ({
+      ...prev,
+      problems: prev.problems.map((problem, i) => 
+        i === index ? { ...problem, [field]: value } : problem
+      )
+    }));
+  };
+
+  const handleBulkProblemFileChange = (index, field, file) => {
+    // 파일 검증
+    if (field === 'descriptionFile') {
+      const allowedTypes = ['.md', '.txt'];
+      const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+      if (!allowedTypes.includes(fileExtension)) {
+        alert('문제 설명 파일은 .md 또는 .txt 형식만 업로드 가능합니다.');
+        return;
+      }
+    }
+    
+    if (field === 'zipFile') {
+      if (!file.name.toLowerCase().endsWith('.zip')) {
+        alert('문제 파일은 .zip 형식만 업로드 가능합니다.');
+        return;
+      }
+      
+      const maxSize = 50 * 1024 * 1024; // 50MB
+      if (file.size > maxSize) {
+        alert('파일 크기는 50MB를 초과할 수 없습니다.');
+        return;
+      }
+    }
+
+    setBulkProblemData(prev => ({
+      ...prev,
+      problems: prev.problems.map((problem, i) => 
+        i === index ? { ...problem, [field]: file } : problem
+      )
+    }));
+  };
+
+  const handleBulkProblemSubmit = async (e) => {
+    e.preventDefault();
+    
+    // 모든 문제 검증
+    for (let i = 0; i < bulkProblemData.problems.length; i++) {
+      const problem = bulkProblemData.problems[i];
+      if (!problem.title.trim()) {
+        alert(`${i + 1}번째 문제의 제목을 입력해주세요.`);
+        return;
+      }
+      if (!problem.descriptionFile) {
+        alert(`${i + 1}번째 문제의 설명 파일(.md)을 업로드해주세요.`);
+        return;
+      }
+      if (!problem.zipFile) {
+        alert(`${i + 1}번째 문제의 파일(.zip)을 업로드해주세요.`);
+        return;
+      }
+    }
+
+    try {
+      console.log('대량 문제 생성 시작:', bulkProblemData.problems.length, '개');
+      
+      const createdProblems = [];
+      
+      for (let i = 0; i < bulkProblemData.problems.length; i++) {
+        const problem = bulkProblemData.problems[i];
+        console.log(`${i + 1}/${bulkProblemData.problems.length} 문제 생성 중: ${problem.title}`);
+        
+        const formData = new FormData();
+        formData.append('title', problem.title);
+        formData.append('descriptionFile', problem.descriptionFile);
+        formData.append('zipFile', problem.zipFile);
+
+        try {
+          const response = await APIService.createProblem(formData);
+          const problemId = response;
+          createdProblems.push({ id: problemId, title: problem.title });
+          console.log(`문제 생성 완료: ${problem.title} (ID: ${problemId})`);
+        } catch (error) {
+          console.error(`문제 생성 실패: ${problem.title}`, error);
+          alert(`${problem.title} 문제 생성에 실패했습니다.\n오류: ${error.message}\n\n지금까지 ${createdProblems.length}개 문제가 생성되었습니다.`);
+          break;
+        }
+      }
+      
+      if (createdProblems.length > 0) {
+        const problemList = createdProblems.map(p => `• ${p.title} (ID: ${p.id})`).join('\n');
+        alert(`${createdProblems.length}개의 문제가 성공적으로 생성되었습니다!\n\n${problemList}\n\n원하는 과제에서 "문제 추가" 버튼으로 추가할 수 있습니다.`);
+        closeBulkProblemModal();
+        fetchAvailableProblems();
+      }
+    } catch (error) {
+      console.error('대량 문제 생성 실패:', error);
+      alert('문제 생성 중 오류가 발생했습니다.');
+    }
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -449,7 +723,23 @@ const AssignmentManagement = () => {
           </h1>
           <div className="header-actions">
             <button 
-              className="btn-primary"
+              className="btn-secondary"
+              onClick={handleStandaloneProblemCreate}
+              title="단일 문제를 생성합니다"
+            >
+              <span>📝</span>
+              새 문제 만들기
+            </button>
+            <button 
+              className="btn-secondary"
+              onClick={handleBulkProblemCreate}
+              title="여러 문제를 한번에 생성합니다"
+            >
+              <span>📚</span>
+              문제 대량 생성
+            </button>
+            <button 
+              className="btn-secondary"
               onClick={handleAddAssignment}
             >
               <span>➕</span>
@@ -644,7 +934,7 @@ const AssignmentManagement = () => {
           <div className="modal-overlay">
             <div className="modal-content">
               <div className="modal-header">
-                <h2>새 과제 만들기</h2>
+                <h2>새 과제 추가</h2>
                 <button 
                   className="modal-close"
                   onClick={handleCloseModal}
@@ -862,7 +1152,7 @@ const AssignmentManagement = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="descriptionFile">문제 설명 파일 (.md)</label>
+                  <label htmlFor="descriptionFile">문제 설명 파일 (.md) <span className="optional">(선택사항)</span></label>
                   <input
                     type="file"
                     id="descriptionFile"
@@ -871,7 +1161,12 @@ const AssignmentManagement = () => {
                     accept=".md,.txt"
                     className="file-input"
                   />
-                  <small className="file-help">마크다운 형식의 문제 설명 파일을 업로드하세요.</small>
+                  <small className="file-help">
+                    마크다운 형식의 문제 설명 파일을 업로드하세요. 
+                    {problemFormData.descriptionFile && (
+                      <span className="file-selected"> ✓ 선택됨: {problemFormData.descriptionFile.name}</span>
+                    )}
+                  </small>
                 </div>
 
                 <div className="form-group">
@@ -885,7 +1180,12 @@ const AssignmentManagement = () => {
                     className="file-input"
                     required
                   />
-                  <small className="file-help">테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요.</small>
+                  <small className="file-help">
+                    테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
+                    {problemFormData.zipFile && (
+                      <span className="file-selected"> ✓ 선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
+                    )}
+                  </small>
                 </div>
 
                 <div className="form-actions">
@@ -901,6 +1201,218 @@ const AssignmentManagement = () => {
                     className="btn-primary"
                   >
                     문제 생성 및 추가
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* 독립적인 새 문제 생성 모달 */}
+        {showStandaloneProblemModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2>새 문제 만들기</h2>
+                <button 
+                  className="modal-close"
+                  onClick={closeStandaloneProblemModal}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <form onSubmit={handleStandaloneProblemSubmit} className="problem-form">
+                <div className="form-group">
+                  <label htmlFor="standaloneProblemTitle">문제 제목 *</label>
+                  <input
+                    type="text"
+                    id="standaloneProblemTitle"
+                    name="title"
+                    value={problemFormData.title}
+                    onChange={handleProblemInputChange}
+                    placeholder="문제 제목을 입력하세요"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="standaloneDescriptionFile">문제 설명 파일 (.md) *</label>
+                  <input
+                    type="file"
+                    id="standaloneDescriptionFile"
+                    name="descriptionFile"
+                    onChange={handleProblemInputChange}
+                    accept=".md,.txt"
+                    className="file-input"
+                    required
+                  />
+                  <small className="file-help">
+                    마크다운 형식의 문제 설명 파일을 업로드하세요. (필수)
+                    {problemFormData.descriptionFile && (
+                      <span className="file-selected"> ✓ 선택됨: {problemFormData.descriptionFile.name}</span>
+                    )}
+                  </small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="standaloneZipFile">문제 파일 (.zip) *</label>
+                  <input
+                    type="file"
+                    id="standaloneZipFile"
+                    name="zipFile"
+                    onChange={handleProblemInputChange}
+                    accept=".zip"
+                    className="file-input"
+                    required
+                  />
+                  <small className="file-help">
+                    테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
+                    {problemFormData.zipFile && (
+                      <span className="file-selected"> ✓ 선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
+                    )}
+                  </small>
+                </div>
+
+                <div className="info-box">
+                  <p><strong>💡 안내:</strong></p>
+                  <p>• 이 기능은 문제만 생성합니다</p>
+                  <p>• 생성 후 원하는 과제에서 "문제 추가" 버튼으로 추가할 수 있습니다</p>
+                  <p>• 여러 과제에 동일한 문제를 재사용할 수 있습니다</p>
+                </div>
+
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={closeStandaloneProblemModal}
+                  >
+                    취소
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-primary"
+                  >
+                    문제 생성
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* 대량 문제 생성 모달 */}
+        {showBulkProblemModal && (
+          <div className="modal-overlay">
+            <div className="modal-content large-modal">
+              <div className="modal-header">
+                <h2>문제 대량 생성</h2>
+                <button 
+                  className="modal-close"
+                  onClick={closeBulkProblemModal}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <form onSubmit={handleBulkProblemSubmit} className="bulk-problem-form">
+                <div className="info-box">
+                  <p><strong>💡 안내:</strong></p>
+                  <p>• 여러 문제를 한번에 생성할 수 있습니다</p>
+                  <p>• 모든 파일(MD, ZIP)이 필수입니다</p>
+                  <p>• 생성 후 원하는 과제에서 "문제 추가" 버튼으로 추가할 수 있습니다</p>
+                </div>
+
+                <div className="bulk-problems-container">
+                  {bulkProblemData.problems.map((problem, index) => (
+                    <div key={index} className="bulk-problem-row">
+                      <div className="problem-row-header">
+                        <h4>문제 {index + 1}</h4>
+                        {bulkProblemData.problems.length > 1 && (
+                          <button
+                            type="button"
+                            className="btn-remove-row"
+                            onClick={() => removeProblemRow(index)}
+                            title="이 문제 제거"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="problem-row-content">
+                        <div className="form-group">
+                          <label>문제 제목 *</label>
+                          <input
+                            type="text"
+                            value={problem.title}
+                            onChange={(e) => handleBulkProblemInputChange(index, 'title', e.target.value)}
+                            placeholder="문제 제목을 입력하세요"
+                            required
+                          />
+                        </div>
+
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>문제 설명 파일 (.md) *</label>
+                            <input
+                              type="file"
+                              onChange={(e) => handleBulkProblemFileChange(index, 'descriptionFile', e.target.files[0])}
+                              accept=".md,.txt"
+                              className="file-input"
+                              required
+                            />
+                            {problem.descriptionFile && (
+                              <small className="file-selected">
+                                ✓ {problem.descriptionFile.name}
+                              </small>
+                            )}
+                          </div>
+
+                          <div className="form-group">
+                            <label>문제 파일 (.zip) *</label>
+                            <input
+                              type="file"
+                              onChange={(e) => handleBulkProblemFileChange(index, 'zipFile', e.target.files[0])}
+                              accept=".zip"
+                              className="file-input"
+                              required
+                            />
+                            {problem.zipFile && (
+                              <small className="file-selected">
+                                ✓ {problem.zipFile.name} ({(problem.zipFile.size / 1024 / 1024).toFixed(2)}MB)
+                              </small>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bulk-actions">
+                  <button
+                    type="button"
+                    className="btn-add-row"
+                    onClick={addProblemRow}
+                  >
+                    ➕ 문제 추가
+                  </button>
+                </div>
+
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={closeBulkProblemModal}
+                  >
+                    취소
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-primary"
+                  >
+                    {bulkProblemData.problems.length}개 문제 생성
                   </button>
                 </div>
               </form>
