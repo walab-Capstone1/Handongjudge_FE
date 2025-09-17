@@ -101,6 +101,35 @@ const ProblemSolvePage = () => {
   // Helper functions
   // 마감일 체크 함수 제거 - 항상 제출 가능하도록 변경
 
+  const getTestcaseResultText = (result) => {
+    const resultTexts = {
+      'correct': '정답',
+      'wrong-answer': '오답',
+      'timelimit': '시간 초과',
+      'memory-limit': '메모리 초과',
+      'run-error': '런타임 에러',
+      'compiler-error': '컴파일 에러',
+      'presentation-error': '출력 형식 오류',
+      'no-output': '출력 없음',
+      null: '미실행'
+    };
+    return resultTexts[result] || '알 수 없음';
+  };
+
+  const formatMemory = (bytes) => {
+    if (!bytes) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unitIndex = 0;
+    
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    
+    return `${size.toFixed(1)} ${units[unitIndex]}`;
+  };
+
   function getDefaultCode(lang) {
     switch (lang) {
       case "javascript":
@@ -254,7 +283,8 @@ const ProblemSolvePage = () => {
           submissionId: submissionId,
           submittedAt: submittedAt,
           language: submittedLanguage,
-          code: code
+          code: code,
+          type: 'judge' // 채점 결과임을 표시
         });
       } else {
         throw new Error('제출 응답을 받지 못했습니다.');
@@ -264,8 +294,96 @@ const ProblemSolvePage = () => {
       setSubmissionResult({
         status: 'error',
         message: error.message || '코드 제출에 실패했습니다.',
-        resultInfo: { status: 'error', message: '제출 실패', color: '#dc3545' }
+        resultInfo: { status: 'error', message: '제출 실패', color: '#dc3545' },
+        type: 'judge'
       });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmitWithOutput = async () => {
+    if (!code.trim()) {
+      alert('코드를 작성해주세요.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionResult(null);
+
+    try {
+      console.log('코드 제출 및 아웃풋 요청 시작:', { sectionId, problemId, language });
+      
+      const submissionResponse = await apiService.submitCodeAndGetOutput(sectionId, problemId, code, language);
+      console.log('🔍 전체 백엔드 응답:', submissionResponse);
+      console.log('🔍 응답 구조 분석:', {
+        hasResult: 'result' in submissionResponse,
+        hasOutputList: 'outputList' in submissionResponse,
+        keys: Object.keys(submissionResponse),
+        outputList: submissionResponse.outputList
+      });
+      
+      if (submissionResponse) {
+        const { result, submissionId, submittedAt, language: submittedLanguage, outputList } = submissionResponse;
+        
+        // Result mapping
+        const resultMapping = {
+          'correct': { status: 'success', message: '정답 (Accepted)', color: '#28a745' },
+          'wrong-answer': { status: 'error', message: '오답 (Wrong Answer)', color: '#dc3545' },
+          'timelimit': { status: 'error', message: '시간 초과 (Time Limit Exceeded)', color: '#ffc107' },
+          'memory-limit': { status: 'error', message: '메모리 초과 (Memory Limit Exceeded)', color: '#fd7e14' },
+          'run-error': { status: 'error', message: '런타임 에러 (Runtime Error)', color: '#e83e8c' },
+          'compiler-error': { status: 'error', message: '컴파일 에러 (Compilation Error)', color: '#6f42c1' },
+          'presentation-error': { status: 'error', message: '출력 형식 오류 (Presentation Error)', color: '#17a2b8' },
+          'no-output': { status: 'error', message: '출력 없음 (No Output)', color: '#6c757d' },
+          // 기존 형식도 지원
+          'AC': { status: 'success', message: '정답 (Accepted)', color: '#28a745' },
+          'WA': { status: 'error', message: '오답 (Wrong Answer)', color: '#dc3545' },
+          'TLE': { status: 'error', message: '시간 초과 (Time Limit Exceeded)', color: '#ffc107' },
+          'MLE': { status: 'error', message: '메모리 초과 (Memory Limit Exceeded)', color: '#fd7e14' },
+          'RE': { status: 'error', message: '런타임 에러 (Runtime Error)', color: '#e83e8c' },
+          'CE': { status: 'error', message: '컴파일 에러 (Compilation Error)', color: '#6f42c1' },
+          'PE': { status: 'error', message: '출력 형식 오류 (Presentation Error)', color: '#17a2b8' },
+          'NO': { status: 'error', message: '출력 없음 (No Output)', color: '#6c757d' }
+        };
+
+        const resultInfo = resultMapping[result] || { 
+          status: 'unknown', 
+          message: `알 수 없는 결과: ${result}`, 
+          color: '#6c757d' 
+        };
+
+        console.log('🔍 제출 결과 설정:', {
+          result,
+          outputList,
+          hasOutputList: !!outputList,
+          outputsLength: outputList?.length,
+          type: 'output'
+        });
+
+        setSubmissionResult({
+          status: 'completed',
+          result: result,
+          resultInfo: resultInfo,
+          submissionId: submissionId,
+          submittedAt: submittedAt,
+          language: submittedLanguage,
+          code: code,
+          outputList: outputList, // outputList 정보 저장
+          type: 'output' // 아웃풋 결과임을 표시
+        });
+      } else {
+        throw new Error('제출 응답을 받지 못했습니다.');
+      }
+    } catch (error) {
+      console.error('코드 제출 및 아웃풋 요청 실패:', error);
+              setSubmissionResult({
+          status: 'error',
+          message: error.message || '코드 제출에 실패했습니다.',
+          resultInfo: { status: 'error', message: '제출 실패', color: '#dc3545' },
+          type: 'output',
+          outputList: null
+        });
     } finally {
       setIsSubmitting(false);
     }
@@ -448,6 +566,7 @@ const ProblemSolvePage = () => {
                     {isSubmitting ? "제출 중..." : "제출하기"}
                   </button>
                 </div>
+
               </div>
               <div className="editor-scroll-area">
                 <CodeMirror
@@ -476,7 +595,9 @@ const ProblemSolvePage = () => {
 
             {/* Result Area */}
             <div className="result-area">
-              <div className="result-header">채점 결과</div>
+              <div className="result-header">
+                {submissionResult?.type === 'output' ? '실행 결과' : '채점 결과'}
+              </div>
               <div>
                 {isSubmitting ? (
                   <div className="result-loading">
@@ -499,6 +620,77 @@ const ProblemSolvePage = () => {
                     {submissionResult.status === 'error' && (
                       <div className="error-message">
                         <strong>오류:</strong> {submissionResult.message}
+                      </div>
+                    )}
+
+                    {/* 테스트케이스 상세 결과 표시 */}
+                    {(() => {
+                      console.log('🔍 렌더링 조건 체크:', {
+                        type: submissionResult?.type,
+                        hasOutputList: !!submissionResult?.outputList,
+                        outputListLength: submissionResult?.outputList?.length,
+                        shouldShow: submissionResult?.type === 'output' && submissionResult?.outputList
+                      });
+                      return submissionResult.type === 'output' && submissionResult.outputList;
+                    })() && (
+                      <div className="testcases-section">
+                        <div className="testcases-header">
+                          <strong>테스트케이스별 결과:</strong>
+                        </div>
+                        <div className="testcases-list">
+                          {submissionResult.outputList.map((testcase, index) => (
+                            <div key={testcase.id || index} className={`testcase-item ${testcase.result ? testcase.result : 'not-run'}`}>
+                              <div className="testcase-header">
+                                <span className="testcase-number">테스트케이스 #{testcase.testcase_rank}</span>
+                                <span className={`testcase-result ${testcase.result || 'not-run'}`}>
+                                  {getTestcaseResultText(testcase.result)}
+                                </span>
+                              </div>
+                              
+                              {testcase.result && (
+                                <div className="testcase-details">
+                                  <div className="testcase-stats">
+                                    <span className="stat-item">
+                                      <strong>실행시간:</strong> {testcase.runtime}ms
+                                    </span>
+                                    <span className="stat-item">
+                                      <strong>메모리:</strong> {formatMemory(testcase.memory_used)}
+                                    </span>
+                                  </div>
+                                  
+                                  {testcase.output && (
+                                    <div className="testcase-output">
+                                      <div className="output-label">프로그램 출력:</div>
+                                      <div className="output-content">
+                                        <pre>{testcase.output}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {testcase.output_error && (
+                                    <div className="testcase-error">
+                                      <div className="error-label">실행 에러:</div>
+                                      <div className="error-content">
+                                        <pre>{testcase.output_error}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {testcase.output_diff && (
+                                    <div className="testcase-diff">
+                                      <div className="diff-label">차이점:</div>
+                                      <div className="diff-content">
+                                        <pre>{testcase.output_diff}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* 최대 실행시간은 outputList에 없으므로 제거하거나 다른 방법으로 처리 */}
                       </div>
                     )}
                   </>

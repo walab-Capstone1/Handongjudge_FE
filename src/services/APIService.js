@@ -183,6 +183,23 @@ class APIService {
     });
   }
 
+  // 코드 제출 및 아웃풋 받기 API
+  async submitCodeAndGetOutput(sectionId, problemId, code, language) {
+    console.log('SubmitCodeAndGetOutput sectionId', sectionId);
+    return await this.request('/submissions/submitAndGetResult/output', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        problemId: parseInt(problemId),
+        sectionId: parseInt(sectionId),
+        language,
+        codeString : code
+      }),
+    });
+  }
+
   // 제출 결과 조회 API (현재 백엔드에서 즉시 결과를 반환하므로 사용하지 않음)
   // async getSubmissionResult(submissionId) {
   //   return await this.request(`/submissions/${submissionId}`);

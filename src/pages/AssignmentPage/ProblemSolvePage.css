@@ -728,6 +728,7 @@
 
 .due-date-text {
   font-weight: 500;
+
 }
 
 /* Inline Submit Button */
@@ -754,6 +755,19 @@
   color: #ffffff;
 }
 
+/* Output Button */
+.submit-button-inline.output-button {
+  background-color: #28a745;
+}
+
+.submit-button-inline.output-button:hover {
+  background-color: #218838;
+}
+
+.submit-button-inline.output-button:disabled {
+  background-color: #6c757d;
+}
+
 /* Loading Container */
 .loading-container {
   display: flex;
@@ -778,4 +792,310 @@
 
 .result-loading .loading-spinner {
   margin-right: 10px;
+}
+
+/* Output Section */
+.output-section {
+  margin-top: 16px;
+  border-top: 1px solid #30363d;
+  padding-top: 16px;
+}
+
+.problem-solve-page.light .output-section {
+  border-top: 1px solid #e1e4e8;
+}
+
+.output-header {
+  margin-bottom: 8px;
+  color: #58a6ff;
+  font-size: 14px;
+}
+
+.problem-solve-page.light .output-header {
+  color: #0969da;
+}
+
+.output-content {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.problem-solve-page.light .output-content {
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+}
+
+.output-content pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #e1e4e8;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.problem-solve-page.light .output-content pre {
+  color: #24292e;
+}
+
+/* Testcases Section */
+.testcases-section {
+  margin-top: 16px;
+  border-top: 1px solid #30363d;
+  padding-top: 16px;
+}
+
+.problem-solve-page.light .testcases-section {
+  border-top: 1px solid #e1e4e8;
+}
+
+.testcases-header {
+  margin-bottom: 12px;
+  color: #58a6ff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.problem-solve-page.light .testcases-header {
+  color: #0969da;
+}
+
+.testcases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Testcase Item */
+.testcase-item {
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  background-color: #0d1117;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.problem-solve-page.light .testcase-item {
+  border: 1px solid #e1e4e8;
+  background-color: #f6f8fa;
+}
+
+.testcase-item.correct {
+  border-left: 4px solid #28a745;
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.testcase-item.wrong-answer {
+  border-left: 4px solid #dc3545;
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.testcase-item.timelimit {
+  border-left: 4px solid #ffc107;
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.testcase-item.memory-limit {
+  border-left: 4px solid #fd7e14;
+  background-color: rgba(253, 126, 20, 0.1);
+}
+
+.testcase-item.run-error {
+  border-left: 4px solid #e83e8c;
+  background-color: rgba(232, 62, 140, 0.1);
+}
+
+.testcase-item.compiler-error {
+  border-left: 4px solid #6f42c1;
+  background-color: rgba(111, 66, 193, 0.1);
+}
+
+.testcase-item.not-run {
+  border-left: 4px solid #6c757d;
+  background-color: rgba(108, 117, 125, 0.1);
+}
+
+/* Testcase Header */
+.testcase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.testcase-number {
+  color: #e1e4e8;
+  font-size: 14px;
+}
+
+.problem-solve-page.light .testcase-number {
+  color: #24292e;
+}
+
+.testcase-result {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.testcase-result.correct {
+  background-color: #28a745;
+  color: white;
+}
+
+.testcase-result.wrong-answer {
+  background-color: #dc3545;
+  color: white;
+}
+
+.testcase-result.timelimit {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.testcase-result.memory-limit {
+  background-color: #fd7e14;
+  color: white;
+}
+
+.testcase-result.run-error {
+  background-color: #e83e8c;
+  color: white;
+}
+
+.testcase-result.compiler-error {
+  background-color: #6f42c1;
+  color: white;
+}
+
+.testcase-result.not-run {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Testcase Details */
+.testcase-details {
+  margin-top: 12px;
+}
+
+.testcase-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.stat-item {
+  color: #c9d1d9;
+}
+
+.problem-solve-page.light .stat-item {
+  color: #586069;
+}
+
+/* Output, Error, Diff Sections */
+.testcase-output,
+.testcase-error,
+.testcase-diff {
+  margin-top: 12px;
+}
+
+.output-label,
+.error-label,
+.diff-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #58a6ff;
+}
+
+.problem-solve-page.light .output-label,
+.problem-solve-page.light .error-label,
+.problem-solve-page.light .diff-label {
+  color: #0969da;
+}
+
+.error-label {
+  color: #ff6b6b !important;
+}
+
+.problem-solve-page.light .error-label {
+  color: #d63384 !important;
+}
+
+.diff-label {
+  color: #ffc107 !important;
+}
+
+.problem-solve-page.light .diff-label {
+  color: #f57c00 !important;
+}
+
+.testcase-output .output-content,
+.testcase-error .error-content,
+.testcase-diff .diff-content {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.problem-solve-page.light .testcase-output .output-content,
+.problem-solve-page.light .testcase-error .error-content,
+.problem-solve-page.light .testcase-diff .diff-content {
+  background-color: #ffffff;
+  border: 1px solid #e1e4e8;
+}
+
+.testcase-output .output-content pre,
+.testcase-error .error-content pre,
+.testcase-diff .diff-content pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #e1e4e8;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.problem-solve-page.light .testcase-output .output-content pre,
+.problem-solve-page.light .testcase-error .error-content pre,
+.problem-solve-page.light .testcase-diff .diff-content pre {
+  color: #24292e;
+}
+
+/* Judging Summary */
+.judging-summary {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: rgba(88, 166, 255, 0.1);
+  border-radius: 6px;
+  border-left: 4px solid #58a6ff;
+  font-size: 14px;
+  color: #e1e4e8;
+}
+
+.problem-solve-page.light .judging-summary {
+  background-color: rgba(9, 105, 218, 0.1);
+  border-left-color: #0969da;
+  color: #24292e;
 }
