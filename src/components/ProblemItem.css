@@ -120,4 +120,34 @@
   height: 6px;
   background: #636e72;
   border-radius: 1px;
+}
+
+/* Problem Limits Styles */
+.problem-limits {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.limit-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.limit-badge.time-limit {
+  background: rgba(88, 166, 255, 0.1);
+  color: #0969da;
+  border: 1px solid rgba(88, 166, 255, 0.2);
+}
+
+.limit-badge.memory-limit {
+  background: rgba(255, 107, 107, 0.1);
+  color: #d63384;
+  border: 1px solid rgba(255, 107, 107, 0.2);
 } 
