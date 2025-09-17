@@ -228,12 +228,59 @@
   background: linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(88, 166, 255, 0.05) 100%);
   border-bottom: 1px solid #30363d;
   border-radius: 6px 6px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .problem-solve-page.light .description-header {
   color: #0969da;
   background: linear-gradient(90deg, rgba(9, 105, 218, 0.1) 0%, rgba(9, 105, 218, 0.05) 100%);
   border-bottom: 1px solid #e1e4e8;
+}
+
+/* Problem Limits in Header */
+.problem-limits-header {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.limit-badge-header {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.limit-badge-header.time-limit {
+  background: rgba(255, 255, 255, 0.15);
+  color: #58a6ff;
+  border: 1px solid rgba(88, 166, 255, 0.3);
+}
+
+.limit-badge-header.memory-limit {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Light theme for header badges */
+.problem-solve-page.light .limit-badge-header.time-limit {
+  background: rgba(9, 105, 218, 0.15);
+  color: #0969da;
+  border: 1px solid rgba(9, 105, 218, 0.3);
+}
+
+.problem-solve-page.light .limit-badge-header.memory-limit {
+  background: rgba(220, 53, 132, 0.15);
+  color: #d63384;
+  border: 1px solid rgba(220, 53, 132, 0.3);
 }
 
 /* Description Content */
@@ -310,6 +357,75 @@
 
 .description-content pre {
   background-color: #0d1117;
+}
+
+/* Problem Limits Info */
+.problem-limits-info {
+  margin: 16px 0;
+  padding: 16px;
+  background: rgba(88, 166, 255, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #58a6ff;
+}
+
+.limits-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #58a6ff;
+  margin-bottom: 12px;
+}
+
+.limits-icon {
+  font-size: 16px;
+}
+
+.limits-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.limit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.limit-label {
+  font-size: 14px;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.limit-value {
+  font-size: 14px;
+  color: #58a6ff;
+  font-weight: 600;
+  background: rgba(88, 166, 255, 0.15);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Light theme for problem limits */
+.problem-solve-page.light .problem-limits-info {
+  background: rgba(9, 105, 218, 0.1);
+  border-left-color: #0969da;
+}
+
+.problem-solve-page.light .limits-header {
+  color: #0969da;
+}
+
+.problem-solve-page.light .limit-label {
+  color: #333333;
+}
+
+.problem-solve-page.light .limit-value {
+  color: #0969da;
+  background: rgba(9, 105, 218, 0.15);
 }
 
 /* Due Date Info */
