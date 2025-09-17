@@ -559,7 +559,7 @@ const ProblemSolvePage = () => {
                     disabled={isSubmitting}
                     title="테스트케이스별 상세 결과를 확인할 수 있습니다"
                   >
-                    {isSubmitting ? "제출 중..." : "출력과 함께 제출"}
+                    {isSubmitting ? "제출 중..." : "테스트하기"}
                   </button>
                 </div>
 
