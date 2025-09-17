@@ -21,6 +21,7 @@ const AssignmentDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submissionStats, setSubmissionStats] = useState(null);
+  const [userSubmissionStatus, setUserSubmissionStatus] = useState(null);
 
   useEffect(() => {
     const fetchAssignmentData = async () => {
@@ -31,7 +32,11 @@ const AssignmentDetailPage = () => {
         console.log('assignmentId:', assignmentId);
         console.log('sectionId:', sectionId);
         
-      
+        // 과제 정보 조회
+        const assignmentResponse = await APIService.getAssignmentInfo(sectionId, assignmentId);
+        const assignmentData = assignmentResponse.data || assignmentResponse;
+        console.log('assignmentData:', assignmentData);
+        setAssignmentInfo(assignmentData);
 
         // 과제 문제 목록 조회
         const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignmentId);
@@ -47,6 +52,16 @@ const AssignmentDetailPage = () => {
         } catch (statsError) {
           console.error('제출 통계 조회 실패:', statsError);
           setSubmissionStats(null);
+        }
+
+        // 사용자별 제출 상태 조회
+        try {
+          const userStatusResponse = await APIService.getUserSubmissionStatus(sectionId, assignmentId);
+          console.log('사용자 제출 상태:', userStatusResponse);
+          setUserSubmissionStatus(userStatusResponse);
+        } catch (userStatusError) {
+          console.error('사용자 제출 상태 조회 실패:', userStatusError);
+          setUserSubmissionStatus(null);
         }
         
       } catch (err) {
@@ -115,6 +130,7 @@ const AssignmentDetailPage = () => {
             problems={problems || []} 
             assignmentId={assignmentId} 
             submissionStats={submissionStats}
+            userSubmissionStatus={userSubmissionStatus}
           />
         </div>
       </div>

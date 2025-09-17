@@ -458,16 +458,16 @@ class APIService {
   }
 
   // 과제 생성
-  async createAssignment(assignmentData) {
-    return await this.request('/admin/assignments', {
+  async createAssignment(sectionId, assignmentData) {
+    return await this.request(`/sections/${sectionId}/assignments`, {
       method: 'POST',
       body: JSON.stringify(assignmentData),
     });
   }
 
   // 과제 수정
-  async updateAssignment(assignmentId, assignmentData) {
-    return await this.request(`/admin/assignments/${assignmentId}`, {
+  async updateAssignment(sectionId, assignmentId, assignmentData) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}`, {
       method: 'PUT',
       body: JSON.stringify(assignmentData),
     });
@@ -506,6 +506,11 @@ class APIService {
       method: 'PUT',
       body: JSON.stringify(userData),
     });
+  }
+
+  // 사용자별 과제 제출 상태 조회
+  async getUserSubmissionStatus(sectionId, assignmentId) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/user-submission-status`);
   }
 
   // 사용자 삭제

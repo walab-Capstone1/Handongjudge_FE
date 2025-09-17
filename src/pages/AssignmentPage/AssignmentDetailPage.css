@@ -20,12 +20,10 @@
 
 .assignment-info {
   flex: 1;
+  margin-right: 2rem;
 }
 
 .assignment-title-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -36,31 +34,32 @@
   margin: 0;
 }
 
-.deadline-badge {
+.deadline-status {
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 0.875rem;
   font-weight: 600;
   text-align: center;
   min-width: 70px;
+  white-space: nowrap;
 }
 
-.deadline-badge.normal {
+.deadline-status.normal {
   background: #d4edda;
   color: #155724;
 }
 
-.deadline-badge.warning {
+.deadline-status.warning {
   background: #fff3cd;
   color: #856404;
 }
 
-.deadline-badge.urgent {
+.deadline-status.urgent {
   background: #f8d7da;
   color: #721c24;
 }
 
-.deadline-badge.expired {
+.deadline-status.expired {
   background: #e2e3e5;
   color: #6c757d;
 }
@@ -76,14 +75,21 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 1rem;
+  text-align: right;
+  min-width: 200px;
+}
+
+.assignment-dates .deadline-status {
+  margin-bottom: 8px;
+  align-self: flex-end;
 }
 
 .date-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   font-size: 0.875rem;
+  gap: 2px;
 }
 
 .date-label {
@@ -204,10 +210,19 @@
     gap: 1rem;
   }
   
-  .assignment-title-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+  .assignment-info {
+    margin-right: 0;
+  }
+  
+  .assignment-dates {
+    text-align: left;
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .assignment-dates .deadline-status {
+    align-self: flex-start;
+    margin-bottom: 12px;
   }
   
   .assignment-title {
@@ -215,8 +230,8 @@
   }
   
   .date-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 } 

@@ -18,7 +18,7 @@ const ProblemSolvePage = () => {
   
   // State management
   const [language, setLanguage] = useState("cpp");
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState("light");
   const [code, setCode] = useState(getDefaultCode("cpp"));
   const [submissionResult, setSubmissionResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -401,7 +401,7 @@ const ProblemSolvePage = () => {
 
   const renderGutter = (direction) => {
     return () => ({
-      backgroundColor: theme === "dark" ? "#139F59" : "#0969da",
+      backgroundColor: theme === "dark" ? "#2d3748" : "#cbd5e0",
     });
   };
 
@@ -496,7 +496,7 @@ const ProblemSolvePage = () => {
           sizes={horizontalSizes}
           direction="horizontal"
           minSize={200}
-          gutterSize={12}
+          gutterSize={20}
           gutterStyle={renderGutter("horizontal")}
           onDragEnd={handleHorizontalDragEnd}
           style={{ display: "flex", width: "100%" }}
@@ -527,25 +527,6 @@ const ProblemSolvePage = () => {
               className="description-content"
               dangerouslySetInnerHTML={{ __html: currentProblem.description || problemDescription }}
             />
-            
-            {/* Assignment Due Date Info */}
-            {(assignmentInfo.dueDate || assignmentInfo.endDate) && (
-              <div className="due-date-info">
-                <div className="due-date-header">
-                  <span className="due-date-icon">⏰</span>
-                  과제 마감일
-                </div>
-                <div className="due-date-content">
-                  {new Date(assignmentInfo.dueDate || assignmentInfo.endDate).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Editor and Result Split */}
@@ -553,7 +534,7 @@ const ProblemSolvePage = () => {
             sizes={verticalSizes}
             direction="vertical"
             minSize={100}
-            gutterSize={12}
+            gutterSize={20}
             gutterStyle={renderGutter("vertical")}
             onDragEnd={handleVerticalDragEnd}
             style={{ display: "flex", flexDirection: "column", height: "100%" }}
@@ -562,21 +543,27 @@ const ProblemSolvePage = () => {
             <div className="editor-wrapper">
               <div className="editor-header">
                 <span>solution.{language === "javascript" ? "js" : language}</span>
-
-                <div className="submit-buttons">
+                <div className="editor-header-right">
+                  {/* Assignment Due Date Info */}
+                  {(assignmentInfo.dueDate || assignmentInfo.endDate) && (
+                    <div className="due-date-info-inline">
+                      <span className="due-date-icon">⏰</span>
+                      <span className="due-date-text">
+                        마감: {new Date(assignmentInfo.dueDate || assignmentInfo.endDate).toLocaleDateString('ko-KR', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  )}
                   <button 
                     className="submit-button-inline"
                     onClick={handleSubmit} 
-                    disabled={isSubmitting || isAssignmentOverdue()}
+                    disabled={isSubmitting}
                   >
-                    {isSubmitting ? "제출 중..." : isAssignmentOverdue() ? "과제 마감" : "채점하기"}
-                  </button>
-                  <button 
-                    className="submit-button-inline output-button"
-                    onClick={handleSubmitWithOutput} 
-                    disabled={isSubmitting || isAssignmentOverdue()}
-                  >
-                    {isSubmitting ? "제출 중..." : isAssignmentOverdue() ? "과제 마감" : "실행 결과 보기"}
+                    {isSubmitting ? "제출 중..." : "제출하기"}
                   </button>
                 </div>
 

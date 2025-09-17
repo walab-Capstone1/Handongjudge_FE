@@ -9,7 +9,7 @@ const SectionDetailPage = () => {
   const { sectionId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState('notices');
+  const [activeTab, setActiveTab] = useState('assignments');
   const [loading, setLoading] = useState(true);
   const [sectionInfo, setSectionInfo] = useState(null);
   const [notices, setNotices] = useState([]);
