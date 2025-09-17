@@ -6,6 +6,11 @@
   scrollbar-color: #555 #1e1e1e;
 }
 
+.problem-solve-page.light * {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f8f9fa;
+}
+
 .problem-solve-page *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -21,11 +26,16 @@
 }
 
 .problem-solve-page.light *::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f8f9fa;
 }
 
 .problem-solve-page.light *::-webkit-scrollbar-thumb {
-  background-color: #bbb;
+  background-color: #d1d5db;
+  border-radius: 10px;
+}
+
+.problem-solve-page.light *::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
 }
 
 /* Gutter Styles */
@@ -37,14 +47,33 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  padding: 8px 0;
+  background-color: #2d3748;
+}
+
+.gutter.gutter-horizontal {
+  padding: 0 8px;
 }
 
 .gutter:hover {
-  background-color: #1aad6b !important;
+  background-color: #718096 !important;
+}
+
+.gutter:active {
+  background-color: #718096 !important;
+}
+
+/* Light mode gutter styles - completely separate */
+.problem-solve-page.light .gutter {
+  background-color: #cbd5e0 !important;
 }
 
 .problem-solve-page.light .gutter:hover {
-  background-color: #1f6feb !important;
+  background-color: #9aa0a6 !important;
+}
+
+.problem-solve-page.light .gutter:active {
+  background-color: #9aa0a6 !important;
 }
 
 .gutter::after {
@@ -69,13 +98,13 @@
 }
 
 .gutter.gutter-horizontal::after {
-  width: 2px;
-  height: 20px;
+  width: 4px;
+  height: 40px;
 }
 
 .gutter.gutter-vertical::after {
-  width: 20px;
-  height: 2px;
+  width: 40px;
+  height: 4px;
 }
 
 .gutter.gutter-horizontal {
@@ -100,13 +129,6 @@
   border-bottom: 1px solid #e1e4e8;
 }
 
-.gutter:active {
-  background-color: #1aad6b !important;
-}
-
-.problem-solve-page.light .gutter:active {
-  background-color: #1f6feb !important;
-}
 
 /* Main Container */
 .problem-solve-page {
@@ -155,6 +177,14 @@
 
 .breadcrumb-link:hover {
   text-decoration: underline;
+}
+
+.breadcrumb strong {
+  color: #EFF5F2;
+}
+
+.problem-solve-page.light .breadcrumb strong {
+  color: #000000;
 }
 
 .controls {
@@ -233,6 +263,8 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .problem-solve-page.light .description-header {
@@ -301,7 +333,7 @@
 .description-content h5,
 .description-content h6 {
   margin: 16px 0 8px 0;
-  color: #58a6ff;
+  color: #EFF5F2 !important;
   font-weight: bold;
 }
 
@@ -311,7 +343,7 @@
 .problem-solve-page.light .description-content h4,
 .problem-solve-page.light .description-content h5,
 .problem-solve-page.light .description-content h6 {
-  color: #0969da;
+  color: #000000 !important;
 }
 
 .description-content p {
@@ -568,6 +600,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.editor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .problem-solve-page.light .editor-header {
@@ -662,6 +702,33 @@
 
 
 
+
+/* Inline Due Date Info */
+.due-date-info-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.problem-solve-page.light .due-date-info-inline {
+  color: #d63384;
+  background: rgba(220, 53, 132, 0.1);
+  border: 1px solid rgba(220, 53, 132, 0.3);
+}
+
+.due-date-icon {
+  font-size: 12px;
+}
+
+.due-date-text {
+  font-weight: 500;
+}
 
 /* Inline Submit Button */
 .submit-button-inline {
