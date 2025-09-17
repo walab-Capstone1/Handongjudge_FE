@@ -315,13 +315,7 @@ const ProblemSolvePage = () => {
       console.log('코드 제출 및 아웃풋 요청 시작:', { sectionId, problemId, language });
       
       const submissionResponse = await apiService.submitCodeAndGetOutput(sectionId, problemId, code, language);
-      console.log('🔍 전체 백엔드 응답:', submissionResponse);
-      console.log('🔍 응답 구조 분석:', {
-        hasResult: 'result' in submissionResponse,
-        hasOutputList: 'outputList' in submissionResponse,
-        keys: Object.keys(submissionResponse),
-        outputList: submissionResponse.outputList
-      });
+      console.log('코드 제출 및 아웃풋 응답:', submissionResponse);
       
       if (submissionResponse) {
         const { result, submissionId, submittedAt, language: submittedLanguage, outputList } = submissionResponse;
@@ -353,13 +347,6 @@ const ProblemSolvePage = () => {
           color: '#6c757d' 
         };
 
-        console.log('🔍 제출 결과 설정:', {
-          result,
-          outputList,
-          hasOutputList: !!outputList,
-          outputsLength: outputList?.length,
-          type: 'output'
-        });
 
         setSubmissionResult({
           status: 'completed',
@@ -377,13 +364,14 @@ const ProblemSolvePage = () => {
       }
     } catch (error) {
       console.error('코드 제출 및 아웃풋 요청 실패:', error);
-              setSubmissionResult({
-          status: 'error',
-          message: error.message || '코드 제출에 실패했습니다.',
-          resultInfo: { status: 'error', message: '제출 실패', color: '#dc3545' },
-          type: 'output',
-          outputList: null
-        });
+      
+      setSubmissionResult({
+        status: 'error',
+        message: error.message || '코드 제출에 실패했습니다.',
+        resultInfo: { status: 'error', message: '제출 실패', color: '#dc3545' },
+        type: 'output',
+        outputList: null
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -565,6 +553,14 @@ const ProblemSolvePage = () => {
                   >
                     {isSubmitting ? "제출 중..." : "제출하기"}
                   </button>
+                  <button 
+                    className="submit-button-inline submit-with-output"
+                    onClick={handleSubmitWithOutput} 
+                    disabled={isSubmitting}
+                    title="테스트케이스별 상세 결과를 확인할 수 있습니다"
+                  >
+                    {isSubmitting ? "제출 중..." : "출력과 함께 제출"}
+                  </button>
                 </div>
 
               </div>
@@ -624,15 +620,7 @@ const ProblemSolvePage = () => {
                     )}
 
                     {/* 테스트케이스 상세 결과 표시 */}
-                    {(() => {
-                      console.log('🔍 렌더링 조건 체크:', {
-                        type: submissionResult?.type,
-                        hasOutputList: !!submissionResult?.outputList,
-                        outputListLength: submissionResult?.outputList?.length,
-                        shouldShow: submissionResult?.type === 'output' && submissionResult?.outputList
-                      });
-                      return submissionResult.type === 'output' && submissionResult.outputList;
-                    })() && (
+                    {submissionResult.type === 'output' && submissionResult.outputList && (
                       <div className="testcases-section">
                         <div className="testcases-header">
                           <strong>테스트케이스별 결과:</strong>
