@@ -1006,13 +1006,17 @@
   color: #586069;
 }
 
-/* Output, Error, Diff Sections */
+/* Input, Expected, Output, Error, Diff Sections */
+.testcase-input,
+.testcase-expected,
 .testcase-output,
 .testcase-error,
 .testcase-diff {
   margin-top: 12px;
 }
 
+.input-label,
+.expected-label,
 .output-label,
 .error-label,
 .diff-label {
@@ -1022,10 +1026,28 @@
   color: #58a6ff;
 }
 
+.problem-solve-page.light .input-label,
+.problem-solve-page.light .expected-label,
 .problem-solve-page.light .output-label,
 .problem-solve-page.light .error-label,
 .problem-solve-page.light .diff-label {
   color: #0969da;
+}
+
+.input-label {
+  color: #7c3aed !important;
+}
+
+.problem-solve-page.light .input-label {
+  color: #7c3aed !important;
+}
+
+.expected-label {
+  color: #059669 !important;
+}
+
+.problem-solve-page.light .expected-label {
+  color: #059669 !important;
 }
 
 .error-label {
@@ -1044,6 +1066,8 @@
   color: #f57c00 !important;
 }
 
+.testcase-input .input-content,
+.testcase-expected .expected-content,
 .testcase-output .output-content,
 .testcase-error .error-content,
 .testcase-diff .diff-content {
@@ -1055,6 +1079,8 @@
   overflow-y: auto;
 }
 
+.problem-solve-page.light .testcase-input .input-content,
+.problem-solve-page.light .testcase-expected .expected-content,
 .problem-solve-page.light .testcase-output .output-content,
 .problem-solve-page.light .testcase-error .error-content,
 .problem-solve-page.light .testcase-diff .diff-content {
@@ -1062,6 +1088,8 @@
   border: 1px solid #e1e4e8;
 }
 
+.testcase-input .input-content pre,
+.testcase-expected .expected-content pre,
 .testcase-output .output-content pre,
 .testcase-error .error-content pre,
 .testcase-diff .diff-content pre {
@@ -1077,6 +1105,8 @@
   word-wrap: break-word;
 }
 
+.problem-solve-page.light .testcase-input .input-content pre,
+.problem-solve-page.light .testcase-expected .expected-content pre,
 .problem-solve-page.light .testcase-output .output-content pre,
 .problem-solve-page.light .testcase-error .error-content pre,
 .problem-solve-page.light .testcase-diff .diff-content pre {

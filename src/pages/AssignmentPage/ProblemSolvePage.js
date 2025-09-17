@@ -646,9 +646,27 @@ const ProblemSolvePage = () => {
                                     </span>
                                   </div>
                                   
+                                  {testcase.testcase_input && (
+                                    <div className="testcase-input">
+                                      <div className="input-label">테스트 입력:</div>
+                                      <div className="input-content">
+                                        <pre>{testcase.testcase_input}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {testcase.expected_output && (
+                                    <div className="testcase-expected">
+                                      <div className="expected-label">기대 출력:</div>
+                                      <div className="expected-content">
+                                        <pre>{testcase.expected_output}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
                                   {testcase.output && (
                                     <div className="testcase-output">
-                                      <div className="output-label">프로그램 출력:</div>
+                                      <div className="output-label">실제 출력:</div>
                                       <div className="output-content">
                                         <pre>{testcase.output}</pre>
                                       </div>
