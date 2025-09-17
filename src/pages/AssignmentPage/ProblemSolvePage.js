@@ -556,7 +556,7 @@ const ProblemSolvePage = () => {
                     disabled={isSubmitting}
                     title="테스트케이스별 상세 결과를 확인할 수 있습니다"
                   >
-                    {isSubmitting ? "제출 중..." : "출력과 함께 제출"}
+                    {isSubmitting ? "제출 중..." : "테스트하기"}
                   </button>
                 </div>
 
@@ -643,9 +643,27 @@ const ProblemSolvePage = () => {
                                     </span>
                                   </div>
                                   
+                                  {testcase.testcase_input && (
+                                    <div className="testcase-input">
+                                      <div className="input-label">테스트 입력:</div>
+                                      <div className="input-content">
+                                        <pre>{testcase.testcase_input}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {testcase.expected_output && (
+                                    <div className="testcase-expected">
+                                      <div className="expected-label">기대 출력:</div>
+                                      <div className="expected-content">
+                                        <pre>{testcase.expected_output}</pre>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
                                   {testcase.output && (
                                     <div className="testcase-output">
-                                      <div className="output-label">프로그램 출력:</div>
+                                      <div className="output-label">실제 출력:</div>
                                       <div className="output-content">
                                         <pre>{testcase.output}</pre>
                                       </div>
