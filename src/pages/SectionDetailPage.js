@@ -120,16 +120,22 @@ const SectionDetailPage = () => {
               <h1 className="section-title">
                 {sectionInfo?.courseTitle} - {sectionInfo?.sectionNumber}분반
               </h1>
-              <div className="section-stats">
-                <span className="stat-item">공지 {notices.length}개</span>
-                <span className="stat-item">과제 {assignments.length}개</span>
-              </div>
+           
             </div>
             <p className="section-instructor">{sectionInfo?.instructorName} 교수님</p>
           </div>
         </div>
 
         <div className="tab-navigation">
+        <button 
+            className={`tab-button ${activeTab === 'assignments' ? 'active' : ''}`}
+            onClick={() => setActiveTab('assignments')}
+          >
+            과제
+            {assignments.filter(a => a.isNew).length > 0 && (
+              <span className="new-badge">{assignments.filter(a => a.isNew).length}</span>
+            )}
+          </button>
           <button 
             className={`tab-button ${activeTab === 'notices' ? 'active' : ''}`}
             onClick={() => setActiveTab('notices')}
@@ -139,15 +145,7 @@ const SectionDetailPage = () => {
               <span className="new-badge">{notices.filter(n => n.isNew).length}</span>
             )}
           </button>
-          <button 
-            className={`tab-button ${activeTab === 'assignments' ? 'active' : ''}`}
-            onClick={() => setActiveTab('assignments')}
-          >
-            과제
-            {assignments.filter(a => a.isNew).length > 0 && (
-              <span className="new-badge">{assignments.filter(a => a.isNew).length}</span>
-            )}
-          </button>
+          
         </div>
 
         <div className="tab-content">

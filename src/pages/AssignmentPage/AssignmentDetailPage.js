@@ -42,7 +42,31 @@ const AssignmentDetailPage = () => {
         const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignmentId);
         const problemsData = problemsResponse.data || problemsResponse;
         console.log('problemsData:', problemsData);
-        setProblems(problemsData.problems || problemsData);
+        
+        // 각 문제의 상세 정보를 가져와서 시간 제한과 메모리 제한 정보 추가
+        const problemsWithDetails = await Promise.all(
+          (problemsData.problems || problemsData).map(async (problem) => {
+            try {
+              console.log(`🔍 문제 ${problem.id} 상세 정보 조회 시작:`, problem);
+              const problemDetail = await APIService.getProblemInfo(problem.id);
+              console.log(`🔍 문제 ${problem.id} 상세 정보 조회 결과:`, problemDetail);
+              
+              const enhancedProblem = {
+                ...problem,
+                timeLimit: problemDetail.timeLimit,
+                memoryLimit: problemDetail.memoryLimit
+              };
+              
+              console.log(`🔍 문제 ${problem.id} 최종 데이터:`, enhancedProblem);
+              return enhancedProblem;
+            } catch (error) {
+              console.error(`문제 ${problem.id} 상세 정보 조회 실패:`, error);
+              return problem; // 상세 정보 조회 실패 시 원본 문제 정보 사용
+            }
+          })
+        );
+        
+        setProblems(problemsWithDetails);
         
         // 과제 제출 통계 조회
         try {
