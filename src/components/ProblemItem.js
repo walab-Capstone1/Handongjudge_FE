@@ -39,6 +39,22 @@ const ProblemItem = ({ problem, assignmentId, submissionStats }) => {
             <span className="problem-level">{problem.level || "Level 1"}</span>
             <span className="problem-completed">{getSubmissionStatus()}</span>
           </div>
+          
+          {/* Problem Limits */}
+          {(problem.timeLimit || problem.memoryLimit) && (
+            <div className="problem-limits">
+              {problem.timeLimit && (
+                <span className="limit-badge time-limit">
+                  시간 제한: {problem.timeLimit}초
+                </span>
+              )}
+              {problem.memoryLimit && (
+                <span className="limit-badge memory-limit">
+                  메모리 제한: {problem.memoryLimit}MB
+                </span>
+              )}
+            </div>
+          )}
         </div>
         
         <div className="problem-icons">

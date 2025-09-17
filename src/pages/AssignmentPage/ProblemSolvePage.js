@@ -67,11 +67,21 @@ const ProblemSolvePage = () => {
         const sectionData = sectionInfoRes.data || sectionInfoRes;
         const assignmentData = assignmentInfoRes.data || assignmentInfoRes;
         
+        console.log('🔍 문제 데이터 상세:', problemData);
+        console.log('🔍 timeLimit 값:', problemData.timeLimit);
+        console.log('🔍 memoryLimit 값:', problemData.memoryLimit);
+        
         console.log('🔍 섹션 데이터 상세:', sectionData);
         console.log('🔍 과제 데이터 상세:', assignmentData);
         console.log('🔍 과제 마감일 확인:', assignmentData.dueDate);
         
-        setCurrentProblem(problemData);
+        // 임시로 제한사항 데이터 추가 (테스트용)
+        const problemWithLimits = {
+          ...problemData,
+          timeLimit: problemData.timeLimit || 2.0,
+          memoryLimit: problemData.memoryLimit || 512
+        };
+        setCurrentProblem(problemWithLimits);
         setSectionInfo(sectionData);
         setAssignmentInfo(assignmentData);
       } catch (error) {
@@ -89,24 +99,7 @@ const ProblemSolvePage = () => {
   }, [problemId, sectionId, assignmentId]);
 
   // Helper functions
-  const isAssignmentOverdue = () => {
-    const deadline = assignmentInfo.dueDate || assignmentInfo.endDate;
-    if (!deadline) {
-      console.log('🔍 마감일 정보 없음');
-      return false;
-    }
-    const now = new Date();
-    const dueDate = new Date(deadline);
-    const isOverdue = now > dueDate;
-    console.log('🔍 마감일 체크:', {
-      현재시간: now.toISOString(),
-      마감일: dueDate.toISOString(),
-      마감여부: isOverdue,
-      사용된필드: assignmentInfo.dueDate ? 'dueDate' : 'endDate',
-      과제정보: assignmentInfo
-    });
-    return isOverdue;
-  };
+  // 마감일 체크 함수 제거 - 항상 제출 가능하도록 변경
 
   const getTestcaseResultText = (result) => {
     const resultTexts = {
@@ -510,7 +503,26 @@ const ProblemSolvePage = () => {
         >
           {/* Description Area */}
           <div className="description-area">
-            <div className="description-header">문제 설명</div>
+            <div className="description-header">
+              <span>문제 설명</span>
+              
+              {/* Problem Limits in Header */}
+              {(currentProblem.timeLimit || currentProblem.memoryLimit) && (
+                <div className="problem-limits-header">
+                  {currentProblem.timeLimit && (
+                    <span className="limit-badge-header time-limit">
+                      시간 제한: {currentProblem.timeLimit}초
+                    </span>
+                  )}
+                  {currentProblem.memoryLimit && (
+                    <span className="limit-badge-header memory-limit">
+                      메모리 제한: {currentProblem.memoryLimit}MB
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+            
             <div 
               className="description-content"
               dangerouslySetInnerHTML={{ __html: currentProblem.description || problemDescription }}
@@ -523,7 +535,7 @@ const ProblemSolvePage = () => {
                   <span className="due-date-icon">⏰</span>
                   과제 마감일
                 </div>
-                <div className={`due-date-content ${isAssignmentOverdue() ? 'overdue' : ''}`}>
+                <div className="due-date-content">
                   {new Date(assignmentInfo.dueDate || assignmentInfo.endDate).toLocaleDateString('ko-KR', {
                     year: 'numeric',
                     month: 'long',
@@ -531,9 +543,6 @@ const ProblemSolvePage = () => {
                     hour: '2-digit',
                     minute: '2-digit'
                   })}
-                  {isAssignmentOverdue() && (
-                    <span className="overdue-warning"> (마감일이 지났습니다)</span>
-                  )}
                 </div>
               </div>
             )}
@@ -553,6 +562,7 @@ const ProblemSolvePage = () => {
             <div className="editor-wrapper">
               <div className="editor-header">
                 <span>solution.{language === "javascript" ? "js" : language}</span>
+
                 <div className="submit-buttons">
                   <button 
                     className="submit-button-inline"
@@ -569,6 +579,7 @@ const ProblemSolvePage = () => {
                     {isSubmitting ? "제출 중..." : isAssignmentOverdue() ? "과제 마감" : "실행 결과 보기"}
                   </button>
                 </div>
+
               </div>
               <div className="editor-scroll-area">
                 <CodeMirror

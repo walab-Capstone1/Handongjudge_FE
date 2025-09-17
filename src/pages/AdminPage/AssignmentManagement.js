@@ -344,10 +344,10 @@ const AssignmentManagement = () => {
       
       // 파일 타입 검증
       if (name === 'descriptionFile') {
-        const allowedTypes = ['.md', '.txt'];
+        const allowedTypes = ['.md', '.txt', '.tex'];
         const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
         if (!allowedTypes.includes(fileExtension)) {
-          alert('문제 설명 파일은 .md 또는 .txt 형식만 업로드 가능합니다.');
+          alert('문제 설명 파일은 .md, .txt, .tex 형식만 업로드 가능합니다.');
           e.target.value = '';
           return;
         }
@@ -485,11 +485,6 @@ const AssignmentManagement = () => {
       return;
     }
     
-    if (!problemFormData.descriptionFile) {
-      alert('문제 설명 파일(.md)을 업로드해주세요.');
-      return;
-    }
-    
     if (!problemFormData.zipFile) {
       alert('문제 파일(.zip)을 업로드해주세요.');
       return;
@@ -579,10 +574,10 @@ const AssignmentManagement = () => {
   const handleBulkProblemFileChange = (index, field, file) => {
     // 파일 검증
     if (field === 'descriptionFile') {
-      const allowedTypes = ['.md', '.txt'];
+      const allowedTypes = ['.md', '.txt', '.tex'];
       const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
       if (!allowedTypes.includes(fileExtension)) {
-        alert('문제 설명 파일은 .md 또는 .txt 형식만 업로드 가능합니다.');
+        alert('문제 설명 파일은 .md, .txt, .tex 형식만 업로드 가능합니다.');
         return;
       }
     }
@@ -618,10 +613,6 @@ const AssignmentManagement = () => {
         alert(`${i + 1}번째 문제의 제목을 입력해주세요.`);
         return;
       }
-      if (!problem.descriptionFile) {
-        alert(`${i + 1}번째 문제의 설명 파일(.md)을 업로드해주세요.`);
-        return;
-      }
       if (!problem.zipFile) {
         alert(`${i + 1}번째 문제의 파일(.zip)을 업로드해주세요.`);
         return;
@@ -639,8 +630,14 @@ const AssignmentManagement = () => {
         
         const formData = new FormData();
         formData.append('title', problem.title);
-        formData.append('descriptionFile', problem.descriptionFile);
-        formData.append('zipFile', problem.zipFile);
+        
+        if (problem.descriptionFile) {
+          formData.append('descriptionFile', problem.descriptionFile);
+        }
+        
+        if (problem.zipFile) {
+          formData.append('zipFile', problem.zipFile);
+        }
 
         try {
           const response = await APIService.createProblem(formData);
@@ -1086,14 +1083,34 @@ const AssignmentManagement = () => {
                         <div className="problem-info">
                           <h4 className="problem-title">{problem.title}</h4>
                           <p className="problem-description">{problem.description}</p>
-                          {problem.difficulty && (
-                            <span 
-                              className="problem-difficulty"
-                              style={{ color: getDifficultyColor(problem.difficulty) }}
-                            >
-                              [{problem.difficulty}]
-                            </span>
-                          )}
+                          
+                          <div className="problem-meta-info">
+                            {problem.difficulty && (
+                              <span 
+                                className="problem-difficulty"
+                                style={{ color: getDifficultyColor(problem.difficulty) }}
+                              >
+                                [{problem.difficulty}]
+                              </span>
+                            )}
+                            
+                            {/* Problem Limits */}
+                            {(problem.timeLimit || problem.memoryLimit) && (
+                              <div className="problem-limits-admin">
+                                {problem.timeLimit && (
+                                  <span className="limit-badge-admin time-limit">
+                                    시간 제한: {problem.timeLimit}초
+                                  </span>
+                                )}
+                                {problem.memoryLimit && (
+                                  <span className="limit-badge-admin memory-limit">
+                                    메모리 제한: {problem.memoryLimit}MB
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          
                           <span className="problem-created">
                             생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
                           </span>
@@ -1151,18 +1168,26 @@ const AssignmentManagement = () => {
                   />
                 </div>
 
+                <div className="info-box">
+                  <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
+                  <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
+                  <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
+                  <p>3. 파일이 없으면 빈 설명으로 생성됩니다.</p>
+                </div>
+
                 <div className="form-group">
-                  <label htmlFor="descriptionFile">문제 설명 파일 (.md) <span className="optional">(선택사항)</span></label>
+                  <label htmlFor="descriptionFile">문제 설명 파일 <span className="optional">(선택사항)</span></label>
                   <input
                     type="file"
                     id="descriptionFile"
                     name="descriptionFile"
                     onChange={handleProblemInputChange}
-                    accept=".md,.txt"
+                    accept=".md,.txt,.tex"
                     className="file-input"
                   />
                   <small className="file-help">
-                    마크다운 형식의 문제 설명 파일을 업로드하세요. 
+                    마크다운(.md), 텍스트(.txt), LaTeX(.tex) 형식의 문제 설명 파일을 업로드하세요.
+                    <br/>이 파일이 있으면 ZIP 파일 내부 설명보다 우선 적용됩니다.
                     {problemFormData.descriptionFile && (
                       <span className="file-selected"> ✓ 선택됨: {problemFormData.descriptionFile.name}</span>
                     )}
@@ -1182,6 +1207,7 @@ const AssignmentManagement = () => {
                   />
                   <small className="file-help">
                     테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
+                    <br/>ZIP 내부에 problem_statement 폴더가 있으면 자동으로 설명을 추출합니다.
                     {problemFormData.zipFile && (
                       <span className="file-selected"> ✓ 선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
                     )}
@@ -1236,19 +1262,26 @@ const AssignmentManagement = () => {
                   />
                 </div>
 
+                <div className="info-box">
+                  <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
+                  <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
+                  <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
+                  <p>3. 파일이 없으면 빈 설명으로 생성됩니다.</p>
+                </div>
+
                 <div className="form-group">
-                  <label htmlFor="standaloneDescriptionFile">문제 설명 파일 (.md) *</label>
+                  <label htmlFor="standaloneDescriptionFile">문제 설명 파일 <span className="optional">(선택사항)</span></label>
                   <input
                     type="file"
                     id="standaloneDescriptionFile"
                     name="descriptionFile"
                     onChange={handleProblemInputChange}
-                    accept=".md,.txt"
+                    accept=".md,.txt,.tex"
                     className="file-input"
-                    required
                   />
                   <small className="file-help">
-                    마크다운 형식의 문제 설명 파일을 업로드하세요. (필수)
+                    마크다운(.md), 텍스트(.txt), LaTeX(.tex) 형식의 문제 설명 파일을 업로드하세요.
+                    <br/>이 파일이 있으면 ZIP 파일 내부 설명보다 우선 적용됩니다.
                     {problemFormData.descriptionFile && (
                       <span className="file-selected"> ✓ 선택됨: {problemFormData.descriptionFile.name}</span>
                     )}
@@ -1268,6 +1301,7 @@ const AssignmentManagement = () => {
                   />
                   <small className="file-help">
                     테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
+                    <br/>ZIP 내부에 problem_statement 폴더가 있으면 자동으로 설명을 추출합니다.
                     {problemFormData.zipFile && (
                       <span className="file-selected"> ✓ 선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
                     )}
@@ -1317,9 +1351,14 @@ const AssignmentManagement = () => {
               
               <form onSubmit={handleBulkProblemSubmit} className="bulk-problem-form">
                 <div className="info-box">
+                  <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
+                  <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
+                  <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
+                  <p>3. 파일이 없으면 빈 설명으로 생성됩니다.</p>
+                  <br/>
                   <p><strong>💡 안내:</strong></p>
                   <p>• 여러 문제를 한번에 생성할 수 있습니다</p>
-                  <p>• 모든 파일(MD, ZIP)이 필수입니다</p>
+                  <p>• ZIP 파일은 필수, 설명 파일은 선택사항입니다</p>
                   <p>• 생성 후 원하는 과제에서 "문제 추가" 버튼으로 추가할 수 있습니다</p>
                 </div>
 
@@ -1354,14 +1393,16 @@ const AssignmentManagement = () => {
 
                         <div className="form-row">
                           <div className="form-group">
-                            <label>문제 설명 파일 (.md) *</label>
+                            <label>문제 설명 파일 <span className="optional">(선택사항)</span></label>
                             <input
                               type="file"
                               onChange={(e) => handleBulkProblemFileChange(index, 'descriptionFile', e.target.files[0])}
-                              accept=".md,.txt"
+                              accept=".md,.txt,.tex"
                               className="file-input"
-                              required
                             />
+                            <small className="file-help">
+                              .md, .txt, .tex 형식 지원. ZIP 파일보다 우선 적용됩니다.
+                            </small>
                             {problem.descriptionFile && (
                               <small className="file-selected">
                                 ✓ {problem.descriptionFile.name}
@@ -1378,6 +1419,9 @@ const AssignmentManagement = () => {
                               className="file-input"
                               required
                             />
+                            <small className="file-help">
+                              테스트 케이스 포함. problem_statement 폴더가 있으면 설명 자동 추출.
+                            </small>
                             {problem.zipFile && (
                               <small className="file-selected">
                                 ✓ {problem.zipFile.name} ({(problem.zipFile.size / 1024 / 1024).toFixed(2)}MB)

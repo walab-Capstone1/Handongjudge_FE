@@ -132,9 +132,7 @@ const MainPage = () => {
     <MainLayout>
       <div className="main-page">
         <div className="main-header">
-          <Link to="/mypage/info" className="profile-avatar">
-            <div className="avatar-icon"></div>
-          </Link>
+          
         </div>
         
         <div className="content-section">
