@@ -166,9 +166,6 @@ class APIService {
 
   // 코드 제출 API
   async submitCode(sectionId, problemId, code, language) {
-    // 먼저 과제 정보를 조회하여 sectionId를 얻습니다
-    
-    console.log('SubmitCode sectionId', sectionId);
     return await this.request('/submissions/submitAndGetResult', {
       method: 'POST',
       headers: {
@@ -185,7 +182,6 @@ class APIService {
 
   // 코드 제출 및 아웃풋 받기 API
   async submitCodeAndGetOutput(sectionId, problemId, code, language) {
-    console.log('SubmitCodeAndGetOutput sectionId', sectionId);
     return await this.request('/submissions/submitAndGetResult/output', {
       method: 'POST',
       headers: {
@@ -195,10 +191,11 @@ class APIService {
         problemId: parseInt(problemId),
         sectionId: parseInt(sectionId),
         language,
-        codeString : code
+        codeString: code
       }),
     });
   }
+
 
   // 제출 결과 조회 API (현재 백엔드에서 즉시 결과를 반환하므로 사용하지 않음)
   // async getSubmissionResult(submissionId) {
