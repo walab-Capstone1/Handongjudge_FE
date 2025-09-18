@@ -544,13 +544,6 @@ const ProblemSolvePage = () => {
                     </div>
                   )}
                   <button 
-                    className="submit-button-inline"
-                    onClick={handleSubmit} 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "제출 중..." : "제출하기"}
-                  </button>
-                  <button 
                     className="submit-button-inline submit-with-output"
                     onClick={handleSubmitWithOutput} 
                     disabled={isSubmitting}
@@ -558,6 +551,14 @@ const ProblemSolvePage = () => {
                   >
                     {isSubmitting ? "제출 중..." : "테스트하기"}
                   </button>
+                  <button 
+                    className="submit-button-inline"
+                    onClick={handleSubmit} 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "제출 중..." : "제출하기"}
+                  </button>
+                  
                 </div>
 
               </div>

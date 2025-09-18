@@ -9,13 +9,73 @@
   margin: 0 auto;
 }
 
+/* 네비게이션 바 - NoticeDetailPage와 동일한 스타일 */
+.assignment-navigation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+  color: #495057;
+}
+
+.back-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.breadcrumb-item {
+  color: #6c757d;
+}
+
+.breadcrumb-item.current {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.breadcrumb-separator {
+  color: #adb5bd;
+}
+
+/* AssignmentHeader 컴포넌트 스타일 */
 .assignment-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #eee;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
 }
 
 .assignment-detail-info {
@@ -204,10 +264,14 @@
     padding: 1rem;
   }
   
-  .assignment-detail-header {
+  .assignment-navigation-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .breadcrumb {
+    align-self: flex-end;
   }
   
   .assignment-detail-info {
