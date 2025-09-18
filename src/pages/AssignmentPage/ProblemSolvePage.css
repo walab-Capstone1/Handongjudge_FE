@@ -6,6 +6,11 @@
   scrollbar-color: #555 #1e1e1e;
 }
 
+.problem-solve-page.light * {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f8f9fa;
+}
+
 .problem-solve-page *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -21,11 +26,16 @@
 }
 
 .problem-solve-page.light *::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f8f9fa;
 }
 
 .problem-solve-page.light *::-webkit-scrollbar-thumb {
-  background-color: #bbb;
+  background-color: #d1d5db;
+  border-radius: 10px;
+}
+
+.problem-solve-page.light *::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
 }
 
 /* Gutter Styles */
@@ -37,14 +47,33 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  padding: 8px 0;
+  background-color: #2d3748;
+}
+
+.gutter.gutter-horizontal {
+  padding: 0 8px;
 }
 
 .gutter:hover {
-  background-color: #1aad6b !important;
+  background-color: #718096 !important;
+}
+
+.gutter:active {
+  background-color: #718096 !important;
+}
+
+/* Light mode gutter styles - completely separate */
+.problem-solve-page.light .gutter {
+  background-color: #cbd5e0 !important;
 }
 
 .problem-solve-page.light .gutter:hover {
-  background-color: #1f6feb !important;
+  background-color: #9aa0a6 !important;
+}
+
+.problem-solve-page.light .gutter:active {
+  background-color: #9aa0a6 !important;
 }
 
 .gutter::after {
@@ -69,13 +98,13 @@
 }
 
 .gutter.gutter-horizontal::after {
-  width: 2px;
-  height: 20px;
+  width: 4px;
+  height: 40px;
 }
 
 .gutter.gutter-vertical::after {
-  width: 20px;
-  height: 2px;
+  width: 40px;
+  height: 4px;
 }
 
 .gutter.gutter-horizontal {
@@ -100,13 +129,6 @@
   border-bottom: 1px solid #e1e4e8;
 }
 
-.gutter:active {
-  background-color: #1aad6b !important;
-}
-
-.problem-solve-page.light .gutter:active {
-  background-color: #1f6feb !important;
-}
 
 /* Main Container */
 .problem-solve-page {
@@ -155,6 +177,14 @@
 
 .breadcrumb-link:hover {
   text-decoration: underline;
+}
+
+.breadcrumb strong {
+  color: #EFF5F2;
+}
+
+.problem-solve-page.light .breadcrumb strong {
+  color: #000000;
 }
 
 .controls {
@@ -233,6 +263,8 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .problem-solve-page.light .description-header {
@@ -301,7 +333,7 @@
 .description-content h5,
 .description-content h6 {
   margin: 16px 0 8px 0;
-  color: #58a6ff;
+  color: #EFF5F2 !important;
   font-weight: bold;
 }
 
@@ -311,7 +343,7 @@
 .problem-solve-page.light .description-content h4,
 .problem-solve-page.light .description-content h5,
 .problem-solve-page.light .description-content h6 {
-  color: #0969da;
+  color: #000000 !important;
 }
 
 .description-content p {
@@ -568,6 +600,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.editor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .problem-solve-page.light .editor-header {
@@ -589,9 +629,12 @@
 /* Result Area */
 .result-area {
   padding: 0 0 8px 0;
-  overflow: auto;
+  overflow: hidden;
   background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
   box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .problem-solve-page.light .result-area {
@@ -601,6 +644,16 @@
 
 .result-area > div {
   padding: 0 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 채점결과 고정 영역 */
+.result-summary,
+.error-message {
+  flex-shrink: 0;
 }
 
 .result-header {
@@ -612,6 +665,10 @@
   background: linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(88, 166, 255, 0.05) 100%);
   border-bottom: 1px solid #30363d;
   border-radius: 6px 6px 0 0;
+  flex-shrink: 0;
+  flex-grow: 0;
+  min-height: auto;
+  max-height: 48px;
 }
 
 .problem-solve-page.light .result-header {
@@ -663,6 +720,34 @@
 
 
 
+/* Inline Due Date Info */
+.due-date-info-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.problem-solve-page.light .due-date-info-inline {
+  color: #d63384;
+  background: rgba(220, 53, 132, 0.1);
+  border: 1px solid rgba(220, 53, 132, 0.3);
+}
+
+.due-date-icon {
+  font-size: 12px;
+}
+
+.due-date-text {
+  font-weight: 500;
+
+}
+
 /* Inline Submit Button */
 .submit-button-inline {
   padding: 6px 12px;
@@ -685,6 +770,19 @@
   cursor: not-allowed;
   background-color: #6c757d;
   color: #ffffff;
+}
+
+/* Output Button */
+.submit-button-inline.output-button {
+  background-color: #28a745;
+}
+
+.submit-button-inline.output-button:hover {
+  background-color: #218838;
+}
+
+.submit-button-inline.output-button:disabled {
+  background-color: #6c757d;
 }
 
 /* Loading Container */
@@ -711,4 +809,345 @@
 
 .result-loading .loading-spinner {
   margin-right: 10px;
+}
+
+/* Output Section */
+.output-section {
+  margin-top: 16px;
+  border-top: 1px solid #30363d;
+  padding-top: 16px;
+}
+
+.problem-solve-page.light .output-section {
+  border-top: 1px solid #e1e4e8;
+}
+
+.output-header {
+  margin-bottom: 8px;
+  color: #58a6ff;
+  font-size: 14px;
+}
+
+.problem-solve-page.light .output-header {
+  color: #0969da;
+}
+
+.output-content {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.problem-solve-page.light .output-content {
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+}
+
+.output-content pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #e1e4e8;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.problem-solve-page.light .output-content pre {
+  color: #24292e;
+}
+
+/* Testcases Section */
+.testcases-section {
+  margin-top: 16px;
+  border-top: 1px solid #30363d;
+  padding-top: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.problem-solve-page.light .testcases-section {
+  border-top: 1px solid #e1e4e8;
+}
+
+.testcases-header {
+  margin-bottom: 12px;
+  color: #58a6ff;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.problem-solve-page.light .testcases-header {
+  color: #0969da;
+}
+
+.testcases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Testcase Item */
+.testcase-item {
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  background-color: #0d1117;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.problem-solve-page.light .testcase-item {
+  border: 1px solid #e1e4e8;
+  background-color: #f6f8fa;
+}
+
+.testcase-item.correct {
+  border-left: 4px solid #28a745;
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.testcase-item.wrong-answer {
+  border-left: 4px solid #dc3545;
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.testcase-item.timelimit {
+  border-left: 4px solid #ffc107;
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.testcase-item.memory-limit {
+  border-left: 4px solid #fd7e14;
+  background-color: rgba(253, 126, 20, 0.1);
+}
+
+.testcase-item.run-error {
+  border-left: 4px solid #e83e8c;
+  background-color: rgba(232, 62, 140, 0.1);
+}
+
+.testcase-item.compiler-error {
+  border-left: 4px solid #6f42c1;
+  background-color: rgba(111, 66, 193, 0.1);
+}
+
+.testcase-item.not-run {
+  border-left: 4px solid #6c757d;
+  background-color: rgba(108, 117, 125, 0.1);
+}
+
+/* Testcase Header */
+.testcase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.testcase-number {
+  color: #e1e4e8;
+  font-size: 14px;
+}
+
+.problem-solve-page.light .testcase-number {
+  color: #24292e;
+}
+
+.testcase-result {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.testcase-result.correct {
+  background-color: #28a745;
+  color: white;
+}
+
+.testcase-result.wrong-answer {
+  background-color: #dc3545;
+  color: white;
+}
+
+.testcase-result.timelimit {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.testcase-result.memory-limit {
+  background-color: #fd7e14;
+  color: white;
+}
+
+.testcase-result.run-error {
+  background-color: #e83e8c;
+  color: white;
+}
+
+.testcase-result.compiler-error {
+  background-color: #6f42c1;
+  color: white;
+}
+
+.testcase-result.not-run {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Testcase Details */
+.testcase-details {
+  margin-top: 12px;
+}
+
+.testcase-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.stat-item {
+  color: #c9d1d9;
+}
+
+.problem-solve-page.light .stat-item {
+  color: #586069;
+}
+
+/* Input, Expected, Output, Error, Diff Sections */
+.testcase-input,
+.testcase-expected,
+.testcase-output,
+.testcase-error,
+.testcase-diff {
+  margin-top: 12px;
+}
+
+.input-label,
+.expected-label,
+.output-label,
+.error-label,
+.diff-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #58a6ff;
+}
+
+.problem-solve-page.light .input-label,
+.problem-solve-page.light .expected-label,
+.problem-solve-page.light .output-label,
+.problem-solve-page.light .error-label,
+.problem-solve-page.light .diff-label {
+  color: #0969da;
+}
+
+.input-label {
+  color: #7c3aed !important;
+}
+
+.problem-solve-page.light .input-label {
+  color: #7c3aed !important;
+}
+
+.expected-label {
+  color: #059669 !important;
+}
+
+.problem-solve-page.light .expected-label {
+  color: #059669 !important;
+}
+
+.error-label {
+  color: #ff6b6b !important;
+}
+
+.problem-solve-page.light .error-label {
+  color: #d63384 !important;
+}
+
+.diff-label {
+  color: #ffc107 !important;
+}
+
+.problem-solve-page.light .diff-label {
+  color: #f57c00 !important;
+}
+
+.testcase-input .input-content,
+.testcase-expected .expected-content,
+.testcase-output .output-content,
+.testcase-error .error-content,
+.testcase-diff .diff-content {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.problem-solve-page.light .testcase-input .input-content,
+.problem-solve-page.light .testcase-expected .expected-content,
+.problem-solve-page.light .testcase-output .output-content,
+.problem-solve-page.light .testcase-error .error-content,
+.problem-solve-page.light .testcase-diff .diff-content {
+  background-color: #ffffff;
+  border: 1px solid #e1e4e8;
+}
+
+.testcase-input .input-content pre,
+.testcase-expected .expected-content pre,
+.testcase-output .output-content pre,
+.testcase-error .error-content pre,
+.testcase-diff .diff-content pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #e1e4e8;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.problem-solve-page.light .testcase-input .input-content pre,
+.problem-solve-page.light .testcase-expected .expected-content pre,
+.problem-solve-page.light .testcase-output .output-content pre,
+.problem-solve-page.light .testcase-error .error-content pre,
+.problem-solve-page.light .testcase-diff .diff-content pre {
+  color: #24292e;
+}
+
+/* Judging Summary */
+.judging-summary {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: rgba(88, 166, 255, 0.1);
+  border-radius: 6px;
+  border-left: 4px solid #58a6ff;
+  font-size: 14px;
+  color: #e1e4e8;
+}
+
+.problem-solve-page.light .judging-summary {
+  background-color: rgba(9, 105, 218, 0.1);
+  border-left-color: #0969da;
+  color: #24292e;
 }

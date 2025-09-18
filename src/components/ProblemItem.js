@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./ProblemItem.css";
 
-const ProblemItem = ({ problem, assignmentId, submissionStats }) => {
+const ProblemItem = ({ problem, assignmentId, submissionStats, userSubmissionStatus }) => {
   const location = useLocation();
 
   // URL에서 sectionId 추출
@@ -26,6 +26,21 @@ const ProblemItem = ({ problem, assignmentId, submissionStats }) => {
     
     return `0/${submissionStats.totalStudents || 0}명 제출`;
   };
+
+  // 사용자의 이 문제 제출 상태 확인
+  const getUserSubmissionStatus = () => {
+    if (!userSubmissionStatus || !userSubmissionStatus.problemStatuses) {
+      return null;
+    }
+    
+    const problemStatus = userSubmissionStatus.problemStatuses.find(
+      status => status.problemId === problem.id
+    );
+    
+    return problemStatus;
+  };
+
+  const userStatus = getUserSubmissionStatus();
 
   return (
     <Link 
@@ -58,7 +73,11 @@ const ProblemItem = ({ problem, assignmentId, submissionStats }) => {
         </div>
         
         <div className="problem-icons">
-          <div className="status-icon solved"></div>
+          {userStatus && (
+            <div className={`submission-status ${userStatus.hasCorrectSubmission ? 'correct' : userStatus.hasSubmitted ? 'submitted' : 'not-submitted'}`}>
+              {userStatus.hasCorrectSubmission ? '정답' : userStatus.hasSubmitted ? '제출함' : '미제출'}
+            </div>
+          )}
           
           {problem.tags && problem.tags.map((tag, index) => (
             <div key={index} className="tag-icon"></div>

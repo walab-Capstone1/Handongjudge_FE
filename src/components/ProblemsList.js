@@ -6,9 +6,10 @@ import ProblemItem from './ProblemItem';
  * @param {Array} problems - 문제 목록
  * @param {string} assignmentId - 과제 ID
  * @param {Object} submissionStats - 제출 통계
+ * @param {Object} userSubmissionStatus - 사용자별 제출 상태
  * @returns {JSX.Element} 문제 목록 JSX
  */
-const ProblemsList = ({ problems, assignmentId, submissionStats }) => {
+const ProblemsList = ({ problems, assignmentId, submissionStats, userSubmissionStatus }) => {
   if (problems.length === 0) {
     return (
       <div className="no-problems">
@@ -26,6 +27,7 @@ const ProblemsList = ({ problems, assignmentId, submissionStats }) => {
           problem={problem} 
           assignmentId={assignmentId}
           submissionStats={submissionStats}
+          userSubmissionStatus={userSubmissionStatus}
         />
       ))}
     </div>

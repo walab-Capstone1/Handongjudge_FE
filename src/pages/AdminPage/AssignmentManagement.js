@@ -11,6 +11,7 @@ const AssignmentManagement = () => {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showProblemModal, setShowProblemModal] = useState(false);
   const [showCreateProblemModal, setShowCreateProblemModal] = useState(false);
   const [showStandaloneProblemModal, setShowStandaloneProblemModal] = useState(false);
@@ -263,19 +264,94 @@ const AssignmentManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // 백엔드 API 호출 (구현 예정)
-      console.log('과제 생성 요청:', formData);
-      alert('과제가 성공적으로 생성되었습니다. (백엔드 API 구현 필요)');
+      // sectionId를 제외한 데이터만 전송
+      const { sectionId, ...assignmentData } = formData;
+      
+      // 날짜 형식을 백엔드가 기대하는 형식으로 변환
+      if (assignmentData.startDate) {
+        assignmentData.startDate = new Date(assignmentData.startDate).toISOString();
+      }
+      if (assignmentData.endDate) {
+        assignmentData.endDate = new Date(assignmentData.endDate).toISOString();
+      }
+      
+      console.log('과제 생성 요청:', {
+        sectionId: parseInt(sectionId),
+        assignmentData
+      });
+      
+      const response = await APIService.createAssignment(
+        parseInt(sectionId),
+        assignmentData
+      );
+      
+      console.log('과제 생성 응답:', response);
+      alert('과제가 성공적으로 생성되었습니다.');
       handleCloseModal();
       fetchAssignments(); // 목록 새로고침
     } catch (error) {
+      console.error('과제 생성 실패:', error);
       alert('과제 생성에 실패했습니다.');
     }
   };
 
   const handleEdit = (assignment) => {
     console.log('과제 수정:', assignment);
-    alert('과제 수정 기능은 구현 예정입니다.');
+    setSelectedAssignment(assignment);
+    
+    // 기존 데이터로 폼 초기화
+    setFormData({
+      title: assignment.title || '',
+      description: assignment.description || '',
+      sectionId: assignment.sectionId || '',
+      startDate: assignment.startDate ? new Date(assignment.startDate).toISOString().slice(0, 16) : '',
+      endDate: assignment.endDate ? new Date(assignment.endDate).toISOString().slice(0, 16) : '',
+      assignmentNumber: assignment.assignmentNumber || ''
+    });
+    
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setSelectedAssignment(null);
+    resetForm();
+  };
+
+  const handleUpdateAssignment = async (e) => {
+    e.preventDefault();
+    try {
+      // sectionId를 제외한 데이터만 전송
+      const { sectionId, ...assignmentData } = formData;
+      
+      // 날짜 형식을 백엔드가 기대하는 형식으로 변환
+      if (assignmentData.startDate) {
+        assignmentData.startDate = new Date(assignmentData.startDate).toISOString();
+      }
+      if (assignmentData.endDate) {
+        assignmentData.endDate = new Date(assignmentData.endDate).toISOString();
+      }
+      
+      console.log('과제 수정 요청:', {
+        sectionId: selectedAssignment.sectionId,
+        assignmentId: selectedAssignment.id,
+        assignmentData
+      });
+      
+      const response = await APIService.updateAssignment(
+        selectedAssignment.sectionId,
+        selectedAssignment.id,
+        assignmentData
+      );
+      
+      console.log('과제 수정 응답:', response);
+      alert('과제가 성공적으로 수정되었습니다.');
+      handleCloseEditModal();
+      fetchAssignments(); // 목록 새로고침
+    } catch (error) {
+      console.error('과제 수정 실패:', error);
+      alert('과제 수정에 실패했습니다.');
+    }
   };
 
   const handleDelete = async (assignmentId) => {
@@ -709,7 +785,7 @@ const AssignmentManagement = () => {
       {sectionId && currentSection && (
         <SectionNavigation 
           sectionId={sectionId}
-          sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
+          sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber || currentSection.sectionId}분반`}
         />
       )}
       
@@ -980,7 +1056,7 @@ const AssignmentManagement = () => {
                     <option value="">분반을 선택하세요</option>
                     {sections.map((section) => (
                       <option key={section.sectionId} value={section.sectionId}>
-                        {section.courseTitle} (분반 {section.sectionId})
+                        {section.courseTitle} (분반 {section.sectionNumber || section.sectionId})
                       </option>
                     ))}
                   </select>
@@ -1035,6 +1111,122 @@ const AssignmentManagement = () => {
                     className="btn-primary"
                   >
                     과제 생성
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* 과제 수정 모달 */}
+        {showEditModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2>과제 수정</h2>
+                <button 
+                  className="modal-close"
+                  onClick={handleCloseEditModal}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <form onSubmit={handleUpdateAssignment} className="assignment-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="edit-title">과제명 *</label>
+                    <input
+                      type="text"
+                      id="edit-title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      placeholder="과제명을 입력하세요"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="edit-assignmentNumber">과제 번호</label>
+                    <input
+                      type="text"
+                      id="edit-assignmentNumber"
+                      name="assignmentNumber"
+                      value={formData.assignmentNumber}
+                      onChange={handleInputChange}
+                      placeholder="예: HW1, Assignment1"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="edit-sectionId">분반 선택 *</label>
+                  <select
+                    id="edit-sectionId"
+                    name="sectionId"
+                    value={formData.sectionId}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">분반을 선택하세요</option>
+                    {sections.map((section) => (
+                      <option key={section.sectionId} value={section.sectionId}>
+                        {section.courseTitle} (분반 {section.sectionNumber || section.sectionId})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="edit-description">과제 설명</label>
+                  <textarea
+                    id="edit-description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="과제에 대한 상세 설명을 입력하세요"
+                    rows="4"
+                  />
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="edit-startDate">시작일</label>
+                    <input
+                      type="datetime-local"
+                      id="edit-startDate"
+                      name="startDate"
+                      value={formData.startDate}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="edit-endDate">마감일</label>
+                    <input
+                      type="datetime-local"
+                      id="edit-endDate"
+                      name="endDate"
+                      value={formData.endDate}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={handleCloseEditModal}
+                  >
+                    취소
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-primary"
+                  >
+                    과제 수정
                   </button>
                 </div>
               </form>

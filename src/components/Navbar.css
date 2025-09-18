@@ -16,7 +16,7 @@
   box-sizing: border-box;
 }
 
-.navbar::after {
+.navbar-container::after {
   content: '';
   position: absolute;
   bottom: 0;
