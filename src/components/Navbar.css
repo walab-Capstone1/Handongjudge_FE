@@ -1,15 +1,22 @@
 .navbar {
+  background-color: white;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(101, 88, 88, 0.05);
+}
+
+.navbar-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1rem 1rem 0.5rem; /* 왼쪽 살짝 패딩, 오른쪽 충분한 패딩 */
-  background-color: white;
-  width: 100%;
+  padding: 1rem 2rem;
+  max-width: 1250px;
+  margin: 0 auto;
   position: relative;
   box-sizing: border-box;
 }
 
-.navbar::after {
+.navbar-container::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -128,24 +135,17 @@
   box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
 }
 
-/* 큰 화면에서 최대 너비 제한 */
-@media (min-width: 1600px) {
-  .navbar {
-    margin: 0 0 0 10px; /* 왼쪽 정렬, HandongJudge가 완전히 왼쪽 끝에 */
-  }
-}
-
 /* 중간 화면 대응 */
 @media (max-width: 1200px) {
-  .navbar {
-    padding: 1rem 1rem 1rem 0.5rem; /* 왼쪽 살짝 패딩 유지 */
+  .navbar-container {
+    padding: 1rem 1.5rem;
   }
 }
 
 /* 작은 화면 대응 */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 1rem 1rem 1rem 0.5rem; /* 모바일에서도 왼쪽 살짝 패딩 */
+  .navbar-container {
+    padding: 1rem;
     flex-direction: column;
     gap: 1rem;
   }

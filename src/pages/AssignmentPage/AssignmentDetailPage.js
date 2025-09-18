@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import AssignmentHeader from "../../components/AssignmentHeader";
@@ -15,6 +15,7 @@ import "./AssignmentDetailPage.css";
 const AssignmentDetailPage = () => {  
   const { assignmentId, sectionId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   
   const [assignmentInfo, setAssignmentInfo] = useState(null);
   const [problems, setProblems] = useState([]);
@@ -22,6 +23,7 @@ const AssignmentDetailPage = () => {
   const [error, setError] = useState(null);
   const [submissionStats, setSubmissionStats] = useState(null);
   const [userSubmissionStatus, setUserSubmissionStatus] = useState(null);
+  const [sectionInfo, setSectionInfo] = useState(null);
 
   useEffect(() => {
     const fetchAssignmentData = async () => {
@@ -32,17 +34,48 @@ const AssignmentDetailPage = () => {
         console.log('assignmentId:', assignmentId);
         console.log('sectionId:', sectionId);
         
-        // 과제 정보 조회
-        const assignmentResponse = await APIService.getAssignmentInfo(sectionId, assignmentId);
+        // 병렬로 과제 정보와 섹션 정보를 가져옴
+        const [assignmentResponse, sectionResponse] = await Promise.all([
+          APIService.getAssignmentInfo(sectionId, assignmentId),
+          APIService.getSectionInfo(sectionId)
+        ]);
+        
         const assignmentData = assignmentResponse.data || assignmentResponse;
+        const sectionData = sectionResponse.data || sectionResponse;
         console.log('assignmentData:', assignmentData);
+        console.log('sectionData:', sectionData);
         setAssignmentInfo(assignmentData);
+        setSectionInfo(sectionData);
 
         // 과제 문제 목록 조회
         const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignmentId);
         const problemsData = problemsResponse.data || problemsResponse;
         console.log('problemsData:', problemsData);
-        setProblems(problemsData.problems || problemsData);
+        
+        // 각 문제의 상세 정보를 가져와서 시간 제한과 메모리 제한 정보 추가
+        const problemsWithDetails = await Promise.all(
+          (problemsData.problems || problemsData).map(async (problem) => {
+            try {
+              console.log(`🔍 문제 ${problem.id} 상세 정보 조회 시작:`, problem);
+              const problemDetail = await APIService.getProblemInfo(problem.id);
+              console.log(`🔍 문제 ${problem.id} 상세 정보 조회 결과:`, problemDetail);
+              
+              const enhancedProblem = {
+                ...problem,
+                timeLimit: problemDetail.timeLimit,
+                memoryLimit: problemDetail.memoryLimit
+              };
+              
+              console.log(`🔍 문제 ${problem.id} 최종 데이터:`, enhancedProblem);
+              return enhancedProblem;
+            } catch (error) {
+              console.error(`문제 ${problem.id} 상세 정보 조회 실패:`, error);
+              return problem; // 상세 정보 조회 실패 시 원본 문제 정보 사용
+            }
+          })
+        );
+        
+        setProblems(problemsWithDetails);
         
         // 과제 제출 통계 조회
         try {
@@ -86,6 +119,15 @@ const AssignmentDetailPage = () => {
     setAssignmentInfo(prev => prev);
   };
 
+  // 네비게이션 함수들
+  const handleBackToSection = () => {
+    navigate(`/sections/${sectionId}`);
+  };
+
+  const handleBackToAssignments = () => {
+    navigate(`/sections/${sectionId}?tab=assignments`);
+  };
+
   // 로딩 상태 처리
   if (loading) {
     return (
@@ -119,6 +161,24 @@ const AssignmentDetailPage = () => {
     <MainLayout>
       <div className="assignment-detail-page">
         <div className="content-area">
+          {/* 네비게이션 바 */}
+          <div className="assignment-navigation-header">
+            <button 
+              className="back-button"
+              onClick={handleBackToAssignments}
+            >
+              <span className="back-icon">←</span>
+              목록으로
+            </button>
+            <div className="breadcrumb">
+              <span className="breadcrumb-item">{sectionInfo?.courseTitle || "강의"}</span>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-item">{sectionInfo?.sectionNumber || sectionId}분반</span>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-item current">과제</span>
+            </div>
+          </div>
+
           {/* 과제 헤더 */}
           <AssignmentHeader 
             assignmentInfo={assignmentInfo} 

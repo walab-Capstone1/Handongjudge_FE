@@ -75,11 +75,8 @@ const ProblemSolvePage = () => {
         console.log('🔍 과제 데이터 상세:', assignmentData);
         console.log('🔍 과제 마감일 확인:', assignmentData.dueDate);
         
-        // 임시로 제한사항 데이터 추가 (테스트용)
         const problemWithLimits = {
-          ...problemData,
-          timeLimit: problemData.timeLimit || 2.0,
-          memoryLimit: problemData.memoryLimit || 512
+          ...problemData
         };
         setCurrentProblem(problemWithLimits);
         setSectionInfo(sectionData);
@@ -547,13 +544,6 @@ const ProblemSolvePage = () => {
                     </div>
                   )}
                   <button 
-                    className="submit-button-inline"
-                    onClick={handleSubmit} 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "제출 중..." : "제출하기"}
-                  </button>
-                  <button 
                     className="submit-button-inline submit-with-output"
                     onClick={handleSubmitWithOutput} 
                     disabled={isSubmitting}
@@ -561,6 +551,14 @@ const ProblemSolvePage = () => {
                   >
                     {isSubmitting ? "제출 중..." : "테스트하기"}
                   </button>
+                  <button 
+                    className="submit-button-inline"
+                    onClick={handleSubmit} 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "제출 중..." : "제출하기"}
+                  </button>
+                  
                 </div>
 
               </div>

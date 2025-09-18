@@ -23,24 +23,28 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <div className="nav-left">
-        <Link to="/main" className="logo-link">HandongJudge</Link>
-        <Link to="/main" className="nav-link">Lecture</Link>
-        <Link to="/mypage/info" className="nav-link">My Page</Link>
-        {isProfessor && (
-          <Link to="/admin" className="nav-link admin-link">관리 페이지</Link>
-        )}
-      </div>
+      <div className="navbar-container">
+        <div className="nav-left">
+          <Link to="/main" className="logo-link">HandongJudge</Link>
+          <Link to="/main" className="nav-link">강의</Link>
+          <Link to="/mypage/info" className="nav-link">마이페이지</Link>
+         
+        </div>
 
-      <div className="nav-right">
-        {isAuthenticated && (
-          <>
-            <span className="user-info">{user?.name || user?.email}</span>
-            <button onClick={handleLogout} className="logout-button">
-              로그아웃
-            </button>
-          </>
-        )}
+        <div className="nav-right">
+        {isProfessor && (
+            <Link to="/admin" className="nav-link admin-link">관리 페이지</Link>
+          )}
+          {isAuthenticated && (
+            <>
+              <span className="user-info">{user?.name || user?.email}</span>
+              <button onClick={handleLogout} className="logout-button">
+                로그아웃
+              </button>
+            </>
+          )}
+          
+        </div>
       </div>
     </nav>
   );

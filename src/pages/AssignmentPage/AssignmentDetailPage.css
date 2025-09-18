@@ -9,32 +9,92 @@
   margin: 0 auto;
 }
 
-.assignment-header {
+/* 네비게이션 바 - NoticeDetailPage와 동일한 스타일 */
+.assignment-navigation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+  color: #495057;
+}
+
+.back-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.breadcrumb-item {
+  color: #6c757d;
+}
+
+.breadcrumb-item.current {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.breadcrumb-separator {
+  color: #adb5bd;
+}
+
+/* AssignmentHeader 컴포넌트 스타일 */
+.assignment-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #eee;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
 }
 
-.assignment-info {
+.assignment-detail-info {
   flex: 1;
   margin-right: 2rem;
 }
 
-.assignment-title-section {
+.assignment-detail-title-section {
   margin-bottom: 1rem;
 }
 
-.assignment-title {
+.assignment-detail-title {
   font-size: 2rem;
   font-weight: bold;
   color: #2d3436;
   margin: 0;
 }
 
-.deadline-status {
+.assignment-detail-deadline-status {
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 0.875rem;
@@ -44,34 +104,34 @@
   white-space: nowrap;
 }
 
-.deadline-status.normal {
+.assignment-detail-deadline-status.normal {
   background: #d4edda;
   color: #155724;
 }
 
-.deadline-status.warning {
+.assignment-detail-deadline-status.warning {
   background: #fff3cd;
   color: #856404;
 }
 
-.deadline-status.urgent {
+.assignment-detail-deadline-status.urgent {
   background: #f8d7da;
   color: #721c24;
 }
 
-.deadline-status.expired {
+.assignment-detail-deadline-status.expired {
   background: #e2e3e5;
   color: #6c757d;
 }
 
-.assignment-description {
+.assignment-detail-description {
   color: #636e72;
   font-size: 1rem;
   margin: 0 0 1rem 0;
   line-height: 1.5;
 }
 
-.assignment-dates {
+.assignment-detail-dates {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -79,12 +139,12 @@
   min-width: 200px;
 }
 
-.assignment-dates .deadline-status {
+.assignment-detail-dates .assignment-detail-deadline-status {
   margin-bottom: 8px;
   align-self: flex-end;
 }
 
-.date-item {
+.assignment-detail-date-item {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -92,32 +152,32 @@
   gap: 2px;
 }
 
-.date-label {
+.assignment-detail-date-label {
   color: #6c757d;
   font-weight: 500;
 }
 
-.date-value {
+.assignment-detail-date-value {
   color: #495057;
   font-weight: 500;
 }
 
-.date-value.urgent {
+.assignment-detail-date-value.urgent {
   color: #6c757d;
   font-weight: 600;
 }
 
-.date-value.warning {
+.assignment-detail-date-value.warning {
   color: #6c757d;
   font-weight: 600;
 }
 
-.date-value.normal {
+.assignment-detail-date-value.normal {
   color: #6c757d;
   font-weight: 500;
 }
 
-.date-value.expired {
+.assignment-detail-date-value.expired {
   color: #6c757d;
   text-decoration: line-through;
 }
@@ -204,34 +264,38 @@
     padding: 1rem;
   }
   
-  .assignment-header {
+  .assignment-navigation-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
+
+  .breadcrumb {
+    align-self: flex-end;
+  }
   
-  .assignment-info {
+  .assignment-detail-info {
     margin-right: 0;
   }
   
-  .assignment-dates {
+  .assignment-detail-dates {
     text-align: left;
     min-width: auto;
     width: 100%;
   }
   
-  .assignment-dates .deadline-status {
+  .assignment-detail-dates .assignment-detail-deadline-status {
     align-self: flex-start;
     margin-bottom: 12px;
   }
   
-  .assignment-title {
+  .assignment-detail-title {
     font-size: 1.5rem;
   }
   
-  .date-item {
+  .assignment-detail-date-item {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
   }
-} 
+}
