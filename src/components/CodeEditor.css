@@ -1,0 +1,120 @@
+/* Editor Area */
+.editor-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  border-bottom: 1px solid #15181C;
+}
+
+.problem-solve-page.light .editor-wrapper {
+  background: #ffffff;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.editor-header {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 16px;
+  color: #58a6ff;
+  background: linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(88, 166, 255, 0.05) 100%);
+  border-bottom: 1px solid #30363d;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  flex-grow: 0;
+  min-height: auto;
+  max-height: 48px;
+}
+
+.editor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.problem-solve-page.light .editor-header {
+  color: #0969da;
+  background: linear-gradient(90deg, rgba(9, 105, 218, 0.1) 0%, rgba(9, 105, 218, 0.05) 100%);
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.editor-scroll-area {
+  flex: 1;
+  overflow: auto;
+  background-color: #000000;
+}
+
+.problem-solve-page.light .editor-scroll-area {
+  background-color: #ffffff;
+}
+
+/* Inline Due Date Info */
+.due-date-info-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.problem-solve-page.light .due-date-info-inline {
+  color: #d63384;
+  background: rgba(220, 53, 132, 0.1);
+  border: 1px solid rgba(220, 53, 132, 0.3);
+}
+
+.due-date-icon {
+  font-size: 12px;
+}
+
+.due-date-text {
+  font-weight: 500;
+}
+
+/* Inline Submit Button */
+.submit-button-inline {
+  padding: 6px 12px;
+  background-color: #2f81f7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.submit-button-inline:hover {
+  background-color: #1f6feb;
+}
+
+.submit-button-inline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #6c757d;
+  color: #ffffff;
+}
+
+/* Submit with Output Button */
+.submit-button-inline.submit-with-output {
+  background-color: #28a745;
+  margin-left: 8px;
+}
+
+.submit-button-inline.submit-with-output:hover {
+  background-color: #218838;
+}
+
+.submit-button-inline.submit-with-output:disabled {
+  background-color: #6c757d;
+}

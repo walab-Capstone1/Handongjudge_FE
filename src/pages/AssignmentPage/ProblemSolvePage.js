@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Split from "react-split";
-import CodeMirror from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
-import { python } from "@codemirror/lang-python";
-import { java } from "@codemirror/lang-java";
-import { cpp } from "@codemirror/lang-cpp";
-import { EditorView } from "@codemirror/view";
 import apiService from "../../services/APIService";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import ProblemDescription from "../../components/ProblemDescription";
+import CodeEditor from "../../components/CodeEditor";
+import ExecutionResult from "../../components/ExecutionResult";
 import "./ProblemSolvePage.css";
 
 const ProblemSolvePage = () => {
@@ -40,7 +37,6 @@ const ProblemSolvePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
   const [verticalSizes, setVerticalSizes] = useState([70, 30]);
-  const [selectedTestcase, setSelectedTestcase] = useState(null);
 
   // Load problem, section, assignment information
   useEffect(() => {
@@ -97,46 +93,6 @@ const ProblemSolvePage = () => {
   }, [problemId, sectionId, assignmentId]);
 
   // Helper functions
-  // 마감일 체크 함수 제거 - 항상 제출 가능하도록 변경
-
-  const getTestcaseResultText = (result) => {
-    const resultTexts = {
-      'correct': '정답',
-      'wrong-answer': '오답',
-      'timelimit': '시간 초과',
-      'memory-limit': '메모리 초과',
-      'run-error': '런타임 에러',
-      'compiler-error': '컴파일 에러',
-      'presentation-error': '출력 형식 오류',
-      'no-output': '출력 없음',
-      null: '미실행'
-    };
-    return resultTexts[result] || '알 수 없음';
-  };
-
-  const formatMemory = (bytes) => {
-    if (!bytes) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
-    
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
-  };
-
-  // 테스트케이스 요약 정보 계산
-  const getTestcaseSummary = (outputList) => {
-    if (!outputList || outputList.length === 0) return { passed: 0, total: 0 };
-    
-    const passed = outputList.filter(testcase => testcase.result === 'correct').length;
-    const total = outputList.length;
-    
-    return { passed, total };
-  };
 
   function getDefaultCode(lang) {
     switch (lang) {
@@ -153,94 +109,6 @@ const ProblemSolvePage = () => {
     }
   }
 
-  const getLanguageExtension = (lang) => {
-    switch (lang) {
-      case "javascript":
-        return [javascript()];
-      case "python":
-        return [python()];
-      case "java":
-        return [java()];
-      case "cpp":
-        return [cpp()];
-      default:
-        return [javascript()];
-    }
-  };
-
-  // Custom dark theme for CodeMirror
-  const customDarkTheme = EditorView.theme({
-    "&": {
-      color: "#ffffff !important",
-      backgroundColor: "#000000 !important"
-    },
-    ".cm-content": {
-      caretColor: "#ffffff !important",
-      color: "#ffffff !important"
-    },
-    ".cm-line": {
-      color: "#ffffff !important"
-    },
-    "&.cm-focused .cm-cursor": {
-      borderLeftColor: "#ffffff"
-    },
-    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
-      backgroundColor: "#0066cc"
-    },
-    ".cm-activeLine": {
-      backgroundColor: "#1a1a1a"
-    },
-    ".cm-gutters": {
-      backgroundColor: "#000000",
-      color: "#ffffff",
-      border: "none"
-    },
-    ".cm-lineNumbers .cm-gutterElement": {
-      color: "#ffffff"
-    },
-    ".cm-foldGutter .cm-gutterElement": {
-      color: "#ffffff"
-    },
-    ".cm-tooltip": {
-      backgroundColor: "#000000",
-      color: "#ffffff",
-      border: "1px solid #333"
-    },
-    // Syntax highlighting colors (all white)
-    ".cm-keyword": { color: "#ffffff !important" },
-    ".cm-operator": { color: "#ffffff !important" },
-    ".cm-variable": { color: "#ffffff !important" },
-    ".cm-variable-2": { color: "#ffffff !important" },
-    ".cm-variable-3": { color: "#ffffff !important" },
-    ".cm-property": { color: "#ffffff !important" },
-    ".cm-definition": { color: "#ffffff !important" },
-    ".cm-type": { color: "#ffffff !important" },
-    ".cm-string": { color: "#ffffff !important" },
-    ".cm-string-2": { color: "#ffffff !important" },
-    ".cm-number": { color: "#ffffff !important" },
-    ".cm-comment": { color: "#ffffff !important" },
-    ".cm-attribute": { color: "#ffffff !important" },
-    ".cm-meta": { color: "#ffffff !important" },
-    ".cm-builtin": { color: "#ffffff !important" },
-    ".cm-tag": { color: "#ffffff !important" },
-    ".cm-header": { color: "#ffffff !important" },
-    ".cm-hr": { color: "#ffffff !important" },
-    ".cm-link": { color: "#ffffff !important" },
-    ".cm-url": { color: "#ffffff !important" },
-    ".cm-formatting": { color: "#ffffff !important" },
-    ".cm-formatting-link": { color: "#ffffff !important" },
-    ".cm-formatting-list": { color: "#ffffff !important" },
-    ".cm-formatting-quote": { color: "#ffffff !important" },
-    ".cm-formatting-strong": { color: "#ffffff !important" },
-    ".cm-formatting-em": { color: "#ffffff !important" },
-    ".cm-formatting-header": { color: "#ffffff !important" },
-    ".cm-formatting-header-1": { color: "#ffffff !important" },
-    ".cm-formatting-header-2": { color: "#ffffff !important" },
-    ".cm-formatting-header-3": { color: "#ffffff !important" },
-    ".cm-formatting-header-4": { color: "#ffffff !important" },
-    ".cm-formatting-header-5": { color: "#ffffff !important" },
-    ".cm-formatting-header-6": { color: "#ffffff !important" }
-  }, { dark: true });
 
   // Event handlers
   const handleLanguageChange = (newLang) => {
@@ -318,7 +186,6 @@ const ProblemSolvePage = () => {
 
     setIsSubmitting(true);
     setSubmissionResult(null);
-    setSelectedTestcase(null); // 테스트케이스 선택 초기화
 
     try {
       console.log('코드 제출 및 아웃풋 요청 시작:', { sectionId, problemId, language });
@@ -499,32 +366,10 @@ const ProblemSolvePage = () => {
           style={{ display: "flex", width: "100%" }}
         >
           {/* Description Area */}
-          <div className="description-area">
-            <div className="description-header">
-              <span>문제 설명</span>
-              
-              {/* Problem Limits in Header */}
-              {(currentProblem.timeLimit || currentProblem.memoryLimit) && (
-                <div className="problem-limits-header">
-                  {currentProblem.timeLimit && (
-                    <span className="limit-badge-header time-limit">
-                      시간 제한: {currentProblem.timeLimit}초
-                    </span>
-                  )}
-                  {currentProblem.memoryLimit && (
-                    <span className="limit-badge-header memory-limit">
-                      메모리 제한: {currentProblem.memoryLimit}MB
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-            
-            <div 
-              className="description-content"
-              dangerouslySetInnerHTML={{ __html: currentProblem.description || problemDescription }}
-            />
-          </div>
+          <ProblemDescription 
+            currentProblem={currentProblem}
+            problemDescription={problemDescription}
+          />
 
           {/* Editor and Result Split */}
           <Split
@@ -537,203 +382,22 @@ const ProblemSolvePage = () => {
             style={{ display: "flex", flexDirection: "column", height: "100%" }}
           >
             {/* Editor Area */}
-            <div className="editor-wrapper">
-              <div className="editor-header">
-                <span>solution.{language === "javascript" ? "js" : language}</span>
-                <div className="editor-header-right">
-                  {/* Assignment Due Date Info */}
-                  {(assignmentInfo.dueDate || assignmentInfo.endDate) && (
-                    <div className="due-date-info-inline">
-                      <span className="due-date-icon">⏰</span>
-                      <span className="due-date-text">
-                        마감: {new Date(assignmentInfo.dueDate || assignmentInfo.endDate).toLocaleDateString('ko-KR', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </span>
-                    </div>
-                  )}
-                  <button 
-                    className="submit-button-inline submit-with-output"
-                    onClick={handleSubmitWithOutput} 
-                    disabled={isSubmitting}
-                    title="테스트케이스별 상세 결과를 확인할 수 있습니다"
-                  >
-                    {isSubmitting ? "제출 중..." : "테스트하기"}
-                  </button>
-                  <button 
-                    className="submit-button-inline"
-                    onClick={handleSubmit} 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "제출 중..." : "제출하기"}
-                  </button>
-                  
-                </div>
-
-              </div>
-              <div className="editor-scroll-area">
-                <CodeMirror
-                  value={code}
-                  height="100%"
-                  extensions={[
-                    ...getLanguageExtension(language),
-                    theme === "dark" ? customDarkTheme : []
-                  ]}
-                  theme={theme}
-                  onChange={(value) => setCode(value)}
-                  style={{
-                    backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
-                    height: "100%",
-                    color: theme === "dark" ? "#ffffff" : "#000000"
-                  }}
-                  options={{
-                    theme: theme,
-                    lineNumbers: true,
-                    foldGutter: true,
-                    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-                  }}
-                />
-              </div>
-            </div>
+            <CodeEditor
+              language={language}
+              code={code}
+              theme={theme}
+              assignmentInfo={assignmentInfo}
+              isSubmitting={isSubmitting}
+              onCodeChange={(value) => setCode(value)}
+              onSubmit={handleSubmit}
+              onSubmitWithOutput={handleSubmitWithOutput}
+            />
 
             {/* Result Area */}
-            <div className="result-area">
-              <div className="result-header">
-                {submissionResult?.type === 'output' ? '실행 결과' : '채점 결과'}
-              </div>
-              <div>
-                {isSubmitting ? (
-                  <div className="result-loading">
-                    <LoadingSpinner />
-                    <span>제출 중...</span>
-                  </div>
-                ) : submissionResult ? (
-                  <>
-                    <div 
-                      className={`result-summary ${submissionResult.resultInfo.status === 'error' ? 'error' : ''}`}
-                      style={{ color: submissionResult.resultInfo.color }}
-                    >
-                      <strong>{submissionResult.resultInfo.message}</strong>
-                      <br />
-                      제출 ID: {submissionResult.submissionId} | 
-                      언어: {submissionResult.language} | 
-                      제출 시간: {new Date(submissionResult.submittedAt).toLocaleString('ko-KR')}
-                    </div>
-                    
-                    {submissionResult.status === 'error' && (
-                      <div className="error-message">
-                        <strong>오류:</strong> {submissionResult.message}
-                      </div>
-                    )}
-
-                    {/* 테스트케이스 상세 결과 표시 */}
-                    {submissionResult.type === 'output' && submissionResult.outputList && (() => {
-                      const { passed, total } = getTestcaseSummary(submissionResult.outputList);
-                      return (
-                        <div className="testcases-section">
-                          <div className="testcases-header">
-                            <strong>테스트케이스 결과: {passed}/{total}</strong>
-                          </div>
-                          
-                          {/* 테스트케이스 버튼들 */}
-                          <div className="testcase-buttons">
-                            {submissionResult.outputList.map((testcase, index) => (
-                              <button
-                                key={testcase.id || index}
-                                className={`testcase-button ${testcase.result || 'not-run'} ${
-                                  selectedTestcase === index ? 'selected' : ''
-                                }`}
-                                onClick={() => setSelectedTestcase(index)}
-                              >
-                                #{testcase.testcase_rank}
-                              </button>
-                            ))}
-                          </div>
-                          
-                          {/* 선택된 테스트케이스 상세 정보 */}
-                          {selectedTestcase !== null && submissionResult.outputList[selectedTestcase] && (() => {
-                            const testcase = submissionResult.outputList[selectedTestcase];
-                            return (
-                              <div className="selected-testcase">
-                                <div className="testcase-info-header">
-                                  <span className="testcase-number">테스트케이스 #{testcase.testcase_rank}</span>
-                                  <span className={`testcase-result ${testcase.result || 'not-run'}`}>
-                                    {getTestcaseResultText(testcase.result)}
-                                  </span>
-                                </div>
-                                
-                                {testcase.result && (
-                                  <div className="testcase-details">
-                                    <div className="testcase-stats">
-                                      <span className="stat-item">
-                                        <strong>실행시간:</strong> {testcase.runtime}ms
-                                      </span>
-                                      <span className="stat-item">
-                                        <strong>메모리:</strong> {formatMemory(testcase.memory_used)}
-                                      </span>
-                                    </div>
-                                    
-                                    {testcase.testcase_input && (
-                                      <div className="testcase-input">
-                                        <div className="input-label">테스트 입력:</div>
-                                        <div className="input-content">
-                                          <pre>{testcase.testcase_input}</pre>
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {testcase.expected_output && (
-                                      <div className="testcase-expected">
-                                        <div className="expected-label">기대 출력:</div>
-                                        <div className="expected-content">
-                                          <pre>{testcase.expected_output}</pre>
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {testcase.output && (
-                                      <div className="testcase-output">
-                                        <div className="output-label">실제 출력:</div>
-                                        <div className="output-content">
-                                          <pre>{testcase.output}</pre>
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {testcase.output_error && (
-                                      <div className="testcase-error">
-                                        <div className="error-label">실행 에러:</div>
-                                        <div className="error-content">
-                                          <pre>{testcase.output_error}</pre>
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {testcase.output_diff && (
-                                      <div className="testcase-diff">
-                                        <div className="diff-label">차이점:</div>
-                                        <div className="diff-content">
-                                          <pre>{testcase.output_diff}</pre>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      );
-                    })()}
-                  </>
-                ) : (
-                  <div style={{ opacity: 0.6 }}>제출 후 결과가 여기에 표시됩니다.</div>
-                )}
-              </div>
-            </div>
+            <ExecutionResult
+              submissionResult={submissionResult}
+              isSubmitting={isSubmitting}
+            />
           </Split>
         </Split>
       </div>
