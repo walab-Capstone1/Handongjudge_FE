@@ -890,12 +890,197 @@
   color: #0969da;
 }
 
-.testcases-list {
+/* 테스트케이스 버튼들 */
+.testcase-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.testcase-button {
+  padding: 8px 12px;
+  border: 2px solid #30363d;
+  border-radius: 6px;
+  background-color: #21262d;
+  color: #c9d1d9;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+}
+
+.testcase-button:hover {
+  background-color: #30363d;
+}
+
+.testcase-button.selected {
+  border-color: #58a6ff;
+  background-color: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
+}
+
+/* 테스트케이스 결과별 버튼 색상 */
+.testcase-button.correct {
+  border-color: #28a745;
+  background-color: #28a745;
+  color: white;
+}
+
+.testcase-button.correct:hover {
+  background-color: #218838;
+}
+
+.testcase-button.correct.selected {
+  background-color: #1e7e34;
+  border-color: #1c7430;
+}
+
+.testcase-button.wrong-answer,
+.testcase-button.timelimit,
+.testcase-button.memory-limit,
+.testcase-button.run-error,
+.testcase-button.compiler-error {
+  border-color: #dc3545;
+  background-color: #dc3545;
+  color: white;
+}
+
+.testcase-button.wrong-answer:hover,
+.testcase-button.timelimit:hover,
+.testcase-button.memory-limit:hover,
+.testcase-button.run-error:hover,
+.testcase-button.compiler-error:hover {
+  background-color: #c82333;
+}
+
+.testcase-button.wrong-answer.selected,
+.testcase-button.timelimit.selected,
+.testcase-button.memory-limit.selected,
+.testcase-button.run-error.selected,
+.testcase-button.compiler-error.selected {
+  background-color: #bd2130;
+  border-color: #b21f2d;
+}
+
+.testcase-button.not-run {
+  border-color: #6c757d;
+  background-color: #6c757d;
+  color: white;
+}
+
+.testcase-button.not-run:hover {
+  background-color: #5a6268;
+}
+
+.testcase-button.not-run.selected {
+  background-color: #545b62;
+  border-color: #4e555b;
+}
+
+/* 선택된 테스트케이스 상세 정보 */
+.selected-testcase {
   flex: 1;
+  overflow-y: auto;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  background-color: #0d1117;
+  padding: 16px;
+}
+
+.testcase-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #30363d;
+}
+
+/* 라이트 테마 */
+.problem-solve-page.light .testcase-button {
+  border-color: #e1e4e8;
+  background-color: #ffffff;
+  color: #24292e;
+}
+
+.problem-solve-page.light .testcase-button:hover {
+  background-color: #f6f8fa;
+}
+
+.problem-solve-page.light .testcase-button.selected {
+  border-color: #0969da;
+  background-color: rgba(9, 105, 218, 0.1);
+  color: #0969da;
+}
+
+/* 라이트 테마 - 테스트케이스 결과별 색상 */
+.problem-solve-page.light .testcase-button.correct {
+  border-color: #28a745;
+  background-color: #28a745;
+  color: white;
+}
+
+.problem-solve-page.light .testcase-button.correct:hover {
+  background-color: #218838;
+}
+
+.problem-solve-page.light .testcase-button.correct.selected {
+  background-color: #1e7e34;
+  border-color: #1c7430;
+}
+
+.problem-solve-page.light .testcase-button.wrong-answer,
+.problem-solve-page.light .testcase-button.timelimit,
+.problem-solve-page.light .testcase-button.memory-limit,
+.problem-solve-page.light .testcase-button.run-error,
+.problem-solve-page.light .testcase-button.compiler-error {
+  border-color: #dc3545;
+  background-color: #dc3545;
+  color: white;
+}
+
+.problem-solve-page.light .testcase-button.wrong-answer:hover,
+.problem-solve-page.light .testcase-button.timelimit:hover,
+.problem-solve-page.light .testcase-button.memory-limit:hover,
+.problem-solve-page.light .testcase-button.run-error:hover,
+.problem-solve-page.light .testcase-button.compiler-error:hover {
+  background-color: #c82333;
+}
+
+.problem-solve-page.light .testcase-button.wrong-answer.selected,
+.problem-solve-page.light .testcase-button.timelimit.selected,
+.problem-solve-page.light .testcase-button.memory-limit.selected,
+.problem-solve-page.light .testcase-button.run-error.selected,
+.problem-solve-page.light .testcase-button.compiler-error.selected {
+  background-color: #bd2130;
+  border-color: #b21f2d;
+}
+
+.problem-solve-page.light .testcase-button.not-run {
+  border-color: #6c757d;
+  background-color: #6c757d;
+  color: white;
+}
+
+.problem-solve-page.light .testcase-button.not-run:hover {
+  background-color: #5a6268;
+}
+
+.problem-solve-page.light .testcase-button.not-run.selected {
+  background-color: #545b62;
+  border-color: #4e555b;
+}
+
+.problem-solve-page.light .selected-testcase {
+  border-color: #e1e4e8;
+  background-color: #ffffff;
+}
+
+.problem-solve-page.light .testcase-info-header {
+  border-bottom-color: #e1e4e8;
 }
 
 /* Testcase Item */
