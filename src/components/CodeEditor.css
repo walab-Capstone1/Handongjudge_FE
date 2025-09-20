@@ -5,6 +5,7 @@
   flex-direction: column;
   background: #000000;
   border-bottom: 1px solid #15181C;
+  min-height: 0;
 }
 
 .problem-solve-page.light .editor-wrapper {

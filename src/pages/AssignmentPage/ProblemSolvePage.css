@@ -1,5 +1,7 @@
 /* ProblemSolvePage.css */
 
+@import '../../components/DraggablePanel.css';
+
 /* Global Styles */
 .problem-solve-page * {
   scrollbar-width: thin;

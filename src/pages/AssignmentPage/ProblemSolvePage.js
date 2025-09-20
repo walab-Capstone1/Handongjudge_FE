@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import Split from "react-split";
 import apiService from "../../services/APIService";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ProblemDescription from "../../components/ProblemDescription";
 import CodeEditor from "../../components/CodeEditor";
 import ExecutionResult from "../../components/ExecutionResult";
+import DraggablePanel from "../../components/DraggablePanel";
 import "./ProblemSolvePage.css";
 
 const ProblemSolvePage = () => {
@@ -37,6 +40,13 @@ const ProblemSolvePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
   const [verticalSizes, setVerticalSizes] = useState([70, 30]);
+  
+  // 패널 레이아웃 상태
+  const [panelLayout, setPanelLayout] = useState({
+    left: 'description',
+    topRight: 'editor', 
+    bottomRight: 'result'
+  });
 
   // Load problem, section, assignment information
   useEffect(() => {
@@ -93,6 +103,75 @@ const ProblemSolvePage = () => {
   }, [problemId, sectionId, assignmentId]);
 
   // Helper functions
+  
+  // 패널 이동 처리
+  const handlePanelMove = (draggedPanelId, targetPanelId) => {
+    console.log(`Moving ${draggedPanelId} to ${targetPanelId} position`);
+    
+    setPanelLayout(prevLayout => {
+      const newLayout = { ...prevLayout };
+      
+      // 현재 위치 찾기
+      const draggedPosition = Object.keys(newLayout).find(key => newLayout[key] === draggedPanelId);
+      const targetPosition = Object.keys(newLayout).find(key => newLayout[key] === targetPanelId);
+      
+      if (draggedPosition && targetPosition) {
+        // 패널 위치 교환
+        newLayout[draggedPosition] = targetPanelId;
+        newLayout[targetPosition] = draggedPanelId;
+      }
+      
+      return newLayout;
+    });
+  };
+  
+  // 패널 컴포넌트 렌더링
+  const renderPanel = (panelType, showDragHandle = true) => {
+    const panels = {
+      description: (
+        <ProblemDescription 
+          currentProblem={currentProblem}
+          problemDescription={problemDescription}
+        />
+      ),
+      editor: (
+        <CodeEditor
+          language={language}
+          code={code}
+          theme={theme}
+          assignmentInfo={assignmentInfo}
+          isSubmitting={isSubmitting}
+          onCodeChange={(value) => setCode(value)}
+          onSubmit={handleSubmit}
+          onSubmitWithOutput={handleSubmitWithOutput}
+        />
+      ),
+      result: (
+        <ExecutionResult
+          submissionResult={submissionResult}
+          isSubmitting={isSubmitting}
+        />
+      )
+    };
+    
+    const titles = {
+      description: '문제 설명',
+      editor: '코드 에디터',
+      result: '실행 결과'
+    };
+    
+    return (
+      <DraggablePanel
+        id={panelType}
+        type={panelType}
+        title={titles[panelType]}
+        onMove={handlePanelMove}
+        showDragHandle={showDragHandle}
+      >
+        {panels[panelType]}
+      </DraggablePanel>
+    );
+  };
 
   function getDefaultCode(lang) {
     switch (lang) {
@@ -301,109 +380,94 @@ const ProblemSolvePage = () => {
   }
 
   return (
-    <div className={`problem-solve-page ${theme}`}>
-      {/* Header */}
-      <div className="problem-solve-header">
-        <div className="breadcrumb">
-          <span 
-            className="breadcrumb-link"
-            onClick={() => navigate("/main")}
-          >
-            {sectionInfo.courseTitle}
-          </span>
-          <span> › </span>
-          <span 
-            className="breadcrumb-link"
-            onClick={() => navigate(`/sections/${sectionId}/assignments`)}
-          >
-            {sectionInfo.sectionNumber}분반
-          </span>
-          <span> › </span>
-          <span 
-            className="breadcrumb-link"
-            onClick={() => navigate(`/sections/${sectionId}/assignments/${assignmentId}/detail`)}
-          >
-            {assignmentInfo.title}
-          </span>
-          <span> › </span>
-          <strong>{currentProblem.title}</strong>
+    <DndProvider backend={HTML5Backend}>
+      <div className={`problem-solve-page ${theme}`}>
+        {/* Header */}
+        <div className="problem-solve-header">
+          <div className="breadcrumb">
+            <span 
+              className="breadcrumb-link"
+              onClick={() => navigate("/main")}
+            >
+              {sectionInfo.courseTitle}
+            </span>
+            <span> › </span>
+            <span 
+              className="breadcrumb-link"
+              onClick={() => navigate(`/sections/${sectionId}/assignments`)}
+            >
+              {sectionInfo.sectionNumber}분반
+            </span>
+            <span> › </span>
+            <span 
+              className="breadcrumb-link"
+              onClick={() => navigate(`/sections/${sectionId}/assignments/${assignmentId}/detail`)}
+            >
+              {assignmentInfo.title}
+            </span>
+            <span> › </span>
+            <strong>{currentProblem.title}</strong>
+          </div>
+          <div className="controls">
+            <button 
+              className={`theme-button ${theme === "light" ? "active" : ""}`}
+              onClick={() => setTheme("light")}
+            >
+              Light
+            </button>
+            <button 
+              className={`theme-button ${theme === "dark" ? "active" : ""}`}
+              onClick={() => setTheme("dark")}
+            >
+              Dark
+            </button>
+            <select 
+              className="language-select"
+              value={language} 
+              onChange={(e) => handleLanguageChange(e.target.value)}
+            >
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="cpp">C++</option>
+            </select>
+          </div>
         </div>
-        <div className="controls">
-          <button 
-            className={`theme-button ${theme === "light" ? "active" : ""}`}
-            onClick={() => setTheme("light")}
-          >
-            Light
-          </button>
-          <button 
-            className={`theme-button ${theme === "dark" ? "active" : ""}`}
-            onClick={() => setTheme("dark")}
-          >
-            Dark
-          </button>
-          <select 
-            className="language-select"
-            value={language} 
-            onChange={(e) => handleLanguageChange(e.target.value)}
-          >
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="cpp">C++</option>
-          </select>
-        </div>
-      </div>
 
-      {/* Main Split */}
-      <div className="main-split">
-        <Split
-          sizes={horizontalSizes}
-          direction="horizontal"
-          minSize={200}
-          gutterSize={20}
-          gutterStyle={renderGutter("horizontal")}
-          onDragEnd={handleHorizontalDragEnd}
-          style={{ display: "flex", width: "100%" }}
-        >
-          {/* Description Area */}
-          <ProblemDescription 
-            currentProblem={currentProblem}
-            problemDescription={problemDescription}
-          />
-
-          {/* Editor and Result Split */}
+        {/* Main Split */}
+        <div className="main-split">
           <Split
-            sizes={verticalSizes}
-            direction="vertical"
-            minSize={100}
+            sizes={horizontalSizes}
+            direction="horizontal"
+            minSize={200}
             gutterSize={20}
-            gutterStyle={renderGutter("vertical")}
-            onDragEnd={handleVerticalDragEnd}
-            style={{ display: "flex", flexDirection: "column", height: "100%" }}
+            gutterStyle={renderGutter("horizontal")}
+            onDragEnd={handleHorizontalDragEnd}
+            style={{ display: "flex", width: "100%" }}
           >
-            {/* Editor Area */}
-            <CodeEditor
-              language={language}
-              code={code}
-              theme={theme}
-              assignmentInfo={assignmentInfo}
-              isSubmitting={isSubmitting}
-              onCodeChange={(value) => setCode(value)}
-              onSubmit={handleSubmit}
-              onSubmitWithOutput={handleSubmitWithOutput}
-            />
+            {/* Left Panel */}
+            {renderPanel(panelLayout.left, false)}
 
-            {/* Result Area */}
-            <ExecutionResult
-              submissionResult={submissionResult}
-              isSubmitting={isSubmitting}
-            />
+            {/* Right Split */}
+            <Split
+              sizes={verticalSizes}
+              direction="vertical"
+              minSize={100}
+              gutterSize={20}
+              gutterStyle={renderGutter("vertical")}
+              onDragEnd={handleVerticalDragEnd}
+              style={{ display: "flex", flexDirection: "column", height: "100%" }}
+            >
+              {/* Top Right Panel */}
+              {renderPanel(panelLayout.topRight, true)}
+
+              {/* Bottom Right Panel */}
+              {renderPanel(panelLayout.bottomRight, true)}
+            </Split>
           </Split>
-        </Split>
+        </div>
       </div>
-
-
-    </div>
+    </DndProvider>
   );
 };
 

@@ -5,6 +5,8 @@
   background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
   border-right: 1px solid #30363d;
   box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+  flex: 1;
+  min-height: 0;
 }
 
 .problem-solve-page.light .description-area {
