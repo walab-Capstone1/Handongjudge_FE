@@ -161,7 +161,7 @@ const SectionDetailPage = () => {
                 <div className="notices-container">
                   <div className="notices-list">
                     {notices.map((notice) => (
-                      <div 
+                      <div
                         key={notice.id} 
                         className={`notice-item ${notice.isNew ? 'new' : ''}`}
                         onClick={() => handleNoticeClick(notice)}
