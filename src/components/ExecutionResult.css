@@ -64,6 +64,80 @@
   color: #ff6b6b;
 }
 
+/* Enhanced Result Summary */
+.result-summary.enhanced {
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.summary-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.summary-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.result-summary.enhanced.success {
+  background-color: #1a3d1a;
+  border-left: 4px solid #28a745;
+}
+
+.result-summary.enhanced.success .summary-title {
+  color: #28a745;
+}
+
+.result-summary.enhanced.error {
+  background-color: #3d1a1a;
+  border-left: 4px solid #dc3545;
+}
+
+.result-summary.enhanced.error .summary-title {
+  color: #dc3545;
+}
+
+.result-summary.enhanced.warning {
+  background-color: #3d3d1a;
+  border-left: 4px solid #ffc107;
+}
+
+.result-summary.enhanced.warning .summary-title {
+  color: #ffc107;
+}
+
+.summary-description {
+  margin-bottom: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.summary-details {
+  margin-bottom: 12px;
+}
+
+.summary-detail {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.submission-info {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 8px;
+}
+
 .problem-solve-page.light .result-summary {
   background-color: #d4edda;
   color: #155724;
@@ -72,6 +146,21 @@
 .problem-solve-page.light .result-summary.error {
   background-color: #ffeef0;
   color: #FF3D50;
+}
+
+.problem-solve-page.light .result-summary.enhanced.success {
+  background-color: #d4edda;
+  border-left-color: #28a745;
+}
+
+.problem-solve-page.light .result-summary.enhanced.error {
+  background-color: #ffeef0;
+  border-left-color: #dc3545;
+}
+
+.problem-solve-page.light .result-summary.enhanced.warning {
+  background-color: #fff3cd;
+  border-left-color: #ffc107;
 }
 
 /* Error Message */
@@ -369,6 +458,58 @@
 
 .problem-solve-page.light .diff-label {
   color: #f57c00 !important;
+}
+
+/* Diff Highlighting */
+.diff-highlighted {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  line-height: 1.4;
+}
+
+.diff-line {
+  margin: 2px 0;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.diff-line.diff-error {
+  background-color: rgba(220, 53, 69, 0.2);
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.diff-expected {
+  background-color: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.diff-actual {
+  background-color: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Light theme diff highlighting */
+.problem-solve-page.light .diff-line.diff-error {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.problem-solve-page.light .diff-expected {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.problem-solve-page.light .diff-actual {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
 }
 
 .testcase-input .input-content,

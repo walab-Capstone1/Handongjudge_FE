@@ -48,6 +48,11 @@ const ProblemSolvePage = () => {
     bottomRight: 'result'
   });
 
+  // 자동저장 관련 상태
+  const [lastSavedTime, setLastSavedTime] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved', 'error'
+
   // Load problem, section, assignment information
   useEffect(() => {
     const loadAllInfo = async () => {
@@ -102,6 +107,59 @@ const ProblemSolvePage = () => {
     loadAllInfo();
   }, [problemId, sectionId, assignmentId]);
 
+  // 자동저장 로직
+  useEffect(() => {
+    // 페이지 로드 시 로컬스토리지에서 코드 복원
+    const savedCodeKey = `code_${problemId}_${language}`;
+    const savedCode = localStorage.getItem(savedCodeKey);
+    if (savedCode && savedCode !== getDefaultCode(language)) {
+      setCode(savedCode);
+      console.log('코드 복원됨:', savedCodeKey);
+    }
+  }, [problemId, language]);
+
+  // 코드 변경 시 로컬스토리지에 자동저장
+  useEffect(() => {
+    if (code && code !== getDefaultCode(language)) {
+      const savedCodeKey = `code_${problemId}_${language}`;
+      localStorage.setItem(savedCodeKey, code);
+      localStorage.setItem(`${savedCodeKey}_timestamp`, Date.now().toString());
+      setAutoSaveStatus('saved');
+      
+      // 1초 후 상태 초기화
+      const timer = setTimeout(() => {
+        setAutoSaveStatus('idle');
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [code, problemId, language]);
+
+  // 주기적으로 DB에 저장 (3분마다)
+  useEffect(() => {
+    const saveToDatabase = async () => {
+      if (!code || code === getDefaultCode(language) || isSaving) return;
+      
+      setIsSaving(true);
+      setAutoSaveStatus('saving');
+      
+      try {
+        // API 호출하여 DB에 저장
+        await apiService.saveProgress(problemId, sectionId, language, code);
+        setLastSavedTime(new Date());
+        setAutoSaveStatus('saved');
+        console.log('코드가 DB에 저장되었습니다');
+      } catch (error) {
+        console.error('DB 저장 실패:', error);
+        setAutoSaveStatus('error');
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    const interval = setInterval(saveToDatabase, 3 * 60 * 1000); // 3분마다
+    return () => clearInterval(interval);
+  }, [code, problemId, sectionId, language, isSaving]);
 
   // Helper functions
   
@@ -159,6 +217,8 @@ const ProblemSolvePage = () => {
           onCodeChange={(value) => setCode(value)}
           onSubmit={handleSubmit}
           onSubmitWithOutput={handleSubmitWithOutput}
+          autoSaveStatus={autoSaveStatus}
+          lastSavedTime={lastSavedTime}
         />
       ),
       result: (
@@ -335,13 +395,13 @@ const ProblemSolvePage = () => {
     } catch (error) {
       console.error('코드 제출 및 아웃풋 요청 실패:', error);
       
-      setSubmissionResult({
-        status: 'error',
-        message: error.message || '코드 제출에 실패했습니다.',
-        resultInfo: { status: 'error', message: '제출 실패', color: '#dc3545' },
-        type: 'output',
-        outputList: null
-      });
+              setSubmissionResult({
+          status: 'error',
+          message: error.message || '코드 제출에 실패했습니다.',
+          resultInfo: { status: 'error', message: '제출 실패', color: '#dc3545' },
+          type: 'output',
+          outputList: null
+        });
     } finally {
       setIsSubmitting(false);
     }
@@ -396,83 +456,83 @@ const ProblemSolvePage = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className={`problem-solve-page ${theme}`}>
-        {/* Header */}
-        <div className="problem-solve-header">
-          <div className="breadcrumb">
-            <span 
-              className="breadcrumb-link"
-              onClick={() => navigate("/main")}
-            >
-              {sectionInfo.courseTitle}
-            </span>
-            <span> › </span>
-            <span 
-              className="breadcrumb-link"
-              onClick={() => navigate(`/sections/${sectionId}/assignments`)}
-            >
-              {sectionInfo.sectionNumber}분반
-            </span>
-            <span> › </span>
-            <span 
-              className="breadcrumb-link"
-              onClick={() => navigate(`/sections/${sectionId}/assignments/${assignmentId}/detail`)}
-            >
-              {assignmentInfo.title}
-            </span>
-            <span> › </span>
-            <strong>{currentProblem.title}</strong>
-          </div>
-          <div className="controls">
-            <button 
-              className={`theme-button ${theme === "light" ? "active" : ""}`}
-              onClick={() => setTheme("light")}
-            >
-              Light
-            </button>
-            <button 
-              className={`theme-button ${theme === "dark" ? "active" : ""}`}
-              onClick={() => setTheme("dark")}
-            >
-              Dark
-            </button>
-            <select 
-              className="language-select"
-              value={language} 
-              onChange={(e) => handleLanguageChange(e.target.value)}
-            >
-              <option value="javascript">JavaScript</option>
-              <option value="python">Python</option>
-              <option value="java">Java</option>
-              <option value="cpp">C++</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Main Split */}
-        <div className="main-split">
-          <Split
-            sizes={horizontalSizes}
-            direction="horizontal"
-            minSize={200}
-            gutterSize={20}
-            gutterStyle={renderGutter("horizontal")}
-            onDragEnd={handleHorizontalDragEnd}
-            style={{ display: "flex", width: "100%" }}
+    <div className={`problem-solve-page ${theme}`}>
+      {/* Header */}
+      <div className="problem-solve-header">
+        <div className="breadcrumb">
+          <span 
+            className="breadcrumb-link"
+            onClick={() => navigate("/main")}
           >
+            {sectionInfo.courseTitle}
+          </span>
+          <span> › </span>
+          <span 
+            className="breadcrumb-link"
+            onClick={() => navigate(`/sections/${sectionId}/assignments`)}
+          >
+            {sectionInfo.sectionNumber}분반
+          </span>
+          <span> › </span>
+          <span 
+            className="breadcrumb-link"
+            onClick={() => navigate(`/sections/${sectionId}/assignments/${assignmentId}/detail`)}
+          >
+            {assignmentInfo.title}
+          </span>
+          <span> › </span>
+          <strong>{currentProblem.title}</strong>
+        </div>
+        <div className="controls">
+          <button 
+            className={`theme-button ${theme === "light" ? "active" : ""}`}
+            onClick={() => setTheme("light")}
+          >
+            Light
+          </button>
+          <button 
+            className={`theme-button ${theme === "dark" ? "active" : ""}`}
+            onClick={() => setTheme("dark")}
+          >
+            Dark
+          </button>
+          <select 
+            className="language-select"
+            value={language} 
+            onChange={(e) => handleLanguageChange(e.target.value)}
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Main Split */}
+      <div className="main-split">
+        <Split
+          sizes={horizontalSizes}
+          direction="horizontal"
+          minSize={200}
+          gutterSize={20}
+          gutterStyle={renderGutter("horizontal")}
+          onDragEnd={handleHorizontalDragEnd}
+          style={{ display: "flex", width: "100%" }}
+        >
             {/* Left Panel */}
             {renderPanel(panelLayout.left, true)}
 
             {/* Right Split */}
-            <Split
-              sizes={verticalSizes}
-              direction="vertical"
-              minSize={100}
-              gutterSize={20}
-              gutterStyle={renderGutter("vertical")}
-              onDragEnd={handleVerticalDragEnd}
-              style={{ display: "flex", flexDirection: "column", height: "100%" }}
-            >
+          <Split
+            sizes={verticalSizes}
+            direction="vertical"
+            minSize={100}
+            gutterSize={20}
+            gutterStyle={renderGutter("vertical")}
+            onDragEnd={handleVerticalDragEnd}
+            style={{ display: "flex", flexDirection: "column", height: "100%" }}
+          >
               {/* Top Right Panel */}
               {renderPanel(panelLayout.topRight, true)}
 

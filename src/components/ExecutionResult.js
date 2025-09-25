@@ -37,6 +37,47 @@ const ExecutionResult = ({
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
+  // diff 텍스트를 파싱하여 차이점 강조
+  const highlightDifferences = (diffText) => {
+    if (!diffText) return null;
+    
+    const lines = diffText.split('\n');
+    const highlightedLines = lines.map((line, index) => {
+      // Judge와 Team 결과를 다른 색으로 표시
+      if (line.includes('Judge:')) {
+        const parts = line.split('Judge:');
+        return (
+          <div key={index} className="diff-line">
+            {parts[0]}
+            <span className="diff-expected">Judge: {parts[1]}</span>
+          </div>
+        );
+      } else if (line.includes('Team:')) {
+        const parts = line.split('Team:');
+        return (
+          <div key={index} className="diff-line">
+            {parts[0]}
+            <span className="diff-actual">Team: {parts[1]}</span>
+          </div>
+        );
+      } else if (line.includes('mismatch') || line.includes('Wrong') || line.includes('error')) {
+        return (
+          <div key={index} className="diff-line diff-error">
+            {line}
+          </div>
+        );
+      } else {
+        return (
+          <div key={index} className="diff-line">
+            {line}
+          </div>
+        );
+      }
+    });
+    
+    return <div className="diff-highlighted">{highlightedLines}</div>;
+  };
+
   // 테스트케이스 요약 정보 계산
   const getTestcaseSummary = (outputList) => {
     if (!outputList || outputList.length === 0) return { passed: 0, total: 0 };
@@ -45,6 +86,61 @@ const ExecutionResult = ({
     const total = outputList.length;
     
     return { passed, total };
+  };
+
+  // 결과 요약 정보 생성
+  const getResultSummary = (submissionResult) => {
+    if (!submissionResult) return null;
+    
+    const { result, outputList } = submissionResult;
+    const { passed, total } = getTestcaseSummary(outputList);
+    
+    if (result === 'AC') {
+      return {
+        type: 'success',
+        title: '정답',
+        description: `모든 테스트케이스 통과 (${total}/${total})`,
+        details: outputList ? [`실행 시간: ${Math.max(...outputList.map(t => t.runtime || 0))}ms`, `메모리 사용: ${formatMemory(Math.max(...outputList.map(t => t.memory_used || 0)))}`] : []
+      };
+    } else if (['WA', 'PE'].includes(result)) {
+      const failedCount = total - passed;
+      return {
+        type: 'error',
+        title: '오답',
+        description: `${failedCount}개 테스트케이스 실패 (${passed}/${total})`,
+        details: outputList ? [`첫 번째 실패: 테스트케이스 #${outputList.find(t => t.result !== 'correct')?.testcase_rank || 1}`] : []
+      };
+    } else if (result === 'TLE') {
+      return {
+        type: 'warning',
+        title: '시간 초과',
+        description: `실행 시간 제한 초과 (${passed}/${total})`,
+        details: ['실행 시간을 단축해보세요']
+      };
+    } else if (result === 'MLE') {
+      return {
+        type: 'warning', 
+        title: '메모리 초과',
+        description: `메모리 제한 초과 (${passed}/${total})`,
+        details: ['메모리 사용량을 줄여보세요']
+      };
+    } else if (result === 'RE') {
+      return {
+        type: 'error',
+        title: '런타임 에러',
+        description: `실행 중 오류 발생 (${passed}/${total})`,
+        details: ['코드 로직을 다시 확인해보세요']
+      };
+    } else if (result === 'CE') {
+      return {
+        type: 'error',
+        title: '컴파일 에러', 
+        description: '코드 컴파일 실패',
+        details: ['문법 오류를 확인해보세요']
+      };
+    }
+    
+    return null;
   };
 
   return (
@@ -60,16 +156,47 @@ const ExecutionResult = ({
           </div>
         ) : submissionResult ? (
           <>
-            <div 
-              className={`result-summary ${submissionResult.resultInfo.status === 'error' ? 'error' : ''}`}
-              style={{ color: submissionResult.resultInfo.color }}
-            >
-              <strong>{submissionResult.resultInfo.message}</strong>
-              <br />
-              제출 ID: {submissionResult.submissionId} | 
-              언어: {submissionResult.language} | 
-              제출 시간: {new Date(submissionResult.submittedAt).toLocaleString('ko-KR')}
-            </div>
+            {(() => {
+              const summary = getResultSummary(submissionResult);
+              if (summary) {
+                return (
+                  <div className={`result-summary enhanced ${summary.type}`}>
+                    <div className="summary-header">
+                      <span className={`summary-icon ${summary.type}`}>
+                        {summary.type === 'success' ? '✅' : summary.type === 'warning' ? '⚠️' : '❌'}
+                      </span>
+                      <strong className="summary-title">{summary.title}</strong>
+                    </div>
+                    <div className="summary-description">{summary.description}</div>
+                    {summary.details.length > 0 && (
+                      <div className="summary-details">
+                        {summary.details.map((detail, index) => (
+                          <div key={index} className="summary-detail">{detail}</div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="submission-info">
+                      제출 ID: {submissionResult.submissionId} | 
+                      언어: {submissionResult.language} | 
+                      제출 시간: {new Date(submissionResult.submittedAt).toLocaleString('ko-KR')}
+                    </div>
+                  </div>
+                );
+              } else {
+                return (
+                  <div 
+                    className={`result-summary ${submissionResult.resultInfo.status === 'error' ? 'error' : ''}`}
+                    style={{ color: submissionResult.resultInfo.color }}
+                  >
+                    <strong>{submissionResult.resultInfo.message}</strong>
+                    <br />
+                    제출 ID: {submissionResult.submissionId} | 
+                    언어: {submissionResult.language} | 
+                    제출 시간: {new Date(submissionResult.submittedAt).toLocaleString('ko-KR')}
+                  </div>
+                );
+              }
+            })()}
             
             {submissionResult.status === 'error' && (
               <div className="error-message">
@@ -160,14 +287,14 @@ const ExecutionResult = ({
                               </div>
                             )}
                             
-                            {testcase.output_diff && (
-                              <div className="testcase-diff">
-                                <div className="diff-label">차이점:</div>
-                                <div className="diff-content">
-                                  <pre>{testcase.output_diff}</pre>
-                                </div>
-                              </div>
-                            )}
+                                {testcase.output_diff && (
+                                  <div className="testcase-diff">
+                                    <div className="diff-label">차이점:</div>
+                                    <div className="diff-content">
+                                      {highlightDifferences(testcase.output_diff)}
+                                    </div>
+                                  </div>
+                                )}
                           </div>
                         )}
                       </div>
