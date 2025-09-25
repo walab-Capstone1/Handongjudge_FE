@@ -340,22 +340,20 @@ const MyAssignmentsPage = () => {
                         <LoadingSpinner />
                         <p>코드를 불러오는 중...</p>
                       </div>
+                    ) : selectedSubmission.code ? (
+                      <pre className="code-content">
+                        <code>{selectedSubmission.code}</code>
+                      </pre>
                     ) : (
-                      {selectedSubmission.code ? (
-                        <pre className="code-content">
-                          <code>{selectedSubmission.code}</code>
-                        </pre>
-                      ) : (
-                        <div className="code-error">
-                          <p>코드를 불러올 수 없습니다.</p>
-                          {selectedSubmission.compileMessage && (
-                            <div className="compile-message">
-                              <strong>컴파일 메시지:</strong>
-                              <pre>{selectedSubmission.compileMessage}</pre>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <div className="code-error">
+                        <p>코드를 불러올 수 없습니다.</p>
+                        {selectedSubmission.compileMessage && (
+                          <div className="compile-message">
+                            <strong>컴파일 메시지:</strong>
+                            <pre>{selectedSubmission.compileMessage}</pre>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
