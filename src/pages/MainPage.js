@@ -70,11 +70,7 @@ const MainPage = () => {
   const generateStatus = (section) => {
     const status = [];
     
-    console.log('🔥 섹션 상태 생성:', {
-      sectionId: section.sectionId,
-      newNoticeCount: section.newNoticeCount,
-      newAssignmentCount: section.newAssignmentCount
-    });
+   
     
     // 새로운 공지사항이 있으면 추가
     if (section.newNoticeCount > 0) {
@@ -131,15 +127,16 @@ const MainPage = () => {
   return (
     <MainLayout>
       <div className="main-page">
-        <div className="main-header">
-          
-        </div>
-        
+                  
         <div className="content-section">
-          <div className="class-header">
-            <h1 className="class-title">
-              {user?.name || '사용자'}'s class
-            </h1>
+          <div className="section-header">
+            <div className="section-info">
+              <div className="title-container">
+                <h1 className="section-title">
+                  {user?.name || '사용자'}'s class
+                </h1>
+              </div>
+            </div>
           </div>
           
           {transformedSections.length === 0 ? (

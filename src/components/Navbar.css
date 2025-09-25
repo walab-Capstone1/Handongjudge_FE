@@ -32,7 +32,7 @@
 .nav-left {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 3rem;
   flex: 1;
   margin-left: 0;
   padding-left: 0;
@@ -43,7 +43,7 @@
   text-decoration: none;
   font-size: 1.5rem;
   font-weight: bold;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
   letter-spacing: 0.5px;
   transition: color 0.2s ease;
   margin-left: 0;
@@ -59,6 +59,7 @@
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
   transition: color 0.2s ease;
 }
 
@@ -67,7 +68,7 @@
 }
 
 .admin-link {
-  color: #e74c3c !important;
+  color: #d33625 !important;
   font-weight: 600;
   position: relative;
 }
@@ -77,7 +78,6 @@
 }
 
 .admin-link::before {
-  content: '🔧';
   margin-right: 0.5rem;
   font-size: 0.9rem;
 }
@@ -109,17 +109,19 @@
   color: #2d3436;
   font-size: 0.9rem;
   font-weight: 500;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
   padding: 0.5rem 0;
 }
 
 .logout-button {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  background: linear-gradient(135deg, #a55249 0%, #e15a4b 100%);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.9rem;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
@@ -152,7 +154,7 @@
   }
   
   .nav-left {
-    gap: 1rem;
+    gap: 1.5rem;
     flex-wrap: wrap;
     justify-content: center;
   }
