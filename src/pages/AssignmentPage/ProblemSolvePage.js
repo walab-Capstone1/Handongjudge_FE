@@ -102,26 +102,41 @@ const ProblemSolvePage = () => {
     loadAllInfo();
   }, [problemId, sectionId, assignmentId]);
 
+
   // Helper functions
   
   // 패널 이동 처리
   const handlePanelMove = (draggedPanelId, targetPanelId) => {
-    console.log(`Moving ${draggedPanelId} to ${targetPanelId} position`);
+    console.log(`드래그한 창: ${draggedPanelId}, 바꾸려는 창: ${targetPanelId}`);
     
-    setPanelLayout(prevLayout => {
-      const newLayout = { ...prevLayout };
+    // 같은 패널이면 무시
+    if (draggedPanelId === targetPanelId) {
+      return;
+    }
+    
+    setPanelLayout(currentLayout => {
+      // 1. 드래그된 패널의 현재 위치 찾기
+      let draggedPos = null;
+      let targetPos = null;
       
-      // 현재 위치 찾기
-      const draggedPosition = Object.keys(newLayout).find(key => newLayout[key] === draggedPanelId);
-      const targetPosition = Object.keys(newLayout).find(key => newLayout[key] === targetPanelId);
+      if (currentLayout.left === draggedPanelId) draggedPos = 'left';
+      else if (currentLayout.topRight === draggedPanelId) draggedPos = 'topRight';
+      else if (currentLayout.bottomRight === draggedPanelId) draggedPos = 'bottomRight';
       
-      if (draggedPosition && targetPosition) {
-        // 패널 위치 교환
-        newLayout[draggedPosition] = targetPanelId;
-        newLayout[targetPosition] = draggedPanelId;
+      // 2. 타겟 패널의 현재 위치 찾기
+      if (currentLayout.left === targetPanelId) targetPos = 'left';
+      else if (currentLayout.topRight === targetPanelId) targetPos = 'topRight';
+      else if (currentLayout.bottomRight === targetPanelId) targetPos = 'bottomRight';
+      
+      // 3. 둘 다 찾았으면 교환
+      if (draggedPos && targetPos) {
+        const newLayout = { ...currentLayout };
+        newLayout[draggedPos] = targetPanelId;
+        newLayout[targetPos] = draggedPanelId;
+        return newLayout;
       }
       
-      return newLayout;
+      return currentLayout;
     });
   };
   
@@ -446,7 +461,7 @@ const ProblemSolvePage = () => {
             style={{ display: "flex", width: "100%" }}
           >
             {/* Left Panel */}
-            {renderPanel(panelLayout.left, false)}
+            {renderPanel(panelLayout.left, true)}
 
             {/* Right Split */}
             <Split
