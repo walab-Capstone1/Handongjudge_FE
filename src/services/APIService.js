@@ -546,6 +546,69 @@ class APIService {
     });
   }
 
+  // ==================== 마이페이지 API ====================
+  
+  // 사용자 프로필 정보 조회 (GitHub 정보 포함)
+  async getUserProfile() {
+    return await this.request('/mypage/profile');
+  }
+
+  // 사용자 학습 통계 조회
+  async getUserStats() {
+    return await this.request('/mypage/stats');
+  }
+
+  // 최근 제출 기록 조회
+  async getRecentSubmissions(limit = 10) {
+    return await this.request(`/mypage/recent-submissions?limit=${limit}`);
+  }
+
+  // 수강 중인 과목 현황 조회
+  async getEnrolledSections() {
+    return await this.request('/mypage/enrolled-sections');
+  }
+
+  // GitHub 연동 상태 조회
+  async getGitHubStatus() {
+    return await this.request('/mypage/github-status');
+  }
+
+  // GitHub 저장소 설정
+  async setGitHubRepository(repositoryData) {
+    return await this.request('/mypage/github/repository', {
+      method: 'POST',
+      body: JSON.stringify(repositoryData),
+    });
+  }
+
+  // 자동 커밋 설정 토글
+  async toggleAutoCommit(enabled) {
+    return await this.request('/mypage/github/auto-commit', {
+      method: 'POST',
+      body: JSON.stringify({ enabled }),
+    });
+  }
+
+  // 커밋 히스토리 조회
+  async getCommitHistory(limit = 10) {
+    return await this.request(`/mypage/github/commits?limit=${limit}`);
+  }
+
+  // 상세 학습 통계 조회 (차트용)
+  async getDetailedStats() {
+    return await this.request('/mypage/stats/detailed');
+  }
+
+  // 학습 진행도 조회
+  async getLearningProgress() {
+    return await this.request('/mypage/progress');
+  }
+
+  // 제출된 코드 조회
+  async getSubmissionCode(submissionId) {
+    return await this.request(`/mypage/submission/${submissionId}/code`);
+  }
+
 }
 
 const apiService = new APIService();
