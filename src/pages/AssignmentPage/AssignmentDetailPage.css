@@ -1,6 +1,5 @@
 .assignment-detail-page {
   min-height: 100vh;
-  background-color: white;
 }
 
 .content-area {
@@ -16,27 +15,27 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .back-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: none;
-  border: 1px solid #dee2e6;
+  background: white;
+  border: 1px solid #e5e7eb;
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  color: #6c757d;
+  color: #6b7280;
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s ease;
 }
 
 .back-button:hover {
-  background-color: #f8f9fa;
-  border-color: #adb5bd;
-  color: #495057;
+  background-color: #f3f4f6;
+  border-color: #667eea;
+  color: #667eea;
 }
 
 .back-icon {
@@ -49,20 +48,20 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #6b7280;
 }
 
 .breadcrumb-item {
-  color: #6c757d;
+  color: #6b7280;
 }
 
 .breadcrumb-item.current {
-  color: #007bff;
+  color: #667eea;
   font-weight: 600;
 }
 
 .breadcrumb-separator {
-  color: #adb5bd;
+  color: #d1d5db;
 }
 
 /* AssignmentHeader 컴포넌트 스타일 */
@@ -74,8 +73,8 @@
   padding: 1.5rem;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
 }
 
 .assignment-detail-info {
@@ -90,7 +89,7 @@
 .assignment-detail-title {
   font-size: 2rem;
   font-weight: bold;
-  color: #2d3436;
+  color: #374151;
   margin: 0;
 }
 
@@ -125,7 +124,7 @@
 }
 
 .assignment-detail-description {
-  color: #636e72;
+  color: #6b7280;
   font-size: 1rem;
   margin: 0 0 1rem 0;
   line-height: 1.5;
@@ -153,32 +152,32 @@
 }
 
 .assignment-detail-date-label {
-  color: #6c757d;
+  color: #6b7280;
   font-weight: 500;
 }
 
 .assignment-detail-date-value {
-  color: #495057;
+  color: #4b5563;
   font-weight: 500;
 }
 
 .assignment-detail-date-value.urgent {
-  color: #6c757d;
+  color: #6b7280;
   font-weight: 600;
 }
 
 .assignment-detail-date-value.warning {
-  color: #6c757d;
+  color: #6b7280;
   font-weight: 600;
 }
 
 .assignment-detail-date-value.normal {
-  color: #6c757d;
+  color: #6b7280;
   font-weight: 500;
 }
 
 .assignment-detail-date-value.expired {
-  color: #6c757d;
+  color: #6b7280;
   text-decoration: line-through;
 }
 
@@ -186,7 +185,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  background: #667eea;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -207,13 +206,13 @@
 .no-problems {
   text-align: center;
   padding: 3rem 1rem;
-  color: #6c757d;
+  color: #6b7280;
 }
 
 .no-problems h3 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  color: #495057;
+  color: #4b5563;
 }
 
 .no-problems p {
@@ -233,7 +232,7 @@
 }
 
 .error-message button {
-  background: #007bff;
+  background: #667eea;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -245,7 +244,7 @@
 }
 
 .error-message button:hover {
-  background: #0056b3;
+  background: #5a67d8;
 }
 
 .problems-list {
@@ -253,10 +252,10 @@
   flex-direction: column;
   gap: 0;
   background: white;
-  border: 1px solid #e1e8ed;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {

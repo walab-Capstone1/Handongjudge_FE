@@ -39,7 +39,7 @@
 }
 
 .logo-link {
-  color: #2d3436;
+  color: #667eea;
   text-decoration: none;
   font-size: 1.5rem;
   font-weight: bold;
@@ -51,11 +51,11 @@
 }
 
 .logo-link:hover {
-  color: #0984e3;
+  color: #5a67d8;
 }
 
 .nav-link {
-  color: #2d3436;
+  color: #6b7280;
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
@@ -64,7 +64,7 @@
 }
 
 .nav-link:hover {
-  color: #0984e3;
+  color: #667eea;
 }
 
 .admin-link {
@@ -106,7 +106,7 @@
 }
 
 .user-info {
-  color: #2d3436;
+  color: #6b7280;
   font-size: 0.9rem;
   font-weight: 500;
   font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
@@ -114,9 +114,9 @@
 }
 
 .logout-button {
-  background: linear-gradient(135deg, #a55249 0%, #e15a4b 100%);
-  color: white;
-  border: none;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 500;
@@ -124,18 +124,17 @@
   font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
 }
 
 .logout-button:hover {
-  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
   transform: translateY(-1px);
 }
 
 .logout-button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
 }
 
 /* 중간 화면 대응 */

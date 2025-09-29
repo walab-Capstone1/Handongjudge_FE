@@ -38,7 +38,7 @@
 .section-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .section-info {
@@ -55,13 +55,13 @@
 .section-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #374151;
   margin: 0;
 }
 
 .section-instructor {
   font-size: 1.1rem;
-  color: #6c757d;
+  color: #6b7280;
   margin: 0;
 }
 
@@ -79,38 +79,44 @@
 }
 
 /* Tab Navigation */
-.tab-navigation {
+.section-detail-page .tab-navigation {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
 }
 
-.tab-button {
+.section-detail-page .tab-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: none;
-  border: none;
+  padding: 0.75rem 1.5rem;
+  background: white !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 25px;
   font-size: 1rem;
   font-weight: 600;
-  color: #6c757d;
+  color: #6b7280 !important;
   cursor: pointer;
-  border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
   position: relative;
+  margin-right: 0.5rem;
 }
 
-.tab-button:hover {
-  color: #495057;
-  background-color: #f8f9fa;
+.section-detail-page .tab-button:hover {
+  color: #667eea !important;
+  background: #f8f9ff !important;
+  background-color: #f8f9ff !important;
+  border-color: #c7d2fe !important;
+  transform: translateY(-1px);
 }
 
-.tab-button.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
-  background-color: #f8f9fa;
+.section-detail-page .tab-button.active {
+  color: white !important;
+  background: #667eea !important;
+  background-color: #667eea !important;
+  border-color: #667eea !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .new-badge {
@@ -132,14 +138,14 @@
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  color: #6c757d;
+  color: #6b7280;
 }
 
 .empty-icon {
   width: 64px;
   height: 64px;
   margin: 0 auto 1rem;
-  background: linear-gradient(135deg, #ddd 0%, #f1f3f4 100%);
+  background: #f3f4f6;
   border-radius: 12px;
   position: relative;
 }
@@ -164,13 +170,13 @@
   transform: translate(-50%, -50%);
   width: 16px;
   height: 16px;
-  background: #ddd;
+  background: #d1d5db;
   border-radius: 3px;
 }
 
 .empty-state h3 {
   margin-bottom: 0.5rem;
-  color: #495057;
+  color: #4b5563;
 }
 
 /* Notices Section */
@@ -198,8 +204,8 @@
 }
 
 .notice-item:hover {
-  border-color: #007bff;
-  box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
   transform: translateY(-1px);
 }
 
@@ -209,9 +215,9 @@
 }
 
 .notice-item.selected {
-  border-color: #007bff;
+  border-color: #667eea;
   background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
-  box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
 .notice-header {
@@ -224,7 +230,7 @@
 .notice-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #374151;
   margin: 0;
   flex: 1;
   margin-right: 1rem;
@@ -254,13 +260,13 @@
 
 .notice-date {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: #6b7280;
   font-weight: 500;
 }
 
 /* Notice Preview and Full Content */
 .notice-preview {
-  color: #6c757d;
+  color: #6b7280;
   font-size: 0.95rem;
   line-height: 1.5;
   margin-top: 0.5rem;
@@ -284,19 +290,19 @@
 
 .notice-content-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, #e9ecef 50%, transparent 100%);
+  background: #e5e7eb;
   margin: 1rem 0;
 }
 
 .notice-detail-content {
-  color: #495057;
+  color: #4b5563;
   line-height: 1.7;
   white-space: pre-wrap;
   font-size: 1rem;
   padding: 1rem;
-  background: #f8f9fa;
+  background: #f9fafb;
   border-radius: 8px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #667eea;
 }
 
 /* Assignments Section */
@@ -317,13 +323,13 @@
 }
 
 .assignment-item:hover {
-  border-color: #007bff;
-  box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   transform: translateY(-2px);
 }
 
 .assignment-item.new {
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #667eea;
   background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
 }
 
@@ -337,7 +343,7 @@
 .assignment-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #374151;
   margin: 0;
   flex: 1;
   margin-right: 1rem;
@@ -353,7 +359,7 @@
   gap: 0.25rem;
   margin-bottom: 0.75rem;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #6b7280;
 }
 
 .start-date, .end-date {
@@ -384,7 +390,7 @@
 }
 
 .assignment-description {
-  color: #495057;
+  color: #4b5563;
   line-height: 1.6;
   font-size: 0.95rem;
 }
