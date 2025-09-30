@@ -20,7 +20,11 @@ const CodeEditor = ({
   isSubmitting,
   onCodeChange,
   onSubmit,
-  onSubmitWithOutput
+  onSubmitWithOutput,
+  sessionSaveStatus = 'idle',
+  onSessionSave,
+  codeLoadSource = null,
+  sessionCleared = false
 }) => {
   // 기본 에디터 확장 기능들
   const getBaseExtensions = () => [
@@ -307,7 +311,35 @@ const CodeEditor = ({
   return (
     <div className="editor-wrapper">
       <div className="editor-header">
-        <span>solution.{language === "javascript" ? "js" : language}</span>
+        <div className="editor-header-left">
+          <span>solution.{language === "javascript" ? "js" : language}</span>
+          <div className="session-save-status">
+            {/* 코드 로드 소스 표시 */}
+            {codeLoadSource && (
+              <span className={`load-source ${codeLoadSource}`}>
+                {codeLoadSource === 'session' && '📁 세션에서 복원'}
+                {codeLoadSource === 'backend' && '☁️ 제출 기록에서 복원'}
+                {codeLoadSource === 'default' && '📝 기본 코드'}
+              </span>
+            )}
+            
+            {/* 세션 저장 상태 표시 */}
+            {sessionCleared && (
+              <span className="save-status cleared">🗑️ 제출 완료 - 세션 정리됨</span>
+            )}
+            {!sessionCleared && sessionSaveStatus === 'saving' && (
+              <span className="save-status saving">💾 세션 저장 중...</span>
+            )}
+            {!sessionCleared && sessionSaveStatus === 'saved' && (
+              <span className="save-status saved">✅ 세션 저장됨</span>
+            )}
+            {!sessionCleared && sessionSaveStatus === 'error' && (
+              <span className="save-status error">⚠️ 세션 저장 실패</span>
+            )}
+            
+            <span className="shortcut-hint">Ctrl+S로 세션 저장</span>
+          </div>
+        </div>
         <div className="editor-header-right">
           {/* Assignment Due Date Info */}
           {(assignmentInfo.dueDate || assignmentInfo.endDate) && (

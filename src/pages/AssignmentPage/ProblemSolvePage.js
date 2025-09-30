@@ -9,6 +9,7 @@ import ProblemDescription from "../../components/ProblemDescription";
 import CodeEditor from "../../components/CodeEditor";
 import ExecutionResult from "../../components/ExecutionResult";
 import DraggablePanel from "../../components/DraggablePanel";
+import indexedDBManager from "../../utils/IndexedDBManager";
 import "./ProblemSolvePage.css";
 
 const ProblemSolvePage = () => {
@@ -47,6 +48,12 @@ const ProblemSolvePage = () => {
     topRight: 'editor', 
     bottomRight: 'result'
   });
+
+  // 세션 관련 상태
+  const [sessionId, setSessionId] = useState(null);
+  const [sessionSaveStatus, setSessionSaveStatus] = useState('idle'); // 'idle', 'saved', 'error'
+  const [codeLoadSource, setCodeLoadSource] = useState(null); // 'session', 'backend', 'default'
+  const [sessionCleared, setSessionCleared] = useState(false); // 제출 후 세션 정리 완료 표시
 
 
   // Load problem, section, assignment information
@@ -103,38 +110,175 @@ const ProblemSolvePage = () => {
     loadAllInfo();
   }, [problemId, sectionId, assignmentId]);
 
-  // 페이지 로드 시 마지막 제출 코드 불러오기
+  // IndexedDB 세션 초기화
   useEffect(() => {
-    const loadLastSubmissionCode = async () => {
-      if (!problemId || !sectionId || !language) return;
-      
+    const initializeSession = async () => {
       try {
-        console.log('마지막 제출 코드 조회 시작:', { problemId, sectionId, language });
-        const response = await apiService.loadProgress(problemId, sectionId, language);
+        await indexedDBManager.init();
+        const currentSessionId = indexedDBManager.getSessionId();
+        setSessionId(currentSessionId);
+        console.log('세션 초기화 완료:', currentSessionId);
         
-        // 응답에서 코드 추출 (백엔드 응답 구조에 따라 조정 필요)
-        const lastCode = response?.codeString || response?.code || response;
-        
-        if (lastCode && typeof lastCode === 'string' && lastCode.trim() !== '' && lastCode !== getDefaultCode(language)) {
-          setCode(lastCode);
-          console.log('마지막 제출 코드 복원됨:', lastCode.substring(0, 50) + '...');
-        } else {
-          console.log('마지막 제출 코드 없음, 기본 코드 사용');
-          setCode(getDefaultCode(language));
-        }
+        // 오래된 데이터 정리 (백그라운드에서 실행)
+        indexedDBManager.cleanupOldData().catch(err => 
+          console.warn('오래된 데이터 정리 실패:', err)
+        );
       } catch (error) {
-        console.log('마지막 제출 코드 조회 실패:', error.message);
-        // 에러 발생 시 기본 코드 설정
-        setCode(getDefaultCode(language));
+        console.error('IndexedDB 초기화 실패:', error);
       }
     };
 
-    loadLastSubmissionCode();
-  }, [problemId, sectionId, language]);
+    initializeSession();
+  }, []);
+
+  // 페이지 언로드 시 세션 정리
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // 세션 데이터 정리는 선택사항 (개발 중에는 유지하는 것이 좋을 수 있음)
+      // indexedDBManager.clearCurrentSession();
+      console.log('페이지 언로드 - 세션 유지');
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // 페이지가 숨겨질 때 (탭 전환 등)
+        console.log('페이지 숨김');
+      } else {
+        // 페이지가 다시 보일 때
+        console.log('페이지 표시');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Ctrl+S 단축키 이벤트
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Ctrl+S 또는 Cmd+S (macOS)
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // 브라우저 기본 저장 동작 방지
+        saveToSession();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [code, sessionId, problemId, sectionId, language]); // 의존성 배열에 필요한 값들 추가
+
+  // 페이지 로드 시 코드 불러오기 (IndexedDB 우선, 그 다음 백엔드)
+  useEffect(() => {
+    const loadCode = async () => {
+      if (!problemId || !sectionId || !language || !sessionId) return;
+      
+      try {
+        // 1단계: IndexedDB에서 세션 코드 확인
+        console.log('1단계: IndexedDB 세션 코드 확인 중...');
+        const sessionCode = await loadFromSession();
+        
+        if (sessionCode && sessionCode.trim() !== '' && sessionCode !== getDefaultCode(language)) {
+          setCode(sessionCode);
+          setCodeLoadSource('session');
+          console.log('✅ 세션 코드 복원됨:', sessionCode.substring(0, 50) + '...');
+          return;
+        }
+        
+        // 2단계: 백엔드에서 마지막 제출 코드 조회
+        console.log('2단계: 백엔드 마지막 제출 코드 조회 중...');
+        const response = await apiService.loadProgress(problemId, sectionId, language);
+        
+        // 응답에서 코드 추출
+        const backendCode = response?.codeString || response?.code || response;
+        
+        if (backendCode && typeof backendCode === 'string' && backendCode.trim() !== '' && backendCode !== getDefaultCode(language)) {
+          setCode(backendCode);
+          setCodeLoadSource('backend');
+          console.log('✅ 백엔드 제출 코드 복원됨:', backendCode.substring(0, 50) + '...');
+          return;
+        }
+        
+        // 3단계: 둘 다 없으면 기본 코드 사용
+        console.log('3단계: 기본 코드 사용');
+        setCode(getDefaultCode(language));
+        setCodeLoadSource('default');
+        
+      } catch (error) {
+        console.log('코드 불러오기 실패:', error.message);
+        // 에러 발생 시 기본 코드 설정
+        setCode(getDefaultCode(language));
+        setCodeLoadSource('default');
+      }
+    };
+
+    loadCode();
+  }, [problemId, sectionId, language, sessionId]); // sessionId 의존성 추가
 
 
   // Helper functions
   
+  // 세션에 코드 저장
+  const saveToSession = async () => {
+    if (!sessionId || !code || code === getDefaultCode(language)) {
+      return;
+    }
+
+    try {
+      setSessionSaveStatus('saving');
+      await indexedDBManager.saveSessionCode(problemId, sectionId, language, code);
+      setSessionSaveStatus('saved');
+      console.log('세션에 코드 저장 완료');
+      
+      // 2초 후 상태 초기화
+      setTimeout(() => setSessionSaveStatus('idle'), 2000);
+    } catch (error) {
+      console.error('세션 저장 실패:', error);
+      setSessionSaveStatus('error');
+      setTimeout(() => setSessionSaveStatus('idle'), 2000);
+    }
+  };
+
+  // 세션에서 코드 불러오기
+  const loadFromSession = async () => {
+    if (!sessionId) return null;
+
+    try {
+      const savedData = await indexedDBManager.getSessionCode(problemId, sectionId, language);
+      return savedData ? savedData.code : null;
+    } catch (error) {
+      console.error('세션 코드 불러오기 실패:', error);
+      return null;
+    }
+  };
+
+  // 제출 후 세션 정리
+  const clearSessionAfterSubmission = async () => {
+    if (!sessionId) return;
+
+    try {
+      await indexedDBManager.deleteSessionCode(problemId, sectionId, language);
+      console.log('✅ 제출 후 세션 데이터 정리 완료');
+      
+      // 코드 로드 소스를 backend로 변경하여 다음 로드 시 백엔드에서 가져오도록 함
+      setCodeLoadSource('backend');
+      
+      // 세션 정리 완료 메시지 표시
+      setSessionCleared(true);
+      setTimeout(() => setSessionCleared(false), 3000); // 3초 후 메시지 숨김
+      
+    } catch (error) {
+      console.warn('세션 데이터 정리 실패:', error);
+    }
+  };
+
   // 패널 이동 처리
   const handlePanelMove = (draggedPanelId, targetPanelId) => {
     console.log(`드래그한 창: ${draggedPanelId}, 바꾸려는 창: ${targetPanelId}`);
@@ -189,6 +333,10 @@ const ProblemSolvePage = () => {
           onCodeChange={(value) => setCode(value)}
           onSubmit={handleSubmit}
           onSubmitWithOutput={handleSubmitWithOutput}
+          sessionSaveStatus={sessionSaveStatus}
+          onSessionSave={saveToSession}
+          codeLoadSource={codeLoadSource}
+          sessionCleared={sessionCleared}
         />
       ),
       result: (
@@ -286,6 +434,9 @@ const ProblemSolvePage = () => {
           code: code,
           type: 'judge' // 채점 결과임을 표시
         });
+
+        // 제출 성공 시 세션 데이터 정리
+        await clearSessionAfterSubmission();
       } else {
         throw new Error('제출 응답을 받지 못했습니다.');
       }
@@ -359,6 +510,9 @@ const ProblemSolvePage = () => {
           outputList: outputList, // outputList 정보 저장
           type: 'output' // 아웃풋 결과임을 표시
         });
+
+        // 제출 성공 시 세션 데이터 정리
+        await clearSessionAfterSubmission();
       } else {
         throw new Error('제출 응답을 받지 못했습니다.');
       }
