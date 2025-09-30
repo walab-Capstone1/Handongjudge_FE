@@ -215,11 +215,11 @@ class APIService {
 
   // 진행 상황 불러오기 API
   async loadProgress(problemId, sectionId, language) {
-    return await this.request(`/progress/load?problemId=${problemId}&sectionId=${sectionId}&language=${language}`, {
+    return await this.request(`/submissions/lastSubmitCode?problemId=${problemId}&sectionId=${sectionId}&language=${language}`, {
       method: 'GET'
     });
   }
-
+  
 
   // 제출 결과 조회 API (현재 백엔드에서 즉시 결과를 반환하므로 사용하지 않음)
   // async getSubmissionResult(submissionId) {

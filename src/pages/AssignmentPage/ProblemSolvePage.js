@@ -48,10 +48,6 @@ const ProblemSolvePage = () => {
     bottomRight: 'result'
   });
 
-  // 자동저장 관련 상태
-  const [lastSavedTime, setLastSavedTime] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved', 'error'
 
   // Load problem, section, assignment information
   useEffect(() => {
@@ -107,59 +103,35 @@ const ProblemSolvePage = () => {
     loadAllInfo();
   }, [problemId, sectionId, assignmentId]);
 
-  // 자동저장 로직
+  // 페이지 로드 시 마지막 제출 코드 불러오기
   useEffect(() => {
-    // 페이지 로드 시 로컬스토리지에서 코드 복원
-    const savedCodeKey = `code_${problemId}_${language}`;
-    const savedCode = localStorage.getItem(savedCodeKey);
-    if (savedCode && savedCode !== getDefaultCode(language)) {
-      setCode(savedCode);
-      console.log('코드 복원됨:', savedCodeKey);
-    }
-  }, [problemId, language]);
-
-  // 코드 변경 시 로컬스토리지에 자동저장
-  useEffect(() => {
-    if (code && code !== getDefaultCode(language)) {
-      const savedCodeKey = `code_${problemId}_${language}`;
-      localStorage.setItem(savedCodeKey, code);
-      localStorage.setItem(`${savedCodeKey}_timestamp`, Date.now().toString());
-      setAutoSaveStatus('saved');
-      
-      // 1초 후 상태 초기화
-      const timer = setTimeout(() => {
-        setAutoSaveStatus('idle');
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [code, problemId, language]);
-
-  // 주기적으로 DB에 저장 (3분마다)
-  useEffect(() => {
-    const saveToDatabase = async () => {
-      if (!code || code === getDefaultCode(language) || isSaving) return;
-      
-      setIsSaving(true);
-      setAutoSaveStatus('saving');
+    const loadLastSubmissionCode = async () => {
+      if (!problemId || !sectionId || !language) return;
       
       try {
-        // API 호출하여 DB에 저장
-        await apiService.saveProgress(problemId, sectionId, language, code);
-        setLastSavedTime(new Date());
-        setAutoSaveStatus('saved');
-        console.log('코드가 DB에 저장되었습니다');
+        console.log('마지막 제출 코드 조회 시작:', { problemId, sectionId, language });
+        const response = await apiService.loadProgress(problemId, sectionId, language);
+        
+        // 응답에서 코드 추출 (백엔드 응답 구조에 따라 조정 필요)
+        const lastCode = response?.codeString || response?.code || response;
+        
+        if (lastCode && typeof lastCode === 'string' && lastCode.trim() !== '' && lastCode !== getDefaultCode(language)) {
+          setCode(lastCode);
+          console.log('마지막 제출 코드 복원됨:', lastCode.substring(0, 50) + '...');
+        } else {
+          console.log('마지막 제출 코드 없음, 기본 코드 사용');
+          setCode(getDefaultCode(language));
+        }
       } catch (error) {
-        console.error('DB 저장 실패:', error);
-        setAutoSaveStatus('error');
-      } finally {
-        setIsSaving(false);
+        console.log('마지막 제출 코드 조회 실패:', error.message);
+        // 에러 발생 시 기본 코드 설정
+        setCode(getDefaultCode(language));
       }
     };
 
-    const interval = setInterval(saveToDatabase, 3 * 60 * 1000); // 3분마다
-    return () => clearInterval(interval);
-  }, [code, problemId, sectionId, language, isSaving]);
+    loadLastSubmissionCode();
+  }, [problemId, sectionId, language]);
+
 
   // Helper functions
   
@@ -217,8 +189,6 @@ const ProblemSolvePage = () => {
           onCodeChange={(value) => setCode(value)}
           onSubmit={handleSubmit}
           onSubmitWithOutput={handleSubmitWithOutput}
-          autoSaveStatus={autoSaveStatus}
-          lastSavedTime={lastSavedTime}
         />
       ),
       result: (

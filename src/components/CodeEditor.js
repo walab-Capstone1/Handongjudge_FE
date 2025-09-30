@@ -20,9 +20,7 @@ const CodeEditor = ({
   isSubmitting,
   onCodeChange,
   onSubmit,
-  onSubmitWithOutput,
-  autoSaveStatus = 'idle',
-  lastSavedTime = null
+  onSubmitWithOutput
 }) => {
   // 기본 에디터 확장 기능들
   const getBaseExtensions = () => [
@@ -309,25 +307,7 @@ const CodeEditor = ({
   return (
     <div className="editor-wrapper">
       <div className="editor-header">
-        <div className="editor-header-left">
-          <span>solution.{language === "javascript" ? "js" : language}</span>
-          <div className="auto-save-status">
-            {autoSaveStatus === 'saving' && (
-              <span className="save-status saving">💾 저장 중...</span>
-            )}
-            {autoSaveStatus === 'saved' && (
-              <span className="save-status saved">✅ 저장됨</span>
-            )}
-            {autoSaveStatus === 'error' && (
-              <span className="save-status error">⚠️ 저장 실패</span>
-            )}
-            {lastSavedTime && (
-              <span className="last-saved">
-                마지막 저장: {lastSavedTime.toLocaleTimeString('ko-KR')}
-              </span>
-            )}
-          </div>
-        </div>
+        <span>solution.{language === "javascript" ? "js" : language}</span>
         <div className="editor-header-right">
           {/* Assignment Due Date Info */}
           {(assignmentInfo.dueDate || assignmentInfo.endDate) && (
