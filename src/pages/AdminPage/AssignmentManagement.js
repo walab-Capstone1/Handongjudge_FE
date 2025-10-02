@@ -39,6 +39,7 @@ const AssignmentManagement = () => {
   });
   const [submissionStats, setSubmissionStats] = useState({});
   const [currentSection, setCurrentSection] = useState(null);
+  const [expandedAssignments, setExpandedAssignments] = useState({});
 
   useEffect(() => {
     fetchAssignments();
@@ -739,6 +740,13 @@ const AssignmentManagement = () => {
     }
   };
 
+  const toggleAssignment = (assignmentId) => {
+    setExpandedAssignments(prev => ({
+      ...prev,
+      [assignmentId]: !prev[assignmentId]
+    }));
+  };
+
   const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
       case 'easy': return '#52c41a';
@@ -832,7 +840,6 @@ const AssignmentManagement = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
               />
-              <span className="search-icon">🔍</span>
             </div>
             
             <select
@@ -848,62 +855,63 @@ const AssignmentManagement = () => {
           </div>
         )}
 
-        <div className="assignments-list">
+        <div className="assignments-grid">
           {filteredAssignments.map((assignment) => (
-            <div key={assignment.id} className="assignment-card">
+            <div key={assignment.id} className={`assignment-card ${expandedAssignments[assignment.id] ? 'expanded' : ''}`}>
               <div className="assignment-header">
-                <div className="assignment-info">
-                  <h3 className="assignment-title">{assignment.title}</h3>
-                  <p className="assignment-course">{assignment.sectionName}</p>
-                </div>
-                <div className="assignment-actions">
-                  <button 
-                    className="btn-icon-small edit"
-                    onClick={() => handleEdit(assignment)}
-                    title="수정"
-                  >
-                    ✏️
-                  </button>
-                  <button 
-                    className="btn-icon-small delete"
-                    onClick={() => handleDelete(assignment.id)}
-                    title="삭제"
-                  >
-                    🗑️
-                  </button>
-                </div>
-              </div>
-              
-              <p className="assignment-description">{assignment.description}</p>
-              
-              <div className="assignment-stats">
-                <div className="stat-item">
-                  <span className="stat-label">마감일:</span>
-                  <span className="stat-value due-date">
-                    {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR') : '미설정'}
-                  </span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">문제 수:</span>
-                  <span className="stat-value">{assignment.problemCount || 0}개</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">제출 현황:</span>
-                  <span className="stat-value submission-rate">
-                    {submissionStats[assignment.id] ? (
-                      <>
-                        {submissionStats[assignment.id].submittedStudents}/{submissionStats[assignment.id].totalStudents}
-                      </>
-                    ) : (
-                      <>
-                        0/{assignment.totalStudents || 0}
-                      </>
-                    )}
-                  </span>
+                <div className="assignment-title-row">
+                  <div className="title-and-course">
+                    <p className="assignment-course">{assignment.sectionName}</p>
+                    <h3 className="assignment-title">{assignment.title}</h3>
+                  </div>
+                  <div className="assignment-actions">
+                    <button 
+                      className="btn-icon-small edit"
+                      onClick={() => handleEdit(assignment)}
+                      title="수정"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      className="btn-icon-small delete"
+                      onClick={() => handleDelete(assignment.id)}
+                      title="삭제"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="problems-section">
+              <div className="assignment-compact-stats">
+                <span className="compact-stat">
+                  <span className="stat-label-compact">마감일:</span>
+                  {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '미설정'}
+                </span>
+                <span className="compact-stat">
+                  <span className="stat-label-compact">문제 수:</span>
+                  {assignment.problemCount || 0}개
+                </span>
+                <span className="compact-stat">
+                  <span className="stat-label-compact">제출현황:</span>
+                  {submissionStats[assignment.id] ? 
+                    `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}` 
+                    : `0/${assignment.totalStudents || 0}`}
+                </span>
+              </div>
+
+              <p className="assignment-description">{assignment.description}</p>
+
+              <button 
+                className="btn-toggle-problems"
+                onClick={() => toggleAssignment(assignment.id)}
+              >
+                {expandedAssignments[assignment.id] ? '문제 목록 숨기기' : '문제 목록 보기'}
+              </button>
+
+              {expandedAssignments[assignment.id] && (
+                <div className="assignment-expanded-content">
+                  <div className="problems-section">
                 <div className="problems-header">
                   <h4 className="problems-title">문제 목록 ({assignment.problemCount || 0}개)</h4>
                   <button 
@@ -977,14 +985,16 @@ const AssignmentManagement = () => {
                 </div>
               </div>
 
-              <div className="progress-bar">
-                <div 
-                  className="progress-fill"
-                  style={{ 
-                    width: `${submissionStats[assignment.id]?.submissionRate || 0}%` 
-                  }}
-                ></div>
-              </div>
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill"
+                      style={{ 
+                        width: `${submissionStats[assignment.id]?.submissionRate || 0}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           {filteredAssignments.length === 0 && (

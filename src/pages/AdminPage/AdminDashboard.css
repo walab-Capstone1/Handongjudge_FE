@@ -517,8 +517,8 @@
   flex: 1;
   min-width: 120px;
   padding: 0.75rem 1rem;
-  border: 1px solid #0984e3;
-  background: #0984e3;
+  border: 1px solid #667eea;
+  background: #667eea;
   color: white;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -528,8 +528,8 @@
 }
 
 .btn-primary:hover {
-  background: #0770c4;
-  border-color: #0770c4;
+  background: #5a67d8;
+  border-color: #5a67d8;
 }
 
 /* 모달 상세 스타일 */
@@ -608,12 +608,12 @@
 }
 
 .btn-detail.primary {
-  border-color: #0984e3;
-  background: #f0f8ff;
+  border-color: #667eea;
+  background: #f8f9ff;
 }
 
 .btn-detail.primary:hover {
-  background: #e6f3ff;
+  background: #eef2ff;
 }
 
 .btn-icon {
@@ -629,7 +629,7 @@
 }
 
 .btn-detail.primary .btn-icon {
-  background: #0984e3;
+  background: #667eea;
   color: white;
 }
 

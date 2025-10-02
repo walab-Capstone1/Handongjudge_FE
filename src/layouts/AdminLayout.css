@@ -7,6 +7,7 @@
   display: flex;
   max-width: none;
   margin: 0;
+  padding: 0;
   min-height: calc(100vh - 80px);
   background: transparent;
 }
@@ -15,16 +16,17 @@
   width: 280px;
   background: white;
   color: #374151;
-  padding: 2rem 0;
+  padding: 2rem 0 2rem 2rem;
   border-right: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
   height: calc(100vh - 80px);
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 
 .sidebar-header {
-  padding: 0 2rem 1.5rem 2rem;
+  padding: 0 2rem 1.5rem 0;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 1.5rem;
 }
@@ -43,7 +45,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: 0 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .sidebar-item {
@@ -99,6 +101,7 @@
     width: 100%;
     height: auto;
     position: static;
+    padding: 2rem 1rem;
   }
   
   .sidebar-nav {
@@ -110,10 +113,6 @@
   .sidebar-item {
     min-width: max-content;
     white-space: nowrap;
-  }
-  
-  .admin-main {
-    padding: 1rem;
   }
   
   .admin-content {
