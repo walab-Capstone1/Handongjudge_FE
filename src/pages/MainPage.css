@@ -1,6 +1,5 @@
 .main-page {
   min-height: 100vh;
-  background-color: white;
 }
 
 .main-header {
@@ -69,7 +68,7 @@
 .section-header {
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .section-info {
@@ -86,7 +85,7 @@
 .section-title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #2d3436;
+  color: #374151;
   margin: 0;
 }
 

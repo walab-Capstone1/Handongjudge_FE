@@ -28,20 +28,20 @@
 .dashboard-header {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e1e8ed;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .dashboard-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #2d3436;
+  color: #374151;
   margin: 0 0 0.5rem 0;
   text-align: left;
 }
 
 .dashboard-subtitle {
   font-size: 1rem;
-  color: #636e72;
+  color: #6b7280;
   margin: 0;
   font-weight: 400;
   text-align: left;
@@ -57,43 +57,20 @@
 .stat-card {
   background: white;
   border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
   transition: all 0.2s ease;
-  border: 1px solid #f1f3f4;
+  border: 1px solid #e5e7eb;
   position: relative;
 }
 
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  border-radius: 12px 12px 0 0;
-}
-
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  border-color: #e1e8ed;
-}
-
-.stat-card.sections::before {
-  background: linear-gradient(90deg, #74b9ff, #0984e3);
-}
-
-.stat-card.assignments::before {
-  background: linear-gradient(90deg, #fd79a8, #e84393);
-}
-
-.stat-card.students::before {
-  background: linear-gradient(90deg, #55efc4, #00b894);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
 }
 
 .stat-icon {
@@ -147,28 +124,18 @@
 }
 
 .section-card {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border-radius: 16px;
-  padding: 2rem; /* 패딩을 늘려서 내부 요소들이 여유롭게 */
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
   position: relative;
-  overflow: hidden; /* 다시 hidden으로 설정 */
-}
-
-.section-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  cursor: pointer;
 }
 
 .section-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
 }
 
@@ -179,14 +146,14 @@
 .section-course-title {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #2d3436;
+  color: #374151;
   margin: 0 0 0.5rem 0;
 }
 
 .section-number {
   font-size: 0.9rem;
-  color: #636e72;
-  background: white;
+  color: #6b7280;
+  background: #f3f4f6;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-weight: 500;
@@ -194,19 +161,27 @@
 
 .section-stats {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.section-stat {
+.stat-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-  background: white;
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
+  padding: 0.5rem 0;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
   font-weight: 500;
-  color: #2d3436;
+}
+
+.stat-value {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
 }
 
 .section-stat .stat-icon {
@@ -522,9 +497,9 @@
   flex: 1;
   min-width: 120px;
   padding: 0.75rem 1rem;
-  border: 1px solid #e1e8ed;
+  border: 1px solid #e5e7eb;
   background: white;
-  color: #2d3436;
+  color: #6b7280;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 500;
@@ -533,17 +508,17 @@
 }
 
 .btn-secondary:hover {
-  background: #f8f9fa;
-  border-color: #0984e3;
-  color: #0984e3;
+  background: #f3f4f6;
+  border-color: #667eea;
+  color: #667eea;
 }
 
 .btn-primary {
   flex: 1;
   min-width: 120px;
   padding: 0.75rem 1rem;
-  border: 1px solid #0984e3;
-  background: #0984e3;
+  border: 1px solid #667eea;
+  background: #667eea;
   color: white;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -553,8 +528,8 @@
 }
 
 .btn-primary:hover {
-  background: #0770c4;
-  border-color: #0770c4;
+  background: #5a67d8;
+  border-color: #5a67d8;
 }
 
 /* 모달 상세 스타일 */
@@ -633,12 +608,12 @@
 }
 
 .btn-detail.primary {
-  border-color: #0984e3;
-  background: #f0f8ff;
+  border-color: #667eea;
+  background: #f8f9ff;
 }
 
 .btn-detail.primary:hover {
-  background: #e6f3ff;
+  background: #eef2ff;
 }
 
 .btn-icon {
@@ -654,7 +629,7 @@
 }
 
 .btn-detail.primary .btn-icon {
-  background: #0984e3;
+  background: #667eea;
   color: white;
 }
 

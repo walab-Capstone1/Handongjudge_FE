@@ -8,14 +8,16 @@
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   cursor: pointer;
 }
 
 .course-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
 }
 
 .card-header {
@@ -28,39 +30,39 @@
 }
 
 .card-header.purple {
-  background: #f8f9fa;
-  border-bottom: 3px solid #6c5ce7;
+  background: #fafbfc;
+  border-bottom: 3px solid #667eea;
 }
 
 .card-header.orange {
-  background: #f8f9fa;
-  border-bottom: 3px solid #fd79a8;
+  background: #fafbfc;
+  border-bottom: 3px solid #9ca3af;
 }
 
 .card-header.red {
-  background: #f8f9fa;
-  border-bottom: 3px solid #e84393;
+  background: #fafbfc;
+  border-bottom: 3px solid #6b7280;
 }
 
 .card-header.blue {
-  background: #f8f9fa;
-  border-bottom: 3px solid #0984e3;
+  background: #fafbfc;
+  border-bottom: 3px solid #667eea;
 }
 
 .card-header.green {
-  background: #f8f9fa;
-  border-bottom: 3px solid #00b894;
+  background: #fafbfc;
+  border-bottom: 3px solid #9ca3af;
 }
 
 .card-title h3 {
-  color: #2d3436;
+  color: #374151;
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0 0 0.5rem 0;
 }
 
 .subtitle {
-  color: #636e72;
+  color: #6b7280;
   font-size: 0.9rem;
   margin: 0;
   font-weight: 500;
@@ -70,8 +72,8 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: #e9ecef;
-  color: #495057;
+  background: #f3f4f6;
+  color: #6b7280;
   padding: 0.25rem 0.5rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -86,7 +88,7 @@
 .course-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2d3436;
+  color: #374151;
   margin: 0 0 1rem 0;
 }
 
@@ -121,7 +123,7 @@
 }
 
 .instructor {
-  color: #636e72;
+  color: #6b7280;
   font-size: 0.9rem;
   margin: 0;
   font-weight: 500;

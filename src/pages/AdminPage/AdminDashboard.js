@@ -78,17 +78,14 @@ const AdminDashboard = () => {
 
               <div className="section-stats">
                 <div className="stat-item">
-                  <span className="stat-icon">👨‍🏫</span>
                   <span className="stat-label">담당교수</span>
                   <span className="stat-value">{section.instructorName}</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-icon">🔔</span>
                   <span className="stat-label">새 공지</span>
                   <span className="stat-value">{section.newNoticeCount || 0}개</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-icon">📚</span>
                   <span className="stat-label">분반</span>
                   <span className="stat-value">{section.sectionNumber}</span>
                 </div>
