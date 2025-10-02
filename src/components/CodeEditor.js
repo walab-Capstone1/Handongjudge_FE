@@ -315,11 +315,10 @@ const CodeEditor = ({
           <span>solution.{language === "javascript" ? "js" : language}</span>
           <div className="session-save-status">
             {/* 코드 로드 소스 표시 */}
-            {codeLoadSource && (
+            {codeLoadSource && codeLoadSource !== 'default' && (
               <span className={`load-source ${codeLoadSource}`}>
                 {codeLoadSource === 'session' && '📁 세션에서 복원'}
                 {codeLoadSource === 'backend' && '☁️ 제출 기록에서 복원'}
-                {codeLoadSource === 'default' && '📝 기본 코드'}
               </span>
             )}
             
@@ -361,7 +360,7 @@ const CodeEditor = ({
             disabled={isSubmitting}
             title="테스트케이스별 상세 결과를 확인할 수 있습니다"
           >
-            {isSubmitting ? "제출 중..." : "출력과 함께 제출"}
+            {isSubmitting ? "제출 중..." : "테스트하기"}
           </button>
           <button 
             className="submit-button-inline"

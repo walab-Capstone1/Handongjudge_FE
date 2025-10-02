@@ -236,12 +236,12 @@
 
 /* Submit with Output Button */
 .submit-button-inline.submit-with-output {
-  background-color: #28a745;
+  background-color: #2f81f7;
   margin-left: 8px;
 }
 
 .submit-button-inline.submit-with-output:hover {
-  background-color: #218838;
+  background-color: #1f6feb;
 }
 
 .submit-button-inline.submit-with-output:disabled {
