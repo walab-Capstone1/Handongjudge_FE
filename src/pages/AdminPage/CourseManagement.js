@@ -49,22 +49,22 @@ const CourseManagement = () => {
     <AdminLayout>
       <div className="course-management">
         <div className="page-header">
-          <h1 className="page-title">수업 관리</h1>
-          <div className="header-stats">
-            <span className="stat-badge">총 {sections.length}개 분반</span>
+          <div className="header-left">
+            <h1 className="page-title">수업 관리</h1>
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="수업명, 교수명으로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
           </div>
-        </div>
-
-        <div className="search-section">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="수업명, 교수명으로 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-            <span className="search-icon">🔍</span>
+          <div className="header-right">
+            <div className="header-stats">
+              <span className="stat-badge">총 {sections.length}개 분반</span>
+            </div>
           </div>
         </div>
 
@@ -72,46 +72,50 @@ const CourseManagement = () => {
           {filteredSections.map((section) => (
             <div key={section.sectionId} className="section-card">
               <div className="section-header">
-                <div className="section-info">
-                  <h3 className="section-title">{section.courseTitle}</h3>
-                  <p className="section-details">{section.sectionNumber}분반</p>
-                </div>
-
+                <h3 className="section-title">{section.courseTitle}</h3>
+                <span className="section-badge">{section.sectionNumber}분반</span>
               </div>
 
-              <div className="section-stats">
-                <div className="stat-item">
-                  <span className="stat-icon">👨‍🏫</span>
-                  <span className="stat-label">담당교수</span>
-                  <span className="stat-value">{section.instructorName}</span>
+              <div className="section-info-grid">
+                <div className="info-row">
+                  <span className="info-label">담당교수</span>
+                  <span className="info-value">{section.instructorName}</span>
                 </div>
-                <div className="stat-item">
-                  <span className="stat-icon">🔔</span>
-                  <span className="stat-label">새 공지</span>
-                  <span className="stat-value">{section.newNoticeCount || 0}개</span>
+                <div className="info-row">
+                  <span className="info-label">공지 수</span>
+                  <span className="info-value">{section.noticeCount || 0}개</span>
                 </div>
-                <div className="stat-item">
-                  <span className="stat-icon">📚</span>
-                  <span className="stat-label">분반</span>
-                  <span className="stat-value">{section.sectionNumber}분반</span>
+                <div className="info-row">
+                  <span className="info-label">학생 관리</span>
+                  <span className="info-value">{section.studentCount || 0}명</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">생성일</span>
+                  <span className="info-value">{section.createdAt || '-'}</span>
                 </div>
               </div>
 
-              <div className="section-actions-bottom">
+              <div className="section-actions">
                 <button 
-                  className="btn-secondary"
+                  className="btn-action"
                   onClick={() => navigate(`/admin/notices/section/${section.sectionId}`)}
                 >
-                  공지사항 관리
+                  공지사항
                 </button>
                 <button 
-                  className="btn-secondary"
+                  className="btn-action"
                   onClick={() => navigate(`/admin/users/section/${section.sectionId}`)}
                 >
-                  수강생 관리
+                  학생 관리
                 </button>
                 <button 
-                  className="btn-primary"
+                  className="btn-action"
+                  onClick={() => navigate(`/admin/grades/section/${section.sectionId}`)}
+                >
+                  성적 관리
+                </button>
+                <button 
+                  className="btn-action primary"
                   onClick={() => navigate(`/admin/assignments/section/${section.sectionId}`)}
                 >
                   과제 관리
@@ -123,15 +127,12 @@ const CourseManagement = () => {
 
         {filteredSections.length === 0 && (
           <div className="no-sections">
-            <div className="no-sections-message">
-              <span className="no-sections-icon">📚</span>
-              <p>
-                {searchTerm 
-                  ? '검색 조건에 맞는 수업이 없습니다.' 
-                  : '담당하고 있는 수업이 없습니다.'
-                }
-              </p>
-            </div>
+            <p>
+              {searchTerm 
+                ? '검색 조건에 맞는 수업이 없습니다.' 
+                : '담당하고 있는 수업이 없습니다.'
+              }
+            </p>
           </div>
         )}
       </div>

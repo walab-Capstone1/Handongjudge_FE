@@ -163,10 +163,9 @@ const NoticeManagement = () => {
     return matchesSearch && matchesSection;
   });
 
-  const uniqueSections = [...new Set(notices.map(notice => ({ 
-    id: notice.sectionId, 
-    name: notice.sectionName 
-  })).filter(Boolean))];
+  const uniqueSections = Array.from(
+    new Map(notices.map(notice => [notice.sectionId, { id: notice.sectionId, name: notice.sectionName }])).values()
+  );
 
   if (loading) {
     return (
@@ -181,94 +180,107 @@ const NoticeManagement = () => {
 
   return (
     <AdminLayout>
-      {/* 분반별 페이지인 경우 네비게이션 표시 */}
+      {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <SectionNavigation 
           sectionId={sectionId}
           sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
+          showCreateButton={true}
+          onCreateClick={handleCreateNotice}
+          createButtonText="새 공지사항 작성"
         />
       )}
       
-      <div className="notice-management">
-        <div className="page-header">
-          <h1 className="page-title">
-            {sectionId ? '분반별 공지사항 관리' : '전체 공지사항 관리'}
-          </h1>
-          <div className="header-actions">
-            <button
-              className="btn-primary"
-              onClick={handleCreateNotice}
-            >
-              새 공지사항 작성
-            </button>
+      {/* 전체 페이지인 경우 기존 헤더 유지 */}
+      {!sectionId && (
+        <div className="notice-management">
+          <div className="page-header">
+            <div className="header-left">
+              <h1 className="page-title">전체 공지사항 관리</h1>
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="제목, 내용, 분반으로 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+            </div>
+            <div className="header-right">
+              <div className="filter-dropdown">
+                <select
+                  value={filterSection}
+                  onChange={(e) => setFilterSection(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="ALL">모든 수업</option>
+                  {uniqueSections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="header-actions">
+                <button
+                  className="btn-primary"
+                  onClick={handleCreateNotice}
+                >
+                  새 공지사항 작성
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
-        {!sectionId && (
-          <div className="filters-section">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="제목, 내용, 분반으로 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-              <span className="search-icon"></span>
-            </div>
-            
-            <div className="filter-dropdown">
-              <select
-                value={filterSection}
-                onChange={(e) => setFilterSection(e.target.value)}
-                className="filter-select"
-              >
-                <option value="ALL">모든 분반</option>
-                {uniqueSections.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {section.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
+      )}
+      
+      <div className="notice-management">
 
         <div className="notices-list">
           {filteredNotices.map((notice) => (
             <div key={notice.id} className="notice-card">
-              <div className="notice-header">
-                <div className="notice-info">
+              <div className="notice-title-row">
+                <div className="title-and-course">
+                  <p className="notice-course">{notice.sectionName}</p>
                   <h3 className="notice-title">{notice.title}</h3>
-                  <div className="notice-meta">
-                    <span className="notice-section">{notice.sectionName}</span>
-                    <span className="notice-date">
-                      {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
-                    </span>
-
-                    {notice.isNew && (
-                      <span className="notice-new-badge">NEW</span>
-                    )}
+                </div>
+                <div className="notice-actions">
+                  <button 
+                    className="btn-text-small edit"
+                    onClick={() => handleEditNotice(notice)}
+                  >
+                    수정
+                  </button>
+                  <div className="more-menu">
+                    <button 
+                      className="btn-icon-small more"
+                      title="더보기"
+                    >
+                      ⋯
+                    </button>
+                    <div className="more-dropdown">
+                      <button 
+                        className="btn-text-small delete"
+                        onClick={() => handleDeleteNotice(notice.id)}
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="notice-actions">
-                  <button
-                    className="btn-icon edit"
-                    onClick={() => handleEditNotice(notice)}
-                    title="수정"
-                  >
-                    <span className="edit-icon"></span>
-                  </button>
-                  <button
-                    className="btn-icon delete"
-                    onClick={() => handleDeleteNotice(notice.id)}
-                    title="삭제"
-                  >
-                    <span className="delete-icon"></span>
-                  </button>
-                </div>
+              </div>
+
+              <div className="notice-compact-stats">
+                <span className="compact-stat">
+                  <span className="stat-label-compact">작성일:</span>
+                  <span className="stat-value-compact">
+                    {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
+                  </span>
+                </span>
+                {notice.isNew && (
+                  <span className="notice-new-badge">NEW</span>
+                )}
               </div>
 
               <div className="notice-content">
