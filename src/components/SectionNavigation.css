@@ -54,9 +54,23 @@
 
 
 
+.section-nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 .section-nav-tabs {
   display: flex;
   gap: 0.5rem;
+}
+
+.section-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .nav-tab {
@@ -81,89 +95,64 @@
 }
 
 .nav-tab.active {
-  color: #0984e3;
-  border-bottom-color: #0984e3;
+  color: #667eea;
+  border-bottom-color: #667eea;
   background: #f8f9fa;
 }
 
-.nav-icon {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  position: relative;
+/* 이모티콘 스타일 제거 - 텍스트만 사용 */
+
+/* 검색창 스타일 */
+.search-box {
+  max-width: 280px;
 }
 
-/* 공지사항 아이콘 */
-.nav-icon.notices {
-  background: linear-gradient(135deg, #74b9ff, #0984e3);
-}
-
-.nav-icon.notices::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 0.9rem;
   background: white;
-  border-radius: 2px;
+  transition: border-color 0.2s ease;
 }
 
-/* 과제 아이콘 */
-.nav-icon.assignments {
-  background: linear-gradient(135deg, #fd79a8, #e84393);
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
-.nav-icon.assignments::before {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 10px;
-  height: 6px;
+/* 필터 드롭다운 스타일 */
+.filter-dropdown {
+  min-width: 150px;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 0.9rem;
   background: white;
-  border-radius: 1px;
+  cursor: pointer;
 }
 
-.nav-icon.assignments::after {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 3px;
-  width: 10px;
-  height: 4px;
-  background: white;
-  border-radius: 1px;
+/* 보조 버튼 스타일 */
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* 수강생 아이콘 */
-.nav-icon.users {
-  background: linear-gradient(135deg, #00b894, #00a085);
-}
-
-.nav-icon.users::before {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
-  background: white;
-  border-radius: 50%;
-}
-
-.nav-icon.users::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 10px;
-  height: 6px;
-  background: white;
-  border-radius: 3px;
+.btn-secondary:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
 }
 
 /* 반응형 디자인 */
@@ -178,6 +167,11 @@
     text-align: left;
   }
   
+  .section-nav-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
   .section-nav-tabs {
     flex-wrap: wrap;
     padding: 0 1rem;
@@ -186,5 +180,15 @@
   .nav-tab {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
+  }
+  
+  .section-nav-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0 1rem;
+  }
+  
+  .search-box {
+    max-width: none;
   }
 }

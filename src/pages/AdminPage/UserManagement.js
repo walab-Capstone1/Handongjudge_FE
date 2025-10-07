@@ -15,6 +15,13 @@ const UserManagement = () => {
   // 모달 관련 상태 제거됨
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
+  
+  // 학생 상세보기 모달 상태
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [studentAssignments, setStudentAssignments] = useState([]);
+  const [expandedAssignment, setExpandedAssignment] = useState(null);
+  const [assignmentProblemsDetail, setAssignmentProblemsDetail] = useState({});
 
   useEffect(() => {
     fetchStudents();
@@ -62,6 +69,68 @@ const UserManagement = () => {
       console.error('학생 상태 변경 실패:', error);
     }
   };
+  
+  // 학생 상세보기 모달 열기
+  const handleStudentDetailView = async (student) => {
+    setSelectedStudent(student);
+    setShowDetailModal(true);
+    
+    try {
+      // 백엔드 API로 학생의 과제 진도율 가져오기
+      const response = await APIService.getStudentAssignmentsProgress(student.userId, student.sectionId);
+      const progressData = response.data || response;
+      
+      setStudentAssignments(progressData || []);
+    } catch (error) {
+      console.error('학생 과제 정보 조회 실패:', error);
+      setStudentAssignments([]);
+    }
+  };
+  
+  // 과제 상세보기 토글 (문제 목록 표시)
+  const handleToggleAssignmentDetail = async (assignmentId) => {
+    if (expandedAssignment === assignmentId) {
+      setExpandedAssignment(null);
+      return;
+    }
+    
+    setExpandedAssignment(assignmentId);
+    
+    // 이미 로드된 경우 스킵
+    if (assignmentProblemsDetail[assignmentId]) {
+      return;
+    }
+    
+    try {
+      // 백엔드 API로 학생의 과제별 문제 상태 가져오기
+      const response = await APIService.getStudentAssignmentProblemsStatus(
+        selectedStudent.userId, 
+        selectedStudent.sectionId,
+        assignmentId
+      );
+      const problemsData = response.data || response;
+      
+      setAssignmentProblemsDetail(prev => ({
+        ...prev,
+        [assignmentId]: problemsData || []
+      }));
+    } catch (error) {
+      console.error('과제 문제 상태 조회 실패:', error);
+      setAssignmentProblemsDetail(prev => ({
+        ...prev,
+        [assignmentId]: []
+      }));
+    }
+  };
+  
+  // 모달 닫기
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedStudent(null);
+    setStudentAssignments([]);
+    setExpandedAssignment(null);
+    setAssignmentProblemsDetail({});
+  };
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -108,7 +177,7 @@ const UserManagement = () => {
 
   return (
     <AdminLayout>
-      {/* 분반별 페이지인 경우 네비게이션 표시 */}
+      {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <SectionNavigation 
           sectionId={sectionId}
@@ -116,38 +185,39 @@ const UserManagement = () => {
         />
       )}
       
-      <div className="user-management">
-        <div className="page-header">
-          <h1 className="page-title">학생 관리</h1>
-          
-        </div>
-
-        {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
-        {!sectionId && (
-          <div className="filters-section">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="이름, 이메일, 팀ID로 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-              <span className="search-icon">🔍</span>
+      {/* 전체 페이지인 경우 기존 헤더 유지 */}
+      {!sectionId && (
+        <div className="user-management">
+          <div className="page-header">
+            <div className="header-left">
+              <h1 className="page-title">학생 관리</h1>
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="이름, 이메일, 팀ID로 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
             </div>
-            
-            <select
-              value={filterSection}
-              onChange={(e) => setFilterSection(e.target.value)}
-              className="section-filter"
-            >
-              <option value="ALL">모든 분반</option>
-              {uniqueSections.map((section, index) => (
-                <option key={index} value={section}>{section}</option>
-              ))}
-            </select>
+            <div className="header-right">
+              <select
+                value={filterSection}
+                onChange={(e) => setFilterSection(e.target.value)}
+                className="section-filter"
+              >
+                <option value="ALL">모든 수업</option>
+                {uniqueSections.map((section, index) => (
+                  <option key={index} value={section}>{section}</option>
+                ))}
+              </select>
+            </div>
           </div>
-        )}
+        </div>
+      )}
+      
+      <div className="user-management">
 
         <div className="users-table-container">
           <table className="users-table">
@@ -155,11 +225,9 @@ const UserManagement = () => {
                                   <tr>
                       <th>이름</th>
                       <th>이메일</th>
-                      <th>팀ID</th>
-                      <th>분반</th>
                       <th>과목</th>
-                      <th>등록일</th>
-                      <th>최근 로그인</th>
+                      <th>분반</th>
+                      <th>전체 과제 진도율</th>
                       <th>작업</th>
                     </tr>
             </thead>
@@ -173,24 +241,30 @@ const UserManagement = () => {
                     {student.name}
                   </td>
                   <td>{student.email}</td>
-                  <td>{student.teamId || '-'}</td>
+                  <td>{student.courseTitle}</td>
                   <td>
                     <span className="section-badge">
                       {student.sectionNumber}분반
                     </span>
                   </td>
-                  <td>{student.courseTitle}</td>
-                  <td className="enrolled-date">
-                    {student.enrolledAt ? new Date(student.enrolledAt).toLocaleDateString('ko-KR') : '-'}
-                  </td>
-                  <td className="last-login">
-                    {student.lastLogin ? new Date(student.lastLogin).toLocaleDateString('ko-KR') : '-'}
+                  <td className="progress-cell">
+                    <div className="progress-info">
+                      <div className="progress-bar-container">
+                        <div 
+                          className="progress-bar-fill" 
+                          style={{ width: `${student.assignmentCompletionRate || 0}%` }}
+                        ></div>
+                      </div>
+                      <span className="progress-text">
+                        {student.assignmentCompletionRate ? `${student.assignmentCompletionRate.toFixed(1)}%` : '0%'}
+                      </span>
+                    </div>
                   </td>
                   <td>
                     <div className="action-buttons">
                       <button 
                         className="btn-detail-view"
-                        onClick={() => console.log('학생 상세 보기:', student.userId)}
+                        onClick={() => handleStudentDetailView(student)}
                         title="상세 보기"
                       >
                         상세 보기
@@ -201,7 +275,7 @@ const UserManagement = () => {
               ))}
                               {filteredStudents.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="no-data">
+                    <td colSpan="6" className="no-data">
                       <div className="no-data-message">
                         <span className="no-data-icon"></span>
                         <div>
@@ -224,6 +298,88 @@ const UserManagement = () => {
             </tbody>
           </table>
         </div>
+
+        {/* 학생 상세보기 모달 */}
+        {showDetailModal && selectedStudent && (
+          <div className="modal-overlay" onClick={handleCloseDetailModal}>
+            <div className="student-detail-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>과제별 진도율</h2>
+                <button className="modal-close-btn" onClick={handleCloseDetailModal}>✕</button>
+              </div>
+              
+              <div className="modal-body">
+                <div className="assignments-progress-section">
+                  {studentAssignments.length === 0 ? (
+                    <p className="no-assignments">등록된 과제가 없습니다.</p>
+                  ) : (
+                    <div className="assignments-list-horizontal">
+                      {studentAssignments.map((assignment) => (
+                        <div key={assignment.assignmentId} className="assignment-progress-card-wide">
+                          <div className="assignment-progress-header">
+                            <div className="assignment-title-section">
+                              <h4>{assignment.assignmentTitle}</h4>
+                              {assignment.description && (
+                                <p className="assignment-description">{assignment.description}</p>
+                              )}
+                            </div>
+                            <span className="progress-badge">{assignment.progressRate || 0}%</span>
+                          </div>
+                          <div className="assignment-progress-body">
+                            <div className="progress-stats">
+                              <span>완료: {assignment.solvedProblems || 0} / {assignment.totalProblems || 0} 문제</span>
+                            </div>
+                            <div className="progress-bar-container">
+                              <div 
+                                className="progress-bar-fill" 
+                                style={{ width: `${assignment.progressRate || 0}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          <button 
+                            className="btn-toggle-detail"
+                            onClick={() => handleToggleAssignmentDetail(assignment.assignmentId)}
+                          >
+                            {expandedAssignment === assignment.assignmentId ? '상세보기 닫기 ▲' : '상세보기 ▼'}
+                          </button>
+                          
+                          {/* 문제별 상태 상세보기 */}
+                          {expandedAssignment === assignment.assignmentId && (
+                            <div className="problems-detail-section">
+                              {assignmentProblemsDetail[assignment.assignmentId]?.length > 0 ? (
+                                <div className="problems-grid">
+                                  {assignmentProblemsDetail[assignment.assignmentId].map((problem) => (
+                                    <div key={problem.problemId} className={`problem-status-card ${problem.status}`}>
+                                      <div className="problem-info">
+                                        <span className="problem-title">{problem.problemTitle}</span>
+                                        <span className={`status-badge ${problem.status}`}>
+                                          {problem.status === 'ACCEPTED' ? '✓ 완료' : 
+                                           problem.status === 'SUBMITTED' ? '⋯ 제출함' : 
+                                           '○ 미제출'}
+                                        </span>
+                                      </div>
+                                      {problem.submissionCount > 0 && (
+                                        <div className="submission-count">
+                                          제출 횟수: {problem.submissionCount}회
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="no-problems">문제 정보를 불러오는 중...</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </AdminLayout>

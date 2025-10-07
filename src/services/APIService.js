@@ -335,6 +335,16 @@ class APIService {
   async getInstructorStudents() {
     return await this.request('/user/instructor/students');
   }
+  
+  // 학생의 특정 분반 과제 진도율 조회
+  async getStudentAssignmentsProgress(userId, sectionId) {
+    return await this.request(`/user/students/${userId}/sections/${sectionId}/assignments-progress`);
+  }
+  
+  // 학생의 특정 과제의 문제별 상태 조회
+  async getStudentAssignmentProblemsStatus(userId, sectionId, assignmentId) {
+    return await this.request(`/user/students/${userId}/sections/${sectionId}/assignments/${assignmentId}/problems-status`);
+  }
 
   // 특정 분반 학생 조회
   async getSectionStudents(sectionId) {

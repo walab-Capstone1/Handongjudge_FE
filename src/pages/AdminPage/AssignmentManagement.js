@@ -87,7 +87,7 @@ const AssignmentManagement = () => {
                   
                   return {
                     ...assignment,
-                    sectionName: currentSection.courseTitle,
+                    sectionName: `${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`,
                     sectionId: parseInt(sectionId),
                     problemCount: problems?.length || 0,
                     problems: problems || [],
@@ -98,7 +98,7 @@ const AssignmentManagement = () => {
                 } catch (error) {
                   return {
                     ...assignment,
-                    sectionName: currentSection.courseTitle,
+                    sectionName: `${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`,
                     sectionId: parseInt(sectionId),
                     problemCount: 0,
                     problems: [],
@@ -129,7 +129,7 @@ const AssignmentManagement = () => {
                   
                   return {
                     ...assignment,
-                    sectionName: section.courseTitle,
+                    sectionName: `${section.courseTitle} - ${section.sectionNumber}분반`,
                     sectionId: section.sectionId,
                     problemCount: problems?.length || 0,
                     problems: problems || [],
@@ -140,7 +140,7 @@ const AssignmentManagement = () => {
                 } catch (error) {
                   return {
                     ...assignment,
-                    sectionName: section.courseTitle,
+                    sectionName: `${section.courseTitle} - ${section.sectionNumber}분반`,
                     sectionId: section.sectionId,
                     problemCount: 0,
                     problems: [],
@@ -789,72 +789,95 @@ const AssignmentManagement = () => {
 
   return (
     <AdminLayout>
-      {/* 분반별 페이지인 경우 네비게이션 표시 */}
+      <>
+      {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <SectionNavigation 
           sectionId={sectionId}
           sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber || currentSection.sectionId}분반`}
+          showCreateButton={true}
+          onCreateClick={() => setShowAddModal(true)}
+          createButtonText="새 과제 생성"
+          showAdditionalButtons={true}
+          additionalButtons={[
+            {
+              text: "새 문제 만들기",
+              onClick: () => setShowStandaloneProblemModal(true),
+              className: "btn-secondary"
+            },
+            {
+              text: "문제 대량 생성",
+              onClick: () => setShowBulkProblemModal(true),
+              className: "btn-secondary"
+            }
+          ]}
         />
       )}
       
-      <div className="assignment-management">
-        <div className="page-header">
-          <h1 className="page-title">
-            {sectionId ? '분반별 과제 관리' : '전체 과제 관리'}
-          </h1>
-          <div className="header-actions">
-            <button 
-              className="btn-secondary"
-              onClick={handleStandaloneProblemCreate}
-              title="단일 문제를 생성합니다"
-            >
-              <span>📝</span>
-              새 문제 만들기
-            </button>
-            <button 
-              className="btn-secondary"
-              onClick={handleBulkProblemCreate}
-              title="여러 문제를 한번에 생성합니다"
-            >
-              <span>📚</span>
-              문제 대량 생성
-            </button>
-            <button 
-              className="btn-secondary"
-              onClick={handleAddAssignment}
-            >
-              <span>➕</span>
-              새 과제 만들기
-            </button>
+      {/* 전체 페이지인 경우 기존 헤더 유지 */}
+      {!sectionId && (
+        <div className="assignment-management">
+          <div className="page-header">
+          <div className="header-left">
+            <h1 className="page-title">전체 과제 관리</h1>
+            {/* 분반별 페이지가 아닌 경우에만 검색창 표시 */}
+            {!sectionId && (
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="과제명, 설명으로 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+            )}
+          </div>
+          <div className="header-right">
+            {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
+            {!sectionId && (
+              <select
+                value={filterSection}
+                onChange={(e) => setFilterSection(e.target.value)}
+                className="section-filter"
+              >
+                <option value="ALL">모든 수업</option>
+                {uniqueSections.map((section, index) => (
+                  <option key={index} value={section}>{section}</option>
+                ))}
+              </select>
+            )}
+            <div className="header-actions">
+              <button 
+                className="btn-secondary"
+                onClick={handleStandaloneProblemCreate}
+                title="단일 문제를 생성합니다"
+              >
+                <span>📝</span>
+                새 문제 만들기
+              </button>
+              <button 
+                className="btn-secondary"
+                onClick={handleBulkProblemCreate}
+                title="여러 문제를 한번에 생성합니다"
+              >
+                <span>📚</span>
+                문제 대량 생성
+              </button>
+              <button 
+                className="btn-secondary"
+                onClick={handleAddAssignment}
+              >
+                <span>➕</span>
+                새 과제 만들기
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
-        {!sectionId && (
-          <div className="filters-section">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="과제명, 설명으로 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-            
-            <select
-              value={filterSection}
-              onChange={(e) => setFilterSection(e.target.value)}
-              className="section-filter"
-            >
-              <option value="ALL">모든 분반</option>
-              {uniqueSections.map((section, index) => (
-                <option key={index} value={section}>{section}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
+        </div>
+      )}
+      
+      <div className="assignment-management">
         <div className="assignments-grid">
           {filteredAssignments.map((assignment) => (
             <div key={assignment.id} className={`assignment-card ${expandedAssignments[assignment.id] ? 'expanded' : ''}`}>
@@ -866,19 +889,27 @@ const AssignmentManagement = () => {
                   </div>
                   <div className="assignment-actions">
                     <button 
-                      className="btn-icon-small edit"
+                      className="btn-text-small edit"
                       onClick={() => handleEdit(assignment)}
-                      title="수정"
                     >
-                      ✏️
+                      수정
                     </button>
-                    <button 
-                      className="btn-icon-small delete"
-                      onClick={() => handleDelete(assignment.id)}
-                      title="삭제"
-                    >
-                      🗑️
-                    </button>
+                    <div className="more-menu">
+                      <button 
+                        className="btn-icon-small more"
+                        title="더보기"
+                      >
+                        ⋯
+                      </button>
+                      <div className="more-dropdown">
+                        <button 
+                          className="btn-text-small delete"
+                          onClick={() => handleDelete(assignment.id)}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1667,6 +1698,7 @@ const AssignmentManagement = () => {
         )}
 
       </div>
+      </>
     </AdminLayout>
   );
 };

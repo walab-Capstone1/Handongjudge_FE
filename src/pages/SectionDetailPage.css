@@ -308,7 +308,7 @@
 /* Assignments Section */
 .assignments-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
 
@@ -334,19 +334,26 @@
 }
 
 .assignment-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 1rem !important;
+  flex-direction: row !important;
+}
+
+.assignment-title-section {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .assignment-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #374151;
-  margin: 0;
-  flex: 1;
-  margin-right: 1rem;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  color: #374151 !important;
+  margin: 0 !important;
+  text-align: left !important;
+  display: block !important;
 }
 
 .assignment-meta {
@@ -357,9 +364,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  margin-bottom: 0.75rem;
   font-size: 0.9rem;
   color: #6b7280;
+  flex: 1;
 }
 
 .start-date, .end-date {
@@ -418,6 +425,7 @@
 
   .assignments-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .notice-header,
