@@ -203,17 +203,19 @@ const SectionDetailPage = () => {
                       onClick={() => handleAssignmentClick(assignment.id)}
                     >
                       <div className="assignment-header">
-                        <h3 className="assignment-title">{assignment.title}</h3>
-                        {assignment.isNew && <span className="new-indicator">NEW</span>}
+                        <div className="assignment-title-section">
+                          <h3 className="assignment-title">{assignment.title}</h3>
+                          {assignment.isNew && <span className="new-indicator">NEW</span>}
+                        </div>
+                        <span className={`deadline-status ${getDeadlineStatus(assignment.endDate).color}`}>
+                          {getDeadlineStatus(assignment.endDate).text}
+                        </span>
                       </div>
                       <div className="assignment-meta">
                         <div className="assignment-dates">
                           <span className="start-date">시작: {formatDate(assignment.startDate)}</span>
                           <span className="end-date">마감: {formatDate(assignment.endDate)}</span>
                         </div>
-                        <span className={`deadline-status ${getDeadlineStatus(assignment.endDate).color}`}>
-                          {getDeadlineStatus(assignment.endDate).text}
-                        </span>
                       </div>
                       <div className="assignment-description">
                         {assignment.description}
