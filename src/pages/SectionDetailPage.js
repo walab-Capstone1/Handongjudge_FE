@@ -158,29 +158,32 @@ const SectionDetailPage = () => {
                   <p>새로운 공지사항이 등록되면 여기에 표시됩니다.</p>
                 </div>
               ) : (
-                <div className="notices-container">
-                  <div className="notices-list">
-                    {notices.map((notice) => (
-                      <div
-                        key={notice.id} 
-                        className={`notice-item ${notice.isNew ? 'new' : ''}`}
-                        onClick={() => handleNoticeClick(notice)}
-                      >
-                        <div className="notice-header">
+                <div className="notices-list">
+                  {notices.map((notice) => (
+                    <div 
+                      key={notice.id} 
+                      className="notice-card"
+                      onClick={() => handleNoticeClick(notice)}
+                    >
+                      <div className="notice-title-row">
+                        <div className="title-and-course">
+                          <p className="notice-course">{sectionInfo?.courseTitle} - {sectionInfo?.sectionNumber}분반</p>
                           <h3 className="notice-title">{notice.title}</h3>
-                          <div className="notice-indicators">
-                            {notice.isNew && <span className="new-indicator">NEW</span>}
-                            <span className="notice-date">{formatDate(notice.createdAt)}</span>
-                          </div>
                         </div>
-                        <div className="notice-preview">
-                          {notice.content.length > 100 
-                            ? `${notice.content.substring(0, 100)}...` 
-                            : notice.content}
+                        <div className="notice-meta">
+                          <span className="notice-date">{formatDate(notice.createdAt)}</span>
+                          {notice.isNew && <span className="new-indicator">NEW</span>}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="notice-content">
+                        <p className="notice-preview">
+                          {notice.content.length > 150 
+                            ? `${notice.content.substring(0, 150)}...` 
+                            : notice.content}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
