@@ -16,6 +16,7 @@ import ProblemSolvePage from "./pages/AssignmentPage/ProblemSolvePage";
 import AdminDashboard from "./pages/AdminPage/AdminDashboard";
 import CourseManagement from "./pages/AdminPage/CourseManagement";
 import AssignmentManagement from "./pages/AdminPage/AssignmentManagement";
+import AssignmentStudentProgress from "./pages/AdminPage/AssignmentStudentProgress";
 import UserManagement from "./pages/AdminPage/UserManagement";
 import NoticeManagement from "./pages/AdminPage/NoticeManagement";
 import AdminRoute from "./components/AdminRoute";
@@ -41,6 +42,7 @@ function App() {
             <Route path="/admin/courses" element={<AdminRoute><CourseManagement /></AdminRoute>} />
             <Route path="/admin/assignments" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
             <Route path="/admin/assignments/section/:sectionId" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
+            <Route path="/admin/sections/:sectionId/assignments/:assignmentId/progress" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
             <Route path="/admin/notices" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/admin/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />

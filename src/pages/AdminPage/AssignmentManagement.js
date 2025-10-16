@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
 import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
@@ -7,6 +7,7 @@ import "./AssignmentManagement.css";
 
 const AssignmentManagement = () => {
   const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기
+  const navigate = useNavigate();
   const [assignments, setAssignments] = useState([]);
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -889,6 +890,12 @@ const AssignmentManagement = () => {
                   </div>
                   <div className="assignment-actions">
                     <button 
+                      className="btn-text-small detail"
+                      onClick={() => navigate(`/admin/sections/${assignment.sectionId}/assignments/${assignment.id}/progress`)}
+                    >
+                      상세보기
+                    </button>
+                    <button 
                       className="btn-text-small edit"
                       onClick={() => handleEdit(assignment)}
                     >
@@ -968,9 +975,6 @@ const AssignmentManagement = () => {
                               [{problem.difficulty}]
                             </span>
                           )}
-                          {problem.domjudgeProblemId && (
-                            <span className="problem-id">ID: {problem.domjudgeProblemId}</span>
-                          )}
                         </div>
                         
                         {/* 문제별 제출률 표시 */}
@@ -985,11 +989,11 @@ const AssignmentManagement = () => {
                                   제출 현황: {problemStat.submittedStudents}/{problemStat.totalStudents}
                                 </>
                               ) : (
-                                `제출 현황: 0/${assignment.totalStudents || 0}`
+                                `제출 현황: 0/${submissionStats[assignment.id]?.totalStudents || assignment.totalStudents || 0}`
                               );
                             })()
                           ) : (
-                            `제출 현황: 0/${assignment.totalStudents || 0}`
+                            `제출 현황: 0/${submissionStats[assignment.id]?.totalStudents || assignment.totalStudents || 0}`
                           )}
                         </span>
                         
@@ -1016,13 +1020,59 @@ const AssignmentManagement = () => {
                 </div>
               </div>
 
-                  <div className="progress-bar">
-                    <div 
-                      className="progress-fill"
-                      style={{ 
-                        width: `${submissionStats[assignment.id]?.submissionRate || 0}%` 
-                      }}
-                    ></div>
+                  <div className="progress-container">
+                    <div className="progress-info">
+                      <span className="progress-label">완료율</span>
+                      <span className="progress-count">
+                        {(() => {
+                          const stats = submissionStats[assignment.id];
+                          if (!stats || !stats.problemStats || stats.problemStats.length === 0) {
+                            return `0 / ${stats?.totalStudents || assignment.totalStudents || 0}명`;
+                          }
+                          
+                          const totalStudents = stats.totalStudents || assignment.totalStudents || 0;
+                          const totalProblems = assignment.problems?.length || 0;
+                          
+                          if (totalStudents === 0 || totalProblems === 0) {
+                            return `0 / ${totalStudents}명`;
+                          }
+                          
+                          // 모든 문제를 다 푼 학생 수 계산
+                          const completedStudents = stats.problemStats.reduce((min, problemStat) => {
+                            return Math.min(min, problemStat.submittedStudents || 0);
+                          }, totalStudents);
+                          
+                          return `${completedStudents} / ${totalStudents}명`;
+                        })()}
+                      </span>
+                    </div>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill"
+                        style={{ 
+                          width: `${(() => {
+                            const stats = submissionStats[assignment.id];
+                            if (!stats || !stats.problemStats || stats.problemStats.length === 0) {
+                              return 0;
+                            }
+                            
+                            const totalStudents = stats.totalStudents || assignment.totalStudents || 0;
+                            const totalProblems = assignment.problems?.length || 0;
+                            
+                            if (totalStudents === 0 || totalProblems === 0) {
+                              return 0;
+                            }
+                            
+                            // 모든 문제를 다 푼 학생 수 계산
+                            const completedStudents = stats.problemStats.reduce((min, problemStat) => {
+                              return Math.min(min, problemStat.submittedStudents || 0);
+                            }, totalStudents);
+                            
+                            return Math.round((completedStudents / totalStudents) * 100);
+                          })()}%` 
+                        }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
               )}

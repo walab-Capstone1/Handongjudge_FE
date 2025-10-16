@@ -385,6 +385,19 @@ class APIService {
   //   }
   // }
 
+  // 과제별 학생 진행 현황 조회 (학생별 문제 풀이 현황)
+  async getAssignmentStudentProgress(assignmentId, sectionId) {
+    try {
+      console.log(`API 호출: /sections/${sectionId}/assignments/${assignmentId}/student-progress`);
+      const response = await this.request(`/sections/${sectionId}/assignments/${assignmentId}/student-progress`);
+      console.log(`API 응답:`, response);
+      return response;
+    } catch (error) {
+      console.error('학생 진행 현황 조회 실패:', error);
+      return [];
+    }
+  }
+
   // ==================== 공지사항 관련 API ====================
 
   // 공지사항 생성

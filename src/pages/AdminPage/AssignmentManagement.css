@@ -281,6 +281,16 @@
   white-space: nowrap;
 }
 
+.btn-text-small.detail {
+  color: #10b981;
+  border-color: #10b981;
+}
+
+.btn-text-small.detail:hover {
+  background: #10b981;
+  color: white;
+}
+
 .btn-text-small.edit {
   color: #667eea;
   border-color: #667eea;
@@ -539,7 +549,6 @@
   padding: 0.8rem 1rem;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
   gap: 0.5rem;
 }
 
@@ -562,7 +571,6 @@
   padding: 0.2rem 0.5rem;
   background: #f8f9fa;
   border-radius: 4px;
-  border-left: 3px solid #0984e3;
 }
 
 
@@ -574,20 +582,65 @@
   letter-spacing: 0.5px;
 }
 
+.progress-container {
+  margin-top: 1rem;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.progress-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.progress-count {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
 .progress-bar {
   width: 100%;
-  height: 6px;
+  height: 8px;
   background: #e9ecef;
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
+  position: relative;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #00b894, #55efc4);
+  background: linear-gradient(90deg, #10b981, #34d399);
   transition: width 0.3s ease;
-  border-radius: 3px;
+  border-radius: 4px;
+  position: relative;
 }
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 
 /* 모달 스타일 */
 .modal-overlay {
@@ -847,7 +900,7 @@
 }
 
 .btn-add-problem {
-  background: linear-gradient(135deg, #00b894, #00cec9);
+  background: #667eea;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -859,12 +912,12 @@
 }
 
 .btn-add-problem:hover {
-  background: linear-gradient(135deg, #00a085, #00b7b3);
+  background: #5a6fd8;
   transform: translateY(-1px);
 }
 
 .btn-add-first-problem {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #667eea;
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -875,7 +928,7 @@
 }
 
 .btn-add-first-problem:hover {
-  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  background: #5a6fd8;
   transform: translateY(-2px);
 }
 
