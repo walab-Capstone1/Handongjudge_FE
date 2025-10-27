@@ -1,0 +1,19 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the application
+COPY . .
+
+# Build the application (uncomment if using production build)
+# RUN npm run build
+
+# Expose the port
+EXPOSE 3000
+
+# Start the development server (change to use production build if needed)
+CMD ["npm", "start"]
