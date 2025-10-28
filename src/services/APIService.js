@@ -656,6 +656,40 @@ class APIService {
     return await this.request(`/mypage/submission/${submissionId}/code`);
   }
 
+  // enrollmentCode로 수강 신청
+  async enrollByCode(enrollmentCode) {
+    return await this.request(`/sections/enroll/${enrollmentCode}`, {
+      method: 'POST',
+    });
+  }
+
+  // 수업(Section) 생성
+  async createSection(data) {
+    return await this.request('/sections', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 강의와 수업을 함께 생성
+  async createSectionWithCourse(data) {
+    return await this.request('/sections/with-course', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 강의(Course) 목록 조회
+  async getCourses() {
+    return await this.request('/courses');
+  }
+
+  // 현재 로그인한 사용자 ID 조회
+  async getCurrentUserId() {
+    const userInfo = await this.getUserInfo();
+    return userInfo.data.user_id || userInfo.user_id;
+  }
+
 }
 
 const apiService = new APIService();

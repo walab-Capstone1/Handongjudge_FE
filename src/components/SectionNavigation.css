@@ -13,6 +13,47 @@
   gap: 1rem;
 }
 
+.section-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3436;
+  margin: 0 0 0.25rem 0;
+}
+
+.section-info-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.enrollment-link-button {
+  background: #667eea;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.enrollment-link-button:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 .back-to-dashboard {
   display: flex;
   align-items: center;
@@ -36,20 +77,6 @@
 .back-icon {
   font-size: 1.1rem;
   font-weight: bold;
-}
-
-.section-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.section-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2d3436;
-  margin: 0 0 0.25rem 0;
 }
 
 

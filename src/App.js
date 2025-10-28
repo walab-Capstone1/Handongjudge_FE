@@ -20,6 +20,7 @@ import AssignmentStudentProgress from "./pages/AdminPage/AssignmentStudentProgre
 import UserManagement from "./pages/AdminPage/UserManagement";
 import NoticeManagement from "./pages/AdminPage/NoticeManagement";
 import AdminRoute from "./components/AdminRoute";
+import EnrollPage from "./pages/EnrollPage";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/" element={<Onboarding />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />
+            <Route path="/enroll/:enrollmentCode" element={<EnrollPage />} />
             <Route path="/main" element={<MainPage />} /> 
             <Route path="/questions" element={<QuestionPage />} />
             <Route path="/sections/:sectionId" element={<SectionDetailPage />} />

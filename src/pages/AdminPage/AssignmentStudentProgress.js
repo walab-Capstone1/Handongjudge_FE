@@ -13,11 +13,29 @@ const AssignmentStudentProgress = () => {
   const [problems, setProblems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL'); // ALL, COMPLETED, IN_PROGRESS, NOT_STARTED
+  const [currentSection, setCurrentSection] = useState(null);
 
   useEffect(() => {
+    fetchSectionInfo();
     fetchAssignmentDetail();
     fetchStudentProgress();
   }, [assignmentId, sectionId]);
+
+  const fetchSectionInfo = async () => {
+    try {
+      const dashboardResponse = await APIService.getInstructorDashboard();
+      const sectionsData = dashboardResponse?.data || [];
+      
+      if (sectionId) {
+        const currentSectionData = sectionsData.find(section => 
+          section.sectionId === parseInt(sectionId)
+        );
+        setCurrentSection(currentSectionData);
+      }
+    } catch (error) {
+      console.error('분반 정보 조회 실패:', error);
+    }
+  };
 
   const fetchAssignmentDetail = async () => {
     try {
@@ -89,7 +107,7 @@ const AssignmentStudentProgress = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout selectedSection={currentSection}>
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>학생 진행 현황을 불러오는 중...</p>
@@ -99,7 +117,7 @@ const AssignmentStudentProgress = () => {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout selectedSection={currentSection}>
       <div className="student-progress-container">
         {/* 헤더 */}
         <div className="page-header">
@@ -114,39 +132,56 @@ const AssignmentStudentProgress = () => {
           </div>
         </div>
 
-        {/* 통계 요약 */}
-        <div className="stats-summary">
-          <div className="stat-card total">
-            <div className="stat-info">
-              <span className="stat-label">전체 학생</span>
-              <span className="stat-value">{studentProgress.length}명</span>
+        {/* 문제별 통계 */}
+        {problems.length > 0 && (
+          <div className="problems-summary">
+            <h3 className="summary-title">문제별 제출 현황</h3>
+            <div className="problems-grid">
+              {problems.map((problem, index) => {
+              const solvedCount = studentProgress.filter(student => 
+                student.solvedProblems?.includes(problem.id)
+              ).length;
+              const totalStudents = studentProgress.length;
+              const percentage = totalStudents > 0 ? Math.round((solvedCount / totalStudents) * 100) : 0;
+              const unsolvedCount = totalStudents - solvedCount;
+              
+              return (
+                <div key={problem.id} className="problem-stat-card">
+                  <div className="problem-stat-header">
+                    <div className="header-left">
+                      <span className="problem-number">문제 {index + 1}</span>
+                      <span className="problem-title">{problem.title}</span>
+                    </div>
+                    <span className="total-label">총 {totalStudents}명</span>
+                  </div>
+                  <div className="problem-stat-info">
+                    <div className="problem-stat-item solved">
+                      <span className="stat-label">완료</span>
+                      <div className="stat-row">
+                        <span className="stat-value">{solvedCount}명</span>
+                        <span className="stat-percent">{percentage}%</span>
+                      </div>
+                    </div>
+                    <div className="problem-stat-item unsolved">
+                      <span className="stat-label">미완료</span>
+                      <div className="stat-row">
+                        <span className="stat-value">{unsolvedCount}명</span>
+                        <span className="stat-percent">{100 - percentage}%</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="problem-stat-bar">
+                    <div 
+                      className="problem-stat-fill solved-fill"
+                      style={{ width: `${percentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+              );
+            })}
             </div>
           </div>
-          <div className="stat-card completed">
-            <div className="stat-info">
-              <span className="stat-label">완료</span>
-              <span className="stat-value">
-                {studentProgress.filter(s => getCompletionStatus(s) === 'COMPLETED').length}명
-              </span>
-            </div>
-          </div>
-          <div className="stat-card in-progress">
-            <div className="stat-info">
-              <span className="stat-label">진행중</span>
-              <span className="stat-value">
-                {studentProgress.filter(s => getCompletionStatus(s) === 'IN_PROGRESS').length}명
-              </span>
-            </div>
-          </div>
-          <div className="stat-card not-started">
-            <div className="stat-info">
-              <span className="stat-label">미시작</span>
-              <span className="stat-value">
-                {studentProgress.filter(s => getCompletionStatus(s) === 'NOT_STARTED').length}명
-              </span>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* 필터 */}
         <div className="filters-section">

@@ -39,6 +39,13 @@
   letter-spacing: -0.025em;
 }
 
+.sidebar-subtitle {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0 0;
+  font-weight: 500;
+}
+
 /* Admin icon removed - using text only */
 
 .sidebar-nav {

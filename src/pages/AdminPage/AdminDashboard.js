@@ -10,8 +10,15 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSection, setSelectedSection] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [selectedYear, setSelectedYear] = useState('ALL');
+  const [selectedSemester, setSelectedSemester] = useState('ALL');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [formData, setFormData] = useState({
+    courseTitle: '',
+    sectionNumber: '',
+    year: new Date().getFullYear(),
+    semester: 'SPRING'
+  });
 
   useEffect(() => {
     const fetchSections = async () => {
@@ -31,14 +38,72 @@ const AdminDashboard = () => {
   }, []);
 
   const handleSectionClick = (section) => {
-    setSelectedSection(section);
-    setShowModal(true);
+    // 수업 카드를 클릭하면 해당 수업의 과제 관리 페이지로 이동
+    navigate(`/admin/assignments/section/${section.sectionId}`, { state: { section } });
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedSection(null);
+  const handleCreateSection = async () => {
+    try {
+      const response = await APIService.createSectionWithCourse({
+        courseTitle: formData.courseTitle,
+        instructorId: await APIService.getCurrentUserId(),
+        sectionNumber: parseInt(formData.sectionNumber),
+        year: parseInt(formData.year),
+        semester: formData.semester
+      });
+
+      alert('수업이 성공적으로 생성되었습니다!');
+      setShowCreateModal(false);
+      setFormData({
+        courseTitle: '',
+        sectionNumber: '',
+        year: new Date().getFullYear(),
+        semester: 'SPRING'
+      });
+      
+      // 수업 목록 다시 불러오기
+      const dashboardResponse = await APIService.getInstructorDashboard();
+      const dashboardData = dashboardResponse?.data || [];
+      setSections(dashboardData);
+    } catch (error) {
+      console.error('수업 생성 실패:', error);
+      alert(error.message || '수업 생성에 실패했습니다.');
+    }
   };
+
+  // 학기 표시 헬퍼 함수
+  const getSemesterLabel = (semester) => {
+    switch(semester) {
+      case 'SPRING': return '1학기';
+      case 'SUMMER': return '여름학기';
+      case 'FALL': return '2학기';
+      case 'WINTER': return '겨울학기';
+      default: return '1학기';
+    }
+  };
+
+  // 년도 필터링
+  const years = ['ALL', ...new Set(sections.map(s => s.year).filter(Boolean))].sort((a, b) => {
+    if (a === 'ALL') return -1;
+    if (b === 'ALL') return 1;
+    return b - a;
+  });
+
+  // 학기 필터링 (1학기, 여름학기, 2학기, 겨울학기)
+  const semesters = [
+    { value: 'ALL', label: '전체' },
+    { value: 'SPRING', label: '1학기' },
+    { value: 'SUMMER', label: '여름학기' },
+    { value: 'FALL', label: '2학기' },
+    { value: 'WINTER', label: '겨울학기' }
+  ];
+
+  // 필터링된 수업 목록
+  const filteredSections = sections.filter(section => {
+    const matchesYear = selectedYear === 'ALL' || section.year === parseInt(selectedYear);
+    const matchesSemester = selectedSemester === 'ALL' || section.semester === selectedSemester;
+    return matchesYear && matchesSemester;
+  });
 
   if (loading) {
     return (
@@ -57,20 +122,72 @@ const AdminDashboard = () => {
         <div className="dashboard-header">
           <h1 className="dashboard-title">담당 분반 목록</h1>
           <p className="dashboard-subtitle">
-            분반을 클릭하면 상세 정보를 확인할 수 있습니다.
+            분반을 클릭하면 해당 수업의 관리 페이지로 이동합니다.
           </p>
         </div>
 
+        {/* 필터 섹션 */}
+        <div className="filter-section">
+          <div className="filter-left">
+            <div className="filter-group">
+              <label className="filter-label">년도</label>
+              <select 
+                className="filter-select"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+              >
+                {years.map(year => (
+                  <option key={year} value={year}>
+                    {year === 'ALL' ? '전체' : `${year}년`}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="filter-group">
+              <label className="filter-label">학기</label>
+              <select 
+                className="filter-select"
+                value={selectedSemester}
+                onChange={(e) => setSelectedSemester(e.target.value)}
+              >
+                {semesters.map(semester => (
+                  <option key={semester.value} value={semester.value}>
+                    {semester.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="filter-stats">
+              <span className="filter-count">총 {filteredSections.length}개 수업</span>
+            </div>
+          </div>
+          <div className="filter-right">
+            <button 
+              className="btn-create-section"
+              onClick={() => setShowCreateModal(true)}
+            >
+              + 새 수업 만들기
+            </button>
+          </div>
+        </div>
+
         <div className="sections-grid">
-          {sections.map((section) => (
+          {filteredSections.map((section) => (
             <div 
               key={section.sectionId} 
               className="section-card clickable"
               onClick={() => handleSectionClick(section)}
             >
               <div className="section-header">
-                <h3 className="section-title">{section.courseTitle}</h3>
-                <span className="section-badge">{section.sectionNumber}분반</span>
+                <div className="section-title-area">
+                  <div className="title-and-badge">
+                    <h3 className="section-title">{section.courseTitle}</h3>
+                    <span className="section-badge">{section.sectionNumber}분반</span>
+                  </div>
+                  <span className="year-badge">
+                    {section.year || '2024'}년 {getSemesterLabel(section.semester)}
+                  </span>
+                </div>
               </div>
 
               <div className="section-info-grid">
@@ -79,59 +196,31 @@ const AdminDashboard = () => {
                   <span className="info-value">{section.instructorName}</span>
                 </div>
                 <div className="info-row">
-                  <span className="info-label">공지 수</span>
-                  <span className="info-value">{section.noticeCount || 0}개</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">학생 관리</span>
+                  <span className="info-label">수강인원</span>
                   <span className="info-value">{section.studentCount || 0}명</span>
                 </div>
                 <div className="info-row">
-                  <span className="info-label">생성일</span>
-                  <span className="info-value">{section.createdAt || '-'}</span>
+                  <span className="info-label">과제</span>
+                  <span className="info-value">{section.assignmentCount || 0}개</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">공지사항</span>
+                  <span className="info-value">{section.noticeCount || 0}개</span>
                 </div>
               </div>
 
-              <div className="section-actions">
-                <button 
-                  className="btn-action"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/admin/notices/section/${section.sectionId}`);
-                  }}
-                >
-                  공지사항
-                </button>
-                <button 
-                  className="btn-action"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/admin/users/section/${section.sectionId}`);
-                  }}
-                >
-                  학생 관리
-                </button>
-                <button 
-                  className="btn-action"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/admin/grades/section/${section.sectionId}`);
-                  }}
-                >
-                  성적 관리
-                </button>
-                <button 
-                  className="btn-action primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/admin/assignments/section/${section.sectionId}`);
-                  }}
-                >
-                  과제 관리
-                </button>
+              <div className="section-footer">
+                <span className="section-hint">클릭하여 관리하기</span>
               </div>
             </div>
           ))}
+          {filteredSections.length === 0 && sections.length > 0 && (
+            <div className="no-sections">
+              <div className="no-sections-message">
+                <p>해당 조건에 맞는 수업이 없습니다.</p>
+              </div>
+            </div>
+          )}
           {sections.length === 0 && (
             <div className="no-sections">
               <div className="no-sections-message">
@@ -142,102 +231,88 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* 분반 상세 모달 */}
-        {showModal && selectedSection && (
-          <div className="modal-overlay">
-            <div className="modal-content">
+        {/* 수업 생성 모달 */}
+        {showCreateModal && (
+          <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h2>{selectedSection.courseTitle} - {selectedSection.sectionNumber}분반</h2>
+                <h2>새 수업 만들기</h2>
                 <button 
                   className="modal-close"
-                  onClick={handleCloseModal}
+                  onClick={() => setShowCreateModal(false)}
                 >
-                  ✕
+                  ×
                 </button>
               </div>
-              
+
               <div className="modal-body">
-                <div className="section-detail-stats">
-                  <div className="detail-stat-item">
-                    <span className="detail-stat-icon">👨‍🏫</span>
-                    <div className="detail-stat-content">
-                      <span className="detail-stat-label">담당교수</span>
-                      <span className="detail-stat-value">{selectedSection.instructorName}</span>
-                    </div>
-                  </div>
-                  <div className="detail-stat-item">
-                    <span className="detail-stat-icon">🔔</span>
-                    <div className="detail-stat-content">
-                      <span className="detail-stat-label">새 공지</span>
-                      <span className="detail-stat-value">{selectedSection.newNoticeCount || 0}개</span>
-                    </div>
-                  </div>
-                  <div className="detail-stat-item">
-                    <span className="detail-stat-icon">📚</span>
-                    <div className="detail-stat-content">
-                      <span className="detail-stat-label">분반</span>
-                      <span className="detail-stat-value">{selectedSection.sectionNumber}분반</span>
-                    </div>
-                  </div>
+                <div className="form-group">
+                  <label>강의 제목</label>
+                  <input
+                    type="text"
+                    value={formData.courseTitle}
+                    onChange={(e) => setFormData({...formData, courseTitle: e.target.value})}
+                    className="form-input"
+                    placeholder="예: 자료구조"
+                  />
                 </div>
 
-                <div className="section-detail-actions">
-                  <button 
-                    className="btn-detail"
-                    onClick={() => {
-                      console.log('공지사항 관리 클릭:', selectedSection);
-                      console.log('이동할 URL:', `/admin/notices/section/${selectedSection.sectionId}`);
-                      handleCloseModal();
-                      navigate(`/admin/notices/section/${selectedSection.sectionId}`);
-                    }}
-                  >
-                    <span className="btn-icon">📢</span>
-                    <div className="btn-content">
-                      <h4>공지사항 관리</h4>
-                      <p>이 분반의 공지사항을 작성하고 관리합니다</p>
-                    </div>
-                  </button>
-                  
-                  <button 
-                    className="btn-detail"
-                    onClick={() => {
-                      console.log('수강생 관리 클릭:', selectedSection);
-                      console.log('이동할 URL:', `/admin/users/section/${selectedSection.sectionId}`);
-                      handleCloseModal();
-                      navigate(`/admin/users/section/${selectedSection.sectionId}`);
-                    }}
-                  >
-                    <span className="btn-icon">👥</span>
-                    <div className="btn-content">
-                      <h4>수강생 관리</h4>
-                      <p>이 분반의 수강생 목록을 확인하고 관리합니다</p>
-                    </div>
-                  </button>
-                  
-                  <button 
-                    className="btn-detail primary"
-                    onClick={() => {
-                      console.log('과제 관리 클릭:', selectedSection);
-                      console.log('이동할 URL:', `/admin/assignments/section/${selectedSection.sectionId}`);
-                      handleCloseModal();
-                      navigate(`/admin/assignments/section/${selectedSection.sectionId}`);
-                    }}
-                  >
-                    <span className="btn-icon">📝</span>
-                    <div className="btn-content">
-                      <h4>과제 관리</h4>
-                      <p>이 분반의 과제를 생성하고 관리합니다</p>
-                    </div>
-                  </button>
-                  
-                  <button className="btn-detail">
-                    <span className="btn-icon">📊</span>
-                    <div className="btn-content">
-                      <h4>성적 관리</h4>
-                      <p>학생들의 성적을 확인하고 관리합니다</p>
-                    </div>
-                  </button>
+                <div className="form-group">
+                  <label>분반 번호</label>
+                  <input
+                    type="number"
+                    value={formData.sectionNumber}
+                    onChange={(e) => setFormData({...formData, sectionNumber: e.target.value})}
+                    className="form-input"
+                    placeholder="예: 1"
+                    min="1"
+                  />
                 </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>년도</label>
+                    <input
+                      type="number"
+                      value={formData.year}
+                      onChange={(e) => setFormData({...formData, year: e.target.value})}
+                      className="form-input"
+                      placeholder="2025"
+                      min="2020"
+                      max="2099"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>학기</label>
+                    <select
+                      value={formData.semester}
+                      onChange={(e) => setFormData({...formData, semester: e.target.value})}
+                      className="form-select"
+                    >
+                      <option value="SPRING">1학기</option>
+                      <option value="SUMMER">여름학기</option>
+                      <option value="FALL">2학기</option>
+                      <option value="WINTER">겨울학기</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button 
+                  className="btn-cancel"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  취소
+                </button>
+                <button 
+                  className="btn-submit"
+                  onClick={handleCreateSection}
+                  disabled={!formData.courseTitle || !formData.sectionNumber}
+                >
+                  생성하기
+                </button>
               </div>
             </div>
           </div>

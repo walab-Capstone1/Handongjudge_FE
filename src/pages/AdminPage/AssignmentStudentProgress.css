@@ -1,5 +1,5 @@
 .student-progress-container {
-  padding: 2rem;
+  padding: 0;
   max-width: 100%;
   margin: 0 auto;
 }
@@ -49,81 +49,140 @@
   color: #6b7280;
 }
 
-/* 통계 요약 */
-.stats-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+/* 문제별 통계 */
+.problems-summary {
   margin-bottom: 2rem;
 }
 
-.stat-card {
+.summary-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 1rem 0;
+}
+
+.problems-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.problem-stat-card {
   background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
   border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
   transition: all 0.3s ease;
 }
 
-.stat-card:hover {
+.problem-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.stat-card.total {
-  border-left: 4px solid #667eea;
-}
-
-.stat-card.total:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
-.stat-card.completed {
-  border-left: 4px solid #10b981;
+.problem-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
-.stat-card.completed:hover {
-  border-color: #10b981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.stat-card.in-progress {
-  border-left: 4px solid #f59e0b;
+.problem-number {
+  background: #667eea;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.stat-card.in-progress:hover {
-  border-color: #f59e0b;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+.problem-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a202c;
+  flex: 1;
 }
 
-.stat-card.not-started {
-  border-left: 4px solid #6b7280;
+.total-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  flex-shrink: 0;
 }
 
-.stat-card.not-started:hover {
-  border-color: #6b7280;
-  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
+.problem-stat-info {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-.stat-info {
+.problem-stat-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
 }
 
-.stat-label {
-  font-size: 0.9rem;
+.problem-stat-item .stat-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.problem-stat-item .stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.problem-stat-item.solved .stat-value {
+  color: #10b981;
+}
+
+.problem-stat-item.unsolved .stat-value {
+  color: #ef4444;
+}
+
+.problem-stat-item .stat-percent {
+  font-size: 0.75rem;
   color: #6b7280;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-.stat-value {
-  font-size: 2rem;
-  color: #1a202c;
-  font-weight: 700;
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.problem-stat-bar {
+  width: 100%;
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.problem-stat-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.problem-stat-fill.solved-fill {
+  background: #10b981;
 }
 
 /* 필터 */
@@ -421,7 +480,7 @@
     gap: 1rem;
   }
 
-  .stats-summary {
+  .problems-grid {
     grid-template-columns: 1fr;
   }
 

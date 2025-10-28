@@ -5,6 +5,7 @@ import "./SectionNavigation.css";
 const SectionNavigation = ({ 
   sectionId, 
   sectionName, 
+  enrollmentCode = null,
   showSearch = false, 
   searchTerm = '', 
   onSearchChange = () => {},
@@ -21,6 +22,18 @@ const SectionNavigation = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleCopyEnrollmentLink = () => {
+    if (enrollmentCode) {
+      const enrollmentLink = `${window.location.origin}/enroll/${enrollmentCode}`;
+      navigator.clipboard.writeText(enrollmentLink).then(() => {
+        alert('수업 참가 링크가 복사되었습니다!');
+      }).catch((err) => {
+        console.error('복사 실패:', err);
+        alert('링크 복사에 실패했습니다.');
+      });
+    }
+  };
 
   const navigationItems = [
     {
@@ -49,14 +62,25 @@ const SectionNavigation = ({
       <div className="section-nav-header">
         <div className="section-info">
           <h2 className="section-title">{sectionName}</h2>
-          <button 
-            className="back-to-dashboard"
-            onClick={handleBackToDashboard}
-            title="대시보드로 돌아가기"
-          >
-            <span className="back-icon">←</span>
-            대시보드
-          </button>
+          <div className="section-info-buttons">
+            {enrollmentCode && (
+              <button 
+                className="enrollment-link-button"
+                onClick={handleCopyEnrollmentLink}
+                title="수업 참가 링크 복사"
+              >
+                🔗 수업 링크 복사
+              </button>
+            )}
+            <button 
+              className="back-to-dashboard"
+              onClick={handleBackToDashboard}
+              title="대시보드로 돌아가기"
+            >
+              <span className="back-icon">←</span>
+              대시보드
+            </button>
+          </div>
         </div>
       </div>
       
