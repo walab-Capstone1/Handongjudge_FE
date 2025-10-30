@@ -179,12 +179,13 @@ const NoticeManagement = () => {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout selectedSection={currentSection}>
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <SectionNavigation 
           sectionId={sectionId}
           sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
+          enrollmentCode={currentSection.enrollmentCode}
           showCreateButton={true}
           onCreateClick={handleCreateNotice}
           createButtonText="새 공지사항 작성"

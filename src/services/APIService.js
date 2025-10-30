@@ -656,6 +656,50 @@ class APIService {
     return await this.request(`/mypage/submission/${submissionId}/code`);
   }
 
+  // enrollmentCode로 수강 신청
+  async enrollByCode(enrollmentCode) {
+    return await this.request(`/sections/enroll/${enrollmentCode}`, {
+      method: 'POST',
+    });
+  }
+
+  // 수업(Section) 생성
+  async createSection(data) {
+    return await this.request('/sections', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 강의(Course) 생성
+  async createCourse(data) {
+    return await this.request('/courses', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 강의(Course) 목록 조회
+  async getCourses() {
+    return await this.request('/courses');
+  }
+
+  // 현재 로그인한 사용자 ID 조회
+  async getCurrentUserId() {
+    const userInfo = await this.getUserInfo();
+    // userInfo 구조: { data: { user_id: ... } } 또는 { user_id: ... }
+    if (userInfo.data && userInfo.data.user_id) {
+      return userInfo.data.user_id;
+    }
+    if (userInfo.user_id) {
+      return userInfo.user_id;
+    }
+    if (userInfo.id) {
+      return userInfo.id;
+    }
+    throw new Error('사용자 ID를 찾을 수 없습니다.');
+  }
+
 }
 
 const apiService = new APIService();
