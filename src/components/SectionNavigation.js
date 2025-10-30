@@ -85,18 +85,6 @@ const SectionNavigation = ({
       </div>
       
       <div className="section-nav-content">
-        <div className="section-nav-tabs">
-          {navigationItems.map((item) => (
-            <button
-              key={item.path}
-              className={`nav-tab ${location.pathname === item.path ? 'active' : ''}`}
-              onClick={() => navigate(item.path)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-        
         <div className="section-nav-actions">
           {showSearch && (
             <div className="search-box">

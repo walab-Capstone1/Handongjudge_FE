@@ -42,11 +42,33 @@ const AdminDashboard = () => {
     navigate(`/admin/assignments/section/${section.sectionId}`, { state: { section } });
   };
 
+  const handleCopyEnrollmentLink = (enrollmentCode, e) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    if (enrollmentCode) {
+      const enrollmentLink = `${window.location.origin}/enroll/${enrollmentCode}`;
+      navigator.clipboard.writeText(enrollmentLink).then(() => {
+        alert('수업 참가 링크가 복사되었습니다!');
+      }).catch((err) => {
+        console.error('복사 실패:', err);
+        alert('링크 복사에 실패했습니다.');
+      });
+    }
+  };
+
   const handleCreateSection = async () => {
     try {
-      const response = await APIService.createSectionWithCourse({
-        courseTitle: formData.courseTitle,
-        instructorId: await APIService.getCurrentUserId(),
+      const instructorId = await APIService.getCurrentUserId();
+
+      // 1단계: Course 생성
+      const courseResponse = await APIService.createCourse({
+        title: formData.courseTitle,
+        description: ''
+      });
+
+      // 2단계: Section 생성 (DomJudge Contest 자동 생성)
+      const sectionResponse = await APIService.createSection({
+        courseId: courseResponse.id,
+        instructorId: instructorId,
         sectionNumber: parseInt(formData.sectionNumber),
         year: parseInt(formData.year),
         semester: formData.semester
@@ -211,6 +233,15 @@ const AdminDashboard = () => {
 
               <div className="section-footer">
                 <span className="section-hint">클릭하여 관리하기</span>
+                {section.enrollmentCode && (
+                  <button
+                    className="section-copy-link-btn"
+                    onClick={(e) => handleCopyEnrollmentLink(section.enrollmentCode, e)}
+                    title="수업 참가 링크 복사"
+                  >
+                    🔗
+                  </button>
+                )}
               </div>
             </div>
           ))}

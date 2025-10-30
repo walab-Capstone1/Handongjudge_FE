@@ -98,6 +98,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-left: auto; /* 탭 제거 시에도 우측 정렬 유지 */
 }
 
 .nav-tab {

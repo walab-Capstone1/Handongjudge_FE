@@ -671,9 +671,9 @@ class APIService {
     });
   }
 
-  // 강의와 수업을 함께 생성
-  async createSectionWithCourse(data) {
-    return await this.request('/sections/with-course', {
+  // 강의(Course) 생성
+  async createCourse(data) {
+    return await this.request('/courses', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -687,7 +687,17 @@ class APIService {
   // 현재 로그인한 사용자 ID 조회
   async getCurrentUserId() {
     const userInfo = await this.getUserInfo();
-    return userInfo.data.user_id || userInfo.user_id;
+    // userInfo 구조: { data: { user_id: ... } } 또는 { user_id: ... }
+    if (userInfo.data && userInfo.data.user_id) {
+      return userInfo.data.user_id;
+    }
+    if (userInfo.user_id) {
+      return userInfo.user_id;
+    }
+    if (userInfo.id) {
+      return userInfo.id;
+    }
+    throw new Error('사용자 ID를 찾을 수 없습니다.');
   }
 
 }
