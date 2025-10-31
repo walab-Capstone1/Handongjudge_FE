@@ -49,8 +49,7 @@ const AuthCallback = () => {
               // 인증 상태 설정
               setStatus("소셜 로그인 성공! 메인 페이지로 이동합니다.");
               setTimeout(() => {
-                // 전역 상태 업데이트를 위해 페이지 새로고침
-                window.location.href = "/main";
+                navigate("/main");
               }, 1500);
             } else {
               const errorData = await response.json();
@@ -59,7 +58,7 @@ const AuthCallback = () => {
           } catch (socialError) {
             console.error("Social login error:", socialError);
             setStatus(`소셜 로그인 실패: ${socialError.message}`);
-            setTimeout(() => navigate("/login"), 3000);
+            setTimeout(() => navigate("/"), 3000);
           }
           return;
         }
@@ -69,7 +68,7 @@ const AuthCallback = () => {
 
         if (!type) {
           setStatus("잘못된 접근입니다.");
-          setTimeout(() => navigate("/login"), 2000);
+          setTimeout(() => navigate("/"), 2000);
           return;
         }
 
@@ -94,7 +93,7 @@ const AuthCallback = () => {
       } catch (error) {
         console.error("Auth callback error:", error);
         setStatus(`로그인 실패: ${error.message}`);
-        setTimeout(() => navigate("/login"), 3000);
+        setTimeout(() => navigate("/"), 3000);
       }
     };
 
