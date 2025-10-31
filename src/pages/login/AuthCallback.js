@@ -35,7 +35,7 @@ const AuthCallback = () => {
             console.log("Access token saved to memory");
 
             // 사용자 정보 조회
-            const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080/api'}/user/me`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://hj.walab.info/api'}/user/me`, {
               headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'

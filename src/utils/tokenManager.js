@@ -94,7 +94,7 @@ class TokenManager {
   // 토큰 갱신 (Refresh Token은 쿠키에서 자동으로 전송됨)
   async refreshToken() {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080/api'}/auth/refresh`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://hj.walab.info/api'}/auth/refresh`, {
         method: 'POST',
         credentials: 'include', // 쿠키 포함
         headers: {

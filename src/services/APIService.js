@@ -2,7 +2,7 @@ import tokenManager from '../utils/tokenManager';
 
 class APIService {
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+    this.baseURL = process.env.REACT_APP_API_URL || 'https://hj.walab.info/api';
   }
 
   // HTTP 요청 헬퍼 함수
