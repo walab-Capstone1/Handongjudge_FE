@@ -14,6 +14,7 @@ const AssignmentStudentProgress = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL'); // ALL, COMPLETED, IN_PROGRESS, NOT_STARTED
   const [currentSection, setCurrentSection] = useState(null);
+  const [expandedProblems, setExpandedProblems] = useState(new Set());
 
   useEffect(() => {
     fetchSectionInfo();
@@ -105,6 +106,18 @@ const AssignmentStudentProgress = () => {
     return totalProblems > 0 ? Math.round((solvedProblems / totalProblems) * 100) : 0;
   };
 
+  const toggleProblem = (problemId) => {
+    setExpandedProblems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(problemId)) {
+        newSet.delete(problemId);
+      } else {
+        newSet.add(problemId);
+      }
+      return newSet;
+    });
+  };
+
   if (loading) {
     return (
       <AdminLayout selectedSection={currentSection}>
@@ -135,8 +148,11 @@ const AssignmentStudentProgress = () => {
         {/* 문제별 통계 */}
         {problems.length > 0 && (
           <div className="problems-summary">
-            <h3 className="summary-title">문제별 제출 현황</h3>
-            <div className="problems-grid">
+            <div className="summary-header">
+              <h3 className="summary-title">문제별 제출 현황</h3>
+              <span className="total-students-label">총 {studentProgress.length}명</span>
+            </div>
+            <div className="problems-list">
               {problems.map((problem, index) => {
               const solvedCount = studentProgress.filter(student => 
                 student.solvedProblems?.includes(problem.id)
@@ -144,38 +160,51 @@ const AssignmentStudentProgress = () => {
               const totalStudents = studentProgress.length;
               const percentage = totalStudents > 0 ? Math.round((solvedCount / totalStudents) * 100) : 0;
               const unsolvedCount = totalStudents - solvedCount;
+              const isExpanded = expandedProblems.has(problem.id);
               
               return (
-                <div key={problem.id} className="problem-stat-card">
-                  <div className="problem-stat-header">
+                <div key={problem.id} className={`problem-stat-card ${isExpanded ? 'expanded' : ''}`}>
+                  <div 
+                    className="problem-stat-header clickable"
+                    onClick={() => toggleProblem(problem.id)}
+                  >
                     <div className="header-left">
                       <span className="problem-number">문제 {index + 1}</span>
                       <span className="problem-title">{problem.title}</span>
                     </div>
-                    <span className="total-label">총 {totalStudents}명</span>
-                  </div>
-                  <div className="problem-stat-info">
-                    <div className="problem-stat-item solved">
-                      <span className="stat-label">완료</span>
-                      <div className="stat-row">
-                        <span className="stat-value">{solvedCount}명</span>
-                        <span className="stat-percent">{percentage}%</span>
-                      </div>
-                    </div>
-                    <div className="problem-stat-item unsolved">
-                      <span className="stat-label">미완료</span>
-                      <div className="stat-row">
-                        <span className="stat-value">{unsolvedCount}명</span>
-                        <span className="stat-percent">{100 - percentage}%</span>
-                      </div>
+                    <div className="header-right">
+                      <span className="problem-summary">
+                        {solvedCount}/{totalStudents}명 완료 ({percentage}%)
+                      </span>
+                      <span className={`toggle-icon ${isExpanded ? 'expanded' : ''}`}>▼</span>
                     </div>
                   </div>
-                  <div className="problem-stat-bar">
-                    <div 
-                      className="problem-stat-fill solved-fill"
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
+                  {isExpanded && (
+                    <div className="problem-stat-details">
+                      <div className="problem-stat-info">
+                        <div className="problem-stat-item solved">
+                          <span className="stat-label">완료</span>
+                          <div className="stat-row">
+                            <span className="stat-value">{solvedCount}명</span>
+                            <span className="stat-percent">{percentage}%</span>
+                          </div>
+                        </div>
+                        <div className="problem-stat-item unsolved">
+                          <span className="stat-label">미완료</span>
+                          <div className="stat-row">
+                            <span className="stat-value">{unsolvedCount}명</span>
+                            <span className="stat-percent">{100 - percentage}%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="problem-stat-bar">
+                        <div 
+                          className="problem-stat-fill solved-fill"
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
