@@ -45,7 +45,7 @@ const Onboarding = () => {
   // Onboarding.jsx
   const handleSocialLogin = (provider) => {
     // 직접 백엔드 OAuth URL로 이동
-    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+    window.location.href = `https://hj.walab.info/api/oauth2/authorization/${provider}`;
   };
 
   const handleSignup = () => {

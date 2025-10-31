@@ -24,7 +24,7 @@ import AdminRoute from "./components/AdminRoute";
 function App() {
   return (
       <RecoilRoot>
-        <Router>
+        <Router basename="/handongjudge">
           <Routes>
             <Route path="/" element={<Onboarding />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
