@@ -12,6 +12,9 @@ const MainPage = () => {
   const [enrolledSections, setEnrolledSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [enrollmentCode, setEnrollmentCode] = useState("");
+  const [enrollLoading, setEnrollLoading] = useState(false);
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
 
   useEffect(() => {
     const fetchEnrolledSections = async () => {
@@ -62,7 +65,8 @@ const MainPage = () => {
       instructor: section.instructorName,
       color: getRandomColor(section.sectionId),
       sectionId: section.sectionId,
-      courseId: section.courseId
+      courseId: section.courseId,
+      active: section.active // active 필드 추가
     };
   };
 
@@ -124,6 +128,30 @@ const MainPage = () => {
 
   const transformedSections = enrolledSections.map(transformSectionData);
 
+  const handleEnrollByCode = async () => {
+    if (!enrollmentCode.trim()) {
+      alert('참가 코드를 입력하세요.');
+      return;
+    }
+    try {
+      setEnrollLoading(true);
+      const resp = await APIService.enrollByCode(enrollmentCode.trim());
+      if (resp && resp.success) {
+        alert(`${resp.courseTitle} 수강 신청이 완료되었습니다!`);
+        setEnrollmentCode("");
+        // 목록 새로고침
+        const refreshed = await APIService.getUserEnrolledSections();
+        setEnrolledSections(refreshed.data || refreshed);
+      } else {
+        alert(resp?.message || '수강 신청에 실패했습니다.');
+      }
+    } catch (e) {
+      alert(e.message || '수강 신청 중 오류가 발생했습니다.');
+    } finally {
+      setEnrollLoading(false);
+    }
+  };
+
   return (
     <MainLayout>
       <div className="main-page">
@@ -135,6 +163,12 @@ const MainPage = () => {
                 <h1 className="section-title">
                   {user?.name || '사용자'}'s class
                 </h1>
+                <button
+                  className="open-enroll-modal"
+                  onClick={() => setShowEnrollModal(true)}
+                >
+                  수업 참가
+                </button>
               </div>
             </div>
           </div>
@@ -155,6 +189,40 @@ const MainPage = () => {
             </div>
           )}
         </div>
+
+        {showEnrollModal && (
+          <div className="enroll-modal-overlay" onClick={() => setShowEnrollModal(false)}>
+            <div className="enroll-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="enroll-modal-header">
+                <h2>수업 참가</h2>
+                <button className="enroll-modal-close" onClick={() => setShowEnrollModal(false)}>×</button>
+              </div>
+              <div className="enroll-modal-body">
+                <label>참가 코드</label>
+                <input
+                  type="text"
+                  className="enroll-input"
+                  placeholder="예: ABCD1234"
+                  value={enrollmentCode}
+                  onChange={(e) => setEnrollmentCode(e.target.value)}
+                />
+              </div>
+              <div className="enroll-modal-actions">
+                <button className="enroll-cancel" onClick={() => setShowEnrollModal(false)}>취소</button>
+                <button
+                  className="enroll-button"
+                  onClick={async () => {
+                    await handleEnrollByCode();
+                    setShowEnrollModal(false);
+                  }}
+                  disabled={enrollLoading}
+                >
+                  {enrollLoading ? '처리 중...' : '참가하기'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </MainLayout>
   );

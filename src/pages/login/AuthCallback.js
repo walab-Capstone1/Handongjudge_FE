@@ -46,11 +46,23 @@ const AuthCallback = () => {
               const userInfo = await response.json();
               console.log("소셜 로그인 성공:", userInfo);
               
-              // 인증 상태 설정
-              setStatus("소셜 로그인 성공! 메인 페이지로 이동합니다.");
-              setTimeout(() => {
-                navigate("/main");
-              }, 1500);
+              // pending enrollmentCode 확인
+              const pendingEnrollmentCode = sessionStorage.getItem('pendingEnrollmentCode');
+              
+              if (pendingEnrollmentCode) {
+                // enrollmentCode가 있으면 해당 페이지로 이동
+                sessionStorage.removeItem('pendingEnrollmentCode');
+                setStatus("로그인 성공! 수업 참가 페이지로 이동합니다.");
+                setTimeout(() => {
+                  window.location.href = `/enroll/${pendingEnrollmentCode}`;
+                }, 1500);
+              } else {
+                // 없으면 메인 페이지로
+                setStatus("소셜 로그인 성공! 메인 페이지로 이동합니다.");
+                setTimeout(() => {
+                  window.location.href = "/main";
+                }, 1500);
+              }
             } else {
               const errorData = await response.json();
               throw new Error(errorData.message || "사용자 정보 조회 실패");
@@ -75,8 +87,18 @@ const AuthCallback = () => {
         if (type === "login") {
           setStatus("로그인 중...");
           await login(email, password);
-          setStatus("로그인 성공! 메인 페이지로 이동합니다.");
-          setTimeout(() => navigate("/main"), 1500);
+          
+          // pending enrollmentCode 확인
+          const pendingEnrollmentCode = sessionStorage.getItem('pendingEnrollmentCode');
+          
+          if (pendingEnrollmentCode) {
+            sessionStorage.removeItem('pendingEnrollmentCode');
+            setStatus("로그인 성공! 수업 참가 페이지로 이동합니다.");
+            setTimeout(() => navigate(`/enroll/${pendingEnrollmentCode}`), 1500);
+          } else {
+            setStatus("로그인 성공! 메인 페이지로 이동합니다.");
+            setTimeout(() => navigate("/main"), 1500);
+          }
         } else if (type === "social") {
           setStatus(`${provider} 로그인 중...`);
 

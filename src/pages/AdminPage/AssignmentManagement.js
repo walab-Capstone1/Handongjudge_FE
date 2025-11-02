@@ -367,6 +367,17 @@ const AssignmentManagement = () => {
     }
   };
 
+  const handleToggleActive = async (sectionId, assignmentId, currentActive) => {
+    try {
+      const newActive = !currentActive;
+      await APIService.toggleAssignmentActive(sectionId, assignmentId, newActive);
+      fetchAssignments(); // 목록 새로고침
+    } catch (error) {
+      console.error('과제 활성화 상태 변경 실패:', error);
+      alert('과제 활성화 상태 변경에 실패했습니다.');
+    }
+  };
+
   // 문제 추가 관련 함수들
   const handleAddProblem = async (assignment) => {
     setSelectedAssignment(assignment);
@@ -779,7 +790,7 @@ const AssignmentManagement = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout selectedSection={currentSection}>
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>과제 데이터를 불러오는 중...</p>
@@ -789,13 +800,14 @@ const AssignmentManagement = () => {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout selectedSection={currentSection}>
       <>
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <SectionNavigation 
           sectionId={sectionId}
           sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber || currentSection.sectionId}분반`}
+          enrollmentCode={currentSection.enrollmentCode}
           showCreateButton={true}
           onCreateClick={() => setShowAddModal(true)}
           createButtonText="새 과제 생성"
@@ -881,7 +893,7 @@ const AssignmentManagement = () => {
       <div className="assignment-management">
         <div className="assignments-grid">
           {filteredAssignments.map((assignment) => (
-            <div key={assignment.id} className={`assignment-card ${expandedAssignments[assignment.id] ? 'expanded' : ''}`}>
+            <div key={assignment.id} className={`assignment-card ${expandedAssignments[assignment.id] ? 'expanded' : ''} ${assignment.active === false ? 'disabled' : ''}`}>
               <div className="assignment-header">
                 <div className="assignment-title-row">
                   <div className="title-and-course">
@@ -909,6 +921,12 @@ const AssignmentManagement = () => {
                         ⋯
                       </button>
                       <div className="more-dropdown">
+                        <button 
+                          className="btn-text-small"
+                          onClick={() => handleToggleActive(assignment.sectionId, assignment.id, assignment.active)}
+                        >
+                          {assignment.active ? '비활성화' : '활성화'}
+                        </button>
                         <button 
                           className="btn-text-small delete"
                           onClick={() => handleDelete(assignment.id)}

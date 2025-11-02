@@ -61,35 +61,72 @@ const CourseCard = ({ course, onStatusUpdate }) => {
     }
   };
 
-  return (
-    <Link to={getLinkPath()} className="course-card-link">
-      <div className="course-card">
-        <div className={`card-header ${getColorClass(course.color)}`}>
-          <div className="card-title">
-            <h3>{course.title}</h3>
+  // 비활성화된 수업인지 확인 (active가 false인 경우)
+  const isDisabled = course.active === false;
+
+  const handleCardClick = (e) => {
+    if (isDisabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      alert('이 수업은 현재 비활성화되어 있어 접근할 수 없습니다.\n교수님께 문의하시기 바랍니다.');
+    }
+  };
+
+  const cardContent = (
+    <div className={`course-card ${isDisabled ? 'disabled' : ''}`}>
+      {isDisabled && (
+        <div className="disabled-overlay">
+          <div className="disabled-message">
+            <p>비활성화된 수업</p>
           </div>
-          <div className="batch-badge">{course.batch}</div>
+        </div>
+      )}
+      <div className={`card-header ${getColorClass(course.color)} ${isDisabled ? 'opacity-reduced' : ''}`}>
+        <div className="card-title">
+          <h3>{course.title}</h3>
+        </div>
+        <div className="batch-badge">{course.batch}</div>
+      </div>
+      
+      <div className="card-content">
+        <h4 className="course-name">{course.courseName}</h4>
+        
+        <div className="status-tags">
+          {course.status.map((status, index) => (
+            <span 
+              key={index} 
+              className={`status-tag ${getStatusColor(status.color)}`}
+              onClick={(e) => {
+                if (isDisabled) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+                handleStatusClick(e, status);
+              }}
+              style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+            >
+              {status.text}
+            </span>
+          ))}
         </div>
         
-        <div className="card-content">
-          <h4 className="course-name">{course.courseName}</h4>
-          
-          <div className="status-tags">
-            {course.status.map((status, index) => (
-              <span 
-                key={index} 
-                className={`status-tag ${getStatusColor(status.color)}`}
-                onClick={(e) => handleStatusClick(e, status)}
-                style={{ cursor: 'pointer' }}
-              >
-                {status.text}
-              </span>
-            ))}
-          </div>
-          
-          <p className="instructor">{course.instructor} 교수님</p>
-        </div>
+        <p className="instructor">{course.instructor} 교수님</p>
       </div>
+    </div>
+  );
+
+  if (isDisabled) {
+    return (
+      <div className="course-card-link" onClick={handleCardClick} style={{ cursor: 'not-allowed' }}>
+        {cardContent}
+      </div>
+    );
+  }
+
+  return (
+    <Link to={getLinkPath()} className="course-card-link" onClick={handleCardClick}>
+      {cardContent}
     </Link>
   );
 };

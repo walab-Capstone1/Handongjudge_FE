@@ -1,5 +1,5 @@
 .student-progress-container {
-  padding: 2rem;
+  padding: 0;
   max-width: 100%;
   margin: 0 auto;
 }
@@ -49,81 +49,209 @@
   color: #6b7280;
 }
 
-/* 통계 요약 */
-.stats-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+/* 문제별 통계 */
+.problems-summary {
   margin-bottom: 2rem;
 }
 
-.stat-card {
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.summary-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.total-students-label {
+  font-size: 1rem;
+  color: #667eea;
+  font-weight: 600;
+  background: #f0f4ff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+/* Progress 페이지 전용 문제 목록 - 그리드 레이아웃 (여러 개 한 줄) */
+.progress-container .problems-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.problem-stat-card {
   background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
   border: 2px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.problem-stat-card.expanded {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  grid-column: span 2;
+}
+
+.problem-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
   transition: all 0.3s ease;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.problem-stat-header.clickable {
+  cursor: pointer;
 }
 
-.stat-card.total {
-  border-left: 4px solid #667eea;
+.problem-stat-header.clickable:hover {
+  background: #f8f9fa;
 }
 
-.stat-card.total:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+.problem-stat-header.expanded {
+  background: #f0f4ff;
 }
 
-.stat-card.completed {
-  border-left: 4px solid #10b981;
+.problem-stat-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.stat-card.completed:hover {
-  border-color: #10b981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+.problem-stat-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
-.stat-card.in-progress {
-  border-left: 4px solid #f59e0b;
+.problem-number {
+  background: #667eea;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.stat-card.in-progress:hover {
-  border-color: #f59e0b;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+.problem-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a202c;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.stat-card.not-started {
-  border-left: 4px solid #6b7280;
+.problem-summary {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.stat-card.not-started:hover {
-  border-color: #6b7280;
-  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
+.toggle-icon {
+  font-size: 0.7rem;
+  color: #667eea;
+  transition: transform 0.3s ease;
+  display: inline-block;
 }
 
-.stat-info {
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.problem-stat-details {
+  padding: 0 1rem 1rem 1rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+  }
+}
+
+.problem-stat-info {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.problem-stat-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
 }
 
-.stat-label {
-  font-size: 0.9rem;
+.problem-stat-item .stat-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.problem-stat-item .stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.problem-stat-item.solved .stat-value {
+  color: #10b981;
+}
+
+.problem-stat-item.unsolved .stat-value {
+  color: #ef4444;
+}
+
+.problem-stat-item .stat-percent {
+  font-size: 0.75rem;
   color: #6b7280;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-.stat-value {
-  font-size: 2rem;
-  color: #1a202c;
-  font-weight: 700;
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.problem-stat-bar {
+  width: 100%;
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.problem-stat-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.problem-stat-fill.solved-fill {
+  background: #10b981;
 }
 
 /* 필터 */
@@ -405,6 +533,16 @@
 }
 
 /* 반응형 */
+@media (max-width: 1024px) {
+  .progress-container .problems-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .problem-stat-card.expanded {
+    grid-column: span 1;
+  }
+}
+
 @media (max-width: 768px) {
   .student-progress-container {
     padding: 1rem;
@@ -421,8 +559,29 @@
     gap: 1rem;
   }
 
-  .stats-summary {
+  .summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .progress-container .problems-list {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .problem-stat-card.expanded {
+    grid-column: span 1;
+  }
+
+  .problem-stat-header {
+    flex-wrap: wrap;
+  }
+
+  .problem-stat-header .header-right {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 0.5rem;
   }
 
   .filters-section {

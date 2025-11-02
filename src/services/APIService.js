@@ -656,6 +656,74 @@ class APIService {
     return await this.request(`/mypage/submission/${submissionId}/code`);
   }
 
+  // enrollmentCode로 수강 신청
+  async enrollByCode(enrollmentCode) {
+    return await this.request(`/sections/enroll/${enrollmentCode}`, {
+      method: 'POST',
+    });
+  }
+
+  // 수업(Section) 생성
+  async createSection(data) {
+    return await this.request('/sections', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 수업(Section) 활성화/비활성화
+  async toggleSectionActive(sectionId, isActive) {
+    return await this.request(`/sections/${sectionId}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active: isActive }),
+    });
+  }
+
+  // 공지사항 활성화/비활성화 토글
+  async toggleNoticeActive(noticeId, isActive) {
+    return await this.request(`/notices/${noticeId}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active: isActive }),
+    });
+  }
+
+  // 과제 활성화/비활성화 토글
+  async toggleAssignmentActive(sectionId, assignmentId, isActive) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active: isActive }),
+    });
+  }
+
+  // 강의(Course) 생성
+  async createCourse(data) {
+    return await this.request('/courses', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 강의(Course) 목록 조회
+  async getCourses() {
+    return await this.request('/courses');
+  }
+
+  // 현재 로그인한 사용자 ID 조회
+  async getCurrentUserId() {
+    const userInfo = await this.getUserInfo();
+    // userInfo 구조: { data: { user_id: ... } } 또는 { user_id: ... }
+    if (userInfo.data && userInfo.data.user_id) {
+      return userInfo.data.user_id;
+    }
+    if (userInfo.user_id) {
+      return userInfo.user_id;
+    }
+    if (userInfo.id) {
+      return userInfo.id;
+    }
+    throw new Error('사용자 ID를 찾을 수 없습니다.');
+  }
+
 }
 
 const apiService = new APIService();
