@@ -10,7 +10,7 @@
   align-items: center;
   padding: 1.5rem;
   background: white;
-  border-bottom: 1px solid #f1f3f4;
+  border-bottom: 2px solid #d1d5db !important;
   transition: background-color 0.2s ease;
   cursor: pointer;
 }
@@ -20,7 +20,16 @@
 }
 
 .problem-item:last-child {
-  border-bottom: none;
+  border-bottom: none !important;
+}
+
+/* ProblemsList 내부의 problem-item에 명시적으로 경계선 지정 */
+.problems-list .problem-item-link .problem-item {
+  border-bottom: 2px solid #d1d5db !important;
+}
+
+.problems-list .problem-item-link:last-child .problem-item {
+  border-bottom: none !important;
 }
 
 .problem-info {
@@ -39,6 +48,7 @@
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
+  align-self: center;
 }
 
 .problem-level {
@@ -57,6 +67,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .submission-status {

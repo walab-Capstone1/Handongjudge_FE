@@ -65,7 +65,8 @@ const MainPage = () => {
       instructor: section.instructorName,
       color: getRandomColor(section.sectionId),
       sectionId: section.sectionId,
-      courseId: section.courseId
+      courseId: section.courseId,
+      active: section.active // active 필드 추가
     };
   };
 

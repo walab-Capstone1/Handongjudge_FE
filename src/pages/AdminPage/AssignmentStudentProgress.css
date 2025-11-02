@@ -54,16 +54,33 @@
   margin-bottom: 2rem;
 }
 
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
 .summary-title {
   font-size: 1.3rem;
   font-weight: 700;
   color: #1a202c;
-  margin: 0 0 1rem 0;
+  margin: 0;
 }
 
-.problems-grid {
+.total-students-label {
+  font-size: 1rem;
+  color: #667eea;
+  font-weight: 600;
+  background: #f0f4ff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+/* Progress 페이지 전용 문제 목록 - 그리드 레이아웃 (여러 개 한 줄) */
+.progress-container .problems-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
 }
 
@@ -71,14 +88,15 @@
   background: white;
   border: 2px solid #e9ecef;
   border-radius: 8px;
-  padding: 1rem;
   transition: all 0.3s ease;
+  overflow: hidden;
+  min-width: 0;
 }
 
-.problem-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.problem-stat-card.expanded {
   border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  grid-column: span 2;
 }
 
 .problem-stat-header {
@@ -86,15 +104,35 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  padding: 1rem;
+  transition: all 0.3s ease;
 }
 
-.header-left {
+.problem-stat-header.clickable {
+  cursor: pointer;
+}
+
+.problem-stat-header.clickable:hover {
+  background: #f8f9fa;
+}
+
+.problem-stat-header.expanded {
+  background: #f0f4ff;
+}
+
+.problem-stat-header .header-left {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex: 1;
   min-width: 0;
+}
+
+.problem-stat-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .problem-number {
@@ -112,19 +150,50 @@
   font-weight: 600;
   color: #1a202c;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.total-label {
-  font-size: 0.75rem;
+.problem-summary {
+  font-size: 0.85rem;
   color: #6b7280;
   font-weight: 500;
-  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.toggle-icon {
+  font-size: 0.7rem;
+  color: #667eea;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.problem-stat-details {
+  padding: 0 1rem 1rem 1rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+  }
 }
 
 .problem-stat-info {
   display: flex;
   gap: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .problem-stat-item {
@@ -464,6 +533,16 @@
 }
 
 /* 반응형 */
+@media (max-width: 1024px) {
+  .progress-container .problems-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .problem-stat-card.expanded {
+    grid-column: span 1;
+  }
+}
+
 @media (max-width: 768px) {
   .student-progress-container {
     padding: 1rem;
@@ -480,8 +559,29 @@
     gap: 1rem;
   }
 
-  .problems-grid {
+  .summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .progress-container .problems-list {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .problem-stat-card.expanded {
+    grid-column: span 1;
+  }
+
+  .problem-stat-header {
+    flex-wrap: wrap;
+  }
+
+  .problem-stat-header .header-right {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 0.5rem;
   }
 
   .filters-section {

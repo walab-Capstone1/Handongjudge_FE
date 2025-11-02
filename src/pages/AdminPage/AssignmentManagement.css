@@ -185,6 +185,10 @@
   border-color: #667eea;
 }
 
+.assignment-card.disabled {
+  opacity: 0.6;
+}
+
 .assignment-header {
   display: flex;
   flex-direction: column;
@@ -454,13 +458,14 @@
   margin: 0 0 1rem 0;
 }
 
-.problems-list {
-  display: flex;
-  flex-direction: column;
+/* AssignmentManagement 전용 문제 목록 - 한 줄씩 표시 */
+.assignment-expanded-content .problems-list {
+  display: flex !important;
+  flex-direction: column !important;
   gap: 0.5rem;
 }
 
-.problem-item {
+.assignment-expanded-content .problem-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -469,21 +474,30 @@
   border-radius: 8px;
   border-left: 4px solid #667eea;
   gap: 0.5rem;
+  width: 100%;
+  min-width: 0; /* flexbox에서 오버플로우 방지 */
+  overflow: hidden; /* 내용이 넘치지 않도록 */
 }
 
-.problem-item-left {
+.assignment-expanded-content .problem-item-left {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex: 1;
+  min-width: 0; /* flexbox에서 오버플로우 방지 */
+  overflow: hidden; /* 내용이 넘치지 않도록 */
 }
 
-.problem-title {
+.assignment-expanded-content .problem-title {
   font-weight: 600;
   color: #2d3436;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
-.problem-submission-rate {
+.assignment-expanded-content .problem-submission-rate {
   font-size: 0.85rem;
   color: #636e72;
   margin-left: 0.5rem;
@@ -491,11 +505,18 @@
   background: #f8f9fa;
   border-radius: 4px;
   border-left: 3px solid #0984e3;
+  flex-shrink: 0; /* 축소되지 않도록 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+.assignment-expanded-content .btn-remove-problem {
+  flex-shrink: 0; /* x 버튼이 잘리지 않도록 */
+  margin-left: 0.5rem;
 }
 
 
 
-.problem-difficulty {
+.assignment-expanded-content .problem-difficulty {
   font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -686,11 +707,11 @@
     align-items: center;
   }
   
-  .problems-list {
+  .assignment-expanded-content .problems-list {
     gap: 0.25rem;
   }
   
-  .problem-item {
+  .assignment-expanded-content .problem-item {
     padding: 0.6rem 0.8rem;
     flex-direction: column;
     align-items: flex-start;
@@ -737,10 +758,11 @@
 }
 
 /* 문제 목록 스타일 */
-.problem-number {
+.assignment-expanded-content .problem-number {
   font-weight: 600;
   color: #667eea;
   margin-right: 0.5rem;
+  flex-shrink: 0; /* 번호가 잘리지 않도록 */
 }
 
 .problem-id {
@@ -807,7 +829,9 @@
   transform: translateY(-2px);
 }
 
-.btn-remove-problem {
+/* assignment-expanded-content 내부의 btn-remove-problem은 이미 위에서 정의됨 */
+/* 모달 등 다른 곳에서 사용하는 버튼 스타일 */
+.btn-remove-problem:not(.assignment-expanded-content .btn-remove-problem) {
   background: #ff6b6b;
   color: white;
   border: none;
@@ -819,7 +843,27 @@
   margin-left: auto;
 }
 
-.btn-remove-problem:hover {
+.btn-remove-problem:not(.assignment-expanded-content .btn-remove-problem):hover {
+  background: #ff5252;
+  transform: scale(1.05);
+}
+
+/* 모달 등에서 사용하는 버튼에 대한 명시적 스타일 */
+.problem-modal .btn-remove-problem,
+.available-problem-item .btn-remove-problem {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.problem-modal .btn-remove-problem:hover,
+.available-problem-item .btn-remove-problem:hover {
   background: #ff5252;
   transform: scale(1.05);
 }

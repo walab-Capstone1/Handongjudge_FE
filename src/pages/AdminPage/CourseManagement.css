@@ -152,7 +152,7 @@
 
 .sections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -224,6 +224,14 @@
   font-weight: 600;
 }
 
+.info-value.status-active {
+  color: #10b981;
+}
+
+.info-value.status-inactive {
+  color: #ef4444;
+}
+
 .section-actions {
   display: flex;
   gap: 0.4rem;
@@ -262,6 +270,40 @@
 .btn-action.primary:hover {
   background: #5568d3;
   border-color: #5568d3;
+}
+
+.btn-toggle-active {
+  padding: 0.5rem 1rem;
+  border: 2px solid;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+}
+
+.btn-toggle-active.active {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+}
+
+.btn-toggle-active.active:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
+.btn-toggle-active.inactive {
+  background: #9ca3af;
+  border-color: #9ca3af;
+  color: white;
+}
+
+.btn-toggle-active.inactive:hover {
+  background: #6b7280;
+  border-color: #6b7280;
 }
 
 .no-sections {
