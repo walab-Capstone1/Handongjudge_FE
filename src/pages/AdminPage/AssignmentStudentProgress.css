@@ -77,7 +77,8 @@
   border-radius: 8px;
 }
 
-.problems-list {
+/* Progress 페이지 전용 문제 목록 - 그리드 레이아웃 (여러 개 한 줄) */
+.progress-container .problems-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
@@ -533,7 +534,7 @@
 
 /* 반응형 */
 @media (max-width: 1024px) {
-  .problems-list {
+  .progress-container .problems-list {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 
@@ -564,7 +565,7 @@
     gap: 0.75rem;
   }
 
-  .problems-list {
+  .progress-container .problems-list {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }

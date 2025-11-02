@@ -38,7 +38,16 @@ const SectionDetailPage = () => {
         APIService.getAssignments(sectionId)
       ]);
 
-      setSectionInfo(sectionResponse.data || sectionResponse);
+      const sectionData = sectionResponse.data || sectionResponse;
+      
+      // 비활성화된 수업인지 확인
+      if (sectionData.active === false) {
+        setError("DISABLED");
+        setSectionInfo(sectionData);
+        return;
+      }
+
+      setSectionInfo(sectionData);
       setNotices(noticesResponse.data || noticesResponse);
       setAssignments(assignmentsResponse.data || assignmentsResponse);
 
@@ -96,6 +105,29 @@ const SectionDetailPage = () => {
   }
 
   if (error) {
+    if (error === "DISABLED") {
+      return (
+        <MainLayout>
+          <div className="section-detail-page">
+            <div className="disabled-section-container">
+              <div className="disabled-icon-large">🚫</div>
+              <h2>수업이 비활성화되었습니다</h2>
+              <p className="disabled-message">
+                {sectionInfo?.courseTitle} - {sectionInfo?.sectionNumber}분반은 현재 비활성화되어 있어<br />
+                접근할 수 없습니다.
+              </p>
+              <p className="disabled-submessage">
+                교수님께 문의하시기 바랍니다.
+              </p>
+              <button onClick={() => navigate('/')} className="btn-primary">
+                홈으로 돌아가기
+              </button>
+            </div>
+          </div>
+        </MainLayout>
+      );
+    }
+    
     return (
       <MainLayout>
         <div className="section-detail-page">

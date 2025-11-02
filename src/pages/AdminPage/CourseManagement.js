@@ -71,6 +71,18 @@ const CourseManagement = () => {
     }
   };
 
+  const handleToggleActive = async (sectionId, currentActive) => {
+    try {
+      const newActiveStatus = !currentActive;
+      await APIService.toggleSectionActive(sectionId, newActiveStatus);
+      alert(newActiveStatus ? '수업이 활성화되었습니다.' : '수업이 비활성화되었습니다.');
+      fetchSections(); // 목록 새로고침
+    } catch (error) {
+      console.error('수업 상태 변경 실패:', error);
+      alert(error.message || '수업 상태 변경에 실패했습니다.');
+    }
+  };
+
   const filteredSections = sections.filter(section =>
     section.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
     section.instructorName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -140,12 +152,21 @@ const CourseManagement = () => {
                   <span className="info-value">{section.studentCount || 0}명</span>
                 </div>
                 <div className="info-row">
-                  <span className="info-label">생성일</span>
-                  <span className="info-value">{section.createdAt || '-'}</span>
+                  <span className="info-label">상태</span>
+                  <span className={`info-value ${section.active !== false ? 'status-active' : 'status-inactive'}`}>
+                    {section.active !== false ? '활성' : '비활성'}
+                  </span>
                 </div>
               </div>
 
               <div className="section-actions">
+                <button 
+                  className={`btn-toggle-active ${section.active !== false ? 'active' : 'inactive'}`}
+                  onClick={() => handleToggleActive(section.sectionId, section.active !== false)}
+                  title={section.active !== false ? '비활성화하기' : '활성화하기'}
+                >
+                  {section.active !== false ? '✓ 활성' : '✕ 비활성'}
+                </button>
                 <button 
                   className="btn-action"
                   onClick={() => navigate(`/admin/notices/section/${section.sectionId}`)}

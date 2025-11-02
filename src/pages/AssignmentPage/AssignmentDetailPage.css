@@ -258,6 +258,24 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* AssignmentDetailPage의 문제 항목 경계선 명시적으로 지정 */
+.assignment-detail-page .problems-list .problem-item-link .problem-item {
+  border-bottom: 2px solid #d1d5db !important;
+}
+
+.assignment-detail-page .problems-list .problem-item-link:last-child .problem-item {
+  border-bottom: none !important;
+}
+
+/* 더 구체적인 선택자로도 지정 */
+.content-area .problems-list .problem-item-link .problem-item {
+  border-bottom: 2px solid #d1d5db !important;
+}
+
+.content-area .problems-list .problem-item-link:last-child .problem-item {
+  border-bottom: none !important;
+}
+
 @media (max-width: 768px) {
   .content-area {
     padding: 1rem;

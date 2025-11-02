@@ -104,6 +104,17 @@ const NoticeManagement = () => {
     }
   };
 
+  const handleToggleActive = async (noticeId, currentActive) => {
+    try {
+      const newActive = !currentActive;
+      await APIService.toggleNoticeActive(noticeId, newActive);
+      fetchNotices(); // 목록 새로고침
+    } catch (error) {
+      console.error('공지사항 활성화 상태 변경 실패:', error);
+      alert('공지사항 활성화 상태 변경에 실패했습니다.');
+    }
+  };
+
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingNotice(null);
@@ -240,7 +251,7 @@ const NoticeManagement = () => {
 
         <div className="notices-list">
           {filteredNotices.map((notice) => (
-            <div key={notice.id} className="notice-card">
+            <div key={notice.id} className={`notice-card ${notice.active === false ? 'disabled' : ''}`}>
               <div className="notice-title-row">
                 <div className="title-and-course">
                   <p className="notice-course">{notice.sectionName}</p>
@@ -261,6 +272,12 @@ const NoticeManagement = () => {
                       ⋯
                     </button>
                     <div className="more-dropdown">
+                      <button 
+                        className="btn-text-small"
+                        onClick={() => handleToggleActive(notice.id, notice.active)}
+                      >
+                        {notice.active ? '비활성화' : '활성화'}
+                      </button>
                       <button 
                         className="btn-text-small delete"
                         onClick={() => handleDeleteNotice(notice.id)}

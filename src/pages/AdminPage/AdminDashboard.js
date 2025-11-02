@@ -38,6 +38,7 @@ const AdminDashboard = () => {
   }, []);
 
   const handleSectionClick = (section) => {
+    // 관리자 페이지에서는 비활성화된 수업도 접근 가능
     // 수업 카드를 클릭하면 해당 수업의 과제 관리 페이지로 이동
     navigate(`/admin/assignments/section/${section.sectionId}`, { state: { section } });
   };
@@ -52,6 +53,30 @@ const AdminDashboard = () => {
         console.error('복사 실패:', err);
         alert('링크 복사에 실패했습니다.');
       });
+    }
+  };
+
+  const handleToggleActive = async (sectionId, currentActive, e) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    try {
+      const newActiveStatus = !currentActive;
+      console.log('활성화 상태 변경 시도:', { sectionId, currentActive, newActiveStatus });
+      const response = await APIService.toggleSectionActive(sectionId, newActiveStatus);
+      console.log('API 응답:', response);
+      alert(newActiveStatus ? '수업이 활성화되었습니다.' : '수업이 비활성화되었습니다.');
+      
+      // 수업 목록 다시 불러오기
+      const dashboardResponse = await APIService.getInstructorDashboard();
+      const dashboardData = dashboardResponse?.data || [];
+      setSections(dashboardData);
+    } catch (error) {
+      console.error('수업 상태 변경 실패:', error);
+      console.error('에러 상세:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      alert(`수업 상태 변경에 실패했습니다.\n${error.message || '네트워크 오류가 발생했습니다.'}`);
     }
   };
 
@@ -197,7 +222,7 @@ const AdminDashboard = () => {
           {filteredSections.map((section) => (
             <div 
               key={section.sectionId} 
-              className="section-card clickable"
+              className={`section-card clickable ${section.active === false ? 'disabled' : ''}`}
               onClick={() => handleSectionClick(section)}
             >
               <div className="section-header">
@@ -232,6 +257,13 @@ const AdminDashboard = () => {
               </div>
 
               <div className="section-footer">
+                <button 
+                  className={`btn-toggle-active ${section.active !== false ? 'active' : 'inactive'}`}
+                  onClick={(e) => handleToggleActive(section.sectionId, section.active !== false, e)}
+                  title={section.active !== false ? '비활성화하기' : '활성화하기'}
+                >
+                  {section.active !== false ? '✓ 활성' : '✕ 비활성'}
+                </button>
                 <span className="section-hint">클릭하여 관리하기</span>
                 {section.enrollmentCode && (
                   <button

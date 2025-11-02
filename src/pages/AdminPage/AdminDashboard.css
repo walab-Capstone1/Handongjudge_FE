@@ -121,7 +121,7 @@
 
 .sections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
 }
@@ -190,9 +190,13 @@
 }
 
 .sections-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
   gap: 1.5rem;
+}
+
+.admin-dashboard .sections-grid {
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
 }
 
 .section-card {
@@ -214,6 +218,11 @@
 
 .section-card.clickable {
   cursor: pointer;
+}
+
+.section-card.disabled {
+  opacity: 0.6;
+  /* 관리자 페이지에서는 클릭 가능하도록 pointer-events 제거 */
 }
 
 .section-header {
@@ -296,10 +305,33 @@
   padding-top: 0.5rem;
   padding-bottom: 0;
   border-top: 1px solid #e0e3f5;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   position: relative;
+  gap: 1rem;
+}
+
+.section-footer .btn-toggle-active {
+  justify-self: start;
+  flex-shrink: 0;
+  width: 87px;
+  min-width: 80px;
+}
+
+.section-footer .section-hint {
+  justify-self: center;
+  grid-column: 2;
+  margin: 0;
+  pointer-events: none;
+}
+
+.section-footer .section-copy-link-btn {
+  justify-self: end;
+  grid-column: 3;
+  flex-shrink: 0;
+  width: 40px;
+  min-width: 40px;
 }
 
 .section-hint {
@@ -333,11 +365,79 @@
   font-weight: 600;
 }
 
+.info-value.status-active {
+  color: #10b981;
+}
+
+.info-value.status-inactive {
+  color: #ef4444;
+}
+
 .section-actions {
   display: flex;
   gap: 0.4rem;
-  margin-top: 1.4rem;
+  margin-top: 0;
   margin-bottom: 0;
+}
+
+.btn-toggle-active {
+  padding: 0.5rem 1rem;
+  border: 2px solid;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-toggle-active.active {
+  background: #667eea !important;
+  border-color: #667eea !important;
+  color: white;
+}
+
+.btn-toggle-active.active:hover {
+  background: #5568d3 !important;
+  border-color: #5568d3 !important;
+  color: white;
+}
+
+/* 활성 버튼이 보라색이 아닌 경우 강제 적용 */
+.section-footer .btn-toggle-active.active {
+  background: #667eea !important;
+  border-color: #667eea !important;
+  color: white !important;
+}
+
+.section-footer .btn-toggle-active.active:hover {
+  background: #5568d3 !important;
+  border-color: #5568d3 !important;
+  color: white !important;
+}
+
+.btn-toggle-active.inactive {
+  background: #9ca3af !important;
+  border-color: #9ca3af !important;
+  color: white !important;
+}
+
+.btn-toggle-active.inactive:hover {
+  background: #6b7280 !important;
+  border-color: #6b7280 !important;
+  color: white !important;
+}
+
+.section-footer .btn-toggle-active.inactive {
+  background: #9ca3af !important;
+  border-color: #9ca3af !important;
+  color: white !important;
+}
+
+.section-footer .btn-toggle-active.inactive:hover {
+  background: #6b7280 !important;
+  border-color: #6b7280 !important;
+  color: white !important;
 }
 
 .btn-action {

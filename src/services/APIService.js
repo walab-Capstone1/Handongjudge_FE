@@ -671,6 +671,30 @@ class APIService {
     });
   }
 
+  // 수업(Section) 활성화/비활성화
+  async toggleSectionActive(sectionId, isActive) {
+    return await this.request(`/sections/${sectionId}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active: isActive }),
+    });
+  }
+
+  // 공지사항 활성화/비활성화 토글
+  async toggleNoticeActive(noticeId, isActive) {
+    return await this.request(`/notices/${noticeId}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active: isActive }),
+    });
+  }
+
+  // 과제 활성화/비활성화 토글
+  async toggleAssignmentActive(sectionId, assignmentId, isActive) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active: isActive }),
+    });
+  }
+
   // 강의(Course) 생성
   async createCourse(data) {
     return await this.request('/courses', {
