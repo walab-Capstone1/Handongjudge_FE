@@ -4,6 +4,7 @@ import { RecoilRoot } from "recoil";
 import Onboarding from "./pages/Onboarding";
 import AuthCallback from "./pages/login/AuthCallback";
 import SignUpPageSocial from "./pages/SignUpPageSocial";
+import SignupEmailPage from "./pages/SignupEmailPage";
 import MainPage from "./pages/MainPage";
 import QuestionPage from "./pages/QuestionPage";
 import SectionDetailPage from "./pages/SectionDetailPage";
@@ -30,6 +31,7 @@ function App() {
             <Route path="/" element={<Onboarding />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />
+            <Route path="/signup/email" element={<SignupEmailPage />} />
             <Route path="/enroll/:enrollmentCode" element={<EnrollPage />} />
             <Route path="/main" element={<MainPage />} /> 
             <Route path="/questions" element={<QuestionPage />} />

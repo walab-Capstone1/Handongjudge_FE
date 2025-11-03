@@ -76,6 +76,20 @@ class APIService {
     }
   }
 
+  // 회원가입
+  async register(registerData) {
+    try {
+      const response = await this.request('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(registerData),
+      });
+      return response;
+    } catch (error) {
+      console.error('회원가입 오류:', error);
+      throw error;
+    }
+  }
+
   // 일반 로그인
   async login(email, password) {
     const response = await this.request('/auth/login', {
