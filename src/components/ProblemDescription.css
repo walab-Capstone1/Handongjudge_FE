@@ -218,3 +218,71 @@
 .description-content a:hover {
   text-decoration: underline;
 }
+
+/* Markdown specific styles */
+.description-content .inline-code {
+  background-color: #30363d;
+  color: #e1e4e8;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+}
+
+.problem-solve-page.light .description-content .inline-code {
+  background-color: #f6f8fa;
+  color: #24292e;
+}
+
+.description-content .code-block {
+  background-color: #0d1117;
+  color: #e1e4e8;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 12px 0;
+  border: 1px solid #30363d;
+}
+
+.problem-solve-page.light .description-content .code-block {
+  background-color: #f6f8fa;
+  color: #24292e;
+  border: 1px solid #e1e4e8;
+}
+
+.description-content .code-block code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+}
+
+.description-content .table-wrapper {
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+/* Strong and emphasis */
+.description-content strong {
+  font-weight: bold;
+  color: #EFF5F2;
+}
+
+.problem-solve-page.light .description-content strong {
+  color: #000000;
+}
+
+.description-content em {
+  font-style: italic;
+}
+
+/* Horizontal rule */
+.description-content hr {
+  border: none;
+  border-top: 2px solid #30363d;
+  margin: 24px 0;
+}
+
+.problem-solve-page.light .description-content hr {
+  border-top-color: #e1e4e8;
+}
