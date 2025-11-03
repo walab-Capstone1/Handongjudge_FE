@@ -364,7 +364,11 @@
 }
 
 .students-table th:nth-child(5) {
-  width: 40%;
+  width: 35%;
+}
+
+.students-table th:nth-child(6) {
+  width: 15%;
 }
 
 .students-table tbody tr {
@@ -459,6 +463,27 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-detail {
+  margin-left: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-detail:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
 }
 
 .problem-badge {
@@ -494,6 +519,26 @@
 .problem-badge.unsolved:hover {
   background: #e5e7eb;
   transform: scale(1.05);
+}
+
+/* 과제 완료 시간 */
+.assignment-completion-time-cell {
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.completion-time-display {
+  font-weight: 600;
+  color: #10b981;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+}
+
+.completion-time-display.not-completed {
+  color: #9ca3af;
+  font-style: italic;
+  font-weight: 500;
 }
 
 /* 데이터 없음 */
@@ -616,4 +661,203 @@
     height: 28px;
     font-size: 0.75rem;
   }
+
+  .btn-detail {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+}
+
+/* 상세보기 모달 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.detail-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+  color: #374151;
+}
+
+.detail-modal-content {
+  padding: 1.5rem;
+}
+
+.student-info {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.student-info h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.3rem;
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.problems-detail-list {
+  margin-top: 1.5rem;
+}
+
+.problems-detail-list h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+}
+
+.detail-table thead {
+  background: #f8f9fa;
+}
+
+.detail-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.detail-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.detail-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.detail-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.status-badge-detail {
+  display: inline-block;
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge-detail.completed {
+  background: #10b981;
+  color: white;
+}
+
+.status-badge-detail.not-completed {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.submission-time {
+  font-weight: 500;
+  color: #1a202c;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.submission-time.not-completed {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.modal-actions {
+  padding: 1.5rem;
+  border-top: 2px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
 }
