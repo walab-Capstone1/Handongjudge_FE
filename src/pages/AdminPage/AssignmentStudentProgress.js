@@ -15,6 +15,8 @@ const AssignmentStudentProgress = () => {
   const [filterStatus, setFilterStatus] = useState('ALL'); // ALL, COMPLETED, IN_PROGRESS, NOT_STARTED
   const [currentSection, setCurrentSection] = useState(null);
   const [expandedProblems, setExpandedProblems] = useState(new Set());
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     fetchSectionInfo();
@@ -267,6 +269,7 @@ const AssignmentStudentProgress = () => {
                     <th>진행 상태</th>
                     <th>완료율</th>
                     <th>문제별 풀이 현황</th>
+                    <th>과제 완료 시간</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -306,7 +309,34 @@ const AssignmentStudentProgress = () => {
                                 </div>
                               );
                             })}
+                            <button 
+                              className="btn-detail"
+                              onClick={() => {
+                                setSelectedStudent(student);
+                                setShowDetailModal(true);
+                              }}
+                              title="상세보기"
+                            >
+                              상세보기
+                            </button>
                           </div>
+                        </td>
+                        <td className="assignment-completion-time-cell">
+                          {student.assignmentCompletedAt ? (
+                            <div className="completion-time-display">
+                              {new Date(student.assignmentCompletedAt).toLocaleString('ko-KR', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                          ) : (
+                            <div className="completion-time-display not-completed">
+                              미완료
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
@@ -316,6 +346,86 @@ const AssignmentStudentProgress = () => {
             </div>
           )}
         </div>
+
+        {/* 상세보기 모달 */}
+        {showDetailModal && selectedStudent && (
+          <div className="modal-overlay" onClick={() => setShowDetailModal(false)}>
+            <div className="modal-content detail-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>제출 시간 상세</h2>
+                <button 
+                  className="modal-close"
+                  onClick={() => setShowDetailModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="detail-modal-content">
+                <div className="student-info">
+                  <h3>{selectedStudent.studentName} ({selectedStudent.studentId})</h3>
+                </div>
+
+                <div className="problems-detail-list">
+                  <h4>문제별 제출 시간</h4>
+                  <table className="detail-table">
+                    <thead>
+                      <tr>
+                        <th>문제 번호</th>
+                        <th>문제 제목</th>
+                        <th>상태</th>
+                        <th>제출 시간</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {problems.map((problem, index) => {
+                        const isSolved = selectedStudent.solvedProblems?.includes(problem.id);
+                        const submissionTime = selectedStudent.problemSubmissionTimes?.[problem.id];
+                        
+                        return (
+                          <tr key={problem.id}>
+                            <td>{index + 1}</td>
+                            <td>{problem.title}</td>
+                            <td>
+                              <span className={`status-badge-detail ${isSolved ? 'completed' : 'not-completed'}`}>
+                                {isSolved ? '완료' : '미완료'}
+                              </span>
+                            </td>
+                            <td>
+                              {submissionTime ? (
+                                <span className="submission-time">
+                                  {new Date(submissionTime).toLocaleString('ko-KR', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit'
+                                  })}
+                                </span>
+                              ) : (
+                                <span className="submission-time not-completed">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button 
+                  className="btn-secondary"
+                  onClick={() => setShowDetailModal(false)}
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
