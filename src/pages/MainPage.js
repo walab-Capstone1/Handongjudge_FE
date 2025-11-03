@@ -128,14 +128,49 @@ const MainPage = () => {
 
   const transformedSections = enrolledSections.map(transformSectionData);
 
+  // URL이나 입력값에서 참가 코드 추출
+  const extractEnrollmentCode = (input) => {
+    const trimmed = input.trim();
+    
+    // URL 패턴 체크: /enroll/코드 형식
+    const urlPattern = /\/enroll\/([^\/\s?#]+)/;
+    const urlMatch = trimmed.match(urlPattern);
+    if (urlMatch) {
+      return urlMatch[1];
+    }
+    
+    // 전체 URL인 경우 (http://... 또는 https://...)
+    try {
+      const url = new URL(trimmed);
+      const pathMatch = url.pathname.match(/\/enroll\/([^\/\s?#]+)/);
+      if (pathMatch) {
+        return pathMatch[1];
+      }
+    } catch (e) {
+      // URL이 아닌 경우 그대로 사용
+    }
+    
+    // 참가 코드만 입력한 경우 그대로 반환
+    return trimmed;
+  };
+
   const handleEnrollByCode = async () => {
     if (!enrollmentCode.trim()) {
       alert('참가 코드를 입력하세요.');
       return;
     }
+    
+    // 입력값에서 참가 코드 추출 (링크 또는 코드 모두 지원)
+    const code = extractEnrollmentCode(enrollmentCode);
+    
+    if (!code) {
+      alert('유효한 참가 코드나 링크를 입력하세요.');
+      return;
+    }
+    
     try {
       setEnrollLoading(true);
-      const resp = await APIService.enrollByCode(enrollmentCode.trim());
+      const resp = await APIService.enrollByCode(code);
       if (resp && resp.success) {
         alert(`${resp.courseTitle} 수강 신청이 완료되었습니다!`);
         setEnrollmentCode("");
@@ -198,14 +233,15 @@ const MainPage = () => {
                 <button className="enroll-modal-close" onClick={() => setShowEnrollModal(false)}>×</button>
               </div>
               <div className="enroll-modal-body">
-                <label>참가 코드</label>
+                <label>참가 코드 또는 링크</label>
                 <input
                   type="text"
                   className="enroll-input"
-                  placeholder="예: ABCD1234"
+                  placeholder={`예: ABCD1234 또는 ${window.location.origin}/enroll/ABCD1234`}
                   value={enrollmentCode}
                   onChange={(e) => setEnrollmentCode(e.target.value)}
                 />
+                <p className="enroll-help-text">참가 코드만 입력하거나 전체 링크를 붙여넣으세요.</p>
               </div>
               <div className="enroll-modal-actions">
                 <button className="enroll-cancel" onClick={() => setShowEnrollModal(false)}>취소</button>

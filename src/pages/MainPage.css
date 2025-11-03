@@ -194,6 +194,13 @@
   color: #374151;
 }
 
+.enroll-help-text {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
+  line-height: 1.4;
+}
+
 .enroll-modal-actions {
   display: flex;
   justify-content: flex-end;
