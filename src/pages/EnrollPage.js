@@ -24,7 +24,8 @@ const EnrollPage = () => {
       if (response.success) {
         alert(`${response.courseTitle} 수강 신청이 완료되었습니다!`);
         // 수강 신청 완료 후 대시보드로 이동
-        window.location.href = '/main';
+        //window.location.href = '/main';
+        navigate('/main');
       } else {
         setError(response.message || '수강 신청에 실패했습니다.');
       }
@@ -81,7 +82,8 @@ const EnrollPage = () => {
                   className="btn-enroll"
                   onClick={() => {
                     sessionStorage.setItem('pendingEnrollmentCode', enrollmentCode);
-                    window.location.href = '/';
+                    //window.location.href = '/';
+                    navigate('/');
                   }}
                 >
                   로그인하러 가기
@@ -126,7 +128,7 @@ const EnrollPage = () => {
             <div className="enroll-actions">
               <button
                 className="btn-cancel"
-                onClick={() => window.location.href = '/main'}
+                onClick={() => navigate('/main')}
                 disabled={enrollLoading}
               >
                 취소

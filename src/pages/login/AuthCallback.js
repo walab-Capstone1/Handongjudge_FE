@@ -54,13 +54,13 @@ const AuthCallback = () => {
                 sessionStorage.removeItem('pendingEnrollmentCode');
                 setStatus("로그인 성공! 수업 참가 페이지로 이동합니다.");
                 setTimeout(() => {
-                  window.location.href = `/enroll/${pendingEnrollmentCode}`;
+                  navigate(`/enroll/${pendingEnrollmentCode}`);
                 }, 1500);
               } else {
                 // 없으면 메인 페이지로
                 setStatus("소셜 로그인 성공! 메인 페이지로 이동합니다.");
                 setTimeout(() => {
-                  window.location.href = "/main";
+                  navigate("/main");
                 }, 1500);
               }
             } else {

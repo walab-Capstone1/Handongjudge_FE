@@ -189,10 +189,13 @@ const BackToLogin = styled.div`
   background: rgba(248, 250, 252, 0.8);
 `;
 
-const BackToLoginLink = styled.a`
+const BackToLoginLink = styled.button`
   color: black;
-  text-decoration: none;
+  background: none;
+  border: none;
   font-size: 14px;
+  cursor: pointer;
+  padding: 0;
   
   &:hover {
     color: #5a67d8;

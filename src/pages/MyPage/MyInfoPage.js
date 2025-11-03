@@ -274,7 +274,7 @@ const MyInfoPage = () => {
                       <p>GitHub를 연동하면 자동 커밋 기능을 사용할 수 있습니다.</p>
                       <div className="github-connect-actions">
                         <a 
-                          href="/oauth2/authorization/github"
+                          href="https://hj.walab.info/api/oauth2/authorization/github"
                           className="github-connect-button"
                         >
                           GitHub 계정 연동하기
