@@ -53,7 +53,7 @@ const CodeEditor = ({
         if (!code || docLength === 0) return diagnostics;
         
         // 전체 문서에서 괄호 매칭 검사 (문자열/주석 제외)
-        if (lang === 'javascript' || lang === 'java' || lang === 'cpp') {
+        if (lang === 'javascript' || lang === 'java' || lang === 'cpp' || lang === 'c') {
           const brackets = [];
           const bracketPairs = { '(': ')', '[': ']', '{': '}' };
           const openBrackets = Object.keys(bracketPairs);
@@ -149,7 +149,7 @@ const CodeEditor = ({
             const lineEnd = line.to;
             
             // 기본적인 문법 오류 검사
-            if (lang === 'javascript' || lang === 'java' || lang === 'cpp') {
+            if (lang === 'javascript' || lang === 'java' || lang === 'cpp' || lang === 'c') {
               // 줄별 괄호 매칭은 제거 (전체 문서에서 확인하는 것이 더 정확)
               
               // 세미콜론 누락 검사 (간단한 경우만)
@@ -206,6 +206,8 @@ const CodeEditor = ({
         return [java(), ...baseExtensions, linterExtension];
       case "cpp":
         return [cpp(), ...baseExtensions, linterExtension];
+      case "c":
+        return [cpp(), ...baseExtensions, linterExtension]; // C also uses cpp extension
       default:
         return [javascript(), ...baseExtensions, linterExtension];
     }
@@ -312,7 +314,7 @@ const CodeEditor = ({
     <div className="editor-wrapper">
       <div className="editor-header">
         <div className="editor-header-left">
-          <span>solution.{language === "javascript" ? "js" : language}</span>
+          <span>solution.{language === "javascript" ? "js" : language === "python" ? "py" : language === "cpp" ? "cpp" : language}</span>
           <div className="session-save-status">
             {/* 코드 로드 소스 표시 */}
             {codeLoadSource && codeLoadSource !== 'default' && (

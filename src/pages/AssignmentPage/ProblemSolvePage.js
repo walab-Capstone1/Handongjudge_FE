@@ -376,6 +376,8 @@ const ProblemSolvePage = () => {
         return "public class Solution {\n    public static void main(String[] args) {\n        // 여기에 코드를 작성하세요\n    }\n}";
       case "cpp":
         return "#include <iostream>\nusing namespace std;\n\nint main() {\n    // 여기에 코드를 작성하세요\n    return 0;\n}";
+      case "c":
+        return "#include <stdio.h>\n\nint main() {\n    // 여기에 코드를 작성하세요\n    return 0;\n}";
       default:
         return "// 여기에 코드를 작성하세요\n";
     }
@@ -629,6 +631,7 @@ const ProblemSolvePage = () => {
             <option value="python">Python</option>
             <option value="java">Java</option>
             <option value="cpp">C++</option>
+            <option value="c">C</option>
           </select>
         </div>
       </div>
