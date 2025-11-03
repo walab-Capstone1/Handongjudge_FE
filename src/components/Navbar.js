@@ -27,7 +27,8 @@ const Navbar = () => {
         <div className="nav-left">
           <Link to="/main" className="logo-link">HandongJudge</Link>
           <Link to="/main" className="nav-link">강의</Link>
-          <Link to="/mypage/info" className="nav-link">마이페이지</Link>
+          {/* 마이페이지 비활성화 (기능은 유지) */}
+          {/* <Link to="/mypage/info" className="nav-link">마이페이지</Link> */}
           {isProfessor && (
             <Link to="/admin" className="nav-link admin-link">관리 페이지</Link>
           )}
