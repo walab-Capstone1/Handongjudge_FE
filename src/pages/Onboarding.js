@@ -44,8 +44,8 @@ const Onboarding = () => {
 
   // Onboarding.jsx
   const handleSocialLogin = (provider) => {
-    // 직접 백엔드 OAuth URL로 이동
-    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+    // 소셜 로그인 비활성화 - 이메일 회원가입 후 이메일로 로그인 안내
+    alert('이메일로 회원가입 후 이메일로 로그인해주세요.');
   };
 
   const handleSignup = () => {

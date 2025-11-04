@@ -244,7 +244,8 @@ const SignUpPageSocial = () => {
           </EmailSignUpButton>
         </SignUpForm>
 
-        <SocialLoginSection>
+        {/* 소셜 회원가입 비활성화 */}
+        {/* <SocialLoginSection>
           <SocialLoginTitle>소셜 계정으로 회원가입</SocialLoginTitle>
           <SocialLoginButtons>
             <SocialButton
@@ -283,7 +284,7 @@ const SignUpPageSocial = () => {
               <span>GitHub</span>
             </SocialButton>
           </SocialLoginButtons>
-        </SocialLoginSection>
+        </SocialLoginSection> */}
 
         <BackToLogin>
           <BackToLoginLink onClick={handleBackToLogin}>
