@@ -22,14 +22,15 @@
   opacity: 1;
   background: rgba(88, 166, 255, 0.9);
   border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-4px);
+  transform: translate(-50%, -54%);
   box-shadow: 0 6px 16px rgba(88, 166, 255, 0.5);
 }
 
 .drag-handle {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 24px;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -47,7 +48,7 @@
 
 .draggable-panel:hover .drag-handle {
   opacity: 1;
-  transform: translateY(-2px);
+  transform: translate(-50%, -52%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
