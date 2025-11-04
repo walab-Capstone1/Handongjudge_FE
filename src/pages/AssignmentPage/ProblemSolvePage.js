@@ -18,9 +18,9 @@ const ProblemSolvePage = () => {
   const navigate = useNavigate();
   
   // State management
-  const [language, setLanguage] = useState("cpp");
+  const [language, setLanguage] = useState("c");
   const [theme, setTheme] = useState("light");
-  const [code, setCode] = useState(getDefaultCode("cpp"));
+  const [code, setCode] = useState(getDefaultCode("c"));
   const [submissionResult, setSubmissionResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentProblem, setCurrentProblem] = useState({
@@ -626,11 +626,9 @@ const ProblemSolvePage = () => {
             className="language-select"
             value={language} 
             onChange={(e) => handleLanguageChange(e.target.value)}
+            disabled
+            style={{ opacity: 0.7, cursor: 'not-allowed' }}
           >
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="cpp">C++</option>
             <option value="c">C</option>
           </select>
         </div>

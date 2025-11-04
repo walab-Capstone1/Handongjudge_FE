@@ -1367,7 +1367,6 @@ const AssignmentManagement = () => {
                       onChange={(e) => setProblemSearchTerm(e.target.value)}
                       className="search-input"
                     />
-                    <span className="search-icon">🔍</span>
                   </div>
                   <button 
                     className="btn-create-new"
@@ -1383,35 +1382,6 @@ const AssignmentManagement = () => {
                       <div key={problem.id} className="available-problem-item">
                         <div className="problem-info">
                           <h4 className="problem-title">{problem.title}</h4>
-                          <p className="problem-description">{problem.description}</p>
-                          
-                          <div className="problem-meta-info">
-                            {problem.difficulty && (
-                              <span 
-                                className="problem-difficulty"
-                                style={{ color: getDifficultyColor(problem.difficulty) }}
-                              >
-                                [{problem.difficulty}]
-                              </span>
-                            )}
-                            
-                            {/* Problem Limits */}
-                            {(problem.timeLimit || problem.memoryLimit) && (
-                              <div className="problem-limits-admin">
-                                {problem.timeLimit && (
-                                  <span className="limit-badge-admin time-limit">
-                                    시간 제한: {problem.timeLimit}초
-                                  </span>
-                                )}
-                                {problem.memoryLimit && (
-                                  <span className="limit-badge-admin memory-limit">
-                                    메모리 제한: {problem.memoryLimit}MB
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          
                           <span className="problem-created">
                             생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
                           </span>
