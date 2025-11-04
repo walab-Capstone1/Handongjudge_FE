@@ -995,7 +995,7 @@ const AssignmentManagement = () => {
                           )}
                         </div>
                         
-                        {/* 문제별 제출률 표시 */}
+                        {/* 문제별 제출률 표시 (정답을 맞춘 학생 수 기준) */}
                         <span className="problem-submission-rate">
                           {submissionStats[assignment.id]?.problemStats ? (
                             (() => {
@@ -1004,7 +1004,7 @@ const AssignmentManagement = () => {
                               );
                               return problemStat ? (
                                 <>
-                                  제출 현황: {problemStat.submittedStudents}/{problemStat.totalStudents}
+                                  제출 현황: {problemStat.correctSubmissions || 0}/{problemStat.totalStudents}
                                 </>
                               ) : (
                                 `제출 현황: 0/${submissionStats[assignment.id]?.totalStudents || assignment.totalStudents || 0}`
