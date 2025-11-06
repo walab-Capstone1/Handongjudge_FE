@@ -1,0 +1,11 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 원 -->
+  <circle cx="20" cy="20" r="20" fill="#667eea"/>
+  
+  <!-- 코드 기호 (</>) -->
+  <path d="M12 15L16 20L12 25" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 15L24 20L28 25" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- 체크마크 (판정 성공을 의미) -->
+  <path d="M18 20L20 22L22 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

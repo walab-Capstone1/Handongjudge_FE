@@ -55,7 +55,10 @@ const Onboarding = () => {
   return (
     <OnboardingContainer>
       <Header>
-        <Logo>HandongJudge</Logo>
+        <Logo>
+          <LogoImage src="/logo.svg" alt="HandongJudge" />
+          <span>HandongJudge</span>
+        </Logo>
         <EnterpriseLink>기업서비스</EnterpriseLink>
       </Header>
 
@@ -206,10 +209,19 @@ const Header = styled.header`
 `;
 
 const Logo = styled.h1`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   font-size: 24px;
   font-weight: bold;
   color: white;
   margin: 0;
+`;
+
+const LogoImage = styled.img`
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 `;
 
 const EnterpriseLink = styled.a`

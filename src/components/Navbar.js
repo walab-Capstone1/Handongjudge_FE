@@ -25,7 +25,10 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="nav-left">
-          <Link to="/main" className="logo-link">HandongJudge</Link>
+          <Link to="/main" className="logo-link">
+            <img src="/logo.svg" alt="HandongJudge" className="logo-image" />
+            <span>HandongJudge</span>
+          </Link>
           <Link to="/main" className="nav-link">강의</Link>
           {/* 마이페이지 비활성화 (기능은 유지) */}
           {/* <Link to="/mypage/info" className="nav-link">마이페이지</Link> */}
