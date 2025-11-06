@@ -72,7 +72,7 @@ const Onboarding = () => {
     <OnboardingContainer>
       <Header>
         <Logo>
-          <LogoImage src="/logo.svg" alt="HandongJudge" />
+          <LogoImage src={`${process.env.PUBLIC_URL}/logo.svg`} alt="HandongJudge" />
           <span>HandongJudge</span>
         </Logo>
         <EnterpriseLink>기업서비스</EnterpriseLink>
