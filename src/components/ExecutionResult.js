@@ -145,9 +145,6 @@ const ExecutionResult = ({
 
   return (
     <div className="result-area">
-      <div className="result-header">
-        {submissionResult?.type === 'output' ? '실행 결과' : '채점 결과'}
-      </div>
       <div>
         {isSubmitting ? (
           <div className="result-loading">

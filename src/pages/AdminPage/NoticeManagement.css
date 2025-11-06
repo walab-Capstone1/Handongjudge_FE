@@ -182,6 +182,10 @@
   box-shadow: 0 2px 12px rgba(9, 132, 227, 0.1);
 }
 
+.notice-card.disabled {
+  opacity: 0.6;
+}
+
 .notice-title-row {
   display: flex;
   justify-content: space-between;

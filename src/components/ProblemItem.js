@@ -10,7 +10,7 @@ const ProblemItem = ({ problem, assignmentId, submissionStats, userSubmissionSta
   const sectionIndex = urlParts.indexOf('sections');
   const sectionId = sectionIndex !== -1 ? urlParts[sectionIndex + 1] : null;
 
-  // 이 문제의 제출 현황 계산
+  // 이 문제의 제출 현황 계산 (정답을 맞춘 학생 수 기준)
   const getSubmissionStatus = () => {
     if (!submissionStats || !submissionStats.problemStats) {
       return "0명 완료";
@@ -21,10 +21,11 @@ const ProblemItem = ({ problem, assignmentId, submissionStats, userSubmissionSta
     );
     
     if (problemStat) {
-      return `${problemStat.submittedStudents}/${problemStat.totalStudents}명 제출`;
+      // 정답을 맞춘 학생 수를 표시 (AssignmentStudentProgress와 동일한 기준)
+      return `${problemStat.correctSubmissions || 0}/${problemStat.totalStudents}명 완료`;
     }
     
-    return `0/${submissionStats.totalStudents || 0}명 제출`;
+    return `0/${submissionStats.totalStudents || 0}명 완료`;
   };
 
   // 사용자의 이 문제 제출 상태 확인

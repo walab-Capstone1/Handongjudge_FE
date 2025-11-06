@@ -44,12 +44,28 @@ const Onboarding = () => {
 
   // Onboarding.jsx
   const handleSocialLogin = (provider) => {
-    // 직접 백엔드 OAuth URL로 이동
-    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+// <<<<<<< HEAD
+//     // 직접 백엔드 OAuth URL로 이동
+//     window.location.href = `https://hj.walab.info/api/oauth2/authorization/${provider}`;
+// =======
+    // 소셜 로그인 비활성화 - 이메일 회원가입 후 이메일로 로그인 안내
+    alert('이메일로 회원가입 후 이메일로 로그인해주세요.');
+
   };
 
   const handleSignup = () => {
     navigate("/signup");
+  };
+
+  const handlePasswordReset = (e) => {
+    e.preventDefault();
+    // 비밀번호 재설정 페이지로 이동
+    navigate("/password-reset");
+  };
+
+  const handleFooterLink = (e, path) => {
+    e.preventDefault();
+    navigate(path);
   };
 
   return (
@@ -130,7 +146,7 @@ const Onboarding = () => {
                 회원가입
               </SignupButton>
 
-              <PasswordResetLink href="#">
+              <PasswordResetLink onClick={handlePasswordReset}>
                 비밀번호 재설정
               </PasswordResetLink>
             </LoginForm>
@@ -175,11 +191,11 @@ const Onboarding = () => {
             </SocialLoginSection>
 
             <FooterLinks>
-              <FooterLink href="#">이용약관</FooterLink>
+              <FooterLink onClick={(e) => handleFooterLink(e, "/terms")}>이용약관</FooterLink>
               <FooterDivider>|</FooterDivider>
-              <FooterLink href="#">개인정보 처리방침</FooterLink>
+              <FooterLink onClick={(e) => handleFooterLink(e, "/privacy")}>개인정보 처리방침</FooterLink>
               <FooterDivider>|</FooterDivider>
-              <FooterLink href="#">FAQ/문의</FooterLink>
+              <FooterLink onClick={(e) => handleFooterLink(e, "/faq")}>FAQ/문의</FooterLink>
             </FooterLinks>
           </LoginCard>
         </RightSection>
@@ -438,13 +454,17 @@ const SignupButton = styled.button`
   }
 `;
 
-const PasswordResetLink = styled.a`
+const PasswordResetLink = styled.button`
   display: block;
+  width: 100%;
   text-align: center;
   color: black;
-  text-decoration: none;
+  background: none;
+  border: none;
   font-size: 14px;
   margin-bottom: 30px;
+  cursor: pointer;
+  padding: 0;
 
   &:hover {
     color: #5a67d8;
@@ -522,10 +542,13 @@ const FooterLinks = styled.div`
   background: rgba(248, 250, 252, 0.8);
 `;
 
-const FooterLink = styled.a`
+const FooterLink = styled.button`
   color: black;
-  text-decoration: none;
+  background: none;
+  border: none;
   font-size: 14px;
+  cursor: pointer;
+  padding: 0;
   
   &:hover {
     color: #5a67d8;

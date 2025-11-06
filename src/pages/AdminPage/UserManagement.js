@@ -166,7 +166,7 @@ const UserManagement = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout selectedSection={currentSection}>
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>학생 데이터를 불러오는 중...</p>
@@ -176,12 +176,13 @@ const UserManagement = () => {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout selectedSection={currentSection}>
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <SectionNavigation 
           sectionId={sectionId}
           sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
+          enrollmentCode={currentSection.enrollmentCode}
         />
       )}
       

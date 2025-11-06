@@ -2,6 +2,7 @@
   "name": "handongjudge_fe",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/handongjudge",
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.7",
     "@codemirror/lang-cpp": "^6.0.3",

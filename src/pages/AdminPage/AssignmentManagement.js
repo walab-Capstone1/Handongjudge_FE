@@ -367,6 +367,17 @@ const AssignmentManagement = () => {
     }
   };
 
+  const handleToggleActive = async (sectionId, assignmentId, currentActive) => {
+    try {
+      const newActive = !currentActive;
+      await APIService.toggleAssignmentActive(sectionId, assignmentId, newActive);
+      fetchAssignments(); // 목록 새로고침
+    } catch (error) {
+      console.error('과제 활성화 상태 변경 실패:', error);
+      alert('과제 활성화 상태 변경에 실패했습니다.');
+    }
+  };
+
   // 문제 추가 관련 함수들
   const handleAddProblem = async (assignment) => {
     setSelectedAssignment(assignment);
@@ -779,7 +790,7 @@ const AssignmentManagement = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout selectedSection={currentSection}>
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>과제 데이터를 불러오는 중...</p>
@@ -789,13 +800,14 @@ const AssignmentManagement = () => {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout selectedSection={currentSection}>
       <>
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <SectionNavigation 
           sectionId={sectionId}
           sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber || currentSection.sectionId}분반`}
+          enrollmentCode={currentSection.enrollmentCode}
           showCreateButton={true}
           onCreateClick={() => setShowAddModal(true)}
           createButtonText="새 과제 생성"
@@ -881,7 +893,7 @@ const AssignmentManagement = () => {
       <div className="assignment-management">
         <div className="assignments-grid">
           {filteredAssignments.map((assignment) => (
-            <div key={assignment.id} className={`assignment-card ${expandedAssignments[assignment.id] ? 'expanded' : ''}`}>
+            <div key={assignment.id} className={`assignment-card ${expandedAssignments[assignment.id] ? 'expanded' : ''} ${assignment.active === false ? 'disabled' : ''}`}>
               <div className="assignment-header">
                 <div className="assignment-title-row">
                   <div className="title-and-course">
@@ -909,6 +921,12 @@ const AssignmentManagement = () => {
                         ⋯
                       </button>
                       <div className="more-dropdown">
+                        <button 
+                          className="btn-text-small"
+                          onClick={() => handleToggleActive(assignment.sectionId, assignment.id, assignment.active)}
+                        >
+                          {assignment.active ? '비활성화' : '활성화'}
+                        </button>
                         <button 
                           className="btn-text-small delete"
                           onClick={() => handleDelete(assignment.id)}
@@ -977,7 +995,7 @@ const AssignmentManagement = () => {
                           )}
                         </div>
                         
-                        {/* 문제별 제출률 표시 */}
+                        {/* 문제별 제출률 표시 (정답을 맞춘 학생 수 기준) */}
                         <span className="problem-submission-rate">
                           {submissionStats[assignment.id]?.problemStats ? (
                             (() => {
@@ -986,7 +1004,7 @@ const AssignmentManagement = () => {
                               );
                               return problemStat ? (
                                 <>
-                                  제출 현황: {problemStat.submittedStudents}/{problemStat.totalStudents}
+                                  제출 현황: {problemStat.correctSubmissions || 0}/{problemStat.totalStudents}
                                 </>
                               ) : (
                                 `제출 현황: 0/${submissionStats[assignment.id]?.totalStudents || assignment.totalStudents || 0}`
@@ -1349,7 +1367,6 @@ const AssignmentManagement = () => {
                       onChange={(e) => setProblemSearchTerm(e.target.value)}
                       className="search-input"
                     />
-                    <span className="search-icon">🔍</span>
                   </div>
                   <button 
                     className="btn-create-new"
@@ -1365,35 +1382,6 @@ const AssignmentManagement = () => {
                       <div key={problem.id} className="available-problem-item">
                         <div className="problem-info">
                           <h4 className="problem-title">{problem.title}</h4>
-                          <p className="problem-description">{problem.description}</p>
-                          
-                          <div className="problem-meta-info">
-                            {problem.difficulty && (
-                              <span 
-                                className="problem-difficulty"
-                                style={{ color: getDifficultyColor(problem.difficulty) }}
-                              >
-                                [{problem.difficulty}]
-                              </span>
-                            )}
-                            
-                            {/* Problem Limits */}
-                            {(problem.timeLimit || problem.memoryLimit) && (
-                              <div className="problem-limits-admin">
-                                {problem.timeLimit && (
-                                  <span className="limit-badge-admin time-limit">
-                                    시간 제한: {problem.timeLimit}초
-                                  </span>
-                                )}
-                                {problem.memoryLimit && (
-                                  <span className="limit-badge-admin memory-limit">
-                                    메모리 제한: {problem.memoryLimit}MB
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          
                           <span className="problem-created">
                             생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
                           </span>

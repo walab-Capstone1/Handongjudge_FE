@@ -4,7 +4,7 @@
   padding: 1.5rem;
 }
 
-.loading-container, .error-container {
+.loading-container, .error-container, .disabled-section-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,6 +12,64 @@
   padding: 4rem 2rem;
   text-align: center;
   background-color: white;
+  min-height: 400px;
+}
+
+.disabled-section-container {
+  background: linear-gradient(to bottom, #fef2f2, #ffffff);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.disabled-icon-large {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.disabled-section-container h2 {
+  color: #dc2626;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.disabled-message {
+  color: #374151;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.disabled-submessage {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+.disabled-section-container .btn-primary {
+  padding: 0.75rem 2rem;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.disabled-section-container .btn-primary:hover {
+  background-color: #5568d3;
 }
 
 .error-container h3 {
