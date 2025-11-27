@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "HandongJudge",
+  "name": "HandongJudge - 한동대학교 온라인 저지",
   "icons": [
     {
       "src": "favicon.ico",

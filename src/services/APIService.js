@@ -326,6 +326,33 @@ class APIService {
     });
   }
 
+  // 문제 복사
+  async copyProblem(problemId, newTitle = null) {
+    const body = newTitle ? { newTitle } : {};
+    return await this.request(`/problems/${problemId}/copy`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+  }
+
+  // 수업 복사
+  async copySection(sectionId, sectionNumber, year, semester) {
+    return await this.request(`/sections/${sectionId}/copy`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sectionNumber,
+        year,
+        semester
+      }),
+    });
+  }
+
   // ==================== 관리자 API ====================
   
   // 대시보드 통계 조회
