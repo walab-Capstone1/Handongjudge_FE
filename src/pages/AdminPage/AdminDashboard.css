@@ -70,6 +70,9 @@
 
 .filter-right {
   display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  display: flex;
   align-items: center;
   gap: 1rem;
 }
@@ -946,6 +949,26 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
+.btn-copy-section {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-copy-section:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 /* 수업 생성 모달 스타일 */
 .modal-overlay {
   position: fixed;
@@ -1074,6 +1097,14 @@
 
 .btn-submit:hover:not(:disabled) {
   background: #5568d3;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.4;
 }
 
 .btn-submit:disabled {

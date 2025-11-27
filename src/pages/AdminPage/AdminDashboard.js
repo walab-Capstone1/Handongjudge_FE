@@ -13,8 +13,15 @@ const AdminDashboard = () => {
   const [selectedYear, setSelectedYear] = useState('ALL');
   const [selectedSemester, setSelectedSemester] = useState('ALL');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
   const [formData, setFormData] = useState({
     courseTitle: '',
+    sectionNumber: '',
+    year: new Date().getFullYear(),
+    semester: 'SPRING'
+  });
+  const [copyFormData, setCopyFormData] = useState({
+    sourceSectionId: '',
     sectionNumber: '',
     year: new Date().getFullYear(),
     semester: 'SPRING'
@@ -118,6 +125,48 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleCopySection = async () => {
+    try {
+      if (!copyFormData.sourceSectionId) {
+        alert('복사할 수업을 선택해주세요.');
+        return;
+      }
+
+      if (!copyFormData.sectionNumber) {
+        alert('새 분반 번호를 입력해주세요.');
+        return;
+      }
+
+      const response = await APIService.copySection(
+        parseInt(copyFormData.sourceSectionId),
+        parseInt(copyFormData.sectionNumber),
+        parseInt(copyFormData.year),
+        copyFormData.semester
+      );
+
+      if (response.success) {
+        alert('수업이 성공적으로 복사되었습니다!');
+        setShowCopyModal(false);
+        setCopyFormData({
+          sourceSectionId: '',
+          sectionNumber: '',
+          year: new Date().getFullYear(),
+          semester: 'SPRING'
+        });
+        
+        // 수업 목록 다시 불러오기
+        const dashboardResponse = await APIService.getInstructorDashboard();
+        const dashboardData = dashboardResponse?.data || [];
+        setSections(dashboardData);
+      } else {
+        alert(response.message || '수업 복사에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('수업 복사 실패:', error);
+      alert(error.message || '수업 복사에 실패했습니다.');
+    }
+  };
+
   // 학기 표시 헬퍼 함수
   const getSemesterLabel = (semester) => {
     switch(semester) {
@@ -210,10 +259,16 @@ const AdminDashboard = () => {
           </div>
           <div className="filter-right">
             <button 
+              className="btn-copy-section"
+              onClick={() => setShowCopyModal(true)}
+            >
+              수업 가져오기
+            </button>
+            <button 
               className="btn-create-section"
               onClick={() => setShowCreateModal(true)}
             >
-              + 새 수업 만들기
+              새 수업 만들기
             </button>
           </div>
         </div>
@@ -262,7 +317,7 @@ const AdminDashboard = () => {
                   onClick={(e) => handleToggleActive(section.sectionId, section.active !== false, e)}
                   title={section.active !== false ? '비활성화하기' : '활성화하기'}
                 >
-                  {section.active !== false ? '✓ 활성' : '✕ 비활성'}
+                  {section.active !== false ? '활성' : '비활성'}
                 </button>
                 <span className="section-hint">클릭하여 관리하기</span>
                 {section.enrollmentCode && (
@@ -287,7 +342,6 @@ const AdminDashboard = () => {
           {sections.length === 0 && (
             <div className="no-sections">
               <div className="no-sections-message">
-                <span className="no-sections-icon">📚</span>
                 <p>담당하고 있는 분반이 없습니다.</p>
               </div>
             </div>
@@ -375,6 +429,99 @@ const AdminDashboard = () => {
                   disabled={!formData.courseTitle || !formData.sectionNumber}
                 >
                   생성하기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 수업 가져오기 모달 */}
+        {showCopyModal && (
+          <div className="modal-overlay" onClick={() => setShowCopyModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>수업 가져오기</h2>
+                <button 
+                  className="modal-close"
+                  onClick={() => setShowCopyModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>복사할 수업 선택</label>
+                  <select
+                    value={copyFormData.sourceSectionId}
+                    onChange={(e) => setCopyFormData({...copyFormData, sourceSectionId: e.target.value})}
+                    className="form-select"
+                  >
+                    <option value="">수업을 선택하세요</option>
+                    {sections.map((section) => (
+                      <option key={section.sectionId} value={section.sectionId}>
+                        {section.courseTitle} - {section.sectionNumber}분반 ({section.year || '2024'}년 {getSemesterLabel(section.semester)})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="form-hint">기존 수업의 과제, 문제, 공지사항이 모두 복사됩니다.</p>
+                </div>
+
+                <div className="form-group">
+                  <label>새 분반 번호</label>
+                  <input
+                    type="number"
+                    value={copyFormData.sectionNumber}
+                    onChange={(e) => setCopyFormData({...copyFormData, sectionNumber: e.target.value})}
+                    className="form-input"
+                    placeholder="예: 2"
+                    min="1"
+                  />
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>년도</label>
+                    <input
+                      type="number"
+                      value={copyFormData.year}
+                      onChange={(e) => setCopyFormData({...copyFormData, year: e.target.value})}
+                      className="form-input"
+                      placeholder="2025"
+                      min="2020"
+                      max="2099"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>학기</label>
+                    <select
+                      value={copyFormData.semester}
+                      onChange={(e) => setCopyFormData({...copyFormData, semester: e.target.value})}
+                      className="form-select"
+                    >
+                      <option value="SPRING">1학기</option>
+                      <option value="SUMMER">여름학기</option>
+                      <option value="FALL">2학기</option>
+                      <option value="WINTER">겨울학기</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button 
+                  className="btn-cancel"
+                  onClick={() => setShowCopyModal(false)}
+                >
+                  취소
+                </button>
+                <button 
+                  className="btn-submit"
+                  onClick={handleCopySection}
+                  disabled={!copyFormData.sourceSectionId || !copyFormData.sectionNumber}
+                >
+                  가져오기
                 </button>
               </div>
             </div>
