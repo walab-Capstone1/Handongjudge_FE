@@ -850,7 +850,7 @@
 }
 
 .btn-add-problem {
-  background: linear-gradient(135deg, #00b894, #00cec9);
+  background: #667eea;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -862,12 +862,12 @@
 }
 
 .btn-add-problem:hover {
-  background: linear-gradient(135deg, #00a085, #00b7b3);
+  background: #5568d3;
   transform: translateY(-1px);
 }
 
 .btn-add-first-problem {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #667eea;
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -878,7 +878,7 @@
 }
 
 .btn-add-first-problem:hover {
-  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  background: #5568d3;
   transform: translateY(-2px);
 }
 
@@ -1049,7 +1049,7 @@
 }
 
 .btn-select-problem {
-  background: linear-gradient(135deg, #00b894, #00cec9);
+  background: #667eea;
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -1063,9 +1063,87 @@
 }
 
 .btn-select-problem:hover {
-  background: linear-gradient(135deg, #00a085, #00b7b3);
+  background: #5568d3;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.problem-action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.btn-copy-problem {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-copy-problem:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-create-new {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-create-new:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+.copy-problem-info {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.copy-problem-info .info-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.btn-copy-problem-item {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-copy-problem-item:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .no-available-problems {

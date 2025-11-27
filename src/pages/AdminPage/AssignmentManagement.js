@@ -17,6 +17,9 @@ const AssignmentManagement = () => {
   const [showCreateProblemModal, setShowCreateProblemModal] = useState(false);
   const [showStandaloneProblemModal, setShowStandaloneProblemModal] = useState(false);
   const [showBulkProblemModal, setShowBulkProblemModal] = useState(false);
+  const [showCopyProblemModal, setShowCopyProblemModal] = useState(false);
+  const [copyableProblems, setCopyableProblems] = useState([]);
+  const [copyProblemSearchTerm, setCopyProblemSearchTerm] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
   const [selectedAssignment, setSelectedAssignment] = useState(null);
@@ -387,12 +390,68 @@ const AssignmentManagement = () => {
 
   const fetchAvailableProblems = async () => {
     try {
-      // 백엔드에 getAllProblems API 필요
-      const problems = await APIService.getAllProblems();
-      setAvailableProblems(problems);
+      // 현재 section의 모든 assignment에 포함된 문제들만 가져오기
+      if (!sectionId || !assignments || assignments.length === 0) {
+        setAvailableProblems([]);
+        return;
+      }
+
+      // 모든 assignment의 문제들을 수집
+      const sectionProblemIds = new Set();
+      
+      for (const assignment of assignments) {
+        try {
+          const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignment.id);
+          const problems = problemsResponse.data || problemsResponse;
+          
+          if (Array.isArray(problems)) {
+            problems.forEach(problem => {
+              sectionProblemIds.add(problem.id);
+            });
+          }
+        } catch (error) {
+          console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
+        }
+      }
+
+      // 문제 ID 목록으로 전체 문제 정보 가져오기
+      const allProblems = await APIService.getAllProblems();
+      const filteredProblems = allProblems.filter(problem => 
+        sectionProblemIds.has(problem.id)
+      );
+      
+      setAvailableProblems(filteredProblems);
     } catch (error) {
       console.error('문제 목록 조회 실패:', error);
       setAvailableProblems([]);
+    }
+  };
+
+  const fetchCopyableProblems = async () => {
+    try {
+      const problems = await APIService.getAllProblems();
+      setCopyableProblems(problems);
+    } catch (error) {
+      console.error('복사 가능한 문제 목록 조회 실패:', error);
+      setCopyableProblems([]);
+    }
+  };
+
+  const handleCopyProblem = async (problemId, newTitle = null) => {
+    try {
+      const newProblemId = await APIService.copyProblem(problemId, newTitle);
+      alert('문제가 성공적으로 복사되었습니다.');
+      setShowCopyProblemModal(false);
+      
+      // 복사된 문제를 현재 과제에 추가
+      if (selectedAssignment) {
+        await APIService.addProblemToAssignment(selectedAssignment.id, newProblemId);
+        alert('복사된 문제가 과제에 추가되었습니다.');
+        fetchAssignments();
+      }
+    } catch (error) {
+      console.error('문제 복사 실패:', error);
+      alert(error.message || '문제 복사에 실패했습니다.');
     }
   };
 
@@ -874,14 +933,12 @@ const AssignmentManagement = () => {
                 onClick={handleBulkProblemCreate}
                 title="여러 문제를 한번에 생성합니다"
               >
-                <span>📚</span>
                 문제 대량 생성
               </button>
               <button 
                 className="btn-secondary"
                 onClick={handleAddAssignment}
               >
-                <span>➕</span>
                 새 과제 만들기
               </button>
             </div>
@@ -975,7 +1032,7 @@ const AssignmentManagement = () => {
                     onClick={() => handleAddProblem(assignment)}
                     title="문제 추가"
                   >
-                    ➕ 문제 추가
+                    문제 추가
                   </button>
                 </div>
                 <div className="problems-list">
@@ -1368,12 +1425,23 @@ const AssignmentManagement = () => {
                       className="search-input"
                     />
                   </div>
-                  <button 
-                    className="btn-create-new"
-                    onClick={handleCreateNewProblem}
-                  >
-                    ➕ 새 문제 만들기
-                  </button>
+                  <div className="problem-action-buttons">
+                    <button 
+                      className="btn-copy-problem"
+                      onClick={() => {
+                        setShowCopyProblemModal(true);
+                        fetchCopyableProblems();
+                      }}
+                    >
+                      기존 문제 가져오기
+                    </button>
+                    <button 
+                      className="btn-create-new"
+                      onClick={handleCreateNewProblem}
+                    >
+                      새 문제 만들기
+                    </button>
+                  </div>
                 </div>
 
                 <div className="available-problems">
@@ -1460,7 +1528,7 @@ const AssignmentManagement = () => {
                     마크다운(.md), 텍스트(.txt), LaTeX(.tex) 형식의 문제 설명 파일을 업로드하세요.
                     <br/>이 파일이 있으면 ZIP 파일 내부 설명보다 우선 적용됩니다.
                     {problemFormData.descriptionFile && (
-                      <span className="file-selected"> ✓ 선택됨: {problemFormData.descriptionFile.name}</span>
+                      <span className="file-selected">선택됨: {problemFormData.descriptionFile.name}</span>
                     )}
                   </small>
                 </div>
@@ -1480,7 +1548,7 @@ const AssignmentManagement = () => {
                     테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
                     <br/>ZIP 내부에 problem_statement 폴더가 있으면 자동으로 설명을 추출합니다.
                     {problemFormData.zipFile && (
-                      <span className="file-selected"> ✓ 선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
+                      <span className="file-selected">선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
                     )}
                   </small>
                 </div>
@@ -1554,7 +1622,7 @@ const AssignmentManagement = () => {
                     마크다운(.md), 텍스트(.txt), LaTeX(.tex) 형식의 문제 설명 파일을 업로드하세요.
                     <br/>이 파일이 있으면 ZIP 파일 내부 설명보다 우선 적용됩니다.
                     {problemFormData.descriptionFile && (
-                      <span className="file-selected"> ✓ 선택됨: {problemFormData.descriptionFile.name}</span>
+                      <span className="file-selected">선택됨: {problemFormData.descriptionFile.name}</span>
                     )}
                   </small>
                 </div>
@@ -1574,7 +1642,7 @@ const AssignmentManagement = () => {
                     테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
                     <br/>ZIP 내부에 problem_statement 폴더가 있으면 자동으로 설명을 추출합니다.
                     {problemFormData.zipFile && (
-                      <span className="file-selected"> ✓ 선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
+                      <span className="file-selected">선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
                     )}
                   </small>
                 </div>
@@ -1676,7 +1744,7 @@ const AssignmentManagement = () => {
                             </small>
                             {problem.descriptionFile && (
                               <small className="file-selected">
-                                ✓ {problem.descriptionFile.name}
+                                선택됨: {problem.descriptionFile.name}
                               </small>
                             )}
                           </div>
@@ -1695,7 +1763,7 @@ const AssignmentManagement = () => {
                             </small>
                             {problem.zipFile && (
                               <small className="file-selected">
-                                ✓ {problem.zipFile.name} ({(problem.zipFile.size / 1024 / 1024).toFixed(2)}MB)
+                                선택됨: {problem.zipFile.name} ({(problem.zipFile.size / 1024 / 1024).toFixed(2)}MB)
                               </small>
                             )}
                           </div>
@@ -1711,7 +1779,7 @@ const AssignmentManagement = () => {
                     className="btn-add-row"
                     onClick={addProblemRow}
                   >
-                    ➕ 문제 추가
+                    문제 추가
                   </button>
                 </div>
 
@@ -1736,6 +1804,85 @@ const AssignmentManagement = () => {
         )}
 
       </div>
+
+        {/* 문제 가져오기 모달 */}
+        {showCopyProblemModal && (
+          <div className="modal-overlay" onClick={() => setShowCopyProblemModal(false)}>
+            <div className="modal-content problem-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>기존 문제 가져오기 - {selectedAssignment?.title}</h2>
+                <button 
+                  className="modal-close"
+                  onClick={() => setShowCopyProblemModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="problem-modal-content">
+                <div className="problem-search-section">
+                  <div className="search-box">
+                    <input
+                      type="text"
+                      placeholder="문제명으로 검색..."
+                      value={copyProblemSearchTerm}
+                      onChange={(e) => setCopyProblemSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="copy-problem-info">
+                  <p className="info-text">
+                    내가 만든 문제만 복사할 수 있습니다. 복사된 문제는 독립적으로 관리됩니다.
+                  </p>
+                </div>
+
+                <div className="available-problems">
+                  {copyableProblems
+                    .filter(problem => 
+                      problem.title.toLowerCase().includes(copyProblemSearchTerm.toLowerCase())
+                    )
+                    .length > 0 ? (
+                    copyableProblems
+                      .filter(problem => 
+                        problem.title.toLowerCase().includes(copyProblemSearchTerm.toLowerCase())
+                      )
+                      .map((problem) => (
+                        <div key={problem.id} className="available-problem-item">
+                          <div className="problem-info">
+                            <h4 className="problem-title">{problem.title}</h4>
+                            <span className="problem-created">
+                              생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
+                            </span>
+                          </div>
+                          <button 
+                            className="btn-copy-problem-item"
+                            onClick={() => handleCopyProblem(problem.id)}
+                          >
+                            가져오기
+                          </button>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="no-available-problems">
+                      <p>복사 가능한 문제가 없습니다.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button 
+                  className="btn-cancel"
+                  onClick={() => setShowCopyProblemModal(false)}
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     </AdminLayout>
   );
