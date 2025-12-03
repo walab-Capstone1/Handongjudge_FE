@@ -12,7 +12,8 @@ const CourseManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
     courseId: '',
-    sectionNumber: '',
+    courseTitle: '',
+    description: '',
     year: new Date().getFullYear(),
     semester: 'SPRING'
   });
@@ -35,10 +36,26 @@ const CourseManagement = () => {
 
   const handleCreateSection = async () => {
     try {
+      // Course 선택 방식이면 기존 Course 사용, 아니면 새 Course 생성
+      let courseId;
+      if (formData.courseId) {
+        courseId = parseInt(formData.courseId);
+      } else if (formData.courseTitle) {
+        // 새 Course 생성
+        const courseResponse = await APIService.createCourse({
+          title: formData.courseTitle,
+          description: formData.description || ''
+        });
+        courseId = courseResponse.id;
+      } else {
+        alert('강의를 선택하거나 새 강의 제목을 입력해주세요.');
+        return;
+      }
+
       const response = await APIService.createSection({
-        courseId: parseInt(formData.courseId),
+        courseId: courseId,
         instructorId: await APIService.getCurrentUserId(), // 현재 로그인한 사용자 ID
-        sectionNumber: parseInt(formData.sectionNumber),
+        sectionNumber: null, // 표시용이므로 null로 전달
         year: parseInt(formData.year),
         semester: formData.semester
       });
@@ -47,7 +64,8 @@ const CourseManagement = () => {
       setShowCreateModal(false);
       setFormData({
         courseId: '',
-        sectionNumber: '',
+        courseTitle: '',
+        description: '',
         year: new Date().getFullYear(),
         semester: 'SPRING'
       });
@@ -135,7 +153,6 @@ const CourseManagement = () => {
             <div key={section.sectionId} className="section-card">
               <div className="section-header">
                 <h3 className="section-title">{section.courseTitle}</h3>
-                <span className="section-badge">{section.sectionNumber}분반</span>
               </div>
 
               <div className="section-info-grid">
@@ -223,13 +240,13 @@ const CourseManagement = () => {
 
               <div className="modal-body">
                 <div className="form-group">
-                  <label>강의 선택</label>
+                  <label>강의 선택 또는 새 강의 제목 입력</label>
                   <select
                     value={formData.courseId}
-                    onChange={(e) => setFormData({...formData, courseId: e.target.value})}
+                    onChange={(e) => setFormData({...formData, courseId: e.target.value, courseTitle: ''})}
                     className="form-select"
                   >
-                    <option value="">강의를 선택하세요</option>
+                    <option value="">새 강의 만들기</option>
                     {availableCourses.map(course => (
                       <option key={course.id} value={course.id}>
                         {course.title}
@@ -238,17 +255,30 @@ const CourseManagement = () => {
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label>분반 번호</label>
-                  <input
-                    type="number"
-                    value={formData.sectionNumber}
-                    onChange={(e) => setFormData({...formData, sectionNumber: e.target.value})}
-                    className="form-input"
-                    placeholder="예: 1"
-                    min="1"
-                  />
-                </div>
+                {!formData.courseId && (
+                  <>
+                    <div className="form-group">
+                      <label>새 강의 제목</label>
+                      <input
+                        type="text"
+                        value={formData.courseTitle}
+                        onChange={(e) => setFormData({...formData, courseTitle: e.target.value})}
+                        className="form-input"
+                        placeholder="예: 자바프로그래밍"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>수업 설명</label>
+                      <textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        className="form-input"
+                        placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
+                        rows="3"
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className="form-row">
                   <div className="form-group">
@@ -265,7 +295,7 @@ const CourseManagement = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>학기</label>
+                    <label>구분</label>
                     <select
                       value={formData.semester}
                       onChange={(e) => setFormData({...formData, semester: e.target.value})}
@@ -275,6 +305,9 @@ const CourseManagement = () => {
                       <option value="SUMMER">여름학기</option>
                       <option value="FALL">2학기</option>
                       <option value="WINTER">겨울학기</option>
+                      <option value="CAMP">캠프</option>
+                      <option value="SPECIAL">특강</option>
+                      <option value="IRREGULAR">비정규 세션</option>
                     </select>
                   </div>
                 </div>
@@ -290,7 +323,7 @@ const CourseManagement = () => {
                 <button 
                   className="btn-submit"
                   onClick={handleCreateSection}
-                  disabled={!formData.courseId || !formData.sectionNumber}
+                  disabled={!formData.courseId && !formData.courseTitle}
                 >
                   생성하기
                 </button>

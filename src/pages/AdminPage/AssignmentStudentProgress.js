@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
 import APIService from "../../services/APIService";
+import { removeCopyLabel } from "../../utils/problemUtils";
 import "./AssignmentStudentProgress.css";
 
 const AssignmentStudentProgress = () => {
@@ -172,7 +173,7 @@ const AssignmentStudentProgress = () => {
                   >
                     <div className="header-left">
                       <span className="problem-number">문제 {index + 1}</span>
-                      <span className="problem-title">{problem.title}</span>
+                      <span className="problem-title">{removeCopyLabel(problem.title)}</span>
                     </div>
                     <div className="header-right">
                       <span className="problem-summary">
@@ -303,7 +304,7 @@ const AssignmentStudentProgress = () => {
                                 <div 
                                   key={problem.id}
                                   className={`problem-badge ${isSolved ? 'solved' : 'unsolved'}`}
-                                  title={`${problem.title} - ${isSolved ? '완료' : '미완료'}`}
+                                  title={`${removeCopyLabel(problem.title)} - ${isSolved ? '완료' : '미완료'}`}
                                 >
                                   {index + 1}
                                 </div>
@@ -385,7 +386,7 @@ const AssignmentStudentProgress = () => {
                         return (
                           <tr key={problem.id}>
                             <td>{index + 1}</td>
-                            <td>{problem.title}</td>
+                            <td>{removeCopyLabel(problem.title)}</td>
                             <td>
                               <span className={`status-badge-detail ${isSolved ? 'completed' : 'not-completed'}`}>
                                 {isSolved ? '완료' : '미완료'}
