@@ -257,9 +257,9 @@ const CourseManagement = () => {
 
                 {!formData.courseId && (
                   <>
-                    <div className="form-group">
+                <div className="form-group">
                       <label>새 강의 제목</label>
-                      <input
+                  <input
                         type="text"
                         value={formData.courseTitle}
                         onChange={(e) => setFormData({...formData, courseTitle: e.target.value})}
@@ -272,11 +272,11 @@ const CourseManagement = () => {
                       <textarea
                         value={formData.description}
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        className="form-input"
+                    className="form-input"
                         placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
                         rows="3"
-                      />
-                    </div>
+                  />
+                </div>
                   </>
                 )}
 

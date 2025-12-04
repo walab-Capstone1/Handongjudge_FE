@@ -497,37 +497,9 @@ const AssignmentManagement = () => {
 
   const fetchAvailableProblems = async () => {
     try {
-      // 현재 section의 모든 assignment에 포함된 문제들만 가져오기
-      if (!sectionId || !assignments || assignments.length === 0) {
-        setAvailableProblems([]);
-        return;
-      }
-
-      // 모든 assignment의 문제들을 수집
-      const sectionProblemIds = new Set();
-      
-      for (const assignment of assignments) {
-        try {
-          const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignment.id);
-          const problems = problemsResponse.data || problemsResponse;
-          
-          if (Array.isArray(problems)) {
-            problems.forEach(problem => {
-              sectionProblemIds.add(problem.id);
-            });
-          }
-        } catch (error) {
-          console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
-        }
-      }
-
-      // 문제 ID 목록으로 전체 문제 정보 가져오기
+      // 모든 문제 가져오기 (instructor가 만든 문제들)
       const allProblems = await APIService.getAllProblems();
-      const filteredProblems = allProblems.filter(problem => 
-        sectionProblemIds.has(problem.id)
-      );
-      
-      setAvailableProblems(filteredProblems);
+      setAvailableProblems(allProblems);
     } catch (error) {
       console.error('문제 목록 조회 실패:', error);
       setAvailableProblems([]);
@@ -596,7 +568,7 @@ const AssignmentManagement = () => {
   const handleSelectProblem = async (problemIds) => {
     try {
       for (const problemId of problemIds) {
-        await APIService.addProblemToAssignment(selectedAssignment.id, problemId);
+      await APIService.addProblemToAssignment(selectedAssignment.id, problemId);
       }
       alert(`${problemIds.length}개의 문제가 성공적으로 추가되었습니다.`);
       setShowProblemModal(false);
@@ -1206,19 +1178,19 @@ const AssignmentManagement = () => {
               <p className="assignment-description">{assignment.description}</p>
 
               <div className="assignment-actions-row">
-                <button 
-                  className="btn-toggle-problems"
-                  onClick={() => toggleAssignment(assignment.id)}
-                >
-                  {expandedAssignments[assignment.id] ? '문제 목록 숨기기' : '문제 목록 보기'}
-                </button>
-                <button 
-                  className="btn-add-problem"
-                  onClick={() => handleAddProblem(assignment)}
-                  title="문제 추가"
-                >
-                  문제 추가
-                </button>
+              <button 
+                className="btn-toggle-problems"
+                onClick={() => toggleAssignment(assignment.id)}
+              >
+                {expandedAssignments[assignment.id] ? '문제 목록 숨기기' : '문제 목록 보기'}
+              </button>
+                  <button 
+                    className="btn-add-problem"
+                    onClick={() => handleAddProblem(assignment)}
+                    title="문제 추가"
+                  >
+                    문제 추가
+                  </button>
               </div>
 
               {expandedAssignments[assignment.id] && (
@@ -1608,14 +1580,14 @@ const AssignmentManagement = () => {
               
               <div className="problem-modal-body">
                 <div className="problem-search-section">
-                  <input
-                    type="text"
-                    placeholder="문제명으로 검색..."
-                    value={problemSearchTerm}
-                    onChange={(e) => setProblemSearchTerm(e.target.value)}
-                    className="search-input"
-                  />
-                </div>
+                    <input
+                      type="text"
+                      placeholder="문제명으로 검색..."
+                      value={problemSearchTerm}
+                      onChange={(e) => setProblemSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
 
                 {filteredProblems.length > 0 && (
                   <div className="problem-selection-header">
@@ -1679,49 +1651,49 @@ const AssignmentManagement = () => {
               </div>
 
               <div className="modal-footer">
-                <div className="problem-action-buttons">
-                  <button 
+                  <div className="problem-action-buttons">
+                    <button 
                     type="button"
-                    className="btn-copy-problem"
-                    onClick={() => {
+                      className="btn-copy-problem"
+                      onClick={() => {
                       setShowProblemModal(false);
-                      setShowCopyProblemModal(true);
+                        setShowCopyProblemModal(true);
                       setSelectedSectionForProblem('');
                       setAssignmentsForProblem([]);
                       setExpandedAssignmentsForProblem({});
                       setAssignmentProblems({});
                       setCopyProblemSearchTerm('');
                       setProblemViewMode('list');
-                    }}
-                  >
-                    기존 문제 가져오기
-                  </button>
-                  <button 
+                      }}
+                    >
+                      기존 문제 가져오기
+                    </button>
+                    <button 
                     type="button"
-                    className="btn-create-new"
-                    onClick={handleCreateNewProblem}
-                  >
-                    새 문제 만들기
-                  </button>
-                </div>
+                      className="btn-create-new"
+                      onClick={handleCreateNewProblem}
+                    >
+                      새 문제 만들기
+                    </button>
+                  </div>
                 {filteredProblems.length > 0 && selectedProblemIds.length > 0 && (
                   <div className="footer-actions">
-                    <button 
+                        <button 
                       type="button"
                       className="btn-secondary"
                       onClick={closeProblemModals}
-                    >
+                        >
                       취소
-                    </button>
-                    <button 
+                        </button>
+                      <button 
                       type="button"
                       className="btn-primary"
                       onClick={() => handleSelectProblem(selectedProblemIds)}
-                    >
+                      >
                       선택한 문제 추가 ({selectedProblemIds.length}개)
-                    </button>
-                  </div>
-                )}
+                      </button>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -2064,7 +2036,7 @@ const AssignmentManagement = () => {
                 >
                   ×
                 </button>
-              </div>
+      </div>
               <div className="detail-panel-content">
                 <div className="problem-detail-content">
                   <h4 className="detail-title">{selectedProblemDetail.title}</h4>
@@ -2147,7 +2119,7 @@ const AssignmentManagement = () => {
                   >
                     ←
                   </button>
-                  <h2>기존 문제 가져오기 - {selectedAssignment?.title}</h2>
+                <h2>기존 문제 가져오기 - {selectedAssignment?.title}</h2>
                 </div>
                 <button 
                   className="modal-close"
@@ -2189,14 +2161,14 @@ const AssignmentManagement = () => {
                   {selectedSectionForProblem && (
                     <div className="copy-problem-toolbar">
                       <div className="problem-search-box">
-                        <input
-                          type="text"
-                          placeholder="문제명으로 검색..."
-                          value={copyProblemSearchTerm}
-                          onChange={(e) => setCopyProblemSearchTerm(e.target.value)}
-                          className="search-input"
-                        />
-                      </div>
+                    <input
+                      type="text"
+                      placeholder="문제명으로 검색..."
+                      value={copyProblemSearchTerm}
+                      onChange={(e) => setCopyProblemSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                </div>
 
                       <div className="view-mode-tabs">
                         <button
@@ -2237,8 +2209,8 @@ const AssignmentManagement = () => {
 
                           const filteredProblems = copyProblemSearchTerm
                             ? allProblems.filter(problem =>
-                                problem.title.toLowerCase().includes(copyProblemSearchTerm.toLowerCase())
-                              )
+                      problem.title.toLowerCase().includes(copyProblemSearchTerm.toLowerCase())
+                    )
                             : allProblems;
 
                           const allSelected = filteredProblems.length > 0 && 
@@ -2263,8 +2235,8 @@ const AssignmentManagement = () => {
                                 </label>
                                 <span className="item-count">
                                   {selectedProblemIds.length} / {filteredProblems.length}개 선택됨
-                                </span>
-                              </div>
+                            </span>
+                          </div>
                               <div className="available-problems-grid">
 
                                 {filteredProblems.length > 0 ? (
@@ -2284,7 +2256,7 @@ const AssignmentManagement = () => {
                                           <span className="problem-card-date">
                                             생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
                                           </span>
-                                          <button 
+                          <button 
                                             className="btn-view-detail-card"
                                             onClick={async (e) => {
                                               e.stopPropagation();
@@ -2296,19 +2268,19 @@ const AssignmentManagement = () => {
                                                 alert('문제 정보를 불러오는데 실패했습니다.');
                                               }
                                             }}
-                                          >
+                          >
                                             설명보기
-                                          </button>
+                          </button>
                                         </div>
                                       </div>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="no-available-problems">
+                        </div>
+                      ))
+                  ) : (
+                    <div className="no-available-problems">
                                     <p>검색 조건에 맞는 문제가 없습니다.</p>
-                                  </div>
-                                )}
-                              </div>
+                    </div>
+                  )}
+                </div>
                             </>
                           );
                         })()}

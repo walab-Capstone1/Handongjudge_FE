@@ -684,29 +684,29 @@ const AdminDashboard = () => {
                   <div className="step-content">
                     <h3 className="step-title">1단계: 기본 정보 입력</h3>
                     
-                    <div className="form-group">
+                <div className="form-group">
                       <label>복사할 수업 선택 *</label>
-                      <select
-                        value={copyFormData.sourceSectionId}
+                  <select
+                    value={copyFormData.sourceSectionId}
                         onChange={(e) => handleSourceSectionChange(e.target.value)}
-                        className="form-select"
-                      >
-                        <option value="">수업을 선택하세요</option>
-                        {sections.map((section) => (
-                          <option key={section.sectionId} value={section.sectionId}>
+                    className="form-select"
+                  >
+                    <option value="">수업을 선택하세요</option>
+                    {sections.map((section) => (
+                      <option key={section.sectionId} value={section.sectionId}>
                             {section.courseTitle} ({section.year || '2024'}년 {getSemesterLabel(section.semester)})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                    <div className="form-group">
+                <div className="form-group">
                       <label>새 수업 제목 *</label>
-                      <input
+                  <input
                         type="text"
                         value={copyFormData.courseTitle}
                         onChange={(e) => setCopyFormData({...copyFormData, courseTitle: e.target.value})}
-                        className="form-input"
+                    className="form-input"
                         placeholder="예: 자바프로그래밍"
                       />
                     </div>
@@ -719,41 +719,41 @@ const AdminDashboard = () => {
                         className="form-input"
                         placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
                         rows="4"
-                      />
-                    </div>
+                  />
+                </div>
 
-                    <div className="form-row">
-                      <div className="form-group">
+                <div className="form-row">
+                  <div className="form-group">
                         <label>년도 *</label>
-                        <input
-                          type="number"
-                          value={copyFormData.year}
-                          onChange={(e) => setCopyFormData({...copyFormData, year: e.target.value})}
-                          className="form-input"
-                          placeholder="2025"
-                          min="2020"
-                          max="2099"
-                        />
-                      </div>
+                    <input
+                      type="number"
+                      value={copyFormData.year}
+                      onChange={(e) => setCopyFormData({...copyFormData, year: e.target.value})}
+                      className="form-input"
+                      placeholder="2025"
+                      min="2020"
+                      max="2099"
+                    />
+                  </div>
 
-                      <div className="form-group">
+                  <div className="form-group">
                         <label>구분 *</label>
-                        <select
-                          value={copyFormData.semester}
-                          onChange={(e) => setCopyFormData({...copyFormData, semester: e.target.value})}
-                          className="form-select"
-                        >
-                          <option value="SPRING">1학기</option>
-                          <option value="SUMMER">여름학기</option>
-                          <option value="FALL">2학기</option>
-                          <option value="WINTER">겨울학기</option>
+                    <select
+                      value={copyFormData.semester}
+                      onChange={(e) => setCopyFormData({...copyFormData, semester: e.target.value})}
+                      className="form-select"
+                    >
+                      <option value="SPRING">1학기</option>
+                      <option value="SUMMER">여름학기</option>
+                      <option value="FALL">2학기</option>
+                      <option value="WINTER">겨울학기</option>
                           <option value="CAMP">캠프</option>
                           <option value="SPECIAL">특강</option>
                           <option value="IRREGULAR">비정규 세션</option>
-                        </select>
-                      </div>
-                    </div>
+                    </select>
                   </div>
+                </div>
+              </div>
                 )}
 
                 {/* 2단계: 공지사항 선택 */}
@@ -1048,15 +1048,15 @@ const AdminDashboard = () => {
                 {/* 1단계 버튼 */}
                 {copyStep === 1 && (
                   <>
-                    <button 
-                      className="btn-cancel"
+                <button 
+                  className="btn-cancel"
                       onClick={() => {
                         setShowCopyModal(false);
                         setCopyStep(1);
                       }}
-                    >
-                      취소
-                    </button>
+                >
+                  취소
+                </button>
                     <button 
                       className="btn-next"
                       onClick={() => setCopyStep(2)}
@@ -1138,12 +1138,12 @@ const AdminDashboard = () => {
                     >
                       이전
                     </button>
-                    <button 
-                      className="btn-submit"
-                      onClick={handleCopySection}
-                    >
+                <button 
+                  className="btn-submit"
+                  onClick={handleCopySection}
+                >
                       수업 만들기
-                    </button>
+                </button>
                   </>
                 )}
               </div>

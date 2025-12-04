@@ -1755,9 +1755,36 @@
 .copy-problem-controls {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1rem;
   flex-shrink: 0;
-  margin-bottom: 0;
+  margin-bottom: 2rem;
+}
+
+.section-select-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.section-select-box label {
+  font-weight: 600;
+  color: #2d3436;
+  font-size: 0.9rem;
+}
+
+.section-select-box .section-select {
+  padding: 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.section-select-box .section-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .copy-problem-toolbar {
@@ -1776,7 +1803,7 @@
 }
 
 .problem-search-box .search-input {
-  width: 100%;
+  width: 99%;
   padding: 0.6rem 0.9rem;
   border: 2px solid #e9ecef;
   border-radius: 8px;
@@ -1815,6 +1842,7 @@
   transition: all 0.2s ease;
   white-space: nowrap;
   line-height: 1.2;
+  margin-bottom: 0px;
 }
 
 .tab-button:hover {
@@ -1837,7 +1865,8 @@
   flex-direction: column;
   gap: 1rem;
   min-height: 0;
-  margin-top: 0.5rem;
+  margin-top: 0;
+  padding-top: 0;
   padding-bottom: 0;
   margin-bottom: 0;
 }
