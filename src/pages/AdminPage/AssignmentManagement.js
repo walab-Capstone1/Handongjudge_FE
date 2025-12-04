@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../layouts/AdminLayout";
 import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
+import { removeCopyLabel } from "../../utils/problemUtils";
+import ReactMarkdown from "react-markdown";
 import "./AssignmentManagement.css";
 
 const AssignmentManagement = () => {
@@ -20,8 +22,18 @@ const AssignmentManagement = () => {
   const [showCopyProblemModal, setShowCopyProblemModal] = useState(false);
   const [copyableProblems, setCopyableProblems] = useState([]);
   const [copyProblemSearchTerm, setCopyProblemSearchTerm] = useState('');
+  const [selectedSectionForProblem, setSelectedSectionForProblem] = useState('');
+  const [currentProblemPage, setCurrentProblemPage] = useState(1);
+  const PROBLEMS_PER_PAGE = 10;
+  const [selectedProblemIds, setSelectedProblemIds] = useState([]);
+  const [selectedProblemDetail, setSelectedProblemDetail] = useState(null);
+  const [assignmentsForProblem, setAssignmentsForProblem] = useState([]);
+  const [expandedAssignmentsForProblem, setExpandedAssignmentsForProblem] = useState({});
+  const [assignmentProblems, setAssignmentProblems] = useState({});
+  const [loadingAssignmentsForProblem, setLoadingAssignmentsForProblem] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
+  const [problemViewMode, setProblemViewMode] = useState('list'); // 'list' or 'hierarchy'
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [availableProblems, setAvailableProblems] = useState([]);
   const [problemSearchTerm, setProblemSearchTerm] = useState('');
@@ -385,28 +397,139 @@ const AssignmentManagement = () => {
   const handleAddProblem = async (assignment) => {
     setSelectedAssignment(assignment);
     setShowProblemModal(true);
+    setSelectedProblemIds([]);
+    setSelectedProblemDetail(null);
+    setProblemSearchTerm('');
     await fetchAvailableProblems();
+  };
+
+  const handleSectionChangeForProblem = async (sectionId) => {
+    setSelectedSectionForProblem(sectionId);
+    setExpandedAssignmentsForProblem({});
+    setAssignmentProblems({});
+    setSelectedProblemIds([]);
+    setCopyProblemSearchTerm('');
+    
+    if (!sectionId) {
+      setAssignmentsForProblem([]);
+      return;
+    }
+
+    try {
+      setLoadingAssignmentsForProblem(true);
+      const assignments = await APIService.getAssignmentsBySection(parseInt(sectionId));
+      const assignmentsData = assignments.data || assignments;
+      
+      // 각 과제의 문제 목록 가져오기
+      const assignmentsWithProblems = await Promise.all(
+        assignmentsData.map(async (assignment) => {
+          try {
+            const problemsResponse = await APIService.getAssignmentProblems(parseInt(sectionId), assignment.id);
+            const problems = problemsResponse.data || problemsResponse;
+            return {
+              ...assignment,
+              problems: Array.isArray(problems) ? problems : (problems.problems || [])
+            };
+          } catch (error) {
+            console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
+            return {
+              ...assignment,
+              problems: []
+            };
+          }
+        })
+      );
+      
+      setAssignmentsForProblem(assignmentsWithProblems);
+      
+      // assignmentProblems 맵 초기화
+      const problemsMap = {};
+      assignmentsWithProblems.forEach(assignment => {
+        problemsMap[assignment.id] = assignment.problems || [];
+      });
+      setAssignmentProblems(problemsMap);
+    } catch (error) {
+      console.error('과제 목록 조회 실패:', error);
+      setAssignmentsForProblem([]);
+    } finally {
+      setLoadingAssignmentsForProblem(false);
+    }
+  };
+
+  const toggleAssignmentForProblem = (assignmentId) => {
+    setExpandedAssignmentsForProblem(prev => ({
+      ...prev,
+      [assignmentId]: !prev[assignmentId]
+    }));
+  };
+
+  const handleProblemToggleForAdd = (assignmentId, problemId) => {
+    setSelectedProblemIds(prev => {
+      if (prev.includes(problemId)) {
+        return prev.filter(id => id !== problemId);
+      } else {
+        return [...prev, problemId];
+      }
+    });
+  };
+
+  const handleSelectAllProblemsForAssignment = (assignmentId) => {
+    const problems = assignmentProblems[assignmentId] || [];
+    const problemIds = problems.map(p => p.id);
+    const allSelected = problemIds.every(id => selectedProblemIds.includes(id));
+    
+    if (allSelected) {
+      // 모두 선택 해제
+      setSelectedProblemIds(prev => prev.filter(id => !problemIds.includes(id)));
+    } else {
+      // 모두 선택
+      setSelectedProblemIds(prev => {
+        const newIds = [...prev];
+        problemIds.forEach(id => {
+          if (!newIds.includes(id)) {
+            newIds.push(id);
+          }
+        });
+        return newIds;
+      });
+    }
   };
 
   const fetchAvailableProblems = async () => {
     try {
-      // 현재 section의 모든 assignment에 포함된 문제들만 가져오기
-      if (!sectionId || !assignments || assignments.length === 0) {
-        setAvailableProblems([]);
+      // 모든 문제 가져오기 (instructor가 만든 문제들)
+      const allProblems = await APIService.getAllProblems();
+      setAvailableProblems(allProblems);
+    } catch (error) {
+      console.error('문제 목록 조회 실패:', error);
+      setAvailableProblems([]);
+    }
+  };
+
+  const fetchCopyableProblems = async (sectionId = null) => {
+    try {
+      if (!sectionId) {
+        setCopyableProblems([]);
         return;
       }
 
-      // 모든 assignment의 문제들을 수집
-      const sectionProblemIds = new Set();
+      // 선택한 섹션의 모든 과제 조회
+      const assignments = await APIService.getAssignmentsBySection(sectionId);
+      const assignmentsData = assignments.data || assignments;
+
+      // 모든 과제의 문제들을 수집 (중복 제거)
+      const problemMap = new Map();
       
-      for (const assignment of assignments) {
+      for (const assignment of assignmentsData) {
         try {
           const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignment.id);
           const problems = problemsResponse.data || problemsResponse;
           
           if (Array.isArray(problems)) {
             problems.forEach(problem => {
-              sectionProblemIds.add(problem.id);
+              if (!problemMap.has(problem.id)) {
+                problemMap.set(problem.id, problem);
+              }
             });
           }
         } catch (error) {
@@ -414,23 +537,10 @@ const AssignmentManagement = () => {
         }
       }
 
-      // 문제 ID 목록으로 전체 문제 정보 가져오기
-      const allProblems = await APIService.getAllProblems();
-      const filteredProblems = allProblems.filter(problem => 
-        sectionProblemIds.has(problem.id)
-      );
-      
-      setAvailableProblems(filteredProblems);
-    } catch (error) {
-      console.error('문제 목록 조회 실패:', error);
-      setAvailableProblems([]);
-    }
-  };
-
-  const fetchCopyableProblems = async () => {
-    try {
-      const problems = await APIService.getAllProblems();
-      setCopyableProblems(problems);
+      // Map을 배열로 변환
+      const problemsArray = Array.from(problemMap.values());
+      setCopyableProblems(problemsArray);
+      setCurrentProblemPage(1); // 페이지 초기화
     } catch (error) {
       console.error('복사 가능한 문제 목록 조회 실패:', error);
       setCopyableProblems([]);
@@ -455,15 +565,36 @@ const AssignmentManagement = () => {
     }
   };
 
-  const handleSelectProblem = async (problemId) => {
+  const handleSelectProblem = async (problemIds) => {
     try {
+      for (const problemId of problemIds) {
       await APIService.addProblemToAssignment(selectedAssignment.id, problemId);
-      alert('문제가 성공적으로 추가되었습니다.');
+      }
+      alert(`${problemIds.length}개의 문제가 성공적으로 추가되었습니다.`);
       setShowProblemModal(false);
+      setSelectedProblemIds([]);
       fetchAssignments(); // 목록 새로고침
     } catch (error) {
       console.error('문제 추가 실패:', error);
       alert('문제 추가에 실패했습니다.');
+    }
+  };
+
+  const handleProblemToggle = (problemId) => {
+    setSelectedProblemIds(prev => {
+      if (prev.includes(problemId)) {
+        return prev.filter(id => id !== problemId);
+      } else {
+        return [...prev, problemId];
+      }
+    });
+  };
+
+  const handleSelectAllProblems = () => {
+    if (selectedProblemIds.length === filteredProblems.length && filteredProblems.length > 0) {
+      setSelectedProblemIds([]);
+    } else {
+      setSelectedProblemIds(filteredProblems.map(p => p.id));
     }
   };
 
@@ -610,6 +741,8 @@ const AssignmentManagement = () => {
     setShowCreateProblemModal(false);
     setSelectedAssignment(null);
     setProblemSearchTerm('');
+    setSelectedProblemIds([]);
+    setSelectedProblemDetail(null);
     resetProblemForm();
   };
 
@@ -827,10 +960,39 @@ const AssignmentManagement = () => {
     }
   };
 
-  // 문제 필터링
+  const getSemesterLabel = (semester) => {
+    const labels = {
+      'SPRING': '1학기',
+      'FALL': '2학기',
+      'CAMP': '캠프',
+      'SPECIAL': '특강',
+      'IRREGULAR': '비정규 세션'
+    };
+    return labels[semester] || semester;
+  };
+
+  // 문제 필터링 (현재 수업의 문제들)
   const filteredProblems = availableProblems.filter(problem =>
     problem.title.toLowerCase().includes(problemSearchTerm.toLowerCase())
   );
+
+  // 기존 문제 가져오기 모달에서의 문제 필터링 (선택한 수업의 문제들)
+  const getFilteredProblemsForCopy = () => {
+    if (!selectedSectionForProblem) return [];
+    
+    const allProblems = [];
+    assignmentsForProblem.forEach(assignment => {
+      const problems = assignmentProblems[assignment.id] || [];
+      allProblems.push(...problems);
+    });
+    
+    if (copyProblemSearchTerm) {
+      return allProblems.filter(problem =>
+        problem.title.toLowerCase().includes(copyProblemSearchTerm.toLowerCase())
+      );
+    }
+    return allProblems;
+  };
 
   const getSubmissionRate = (submitted, total) => {
     return total > 0 ? Math.round((submitted / total) * 100) : 0;
@@ -936,7 +1098,7 @@ const AssignmentManagement = () => {
                 문제 대량 생성
               </button>
               <button 
-                className="btn-secondary"
+                className="btn-secondary btn-primary-color"
                 onClick={handleAddAssignment}
               >
                 새 과제 만들기
@@ -1015,18 +1177,13 @@ const AssignmentManagement = () => {
 
               <p className="assignment-description">{assignment.description}</p>
 
+              <div className="assignment-actions-row">
               <button 
                 className="btn-toggle-problems"
                 onClick={() => toggleAssignment(assignment.id)}
               >
                 {expandedAssignments[assignment.id] ? '문제 목록 숨기기' : '문제 목록 보기'}
               </button>
-
-              {expandedAssignments[assignment.id] && (
-                <div className="assignment-expanded-content">
-                  <div className="problems-section">
-                <div className="problems-header">
-                  <h4 className="problems-title">문제 목록 ({assignment.problemCount || 0}개)</h4>
                   <button 
                     className="btn-add-problem"
                     onClick={() => handleAddProblem(assignment)}
@@ -1034,6 +1191,13 @@ const AssignmentManagement = () => {
                   >
                     문제 추가
                   </button>
+              </div>
+
+              {expandedAssignments[assignment.id] && (
+                <div className="assignment-expanded-content">
+                  <div className="problems-section">
+                <div className="problems-header">
+                  <h4 className="problems-title">문제 목록 ({assignment.problemCount || 0}개)</h4>
                 </div>
                 <div className="problems-list">
                   {assignment.problems && assignment.problems.length > 0 ? (
@@ -1041,7 +1205,7 @@ const AssignmentManagement = () => {
                       <div key={problem.id || index} className="problem-item">
                         <div className="problem-item-left">
                           <span className="problem-number">{index + 1}.</span>
-                          <span className="problem-title">{problem.title}</span>
+                          <span className="problem-title">{removeCopyLabel(problem.title)}</span>
                           {problem.difficulty && (
                             <span 
                               className="problem-difficulty"
@@ -1400,10 +1564,10 @@ const AssignmentManagement = () => {
           </div>
         )}
 
-        {/* 문제 선택 모달 */}
+        {/* 문제 선택 모달 (현재 수업의 문제들) */}
         {showProblemModal && (
           <div className="modal-overlay">
-            <div className="modal-content problem-modal">
+            <div className="modal-content problem-modal problem-modal-large">
               <div className="modal-header">
                 <h2>문제 추가 - {selectedAssignment?.title}</h2>
                 <button 
@@ -1414,9 +1578,8 @@ const AssignmentManagement = () => {
                 </button>
               </div>
               
-              <div className="problem-modal-content">
+              <div className="problem-modal-body">
                 <div className="problem-search-section">
-                  <div className="search-box">
                     <input
                       type="text"
                       placeholder="문제명으로 검색..."
@@ -1425,55 +1588,112 @@ const AssignmentManagement = () => {
                       className="search-input"
                     />
                   </div>
+
+                {filteredProblems.length > 0 && (
+                  <div className="problem-selection-header">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={selectedProblemIds.length === filteredProblems.length && filteredProblems.length > 0}
+                        onChange={handleSelectAllProblems}
+                      />
+                      <span>전체 선택</span>
+                    </label>
+                    <span className="item-count">
+                      {selectedProblemIds.length} / {filteredProblems.length}개 선택됨
+                    </span>
+                  </div>
+                )}
+
+                <div className="available-problems-grid">
+                  {filteredProblems.length > 0 ? (
+                    filteredProblems.map((problem) => (
+                      <div key={problem.id} className="problem-card">
+                        <div className="problem-card-header">
+                          <input
+                            type="checkbox"
+                            checked={selectedProblemIds.includes(problem.id)}
+                            onChange={() => handleProblemToggle(problem.id)}
+                            className="problem-checkbox"
+                          />
+                        </div>
+                        <div className="problem-card-body">
+                          <h4 className="problem-card-title">{removeCopyLabel(problem.title)}</h4>
+                          <div className="problem-card-meta-row">
+                            <span className="problem-card-date">
+                              생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
+                            </span>
+                            <button 
+                              className="btn-view-detail-card"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                  const problemInfo = await APIService.getProblemInfo(problem.id);
+                                  setSelectedProblemDetail(problemInfo.data || problemInfo);
+                                } catch (error) {
+                                  console.error('문제 정보 조회 실패:', error);
+                                  alert('문제 정보를 불러오는데 실패했습니다.');
+                                }
+                              }}
+                            >
+                              설명보기
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-available-problems">
+                      <p>사용 가능한 문제가 없습니다.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="modal-footer">
                   <div className="problem-action-buttons">
                     <button 
+                    type="button"
                       className="btn-copy-problem"
                       onClick={() => {
+                      setShowProblemModal(false);
                         setShowCopyProblemModal(true);
-                        fetchCopyableProblems();
+                      setSelectedSectionForProblem('');
+                      setAssignmentsForProblem([]);
+                      setExpandedAssignmentsForProblem({});
+                      setAssignmentProblems({});
+                      setCopyProblemSearchTerm('');
+                      setProblemViewMode('list');
                       }}
                     >
                       기존 문제 가져오기
                     </button>
                     <button 
+                    type="button"
                       className="btn-create-new"
                       onClick={handleCreateNewProblem}
                     >
                       새 문제 만들기
                     </button>
                   </div>
-                </div>
-
-                <div className="available-problems">
-                  {filteredProblems.length > 0 ? (
-                    filteredProblems.map((problem) => (
-                      <div key={problem.id} className="available-problem-item">
-                        <div className="problem-info">
-                          <h4 className="problem-title">{problem.title}</h4>
-                          <span className="problem-created">
-                            생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
-                          </span>
-                        </div>
+                {filteredProblems.length > 0 && selectedProblemIds.length > 0 && (
+                  <div className="footer-actions">
                         <button 
-                          className="btn-select-problem"
-                          onClick={() => handleSelectProblem(problem.id)}
+                      type="button"
+                      className="btn-secondary"
+                      onClick={closeProblemModals}
                         >
-                          선택
+                      취소
                         </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="no-available-problems">
-                      <p>사용 가능한 문제가 없습니다.</p>
                       <button 
-                        className="btn-create-new"
-                        onClick={handleCreateNewProblem}
+                      type="button"
+                      className="btn-primary"
+                      onClick={() => handleSelectProblem(selectedProblemIds)}
                       >
-                        새 문제 만들기
+                      선택한 문제 추가 ({selectedProblemIds.length}개)
                       </button>
                     </div>
                   )}
-                </div>
               </div>
             </div>
           </div>
@@ -1803,25 +2023,144 @@ const AssignmentManagement = () => {
           </div>
         )}
 
+        {/* 문제 설명보기 패널 */}
+        {selectedProblemDetail && (
+          <>
+            <div className="detail-overlay" onClick={() => setSelectedProblemDetail(null)}></div>
+            <div className="detail-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="detail-panel-header">
+                <h3>문제 설명</h3>
+                <button
+                  className="btn-close-detail"
+                  onClick={() => setSelectedProblemDetail(null)}
+                >
+                  ×
+                </button>
+      </div>
+              <div className="detail-panel-content">
+                <div className="problem-detail-content">
+                  <h4 className="detail-title">{selectedProblemDetail.title}</h4>
+                  <div className="detail-meta">
+                    {selectedProblemDetail.timeLimit && (
+                      <span>시간 제한: {selectedProblemDetail.timeLimit}초</span>
+                    )}
+                    {selectedProblemDetail.memoryLimit && (
+                      <span>메모리 제한: {selectedProblemDetail.memoryLimit}MB</span>
+                    )}
+                  </div>
+                  <div className="detail-body problem-description">
+                    {selectedProblemDetail.description ? (
+                      (() => {
+                        const description = selectedProblemDetail.description;
+                        const isMarkdown = description.includes('# ') || 
+                          description.includes('## ') || 
+                          description.includes('```') ||
+                          description.includes('**') ||
+                          !description.includes('<');
+                        
+                        return isMarkdown ? (
+                          <ReactMarkdown
+                            components={{
+                              code({node, inline, className, children, ...props}) {
+                                return inline ? (
+                                  <code className="inline-code" {...props}>
+                                    {children}
+                                  </code>
+                                ) : (
+                                  <pre className="code-block">
+                                    <code className={className} {...props}>
+                                      {children}
+                                    </code>
+                                  </pre>
+                                );
+                              }
+                            }}
+                          >
+                            {description}
+                          </ReactMarkdown>
+                        ) : (
+                          <div dangerouslySetInnerHTML={{ __html: description }} />
+                        );
+                      })()
+                    ) : (
+                      <p>설명이 없습니다.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-        {/* 문제 가져오기 모달 */}
+        {/* 문제 가져오기 모달 (수업 및 문제 선택) */}
         {showCopyProblemModal && (
-          <div className="modal-overlay" onClick={() => setShowCopyProblemModal(false)}>
-            <div className="modal-content problem-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-overlay" onClick={() => {
+            setShowCopyProblemModal(false);
+            setSelectedSectionForProblem('');
+            setAssignmentsForProblem([]);
+            setExpandedAssignmentsForProblem({});
+            setAssignmentProblems({});
+            setSelectedProblemIds([]);
+            setCopyProblemSearchTerm('');
+            setProblemViewMode('list');
+            setSelectedProblemDetail(null);
+          }}>
+            <div className="modal-content problem-modal problem-modal-large" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
+                <div className="modal-header-left">
+                  <button 
+                    className="btn-back"
+                    onClick={() => {
+                      setShowCopyProblemModal(false);
+                      setShowProblemModal(true);
+                    }}
+                    title="뒤로가기"
+                  >
+                    ←
+                  </button>
                 <h2>기존 문제 가져오기 - {selectedAssignment?.title}</h2>
+                </div>
                 <button 
                   className="modal-close"
-                  onClick={() => setShowCopyProblemModal(false)}
+                  onClick={() => {
+                    setShowCopyProblemModal(false);
+                    setSelectedSectionForProblem('');
+                    setAssignmentsForProblem([]);
+                    setExpandedAssignmentsForProblem({});
+                    setAssignmentProblems({});
+                    setSelectedProblemIds([]);
+                    setCopyProblemSearchTerm('');
+                    setProblemViewMode('list');
+                    setSelectedProblemDetail(null);
+                  }}
                 >
                   ×
                 </button>
               </div>
               
-              <div className="problem-modal-content">
-                <div className="problem-search-section">
-                  <div className="search-box">
+              <div className="problem-modal-body">
+                <div className="copy-problem-controls">
+                  <div className="section-select-box">
+                    <label htmlFor="section-select-copy">수업 선택 *</label>
+                    <select
+                      id="section-select-copy"
+                      value={selectedSectionForProblem}
+                      onChange={(e) => handleSectionChangeForProblem(e.target.value)}
+                      className="section-select"
+                    >
+                      <option value="">수업을 선택하세요</option>
+                      {sections.map((section) => (
+                        <option key={section.sectionId} value={section.sectionId}>
+                          {section.courseTitle} ({section.year || '2024'}년 {getSemesterLabel(section.semester)})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedSectionForProblem && (
+                    <div className="copy-problem-toolbar">
+                      <div className="problem-search-box">
                     <input
                       type="text"
                       placeholder="문제명으로 검색..."
@@ -1829,56 +2168,282 @@ const AssignmentManagement = () => {
                       onChange={(e) => setCopyProblemSearchTerm(e.target.value)}
                       className="search-input"
                     />
-                  </div>
                 </div>
 
-                <div className="copy-problem-info">
-                  <p className="info-text">
-                    내가 만든 문제만 복사할 수 있습니다. 복사된 문제는 독립적으로 관리됩니다.
-                  </p>
+                      <div className="view-mode-tabs">
+                        <button
+                          className={`tab-button ${problemViewMode === 'list' ? 'active' : ''}`}
+                          onClick={() => setProblemViewMode('list')}
+                        >
+                          목록 보기
+                        </button>
+                        <button
+                          className={`tab-button ${problemViewMode === 'hierarchy' ? 'active' : ''}`}
+                          onClick={() => setProblemViewMode('hierarchy')}
+                        >
+                          과제별 보기
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="available-problems">
-                  {copyableProblems
-                    .filter(problem => 
+                {loadingAssignmentsForProblem ? (
+                  <div className="loading-items">과제를 불러오는 중...</div>
+                ) : selectedSectionForProblem && assignmentsForProblem.length === 0 ? (
+                  <div className="no-items">선택한 수업에 과제가 없습니다.</div>
+                ) : selectedSectionForProblem ? (
+                  <>
+                    {problemViewMode === 'list' ? (
+                      <div className="problem-list-view">
+                        {(() => {
+                          const allProblems = [];
+                          assignmentsForProblem.forEach(assignment => {
+                            const problems = assignmentProblems[assignment.id] || [];
+                            problems.forEach(problem => {
+                              if (!allProblems.find(p => p.id === problem.id)) {
+                                allProblems.push(problem);
+                              }
+                            });
+                          });
+
+                          const filteredProblems = copyProblemSearchTerm
+                            ? allProblems.filter(problem =>
                       problem.title.toLowerCase().includes(copyProblemSearchTerm.toLowerCase())
                     )
-                    .length > 0 ? (
-                    copyableProblems
-                      .filter(problem => 
-                        problem.title.toLowerCase().includes(copyProblemSearchTerm.toLowerCase())
-                      )
-                      .map((problem) => (
-                        <div key={problem.id} className="available-problem-item">
-                          <div className="problem-info">
-                            <h4 className="problem-title">{problem.title}</h4>
-                            <span className="problem-created">
-                              생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
+                            : allProblems;
+
+                          const allSelected = filteredProblems.length > 0 && 
+                                            filteredProblems.every(p => selectedProblemIds.includes(p.id));
+
+                          return (
+                            <>
+                              <div className="problem-selection-header">
+                                <label className="checkbox-label">
+                                  <input
+                                    type="checkbox"
+                                    checked={allSelected}
+                                    onChange={() => {
+                                      if (allSelected) {
+                                        setSelectedProblemIds([]);
+                                      } else {
+                                        setSelectedProblemIds(filteredProblems.map(p => p.id));
+                                      }
+                                    }}
+                                  />
+                                  <span>전체 선택</span>
+                                </label>
+                                <span className="item-count">
+                                  {selectedProblemIds.length} / {filteredProblems.length}개 선택됨
                             </span>
                           </div>
+                              <div className="available-problems-grid">
+
+                                {filteredProblems.length > 0 ? (
+                                  filteredProblems.map((problem) => (
+                                    <div key={problem.id} className="problem-card">
+                                      <div className="problem-card-header">
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedProblemIds.includes(problem.id)}
+                                          onChange={() => handleProblemToggle(problem.id)}
+                                          className="problem-checkbox"
+                                        />
+                                      </div>
+                                      <div className="problem-card-body">
+                                        <h4 className="problem-card-title">{removeCopyLabel(problem.title)}</h4>
+                                        <div className="problem-card-meta-row">
+                                          <span className="problem-card-date">
+                                            생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
+                                          </span>
                           <button 
-                            className="btn-copy-problem-item"
-                            onClick={() => handleCopyProblem(problem.id)}
+                                            className="btn-view-detail-card"
+                                            onClick={async (e) => {
+                                              e.stopPropagation();
+                                              try {
+                                                const problemInfo = await APIService.getProblemInfo(problem.id);
+                                                setSelectedProblemDetail(problemInfo.data || problemInfo);
+                                              } catch (error) {
+                                                console.error('문제 정보 조회 실패:', error);
+                                                alert('문제 정보를 불러오는데 실패했습니다.');
+                                              }
+                                            }}
                           >
-                            가져오기
+                                            설명보기
                           </button>
+                                        </div>
+                                      </div>
                         </div>
                       ))
                   ) : (
                     <div className="no-available-problems">
-                      <p>복사 가능한 문제가 없습니다.</p>
+                                    <p>검색 조건에 맞는 문제가 없습니다.</p>
                     </div>
                   )}
                 </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="problem-hierarchy-view">
+                        {selectedProblemIds.length > 0 && (
+                          <div className="problem-selection-header">
+                            <span className="item-count">
+                              {selectedProblemIds.length}개 문제 선택됨
+                            </span>
+                          </div>
+                        )}
+                        <div className="assignment-list-large">
+                          {assignmentsForProblem.map((assignment) => {
+                            const isExpanded = expandedAssignmentsForProblem[assignment.id];
+                            let assignmentProblemsList = assignmentProblems[assignment.id] || [];
+                            
+                            if (copyProblemSearchTerm) {
+                              assignmentProblemsList = assignmentProblemsList.filter(problem =>
+                                problem.title.toLowerCase().includes(copyProblemSearchTerm.toLowerCase())
+                              );
+                            }
+                            
+                            const selectedProblems = assignmentProblemsList.filter(p => selectedProblemIds.includes(p.id));
+                            const allSelected = assignmentProblemsList.length > 0 && 
+                                              assignmentProblemsList.every(p => selectedProblemIds.includes(p.id));
+
+                            if (copyProblemSearchTerm && assignmentProblemsList.length === 0) {
+                              return null;
+                            }
+
+                            return (
+                              <div key={assignment.id} className={`assignment-item-large ${isExpanded ? 'expanded' : ''}`}>
+                                <div className="assignment-item-header-large">
+                                  <label className="checkbox-label">
+                                    <input
+                                      type="checkbox"
+                                      checked={allSelected}
+                                      onChange={() => handleSelectAllProblemsForAssignment(assignment.id)}
+                                      disabled={assignmentProblemsList.length === 0}
+                                    />
+                                    <div className="assignment-info-large">
+                                      <span className="assignment-title-large">{assignment.title}</span>
+                                      <span className="assignment-meta">
+                                        {assignmentProblemsList.length}개 문제
+                                      </span>
+                                    </div>
+                                  </label>
+                                  {assignmentProblemsList.length > 0 && (
+                                    <button
+                                      className="btn-expand-assignment-large"
+                                      onClick={() => toggleAssignmentForProblem(assignment.id)}
+                                    >
+                                      {isExpanded ? '접기 ▲' : '문제 보기 ▼'}
+                                    </button>
+                                  )}
+                                </div>
+                                
+                                {isExpanded && assignmentProblemsList.length > 0 && (
+                                  <div className="problem-selection-box-large">
+                                    <div className="problem-selection-header-large">
+                                      <label className="checkbox-label">
+                                        <input
+                                          type="checkbox"
+                                          checked={allSelected}
+                                          onChange={() => handleSelectAllProblemsForAssignment(assignment.id)}
+                                        />
+                                        <span>문제 전체 선택</span>
+                                      </label>
+                                      <span className="item-count">
+                                        {selectedProblems.length} / {assignmentProblemsList.length}개
+                                      </span>
+                                    </div>
+                                    <div className="problem-list-large">
+                                      {assignmentProblemsList.map((problem, index) => (
+                                        <div key={problem.id} className="problem-item-large">
+                                          <div className="problem-item-large-header">
+                                            <input
+                                              type="checkbox"
+                                              checked={selectedProblemIds.includes(problem.id)}
+                                              onChange={() => handleProblemToggleForAdd(assignment.id, problem.id)}
+                                              className="problem-checkbox"
+                                            />
+                                          </div>
+                                          <div className="problem-item-large-body">
+                                            <div className="problem-title-row">
+                                              <h4 className="problem-title-large">
+                                                <span className="problem-number-large">{index + 1}.</span>
+                                                {removeCopyLabel(problem.title)}
+                                              </h4>
+                                              <button
+                                                className="btn-view-detail-card"
+                                                onClick={async (e) => {
+                                                  e.stopPropagation();
+                                                  try {
+                                                    const problemInfo = await APIService.getProblemInfo(problem.id);
+                                                    setSelectedProblemDetail(problemInfo.data || problemInfo);
+                                                  } catch (error) {
+                                                    console.error('문제 정보 조회 실패:', error);
+                                                    alert('문제 정보를 불러오는데 실패했습니다.');
+                                                  }
+                                                }}
+                                              >
+                                                설명보기
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="no-items">수업을 선택해주세요.</div>
+                )}
               </div>
 
               <div className="modal-footer">
                 <button 
-                  className="btn-cancel"
-                  onClick={() => setShowCopyProblemModal(false)}
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setShowCopyProblemModal(false);
+                    setSelectedSectionForProblem('');
+                    setAssignmentsForProblem([]);
+                    setExpandedAssignmentsForProblem({});
+                    setAssignmentProblems({});
+                    setSelectedProblemIds([]);
+                    setCopyProblemSearchTerm('');
+                    setProblemViewMode('list');
+                    setSelectedProblemDetail(null);
+                  }}
                 >
-                  닫기
+                  취소
                 </button>
+                {selectedProblemIds.length > 0 && (
+                  <button 
+                    type="button"
+                    className="btn-primary"
+                    onClick={() => {
+                      handleSelectProblem(selectedProblemIds);
+                      setShowCopyProblemModal(false);
+                      setSelectedSectionForProblem('');
+                      setAssignmentsForProblem([]);
+                      setExpandedAssignmentsForProblem({});
+                      setAssignmentProblems({});
+                      setSelectedProblemIds([]);
+                      setCopyProblemSearchTerm('');
+                      setProblemViewMode('list');
+                      setSelectedProblemDetail(null);
+                    }}
+                  >
+                    선택한 문제 추가 ({selectedProblemIds.length}개)
+                  </button>
+                )}
               </div>
             </div>
           </div>

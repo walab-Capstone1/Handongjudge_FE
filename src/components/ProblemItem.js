@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { removeCopyLabel } from "../utils/problemUtils";
 import "./ProblemItem.css";
 
 const ProblemItem = ({ problem, assignmentId, submissionStats, userSubmissionStatus }) => {
@@ -50,7 +51,7 @@ const ProblemItem = ({ problem, assignmentId, submissionStats, userSubmissionSta
     >
       <div className="problem-item">
         <div className="problem-info">
-          <h3 className="problem-title">{problem.title}</h3>
+          <h3 className="problem-title">{removeCopyLabel(problem.title)}</h3>
           <div className="problem-meta">
             <span className="problem-level">{problem.level || "Level 1"}</span>
             <span className="problem-completed">{getSubmissionStatus()}</span>
