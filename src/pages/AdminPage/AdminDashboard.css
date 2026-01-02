@@ -1,6 +1,7 @@
-  .admin-dashboard {
+   .admin-dashboard {
   padding: 0;
 }
+
 
 .dashboard-loading {
   display: flex;
@@ -11,7 +12,7 @@
   gap: 1rem;
 }
 
-.loading-spinner {
+.admin-loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
@@ -25,11 +26,13 @@
   100% { transform: rotate(360deg); }
 }
 
+
 .dashboard-header {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
+
 
 .dashboard-title {
   font-size: 2rem;
@@ -38,6 +41,7 @@
   margin: 0 0 0.5rem 0;
   text-align: left;
 }
+
 
 .dashboard-subtitle {
   font-size: 1rem;
@@ -48,7 +52,7 @@
 }
 
 /* 필터 섹션 */
-.filter-section {
+.admin-filter-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -61,14 +65,14 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.filter-left {
+.admin-filter-left {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex: 1;
 }
 
-.filter-right {
+.admin-filter-right {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -77,20 +81,20 @@
   gap: 1rem;
 }
 
-.filter-group {
+.admin-filter-group {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.filter-label {
+.admin-filter-label {
   font-size: 0.9rem;
   font-weight: 600;
   color: #374151;
   white-space: nowrap;
 }
 
-.filter-select {
+.admin-filter-select {
   padding: 0.5rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -102,34 +106,34 @@
   min-width: 120px;
 }
 
-.filter-select:hover {
+.admin-filter-select:hover {
   border-color: #667eea;
 }
 
-.filter-select:focus {
+.admin-filter-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.filter-stats {
+.admin-filter-stats {
   margin-left: auto;
 }
 
-.filter-count {
+.admin-filter-count {
   font-size: 0.9rem;
   color: #6b7280;
   font-weight: 500;
 }
 
-.sections-grid {
+.admin-sections-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
 }
 
-.stat-card {
+.admin-stat-card {
   background: white;
   border-radius: 12px;
   padding: 2rem;
@@ -142,13 +146,13 @@
   position: relative;
 }
 
-.stat-card:hover {
+.admin-stat-card:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
 }
 
-.stat-icon {
+.admin-stat-icon {
   font-size: 3rem;
   padding: 1rem;
   border-radius: 50%;
@@ -160,23 +164,24 @@
   height: 80px;
 }
 
-.stat-content {
+.admin-stat-content {
   flex: 1;
 }
 
-.stat-number {
+.admin-stat-number {
   font-size: 2.5rem;
   font-weight: 800;
   color: #2d3436;
   margin: 0 0 0.5rem 0;
 }
 
-.stat-label {
+.admin-stat-label {
   font-size: 1.1rem;
   color: #636e72;
   margin: 0;
   font-weight: 500;
 }
+
 
 .dashboard-content {
   display: grid;
@@ -184,7 +189,7 @@
   gap: 2rem;
 }
 
-.sections-overview {
+.admin-sections-overview {
   background: white;
   border-radius: 20px;
   padding: 2rem;
@@ -192,15 +197,17 @@
   margin-bottom: 2rem;
 }
 
-.sections-grid {
+.admin-sections-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
   gap: 1.5rem;
 }
 
-.admin-dashboard .sections-grid {
+
+.admin-dashboard .admin-sections-grid {
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
 }
+
 
 .section-card {
   background: #f8f9ff;
@@ -213,20 +220,24 @@
   cursor: pointer;
 }
 
+
 .section-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
 }
 
-.section-card.clickable {
+
+.section-card.admin-clickable {
   cursor: pointer;
 }
 
-.section-card.disabled {
+
+.section-card.admin-disabled {
   opacity: 0.6;
   /* 관리자 페이지에서는 클릭 가능하도록 pointer-events 제거 */
 }
+
 
 .section-header {
   margin-bottom: 1rem;
@@ -234,12 +245,14 @@
   border-bottom: 1px solid #e0e3f5;
 }
 
+
 .section-title-area {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
 }
+
 
 .section-copy-link-btn {
   background: #f3f4f6;
@@ -259,6 +272,7 @@
   right: 0;
 }
 
+
 .section-copy-link-btn:hover {
   background: #667eea;
   border-color: #667eea;
@@ -267,12 +281,13 @@
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
-.title-and-badge {
+.admin-title-and-badge {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex: 1;
 }
+
 
 .section-title {
   font-size: 1.2rem;
@@ -281,6 +296,7 @@
   margin: 0;
   line-height: 1.3;
 }
+
 
 .section-badge {
   background: #667eea;
@@ -292,7 +308,7 @@
   white-space: nowrap;
 }
 
-.year-badge {
+.admin-year-badge {
   background: #f3f4f6;
   color: #4b5563;
   font-size: 0.85rem;
@@ -302,6 +318,7 @@
   border: 1px solid #e5e7eb;
   white-space: nowrap;
 }
+
 
 .section-footer {
   margin-top: 0.5rem;
@@ -315,21 +332,24 @@
   gap: 1rem;
 }
 
-.section-footer .btn-toggle-active {
+
+.section-footer .admin-btn-toggle-active {
   justify-self: start;
   flex-shrink: 0;
   width: 87px;
   min-width: 80px;
 }
 
-.section-footer .section-hint {
+
+.section-footer  .section-hint {
   justify-self: center;
   grid-column: 2;
   margin: 0;
   pointer-events: none;
 }
 
-.section-footer .section-copy-link-btn {
+
+.section-footer  .section-copy-link-btn {
   justify-self: end;
   grid-column: 3;
   flex-shrink: 0;
@@ -337,11 +357,13 @@
   min-width: 40px;
 }
 
+
 .section-hint {
   font-size: 0.8rem;
   color: #667eea;
   font-weight: 500;
 }
+
 
 .section-info-grid {
   display: grid;
@@ -350,31 +372,32 @@
   margin-bottom: 0.85rem;
 }
 
-.info-row {
+.admin-info-row {
   display: flex;
   justify-content: space-between;
   padding: 0.4rem 0;
 }
 
-.info-label {
+.admin-info-label {
   font-size: 0.85rem;
   color: #64748b;
   font-weight: 500;
 }
 
-.info-value {
+.admin-info-value {
   font-size: 0.85rem;
   color: #1e293b;
   font-weight: 600;
 }
 
-.info-value.status-active {
+.admin-info-value.status-active {
   color: #10b981;
 }
 
-.info-value.status-inactive {
+.admin-info-value.status-inactive {
   color: #ef4444;
 }
+
 
 .section-actions {
   display: flex;
@@ -383,7 +406,7 @@
   margin-bottom: 0;
 }
 
-.btn-toggle-active {
+.admin-btn-toggle-active {
   padding: 0.5rem 1rem;
   border: 2px solid;
   border-radius: 6px;
@@ -394,56 +417,60 @@
   flex-shrink: 0;
 }
 
-.btn-toggle-active.active {
+.admin-btn-toggle-active.admin-active {
   background: #667eea !important;
   border-color: #667eea !important;
   color: white;
 }
 
-.btn-toggle-active.active:hover {
+.admin-btn-toggle-active.admin-active:hover {
   background: #5568d3 !important;
   border-color: #5568d3 !important;
   color: white;
 }
 
 /* 활성 버튼이 보라색이 아닌 경우 강제 적용 */
-.section-footer .btn-toggle-active.active {
+
+.section-footer .admin-btn-toggle-active.admin-active {
   background: #667eea !important;
   border-color: #667eea !important;
   color: white !important;
 }
 
-.section-footer .btn-toggle-active.active:hover {
+
+.section-footer .admin-btn-toggle-active.admin-active:hover {
   background: #5568d3 !important;
   border-color: #5568d3 !important;
   color: white !important;
 }
 
-.btn-toggle-active.inactive {
+.admin-btn-toggle-active.admin-inactive {
   background: #9ca3af !important;
   border-color: #9ca3af !important;
   color: white !important;
 }
 
-.btn-toggle-active.inactive:hover {
+.admin-btn-toggle-active.admin-inactive:hover {
   background: #6b7280 !important;
   border-color: #6b7280 !important;
   color: white !important;
 }
 
-.section-footer .btn-toggle-active.inactive {
+
+.section-footer .admin-btn-toggle-active.admin-inactive {
   background: #9ca3af !important;
   border-color: #9ca3af !important;
   color: white !important;
 }
 
-.section-footer .btn-toggle-active.inactive:hover {
+
+.section-footer .admin-btn-toggle-active.admin-inactive:hover {
   background: #6b7280 !important;
   border-color: #6b7280 !important;
   color: white !important;
 }
 
-.btn-action {
+.admin-btn-action {
   flex: 1;
   padding: 0.6rem 0.6rem;
   border: 1px solid #d1d5f0;
@@ -459,24 +486,25 @@
   text-align: center;
 }
 
-.btn-action:hover {
+.admin-btn-action:hover {
   background: white;
   border-color: #667eea;
   color: #667eea;
 }
 
-.btn-action.primary {
+.admin-btn-action.primary {
   background: #667eea;
   border-color: #667eea;
   color: white;
 }
 
-.btn-action.primary:hover {
+.admin-btn-action.primary:hover {
   background: #5568d3;
   border-color: #5568d3;
 }
 
-.section-stat .stat-icon {
+
+.section-stat .admin-stat-icon {
   font-size: 1rem;
   width: auto;
   height: auto;
@@ -486,11 +514,12 @@
   box-shadow: none;
 }
 
-.section-stat .stat-text {
+
+.section-stat .admin-stat-text {
   font-size: 0.9rem;
 }
 
-.no-sections {
+.admin-no-sections {
   grid-column: 1 / -1;
   text-align: center;
   padding: 3rem;
@@ -498,13 +527,14 @@
   font-style: italic;
 }
 
-.recent-activity,
-.quick-actions {
+.admin-recent-activity,
+.admin-quick-actions {
   background: white;
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
+
 
 .section-title {
   font-size: 1.5rem;
@@ -516,6 +546,7 @@
   gap: 0.5rem;
 }
 
+
 .section-title::before {
   content: '';
   width: 4px;
@@ -524,13 +555,13 @@
   border-radius: 2px;
 }
 
-.activity-list {
+.admin-activity-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.activity-item {
+.admin-activity-item {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -540,12 +571,12 @@
   transition: all 0.2s ease;
 }
 
-.activity-item:hover {
+.admin-activity-item:hover {
   background: #e9ecef;
   transform: translateX(5px);
 }
 
-.activity-icon {
+.admin-activity-icon {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
@@ -557,29 +588,29 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.activity-content {
+.admin-activity-content {
   flex: 1;
 }
 
-.activity-message {
+.admin-activity-message {
   font-size: 1rem;
   color: #2d3436;
   margin: 0 0 0.25rem 0;
   font-weight: 500;
 }
 
-.activity-time {
+.admin-activity-time {
   font-size: 0.9rem;
   color: #636e72;
 }
 
-.action-buttons {
+.admin-action-buttons {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.action-btn {
+.admin-action-btn {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -593,106 +624,109 @@
   text-align: left;
 }
 
-.action-btn.primary {
+.admin-action-btn.primary {
   background: #667eea;
   color: white;
 }
 
-.action-btn.primary:hover {
+.admin-action-btn.primary:hover {
   background: #5568d3;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.action-btn.secondary {
+.admin-action-btn.secondary {
   background: #f093fb;
   color: white;
 }
 
-.action-btn.secondary:hover {
+.admin-action-btn.secondary:hover {
   background: #e07ce8;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(240, 147, 251, 0.3);
 }
 
-.action-btn.tertiary {
+.admin-action-btn.tertiary {
   background: #00b894;
   color: white;
 }
 
-.action-btn.tertiary:hover {
+.admin-action-btn.tertiary:hover {
   background: #009c7f;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
 }
 
-.btn-icon {
+.admin-btn-icon {
   font-size: 1.2rem;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
-  .dashboard-content {
+   .dashboard-content {
     grid-template-columns: 1fr;
   }
   
-  .stats-grid {
+  .admin-stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
   }
   
-  .stat-card {
+  .admin-stat-card {
     padding: 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
-  .dashboard-title {
+   .dashboard-title {
     font-size: 2rem;
   }
   
-  .dashboard-subtitle {
+   .dashboard-subtitle {
     font-size: 1rem;
   }
   
-  .stats-grid {
+  .admin-stats-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
   
-  .stat-card {
+  .admin-stat-card {
     padding: 1.5rem;
     flex-direction: column;
     text-align: center;
   }
   
-  .stat-icon {
+  .admin-stat-icon {
     font-size: 2.5rem;
     width: 60px;
     height: 60px;
   }
   
-  .stat-number {
+  .admin-stat-number {
     font-size: 2rem;
   }
   
-  .recent-activity,
-  .quick-actions {
+  .admin-recent-activity,
+  .admin-quick-actions {
     padding: 1.5rem;
   }
 }
 
 /* 새로운 섹션 카드 스타일 */
-.section-card.clickable {
+
+.section-card.admin-clickable {
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.section-card.clickable:hover {
+
+.section-card.admin-clickable:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border-color: #0984e3;
 }
+
 
 .section-header {
   display: flex;
@@ -701,9 +735,11 @@
   margin-bottom: 1.5rem;
 }
 
+
 .section-info {
   flex: 1;
 }
+
 
 .section-title {
   font-size: 1.3rem;
@@ -713,18 +749,20 @@
   line-height: 1.3;
 }
 
+
 .section-details {
   color: #636e72;
   font-size: 0.9rem;
   margin: 0;
 }
 
+
 .section-actions {
   display: flex;
   gap: 0.5rem;
 }
 
-.btn-icon-small {
+.admin-btn-icon-small {
   width: 36px;
   height: 36px;
   border: 1px solid #e1e8ed;
@@ -738,10 +776,11 @@
   font-size: 1rem;
 }
 
-.btn-icon-small:hover {
+.admin-btn-icon-small:hover {
   background: #f8f9fa;
   border-color: #0984e3;
 }
+
 
 .section-stats {
   display: grid;
@@ -753,7 +792,7 @@
   border-radius: 8px;
 }
 
-.stat-item {
+.admin-stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -763,23 +802,23 @@
   overflow: hidden; /* 내용이 넘치지 않도록 */
 }
 
-.stat-icon {
+.admin-stat-icon {
   font-size: 1.1rem; /* 아이콘 크기를 살짝 줄여서 카드 안에 잘 들어가도록 */
 }
 
-.stat-label {
+.admin-stat-label {
   font-size: 0.8rem;
   color: #636e72;
   font-weight: 500;
 }
 
-.stat-value {
+.admin-stat-value {
   font-size: 0.9rem;
   color: #2d3436;
   font-weight: 600;
 }
 
-.btn-secondary {
+.admin-btn-secondary {
   padding: 0.65rem 1rem;
   border: 1px solid #d1d5f0;
   background: white;
@@ -791,13 +830,13 @@
   transition: all 0.2s ease;
 }
 
-.btn-secondary:hover {
+.admin-btn-secondary:hover {
   background: white;
   border-color: #667eea;
   color: #667eea;
 }
 
-.btn-primary {
+.admin-btn-primary {
   padding: 0.65rem 1rem;
   border: 1px solid #667eea;
   background: #667eea;
@@ -809,15 +848,16 @@
   transition: all 0.2s ease;
 }
 
-.btn-primary:hover {
+.admin-btn-primary:hover {
   background: #5568d3;
   border-color: #5568d3;
 }
 
 /* 모달 상세 스타일 */
-.modal-body {
+.admin-modal-body {
   padding: 2rem;
 }
+
 
 .section-detail-stats {
   display: grid;
@@ -829,13 +869,13 @@
   border-radius: 12px;
 }
 
-.detail-stat-item {
+.admin-detail-stat-item {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.detail-stat-icon {
+.admin-detail-stat-icon {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
@@ -847,23 +887,24 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.detail-stat-content {
+.admin-detail-stat-content {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.detail-stat-label {
+.admin-detail-stat-label {
   font-size: 0.8rem;
   color: #636e72;
   font-weight: 500;
 }
 
-.detail-stat-value {
+.admin-detail-stat-value {
   font-size: 1rem;
   color: #2d3436;
   font-weight: 600;
 }
+
 
 .section-detail-actions {
   display: grid;
@@ -871,7 +912,7 @@
   gap: 1rem;
 }
 
-.btn-detail {
+.admin-btn-detail {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -884,21 +925,21 @@
   text-align: left;
 }
 
-.btn-detail:hover {
+.admin-btn-detail:hover {
   border-color: #0984e3;
   box-shadow: 0 2px 8px rgba(9, 132, 227, 0.1);
 }
 
-.btn-detail.primary {
+.admin-btn-detail.primary {
   border-color: #667eea;
   background: #f8f9ff;
 }
 
-.btn-detail.primary:hover {
+.admin-btn-detail.primary:hover {
   background: #eef2ff;
 }
 
-.btn-icon {
+.admin-btn-icon {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
@@ -910,19 +951,19 @@
   flex-shrink: 0;
 }
 
-.btn-detail.primary .btn-icon {
+.admin-btn-detail.primary .admin-btn-icon {
   background: #667eea;
   color: white;
 }
 
-.btn-content h4 {
+.admin-btn-content h4 {
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
   font-weight: 600;
   color: #2d3436;
 }
 
-.btn-content p {
+.admin-btn-content p {
   margin: 0;
   font-size: 0.8rem;
   color: #636e72;
@@ -930,7 +971,7 @@
 }
 
 /* 수업 생성 버튼 */
-.btn-create-section {
+.admin-btn-create-section {
   background: #667eea;
   color: white;
   border: none;
@@ -943,13 +984,13 @@
   white-space: nowrap;
 }
 
-.btn-create-section:hover {
+.admin-btn-create-section:hover {
   background: #5568d3;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.btn-copy-section {
+.admin-btn-copy-section {
   background: white;
   color: #667eea;
   border: 2px solid #667eea;
@@ -962,7 +1003,7 @@
   white-space: nowrap;
 }
 
-.btn-copy-section:hover {
+.admin-btn-copy-section:hover {
   background: #667eea;
   color: white;
   transform: translateY(-1px);
@@ -970,7 +1011,7 @@
 }
 
 /* 수업 생성 모달 스타일 */
-.modal-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -983,7 +1024,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.admin-modal-content {
   background: white;
   border-radius: 16px;
   width: 90%;
@@ -993,7 +1034,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.modal-content-large {
+.admin-modal-content-large {
   width: 95vw !important;
   max-width: 95vw !important;
   min-width: 800px;
@@ -1004,7 +1045,7 @@
   margin: auto;
 }
 
-.modal-header {
+.admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1012,14 +1053,14 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-header h2 {
+.admin-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
 }
 
-.modal-close {
+.admin-modal-close {
   background: none;
   border: none;
   font-size: 2rem;
@@ -1034,15 +1075,15 @@
   transition: color 0.2s ease;
 }
 
-.modal-close:hover {
+.admin-modal-close:hover {
   color: #374151;
 }
 
-.form-group {
+.admin-form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.admin-form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -1050,8 +1091,8 @@
   font-size: 0.9rem;
 }
 
-.form-input,
-.form-select {
+.admin-form-input,
+.admin-form-select {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
@@ -1060,20 +1101,20 @@
   transition: all 0.2s ease;
 }
 
-.form-input:focus,
-.form-select:focus {
+.admin-form-input:focus,
+.admin-form-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-row {
+.admin-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.modal-footer {
+.admin-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -1081,8 +1122,8 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.btn-cancel,
-.btn-submit {
+.admin-btn-cancel,
+.admin-btn-submit {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -1092,25 +1133,25 @@
   border: none;
 }
 
-.btn-cancel {
+.admin-btn-cancel {
   background: #f3f4f6;
   color: #6b7280;
 }
 
-.btn-cancel:hover {
+.admin-btn-cancel:hover {
   background: #e5e7eb;
 }
 
-.btn-submit {
+.admin-btn-submit {
   background: #667eea;
   color: white;
 }
 
-.btn-submit:hover:not(:disabled) {
+.admin-btn-submit:hover:not(:disabled) {
   background: #5568d3;
 }
 
-.form-hint {
+.admin-form-hint {
   display: block;
   margin-top: 0.5rem;
   font-size: 0.85rem;
@@ -1118,24 +1159,24 @@
   line-height: 1.4;
 }
 
-.btn-submit:disabled {
+.admin-btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* 가져오기 옵션 스타일 */
-.form-label-bold {
+.admin-form-label-bold {
   font-weight: 600;
   color: #374151;
   margin-bottom: 0.75rem;
   display: block;
 }
 
-.checkbox-group {
+.admin-checkbox-group {
   margin-bottom: 1rem;
 }
 
-.checkbox-label {
+.admin-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1144,7 +1185,7 @@
   color: #374151;
 }
 
-.checkbox-label input[type="checkbox"] {
+.admin-checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -1160,7 +1201,7 @@ input[type="checkbox"]:checked {
   background-color: #667eea;
 }
 
-.selection-box {
+.admin-selection-box {
   margin-top: 1rem;
   padding: 1rem;
   background: #f8f9fa;
@@ -1170,7 +1211,7 @@ input[type="checkbox"]:checked {
   overflow-y: auto;
 }
 
-.selection-header {
+.admin-selection-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1179,27 +1220,27 @@ input[type="checkbox"]:checked {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.item-count {
+.admin-item-count {
   font-size: 0.85rem;
   color: #6b7280;
   font-weight: 500;
 }
 
-.loading-items,
-.no-items {
+.admin-loading-items,
+.admin-no-items {
   padding: 1rem;
   text-align: center;
   color: #6b7280;
   font-size: 0.9rem;
 }
 
-.item-list {
+.admin-item-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.list-item {
+.admin-list-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1210,37 +1251,39 @@ input[type="checkbox"]:checked {
   transition: all 0.2s ease;
 }
 
-.list-item:hover {
+.admin-list-item:hover {
   background: #f9fafb;
   border-color: #d1d5db;
 }
 
-.list-item input[type="checkbox"] {
+.admin-list-item input[type="checkbox"] {
   accent-color: #667eea;
 }
 
-.list-item input[type="checkbox"]:checked + .item-title {
+.admin-list-item input[type="checkbox"]:checked + .admin-item-title {
   color: #667eea;
   font-weight: 600;
 }
 
-.item-title {
+.admin-item-title {
   flex: 1;
   font-size: 0.9rem;
   color: #374151;
 }
 
-.item-date {
+.admin-item-date {
   font-size: 0.8rem;
   color: #9ca3af;
 }
 
 /* 과제 선택 UI */
+
 .assignment-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
+
 
 .assignment-item {
   background: white;
@@ -1250,9 +1293,11 @@ input[type="checkbox"]:checked {
   transition: all 0.2s ease;
 }
 
-.assignment-item.expanded {
+
+.assignment-item.admin-expanded {
   border-color: #667eea;
 }
+
 
 .assignment-item-header {
   display: flex;
@@ -1262,14 +1307,17 @@ input[type="checkbox"]:checked {
   background: white;
 }
 
-.assignment-item-header .checkbox-label {
+
+.assignment-item-header .admin-checkbox-label {
   flex: 1;
   margin: 0;
 }
 
-.assignment-item-header .checkbox-label input[type="checkbox"] {
+
+.assignment-item-header .admin-checkbox-label input[type="checkbox"] {
   accent-color: #667eea;
 }
+
 
 .assignment-title {
   flex: 1;
@@ -1278,13 +1326,14 @@ input[type="checkbox"]:checked {
   font-weight: 500;
 }
 
-.problem-count {
+
+.admin-problem-count {
   font-size: 0.8rem;
   color: #9ca3af;
   margin-left: 0.5rem;
 }
 
-.btn-expand-assignment {
+.admin-btn-expand-assignment {
   padding: 0.25rem 0.5rem;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
@@ -1294,23 +1343,25 @@ input[type="checkbox"]:checked {
   transition: all 0.2s ease;
 }
 
-.btn-expand-assignment:hover:not(:disabled) {
+.admin-btn-expand-assignment:hover:not(:disabled) {
   background: #e5e7eb;
 }
 
-.btn-expand-assignment:disabled {
+.admin-btn-expand-assignment:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 /* 문제 선택 UI */
-.problem-selection-box {
+
+.admin-problem-selection-box {
   padding: 0.75rem;
   background: #f9fafb;
   border-top: 1px solid #e5e7eb;
 }
 
-.problem-selection-header {
+
+.admin-problem-selection-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1319,7 +1370,8 @@ input[type="checkbox"]:checked {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.problem-list {
+
+.admin-problem-list {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -1327,7 +1379,8 @@ input[type="checkbox"]:checked {
   overflow-y: auto;
 }
 
-.problem-item {
+
+.admin-problem-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1338,48 +1391,51 @@ input[type="checkbox"]:checked {
   font-size: 0.85rem;
 }
 
-.problem-item input[type="checkbox"] {
+
+.admin-problem-item input[type="checkbox"] {
   accent-color: #667eea;
 }
 
-.problem-item:hover {
+
+.admin-problem-item:hover {
   background: #f9fafb;
 }
 
-.problem-item .problem-title {
+
+.admin-problem-item  .admin-problem-title {
   flex: 1;
   color: #374151;
 }
 
 /* 단계별 컨텐츠 */
-.step-content {
+.admin-step-content {
   min-height: 400px;
   display: flex;
   flex-direction: column;
 }
 
-.step-title {
+.admin-step-title {
   font-size: 1.3rem;
   font-weight: 600;
   color: #374151;
   margin: 0 0 0.5rem 0;
 }
 
-.step-description {
+.admin-step-description {
   font-size: 0.95rem;
   color: #6b7280;
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }
 
-.modal-body-large {
+.admin-modal-body-large {
   flex: 1;
   overflow-y: auto;
   padding: 2rem;
 }
 
 /* Large 버전 스타일 */
-.selection-box-large {
+.admin-selection-box-large {
   margin-top: 1rem;
   padding: 1.5rem;
   background: #f8f9fa;
@@ -1388,7 +1444,7 @@ input[type="checkbox"]:checked {
   flex: 1;
 }
 
-.item-list-large {
+.admin-item-list-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 0.75rem;
@@ -1396,7 +1452,7 @@ input[type="checkbox"]:checked {
   overflow-y: auto;
 }
 
-.list-item-large {
+.admin-list-item-large {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1408,35 +1464,36 @@ input[type="checkbox"]:checked {
   cursor: pointer;
 }
 
-.list-item-large:hover {
+.admin-list-item-large:hover {
   background: #f9fafb;
   border-color: #667eea;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
-.list-item-large input[type="checkbox"] {
+.admin-list-item-large input[type="checkbox"] {
   accent-color: #667eea;
 }
 
-.item-info {
+.admin-item-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.item-title-large {
+.admin-item-title-large {
   font-size: 0.95rem;
   color: #374151;
   font-weight: 500;
 }
 
-.item-meta {
+.admin-item-meta {
   font-size: 0.8rem;
   color: #9ca3af;
 }
 
 /* 과제 목록 Large */
+
 .assignment-list-large {
   display: flex;
   flex-direction: column;
@@ -1444,6 +1501,7 @@ input[type="checkbox"]:checked {
   max-height: none;
   overflow-y: visible;
 }
+
 
 .assignment-item-large {
   background: white;
@@ -1453,10 +1511,12 @@ input[type="checkbox"]:checked {
   transition: all 0.2s ease;
 }
 
-.assignment-item-large.expanded {
+
+.assignment-item-large.admin-expanded {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
+
 
 .assignment-item-header-large {
   display: flex;
@@ -1467,9 +1527,11 @@ input[type="checkbox"]:checked {
   gap: 1rem;
 }
 
-.assignment-item-header-large .checkbox-label input[type="checkbox"] {
+
+.assignment-item-header-large .admin-checkbox-label input[type="checkbox"] {
   accent-color: #667eea;
 }
+
 
 .assignment-info-large {
   flex: 1;
@@ -1478,18 +1540,20 @@ input[type="checkbox"]:checked {
   gap: 0.25rem;
 }
 
+
 .assignment-title-large {
   font-size: 1rem;
   color: #374151;
   font-weight: 600;
 }
 
+
 .assignment-meta {
   font-size: 0.85rem;
   color: #9ca3af;
 }
 
-.btn-expand-assignment-large {
+.admin-btn-expand-assignment-large {
   padding: 0.5rem 1rem;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
@@ -1502,25 +1566,27 @@ input[type="checkbox"]:checked {
   white-space: nowrap;
 }
 
-.btn-expand-assignment-large:hover:not(:disabled) {
+.admin-btn-expand-assignment-large:hover:not(:disabled) {
   background: #667eea;
   color: white;
   border-color: #667eea;
 }
 
-.btn-expand-assignment-large:disabled {
+.admin-btn-expand-assignment-large:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 /* 문제 선택 박스 Large */
-.problem-selection-box-large {
+
+.admin-problem-selection-box-large {
   padding: 1rem;
   background: #f9fafb;
   border-top: 1px solid #e5e7eb;
 }
 
-.problem-selection-header-large {
+
+.admin-problem-selection-header-large {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1529,7 +1595,8 @@ input[type="checkbox"]:checked {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.problem-list-large {
+
+.admin-problem-list-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
@@ -1537,7 +1604,8 @@ input[type="checkbox"]:checked {
   overflow-y: visible;
 }
 
-.problem-item-large {
+
+.admin-problem-item-large {
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -1551,12 +1619,14 @@ input[type="checkbox"]:checked {
   overflow: hidden;
 }
 
-.problem-item-large:hover {
+
+.admin-problem-item-large:hover {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-.problem-item-large-header {
+
+.admin-problem-item-large-header {
   position: absolute;
   top: 0.5rem;
   right: 1rem;
@@ -1565,14 +1635,16 @@ input[type="checkbox"]:checked {
   z-index: 1;
 }
 
-.problem-item-large-header .problem-checkbox {
+
+.admin-problem-item-large-header  .admin-problem-checkbox {
   width: 1.3rem;
   height: 1.3rem;
   cursor: pointer;
   accent-color: #667eea;
 }
 
-.problem-item-large-body {
+
+.admin-problem-item-large-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1586,7 +1658,8 @@ input[type="checkbox"]:checked {
   box-sizing: border-box;
 }
 
-.problem-title-row {
+
+.admin-problem-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1596,7 +1669,8 @@ input[type="checkbox"]:checked {
   box-sizing: border-box;
 }
 
-.problem-title-large {
+
+.admin-problem-title-large {
   font-weight: 600;
   color: #1e293b;
   font-size: 0.95rem;
@@ -1612,7 +1686,8 @@ input[type="checkbox"]:checked {
   min-width: 0;
 }
 
-.problem-number-large {
+
+.admin-problem-number-large {
   font-weight: 600;
   color: #667eea;
   font-size: 0.95rem;
@@ -1620,9 +1695,9 @@ input[type="checkbox"]:checked {
 }
 
 /* 버튼 스타일 */
-.btn-next,
-.btn-prev,
-.btn-skip {
+.admin-btn-next,
+.admin-btn-prev,
+.admin-btn-skip {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
@@ -1631,45 +1706,45 @@ input[type="checkbox"]:checked {
   font-size: 0.95rem;
 }
 
-.btn-next {
+.admin-btn-next {
   background: #667eea;
   color: white;
   border: none;
 }
 
-.btn-next:hover:not(:disabled) {
+.admin-btn-next:hover:not(:disabled) {
   background: #5568d3;
 }
 
-.btn-next:disabled {
+.admin-btn-next:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.btn-prev {
+.admin-btn-prev {
   background: white;
   color: #667eea;
   border: 2px solid #667eea;
 }
 
-.btn-prev:hover {
+.admin-btn-prev:hover {
   background: #f3f4f6;
 }
 
-.btn-skip {
+.admin-btn-skip {
   background: white;
   color: #9ca3af;
   border: 2px solid #e5e7eb;
 }
 
-.btn-skip:hover {
+.admin-btn-skip:hover {
   background: #f3f4f6;
   border-color: #d1d5db;
   color: #6b7280;
 }
 
 /* 상세보기 패널 */
-.detail-overlay {
+.admin-detail-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1679,7 +1754,7 @@ input[type="checkbox"]:checked {
   z-index: 1999;
 }
 
-.detail-panel {
+.admin-detail-panel {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -1695,7 +1770,7 @@ input[type="checkbox"]:checked {
   flex-direction: column;
 }
 
-.detail-panel-header {
+.admin-detail-panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1703,14 +1778,14 @@ input[type="checkbox"]:checked {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.detail-panel-header h3 {
+.admin-detail-panel-header h3 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
   color: #374151;
 }
 
-.btn-close-detail {
+.admin-btn-close-detail {
   width: 32px;
   height: 32px;
   border: none;
@@ -1725,26 +1800,26 @@ input[type="checkbox"]:checked {
   transition: all 0.2s ease;
 }
 
-.btn-close-detail:hover {
+.admin-btn-close-detail:hover {
   background: #e5e7eb;
   color: #374151;
 }
 
-.detail-panel-content {
+.admin-detail-panel-content {
   padding: 2rem;
   padding-bottom: 3rem;
   overflow-y: auto;
   flex: 1;
 }
 
-.detail-title {
+.admin-detail-title {
   font-size: 1.2rem;
   font-weight: 600;
   color: #374151;
   margin: 0 0 1rem 0;
 }
 
-.detail-meta {
+.admin-detail-meta {
   font-size: 0.9rem;
   color: #6b7280;
   margin-bottom: 1.5rem;
@@ -1752,26 +1827,29 @@ input[type="checkbox"]:checked {
   gap: 1rem;
 }
 
-.detail-body {
+.admin-detail-body {
   font-size: 0.95rem;
   line-height: 1.8;
   color: #374151;
   white-space: pre-wrap;
 }
 
+
 .notice-detail-content {
   border-left: none;
   padding-left: 0;
 }
 
-.problem-description {
+
+.admin-problem-description {
   background: #f9fafb;
   padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
 }
 
-.problem-description .inline-code {
+
+.admin-problem-description .admin-inline-code {
   background: #f3f4f6;
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
@@ -1780,7 +1858,8 @@ input[type="checkbox"]:checked {
   color: #e11d48;
 }
 
-.problem-description .code-block {
+
+.admin-problem-description .admin-code-block {
   background: #1f2937;
   color: #f9fafb;
   padding: 1rem;
@@ -1789,13 +1868,14 @@ input[type="checkbox"]:checked {
   margin: 1rem 0;
 }
 
-.problem-description .code-block code {
+
+.admin-problem-description .admin-code-block code {
   font-family: 'Courier New', monospace;
   font-size: 0.9em;
 }
 
 /* 상세보기 버튼 */
-.btn-view-detail {
+.admin-btn-view-detail {
   padding: 0.4rem 0.8rem;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
@@ -1809,14 +1889,14 @@ input[type="checkbox"]:checked {
   flex-shrink: 0;
 }
 
-.btn-view-detail:hover {
+.admin-btn-view-detail:hover {
   background: #667eea;
   color: white;
   border-color: #667eea;
   transform: translateY(-1px);
 }
 
-.btn-view-detail-card {
+.admin-btn-view-detail-card {
   padding: 0.4rem 0.8rem;
   background: #f3f4f6;
   color: #667eea;
@@ -1830,15 +1910,16 @@ input[type="checkbox"]:checked {
   flex-shrink: 0;
 }
 
-.btn-view-detail-card:hover {
+.admin-btn-view-detail-card:hover {
   background: #667eea;
   color: white;
   border-color: #667eea;
   transform: translateY(-1px);
 }
 
-.list-item-large,
-.problem-item-large {
+.admin-list-item-large,
+
+.admin-problem-item-large {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1846,66 +1927,66 @@ input[type="checkbox"]:checked {
 }
 
 /* 4단계 최종 확인 스타일 */
-.summary-section {
+.admin-summary-section {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   margin-top: 1rem;
 }
 
-.summary-item {
+.admin-summary-item {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 1.5rem;
 }
 
-.summary-label {
+.admin-summary-label {
   font-size: 1.1rem;
   font-weight: 600;
   color: #374151;
   margin: 0 0 1rem 0;
 }
 
-.summary-content {
+.admin-summary-content {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.summary-row {
+.admin-summary-row {
   display: flex;
   gap: 1rem;
   align-items: flex-start;
 }
 
-.summary-key {
+.admin-summary-key {
   font-weight: 500;
   color: #6b7280;
   min-width: 100px;
 }
 
-.summary-value {
+.admin-summary-value {
   color: #374151;
   flex: 1;
 }
 
-.summary-list {
+.admin-summary-list {
   margin-top: 0.5rem;
   padding-left: 1rem;
 }
 
-.summary-list-item {
+.admin-summary-list-item {
   color: #374151;
   margin: 0.5rem 0;
   line-height: 1.6;
 }
 
-.summary-assignment {
+.admin-summary-assignment {
   color: #374151;
 }
 
-.summary-skipped {
+.admin-summary-skipped {
   color: #9ca3af;
   font-style: italic;
 }

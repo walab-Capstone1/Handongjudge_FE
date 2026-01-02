@@ -2,7 +2,7 @@
   padding: 0;
 }
 
-.loading-container {
+.admin-loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,7 +12,7 @@
   background-color: white;
 }
 
-.loading-spinner {
+.admin-loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
@@ -26,7 +26,7 @@
   100% { transform: rotate(360deg); }
 }
 
-.page-header {
+.admin-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -37,7 +37,7 @@
   gap: 1rem;
 }
 
-.page-title {
+.admin-page-title {
   font-size: 2rem;
   font-weight: 700;
   color: #2d3436;
@@ -45,18 +45,18 @@
   margin-right: 1rem;
 }
 
-.header-left {
+.admin-header-left {
   display: flex;
   align-items: center;
 }
 
-.header-right {
+.admin-header-right {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.btn-create-section {
+.admin-btn-create-section {
   background: #667eea;
   color: white;
   border: none;
@@ -68,19 +68,19 @@
   transition: all 0.2s ease;
 }
 
-.btn-create-section:hover {
+.admin-btn-create-section:hover {
   background: #5568d3;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.header-stats {
+.admin-header-stats {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-.stat-badge {
+.admin-stat-badge {
   background: #f1f3f4;
   color: #2d3436;
   padding: 0.5rem 1rem;
@@ -90,16 +90,16 @@
   border: 1px solid #e1e8ed;
 }
 
-.search-section {
+.admin-search-section {
   margin-bottom: 2rem;
 }
 
-.search-box {
+.admin-search-box {
   position: relative;
   max-width: 280px;
 }
 
-.search-input {
+.admin-search-input {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #e1e8ed;
@@ -109,13 +109,13 @@
   background: white;
 }
 
-.search-input:focus {
+.admin-search-input:focus {
   outline: none;
   border-color: #0984e3;
   box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
 }
 
-.search-icon {
+.admin-search-icon {
   position: absolute;
   right: 1rem;
   top: 50%;
@@ -126,7 +126,7 @@
   border-radius: 50%;
 }
 
-.search-icon::before {
+.admin-search-icon::before {
   content: '';
   position: absolute;
   top: 2px;
@@ -137,7 +137,7 @@
   border-radius: 50%;
 }
 
-.search-icon::after {
+.admin-search-icon::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -150,12 +150,13 @@
   transform-origin: bottom right;
 }
 
-.sections-grid {
+.admin-sections-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
+
 
 .section-card {
   background: #f8f9ff;
@@ -167,11 +168,13 @@
   box-shadow: 0 1px 3px rgba(102, 126, 234, 0.1);
 }
 
+
 .section-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
 }
+
 
 .section-header {
   display: flex;
@@ -182,6 +185,7 @@
   border-bottom: 1px solid #e0e3f5;
 }
 
+
 .section-title {
   font-size: 1.2rem;
   font-weight: 700;
@@ -189,6 +193,7 @@
   margin: 0;
   line-height: 1.3;
 }
+
 
 .section-badge {
   background: #667eea;
@@ -199,6 +204,7 @@
   border-radius: 4px;
 }
 
+
 .section-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -206,31 +212,32 @@
   margin-bottom: 0.85rem;
 }
 
-.info-row {
+.admin-info-row {
   display: flex;
   justify-content: space-between;
   padding: 0.4rem 0;
 }
 
-.info-label {
+.admin-info-label {
   font-size: 0.85rem;
   color: #64748b;
   font-weight: 500;
 }
 
-.info-value {
+.admin-info-value {
   font-size: 0.85rem;
   color: #1e293b;
   font-weight: 600;
 }
 
-.info-value.status-active {
+.admin-info-value.status-active {
   color: #10b981;
 }
 
-.info-value.status-inactive {
+.admin-info-value.status-inactive {
   color: #ef4444;
 }
+
 
 .section-actions {
   display: flex;
@@ -239,7 +246,7 @@
   margin-bottom: 0;
 }
 
-.btn-action {
+.admin-btn-action {
   flex: 1;
   padding: 0.6rem 0.6rem;
   border: 1px solid #d1d5f0;
@@ -255,24 +262,24 @@
   text-align: center;
 }
 
-.btn-action:hover {
+.admin-btn-action:hover {
   background: white;
   border-color: #667eea;
   color: #667eea;
 }
 
-.btn-action.primary {
+.admin-btn-action.primary {
   background: #667eea;
   border-color: #667eea;
   color: white;
 }
 
-.btn-action.primary:hover {
+.admin-btn-action.primary:hover {
   background: #5568d3;
   border-color: #5568d3;
 }
 
-.btn-toggle-active {
+.admin-btn-toggle-active {
   padding: 0.5rem 1rem;
   border: 2px solid;
   border-radius: 6px;
@@ -284,35 +291,35 @@
   margin-right: 0.5rem;
 }
 
-.btn-toggle-active.active {
+.admin-btn-toggle-active.admin-active {
   background: #10b981;
   border-color: #10b981;
   color: white;
 }
 
-.btn-toggle-active.active:hover {
+.admin-btn-toggle-active.admin-active:hover {
   background: #059669;
   border-color: #059669;
 }
 
-.btn-toggle-active.inactive {
+.admin-btn-toggle-active.admin-inactive {
   background: #9ca3af;
   border-color: #9ca3af;
   color: white;
 }
 
-.btn-toggle-active.inactive:hover {
+.admin-btn-toggle-active.admin-inactive:hover {
   background: #6b7280;
   border-color: #6b7280;
 }
 
-.no-sections {
+.admin-no-sections {
   text-align: center;
   padding: 3rem 2rem;
   color: #64748b;
 }
 
-.no-sections p {
+.admin-no-sections p {
   margin: 0;
   font-size: 1rem;
   font-weight: 500;
@@ -320,30 +327,30 @@
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-  .sections-grid {
+  .admin-sections-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
 
-  .section-card {
+   .section-card {
     padding: 1.25rem;
   }
 
-  .section-info-grid {
+   .section-info-grid {
     grid-template-columns: 1fr;
   }
 
-  .section-actions {
+   .section-actions {
     flex-direction: column;
   }
 
-  .btn-action {
+  .admin-btn-action {
     width: 100%;
   }
 }
 
 /* 수업 생성 모달 스타일 */
-.modal-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -356,7 +363,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.admin-modal-content {
   background: white;
   border-radius: 16px;
   width: 90%;
@@ -366,7 +373,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.modal-header {
+.admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -374,14 +381,14 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-header h2 {
+.admin-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
 }
 
-.modal-close {
+.admin-modal-close {
   background: none;
   border: none;
   font-size: 2rem;
@@ -396,19 +403,19 @@
   transition: color 0.2s ease;
 }
 
-.modal-close:hover {
+.admin-modal-close:hover {
   color: #374151;
 }
 
-.modal-body {
+.admin-modal-body {
   padding: 2rem;
 }
 
-.form-group {
+.admin-form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.admin-form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -416,8 +423,8 @@
   font-size: 0.9rem;
 }
 
-.form-input,
-.form-select {
+.admin-form-input,
+.admin-form-select {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
@@ -426,20 +433,20 @@
   transition: all 0.2s ease;
 }
 
-.form-input:focus,
-.form-select:focus {
+.admin-form-input:focus,
+.admin-form-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-row {
+.admin-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.modal-footer {
+.admin-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -447,8 +454,8 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.btn-cancel,
-.btn-submit {
+.admin-btn-cancel,
+.admin-btn-submit {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -458,25 +465,25 @@
   border: none;
 }
 
-.btn-cancel {
+.admin-btn-cancel {
   background: #f3f4f6;
   color: #6b7280;
 }
 
-.btn-cancel:hover {
+.admin-btn-cancel:hover {
   background: #e5e7eb;
 }
 
-.btn-submit {
+.admin-btn-submit {
   background: #667eea;
   color: white;
 }
 
-.btn-submit:hover:not(:disabled) {
+.admin-btn-submit:hover:not(:disabled) {
   background: #5568d3;
 }
 
-.btn-submit:disabled {
+.admin-btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
