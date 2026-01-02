@@ -47,7 +47,8 @@ function App() {
             <Route path="/admin/courses" element={<AdminRoute><CourseManagement /></AdminRoute>} />
             <Route path="/admin/assignments" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
             <Route path="/admin/assignments/section/:sectionId" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
-            <Route path="/admin/sections/:sectionId/assignments/:assignmentId/progress" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
+            <Route path="/admin/assignments/section/:sectionId/progress" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
+            <Route path="/admin/assignments/section/:sectionId/progress/:assignmentId" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
             <Route path="/admin/notices" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/admin/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />

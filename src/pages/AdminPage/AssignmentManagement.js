@@ -6,6 +6,9 @@ import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
 import ReactMarkdown from "react-markdown";
 import "./AssignmentManagement.css";
+import "./AssignmentManagementList.css";
+import "./AssignmentTable.css";
+import "./Pagination.css";
 
 const AssignmentManagement = () => {
   const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기
@@ -56,6 +59,14 @@ const AssignmentManagement = () => {
   const [submissionStats, setSubmissionStats] = useState({});
   const [currentSection, setCurrentSection] = useState(null);
   const [expandedAssignments, setExpandedAssignments] = useState({});
+  const [showProblemListModal, setShowProblemListModal] = useState(false);
+  const [selectedAssignmentForProblemList, setSelectedAssignmentForProblemList] = useState(null);
+  const [selectedProblemForDetail, setSelectedProblemForDetail] = useState(null);
+  const [showProblemDetailModal, setShowProblemDetailModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [problemListSearchTerm, setProblemListSearchTerm] = useState('');
+  const [openMoreMenu, setOpenMoreMenu] = useState(null);
+  const ASSIGNMENTS_PER_PAGE = 10;
 
   useEffect(() => {
     fetchAssignments();
@@ -67,6 +78,22 @@ const AssignmentManagement = () => {
       fetchSubmissionStats();
     }
   }, [assignments]); // 과제 목록이 변경될 때마다 제출 통계 조회
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openMoreMenu !== null && !event.target.closest('.admin-more-menu')) {
+        setOpenMoreMenu(null);
+      }
+    };
+
+    if (openMoreMenu !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [openMoreMenu]);
 
   const fetchAssignments = async () => {
     try {
@@ -412,8 +439,8 @@ const AssignmentManagement = () => {
     
     if (!sectionId) {
       setAssignmentsForProblem([]);
-      return;
-    }
+        return;
+      }
 
     try {
       setLoadingAssignmentsForProblem(true);
@@ -425,7 +452,7 @@ const AssignmentManagement = () => {
         assignmentsData.map(async (assignment) => {
           try {
             const problemsResponse = await APIService.getAssignmentProblems(parseInt(sectionId), assignment.id);
-            const problems = problemsResponse.data || problemsResponse;
+          const problems = problemsResponse.data || problemsResponse;
             return {
               ...assignment,
               problems: Array.isArray(problems) ? problems : (problems.problems || [])
@@ -448,7 +475,7 @@ const AssignmentManagement = () => {
         problemsMap[assignment.id] = assignment.problems || [];
       });
       setAssignmentProblems(problemsMap);
-    } catch (error) {
+        } catch (error) {
       console.error('과제 목록 조회 실패:', error);
       setAssignmentsForProblem([]);
     } finally {
@@ -1006,6 +1033,17 @@ const AssignmentManagement = () => {
     return matchesSearch && matchesSection;
   });
 
+  // 페이지네이션
+  const totalPages = Math.ceil(filteredAssignments.length / ASSIGNMENTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ASSIGNMENTS_PER_PAGE;
+  const endIndex = startIndex + ASSIGNMENTS_PER_PAGE;
+  const paginatedAssignments = filteredAssignments.slice(startIndex, endIndex);
+
+  // 검색어 변경 시 첫 페이지로
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterSection]);
+
   // 고유한 섹션 목록 추출
   const uniqueSections = [...new Set(assignments.map(assignment => assignment.sectionName))].filter(Boolean);
 
@@ -1025,27 +1063,31 @@ const AssignmentManagement = () => {
       <>
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
-        <SectionNavigation 
-          sectionId={sectionId}
-          sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber || currentSection.sectionId}분반`}
-          enrollmentCode={currentSection.enrollmentCode}
-          showCreateButton={true}
-          onCreateClick={() => setShowAddModal(true)}
-          createButtonText="새 과제 생성"
-          showAdditionalButtons={true}
-          additionalButtons={[
-            {
-              text: "새 문제 만들기",
-              onClick: () => setShowStandaloneProblemModal(true),
-              className: "btn-secondary"
-            },
-            {
-              text: "문제 대량 생성",
-              onClick: () => setShowBulkProblemModal(true),
-              className: "btn-secondary"
-            }
-          ]}
-        />
+        <>
+          <div className="admin-page-header">
+            <h1 className="admin-page-title">과제 관리</h1>
+            <div className="admin-header-actions">
+              <button 
+                className="admin-btn-primary"
+                onClick={() => setShowAddModal(true)}
+              >
+                과제 추가하기
+              </button>
+            </div>
+          </div>
+          
+          <div className="admin-filters-section">
+            <div className="admin-search-box">
+              <input
+                type="text"
+                placeholder="과제명으로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="admin-search-input"
+              />
+            </div>
+          </div>
+        </>
       )}
       
       {/* 전체 페이지인 경우 기존 헤더 유지 */}
@@ -1110,87 +1152,238 @@ const AssignmentManagement = () => {
       )}
       
       <div className="assignment-management">
-        <div className="admin-assignments-grid">
-          {filteredAssignments.map((assignment) => (
-            <div key={assignment.id} className={`assignment-card ${expandedAssignments[assignment.id] ? 'admin-expanded' : ''} ${assignment.active === false ? 'admin-disabled' : ''}`}>
-              <div className="assignment-header">
-                <div className="assignment-title-row">
-                  <div className="admin-title-and-course">
-                    <p className="assignment-course">{assignment.sectionName}</p>
-                    <h3 className="assignment-title">{assignment.title}</h3>
+        {sectionId ? (
+          <div className="admin-assignments-table-container">
+            <table className="admin-assignments-table">
+              <thead>
+                <tr>
+                  <th>과제 제목</th>
+                  <th>마감일</th>
+                  <th>문제 수</th>
+                  <th>제출 현황</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAssignments.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="admin-table-empty">
+                      과제가 없습니다.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedAssignments.map((assignment) => (
+                    <tr key={assignment.id} className={assignment.active === false ? 'admin-disabled' : ''}>
+                      <td className="admin-assignment-title-cell">
+                        <div>
+                          <div className="admin-assignment-title">{assignment.title}</div>
+                          {assignment.description && (
+                            <div className="admin-assignment-description">{assignment.description}</div>
+                          )}
                   </div>
-                  <div className="assignment-actions">
+                      </td>
+                      <td className="admin-assignment-meta-cell">
+                        {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }) : '미설정'}
+                      </td>
+                      <td className="admin-assignment-meta-cell">{assignment.problemCount || 0}개</td>
+                      <td className="admin-assignment-meta-cell">
+                        {submissionStats[assignment.id] ? 
+                          `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}` 
+                          : `0/${assignment.totalStudents || 0}`}
+                      </td>
+                      <td className="admin-assignment-actions-cell">
+                        <div className="admin-assignment-actions-inline">
                     <button 
-                      className="admin-btn-text-small admin-detail"
-                      onClick={() => navigate(`/admin/sections/${assignment.sectionId}/assignments/${assignment.id}/progress`)}
-                    >
-                      상세보기
+                            className="admin-btn-table-action"
+                            onClick={() => {
+                              setSelectedAssignmentForProblemList(assignment);
+                              setShowProblemListModal(true);
+                              setProblemListSearchTerm('');
+                            }}
+                          >
+                            문제 목록 관리
                     </button>
                     <button 
-                      className="admin-btn-text-small admin-edit"
+                            className="admin-btn-table-action"
+                            onClick={() => handleAddProblem(assignment)}
+                          >
+                            문제 추가
+                          </button>
+                          <button 
+                            className="admin-btn-table-action admin-btn-edit"
                       onClick={() => handleEdit(assignment)}
                     >
                       수정
                     </button>
-                    <div className="admin-more-menu">
+                          <div className="admin-more-menu">
                       <button 
-                        className="admin-btn-icon-small admin-more"
+                              className="admin-btn-table-action admin-btn-more"
                         title="더보기"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMoreMenu(openMoreMenu === assignment.id ? null : assignment.id);
+                        }}
                       >
                         ⋯
                       </button>
-                      <div className="admin-more-dropdown">
+                            {openMoreMenu === assignment.id && (
+                              <div className="admin-more-dropdown">
                         <button 
-                          className="admin-btn-text-small"
-                          onClick={() => handleToggleActive(assignment.sectionId, assignment.id, assignment.active)}
+                                  className="admin-btn-text-small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleActive(assignment.sectionId, assignment.id, assignment.active);
+                                    setOpenMoreMenu(null);
+                                  }}
                         >
                           {assignment.active ? '비활성화' : '활성화'}
                         </button>
                         <button 
-                          className="admin-btn-text-small admin-delete"
-                          onClick={() => handleDelete(assignment.id)}
+                                  className="admin-btn-text-small admin-delete"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(assignment.id);
+                                    setOpenMoreMenu(null);
+                                  }}
                         >
                           삭제
                         </button>
                       </div>
+                            )}
                     </div>
                   </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            
+            {/* 페이지네이션 */}
+            {totalPages > 1 && (
+              <div className="admin-pagination">
+                <div className="admin-pagination-info">
+                  총 {filteredAssignments.length}개 중 {startIndex + 1}-{Math.min(endIndex, filteredAssignments.length)}개 표시
+                </div>
+                <div className="admin-pagination-controls">
+                  <button
+                    className="admin-btn-pagination"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    이전
+                  </button>
+                  <div className="admin-pagination-pages">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        className={`admin-btn-pagination-page ${currentPage === page ? 'active' : ''}`}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </button>
+                    ))}
+              </div>
+                  <button
+                    className="admin-btn-pagination"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    다음
+                  </button>
                 </div>
               </div>
-
-              <div className="assignment-compact-stats">
-                <span className="admin-compact-stat">
-                  <span className="admin-stat-label-compact">마감일:</span>
+            )}
+          </div>
+        ) : (
+          <div className="admin-assignments-list">
+            {filteredAssignments.map((assignment) => (
+              <div key={assignment.id} className={`admin-assignment-list-item ${expandedAssignments[assignment.id] ? 'admin-expanded' : ''} ${assignment.active === false ? 'admin-disabled' : ''}`}>
+              <div className="admin-assignment-list-main">
+                <div className="admin-assignment-list-info">
+                  <div className="admin-assignment-list-title-section">
+                    <h3 className="admin-assignment-list-title">{assignment.title}</h3>
+                    {assignment.description && (
+                      <p className="admin-assignment-list-description">{assignment.description}</p>
+                    )}
+              </div>
+                  <div className="admin-assignment-list-meta">
+                    <span className="admin-assignment-meta-item">
+                      <span className="admin-meta-label">마감일</span>
+                      <span className="admin-meta-value">
                   {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '미설정'}
                 </span>
-                <span className="admin-compact-stat">
-                  <span className="admin-stat-label-compact">문제 수:</span>
-                  {assignment.problemCount || 0}개
                 </span>
-                <span className="admin-compact-stat">
-                  <span className="admin-stat-label-compact">제출현황:</span>
+                    <span className="admin-assignment-meta-item">
+                      <span className="admin-meta-label">문제 수</span>
+                      <span className="admin-meta-value">{assignment.problemCount || 0}개</span>
+                    </span>
+                    <span className="admin-assignment-meta-item">
+                      <span className="admin-meta-label">제출현황</span>
+                      <span className="admin-meta-value">
                   {submissionStats[assignment.id] ? 
                     `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}` 
                     : `0/${assignment.totalStudents || 0}`}
+                      </span>
                 </span>
               </div>
-
-              <p className="assignment-description">{assignment.description}</p>
-
-              <div className="assignment-actions-row">
+                </div>
+                <div className="admin-assignment-list-actions">
               <button 
-                className="admin-btn-toggle-problems"
+                    className="admin-btn-list-action"
                 onClick={() => toggleAssignment(assignment.id)}
               >
                 {expandedAssignments[assignment.id] ? '문제 목록 숨기기' : '문제 목록 보기'}
               </button>
                   <button 
-                    className="admin-btn-add-problem"
+                    className="admin-btn-list-action"
                     onClick={() => handleAddProblem(assignment)}
-                    title="문제 추가"
                   >
                     문제 추가
                   </button>
+                  <button 
+                    className="admin-btn-list-action"
+                      onClick={() => handleEdit(assignment)}
+                    >
+                      수정
+                    </button>
+                  <div className="admin-more-menu">
+                      <button 
+                      className="admin-btn-list-action admin-btn-more"
+                        title="더보기"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMoreMenu(openMoreMenu === assignment.id ? null : assignment.id);
+                        }}
+                      >
+                        ⋯
+                      </button>
+                    {openMoreMenu === assignment.id && (
+                      <div className="admin-more-dropdown">
+                        <button 
+                          className="admin-btn-text-small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleActive(assignment.sectionId, assignment.id, assignment.active);
+                            setOpenMoreMenu(null);
+                          }}
+                        >
+                          {assignment.active ? '비활성화' : '활성화'}
+                        </button>
+                        <button 
+                          className="admin-btn-text-small admin-delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(assignment.id);
+                            setOpenMoreMenu(null);
+                          }}
+                        >
+                          삭제
+                  </button>
+                </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {expandedAssignments[assignment.id] && (
@@ -1331,6 +1524,7 @@ const AssignmentManagement = () => {
             </div>
           )}
         </div>
+        )}
 
         {/* 과제 추가 모달 */}
         {showAddModal && (
@@ -1623,7 +1817,7 @@ const AssignmentManagement = () => {
                             <span className="admin-problem-card-date">
                               생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
                             </span>
-                            <button 
+                    <button 
                               className="admin-btn-view-detail-card"
                               onClick={async (e) => {
                                 e.stopPropagation();
@@ -2284,7 +2478,7 @@ const AssignmentManagement = () => {
                             </>
                           );
                         })()}
-                      </div>
+              </div>
                     ) : (
                       <div className="admin-problem-hierarchy-view">
                         {selectedProblemIds.length > 0 && (
@@ -2331,14 +2525,14 @@ const AssignmentManagement = () => {
                                     </div>
                                   </label>
                                   {assignmentProblemsList.length > 0 && (
-                                    <button
+                <button 
                                       className="admin-btn-expand-assignment-large"
                                       onClick={() => toggleAssignmentForProblem(assignment.id)}
-                                    >
+                >
                                       {isExpanded ? '접기 ▲' : '문제 보기 ▼'}
-                                    </button>
+                </button>
                                   )}
-                                </div>
+              </div>
                                 
                                 {isExpanded && assignmentProblemsList.length > 0 && (
                                   <div className="admin-problem-selection-box-large">
@@ -2444,6 +2638,236 @@ const AssignmentManagement = () => {
                     선택한 문제 추가 ({selectedProblemIds.length}개)
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 문제 목록 모달 */}
+        {showProblemListModal && selectedAssignmentForProblemList && (
+          <div className="admin-modal-overlay" onClick={() => {
+            setShowProblemListModal(false);
+            setSelectedAssignmentForProblemList(null);
+            setSelectedProblemForDetail(null);
+            setShowProblemDetailModal(false);
+          }}>
+            <div className="admin-modal-content admin-modal-content-extra-large" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header">
+                <h2>문제 목록 관리 - {selectedAssignmentForProblemList.title}</h2>
+                <button 
+                  className="admin-modal-close"
+                  onClick={() => {
+                    setShowProblemListModal(false);
+                    setSelectedAssignmentForProblemList(null);
+                    setSelectedProblemForDetail(null);
+                    setShowProblemDetailModal(false);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="admin-modal-body">
+                {/* 문제 검색 */}
+                <div className="admin-filters-section">
+                  <div className="admin-search-box">
+                    <input
+                      type="text"
+                      placeholder="문제 ID, 제목으로 검색..."
+                      value={problemListSearchTerm}
+                      onChange={(e) => setProblemListSearchTerm(e.target.value)}
+                      className="admin-search-input"
+                    />
+                  </div>
+                </div>
+
+                {selectedAssignmentForProblemList.problems && selectedAssignmentForProblemList.problems.length > 0 ? (
+                  (() => {
+                    const filteredProblems = selectedAssignmentForProblemList.problems.filter(problem => {
+                      if (!problemListSearchTerm) return true;
+                      const searchLower = problemListSearchTerm.toLowerCase();
+                      return (
+                        problem.id?.toString().includes(searchLower) ||
+                        problem.title?.toLowerCase().includes(searchLower)
+                      );
+                    });
+                    
+                    return filteredProblems.length > 0 ? (
+                      <div className="admin-problems-table-container">
+                        <table className="admin-problems-table">
+                          <thead>
+                            <tr>
+                              <th>ID</th>
+                              <th>제목</th>
+                              <th>난이도</th>
+                              <th>상태</th>
+                              <th>관리</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredProblems.map((problem, index) => (
+                          <tr key={problem.id || index}>
+                            <td>{problem.id}</td>
+                            <td className="admin-problem-title-cell">
+                              <button
+                                className="admin-btn-link"
+                                onClick={async () => {
+                                  try {
+                                    const problemDetail = await APIService.getProblemInfo(problem.id);
+                                    setSelectedProblemForDetail({
+                                      ...problemDetail,
+                                      id: problem.id
+                                    });
+                                    setShowProblemDetailModal(true);
+                                  } catch (error) {
+                                    console.error('문제 상세 정보 조회 실패:', error);
+                                    alert('문제 상세 정보를 불러오는데 실패했습니다.');
+                                  }
+                                }}
+                              >
+                                {removeCopyLabel(problem.title)}
+                              </button>
+                            </td>
+                            <td>{problem.difficulty || 'N/A'}</td>
+                            <td>
+                              {submissionStats[selectedAssignmentForProblemList.id]?.problemStats ? (
+                                (() => {
+                                  const problemStat = submissionStats[selectedAssignmentForProblemList.id].problemStats.find(
+                                    stat => stat.problemId === problem.id
+                                  );
+                                  return problemStat ? `${problemStat.solvedCount}/${problemStat.totalStudents}명 완료` : '0/0명';
+                                })()
+                              ) : '0/0명'}
+                            </td>
+                            <td>
+                              <button
+                                className="admin-btn-table-action"
+                                onClick={async () => {
+                                  try {
+                                    const problemDetail = await APIService.getProblemInfo(problem.id);
+                                    setSelectedProblemForDetail({
+                                      ...problemDetail,
+                                      id: problem.id
+                                    });
+                                    setShowProblemDetailModal(true);
+                                  } catch (error) {
+                                    console.error('문제 상세 정보 조회 실패:', error);
+                                    alert('문제 상세 정보를 불러오는데 실패했습니다.');
+                                  }
+                                }}
+                              >
+                                수정
+                              </button>
+                              <button
+                                className="admin-btn-table-action admin-btn-delete"
+                                onClick={() => handleRemoveProblem(selectedAssignmentForProblemList.id, problem.id)}
+                              >
+                                제거
+                              </button>
+                            </td>
+                          </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="admin-no-problems">
+                        <p>검색 조건에 맞는 문제가 없습니다.</p>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <div className="admin-no-problems">
+                    <p>등록된 문제가 없습니다.</p>
+                    <button 
+                      className="admin-btn-primary"
+                      onClick={() => {
+                        setShowProblemListModal(false);
+                        handleAddProblem(selectedAssignmentForProblemList);
+                      }}
+                    >
+                      첫 번째 문제 추가하기
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 문제 상세 및 수정 모달 */}
+        {showProblemDetailModal && selectedProblemForDetail && (
+          <div className="admin-modal-overlay" onClick={() => {
+            setShowProblemDetailModal(false);
+            setSelectedProblemForDetail(null);
+          }}>
+            <div className="admin-modal-content admin-large-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header">
+                <h2>문제 상세 - {selectedProblemForDetail.title}</h2>
+                <button 
+                  className="admin-modal-close"
+                  onClick={() => {
+                    setShowProblemDetailModal(false);
+                    setSelectedProblemForDetail(null);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="admin-modal-body">
+                <div className="admin-problem-detail-content">
+                  <div className="admin-detail-meta">
+                    {selectedProblemForDetail.timeLimit && (
+                      <span>시간 제한: {selectedProblemForDetail.timeLimit}초</span>
+                    )}
+                    {selectedProblemForDetail.memoryLimit && (
+                      <span>메모리 제한: {selectedProblemForDetail.memoryLimit}MB</span>
+                    )}
+                  </div>
+                  <div className="admin-detail-body admin-problem-description">
+                    {selectedProblemForDetail.description ? (
+                      (() => {
+                        const description = selectedProblemForDetail.description;
+                        const isMarkdown = description.includes('# ') || 
+                          description.includes('## ') || 
+                          description.includes('```') ||
+                          description.includes('**') ||
+                          !description.includes('<');
+                        
+                        if (isMarkdown) {
+                          return <ReactMarkdown>{description}</ReactMarkdown>;
+                        } else {
+                          return <div dangerouslySetInnerHTML={{ __html: description }} />;
+                        }
+                      })()
+                    ) : (
+                      <p>문제 설명이 없습니다.</p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="admin-modal-actions">
+                  <button 
+                    className="admin-btn-secondary"
+                    onClick={() => {
+                      setShowProblemDetailModal(false);
+                      setSelectedProblemForDetail(null);
+                    }}
+                >
+                  닫기
+                </button>
+                  <button 
+                    className="admin-btn-primary"
+                    onClick={() => {
+                      // 문제 수정 페이지로 이동하거나 수정 모달 열기
+                      // 여기서는 수정 기능을 추가할 수 있습니다
+                      alert('문제 수정 기능은 추후 구현 예정입니다.');
+                    }}
+                  >
+                    수정
+                </button>
+                </div>
               </div>
             </div>
           </div>

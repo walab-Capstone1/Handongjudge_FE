@@ -4,11 +4,14 @@ import AdminLayout from "../../layouts/AdminLayout";
 import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
 import "./AssignmentStudentProgress.css";
+import "../AdminPage/AssignmentManagementList.css";
+import "../AdminPage/AssignmentTable.css";
 
 const AssignmentStudentProgress = () => {
   const { sectionId, assignmentId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [assignments, setAssignments] = useState([]);
   const [assignment, setAssignment] = useState(null);
   const [studentProgress, setStudentProgress] = useState([]);
   const [problems, setProblems] = useState([]);
@@ -18,11 +21,16 @@ const AssignmentStudentProgress = () => {
   const [expandedProblems, setExpandedProblems] = useState(new Set());
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [submissionStats, setSubmissionStats] = useState({});
+  const [progressSearchTerm, setProgressSearchTerm] = useState('');
 
   useEffect(() => {
     fetchSectionInfo();
-    fetchAssignmentDetail();
-    fetchStudentProgress();
+    fetchAssignments();
+    if (assignmentId) {
+      fetchAssignmentDetail();
+      fetchStudentProgress();
+    }
   }, [assignmentId, sectionId]);
 
   const fetchSectionInfo = async () => {
@@ -41,7 +49,55 @@ const AssignmentStudentProgress = () => {
     }
   };
 
+  const fetchAssignments = async () => {
+    try {
+      setLoading(true);
+      const sectionAssignments = await APIService.getAssignmentsBySection(parseInt(sectionId));
+      
+      // 각 과제의 문제 수와 제출 통계 조회
+      const assignmentsWithDetails = await Promise.all(
+        (sectionAssignments || []).map(async (assignment) => {
+          try {
+            const problems = await APIService.getAssignmentProblems(parseInt(sectionId), assignment.id);
+            const stats = await APIService.getAssignmentSubmissionStats(assignment.id, parseInt(sectionId));
+            return {
+              ...assignment,
+              problemCount: problems?.length || 0,
+              problems: problems || [],
+              stats: stats || {}
+            };
+          } catch (error) {
+            console.error(`과제 ${assignment.id} 정보 조회 실패:`, error);
+            return {
+              ...assignment,
+              problemCount: 0,
+              problems: [],
+              stats: {}
+            };
+          }
+        })
+      );
+      
+      setAssignments(assignmentsWithDetails);
+      
+      // 제출 통계 저장
+      const stats = {};
+      assignmentsWithDetails.forEach(assignment => {
+        if (assignment.stats) {
+          stats[assignment.id] = assignment.stats;
+        }
+      });
+      setSubmissionStats(stats);
+    } catch (error) {
+      console.error('과제 목록 조회 실패:', error);
+      setAssignments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchAssignmentDetail = async () => {
+    if (!assignmentId) return;
     try {
       const response = await APIService.getAssignmentInfo(sectionId, assignmentId);
       setAssignment(response);
@@ -132,21 +188,24 @@ const AssignmentStudentProgress = () => {
     );
   }
 
-  return (
-    <AdminLayout selectedSection={currentSection}>
-      <div className="student-progress-container">
-        {/* 헤더 */}
-        <div className="admin-page-header">
-          <div className="admin-header-left">
-            <button className="admin-btn-back" onClick={() => navigate(-1)}>
-              ← 돌아가기
-            </button>
-            <div>
-              <h1 className="admin-page-title">{assignment?.title}</h1>
-              <p className="admin-page-subtitle">학생별 문제 풀이 현황</p>
+  // assignmentId가 있으면 상세 보기, 없으면 리스트 보기
+  if (assignmentId) {
+    // 상세 보기 (기존 코드)
+    return (
+      <AdminLayout selectedSection={currentSection}>
+        <div className="student-progress-container">
+          {/* 헤더 */}
+          <div className="admin-page-header">
+            <div className="admin-header-left">
+              <button className="admin-btn-back" onClick={() => navigate(`/admin/assignments/section/${sectionId}/progress`)}>
+                ← 돌아가기
+              </button>
+              <div>
+                <h1 className="admin-page-title">{assignment?.title}</h1>
+                <p className="admin-page-subtitle">학생별 문제 풀이 현황</p>
+              </div>
             </div>
           </div>
-        </div>
 
         {/* 문제별 통계 */}
         {problems.length > 0 && (
@@ -425,6 +484,94 @@ const AssignmentStudentProgress = () => {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  // 리스트 보기
+  const filteredProgressAssignments = assignments.filter(assignment => {
+    return assignment.title.toLowerCase().includes(progressSearchTerm.toLowerCase()) ||
+           (assignment.description && assignment.description.toLowerCase().includes(progressSearchTerm.toLowerCase()));
+  });
+
+  return (
+    <AdminLayout selectedSection={currentSection}>
+      <div className="assignment-progress-container">
+        <div className="admin-page-header">
+          <h1 className="admin-page-title">과제별 풀이 현황</h1>
+        </div>
+
+        <div className="admin-filters-section">
+          <div className="admin-search-box">
+            <input
+              type="text"
+              placeholder="과제명으로 검색..."
+              value={progressSearchTerm}
+              onChange={(e) => setProgressSearchTerm(e.target.value)}
+              className="admin-search-input"
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="admin-loading-container">
+            <div className="admin-loading-spinner"></div>
+            <p>과제 목록을 불러오는 중...</p>
+          </div>
+        ) : assignments.length === 0 ? (
+          <div className="admin-no-data">
+            <p>등록된 과제가 없습니다.</p>
+          </div>
+        ) : (
+          <div className="admin-assignments-table-container">
+            <table className="admin-assignments-table">
+              <thead>
+                <tr>
+                  <th>과제 제목</th>
+                  <th>마감일</th>
+                  <th>문제 수</th>
+                  <th>제출 현황</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProgressAssignments.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="admin-table-empty">
+                      검색 조건에 맞는 과제가 없습니다.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProgressAssignments.map((assignment) => (
+                    <tr 
+                      key={assignment.id} 
+                      className="admin-clickable"
+                      onClick={() => navigate(`/admin/assignments/section/${sectionId}/progress/${assignment.id}`)}
+                    >
+                      <td className="admin-assignment-title-cell">
+                        <div>
+                          <div className="admin-assignment-title">{assignment.title}</div>
+                          {assignment.description && (
+                            <div className="admin-assignment-description">{assignment.description}</div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="admin-assignment-meta-cell">
+                        {assignment.endDate ? new Date(assignment.endDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '미설정'}
+                      </td>
+                      <td className="admin-assignment-meta-cell">{assignment.problemCount || 0}개</td>
+                      <td className="admin-assignment-meta-cell">
+                        {submissionStats[assignment.id] ? 
+                          `${submissionStats[assignment.id].submittedStudents || 0}/${submissionStats[assignment.id].totalStudents || 0}` 
+                          : `0/0`}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

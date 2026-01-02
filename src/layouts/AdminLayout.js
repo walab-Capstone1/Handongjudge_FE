@@ -110,8 +110,7 @@ const AdminLayout = ({ children, selectedSection = null }) => {
       label: "과제 관리",
       subItems: [
         { path: `/admin/assignments/section/${currentSection.sectionId}`, label: "과제 목록" },
-        { path: `/admin/assignments/section/${currentSection.sectionId}/create`, label: "새 과제 만들기" },
-        { path: `/admin/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황" },
+        { path: `/admin/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황", subItems: [] },
       ]
     },
     { path: `/admin/notices/section/${currentSection.sectionId}`, label: "공지사항 관리", subItems: [] },
