@@ -20,6 +20,7 @@ import AssignmentManagement from "./pages/AdminPage/AssignmentManagement";
 import AssignmentStudentProgress from "./pages/AdminPage/AssignmentStudentProgress";
 import UserManagement from "./pages/AdminPage/UserManagement";
 import NoticeManagement from "./pages/AdminPage/NoticeManagement";
+import ProblemManagement from "./pages/AdminPage/ProblemManagement";
 import AdminRoute from "./components/AdminRoute";
 import EnrollPage from "./pages/EnrollPage";
 
@@ -51,6 +52,7 @@ function App() {
             <Route path="/admin/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
             <Route path="/admin/users/section/:sectionId" element={<AdminRoute><UserManagement /></AdminRoute>} />
+            <Route path="/admin/problems" element={<AdminRoute><ProblemManagement /></AdminRoute>} />
           </Routes>
         </Router>
       </RecoilRoot>

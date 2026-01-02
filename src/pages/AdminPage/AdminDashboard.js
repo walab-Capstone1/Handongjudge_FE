@@ -662,7 +662,7 @@ const AdminDashboard = () => {
             setSelectedNoticeDetail(null);
             setSelectedProblemDetail(null);
           }}>
-            <div className={`modal-content ${copyStep === 1 ? '' : 'modal-content-large'}`} onClick={(e) => e.stopPropagation()}>
+            <div className={`admin-modal-content ${copyStep === 1 ? '' : 'admin-modal-content-large'}`} onClick={(e) => e.stopPropagation()}>
               <div className="admin-modal-header">
                 <h2>수업 가져오기</h2>
                 <button 
@@ -678,7 +678,7 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              <div className={copyStep === 1 ? "modal-body" : "modal-body modal-body-large"}>
+              <div className={copyStep === 1 ? "admin-modal-body" : "admin-modal-body admin-modal-body-large"}>
                 {/* 1단계: 기본 정보 */}
                 {copyStep === 1 && (
                   <div className="admin-step-content">

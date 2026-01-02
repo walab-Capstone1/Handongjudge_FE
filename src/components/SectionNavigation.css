@@ -183,6 +183,28 @@
   border-color: #dee2e6;
 }
 
+/* 주요 버튼 스타일 (관리 페이지와 동일) */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.btn-primary:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .section-nav-header {
