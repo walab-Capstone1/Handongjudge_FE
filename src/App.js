@@ -23,6 +23,7 @@ import NoticeManagement from "./pages/AdminPage/NoticeManagement";
 import AdminRoute from "./components/AdminRoute";
 import EnrollPage from "./pages/EnrollPage";
 import IndexPage from "./pages/IndexPage";
+import ClassPage from "./pages/ClassPage";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Onboarding />} />
             <Route path="/index" element={<IndexPage />} />
+            <Route path="/courses" element={<ClassPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />
             <Route path="/signup/email" element={<SignupEmailPage />} />

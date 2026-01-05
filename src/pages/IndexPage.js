@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaGraduationCap, FaPencilAlt, FaCog, FaPlus } from "react-icons/fa";
 import Silk from "../components/Silk";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import APIService from "../services/APIService";
 
 const IndexPage = () => {
@@ -34,11 +35,11 @@ const IndexPage = () => {
   }, []);
 
   const handleGoToClassroom = () => {
-    navigate("/main");
+    navigate("/courses");
   };
 
   const handleLecturesClick = () => {
-    navigate("/main");
+    navigate("/courses");
   };
   const handleManagementClick = () => {
     navigate("/admin");
@@ -141,18 +142,7 @@ const IndexPage = () => {
         </ContentPanel>
       </MainContent>
 
-      <Footer>
-        <FooterWrapper>
-          <FooterContent>
-            <FooterText>연락처 및 기타 정보</FooterText>
-            <FooterPlaceholder>
-              <PlaceholderItem>이메일: contact@codesturdy.com</PlaceholderItem>
-              <PlaceholderItem>전화: 000-0000-0000</PlaceholderItem>
-              <PlaceholderItem>주소: 한동대학교</PlaceholderItem>
-            </FooterPlaceholder>
-          </FooterContent>
-        </FooterWrapper>
-      </Footer>
+      <Footer />
     </IndexContainer>
   );
 };
@@ -397,46 +387,6 @@ const ItemDate = styled.span`
   font-size: 14px;
   color: #9ca3af;
   margin-left: 16px;
-`;
-
-const Footer = styled.footer`
-  width: 100%;
-  background: #000000;
-  color: white;
-  margin-top: auto;
-`;
-
-const FooterWrapper = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 40px;
-  box-sizing: border-box;
-`;
-
-const FooterContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`;
-
-const FooterText = styled.p`
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0;
-  color: white;
-`;
-
-const FooterPlaceholder = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const PlaceholderItem = styled.div`
-  font-size: 14px;
-  color: #9ca3af;
-  margin: 0;
 `;
 
 export default IndexPage;

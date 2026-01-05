@@ -46,7 +46,7 @@ const HeaderWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
-  max-width: 1440px;
+  max-width: 1152px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
