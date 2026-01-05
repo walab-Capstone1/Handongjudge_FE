@@ -37,6 +37,13 @@ const IndexPage = () => {
     navigate("/main");
   };
 
+  const handleLecturesClick = () => {
+    navigate("/main");
+  };
+  const handleManagementClick = () => {
+    navigate("/admin");
+  };
+
   return (
     <IndexContainer>
       <Header userName={userName} />
@@ -63,14 +70,15 @@ const IndexPage = () => {
         <TabNavigation>
           <Tab
             active={activeTab === "lectures"}
-            onClick={() => setActiveTab("lectures")}
+            onClick={handleLecturesClick}
           >
             <FaGraduationCap />
             수강 강의
           </Tab>
           <Tab
             active={activeTab === "management"}
-            onClick={() => setActiveTab("management")}
+            //onClick={() => setActiveTab("management")}
+            onClick={handleManagementClick}
           >
             <FaPencilAlt />
             강의 관리

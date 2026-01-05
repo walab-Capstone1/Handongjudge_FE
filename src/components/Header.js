@@ -1,7 +1,21 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import APIService from '../services/APIService';
 
-const Header = ({ userName = "사용자 이름", logoutText = "로그아웃", onUserNameClick, onLogoutClick }) => {
+const Header = ({ userName = "사용자 이름", logoutText = "로그아웃", onUserNameClick }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await APIService.logout();
+      navigate("/");
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+      navigate("/");
+    }
+  };
+
   return (
     <HeaderContainer>
       <HeaderWrapper>
@@ -13,7 +27,7 @@ const Header = ({ userName = "사용자 이름", logoutText = "로그아웃", on
         </Logo>
         <HeaderLinks>
           <HeaderLink onClick={onUserNameClick}>{userName}</HeaderLink>
-          <HeaderLink onClick={onLogoutClick}>{logoutText}</HeaderLink>
+          <HeaderLink onClick={handleLogout}>{logoutText}</HeaderLink>
         </HeaderLinks>
       </HeaderWrapper>
     </HeaderContainer>
