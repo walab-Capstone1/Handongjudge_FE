@@ -57,10 +57,10 @@ const AuthCallback = () => {
                   window.location.href = `/enroll/${pendingEnrollmentCode}`;
                 }, 1500);
               } else {
-                // 없으면 메인 페이지로
-                setStatus("소셜 로그인 성공! 메인 페이지로 이동합니다.");
+                // 없으면 인덱스 페이지로
+                setStatus("소셜 로그인 성공! 인덱스 페이지로 이동합니다.");
                 setTimeout(() => {
-                  window.location.href = "/main";
+                  window.location.href = "/index";
                 }, 1500);
               }
             } else {
@@ -96,8 +96,8 @@ const AuthCallback = () => {
             setStatus("로그인 성공! 수업 참가 페이지로 이동합니다.");
             setTimeout(() => navigate(`/enroll/${pendingEnrollmentCode}`), 1500);
           } else {
-            setStatus("로그인 성공! 메인 페이지로 이동합니다.");
-            setTimeout(() => navigate("/main"), 1500);
+            setStatus("로그인 성공! 인덱스 페이지로 이동합니다.");
+            setTimeout(() => navigate("/index"), 1500);
           }
         } else if (type === "social") {
           setStatus(`${provider} 로그인 중...`);
@@ -109,8 +109,8 @@ const AuthCallback = () => {
           }
 
           await socialLogin(provider, token);
-          setStatus("소셜 로그인 성공! 메인 페이지로 이동합니다.");
-          setTimeout(() => navigate("/main"), 1500);
+          setStatus("소셜 로그인 성공! 인덱스 페이지로 이동합니다.");
+          setTimeout(() => navigate("/index"), 1500);
         }
       } catch (error) {
         console.error("Auth callback error:", error);

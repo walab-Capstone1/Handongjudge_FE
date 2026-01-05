@@ -22,6 +22,7 @@ import UserManagement from "./pages/AdminPage/UserManagement";
 import NoticeManagement from "./pages/AdminPage/NoticeManagement";
 import AdminRoute from "./components/AdminRoute";
 import EnrollPage from "./pages/EnrollPage";
+import IndexPage from "./pages/IndexPage";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Onboarding />} />
+            <Route path="/index" element={<IndexPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />
             <Route path="/signup/email" element={<SignupEmailPage />} />
