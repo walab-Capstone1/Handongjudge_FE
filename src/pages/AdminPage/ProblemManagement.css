@@ -2,94 +2,195 @@
   padding: 0;
 }
 
-.admin-problems-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+/* 문제 테이블 스타일 */
+.admin-problems-table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: visible;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-top: 2rem;
 }
 
-.admin-problem-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.2s ease;
+.admin-problems-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-problems-table thead {
+  background: #f8fafc;
+}
+
+.admin-problems-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.admin-problems-table th.admin-problem-meta-cell {
+  text-align: right;
+}
+
+.admin-problems-table th.admin-problem-actions-cell {
+  text-align: right;
+}
+
+.admin-problems-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.admin-problems-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.admin-problem-title-cell {
+  min-width: 300px;
+}
+
+.admin-problem-title-wrapper {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.admin-problem-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+.admin-problem-title {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 1rem;
 }
 
-.admin-problem-card-header {
+.admin-problem-meta-cell {
+  text-align: right;
+  color: #64748b;
+}
+
+.admin-problem-actions-cell {
+  text-align: right;
+}
+
+.admin-problem-actions-inline {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.admin-btn-table-action {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  color: #667eea;
+  border: 1px solid #667eea;
+}
+
+.admin-btn-table-action:hover {
+  background: #667eea;
+  color: white;
+}
+
+.admin-btn-edit {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.admin-btn-edit:hover {
+  background: #667eea;
+  color: white;
+}
+
+.admin-table-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.admin-problem-title-clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.admin-problem-title-clickable:hover {
+  color: #667eea;
+}
+
+/* 문제 설명 모달 스타일 */
+.problem-description-modal-content {
+  padding: 1.5rem;
+  line-height: 1.7;
+  color: #334155;
+}
+
+.problem-description-h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid #667eea;
+}
+
+.problem-description-h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.problem-description-h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
-.admin-problem-card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2d3436;
-  margin: 0;
+.problem-description-paragraph {
+  margin: 0.75rem 0;
+  color: #475569;
+  line-height: 1.7;
 }
 
-.admin-problem-card-body {
-  flex: 1;
+.problem-description-inline-code {
+  background: #f1f5f9;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+  color: #dc2626;
+  border: 1px solid #e2e8f0;
 }
 
-.admin-problem-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-  color: #6b7280;
+.problem-description-code-block {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid #334155;
 }
 
-.admin-problem-level {
-  padding: 0.25rem 0.75rem;
-  background: #f3f4f6;
-  border-radius: 12px;
-  font-weight: 500;
-}
-
-.admin-problem-limit {
-  padding: 0.25rem 0.75rem;
-  background: #eef2ff;
-  color: #667eea;
-  border-radius: 12px;
-  font-weight: 500;
-}
-
-.admin-problem-card-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: auto;
-}
-
-.admin-empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #6b7280;
-}
-
-.admin-filter-select {
-  padding: 0.8rem 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 1rem;
-  background: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 150px;
-}
-
-.admin-filter-select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.problem-description-code-block code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+  white-space: pre;
+  display: block;
 }
 
