@@ -24,6 +24,8 @@ import AdminRoute from "./components/AdminRoute";
 import EnrollPage from "./pages/EnrollPage";
 import IndexPage from "./pages/IndexPage";
 import ClassPage from "./pages/ClassPage";
+import CourseDashboardPage from "./pages/CourseDashboardPage";
+import CourseAssignmentsPage from "./pages/CourseAssignmentsPage";
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
             <Route path="/" element={<Onboarding />} />
             <Route path="/index" element={<IndexPage />} />
             <Route path="/courses" element={<ClassPage />} />
+            <Route path="/sections/:sectionId/dashboard" element={<CourseDashboardPage />} />
+            <Route path="/sections/:sectionId/course-assignments" element={<CourseAssignmentsPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />
             <Route path="/signup/email" element={<SignupEmailPage />} />

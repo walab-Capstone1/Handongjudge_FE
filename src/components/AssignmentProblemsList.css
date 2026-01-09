@@ -1,0 +1,77 @@
+.dashboard-problems-list {
+  display: flex;
+  align-items: flex-start;
+  background: #D9DFF9;
+  border-radius: 10px;
+  padding: 20px 32px 20px 29px;
+  gap: 33px;
+}
+
+.problems-indicator {
+  width: 5px;
+  min-height: 85px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.problems-items {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+  flex: 1;
+}
+
+.problem-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.problem-row:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+.problem-row .bullet {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.problem-row .problem-title {
+  font-size: 14px;
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* 완료된 문제 스타일 */
+.problem-row.completed .bullet,
+.problem-row.completed .problem-title {
+  color: #868FB7;
+}
+
+/* 미완료 문제 스타일 */
+.problem-row.not-completed .bullet,
+.problem-row.not-completed .problem-title {
+  color: #000000;
+}
+
+.no-problems-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.no-problems-message span {
+  color: #868FB7;
+  font-size: 14px;
+  font-style: italic;
+}
+

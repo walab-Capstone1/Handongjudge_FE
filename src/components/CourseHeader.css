@@ -1,0 +1,20 @@
+.course-header-container {
+  background: #FFFFFF;
+  padding: 0 32px;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.course-header-top {
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+  height: 61px;
+  box-sizing: border-box;
+}
+
+.course-name {
+  color: #000000;
+  font-size: 18px;
+  font-weight: 600;
+}
+
