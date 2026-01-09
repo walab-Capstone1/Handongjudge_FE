@@ -225,11 +225,11 @@ const CourseAssignmentsPage = () => {
                           {assignment.dDay < 0 ? `D+${Math.abs(assignment.dDay)}` : `D-${assignment.dDay}`}
                         </span>
                       )}
+                    </div>
+                    <div className="accordion-header-right">
                       <span className="accordion-deadline">
                         [마감일 | {formatDate(assignment.endDate)} 23:59 까지 제출]
                       </span>
-                    </div>
-                    <div className="accordion-header-right">
                       <div className="progress-info">
                         <div className="mini-progress-bar">
                           <div 

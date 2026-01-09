@@ -94,12 +94,18 @@
   display: flex;
   align-items: center;
   margin-bottom: 16px;
-  gap: 14px;
+  gap: 8px;
 }
 
 .assignment-title {
   color: #000000;
   font-size: 18px;
+  flex-shrink: 1;
+  margin-right: 0;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .d-day-badge {
@@ -108,6 +114,7 @@
   background: #667EEA;
   border-radius: 15px;
   padding: 4px 17px;
+  flex-shrink: 0;
 }
 
 .d-day-badge.expired {
@@ -126,6 +133,7 @@
 .assignment-deadline {
   color: #000000;
   font-size: 16px;
+  flex-shrink: 0;
   margin-right: 15px;
 }
 
