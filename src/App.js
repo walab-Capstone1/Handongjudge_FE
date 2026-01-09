@@ -26,6 +26,8 @@ import IndexPage from "./pages/IndexPage";
 import ClassPage from "./pages/ClassPage";
 import CourseDashboardPage from "./pages/CourseDashboardPage";
 import CourseAssignmentsPage from "./pages/CourseAssignmentsPage";
+import CourseNoticesPage from "./pages/CourseNoticesPage";
+import CourseNoticeDetailPage from "./pages/CourseNoticeDetailPage";
 
 function App() {
   return (
@@ -37,6 +39,8 @@ function App() {
             <Route path="/courses" element={<ClassPage />} />
             <Route path="/sections/:sectionId/dashboard" element={<CourseDashboardPage />} />
             <Route path="/sections/:sectionId/course-assignments" element={<CourseAssignmentsPage />} />
+            <Route path="/sections/:sectionId/course-notices" element={<CourseNoticesPage />} />
+            <Route path="/sections/:sectionId/course-notices/:noticeId" element={<CourseNoticeDetailPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />
             <Route path="/signup/email" element={<SignupEmailPage />} />

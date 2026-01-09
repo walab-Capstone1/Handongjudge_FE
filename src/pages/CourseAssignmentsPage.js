@@ -148,7 +148,7 @@ const CourseAssignmentsPage = () => {
         // 현재 페이지
         break;
       case "notice":
-        navigate(`/sections/${sectionId}?tab=notices`);
+        navigate(`/sections/${sectionId}/course-notices`);
         break;
       case "notification":
         // 알림 페이지로 이동

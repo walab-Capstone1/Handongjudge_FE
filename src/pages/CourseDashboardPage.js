@@ -181,7 +181,7 @@ const CourseDashboardPage = () => {
         navigate(`/sections/${sectionId}/course-assignments`);
         break;
       case "notice":
-        navigate(`/sections/${sectionId}?tab=notices`);
+        navigate(`/sections/${sectionId}/course-notices`);
         break;
       case "notification":
         // 알림 페이지로 이동 (구현 필요)
