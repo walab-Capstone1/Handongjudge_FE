@@ -13,9 +13,15 @@
 
 .dashboard-body {
   display: flex;
-  gap: 53px;
-  padding: 0 66px;
+  flex-direction: column;
+  padding: 0 100px;
   margin-top: 17px;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 53px;
+  align-items: flex-start;
 }
 
 /* Assignments Section */
@@ -196,7 +202,6 @@
   display: flex;
   flex-direction: column;
   width: 350px;
-  margin-top: 150px;
   gap: 20px;
 }
 
@@ -318,5 +323,27 @@
 
 .error-message button:hover {
   background: #5568d3;
+}
+
+/* Profile Section */
+.profile-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 24px 0;
+  margin-bottom: 32px;
+}
+
+.profile-avatar {
+  width: 79px;
+  height: 82px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-greeting {
+  color: #000000;
+  font-size: 18px;
+  margin-top: 31px;
 }
 

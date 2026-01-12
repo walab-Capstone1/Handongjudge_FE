@@ -15,7 +15,10 @@ const CourseSidebar = ({ activeMenu = "대시보드", onMenuClick }) => {
 
   return (
     <div className="course-sidebar">
-      <div className="sidebar-header">
+      <div 
+        className="sidebar-header"
+        onClick={() => navigate("/courses")}
+      >
         <img
           src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/blBC3g5kkQ/0xrnt7m1_expires_30_days.png"
           alt="CodeSturdy Logo"

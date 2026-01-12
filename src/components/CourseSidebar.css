@@ -16,6 +16,12 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   height: 61px;
   box-sizing: border-box;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-header:hover {
+  background-color: rgba(102, 126, 234, 0.15);
 }
 
 .sidebar-logo {

@@ -258,7 +258,21 @@ const CourseDashboardPage = () => {
         />
 
         <div className="dashboard-body">
-          <div className="assignments-section">
+          {/* Profile Section */}
+          <div className="profile-section">
+            <img
+              src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/blBC3g5kkQ/pe2v4bz8_expires_30_days.png"
+              alt="User Avatar"
+              className="profile-avatar"
+            />
+            <span className="profile-greeting">
+              {auth.user?.name || "사용자"} {auth.user?.role === "INSTRUCTOR" ? "교수" : "학부생"}님, 반가워요!
+            </span>
+          </div>
+
+          {/* Content wrapper for assignments and notifications */}
+          <div className="content-wrapper">
+            <div className="assignments-section">
             <div className="section-header">
               <span className="section-title">과제 현황</span>
               <div className="sort-dropdown" onClick={handleSortToggle}>
@@ -322,27 +336,28 @@ const CourseDashboardPage = () => {
             </div>
           </div>
 
-          <div className="notifications-section">
-            <span className="section-title">알림</span>
-            <div className="notifications-box">
-              {notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <div 
-                    key={notification.id} 
-                    className={`notification-item ${notification.isNew ? 'new' : ''}`}
-                    onClick={() => handleNotificationClick(notification.id)}
-                  >
-                    <span className="notification-text">
-                      {notification.isNew && <span className="new-badge">NEW</span>}
-                      {notification.title} [{notification.date}]
-                    </span>
+            <div className="notifications-section">
+              <span className="section-title">알림</span>
+              <div className="notifications-box">
+                {notifications.length > 0 ? (
+                  notifications.map((notification) => (
+                    <div 
+                      key={notification.id} 
+                      className={`notification-item ${notification.isNew ? 'new' : ''}`}
+                      onClick={() => handleNotificationClick(notification.id)}
+                    >
+                      <span className="notification-text">
+                        {notification.isNew && <span className="new-badge">NEW</span>}
+                        {notification.title} [{notification.date}]
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-notifications">
+                    <span>새로운 알림이 없습니다.</span>
                   </div>
-                ))
-              ) : (
-                <div className="no-notifications">
-                  <span>새로운 알림이 없습니다.</span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
