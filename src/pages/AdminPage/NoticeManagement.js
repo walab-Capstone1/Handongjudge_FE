@@ -181,8 +181,8 @@ const NoticeManagement = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
+        <div className="admin-loading-container">
+          <div className="admin-loading-spinner"></div>
           <p>공지사항을 불러오는 중...</p>
         </div>
       </AdminLayout>
@@ -206,25 +206,25 @@ const NoticeManagement = () => {
       {/* 전체 페이지인 경우 기존 헤더 유지 */}
       {!sectionId && (
         <div className="notice-management">
-          <div className="page-header">
-            <div className="header-left">
-              <h1 className="page-title">전체 공지사항 관리</h1>
-              <div className="search-box">
+          <div className="admin-page-header">
+            <div className="admin-header-left">
+              <h1 className="admin-page-title">전체 공지사항 관리</h1>
+              <div className="admin-search-box">
                 <input
                   type="text"
                   placeholder="제목, 내용, 분반으로 검색..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
+                  className="admin-search-input"
                 />
               </div>
             </div>
-            <div className="header-right">
-              <div className="filter-dropdown">
+            <div className="admin-header-right">
+              <div className="admin-filter-dropdown">
                 <select
                   value={filterSection}
                   onChange={(e) => setFilterSection(e.target.value)}
-                  className="filter-select"
+                  className="admin-filter-select"
                 >
                   <option value="ALL">모든 수업</option>
                   {uniqueSections.map((section) => (
@@ -234,9 +234,9 @@ const NoticeManagement = () => {
                   ))}
                 </select>
               </div>
-              <div className="header-actions">
+              <div className="admin-header-actions">
                 <button
-                  className="btn-primary"
+                  className="admin-btn-primary"
                   onClick={handleCreateNotice}
                 >
                   새 공지사항 작성
@@ -249,37 +249,37 @@ const NoticeManagement = () => {
       
       <div className="notice-management">
 
-        <div className="notices-list">
+        <div className="admin-notices-list">
           {filteredNotices.map((notice) => (
             <div key={notice.id} className={`notice-card ${notice.active === false ? 'disabled' : ''}`}>
               <div className="notice-title-row">
-                <div className="title-and-course">
+                <div className="admin-title-and-course">
                   <p className="notice-course">{notice.sectionName}</p>
                   <h3 className="notice-title">{notice.title}</h3>
                 </div>
                 <div className="notice-actions">
                   <button 
-                    className="btn-text-small edit"
+                    className="admin-btn-text-small admin-edit"
                     onClick={() => handleEditNotice(notice)}
                   >
                     수정
                   </button>
-                  <div className="more-menu">
+                  <div className="admin-more-menu">
                     <button 
-                      className="btn-icon-small more"
+                      className="admin-btn-icon-small admin-more"
                       title="더보기"
                     >
                       ⋯
                     </button>
-                    <div className="more-dropdown">
+                    <div className="admin-more-dropdown">
                       <button 
-                        className="btn-text-small"
+                        className="admin-btn-text-small"
                         onClick={() => handleToggleActive(notice.id, notice.active)}
                       >
                         {notice.active ? '비활성화' : '활성화'}
                       </button>
                       <button 
-                        className="btn-text-small delete"
+                        className="admin-btn-text-small admin-delete"
                         onClick={() => handleDeleteNotice(notice.id)}
                       >
                         삭제
@@ -290,9 +290,9 @@ const NoticeManagement = () => {
               </div>
 
               <div className="notice-compact-stats">
-                <span className="compact-stat">
-                  <span className="stat-label-compact">작성일:</span>
-                  <span className="stat-value-compact">
+                <span className="admin-compact-stat">
+                  <span className="admin-stat-label-compact">작성일:</span>
+                  <span className="admin-stat-value-compact">
                     {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
                   </span>
                 </span>
@@ -308,9 +308,9 @@ const NoticeManagement = () => {
           ))}
 
           {filteredNotices.length === 0 && (
-            <div className="no-notices">
-              <div className="no-notices-message">
-                <span className="no-notices-icon">📢</span>
+            <div className="admin-no-notices">
+              <div className="admin-no-notices-message">
+                <span className="admin-no-notices-icon">📢</span>
                 <div>
                   {notices.length === 0 ? (
                     <>
@@ -331,12 +331,12 @@ const NoticeManagement = () => {
 
         {/* 공지사항 생성/수정 모달 */}
         {showModal && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <div className="modal-header">
+          <div className="admin-modal-overlay">
+            <div className="admin-modal-content">
+              <div className="admin-modal-header">
                 <h2>{editingNotice ? '공지사항 수정' : '새 공지사항 작성'}</h2>
                 <button
-                  className="modal-close"
+                  className="admin-modal-close"
                   onClick={handleCloseModal}
                 >
                   ✕
@@ -344,8 +344,8 @@ const NoticeManagement = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="notice-form">
-                <div className="form-row">
-                  <div className="form-group">
+                <div className="admin-form-row">
+                  <div className="admin-form-group">
                     <label htmlFor="title">공지사항 제목 *</label>
                     <input
                       type="text"
@@ -357,7 +357,7 @@ const NoticeManagement = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="admin-form-group">
                     <label htmlFor="sectionId">분반 선택 *</label>
                     <select
                       id="sectionId"
@@ -378,7 +378,7 @@ const NoticeManagement = () => {
 
 
 
-                <div className="form-group">
+                <div className="admin-form-group">
                   <label htmlFor="content">공지사항 내용 *</label>
                   <textarea
                     id="content"
@@ -391,11 +391,11 @@ const NoticeManagement = () => {
                   />
                 </div>
 
-                <div className="form-actions">
-                  <button type="button" className="btn-secondary" onClick={handleCloseModal}>
+                <div className="admin-form-actions">
+                  <button type="button" className="admin-btn-secondary" onClick={handleCloseModal}>
                     취소
                   </button>
-                  <button type="submit" className="btn-primary">
+                  <button type="submit" className="admin-btn-primary">
                     {editingNotice ? '수정' : '작성'}
                   </button>
                 </div>

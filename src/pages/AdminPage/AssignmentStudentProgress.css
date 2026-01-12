@@ -4,7 +4,7 @@
   margin: 0 auto;
 }
 
-.page-header {
+.admin-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,13 +13,13 @@
   border-bottom: 2px solid #e1e8ed;
 }
 
-.header-left {
+.admin-header-left {
   display: flex;
   align-items: center;
   gap: 1.5rem;
 }
 
-.btn-back {
+.admin-btn-back {
   background: #f3f4f6;
   color: #374151;
   border: none;
@@ -31,44 +31,45 @@
   transition: all 0.3s ease;
 }
 
-.btn-back:hover {
+.admin-btn-back:hover {
   background: #e5e7eb;
   transform: translateX(-2px);
 }
 
-.page-title {
+.admin-page-title {
   margin: 0;
   font-size: 1.8rem;
   color: #1a202c;
   font-weight: 700;
 }
 
-.page-subtitle {
+.admin-page-subtitle {
   margin: 0.5rem 0 0 0;
   font-size: 1rem;
   color: #6b7280;
 }
 
 /* 문제별 통계 */
-.problems-summary {
+
+.admin-problems-summary {
   margin-bottom: 2rem;
 }
 
-.summary-header {
+.admin-summary-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
 }
 
-.summary-title {
+.admin-summary-title {
   font-size: 1.3rem;
   font-weight: 700;
   color: #1a202c;
   margin: 0;
 }
 
-.total-students-label {
+.admin-total-students-label {
   font-size: 1rem;
   color: #667eea;
   font-weight: 600;
@@ -78,13 +79,14 @@
 }
 
 /* Progress 페이지 전용 문제 목록 - 그리드 레이아웃 (여러 개 한 줄) */
-.progress-container .problems-list {
+.admin-progress-container  .admin-problems-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
 }
 
-.problem-stat-card {
+
+.admin-problem-stat-card {
   background: white;
   border: 2px solid #e9ecef;
   border-radius: 8px;
@@ -93,13 +95,15 @@
   min-width: 0;
 }
 
-.problem-stat-card.expanded {
+
+.admin-problem-stat-card.admin-expanded {
   border-color: #667eea;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
   grid-column: span 2;
 }
 
-.problem-stat-header {
+
+.admin-problem-stat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -108,19 +112,23 @@
   transition: all 0.3s ease;
 }
 
-.problem-stat-header.clickable {
+
+.admin-problem-stat-header.admin-clickable {
   cursor: pointer;
 }
 
-.problem-stat-header.clickable:hover {
+
+.admin-problem-stat-header.admin-clickable:hover {
   background: #f8f9fa;
 }
 
-.problem-stat-header.expanded {
+
+.admin-problem-stat-header.admin-expanded {
   background: #f0f4ff;
 }
 
-.problem-stat-header .header-left {
+
+.admin-problem-stat-header .admin-header-left {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -128,14 +136,16 @@
   min-width: 0;
 }
 
-.problem-stat-header .header-right {
+
+.admin-problem-stat-header .admin-header-right {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-shrink: 0;
 }
 
-.problem-number {
+
+.admin-problem-number {
   background: #667eea;
   color: white;
   padding: 0.3rem 0.6rem;
@@ -145,7 +155,8 @@
   flex-shrink: 0;
 }
 
-.problem-title {
+
+.admin-problem-title {
   font-size: 0.9rem;
   font-weight: 600;
   color: #1a202c;
@@ -156,25 +167,27 @@
   white-space: nowrap;
 }
 
-.problem-summary {
+
+.admin-problem-summary {
   font-size: 0.85rem;
   color: #6b7280;
   font-weight: 500;
   white-space: nowrap;
 }
 
-.toggle-icon {
+.admin-toggle-icon {
   font-size: 0.7rem;
   color: #667eea;
   transition: transform 0.3s ease;
   display: inline-block;
 }
 
-.toggle-icon.expanded {
+.admin-toggle-icon.admin-expanded {
   transform: rotate(180deg);
 }
 
-.problem-stat-details {
+
+.admin-problem-stat-details {
   padding: 0 1rem 1rem 1rem;
   animation: slideDown 0.3s ease;
 }
@@ -190,20 +203,23 @@
   }
 }
 
-.problem-stat-info {
+
+.admin-problem-stat-info {
   display: flex;
   gap: 1rem;
   margin-bottom: 0.75rem;
 }
 
-.problem-stat-item {
+
+.admin-problem-stat-item {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
 }
 
-.problem-stat-item .stat-label {
+
+.admin-problem-stat-item .admin-stat-label {
   font-size: 0.7rem;
   color: #6b7280;
   font-weight: 500;
@@ -211,33 +227,38 @@
   letter-spacing: 0.3px;
 }
 
-.problem-stat-item .stat-value {
+
+.admin-problem-stat-item .admin-stat-value {
   font-size: 1.2rem;
   font-weight: 700;
   color: #1a202c;
 }
 
-.problem-stat-item.solved .stat-value {
+
+.admin-problem-stat-item.solved .admin-stat-value {
   color: #10b981;
 }
 
-.problem-stat-item.unsolved .stat-value {
+
+.admin-problem-stat-item.unsolved .admin-stat-value {
   color: #ef4444;
 }
 
-.problem-stat-item .stat-percent {
+
+.admin-problem-stat-item .admin-stat-percent {
   font-size: 0.75rem;
   color: #6b7280;
   font-weight: 600;
 }
 
-.stat-row {
+.admin-stat-row {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
 }
 
-.problem-stat-bar {
+
+.admin-problem-stat-bar {
   width: 100%;
   height: 6px;
   background: #f3f4f6;
@@ -245,17 +266,19 @@
   overflow: hidden;
 }
 
-.problem-stat-fill {
+
+.admin-problem-stat-fill {
   height: 100%;
   transition: width 0.3s ease;
 }
 
-.problem-stat-fill.solved-fill {
+
+.admin-problem-stat-fill.solved-fill {
   background: #10b981;
 }
 
 /* 필터 */
-.filters-section {
+.admin-filters-section {
   display: flex;
   gap: 1.5rem;
   margin-bottom: 2rem;
@@ -263,14 +286,14 @@
   flex-wrap: wrap;
 }
 
-.search-box {
+.admin-search-box {
   position: relative;
   flex: 1 1 300px;
   min-width: 250px;
   max-width: 400px;
 }
 
-.search-input {
+.admin-search-input {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 2px solid #e5e7eb;
@@ -279,13 +302,13 @@
   transition: all 0.3s ease;
 }
 
-.search-input:focus {
+.admin-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.status-filters {
+.admin-status-filters {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
@@ -293,7 +316,7 @@
   padding-left: 2rem;
 }
 
-.filter-btn {
+.admin-filter-btn {
   padding: 0.75rem 1.5rem;
   border: 2px solid #e5e7eb;
   background: white;
@@ -305,41 +328,41 @@
   color: #6b7280;
 }
 
-.filter-btn:hover {
+.admin-filter-btn:hover {
   background: #f3f4f6;
   border-color: #d1d5db;
 }
 
-.filter-btn.active {
+.admin-filter-btn.admin-active {
   background: #667eea;
   color: white;
   border-color: #667eea;
 }
 
 /* 학생 목록 */
-.students-list {
+.admin-students-list {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
-.table-container {
+.admin-table-container {
   overflow-x: auto;
 }
 
-.students-table {
+.admin-students-table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
-.students-table thead {
+.admin-students-table thead {
   background: #667eea;
   color: white;
 }
 
-.students-table th {
+.admin-students-table th {
   padding: 1rem 1.25rem;
   text-align: left;
   font-weight: 600;
@@ -347,49 +370,50 @@
   white-space: nowrap;
 }
 
-.students-table th:nth-child(1) {
+.admin-students-table th:nth-child(1) {
   width: 15%;
 }
 
-.students-table th:nth-child(2) {
+.admin-students-table th:nth-child(2) {
   width: 15%;
 }
 
-.students-table th:nth-child(3) {
+.admin-students-table th:nth-child(3) {
   width: 12%;
 }
 
-.students-table th:nth-child(4) {
+.admin-students-table th:nth-child(4) {
   width: 18%;
 }
 
-.students-table th:nth-child(5) {
+.admin-students-table th:nth-child(5) {
   width: 35%;
 }
 
-.students-table th:nth-child(6) {
+.admin-students-table th:nth-child(6) {
   width: 15%;
 }
 
-.students-table tbody tr {
+.admin-students-table tbody tr {
   border-bottom: 1px solid #e5e7eb;
   transition: all 0.2s ease;
 }
 
-.students-table tbody tr:hover {
+.admin-students-table tbody tr:hover {
   background: #f8f9fa;
 }
 
-.students-table tbody tr:last-child {
+.admin-students-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.students-table td {
+.admin-students-table td {
   padding: 1.25rem;
   font-size: 0.95rem;
   color: #374151;
   vertical-align: middle;
 }
+
 
 .student-id {
   font-family: 'Courier New', monospace;
@@ -397,13 +421,14 @@
   font-weight: 500;
 }
 
+
 .student-name {
   font-weight: 600;
   color: #1a202c;
 }
 
 /* 상태 배지 */
-.status-badge {
+.admin-status-badge {
   display: inline-block;
   padding: 0.4rem 1rem;
   border-radius: 20px;
@@ -412,29 +437,29 @@
   white-space: nowrap;
 }
 
-.status-badge.completed {
+.admin-status-badge.completed {
   background: #10b981;
   color: white;
 }
 
-.status-badge.in-progress {
+.admin-status-badge.in-progress {
   background: #f59e0b;
   color: white;
 }
 
-.status-badge.not-started {
+.admin-status-badge.not-started {
   background: #e5e7eb;
   color: #6b7280;
 }
 
 /* 진행률 */
-.progress-cell {
+.admin-progress-cell {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.mini-progress-bar {
+.admin-mini-progress-bar {
   flex: 1;
   height: 8px;
   background: #e9ecef;
@@ -443,14 +468,14 @@
   min-width: 80px;
 }
 
-.mini-progress-fill {
+.admin-mini-progress-fill {
   height: 100%;
   background: #10b981;
   transition: width 0.3s ease;
   border-radius: 4px;
 }
 
-.progress-text {
+.admin-progress-text {
   font-weight: 600;
   color: #374151;
   white-space: nowrap;
@@ -459,14 +484,15 @@
 }
 
 /* 문제별 상태 */
-.problems-status {
+
+.admin-problems-status {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   align-items: center;
 }
 
-.btn-detail {
+.admin-btn-detail {
   margin-left: 0.75rem;
   padding: 0.4rem 0.8rem;
   background: #667eea;
@@ -480,13 +506,14 @@
   white-space: nowrap;
 }
 
-.btn-detail:hover {
+.admin-btn-detail:hover {
   background: #5568d3;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
 }
 
-.problem-badge {
+
+.admin-problem-badge {
   width: 32px;
   height: 32px;
   display: flex;
@@ -499,35 +526,40 @@
   transition: all 0.2s ease;
 }
 
-.problem-badge.solved {
+
+.admin-problem-badge.solved {
   background: #10b981;
   color: white;
   box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
 }
 
-.problem-badge.solved:hover {
+
+.admin-problem-badge.solved:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
 }
 
-.problem-badge.unsolved {
+
+.admin-problem-badge.unsolved {
   background: #f3f4f6;
   color: #9ca3af;
   border: 2px solid #e5e7eb;
 }
 
-.problem-badge.unsolved:hover {
+
+.admin-problem-badge.unsolved:hover {
   background: #e5e7eb;
   transform: scale(1.05);
 }
 
 /* 과제 완료 시간 */
+
 .assignment-completion-time-cell {
   font-size: 0.9rem;
   vertical-align: middle;
 }
 
-.completion-time-display {
+.admin-completion-time-display {
   font-weight: 600;
   color: #10b981;
   font-size: 0.9rem;
@@ -535,26 +567,26 @@
   font-family: 'Courier New', monospace;
 }
 
-.completion-time-display.not-completed {
+.admin-completion-time-display.not-completed {
   color: #9ca3af;
   font-style: italic;
   font-weight: 500;
 }
 
 /* 데이터 없음 */
-.no-data {
+.admin-no-data {
   padding: 4rem 2rem;
   text-align: center;
   color: #6b7280;
   font-size: 1.1rem;
 }
 
-.no-data p {
+.admin-no-data p {
   margin: 0;
 }
 
 /* 로딩 */
-.loading-container {
+.admin-loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -563,7 +595,7 @@
   gap: 1rem;
 }
 
-.loading-spinner {
+.admin-loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
@@ -579,90 +611,90 @@
 
 /* 반응형 */
 @media (max-width: 1024px) {
-  .progress-container .problems-list {
+  .admin-progress-container  .admin-problems-list {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 
-  .problem-stat-card.expanded {
+   .admin-problem-stat-card.admin-expanded {
     grid-column: span 1;
   }
 }
 
 @media (max-width: 768px) {
-  .student-progress-container {
+   .student-progress-container {
     padding: 1rem;
   }
 
-  .page-header {
+  .admin-page-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .header-left {
+  .admin-header-left {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
 
-  .summary-header {
+  .admin-summary-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
   }
 
-  .progress-container .problems-list {
+  .admin-progress-container  .admin-problems-list {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
 
-  .problem-stat-card.expanded {
+   .admin-problem-stat-card.admin-expanded {
     grid-column: span 1;
   }
 
-  .problem-stat-header {
+   .admin-problem-stat-header {
     flex-wrap: wrap;
   }
 
-  .problem-stat-header .header-right {
+   .admin-problem-stat-header .admin-header-right {
     width: 100%;
     justify-content: space-between;
     margin-top: 0.5rem;
   }
 
-  .filters-section {
+  .admin-filters-section {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .search-box {
+  .admin-search-box {
     max-width: none;
   }
 
-  .status-filters {
+  .admin-status-filters {
     overflow-x: auto;
     padding-bottom: 0.5rem;
   }
 
-  .students-table {
+  .admin-students-table {
     font-size: 0.85rem;
   }
 
-  .students-table th,
-  .students-table td {
+  .admin-students-table th,
+  .admin-students-table td {
     padding: 0.75rem 0.5rem;
   }
 
-  .problems-status {
+   .admin-problems-status {
     justify-content: flex-start;
   }
 
-  .problem-badge {
+   .admin-problem-badge {
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
   }
 
-  .btn-detail {
+  .admin-btn-detail {
     margin-left: 0;
     margin-top: 0.5rem;
     width: 100%;
@@ -670,7 +702,7 @@
 }
 
 /* 상세보기 모달 */
-.modal-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -694,7 +726,7 @@
   }
 }
 
-.detail-modal {
+.admin-detail-modal {
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -716,7 +748,7 @@
   }
 }
 
-.modal-header {
+.admin-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -724,14 +756,14 @@
   border-bottom: 2px solid #e5e7eb;
 }
 
-.modal-header h2 {
+.admin-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   color: #1a202c;
   font-weight: 700;
 }
 
-.modal-close {
+.admin-modal-close {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -742,19 +774,21 @@
   transition: color 0.2s ease;
 }
 
-.modal-close:hover {
+.admin-modal-close:hover {
   color: #374151;
 }
 
-.detail-modal-content {
+.admin-detail-modal-content {
   padding: 1.5rem;
 }
+
 
 .student-info {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 2px solid #e5e7eb;
 }
+
 
 .student-info h3 {
   margin: 0 0 1rem 0;
@@ -763,28 +797,30 @@
   font-weight: 700;
 }
 
-.problems-detail-list {
+
+.admin-problems-detail-list {
   margin-top: 1.5rem;
 }
 
-.problems-detail-list h4 {
+
+.admin-problems-detail-list h4 {
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
   color: #1a202c;
   font-weight: 700;
 }
 
-.detail-table {
+.admin-detail-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.75rem;
 }
 
-.detail-table thead {
+.admin-detail-table thead {
   background: #f8f9fa;
 }
 
-.detail-table th {
+.admin-detail-table th {
   padding: 0.75rem 1rem;
   text-align: left;
   font-weight: 600;
@@ -793,22 +829,22 @@
   border-bottom: 2px solid #e5e7eb;
 }
 
-.detail-table td {
+.admin-detail-table td {
   padding: 1rem;
   border-bottom: 1px solid #e5e7eb;
   font-size: 0.95rem;
   color: #374151;
 }
 
-.detail-table tbody tr:hover {
+.admin-detail-table tbody tr:hover {
   background: #f8f9fa;
 }
 
-.detail-table tbody tr:last-child td {
+.admin-detail-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.status-badge-detail {
+.admin-status-badge-detail {
   display: inline-block;
   padding: 0.35rem 0.8rem;
   border-radius: 20px;
@@ -817,36 +853,36 @@
   white-space: nowrap;
 }
 
-.status-badge-detail.completed {
+.admin-status-badge-detail.completed {
   background: #10b981;
   color: white;
 }
 
-.status-badge-detail.not-completed {
+.admin-status-badge-detail.not-completed {
   background: #e5e7eb;
   color: #6b7280;
 }
 
-.submission-time {
+.admin-submission-time {
   font-weight: 500;
   color: #1a202c;
   font-family: 'Courier New', monospace;
   font-size: 0.9rem;
 }
 
-.submission-time.not-completed {
+.admin-submission-time.not-completed {
   color: #9ca3af;
   font-style: italic;
 }
 
-.modal-actions {
+.admin-modal-actions {
   padding: 1.5rem;
   border-top: 2px solid #e5e7eb;
   display: flex;
   justify-content: flex-end;
 }
 
-.btn-secondary {
+.admin-btn-secondary {
   padding: 0.75rem 1.5rem;
   background: #f3f4f6;
   color: #374151;
@@ -858,6 +894,6 @@
   transition: all 0.2s ease;
 }
 
-.btn-secondary:hover {
+.admin-btn-secondary:hover {
   background: #e5e7eb;
 }

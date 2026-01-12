@@ -319,6 +319,78 @@ class APIService {
     });
   }
 
+  // ZIP 파일 파싱 (미리보기)
+  async parseZipFile(formData) {
+    const url = `${this.baseURL}/problems/parse-zip`;
+    const accessToken = tokenManager.getAccessToken();
+    
+    const config = {
+      method: 'POST',
+      credentials: 'include',
+      headers: {},
+      body: formData,
+    };
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    try {
+      const response = await fetch(url, config);
+      
+      if (response.status === 401) {
+        await tokenManager.refreshToken();
+        const newAccessToken = tokenManager.getAccessToken();
+        if (newAccessToken) {
+          config.headers.Authorization = `Bearer ${newAccessToken}`;
+          const retryResponse = await fetch(url, config);
+          return this.handleResponse(retryResponse);
+        }
+      }
+
+      return this.handleResponse(response);
+    } catch (error) {
+      console.error('ZIP 파일 파싱 오류:', error);
+      throw error;
+    }
+  }
+
+  // 문제 수정
+  async updateProblem(problemId, formData) {
+    const url = `${this.baseURL}/problems/${problemId}`;
+    const accessToken = tokenManager.getAccessToken();
+    
+    const config = {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {},
+      body: formData,
+    };
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    try {
+      const response = await fetch(url, config);
+      
+      if (response.status === 401) {
+        await tokenManager.refreshToken();
+        const newAccessToken = tokenManager.getAccessToken();
+        if (newAccessToken) {
+          config.headers.Authorization = `Bearer ${newAccessToken}`;
+          const retryResponse = await fetch(url, config);
+          return this.handleResponse(retryResponse);
+        }
+      }
+
+      return this.handleResponse(response);
+    } catch (error) {
+      console.error('문제 수정 오류:', error);
+      throw error;
+    }
+  }
+
   // 과제에서 문제 제거 (백엔드 API 필요)
   async removeProblemFromAssignment(assignmentId, problemId) {
     return await this.request(`/assignments/${assignmentId}/${problemId}`, {

@@ -20,6 +20,9 @@ import AssignmentManagement from "./pages/AdminPage/AssignmentManagement";
 import AssignmentStudentProgress from "./pages/AdminPage/AssignmentStudentProgress";
 import UserManagement from "./pages/AdminPage/UserManagement";
 import NoticeManagement from "./pages/AdminPage/NoticeManagement";
+import ProblemManagement from "./pages/AdminPage/ProblemManagement";
+import ProblemCreate from "./pages/AdminPage/ProblemCreate";
+import ProblemEdit from "./pages/AdminPage/ProblemEdit";
 import AdminRoute from "./components/AdminRoute";
 import EnrollPage from "./pages/EnrollPage";
 import IndexPage from "./pages/IndexPage";
@@ -50,11 +53,15 @@ function App() {
             <Route path="/admin/courses" element={<AdminRoute><CourseManagement /></AdminRoute>} />
             <Route path="/admin/assignments" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
             <Route path="/admin/assignments/section/:sectionId" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
-            <Route path="/admin/sections/:sectionId/assignments/:assignmentId/progress" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
+            <Route path="/admin/assignments/section/:sectionId/progress" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
+            <Route path="/admin/assignments/section/:sectionId/progress/:assignmentId" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
             <Route path="/admin/notices" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/admin/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
             <Route path="/admin/users/section/:sectionId" element={<AdminRoute><UserManagement /></AdminRoute>} />
+            <Route path="/admin/problems" element={<AdminRoute><ProblemManagement /></AdminRoute>} />
+            <Route path="/admin/problems/create" element={<AdminRoute><ProblemCreate /></AdminRoute>} />
+            <Route path="/admin/problems/:problemId/edit" element={<AdminRoute><ProblemEdit /></AdminRoute>} />
           </Routes>
         </Router>
       </RecoilRoot>
