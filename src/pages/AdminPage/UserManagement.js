@@ -167,8 +167,8 @@ const UserManagement = () => {
   if (loading) {
     return (
       <AdminLayout selectedSection={currentSection}>
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
+        <div className="admin-loading-container">
+          <div className="admin-loading-spinner"></div>
           <p>학생 데이터를 불러오는 중...</p>
         </div>
       </AdminLayout>
@@ -189,20 +189,20 @@ const UserManagement = () => {
       {/* 전체 페이지인 경우 기존 헤더 유지 */}
       {!sectionId && (
         <div className="user-management">
-          <div className="page-header">
-            <div className="header-left">
-              <h1 className="page-title">학생 관리</h1>
-              <div className="search-box">
+          <div className="admin-page-header">
+            <div className="admin-header-left">
+              <h1 className="admin-page-title">학생 관리</h1>
+              <div className="admin-search-box">
                 <input
                   type="text"
                   placeholder="이름, 이메일, 팀ID로 검색..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
+                  className="admin-search-input"
                 />
               </div>
             </div>
-            <div className="header-right">
+            <div className="admin-header-right">
               <select
                 value={filterSection}
                 onChange={(e) => setFilterSection(e.target.value)}
@@ -220,8 +220,8 @@ const UserManagement = () => {
       
       <div className="user-management">
 
-        <div className="users-table-container">
-          <table className="users-table">
+        <div className="admin-users-table-container">
+          <table className="admin-users-table">
             <thead>
                                   <tr>
                       <th>이름</th>
@@ -248,23 +248,23 @@ const UserManagement = () => {
                       {student.sectionNumber}분반
                     </span>
                   </td>
-                  <td className="progress-cell">
-                    <div className="progress-info">
-                      <div className="progress-bar-container">
+                  <td className="admin-progress-cell">
+                    <div className="admin-progress-info">
+                      <div className="admin-progress-bar-container">
                         <div 
-                          className="progress-bar-fill" 
+                          className="admin-progress-bar-fill" 
                           style={{ width: `${student.assignmentCompletionRate || 0}%` }}
                         ></div>
                       </div>
-                      <span className="progress-text">
+                      <span className="admin-progress-text">
                         {student.assignmentCompletionRate ? `${student.assignmentCompletionRate.toFixed(1)}%` : '0%'}
                       </span>
                     </div>
                   </td>
                   <td>
-                    <div className="action-buttons">
+                    <div className="admin-action-buttons">
                       <button 
-                        className="btn-detail-view"
+                        className="admin-btn-detail-view"
                         onClick={() => handleStudentDetailView(student)}
                         title="상세 보기"
                       >
@@ -276,9 +276,9 @@ const UserManagement = () => {
               ))}
                               {filteredStudents.length === 0 && (
                   <tr>
-                    <td colSpan="6" className="no-data">
-                      <div className="no-data-message">
-                        <span className="no-data-icon"></span>
+                    <td colSpan="6" className="admin-no-data">
+                      <div className="admin-no-data-message">
+                        <span className="admin-no-data-icon"></span>
                         <div>
                           {students.length === 0 ? (
                             <>
@@ -302,19 +302,19 @@ const UserManagement = () => {
 
         {/* 학생 상세보기 모달 */}
         {showDetailModal && selectedStudent && (
-          <div className="modal-overlay" onClick={handleCloseDetailModal}>
+          <div className="admin-modal-overlay" onClick={handleCloseDetailModal}>
             <div className="student-detail-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
+              <div className="admin-modal-header">
                 <h2>과제별 진도율</h2>
-                <button className="modal-close-btn" onClick={handleCloseDetailModal}>✕</button>
+                <button className="admin-modal-close-btn" onClick={handleCloseDetailModal}>✕</button>
               </div>
               
-              <div className="modal-body">
-                <div className="assignments-progress-section">
+              <div className="admin-modal-body">
+                <div className="admin-assignments-progress-section">
                   {studentAssignments.length === 0 ? (
-                    <p className="no-assignments">등록된 과제가 없습니다.</p>
+                    <p className="admin-no-assignments">등록된 과제가 없습니다.</p>
                   ) : (
-                    <div className="assignments-list-horizontal">
+                    <div className="admin-assignments-list-horizontal">
                       {studentAssignments.map((assignment) => (
                         <div key={assignment.assignmentId} className="assignment-progress-card-wide">
                           <div className="assignment-progress-header">
@@ -324,21 +324,21 @@ const UserManagement = () => {
                                 <p className="assignment-description">{assignment.description}</p>
                               )}
                             </div>
-                            <span className="progress-badge">{assignment.progressRate || 0}%</span>
+                            <span className="admin-progress-badge">{assignment.progressRate || 0}%</span>
                           </div>
                           <div className="assignment-progress-body">
-                            <div className="progress-stats">
+                            <div className="admin-progress-stats">
                               <span>완료: {assignment.solvedProblems || 0} / {assignment.totalProblems || 0} 문제</span>
                             </div>
-                            <div className="progress-bar-container">
+                            <div className="admin-progress-bar-container">
                               <div 
-                                className="progress-bar-fill" 
+                                className="admin-progress-bar-fill" 
                                 style={{ width: `${assignment.progressRate || 0}%` }}
                               ></div>
                             </div>
                           </div>
                           <button 
-                            className="btn-toggle-detail"
+                            className="admin-btn-toggle-detail"
                             onClick={() => handleToggleAssignmentDetail(assignment.assignmentId)}
                           >
                             {expandedAssignment === assignment.assignmentId ? '상세보기 닫기 ▲' : '상세보기 ▼'}
@@ -346,13 +346,13 @@ const UserManagement = () => {
                           
                           {/* 문제별 상태 상세보기 */}
                           {expandedAssignment === assignment.assignmentId && (
-                            <div className="problems-detail-section">
+                            <div className="admin-problems-detail-section">
                               {assignmentProblemsDetail[assignment.assignmentId]?.length > 0 ? (
-                                <div className="problems-grid">
+                                <div className="admin-problems-grid">
                                   {assignmentProblemsDetail[assignment.assignmentId].map((problem) => (
-                                    <div key={problem.problemId} className={`problem-status-card ${problem.status}`}>
-                                      <div className="problem-info">
-                                        <span className="problem-title">{problem.problemTitle}</span>
+                                    <div key={problem.problemId} className={`admin-problem-status-card ${problem.status}`}>
+                                      <div className="admin-problem-info">
+                                        <span className="admin-problem-title">{problem.problemTitle}</span>
                                         <span className={`status-badge ${problem.status}`}>
                                           {problem.status === 'ACCEPTED' ? '✓ 완료' : 
                                            problem.status === 'SUBMITTED' ? '⋯ 제출함' : 
@@ -360,7 +360,7 @@ const UserManagement = () => {
                                         </span>
                                       </div>
                                       {problem.submissionCount > 0 && (
-                                        <div className="submission-count">
+                                        <div className="admin-submission-count">
                                           제출 횟수: {problem.submissionCount}회
                                         </div>
                                       )}
@@ -368,7 +368,7 @@ const UserManagement = () => {
                                   ))}
                                 </div>
                               ) : (
-                                <p className="no-problems">문제 정보를 불러오는 중...</p>
+                                <p className="admin-no-problems">문제 정보를 불러오는 중...</p>
                               )}
                             </div>
                           )}

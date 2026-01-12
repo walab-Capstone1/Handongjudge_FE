@@ -2,7 +2,7 @@
   padding: 0;
 }
 
-.loading-container {
+.admin-loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,7 +12,7 @@
   background-color: white;
 }
 
-.loading-spinner {
+.admin-loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
@@ -26,7 +26,7 @@
   100% { transform: rotate(360deg); }
 }
 
-.page-header {
+.admin-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -37,7 +37,7 @@
   gap: 1rem;
 }
 
-.page-title {
+.admin-page-title {
   font-size: 2rem;
   font-weight: 700;
   color: #2d3436;
@@ -45,24 +45,24 @@
   margin-right: 1rem;
 }
 
-.header-left {
+.admin-header-left {
   display: flex;
   align-items: center;
 }
 
-.header-right {
+.admin-header-right {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.header-stats {
+.admin-header-stats {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-.stat-badge {
+.admin-stat-badge {
   background: #f8f9fa;
   color: #2d3436;
   padding: 0.5rem 1rem;
@@ -73,20 +73,20 @@
   transition: all 0.3s ease;
 }
 
-.stat-badge.active {
+.admin-stat-badge.admin-active {
   background: #00b894;
   color: white;
   border-color: #00b894;
 }
 
-.page-title {
+.admin-page-title {
   font-size: 2rem;
   font-weight: 700;
   color: #2d3436;
   margin: 0;
 }
 
-.btn-primary {
+.admin-btn-primary {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -101,29 +101,29 @@
   font-size: 1rem;
 }
 
-.btn-primary:hover {
+.admin-btn-primary:hover {
   background: #5568d3;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
-.btn-icon {
+.admin-btn-icon {
   font-size: 1.2rem;
 }
 
-.filters-section {
+.admin-filters-section {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
 }
 
-.search-box {
+.admin-search-box {
   position: relative;
   max-width: 280px;
 }
 
-.search-input {
+.admin-search-input {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #e1e8ed;
@@ -133,13 +133,13 @@
   background: white;
 }
 
-.search-input:focus {
+.admin-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.search-icon {
+.admin-search-icon {
   position: absolute;
   left: 1rem;
   top: 50%;
@@ -150,7 +150,7 @@
   border-radius: 50%;
 }
 
-.search-icon::before {
+.admin-search-icon::before {
   content: '';
   position: absolute;
   top: 2px;
@@ -161,7 +161,7 @@
   border-radius: 50%;
 }
 
-.search-icon::after {
+.admin-search-icon::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -174,6 +174,7 @@
   transform-origin: bottom right;
 }
 
+
 .section-filter {
   padding: 0.65rem 1rem;
   border: 1px solid #e1e8ed;
@@ -185,13 +186,14 @@
   min-width: 150px;
 }
 
+
 .section-filter:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.users-table-container {
+.admin-users-table-container {
   background: white;
   border-radius: 20px;
   padding: 0;
@@ -199,17 +201,17 @@
   overflow: hidden;
 }
 
-.users-table {
+.admin-users-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.users-table thead {
+.admin-users-table thead {
   background: #667eea;
   color: white;
 }
 
-.users-table th {
+.admin-users-table th {
   padding: 1.5rem 1rem;
   text-align: left;
   font-weight: 600;
@@ -218,28 +220,29 @@
   letter-spacing: 0.5px;
 }
 
-.users-table th:last-child {
+.admin-users-table th:last-child {
   text-align: center;
 }
 
-.users-table td {
+.admin-users-table td {
   padding: 1rem;
   border-bottom: 1px solid #f1f3f4;
   vertical-align: middle;
 }
 
-.users-table tbody tr {
+.admin-users-table tbody tr {
   transition: all 0.2s ease;
 }
 
-.users-table tbody tr:hover {
+.admin-users-table tbody tr:hover {
   background-color: #f8f9fa;
 }
 
-.users-table tbody tr.inactive-row {
+.admin-users-table tbody tr.admin-inactive-row {
   opacity: 0.6;
   background-color: #f8f9fa;
 }
+
 
 .user-name {
   display: flex;
@@ -247,6 +250,7 @@
   gap: 0.8rem;
   font-weight: 600;
 }
+
 
 .user-avatar {
   width: 40px;
@@ -261,7 +265,7 @@
   font-size: 1.1rem;
 }
 
-.role-badge {
+.admin-role-badge {
   display: inline-block;
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
@@ -271,6 +275,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
 
 .section-badge {
   background: #667eea;
@@ -282,7 +287,7 @@
   display: inline-block;
 }
 
-.status-toggle {
+.admin-status-toggle {
   background: none;
   border: none;
   font-weight: 600;
@@ -293,24 +298,24 @@
   font-size: 0.9rem;
 }
 
-.status-toggle:hover {
+.admin-status-toggle:hover {
   background-color: currentColor;
   color: white !important;
 }
 
-.last-login {
+.admin-last-login {
   font-size: 0.9rem;
   color: #636e72;
 }
 
-.action-buttons {
+.admin-action-buttons {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
   align-items: center;
 }
 
-.btn-icon-small {
+.admin-btn-icon-small {
   background: none;
   border: none;
   font-size: 1.2rem;
@@ -320,7 +325,7 @@
   transition: all 0.2s ease;
 }
 
-.btn-detail-view {
+.admin-btn-detail-view {
   background: #667eea;
   color: white;
   border: none;
@@ -334,28 +339,28 @@
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
-.btn-detail-view:hover {
+.admin-btn-detail-view:hover {
   background: #5568d3;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.btn-detail-view:active {
+.admin-btn-detail-view:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
 }
 
-.progress-cell {
+.admin-progress-cell {
   padding: 1rem !important;
 }
 
-.progress-info {
+.admin-progress-info {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.progress-bar-container {
+.admin-progress-bar-container {
   flex: 1;
   height: 8px;
   background: #e9ecef;
@@ -364,14 +369,14 @@
   position: relative;
 }
 
-.progress-bar-fill {
+.admin-progress-bar-fill {
   height: 100%;
   background: #00b894;
   border-radius: 10px;
   transition: width 0.3s ease;
 }
 
-.progress-text {
+.admin-progress-text {
   font-size: 0.85rem;
   font-weight: 600;
   color: #2d3436;
@@ -380,7 +385,7 @@
 }
 
 /* 학생 상세보기 모달 스타일 */
-.modal-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -393,6 +398,7 @@
   z-index: 1000;
 }
 
+
 .student-detail-modal-content {
   background: white;
   border-radius: 16px;
@@ -404,7 +410,7 @@
   overflow-x: hidden;
 }
 
-.modal-header {
+.admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -413,14 +419,14 @@
   box-sizing: border-box;
 }
 
-.modal-header h2 {
+.admin-modal-header h2 {
   margin: 0;
   font-size: 1.8rem;
   font-weight: 700;
   color: #2d3436;
 }
 
-.modal-close-btn {
+.admin-modal-close-btn {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -431,16 +437,17 @@
   transition: color 0.2s ease;
 }
 
-.modal-close-btn:hover {
+.admin-modal-close-btn:hover {
   color: #2d3436;
 }
 
-.modal-body {
+.admin-modal-body {
   padding: 2rem;
   box-sizing: border-box;
 }
 
 /* 학생 정보 섹션 제거 - 과제별 진도율만 표시 */
+
 
 .student-info-item {
   display: flex;
@@ -448,13 +455,13 @@
   gap: 0.25rem;
 }
 
-.info-label {
+.admin-info-label {
   font-size: 0.85rem;
   font-weight: 600;
   color: #636e72;
 }
 
-.info-value {
+.admin-info-value {
   font-size: 1rem;
   font-weight: 600;
   color: #2d3436;
@@ -462,24 +469,25 @@
 
 /* 과제별 진도율 제목 제거 - 헤더에서 처리 */
 
-.no-assignments {
+.admin-no-assignments {
   text-align: center;
   padding: 2rem;
   color: #636e72;
   font-size: 1rem;
 }
 
-.assignments-list {
+.admin-assignments-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.assignments-list-horizontal {
+.admin-assignments-list-horizontal {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
+
 
 .assignment-progress-card {
   background: white;
@@ -488,6 +496,7 @@
   padding: 1.25rem;
   transition: all 0.2s ease;
 }
+
 
 .assignment-progress-card-wide {
   background: white;
@@ -500,14 +509,18 @@
   box-sizing: border-box;
 }
 
+
 .assignment-progress-card:hover,
+
 .assignment-progress-card-wide:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+
 .assignment-title-section {
   flex: 1;
 }
+
 
 .assignment-title-section h4 {
   margin: 0 0 0.5rem 0;
@@ -516,12 +529,14 @@
   color: #2d3436;
 }
 
+
 .assignment-description {
   margin: 0;
   font-size: 0.9rem;
   color: #636e72;
   line-height: 1.4;
 }
+
 
 .assignment-progress-header {
   display: flex;
@@ -530,6 +545,7 @@
   margin-bottom: 1rem;
 }
 
+
 .assignment-progress-header h4 {
   margin: 0;
   font-size: 1.1rem;
@@ -537,7 +553,7 @@
   color: #2d3436;
 }
 
-.progress-badge {
+.admin-progress-badge {
   background: #667eea;
   color: white;
   padding: 0.3rem 0.8rem;
@@ -546,19 +562,20 @@
   font-weight: 600;
 }
 
+
 .assignment-progress-body {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.progress-stats {
+.admin-progress-stats {
   font-size: 0.9rem;
   color: #636e72;
   font-weight: 500;
 }
 
-.btn-toggle-detail {
+.admin-btn-toggle-detail {
   width: 100%;
   margin-top: 1rem;
   padding: 0.75rem;
@@ -572,47 +589,54 @@
   transition: all 0.2s ease;
 }
 
-.btn-toggle-detail:hover {
+.admin-btn-toggle-detail:hover {
   background: #667eea;
   color: white;
   border-color: #667eea;
 }
 
-.problems-detail-section {
+
+.admin-problems-detail-section {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #e1e8ed;
 }
 
-.problems-grid {
+
+.admin-problems-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
 }
 
-.problem-status-card {
+
+.admin-problem-status-card {
   padding: 1.25rem;
   border-radius: 8px;
   border: 2px solid;
   transition: all 0.2s ease;
 }
 
-.problem-status-card.ACCEPTED {
+
+.admin-problem-status-card.ACCEPTED {
   background: #e8f5e9;
   border-color: #00b894;
 }
 
-.problem-status-card.SUBMITTED {
+
+.admin-problem-status-card.SUBMITTED {
   background: #fff3e0;
   border-color: #f39c12;
 }
 
-.problem-status-card.NOT_SUBMITTED {
+
+.admin-problem-status-card.NOT_SUBMITTED {
   background: #f5f5f5;
   border-color: #ddd;
 }
 
-.problem-info {
+
+.admin-problem-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -620,14 +644,15 @@
   margin-bottom: 0.5rem;
 }
 
-.problem-title {
+
+.admin-problem-title {
   font-weight: 600;
   font-size: 0.95rem;
   color: #2d3436;
   flex: 1;
 }
 
-.status-badge {
+.admin-status-badge {
   padding: 0.25rem 0.6rem;
   border-radius: 12px;
   font-size: 0.8rem;
@@ -635,43 +660,43 @@
   white-space: nowrap;
 }
 
-.status-badge.ACCEPTED {
+.admin-status-badge.ACCEPTED {
   background: #00b894;
   color: white;
 }
 
-.status-badge.SUBMITTED {
+.admin-status-badge.SUBMITTED {
   background: #f39c12;
   color: white;
 }
 
-.status-badge.NOT_SUBMITTED {
+.admin-status-badge.NOT_SUBMITTED {
   background: #636e72;
   color: white;
 }
 
-.submission-count {
+.admin-submission-count {
   font-size: 0.85rem;
   color: #636e72;
 }
 
-.no-problems {
+.admin-no-problems {
   text-align: center;
   padding: 1rem;
   color: #636e72;
   font-size: 0.9rem;
 }
 
-.btn-icon-small.edit:hover {
+.admin-btn-icon-small.edit:hover {
   background: #e3f2fd;
 }
 
-.btn-icon-small.delete:hover {
+.admin-btn-icon-small.delete:hover {
   background: #ffebee;
 }
 
 /* 모달 스타일 */
-.modal-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -685,7 +710,7 @@
   padding: 1rem;
 }
 
-.modal-content {
+.admin-modal-content {
   background: white;
   border-radius: 20px;
   width: 100%;
@@ -695,7 +720,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.modal-header {
+.admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -703,14 +728,14 @@
   border-bottom: 1px solid #e9ecef;
 }
 
-.modal-title {
+.admin-modal-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #2d3436;
   margin: 0;
 }
 
-.modal-close {
+.admin-modal-close {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -721,34 +746,35 @@
   color: #636e72;
 }
 
-.modal-close:hover {
+.admin-modal-close:hover {
   background: #f1f3f4;
   color: #2d3436;
 }
+
 
 .user-form {
   padding: 2rem;
 }
 
-.form-group {
+.admin-form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-row {
+.admin-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.form-label {
+.admin-form-label {
   display: block;
   font-weight: 600;
   color: #2d3436;
   margin-bottom: 0.5rem;
 }
 
-.form-input,
-.form-select {
+.admin-form-input,
+.admin-form-select {
   width: 100%;
   padding: 0.8rem 1rem;
   border: 2px solid #e9ecef;
@@ -758,14 +784,14 @@
   box-sizing: border-box;
 }
 
-.form-input:focus,
-.form-select:focus {
+.admin-form-input:focus,
+.admin-form-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-actions {
+.admin-form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -774,7 +800,7 @@
   border-top: 1px solid #e9ecef;
 }
 
-.btn-secondary {
+.admin-btn-secondary {
   background: #f1f3f4;
   color: #636e72;
   border: none;
@@ -786,76 +812,76 @@
   font-size: 1rem;
 }
 
-.btn-secondary:hover {
+.admin-btn-secondary:hover {
   background: #e9ecef;
   color: #2d3436;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 1200px) {
-  .users-table-container {
+  .admin-users-table-container {
     overflow-x: auto;
   }
   
-  .users-table {
+  .admin-users-table {
     min-width: 1000px;
   }
 }
 
 @media (max-width: 768px) {
-  .page-header {
+  .admin-page-header {
     flex-direction: column;
     align-items: stretch;
   }
   
-  .filters-section {
+  .admin-filters-section {
     flex-direction: column;
   }
   
-  .search-box {
+  .admin-search-box {
     min-width: auto;
   }
   
-  .users-table th,
-  .users-table td {
+  .admin-users-table th,
+  .admin-users-table td {
     padding: 0.8rem 0.5rem;
     font-size: 0.9rem;
   }
   
-  .user-name {
+   .user-name {
     gap: 0.5rem;
   }
   
-  .user-avatar {
+   .user-avatar {
     width: 32px;
     height: 32px;
     font-size: 1rem;
   }
   
-  .form-row {
+  .admin-form-row {
     grid-template-columns: 1fr;
   }
   
-  .modal-content {
+  .admin-modal-content {
     margin: 1rem;
   }
   
-  .modal-header,
-  .user-form {
+  .admin-modal-header,
+   .user-form {
     padding: 1.5rem;
   }
   
-  .form-actions {
+  .admin-form-actions {
     flex-direction: column;
   }
 }
 
-.no-data {
+.admin-no-data {
   text-align: center;
   padding: 3rem;
 }
 
-.no-data-message {
+.admin-no-data-message {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -863,7 +889,7 @@
   color: #636e72;
 }
 
-.no-data-icon {
+.admin-no-data-icon {
   width: 48px;
   height: 48px;
   background: #e9ecef;
@@ -873,7 +899,7 @@
   margin: 0 auto;
 }
 
-.no-data-icon::before {
+.admin-no-data-icon::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -885,7 +911,7 @@
   border-radius: 50%;
 }
 
-.no-data-icon::after {
+.admin-no-data-icon::after {
   content: '';
   position: absolute;
   bottom: 8px;
@@ -897,6 +923,7 @@
   border-radius: 6px;
 }
 
+
 .section-info {
   margin-top: 1rem;
   padding: 1rem;
@@ -905,22 +932,25 @@
   text-align: left;
 }
 
+
 .section-info ul {
   margin: 0.5rem 0;
   padding-left: 1.5rem;
 }
+
 
 .section-info li {
   margin: 0.25rem 0;
   color: #2d3436;
 }
 
+
 .section-info small {
   color: #636e72;
   font-style: italic;
 }
 
-.no-data-message p {
+.admin-no-data-message p {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 500;

@@ -2,7 +2,7 @@
   padding: 0;
 }
 
-.loading-container {
+.admin-loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,7 +12,7 @@
   background-color: white;
 }
 
-.loading-spinner {
+.admin-loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
@@ -26,7 +26,7 @@
   100% { transform: rotate(360deg); }
 }
 
-.page-header {
+.admin-page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -38,26 +38,26 @@
   min-width: 0;
 }
 
-.page-title {
+.admin-page-title {
   flex-shrink: 0;
   margin: 0;
   white-space: nowrap;
 }
 
-.header-actions {
+.admin-header-actions {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
-.header-stats {
+.admin-header-stats {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-.stat-badge {
+.admin-stat-badge {
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   color: #2d3436;
   padding: 0.5rem 1rem;
@@ -68,13 +68,13 @@
   transition: all 0.3s ease;
 }
 
-.stat-badge.active {
+.admin-stat-badge.admin-active {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border-color: #667eea;
 }
 
-.filters-section {
+.admin-filters-section {
   display: flex;
   gap: 1.5rem;
   margin-bottom: 2rem;
@@ -82,13 +82,13 @@
   flex-wrap: wrap;
 }
 
-.search-box {
+.admin-search-box {
   position: relative;
   flex: 1;
   min-width: 300px;
 }
 
-.search-input {
+.admin-search-input {
   width: 100%;
   padding: 0.8rem 1rem;
   border: 2px solid #e9ecef;
@@ -98,11 +98,12 @@
   transition: all 0.3s ease;
 }
 
-.search-input:focus {
+.admin-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
+
 
 
 .section-filter {
@@ -116,20 +117,21 @@
   min-width: 150px;
 }
 
+
 .section-filter:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.page-title {
+.admin-page-title {
   font-size: 2rem;
   font-weight: 700;
   color: #2d3436;
   margin: 0;
 }
 
-.btn-primary {
+.admin-btn-primary {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -144,22 +146,23 @@
   font-size: 1rem;
 }
 
-.btn-primary:hover {
+.admin-btn-primary:hover {
   background: #5568d3;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
-.btn-icon {
+.admin-btn-icon {
   font-size: 1.2rem;
 }
 
-.assignments-grid {
+.admin-assignments-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 1.5rem;
   align-items: start;
 }
+
 
 .assignment-card {
   background: white;
@@ -175,26 +178,31 @@
   overflow: visible;
 }
 
+
 .assignment-card:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
-.assignment-card.expanded {
+
+.assignment-card.admin-expanded {
   grid-column: span 2;
   box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
 }
 
-.assignment-card.disabled {
+
+.assignment-card.admin-disabled {
   opacity: 0.6;
 }
+
 
 .assignment-header {
   display: flex;
   flex-direction: column;
   gap: 0;
 }
+
 
 .assignment-title-row {
   display: flex;
@@ -203,12 +211,13 @@
   gap: 1rem;
 }
 
-.title-and-course {
+.admin-title-and-course {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
+
 
 .assignment-title {
   font-size: 1.25rem;
@@ -219,6 +228,7 @@
   line-height: 1.3;
 }
 
+
 .assignment-course {
   color: #667eea;
   font-weight: 600;
@@ -227,13 +237,14 @@
   line-height: 1.2;
 }
 
+
 .assignment-compact-stats {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
-.compact-stat {
+.admin-compact-stat {
   font-size: 0.85rem;
   color: #6b7280;
   font-weight: 500;
@@ -242,17 +253,18 @@
   gap: 0.35rem;
 }
 
-.stat-label-compact {
+.admin-stat-label-compact {
   font-weight: 600;
   color: #4b5563;
 }
+
 
 .assignment-actions {
   display: flex;
   gap: 0.5rem;
 }
 
-.btn-text-small {
+.admin-btn-text-small {
   padding: 0.4rem 0.8rem;
   border: 1px solid #e5e7eb;
   background: white;
@@ -264,27 +276,27 @@
   white-space: nowrap;
 }
 
-.btn-text-small.edit {
+.admin-btn-text-small.edit {
   color: #667eea;
   border-color: #667eea;
 }
 
-.btn-text-small.edit:hover {
+.admin-btn-text-small.edit:hover {
   background: #667eea;
   color: white;
 }
 
-.btn-text-small.delete {
+.admin-btn-text-small.delete {
   color: #ef4444;
   border-color: #ef4444;
 }
 
-.btn-text-small.delete:hover {
+.admin-btn-text-small.delete:hover {
   background: #ef4444;
   color: white;
 }
 
-.btn-icon-small {
+.admin-btn-icon-small {
   background: none;
   border: none;
   font-size: 1.2rem;
@@ -294,29 +306,29 @@
   transition: all 0.2s ease;
 }
 
-.btn-icon-small.edit {
+.admin-btn-icon-small.edit {
   color: #000000;
 }
 
-.btn-icon-small.delete {
+.admin-btn-icon-small.delete {
   color: #e74c3c;
 }
 
-.btn-icon-small.edit:hover {
+.admin-btn-icon-small.edit:hover {
   background: #e3f2fd;
 }
 
-.btn-icon-small.delete:hover {
+.admin-btn-icon-small.delete:hover {
   background: #ffebee;
 }
 
-.edit-icon {
+.admin-edit-icon {
   width: 14px;
   height: 14px;
   position: relative;
 }
 
-.edit-icon::before {
+.admin-edit-icon::before {
   content: '';
   position: absolute;
   top: 0;
@@ -327,7 +339,7 @@
   border-radius: 2px;
 }
 
-.edit-icon::after {
+.admin-edit-icon::after {
   content: '';
   position: absolute;
   top: 1px;
@@ -339,13 +351,13 @@
   transform-origin: 0 0;
 }
 
-.delete-icon {
+.admin-delete-icon {
   width: 14px;
   height: 14px;
   position: relative;
 }
 
-.delete-icon::before {
+.admin-delete-icon::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -356,7 +368,7 @@
   transform: translateY(-50%) rotate(45deg);
 }
 
-.delete-icon::after {
+.admin-delete-icon::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -367,12 +379,14 @@
   transform: translateY(-50%) rotate(-45deg);
 }
 
+
 .assignment-description {
   color: #636e72;
   font-size: 1rem;
   line-height: 1.6;
   margin: 0 0 1.5rem 0;
 }
+
 
 .assignment-actions-row {
   display: flex;
@@ -381,7 +395,7 @@
   margin-top: 0.5rem;
 }
 
-.btn-toggle-problems {
+.admin-btn-toggle-problems {
   flex: 1;
   padding: 0.75rem 1rem;
   background: #f3f4f6;
@@ -394,11 +408,12 @@
   transition: all 0.2s ease;
 }
 
-.btn-toggle-problems:hover {
+.admin-btn-toggle-problems:hover {
   background: #667eea;
   color: white;
   border-color: #667eea;
 }
+
 
 .assignment-expanded-content {
   padding-top: 1rem;
@@ -419,6 +434,7 @@
   }
 }
 
+
 .assignment-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -429,13 +445,13 @@
   border-radius: 12px;
 }
 
-.stat-item {
+.admin-stat-item {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.stat-label {
+.admin-stat-label {
   font-size: 0.9rem;
   font-weight: 600;
   color: #636e72;
@@ -443,27 +459,29 @@
   letter-spacing: 0.5px;
 }
 
-.stat-value {
+.admin-stat-value {
   font-size: 1.1rem;
   font-weight: 700;
   color: #2d3436;
 }
 
-.stat-value.due-date {
+.admin-stat-value.due-date {
   color: #e17055;
 }
 
-.stat-value.submission-rate {
+.admin-stat-value.submission-rate {
   color: #00b894;
 }
 
-.problems-section {
+
+.admin-problems-section {
   margin-bottom: 1.5rem;
   overflow: visible;
   width: 100%;
 }
 
-.problems-title {
+
+.admin-problems-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #2d3436;
@@ -471,7 +489,8 @@
 }
 
 /* AssignmentManagement 전용 문제 목록 - 한 줄씩 표시 */
-.assignment-expanded-content .problems-list {
+
+.assignment-expanded-content  .admin-problems-list {
   display: flex !important;
   flex-direction: column !important;
   gap: 0.5rem;
@@ -479,7 +498,8 @@
   width: 100%;
 }
 
-.assignment-expanded-content .problem-item {
+
+.assignment-expanded-content  .admin-problem-item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
@@ -494,12 +514,14 @@
   box-sizing: border-box;
 }
 
-.assignment-expanded-content .problem-item:hover {
+
+.assignment-expanded-content  .admin-problem-item:hover {
   background: #e9ecef;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.assignment-expanded-content .problem-item-left {
+
+.assignment-expanded-content  .admin-problem-item-left {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -508,7 +530,8 @@
   max-width: 100%;
 }
 
-.assignment-expanded-content .problem-number {
+
+.assignment-expanded-content  .admin-problem-number {
   font-weight: 700;
   color: #667eea;
   font-size: 1rem;
@@ -516,7 +539,8 @@
   min-width: 24px;
 }
 
-.assignment-expanded-content .problem-title {
+
+.assignment-expanded-content  .admin-problem-title {
   font-weight: 600;
   color: #2d3436;
   overflow: hidden;
@@ -526,7 +550,8 @@
   min-width: 0;
 }
 
-.assignment-expanded-content .problem-submission-rate {
+
+.assignment-expanded-content  .admin-problem-submission-rate {
   font-size: 0.8rem;
   color: #495057;
   padding: 0.25rem 0.6rem;
@@ -539,7 +564,8 @@
   justify-self: end; /* grid에서 오른쪽 정렬 */
 }
 
-.assignment-expanded-content .btn-remove-problem {
+
+.assignment-expanded-content .admin-btn-remove-problem {
   background: #ff6b6b;
   color: white;
   border: none;
@@ -559,7 +585,8 @@
   flex-shrink: 0;
 }
 
-.assignment-expanded-content .btn-remove-problem:hover {
+
+.assignment-expanded-content .admin-btn-remove-problem:hover {
   background: #ff5252;
   transform: scale(1.1);
   box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
@@ -567,7 +594,8 @@
 
 
 
-.assignment-expanded-content .problem-difficulty {
+
+.assignment-expanded-content  .admin-problem-difficulty {
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -578,7 +606,7 @@
   flex-shrink: 0;
 }
 
-.progress-bar {
+.admin-progress-bar {
   width: 100%;
   height: 6px;
   background: #e9ecef;
@@ -586,7 +614,7 @@
   overflow: hidden;
 }
 
-.progress-fill {
+.admin-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #00b894, #55efc4);
   transition: width 0.3s ease;
@@ -594,7 +622,7 @@
 }
 
 /* 모달 스타일 */
-.modal-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -608,7 +636,7 @@
   padding: 1rem;
 }
 
-.modal-content {
+.admin-modal-content {
   background: white;
   border-radius: 20px;
   width: 100%;
@@ -618,7 +646,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.modal-header {
+.admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -626,14 +654,14 @@
   border-bottom: 1px solid #e9ecef;
 }
 
-.modal-title {
+.admin-modal-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #2d3436;
   margin: 0;
 }
 
-.modal-close {
+.admin-modal-close {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -644,35 +672,36 @@
   color: #636e72;
 }
 
-.modal-close:hover {
+.admin-modal-close:hover {
   background: #f1f3f4;
   color: #2d3436;
 }
+
 
 .assignment-form {
   padding: 2rem;
 }
 
-.form-group {
+.admin-form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-row {
+.admin-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.form-label {
+.admin-form-label {
   display: block;
   font-weight: 600;
   color: #2d3436;
   margin-bottom: 0.5rem;
 }
 
-.form-input,
-.form-textarea,
-.form-select {
+.admin-form-input,
+.admin-form-textarea,
+.admin-form-select {
   width: 100%;
   padding: 0.8rem 1rem;
   border: 2px solid #e9ecef;
@@ -682,20 +711,20 @@
   box-sizing: border-box;
 }
 
-.form-input:focus,
-.form-textarea:focus,
-.form-select:focus {
+.admin-form-input:focus,
+.admin-form-textarea:focus,
+.admin-form-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-textarea {
+.admin-form-textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-.form-actions {
+.admin-form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -704,7 +733,7 @@
   border-top: 1px solid #e9ecef;
 }
 
-.btn-secondary {
+.admin-btn-secondary {
   background: #f1f3f4;
   color: #636e72;
   border: none;
@@ -716,103 +745,103 @@
   font-size: 1rem;
 }
 
-.btn-secondary:hover {
+.admin-btn-secondary:hover {
   background: #e9ecef;
   color: #2d3436;
 }
 
-.btn-secondary.btn-primary-color {
+.admin-btn-secondary.btn-primary-color {
   background: #667eea;
   color: white;
 }
 
-.btn-secondary.btn-primary-color:hover {
+.admin-btn-secondary.btn-primary-color:hover {
   background: #5568d3;
   color: white;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 1200px) {
-  .assignment-card.expanded {
+   .assignment-card.admin-expanded {
     grid-column: span 3;
   }
 }
 
 @media (max-width: 768px) {
-  .page-header {
+  .admin-page-header {
     flex-direction: column;
     align-items: stretch;
   }
   
-  .assignments-grid {
+  .admin-assignments-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
 
-  .assignment-card {
+   .assignment-card {
     padding: 1.25rem;
   }
 
-  .assignment-card.expanded {
+   .assignment-card.admin-expanded {
     grid-column: span 1;
   }
   
-  .assignment-title {
+   .assignment-title {
     font-size: 1.1rem;
   }
 
-  .assignment-compact-stats {
+   .assignment-compact-stats {
     flex-direction: column;
     gap: 0.5rem;
   }
   
-  .stat-item {
+  .admin-stat-item {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
   }
   
-  .assignment-expanded-content .problems-list {
+   .assignment-expanded-content  .admin-problems-list {
     gap: 0.25rem;
   }
   
-  .assignment-expanded-content .problem-item {
+   .assignment-expanded-content  .admin-problem-item {
     padding: 0.6rem 0.8rem;
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
     gap: 0.5rem;
   }
   
-  .assignment-expanded-content .problem-submission-rate {
+   .assignment-expanded-content  .admin-problem-submission-rate {
     justify-self: start;
   }
   
-  .assignment-expanded-content .btn-remove-problem {
+   .assignment-expanded-content .admin-btn-remove-problem {
     justify-self: start;
     width: auto;
     min-width: auto;
     padding: 0.3rem 0.8rem;
   }
   
-  .form-row {
+  .admin-form-row {
     grid-template-columns: 1fr;
   }
   
-  .modal-content {
+  .admin-modal-content {
     margin: 1rem;
   }
   
-  .modal-header,
-  .assignment-form {
+  .admin-modal-header,
+   .assignment-form {
     padding: 1.5rem;
   }
   
-  .form-actions {
+  .admin-form-actions {
     flex-direction: column;
   }
 }
 
-.no-assignments {
+.admin-no-assignments {
   text-align: center;
   padding: 4rem 2rem;
   background: white;
@@ -820,7 +849,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.no-assignments-message {
+.admin-no-assignments-message {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -828,14 +857,15 @@
   color: #636e72;
 }
 
-.no-assignments-icon {
+.admin-no-assignments-icon {
   font-size: 4rem;
   opacity: 0.5;
 }
 
 /* 문제 목록 스타일 - problem-number는 위에서 이미 정의됨 */
 
-.problem-id {
+
+.admin-problem-id {
   font-size: 0.8rem;
   color: #636e72;
   background: #f8f9fa;
@@ -844,7 +874,7 @@
   margin-left: 0.5rem;
 }
 
-.no-problems {
+.admin-no-problems {
   color: #636e72;
   font-style: italic;
   text-align: center;
@@ -859,14 +889,15 @@
 }
 
 /* 문제 관리 관련 스타일 */
-.problems-header {
+
+.admin-problems-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.btn-add-problem {
+.admin-btn-add-problem {
   flex: 1;
   background: #667eea;
   color: white;
@@ -879,12 +910,12 @@
   transition: all 0.3s ease;
 }
 
-.btn-add-problem:hover {
+.admin-btn-add-problem:hover {
   background: #5568d3;
   transform: translateY(-1px);
 }
 
-.btn-add-first-problem {
+.admin-btn-add-first-problem {
   background: #667eea;
   color: white;
   border: none;
@@ -895,14 +926,14 @@
   transition: all 0.3s ease;
 }
 
-.btn-add-first-problem:hover {
+.admin-btn-add-first-problem:hover {
   background: #5568d3;
   transform: translateY(-2px);
 }
 
 /* assignment-expanded-content 내부의 btn-remove-problem은 이미 위에서 정의됨 */
 /* 모달 등 다른 곳에서 사용하는 버튼 스타일 */
-.btn-remove-problem:not(.assignment-expanded-content .btn-remove-problem) {
+.admin-btn-remove-problem:not(.assignment-expanded-content .admin-btn-remove-problem) {
   background: #ff6b6b;
   color: white;
   border: none;
@@ -914,14 +945,15 @@
   margin-left: auto;
 }
 
-.btn-remove-problem:not(.assignment-expanded-content .btn-remove-problem):hover {
+.admin-btn-remove-problem:not(.assignment-expanded-content .admin-btn-remove-problem):hover {
   background: #ff5252;
   transform: scale(1.05);
 }
 
 /* 모달 등에서 사용하는 버튼에 대한 명시적 스타일 */
-.problem-modal .btn-remove-problem,
-.available-problem-item .btn-remove-problem {
+
+.admin-problem-modal .admin-btn-remove-problem,
+.admin-available-problem-item .admin-btn-remove-problem {
   background: #ff6b6b;
   color: white;
   border: none;
@@ -933,27 +965,31 @@
   margin-left: auto;
 }
 
-.problem-modal .btn-remove-problem:hover,
-.available-problem-item .btn-remove-problem:hover {
+
+.admin-problem-modal .admin-btn-remove-problem:hover,
+.admin-available-problem-item .admin-btn-remove-problem:hover {
   background: #ff5252;
   transform: scale(1.05);
 }
 
 /* 문제 선택 모달 스타일 */
-.problem-modal {
+
+.admin-problem-modal {
   width: 90%;
   max-width: 700px;
   max-height: 90vh;
 }
 
-.problem-modal-content {
+
+.admin-problem-modal-content {
   padding: 1.5rem;
   max-height: 70vh;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.problem-search-section {
+
+.admin-problem-search-section {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
@@ -961,14 +997,16 @@
   flex-wrap: nowrap;
 }
 
-.problem-search-section .search-box {
+
+.admin-problem-search-section .admin-search-box {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
 }
 
-.problem-search-section .search-input {
+
+.admin-problem-search-section .admin-search-input {
   width: 100%;
   padding: 0.6rem 1rem;
   border: 2px solid #e9ecef;
@@ -978,24 +1016,25 @@
   transition: all 0.3s ease;
 }
 
-.problem-search-section .search-input:focus {
+
+.admin-problem-search-section .admin-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 @media (max-width: 600px) {
-  .problem-search-section {
+   .admin-problem-search-section {
     flex-wrap: wrap;
   }
   
-  .problem-search-section .search-box {
+   .admin-problem-search-section .admin-search-box {
     width: 100%;
     min-width: 100%;
   }
 }
 
-.btn-create-new {
+.admin-btn-create-new {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
@@ -1009,13 +1048,13 @@
   flex-shrink: 0;
 }
 
-.btn-create-new:hover {
+.admin-btn-create-new:hover {
   background: linear-gradient(135deg, #5a6fd8, #6a4190);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.available-problems {
+.admin-available-problems {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -1024,7 +1063,7 @@
   padding-right: 0.5rem;
 }
 
-.available-problem-item {
+.admin-available-problem-item {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
@@ -1036,13 +1075,13 @@
   gap: 1rem;
 }
 
-.available-problem-item:hover {
+.admin-available-problem-item:hover {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
   background: white;
 }
 
-.available-problem-item .problem-info {
+.admin-available-problem-item  .admin-problem-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -1050,7 +1089,7 @@
   overflow: hidden;
 }
 
-.available-problem-item .problem-title {
+.admin-available-problem-item  .admin-problem-title {
   font-size: 1rem;
   font-weight: 600;
   color: #2d3436;
@@ -1060,13 +1099,13 @@
   white-space: nowrap;
 }
 
-.available-problem-item .problem-created {
+.admin-available-problem-item  .admin-problem-created {
   font-size: 0.8rem;
   color: #95a5a6;
   margin: 0;
 }
 
-.btn-select-problem {
+.admin-btn-select-problem {
   background: #667eea;
   color: white;
   border: none;
@@ -1080,19 +1119,20 @@
   flex-shrink: 0;
 }
 
-.btn-select-problem:hover {
+.admin-btn-select-problem:hover {
   background: #5568d3;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.problem-action-buttons {
+
+.admin-problem-action-buttons {
   display: flex;
   gap: 0.75rem;
   align-items: center;
 }
 
-.btn-copy-problem {
+.admin-btn-copy-problem {
   background: white;
   color: #667eea;
   border: 2px solid #667eea;
@@ -1105,13 +1145,13 @@
   white-space: nowrap;
 }
 
-.btn-copy-problem:hover {
+.admin-btn-copy-problem:hover {
   background: #667eea;
   color: white;
   transform: translateY(-1px);
 }
 
-.btn-create-new {
+.admin-btn-create-new {
   background: #667eea;
   color: white;
   border: none;
@@ -1124,12 +1164,12 @@
   white-space: nowrap;
 }
 
-.btn-create-new:hover {
+.admin-btn-create-new:hover {
   background: #5568d3;
   transform: translateY(-1px);
 }
 
-.copy-problem-info {
+.admin-copy-problem-info {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
@@ -1137,14 +1177,14 @@
   margin: 1rem 0;
 }
 
-.copy-problem-info .info-text {
+.admin-copy-problem-info .admin-info-text {
   margin: 0;
   font-size: 0.9rem;
   color: #495057;
   line-height: 1.5;
 }
 
-.btn-copy-problem-item {
+.admin-btn-copy-problem-item {
   background: #667eea;
   color: white;
   border: none;
@@ -1158,13 +1198,13 @@
   flex-shrink: 0;
 }
 
-.btn-copy-problem-item:hover {
+.admin-btn-copy-problem-item:hover {
   background: #5568d3;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.no-available-problems {
+.admin-no-available-problems {
   text-align: center;
   padding: 3rem;
   color: #636e72;
@@ -1175,11 +1215,12 @@
 }
 
 /* 문제 생성 폼 스타일 */
-.problem-form {
+
+.admin-problem-form {
   padding: 1.5rem;
 }
 
-.file-input {
+.admin-file-input {
   width: 100%;
   padding: 0.8rem;
   border: 2px dashed #e9ecef;
@@ -1189,12 +1230,12 @@
   transition: all 0.3s ease;
 }
 
-.file-input:hover {
+.admin-file-input:hover {
   border-color: #667eea;
   background: #f0f4ff;
 }
 
-.file-help {
+.admin-file-help {
   display: block;
   color: #636e72;
   font-size: 0.8rem;
@@ -1202,20 +1243,20 @@
   line-height: 1.4;
 }
 
-.file-selected {
+.admin-file-selected {
   color: #28a745;
   font-weight: 600;
   display: inline-block;
   margin-left: 8px;
 }
 
-.optional {
+.admin-optional {
   color: #999;
   font-weight: normal;
   font-size: 0.9rem;
 }
 
-.info-box {
+.admin-info-box {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
@@ -1223,17 +1264,17 @@
   margin: 1rem 0;
 }
 
-.info-box p {
+.admin-info-box p {
   margin: 0.25rem 0;
   font-size: 0.9rem;
   color: #495057;
 }
 
-.info-box p:first-child {
+.admin-info-box p:first-child {
   margin-bottom: 0.5rem;
 }
 
-.header-actions {
+.admin-header-actions {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -1241,7 +1282,7 @@
   min-width: 0;
 }
 
-.header-actions button {
+.admin-header-actions button {
   white-space: nowrap;
   flex-shrink: 0;
   min-width: fit-content;
@@ -1249,17 +1290,17 @@
   font-size: 0.9rem;
 }
 
-.header-actions button span {
+.admin-header-actions button span {
   margin-right: 0.5rem;
 }
 
 /* 반응형을 위한 미디어 쿼리 */
 @media (max-width: 1024px) {
-  .page-header {
+  .admin-page-header {
     flex-wrap: wrap;
   }
   
-  .header-actions {
+  .admin-header-actions {
     flex-wrap: wrap;
     justify-content: flex-start;
     width: 100%;
@@ -1267,21 +1308,21 @@
 }
 
 @media (max-width: 768px) {
-  .header-actions button {
+  .admin-header-actions button {
     padding: 0.5rem 0.8rem;
     font-size: 0.85rem;
   }
 }
 
 /* 대량 문제 생성 모달 스타일 */
-.large-modal {
+.admin-large-modal {
   max-width: 900px;
   width: 90vw;
   max-height: 90vh;
   overflow-y: auto;
 }
 
-.bulk-problems-container {
+.admin-bulk-problems-container {
   max-height: 400px;
   overflow-y: auto;
   border: 1px solid #e9ecef;
@@ -1290,7 +1331,7 @@
   margin: 1rem 0;
 }
 
-.bulk-problem-row {
+.admin-bulk-problem-row {
   border: 1px solid #dee2e6;
   border-radius: 8px;
   padding: 1rem;
@@ -1298,11 +1339,12 @@
   background: #f8f9fa;
 }
 
-.bulk-problem-row:last-child {
+.admin-bulk-problem-row:last-child {
   margin-bottom: 0;
 }
 
-.problem-row-header {
+
+.admin-problem-row-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1311,12 +1353,13 @@
   border-bottom: 1px solid #dee2e6;
 }
 
-.problem-row-header h4 {
+
+.admin-problem-row-header h4 {
   margin: 0;
   color: #495057;
 }
 
-.btn-remove-row {
+.admin-btn-remove-row {
   background: #dc3545;
   color: white;
   border: none;
@@ -1330,23 +1373,24 @@
   justify-content: center;
 }
 
-.btn-remove-row:hover {
+.admin-btn-remove-row:hover {
   background: #c82333;
 }
 
-.problem-row-content .form-row {
+
+.admin-problem-row-content .admin-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-top: 1rem;
 }
 
-.bulk-actions {
+.admin-bulk-actions {
   text-align: center;
   margin: 1rem 0;
 }
 
-.btn-add-row {
+.admin-btn-add-row {
   background: #28a745;
   color: white;
   border: none;
@@ -1358,22 +1402,22 @@
   transition: background-color 0.2s ease;
 }
 
-.btn-add-row:hover {
+.admin-btn-add-row:hover {
   background: #218838;
 }
 
 @media (max-width: 768px) {
-  .problem-row-content .form-row {
+   .admin-problem-row-content .admin-form-row {
     grid-template-columns: 1fr;
   }
   
-  .large-modal {
+  .admin-large-modal {
     width: 95vw;
   }
 }
 
 /* 모달 스타일 */
-.modal-overlay {
+.admin-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1387,7 +1431,7 @@
   padding: 2rem;
 }
 
-.modal-content {
+.admin-modal-content {
   background: white;
   border-radius: 12px;
   max-width: 600px;
@@ -1397,7 +1441,7 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-.modal-header {
+.admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1405,28 +1449,28 @@
   border-bottom: 1px solid #e1e8ed;
 }
 
-.modal-header-left {
+.admin-modal-header-left {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex: 1;
 }
 
-.modal-header-left h2 {
+.admin-modal-header-left h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #2d3436;
 }
 
-.modal-header h2 {
+.admin-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #2d3436;
 }
 
-.btn-back {
+.admin-btn-back {
   background: #f8fafc;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -1441,13 +1485,13 @@
   flex-shrink: 0;
 }
 
-.btn-back:hover {
+.admin-btn-back:hover {
   background: #e2e8f0;
   border-color: #cbd5e1;
   color: #1e293b;
 }
 
-.modal-close {
+.admin-modal-close {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -1463,38 +1507,39 @@
   transition: all 0.2s ease;
 }
 
-.modal-close:hover {
+.admin-modal-close:hover {
   background: #f8f9fa;
   color: #2d3436;
 }
+
 
 .assignment-form {
   padding: 2rem;
 }
 
-.form-row {
+.admin-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.form-group {
+.admin-form-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
 }
 
-.form-group label {
+.admin-form-group label {
   font-weight: 600;
   color: #2d3436;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.admin-form-group input,
+.admin-form-group select,
+.admin-form-group textarea {
   padding: 0.75rem;
   border: 1px solid #e1e8ed;
   border-radius: 8px;
@@ -1503,20 +1548,20 @@
   font-family: inherit;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.admin-form-group input:focus,
+.admin-form-group select:focus,
+.admin-form-group textarea:focus {
   outline: none;
   border-color: #0984e3;
   box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
 }
 
-.form-group textarea {
+.admin-form-group textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-.form-actions {
+.admin-form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -1525,55 +1570,57 @@
   border-top: 1px solid #e1e8ed;
 }
 
-.btn-primary span {
+.admin-btn-primary span {
   margin-right: 0.5rem;
 }
 
 /* 반응형 모달 */
 @media (max-width: 768px) {
-  .modal-overlay {
+  .admin-modal-overlay {
     padding: 1rem;
   }
 
-  .modal-content {
+  .admin-modal-content {
     max-height: 95vh;
   }
 
-  .modal-header,
-  .assignment-form {
+  .admin-modal-header,
+   .assignment-form {
     padding: 1rem;
   }
 
-  .form-row {
+  .admin-form-row {
     grid-template-columns: 1fr;
   }
 
-  .form-actions {
+  .admin-form-actions {
     flex-direction: column;
   }
 }
 
-.no-assignments-message p {
+.admin-no-assignments-message p {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 500;
 }
 
 /* Problem Meta Info and Limits for Admin */
-.problem-meta-info {
+
+.admin-problem-meta-info {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin: 8px 0;
 }
 
-.problem-limits-admin {
+
+.admin-problem-limits-admin {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.limit-badge-admin {
+.admin-limit-badge-admin {
   font-size: 11px;
   font-weight: 500;
   padding: 3px 8px;
@@ -1583,13 +1630,13 @@
   gap: 3px;
 }
 
-.limit-badge-admin.time-limit {
+.admin-limit-badge-admin.time-limit {
   background: rgba(88, 166, 255, 0.1);
   color: #0969da;
   border: 1px solid rgba(88, 166, 255, 0.2);
 }
 
-.limit-badge-admin.memory-limit {
+.admin-limit-badge-admin.memory-limit {
   background: rgba(255, 107, 107, 0.1);
   color: #d63384;
   border: 1px solid rgba(255, 107, 107, 0.2);
@@ -1600,7 +1647,8 @@
    ============================================ */
 
 /* Problem Modal Large - 95vw width */
-.problem-modal-large {
+
+.admin-problem-modal-large {
   width: 95vw !important;
   max-width: 95vw !important;
   min-width: 800px;
@@ -1610,7 +1658,8 @@
 }
 
 /* Problem Modal Body */
-.problem-modal-body {
+
+.admin-problem-modal-body {
   padding: 1.5rem;
   padding-bottom: 1.5rem;
   flex: 1;
@@ -1624,7 +1673,8 @@
 }
 
 /* Problem Search Section (for large modals) */
-.problem-modal-body .problem-search-section {
+
+.admin-problem-modal-body  .admin-problem-search-section {
   flex-shrink: 0;
   margin-bottom: 0;
   display: flex;
@@ -1633,7 +1683,8 @@
   max-width: 500px;
 }
 
-.problem-modal-body .problem-search-section .search-input {
+
+.admin-problem-modal-body  .admin-problem-search-section .admin-search-input {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 2px solid #e9ecef;
@@ -1643,14 +1694,15 @@
   transition: all 0.3s ease;
 }
 
-.problem-modal-body .problem-search-section .search-input:focus {
+
+.admin-problem-modal-body  .admin-problem-search-section .admin-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* Problem Grid Layout */
-.available-problems-grid {
+.admin-available-problems-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
@@ -1658,7 +1710,8 @@
   overflow-y: auto;
 }
 
-.problem-card {
+
+.admin-problem-card {
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -1671,12 +1724,14 @@
   position: relative;
 }
 
-.problem-card:hover {
+
+.admin-problem-card:hover {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-.problem-card-header {
+
+.admin-problem-card-header {
   position: absolute;
   top: 0.5rem;
   right: 1rem;
@@ -1687,14 +1742,16 @@
   z-index: 1;
 }
 
-.problem-checkbox {
+
+.admin-problem-checkbox {
   width: 1.3rem;
   height: 1.3rem;
   cursor: pointer;
   accent-color: #667eea;
 }
 
-.problem-card-body {
+
+.admin-problem-card-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1703,7 +1760,8 @@
   padding-top: 0;
 }
 
-.problem-card-title {
+
+.admin-problem-card-title {
   font-weight: 600;
   color: #1e293b;
   font-size: 0.95rem;
@@ -1718,19 +1776,21 @@
   max-width: 100%;
 }
 
-.problem-card-date {
+
+.admin-problem-card-date {
   font-size: 0.8rem;
   color: #64748b;
 }
 
-.problem-card-meta-row {
+
+.admin-problem-card-meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0.75rem;
 }
 
-.btn-view-detail-card {
+.admin-btn-view-detail-card {
   padding: 0.4rem 0.8rem;
   background: #f3f4f6;
   color: #667eea;
@@ -1744,7 +1804,7 @@
   flex-shrink: 0;
 }
 
-.btn-view-detail-card:hover {
+.admin-btn-view-detail-card:hover {
   background: #667eea;
   color: white;
   border-color: #667eea;
@@ -1752,7 +1812,7 @@
 }
 
 /* Copy Problem Modal Controls */
-.copy-problem-controls {
+.admin-copy-problem-controls {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -1760,11 +1820,13 @@
   margin-bottom: 2rem;
 }
 
+
 .section-select-box {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
+
 
 .section-select-box label {
   font-weight: 600;
@@ -1772,7 +1834,8 @@
   font-size: 0.9rem;
 }
 
-.section-select-box .section-select {
+
+.section-select-box  .section-select {
   padding: 0.75rem;
   border: 2px solid #e9ecef;
   border-radius: 8px;
@@ -1781,13 +1844,14 @@
   transition: all 0.2s ease;
 }
 
-.section-select-box .section-select:focus {
+
+.section-select-box  .section-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.copy-problem-toolbar {
+.admin-copy-problem-toolbar {
   display: flex;
   gap: 1rem;
   align-items: center;
@@ -1796,13 +1860,15 @@
   padding-bottom: 0;
 }
 
-.problem-search-box {
+
+.admin-problem-search-box {
   flex: 1;
   max-width: calc(100% - 200px);
   min-width: 200px;
 }
 
-.problem-search-box .search-input {
+
+.admin-problem-search-box .admin-search-input {
   width: 99%;
   padding: 0.6rem 0.9rem;
   border: 2px solid #e9ecef;
@@ -1812,13 +1878,14 @@
   transition: all 0.3s ease;
 }
 
-.problem-search-box .search-input:focus {
+
+.admin-problem-search-box .admin-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.view-mode-tabs {
+.admin-view-mode-tabs {
   display: flex;
   gap: 0.25rem;
   background: #f1f5f9;
@@ -1829,7 +1896,7 @@
   align-items: center;
 }
 
-.tab-button {
+.admin-tab-button {
   flex: 1;
   padding: 0.4rem 0.8rem;
   background: transparent;
@@ -1845,20 +1912,22 @@
   margin-bottom: 0px;
 }
 
-.tab-button:hover {
+.admin-tab-button:hover {
   background: #e2e8f0;
   color: #475569;
 }
 
-.tab-button.active {
+.admin-tab-button.admin-active {
   background: white;
   color: #667eea;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Problem List View and Hierarchy View */
-.problem-list-view,
-.problem-hierarchy-view {
+
+.admin-problem-list-view,
+
+.admin-problem-hierarchy-view {
   flex: 1;
   overflow-y: auto;
   display: flex;
@@ -1872,11 +1941,13 @@
 }
 
 /* Assignment List Large (Hierarchy View) */
+
 .assignment-list-large {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
 
 .assignment-item-large {
   background: white;
@@ -1886,10 +1957,12 @@
   transition: all 0.2s ease;
 }
 
+
 .assignment-item-large:hover {
   border-color: #cbd5e1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
 
 .assignment-item-header-large {
   display: flex;
@@ -1899,7 +1972,8 @@
   background: #f9fafb;
 }
 
-.assignment-item-header-large .checkbox-label {
+
+.assignment-item-header-large .admin-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1907,12 +1981,14 @@
   cursor: pointer;
 }
 
-.assignment-item-header-large .checkbox-label input[type="checkbox"] {
+
+.assignment-item-header-large .admin-checkbox-label input[type="checkbox"] {
   width: 1.2rem;
   height: 1.2rem;
   cursor: pointer;
   accent-color: #667eea;
 }
+
 
 .assignment-info-large {
   display: flex;
@@ -1920,18 +1996,20 @@
   gap: 0.25rem;
 }
 
+
 .assignment-title-large {
   font-weight: 600;
   color: #1e293b;
   font-size: 1rem;
 }
 
+
 .assignment-meta {
   font-size: 0.85rem;
   color: #64748b;
 }
 
-.btn-expand-assignment-large {
+.admin-btn-expand-assignment-large {
   padding: 0.5rem 1rem;
   background: transparent;
   color: #667eea;
@@ -1943,18 +2021,20 @@
   transition: all 0.2s ease;
 }
 
-.btn-expand-assignment-large:hover {
+.admin-btn-expand-assignment-large:hover {
   background: #667eea;
   color: white;
 }
 
-.problem-selection-box-large {
+
+.admin-problem-selection-box-large {
   padding: 1rem;
   background: white;
   border-top: 1px solid #e5e7eb;
 }
 
-.problem-selection-header-large {
+
+.admin-problem-selection-header-large {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1964,7 +2044,8 @@
   margin-bottom: 0.75rem;
 }
 
-.problem-selection-header-large .checkbox-label {
+
+.admin-problem-selection-header-large .admin-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1973,27 +2054,31 @@
   cursor: pointer;
 }
 
-.problem-selection-header-large .checkbox-label input[type="checkbox"] {
+
+.admin-problem-selection-header-large .admin-checkbox-label input[type="checkbox"] {
   width: 1.1rem;
   height: 1.1rem;
   cursor: pointer;
   accent-color: #667eea;
 }
 
-.problem-selection-header-large .item-count {
+
+.admin-problem-selection-header-large .admin-item-count {
   font-weight: 600;
   color: #667eea;
   font-size: 0.85rem;
 }
 
-.problem-list-large {
+
+.admin-problem-list-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
   padding-bottom: 1rem;
 }
 
-.problem-item-large {
+
+.admin-problem-item-large {
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -2007,12 +2092,14 @@
   overflow: hidden;
 }
 
-.problem-item-large:hover {
+
+.admin-problem-item-large:hover {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-.problem-item-large-header {
+
+.admin-problem-item-large-header {
   position: absolute;
   top: 0.5rem;
   right: 1rem;
@@ -2021,14 +2108,16 @@
   z-index: 1;
 }
 
-.problem-item-large-header .problem-checkbox {
+
+.admin-problem-item-large-header  .admin-problem-checkbox {
   width: 1.3rem;
   height: 1.3rem;
   cursor: pointer;
   accent-color: #667eea;
 }
 
-.problem-item-large-body {
+
+.admin-problem-item-large-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -2042,7 +2131,8 @@
   box-sizing: border-box;
 }
 
-.problem-title-row {
+
+.admin-problem-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2052,7 +2142,8 @@
   box-sizing: border-box;
 }
 
-.problem-title-large {
+
+.admin-problem-title-large {
   font-weight: 600;
   color: #1e293b;
   font-size: 0.95rem;
@@ -2068,26 +2159,28 @@
   min-width: 0;
 }
 
-.problem-number-large {
+
+.admin-problem-number-large {
   font-weight: 600;
   color: #667eea;
   font-size: 0.95rem;
   margin-right: 0.5rem;
 }
 
-.problem-item-large-actions {
+
+.admin-problem-item-large-actions {
   display: flex;
   justify-content: center;
   margin-top: 0.25rem;
 }
 
-.btn-view-problem {
+.admin-btn-view-problem {
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
 }
 
 /* Footer Actions */
-.footer-actions {
+.admin-footer-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -2096,13 +2189,13 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.modal-footer .problem-action-buttons {
+.admin-modal-footer  .admin-problem-action-buttons {
   margin-bottom: 0;
 }
 
 /* Loading and Empty States for Modals */
-.loading-items,
-.no-items {
+.admin-loading-items,
+.admin-no-items {
   text-align: center;
   padding: 2rem 1rem;
   color: #64748b;
