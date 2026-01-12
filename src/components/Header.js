@@ -16,10 +16,14 @@ const Header = ({ userName = "사용자 이름", logoutText = "로그아웃", on
     }
   };
 
+  const handleLogoClick = () => {
+    navigate("/index");
+  };
+
   return (
     <HeaderContainer>
       <HeaderWrapper>
-        <Logo>
+        <Logo onClick={handleLogoClick}>
           <LogoIcon>
             <img src="/logo.svg" alt="CodeSturdy Logo" />
           </LogoIcon>
@@ -56,6 +60,12 @@ const Logo = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const LogoIcon = styled.div`

@@ -98,7 +98,7 @@
 .assignments-list {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
 }
 
 /* Assignment Card */
@@ -107,22 +107,23 @@
   flex-direction: column;
   border: 1px solid #B3BFF5;
   border-radius: 10px;
-  padding: 19px 32px 19px 20px;
+  padding: 14px 24px 14px 16px;
 }
 
 .assignment-header {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   gap: 8px;
 }
 
 .assignment-title {
   color: #000000;
   font-size: 18px;
-  flex-shrink: 1;
-  margin-right: 0;
-  max-width: 300px;
+  font-weight: 600;
+  flex: 0 1 auto;
+  margin-right: 8px;
+  max-width: 500px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -177,14 +178,14 @@
 .progress-label {
   color: #000000;
   font-size: 14px;
-  margin-bottom: 19px;
+  margin-bottom: 10px;
 }
 
 .progress-bar-container {
   display: flex;
   align-items: center;
-  gap: 19px;
-  margin-bottom: 29px;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
 .progress-text {
