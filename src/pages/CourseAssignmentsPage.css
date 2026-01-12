@@ -10,26 +10,28 @@
   flex-direction: column;
   margin-left: 250px;
   height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.course-assignments-content::-webkit-scrollbar {
-  display: none;
-}
-
-.course-assignments-content {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  overflow: hidden;
 }
 
 /* 과제 메인 바디 */
 .assignments-body {
   flex: 1;
   padding: 32px 48px;
+  padding-top: 93px;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  overflow-y: auto;
+  height: calc(100vh - 61px);
+}
+
+.assignments-body::-webkit-scrollbar {
+  display: none;
+}
+
+.assignments-body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .assignments-header {

@@ -13,24 +13,26 @@
   flex-direction: column;
   margin-left: 250px;
   height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.notifications-page-content::-webkit-scrollbar {
-  display: none;
-}
-
-.notifications-page-content {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  overflow: hidden;
 }
 
 .notifications-page-body {
   display: flex;
   flex-direction: column;
   padding: 0 100px;
-  margin-top: 32px;
+  padding-top: 93px;
+  margin-top: 0;
+  overflow-y: auto;
+  height: calc(100vh - 61px);
+}
+
+.notifications-page-body::-webkit-scrollbar {
+  display: none;
+}
+
+.notifications-page-body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .notifications-page-title {
