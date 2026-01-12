@@ -131,7 +131,7 @@ const CourseNoticesPage = () => {
   if (loading) {
     return (
       <div className="course-notices-container">
-        <CourseSidebar activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+        <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
         <div className="course-notices-content">
           <LoadingSpinner />
         </div>
@@ -142,7 +142,7 @@ const CourseNoticesPage = () => {
   if (error) {
     return (
       <div className="course-notices-container">
-        <CourseSidebar activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+        <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
         <div className="course-notices-content">
           <div className="error-message">
             <p>{error}</p>
@@ -155,7 +155,7 @@ const CourseNoticesPage = () => {
 
   return (
     <div className="course-notices-container">
-      <CourseSidebar activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+      <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
       
       <div className="course-notices-content">
         <CourseHeader

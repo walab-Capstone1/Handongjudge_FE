@@ -165,7 +165,7 @@ const CourseAssignmentsPage = () => {
   if (loading) {
     return (
       <div className="course-assignments-container">
-        <CourseSidebar activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+        <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
         <div className="course-assignments-content">
           <LoadingSpinner />
         </div>
@@ -176,7 +176,7 @@ const CourseAssignmentsPage = () => {
   if (error) {
     return (
       <div className="course-assignments-container">
-        <CourseSidebar activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+        <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
         <div className="course-assignments-content">
           <div className="error-message">
             <p>{error}</p>
@@ -189,7 +189,7 @@ const CourseAssignmentsPage = () => {
 
   return (
     <div className="course-assignments-container">
-      <CourseSidebar activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+      <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
       
       <div className="course-assignments-content">
         <CourseHeader

@@ -1,5 +1,5 @@
 .course-notice-detail-container {
-  display: flex;
+  display: block;
   min-height: 100vh;
   background: #FFFFFF;
 }
@@ -8,6 +8,19 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin-left: 250px;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.course-notice-detail-content::-webkit-scrollbar {
+  display: none;
+}
+
+.course-notice-detail-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* 공지사항 상세 바디 */

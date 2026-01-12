@@ -3,15 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import "./CourseSidebar.css";
 
-const CourseSidebar = ({ activeMenu = "대시보드", onMenuClick }) => {
+const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  
+  // sectionId가 없을 때 에러 방지
   const menuItems = [
-    { id: "dashboard", label: "대시보드" },
-    { id: "assignment", label: "과제" },
-    { id: "notice", label: "공지사항" },
-    { id: "notification", label: "알림" },
+    { id: "dashboard", label: "대시보드", path: sectionId ? `/sections/${sectionId}/dashboard` : '#' },
+    { id: "assignment", label: "과제", path: sectionId ? `/sections/${sectionId}/course-assignments` : '#' },
+    { id: "notice", label: "공지사항", path: sectionId ? `/sections/${sectionId}/course-notices` : '#' },
+    { id: "notification", label: "알림", path: sectionId ? `/sections/${sectionId}/alarm` : '#' },
   ];
+  
+  console.log('CourseSidebar - sectionId:', sectionId, 'menuItems:', menuItems);
 
   return (
     <div className="course-sidebar">
@@ -34,7 +38,19 @@ const CourseSidebar = ({ activeMenu = "대시보드", onMenuClick }) => {
             className={`sidebar-menu-item ${
               activeMenu === item.label ? "active" : ""
             }`}
-            onClick={() => onMenuClick && onMenuClick(item.id)}
+            onClick={() => {
+              console.log('🔔 Menu clicked:', item.label, 'path:', item.path, 'sectionId:', sectionId);
+              if (item.path && item.path !== '#') {
+                console.log('✅ Navigating to:', item.path);
+                navigate(item.path);
+              } else {
+                console.log('❌ Cannot navigate - path is:', item.path);
+              }
+              if (onMenuClick) {
+                console.log('📞 Calling onMenuClick with:', item.id);
+                onMenuClick(item.id);
+              }
+            }}
           >
             <span className="menu-text">{item.label}</span>
           </div>

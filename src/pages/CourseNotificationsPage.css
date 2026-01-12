@@ -1,0 +1,283 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+.notifications-page-container {
+  display: block;
+  min-height: 100vh;
+  background: #FFFFFF;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
+.notifications-page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 250px;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.notifications-page-content::-webkit-scrollbar {
+  display: none;
+}
+
+.notifications-page-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.notifications-page-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 100px;
+  margin-top: 32px;
+}
+
+.notifications-page-title {
+  color: #000000;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+/* 통계 및 정렬 바 */
+.notifications-stats-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 2px solid #E0E0E0;
+  margin-bottom: 24px;
+}
+
+.notifications-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.stat-item {
+  color: #333333;
+  font-size: 14px;
+  font-weight: 400;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  cursor: default;
+  user-select: none;
+}
+
+.stat-item::after {
+  content: '';
+  width: 1px;
+  height: 14px;
+  background: #D0D0D0;
+  margin: 0 20px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.stat-item:last-child::after {
+  display: none;
+}
+
+.sort-button {
+  background: transparent;
+  color: #000000;
+  border: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-button:hover {
+  color: #667EEA;
+}
+
+.sort-arrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.sort-button .sort-arrow.asc {
+  transform: rotate(0deg);
+}
+
+.sort-button .sort-arrow.desc {
+  transform: rotate(180deg);
+}
+
+/* 알림 리스트 */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.notification-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  margin-bottom: 8px;
+}
+
+.notification-card.unread {
+  background: #B3BFF5;
+}
+
+.notification-card.unread.notice {
+  background: #B3BFF5;
+}
+
+.notification-card.unread.assignment {
+  background: #000000;
+}
+
+.notification-card.read.notice {
+  background: #D9DFF9;
+  border: none;
+}
+
+.notification-card.read.assignment {
+  background: #000000;
+  border: none;
+}
+
+.notification-card:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.notification-tag {
+  order: -1;
+  margin-right: 8px;
+}
+
+.notification-title {
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.notification-card.unread.assignment .notification-title {
+  color: #FFFFFF;
+}
+
+.notification-card.unread .notification-title {
+  color: #000000;
+}
+
+.notification-card.read.notice .notification-title {
+  color: #667EEA;
+}
+
+.notification-card.read.assignment .notification-title {
+  color: #FFFFFF;
+}
+
+.notification-date {
+  color: #666666;
+  font-size: 13px;
+  font-weight: 400;
+  margin-left: auto;
+}
+
+.notification-card.unread.assignment .notification-date {
+  color: #CCCCCC;
+}
+
+.notification-card.read.notice .notification-date {
+  color: #667EEA;
+}
+
+.notification-card.read.assignment .notification-date {
+  color: #CCCCCC;
+}
+
+.notification-tag {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  border: 1px solid #667EEA;
+  white-space: nowrap;
+  order: -1;
+  margin-right: 8px;
+}
+
+.notification-card.unread .notification-tag {
+  background: #667EEA;
+  color: #FFFFFF;
+}
+
+.notification-card.read.notice .notification-tag {
+  background: #667EEA;
+  color: #FFFFFF;
+  border-color: #667EEA;
+}
+
+.notification-card.read.assignment .notification-tag {
+  background: #667EEA;
+  color: #FFFFFF;
+  border-color: #667EEA;
+}
+
+.notification-card.unread.assignment .notification-tag {
+  background: #667EEA;
+  color: #FFFFFF;
+  border-color: #667EEA;
+}
+
+/* 읽지 않은 알림 강조 */
+.notification-card.unread .notification-title {
+  font-weight: 600;
+}
+
+/* 메시지 */
+.loading-message,
+.no-notifications-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  color: #868FB7;
+  font-size: 16px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .notifications-page-body {
+    padding: 0 20px;
+  }
+
+  .notifications-stats-bar {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .notifications-stats {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+}
+

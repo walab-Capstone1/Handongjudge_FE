@@ -1,13 +1,14 @@
 .course-header-container {
   background: #FFFFFF;
-  padding: 0 32px;
+  padding: 0 0 0 32px;
   border-bottom: 1px solid #E0E0E0;
 }
 
 .course-header-top {
   display: flex;
   align-items: center;
-  padding: 20px 0;
+  justify-content: flex-start;
+  padding: 0;
   height: 61px;
   box-sizing: border-box;
 }
@@ -16,5 +17,8 @@
   color: #000000;
   font-size: 18px;
   font-weight: 600;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
