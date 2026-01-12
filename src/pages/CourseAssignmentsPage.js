@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { authState } from "../recoil/atoms";
 import CourseSidebar from "../components/CourseSidebar";
@@ -11,6 +11,7 @@ import "./CourseAssignmentsPage.css";
 const CourseAssignmentsPage = () => {
   const { sectionId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const auth = useRecoilValue(authState);
   
   const [activeMenu, setActiveMenu] = useState("과제");
@@ -28,6 +29,18 @@ const CourseAssignmentsPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sectionId, auth.user]);
+
+  // URL 파라미터로 전달된 assignmentId가 있으면 해당 아이템을 자동으로 펼침
+  useEffect(() => {
+    const assignmentId = searchParams.get('assignmentId');
+    if (assignmentId && assignments.length > 0) {
+      const assignmentIdNum = parseInt(assignmentId, 10);
+      if (!expandedAssignmentIds.includes(assignmentIdNum)) {
+        setExpandedAssignmentIds(prev => [...prev, assignmentIdNum]);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, assignments]);
 
   const fetchAssignmentsData = async () => {
     try {

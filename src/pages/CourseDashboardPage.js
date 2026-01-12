@@ -192,11 +192,13 @@ const CourseDashboardPage = () => {
   };
 
   const handleAssignmentClick = (assignmentId) => {
-    navigate(`/sections/${sectionId}/assignments/${assignmentId}/detail`);
+    // 과제 페이지로 이동하면서 해당 과제 아이템을 펼치도록 assignmentId를 URL 파라미터로 전달
+    navigate(`/sections/${sectionId}/course-assignments?assignmentId=${assignmentId}`);
   };
 
   const handleNotificationClick = (noticeId) => {
-    navigate(`/sections/${sectionId}/notices/${noticeId}`);
+    // 공지사항 상세페이지로 이동
+    navigate(`/sections/${sectionId}/course-notices/${noticeId}`);
   };
 
   // 정렬 순서 변경 핸들러
