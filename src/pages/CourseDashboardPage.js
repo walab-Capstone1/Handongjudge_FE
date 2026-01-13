@@ -112,25 +112,59 @@ const CourseDashboardPage = () => {
 
       setAssignments(sortedAssignments);
 
-      // 공지사항 조회
+      // 커뮤니티 알림 조회 (통합 알림 시스템)
       try {
-        const noticesResponse = await APIService.getSectionNotices(sectionId);
-        const noticesList = noticesResponse.data || noticesResponse;
-        
-        // 최근 공지사항만 표시 (최대 5개)
-        const recentNotices = noticesList
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .slice(0, 5)
-          .map(notice => ({
-            id: notice.id,
-            title: notice.title,
-            date: formatDate(notice.createdAt),
-            isNew: notice.isNew
-          }));
-        
-        setNotifications(recentNotices);
+        const notificationsResponse = await APIService.getCommunityNotifications(sectionId, 0, 10);
+        const notificationsList = notificationsResponse.data?.content || [];
+          
+          // 백엔드에서 이미 섹션별로 필터링된 알림을 받음
+          const sectionNotifications = notificationsList
+            .slice(0, 5) // 최대 5개
+            .map(notif => {
+              // 알림 타입에 따라 다른 정보 표시
+              let title = '';
+              let link = '';
+              
+              switch (notif.type) {
+                case 'NOTICE_CREATED':
+                  title = `새 공지사항: ${notif.noticeTitle || '공지사항'}`;
+                  link = notif.noticeId ? `/sections/${sectionId}/course-notices/${notif.noticeId}` : null;
+                  break;
+                case 'ASSIGNMENT_CREATED':
+                  title = `새 과제: ${notif.assignmentTitle || '과제'}`;
+                  link = notif.assignmentId ? `/sections/${sectionId}/course-assignments?assignmentId=${notif.assignmentId}` : null;
+                  break;
+                case 'QUESTION_COMMENT':
+                  title = notif.message || '내 질문에 댓글이 달렸습니다';
+                  link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+                  break;
+                case 'COMMENT_ACCEPTED':
+                  title = notif.message || '내 댓글이 채택되었습니다';
+                  link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+                  break;
+                case 'QUESTION_LIKED':
+                case 'COMMENT_LIKED':
+                  title = notif.message || '추천을 받았습니다';
+                  link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+                  break;
+                default:
+                  title = notif.message || '새 알림';
+                  break;
+              }
+              
+              return {
+                id: notif.id,
+                title: title,
+                date: formatDate(notif.createdAt),
+                isNew: !notif.isRead,
+                type: notif.type,
+                link: link
+              };
+            });
+          
+          setNotifications(sectionNotifications);
       } catch (err) {
-        console.error("공지사항 조회 실패:", err);
+        console.error("알림 조회 실패:", err);
         setNotifications([]);
       }
 
@@ -189,9 +223,20 @@ const CourseDashboardPage = () => {
     navigate(`/sections/${sectionId}/course-assignments?assignmentId=${assignmentId}`);
   };
 
-  const handleNotificationClick = (noticeId) => {
-    // 공지사항 상세페이지로 이동
-    navigate(`/sections/${sectionId}/course-notices/${noticeId}`);
+  const handleNotificationClick = async (notification) => {
+    // 알림 타입에 따라 다른 페이지로 이동
+    if (notification.link) {
+      navigate(notification.link);
+      
+      // 알림 읽음 처리
+      if (notification.isNew && notification.id) {
+        try {
+          await APIService.markCommunityNotificationAsRead(notification.id);
+        } catch (err) {
+          console.error('알림 읽음 처리 실패:', err);
+        }
+      }
+    }
   };
 
   // 정렬 순서 변경 핸들러
@@ -339,11 +384,12 @@ const CourseDashboardPage = () => {
                     <div 
                       key={notification.id} 
                       className={`notification-item ${notification.isNew ? 'new' : ''}`}
-                      onClick={() => handleNotificationClick(notification.id)}
+                      onClick={() => handleNotificationClick(notification)}
                     >
                       <span className="notification-text">
                         {notification.isNew && <span className="new-badge">NEW</span>}
-                        {notification.title} [{notification.date}]
+                        {notification.title}
+                        <span className="notification-date"> [{notification.date}]</span>
                       </span>
                     </div>
                   ))

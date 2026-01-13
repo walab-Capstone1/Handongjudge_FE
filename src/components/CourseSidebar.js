@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { MdDashboard, MdAssignment, MdAnnouncement, MdNotifications, MdLogout, MdMenuBook, MdClose } from "react-icons/md";
+import { MdDashboard, MdAssignment, MdAnnouncement, MdNotifications, MdLogout, MdMenuBook, MdClose, MdForum } from "react-icons/md";
 import APIService from "../services/APIService";
 import "./CourseSidebar.css";
 
@@ -20,6 +20,7 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
     { id: "dashboard", label: "대시보드", path: sectionId ? `/sections/${sectionId}/dashboard` : '#', icon: MdDashboard },
     { id: "assignment", label: "과제", path: sectionId ? `/sections/${sectionId}/course-assignments` : '#', icon: MdAssignment },
     { id: "notice", label: "공지사항", path: sectionId ? `/sections/${sectionId}/course-notices` : '#', icon: MdAnnouncement },
+    { id: "community", label: "커뮤니티", path: sectionId ? `/sections/${sectionId}/community` : '#', icon: MdForum },
     { id: "notification", label: "알림", path: sectionId ? `/sections/${sectionId}/alarm` : '#', icon: MdNotifications },
   ];
 
@@ -100,11 +101,16 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
         <div className="sidebar-menu">
           {menuItems.map((item) => {
             const IconComponent = item.icon;
+            // 현재 경로를 기반으로 활성 메뉴 판단
+            const isActive = location.pathname.includes(item.id === 'assignment' ? 'course-assignments' : 
+                                                        item.id === 'notice' ? 'course-notices' :
+                                                        item.id === 'notification' ? 'alarm' :
+                                                        item.id);
             return (
               <div
                 key={item.id}
                 className={`sidebar-menu-item ${
-                  activeMenu === item.label ? "active" : ""
+                  isActive ? "active" : ""
                 }`}
                 onClick={() => {
                   if (item.type === 'action' && item.id === 'courses') {

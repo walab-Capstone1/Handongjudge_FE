@@ -29,6 +29,15 @@ const CourseNotificationsPage = () => {
     fetchData();
   }, [sectionId]);
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}.${month}.${day}`;
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -37,54 +46,74 @@ const CourseNotificationsPage = () => {
       const sectionData = await APIService.getSectionInfo(sectionId);
       setSectionInfo(sectionData);
 
-      // 공지사항 가져오기
-      const noticesData = await APIService.getSectionNotices(sectionId);
-      
-      // 과제 가져오기
-      const assignmentsData = await APIService.getAssignmentsBySection(sectionId);
+      // 커뮤니티 알림 조회 (통합 알림 시스템)
+      const notificationsResponse = await APIService.getCommunityNotifications(sectionId, 0, 100);
+      const notificationsList = notificationsResponse.data?.content || [];
 
-      // 알림 데이터 생성
-      const notificationList = [];
+      // 알림 데이터 변환
+      const notificationList = notificationsList.map(notif => {
+        // 알림 타입에 따라 다른 정보 표시
+        let title = '';
+        let link = '';
+        let displayType = '';
+        
+        switch (notif.type) {
+          case 'NOTICE_CREATED':
+            title = notif.noticeTitle || '공지사항';
+            link = notif.noticeId ? `/sections/${sectionId}/course-notices/${notif.noticeId}` : null;
+            displayType = 'notice';
+            break;
+          case 'ASSIGNMENT_CREATED':
+            title = notif.assignmentTitle || '과제';
+            link = notif.assignmentId ? `/sections/${sectionId}/course-assignments?assignmentId=${notif.assignmentId}` : null;
+            displayType = 'assignment';
+            break;
+          case 'QUESTION_COMMENT':
+            title = notif.message || '내 질문에 댓글이 달렸습니다';
+            link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+            displayType = 'community';
+            break;
+          case 'COMMENT_ACCEPTED':
+            title = notif.message || '내 댓글이 채택되었습니다';
+            link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+            displayType = 'community';
+            break;
+          case 'QUESTION_LIKED':
+          case 'COMMENT_LIKED':
+            title = notif.message || '추천을 받았습니다';
+            link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+            displayType = 'community';
+            break;
+          case 'QUESTION_PINNED':
+            title = notif.message || '내 질문이 고정되었습니다';
+            link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+            displayType = 'community';
+            break;
+          case 'QUESTION_RESOLVED':
+            title = notif.message || '내 질문이 해결되었습니다';
+            link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+            displayType = 'community';
+            break;
+          default:
+            title = notif.message || '새 알림';
+            displayType = 'other';
+            break;
+        }
+        
+        return {
+          id: notif.id,
+          type: displayType,
+          originalId: notif.noticeId || notif.assignmentId || notif.questionId || notif.id,
+          title: title,
+          date: formatDate(notif.createdAt),
+          isNew: !notif.isRead,
+          createdAt: notif.createdAt,
+          link: link,
+          notificationType: notif.type
+        };
+      });
 
-      // 공지사항을 알림으로 변환
-      if (noticesData && noticesData.length > 0) {
-        noticesData.forEach(notice => {
-          notificationList.push({
-            id: `notice-${notice.id}`,
-            type: 'notice',
-            originalId: notice.id,
-            title: notice.title,
-            date: notice.createdAt ? new Date(notice.createdAt).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit'
-            }).replace(/\. /g, '.').replace(/\.$/, '') : '',
-            isNew: notice.isNew || false,
-            createdAt: notice.createdAt
-          });
-        });
-      }
-
-      // 과제를 알림으로 변환
-      if (assignmentsData && assignmentsData.length > 0) {
-        assignmentsData.forEach(assignment => {
-          notificationList.push({
-            id: `assignment-${assignment.id}`,
-            type: 'assignment',
-            originalId: assignment.id,
-            title: assignment.title,
-            date: assignment.createdAt ? new Date(assignment.createdAt).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit'
-            }).replace(/\. /g, '.').replace(/\.$/, '') : '',
-            isNew: assignment.isNew || false,
-            createdAt: assignment.createdAt
-          });
-        });
-      }
-
-      // 최신순으로 정렬
+      // 최신순으로 정렬 (이미 백엔드에서 정렬되어 있지만, 안전을 위해)
       notificationList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       setNotifications(notificationList);
@@ -116,12 +145,8 @@ const CourseNotificationsPage = () => {
   const handleNotificationClick = async (notification) => {
     try {
       // 읽음 처리
-      if (notification.isNew) {
-        if (notification.type === 'notice') {
-          await APIService.markNoticeAsRead(notification.originalId);
-        } else if (notification.type === 'assignment') {
-          await APIService.markAssignmentAsRead(notification.originalId);
-        }
+      if (notification.isNew && notification.id) {
+        await APIService.markCommunityNotificationAsRead(notification.id);
         
         // 로컬 상태 업데이트
         setNotifications(prev => 
@@ -137,10 +162,17 @@ const CourseNotificationsPage = () => {
       }
 
       // 페이지 이동
-      if (notification.type === 'notice') {
-        navigate(`/sections/${sectionId}/course-notices/${notification.originalId}`);
-      } else if (notification.type === 'assignment') {
-        navigate(`/sections/${sectionId}/course-assignments`);
+      if (notification.link) {
+        navigate(notification.link);
+      } else {
+        // link가 없는 경우 타입별 기본 경로
+        if (notification.type === 'notice') {
+          navigate(`/sections/${sectionId}/course-notices/${notification.originalId}`);
+        } else if (notification.type === 'assignment') {
+          navigate(`/sections/${sectionId}/course-assignments`);
+        } else if (notification.type === 'community') {
+          navigate(`/sections/${sectionId}/community/${notification.originalId}`);
+        }
       }
     } catch (error) {
       console.error("알림 처리 실패:", error);
@@ -210,13 +242,15 @@ const CourseNotificationsPage = () => {
                 >
                   <div className="notification-content">
                     <span className="notification-title">
-                      새로운 {notification.type === 'notice' ? '공지' : '과제'} [{notification.title}]
+                      {notification.title}
                     </span>
                     <span className="notification-date">
                       [{notification.date}]
                     </span>
                     <span className={`notification-tag ${notification.type}`}>
-                      {notification.type === 'notice' ? '공지' : '과제'}
+                      {notification.type === 'notice' ? '공지' : 
+                       notification.type === 'assignment' ? '과제' : 
+                       notification.type === 'community' ? '커뮤니티' : '알림'}
                     </span>
                   </div>
                 </div>

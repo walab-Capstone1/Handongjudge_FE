@@ -32,6 +32,10 @@ import CourseAssignmentsPage from "./pages/CourseAssignmentsPage";
 import CourseNoticesPage from "./pages/CourseNoticesPage";
 import CourseNoticeDetailPage from "./pages/CourseNoticeDetailPage";
 import CourseNotificationsPage from "./pages/CourseNotificationsPage";
+import CourseCommunityPage from "./pages/CourseCommunityPage";
+import QuestionCreatePage from "./pages/QuestionCreatePage";
+import QuestionDetailPage from "./pages/QuestionDetailPage";
+import QuestionEditPage from "./pages/QuestionEditPage";
 
 function App() {
   return (
@@ -45,6 +49,10 @@ function App() {
             <Route path="/sections/:sectionId/course-assignments" element={<CourseAssignmentsPage />} />
             <Route path="/sections/:sectionId/course-notices" element={<CourseNoticesPage />} />
             <Route path="/sections/:sectionId/course-notices/:noticeId" element={<CourseNoticeDetailPage />} />
+            <Route path="/sections/:sectionId/community" element={<CourseCommunityPage />} />
+            <Route path="/sections/:sectionId/community/new" element={<QuestionCreatePage />} />
+            <Route path="/sections/:sectionId/community/:questionId" element={<QuestionDetailPage />} />
+            <Route path="/sections/:sectionId/community/:questionId/edit" element={<QuestionEditPage />} />
             <Route path="/sections/:sectionId/alarm" element={<CourseNotificationsPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />

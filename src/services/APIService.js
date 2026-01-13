@@ -842,6 +842,29 @@ class APIService {
     throw new Error('사용자 ID를 찾을 수 없습니다.');
   }
 
+  // ==================== 커뮤니티 알림 API ====================
+  
+  // 커뮤니티 알림 목록 조회
+  async getCommunityNotifications(sectionId, page = 0, size = 10) {
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString()
+    });
+    
+    if (sectionId) {
+      queryParams.append('sectionId', sectionId.toString());
+    }
+    
+    return await this.request(`/community/notifications?${queryParams.toString()}`);
+  }
+
+  // 커뮤니티 알림 읽음 처리
+  async markCommunityNotificationAsRead(notificationId) {
+    return await this.request(`/community/notifications/${notificationId}/read`, {
+      method: 'PUT'
+    });
+  }
+
 }
 
 const apiService = new APIService();
