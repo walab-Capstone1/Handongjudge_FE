@@ -12,8 +12,6 @@ const CourseNotificationsPage = () => {
   const navigate = useNavigate();
   const auth = useRecoilValue(authState);
   
-  console.log('CourseNotificationsPage - sectionId:', sectionId);
-  
   const [sectionInfo, setSectionInfo] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);

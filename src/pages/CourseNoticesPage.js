@@ -37,13 +37,11 @@ const CourseNoticesPage = () => {
       // 섹션 정보 조회
       const sectionResponse = await APIService.getSectionInfo(sectionId);
       const sectionData = sectionResponse.data || sectionResponse;
-      console.log('섹션 정보:', sectionData);
       setSectionInfo(sectionData);
 
       // 공지사항 목록 조회
       const noticesResponse = await APIService.getSectionNotices(sectionId);
       const noticesList = noticesResponse.data || noticesResponse;
-      console.log('공지사항 목록:', noticesList);
 
       // 최신순으로 정렬
       const sortedNotices = [...noticesList].sort((a, b) => {

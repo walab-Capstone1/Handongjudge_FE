@@ -50,7 +50,6 @@ const CourseAssignmentsPage = () => {
       // 섹션 정보 조회
       const sectionResponse = await APIService.getSectionInfo(sectionId);
       const sectionData = sectionResponse.data || sectionResponse;
-      console.log('섹션 정보:', sectionData);
       setSectionInfo(sectionData);
 
       // 과제 목록 조회

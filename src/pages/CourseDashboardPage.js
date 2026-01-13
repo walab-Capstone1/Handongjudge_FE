@@ -39,7 +39,6 @@ const CourseDashboardPage = () => {
       // 섹션 정보 조회
       const sectionResponse = await APIService.getSectionInfo(sectionId);
       const sectionData = sectionResponse.data || sectionResponse;
-      console.log('섹션 정보:', sectionData);
       setSectionInfo(sectionData);
 
       // 과제 목록 조회
@@ -54,8 +53,6 @@ const CourseDashboardPage = () => {
             const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignment.id);
             const problemsList = problemsResponse.data || problemsResponse;
 
-            console.log(`과제 ${assignment.id} 문제 목록:`, problemsList);
-
             // 학생의 문제별 제출 상태 조회
             let problemsStatus = [];
             try {
@@ -65,9 +62,8 @@ const CourseDashboardPage = () => {
                 assignment.id
               );
               problemsStatus = statusResponse.data || statusResponse;
-              console.log(`과제 ${assignment.id} 제출 상태:`, problemsStatus);
             } catch (statusErr) {
-              console.warn(`과제 ${assignment.id} 상태 조회 실패, 기본값 사용:`, statusErr);
+              // 상태 조회 실패 시 기본값 사용
             }
 
             // 문제 목록과 상태를 결합
@@ -90,9 +86,6 @@ const CourseDashboardPage = () => {
 
             // D-day 계산
             const dDay = calculateDDay(assignment.endDate);
-
-            console.log(`과제 ${assignment.id} 진도율: ${progress}% (제출: ${submittedProblems}/${totalProblems})`);
-            console.log(`과제 ${assignment.id} 문제 상태:`, problems);
 
             return {
               ...assignment,
