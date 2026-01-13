@@ -54,7 +54,8 @@
 .sidebar-menu-item {
   display: flex;
   align-items: center;
-  padding: 9px 51px;
+  gap: 12px;
+  padding: 9px 20px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
@@ -67,7 +68,13 @@
   background: #667EEA;
   border-radius: 5px;
   margin: 0 14px;
-  padding: 9px 37px;
+  padding: 9px 20px;
+}
+
+.menu-icon {
+  color: #FFFFFF;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .menu-text {
@@ -78,7 +85,8 @@
 .sidebar-logout {
   display: flex;
   align-items: center;
-  padding: 24px 60px;
+  gap: 12px;
+  padding: 24px 20px;
   cursor: pointer;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }

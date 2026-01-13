@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { MdDashboard, MdAssignment, MdAnnouncement, MdNotifications, MdLogout } from "react-icons/md";
 import "./CourseSidebar.css";
 
 const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) => {
@@ -9,10 +10,10 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
   
   // sectionId가 없을 때 에러 방지
   const menuItems = [
-    { id: "dashboard", label: "대시보드", path: sectionId ? `/sections/${sectionId}/dashboard` : '#' },
-    { id: "assignment", label: "과제", path: sectionId ? `/sections/${sectionId}/course-assignments` : '#' },
-    { id: "notice", label: "공지사항", path: sectionId ? `/sections/${sectionId}/course-notices` : '#' },
-    { id: "notification", label: "알림", path: sectionId ? `/sections/${sectionId}/alarm` : '#' },
+    { id: "dashboard", label: "대시보드", path: sectionId ? `/sections/${sectionId}/dashboard` : '#', icon: MdDashboard },
+    { id: "assignment", label: "과제", path: sectionId ? `/sections/${sectionId}/course-assignments` : '#', icon: MdAssignment },
+    { id: "notice", label: "공지사항", path: sectionId ? `/sections/${sectionId}/course-notices` : '#', icon: MdAnnouncement },
+    { id: "notification", label: "알림", path: sectionId ? `/sections/${sectionId}/alarm` : '#', icon: MdNotifications },
   ];
   
   console.log('CourseSidebar - sectionId:', sectionId, 'menuItems:', menuItems);
@@ -32,29 +33,33 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
       </div>
 
       <div className="sidebar-menu">
-        {menuItems.map((item) => (
-          <div
-            key={item.id}
-            className={`sidebar-menu-item ${
-              activeMenu === item.label ? "active" : ""
-            }`}
-            onClick={() => {
-              console.log('🔔 Menu clicked:', item.label, 'path:', item.path, 'sectionId:', sectionId);
-              if (item.path && item.path !== '#') {
-                console.log('✅ Navigating to:', item.path);
-                navigate(item.path);
-              } else {
-                console.log('❌ Cannot navigate - path is:', item.path);
-              }
-              if (onMenuClick) {
-                console.log('📞 Calling onMenuClick with:', item.id);
-                onMenuClick(item.id);
-              }
-            }}
-          >
-            <span className="menu-text">{item.label}</span>
-          </div>
-        ))}
+        {menuItems.map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <div
+              key={item.id}
+              className={`sidebar-menu-item ${
+                activeMenu === item.label ? "active" : ""
+              }`}
+              onClick={() => {
+                console.log('🔔 Menu clicked:', item.label, 'path:', item.path, 'sectionId:', sectionId);
+                if (item.path && item.path !== '#') {
+                  console.log('✅ Navigating to:', item.path);
+                  navigate(item.path);
+                } else {
+                  console.log('❌ Cannot navigate - path is:', item.path);
+                }
+                if (onMenuClick) {
+                  console.log('📞 Calling onMenuClick with:', item.id);
+                  onMenuClick(item.id);
+                }
+              }}
+            >
+              <IconComponent className="menu-icon" />
+              <span className="menu-text">{item.label}</span>
+            </div>
+          );
+        })}
       </div>
 
       <div 
@@ -68,6 +73,7 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
           }
         }}
       >
+        <MdLogout className="menu-icon" />
         <span className="menu-text">로그아웃</span>
       </div>
     </div>

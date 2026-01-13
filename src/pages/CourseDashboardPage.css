@@ -1,7 +1,10 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
 .course-dashboard-container {
   display: block;
   min-height: 100vh;
   background: #FFFFFF;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
 }
 
 .course-dashboard-content {
@@ -144,7 +147,8 @@
 
 .d-day-text {
   color: #FFFFFF;
-  font-size: 18px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .flex-spacer {
@@ -167,6 +171,7 @@
   padding: 7px 18px;
   color: #FFFFFF;
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
@@ -178,6 +183,7 @@
 .progress-label {
   color: #000000;
   font-size: 14px;
+  font-weight: 600;
   margin-bottom: 10px;
 }
 
