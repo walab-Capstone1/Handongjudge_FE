@@ -123,11 +123,9 @@ class APIService {
   // 사용자 정보 조회
   async getUserInfo() {
     const response = await this.request('/user/me');
-    console.log('APIService - getUserInfo 응답:', response);
     
     // 응답 데이터 구조에 따라 적절히 반환
     const userData = response.data || response;
-    console.log('APIService - 처리된 사용자 데이터:', userData);
     
     return userData;
   }
