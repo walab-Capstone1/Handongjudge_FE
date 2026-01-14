@@ -71,7 +71,7 @@ const ProblemSolvePage = () => {
         const [problemInfo, sectionInfoRes, assignmentInfoRes] = await Promise.all([
           apiService.getProblemInfo(problemId),
           apiService.getSectionInfo(sectionId),
-          apiService.getAssignmentInfo(sectionId, assignmentId)
+          apiService.getAssignmentInfoBySection(sectionId, assignmentId)
         ]);
         
         console.log('문제 정보 로드 성공:', problemInfo);

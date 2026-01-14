@@ -7,8 +7,9 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   
-  // role이 ADMIN인 사용자에게만 관리자 링크 표시
-  const isProfessor = user?.role === 'ADMIN';
+  // role이 ADMIN 또는 SUPER_ADMIN인 사용자에게 관리자 링크 표시
+  const isProfessor = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
   const handleLogout = async () => {
     try {
@@ -34,6 +35,9 @@ const Navbar = () => {
           {/* <Link to="/mypage/info" className="nav-link">마이페이지</Link> */}
           {isProfessor && (
             <Link to="/admin" className="nav-link admin-link">관리 페이지</Link>
+          )}
+          {isSuperAdmin && (
+            <Link to="/super-admin" className="nav-link super-admin-link">시스템 관리</Link>
           )}
         </div>
 

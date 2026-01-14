@@ -93,7 +93,8 @@
   justify-content: center;
 }
 
-.menu-icon {
+/* 코스 사이드바 전용 아이콘 스타일 */
+.course-sidebar .menu-icon {
   color: #FFFFFF;
   font-size: 20px;
   flex-shrink: 0;

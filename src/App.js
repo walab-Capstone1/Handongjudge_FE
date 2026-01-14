@@ -36,6 +36,14 @@ import CourseCommunityPage from "./pages/CourseCommunityPage";
 import QuestionCreatePage from "./pages/QuestionCreatePage";
 import QuestionDetailPage from "./pages/QuestionDetailPage";
 import QuestionEditPage from "./pages/QuestionEditPage";
+import SuperAdminDashboard from "./pages/SuperAdminPage/SuperAdminDashboard";
+import SystemNoticeManagement from "./pages/SuperAdminPage/SystemNoticeManagement";
+import SystemGuideManagement from "./pages/SuperAdminPage/SystemGuideManagement";
+import SuperAdminCourseManagement from "./pages/SuperAdminPage/SuperAdminCourseManagement";
+import SuperAdminProblemManagement from "./pages/SuperAdminPage/SuperAdminProblemManagement";
+import SuperAdminUserManagement from "./pages/SuperAdminPage/SuperAdminUserManagement";
+import SuperAdminSubmissionManagement from "./pages/SuperAdminPage/SuperAdminSubmissionManagement";
+import SuperAdminRoute from "./components/SuperAdminRoute";
 
 function App() {
   return (
@@ -80,6 +88,14 @@ function App() {
             <Route path="/admin/problems" element={<AdminRoute><ProblemManagement /></AdminRoute>} />
             <Route path="/admin/problems/create" element={<AdminRoute><ProblemCreate /></AdminRoute>} />
             <Route path="/admin/problems/:problemId/edit" element={<AdminRoute><ProblemEdit /></AdminRoute>} />
+            {/* 시스템 관리자 라우트 */}
+            <Route path="/super-admin" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
+            <Route path="/super-admin/system-notices" element={<SuperAdminRoute><SystemNoticeManagement /></SuperAdminRoute>} />
+            <Route path="/super-admin/system-guides" element={<SuperAdminRoute><SystemGuideManagement /></SuperAdminRoute>} />
+            <Route path="/super-admin/courses" element={<SuperAdminRoute><SuperAdminCourseManagement /></SuperAdminRoute>} />
+            <Route path="/super-admin/problems" element={<SuperAdminRoute><SuperAdminProblemManagement /></SuperAdminRoute>} />
+            <Route path="/super-admin/users" element={<SuperAdminRoute><SuperAdminUserManagement /></SuperAdminRoute>} />
+            <Route path="/super-admin/submissions" element={<SuperAdminRoute><SuperAdminSubmissionManagement /></SuperAdminRoute>} />
           </Routes>
         </Router>
       </RecoilRoot>

@@ -36,7 +36,7 @@ const AssignmentDetailPage = () => {
         
         // 병렬로 과제 정보와 섹션 정보를 가져옴
         const [assignmentResponse, sectionResponse] = await Promise.all([
-          APIService.getAssignmentInfo(sectionId, assignmentId),
+          APIService.getAssignmentInfoBySection(sectionId, assignmentId),
           APIService.getSectionInfo(sectionId)
         ]);
         

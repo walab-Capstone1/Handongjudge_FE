@@ -28,7 +28,7 @@ export const useAssignmentData = (assignmentId, pathname, locationState) => {
 
         // 1. 과제 정보 가져오기
         console.log('과제 정보 로드 시작:', { assignmentId, sectionId: currentSectionId });
-        const assignmentResponse = await APIService.getAssignmentInfo(currentSectionId, assignmentId);
+        const assignmentResponse = await APIService.getAssignmentInfoBySection(currentSectionId, assignmentId);
         const assignmentData = assignmentResponse.data || assignmentResponse;
         console.log('과제 정보 로드 성공:', assignmentData);
         

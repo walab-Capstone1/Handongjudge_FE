@@ -174,6 +174,7 @@ class APIService {
   }
 
 
+
   // 과제 생성
 
   // 코드 제출 API
@@ -437,6 +438,26 @@ class APIService {
     return await this.request('/admin/dashboard/stats');
   }
 
+  // 시스템 관리자 통계 조회
+  async getSuperAdminStats() {
+    return await this.request('/admin/system-admin/stats');
+  }
+
+  // 시스템 관리자용 모든 수업 조회
+  async getAllSectionsForSuperAdmin() {
+    return await this.request('/admin/system-admin/sections');
+  }
+
+  // 시스템 관리자용 모든 사용자 조회
+  async getAllUsersForSuperAdmin() {
+    return await this.request('/admin/system-admin/users');
+  }
+
+  // 시스템 관리자용 모든 제출 레코드 조회
+  async getAllSubmissionsForSuperAdmin(page = 0, size = 50) {
+    return await this.request(`/admin/system-admin/submissions?page=${page}&size=${size}`);
+  }
+
   // 최근 활동 조회
   async getRecentActivity() {
     return await this.request('/admin/dashboard/activity');
@@ -474,10 +495,6 @@ class APIService {
     return await this.request(`/sections/${sectionId}/assignments`);
   }
 
-  // 특정 과제의 문제 목록 조회
-  async getAssignmentProblems(sectionId, assignmentId) {
-    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/problems`);
-  }
 
   // 과제별 제출 통계 조회 (분반별)
   async getAssignmentSubmissionStats(assignmentId, sectionId) {
@@ -570,8 +587,8 @@ class APIService {
         return await this.request(`/sections/${sectionId}`);
     }
 
-    // 과제 정보 조회 (기존 API 사용)
-    async getAssignmentInfo(sectionId, assignmentId) {
+    // 과제 정보 조회 (sectionId와 assignmentId로 조회 - Super Admin용)
+    async getAssignmentInfoBySection(sectionId, assignmentId) {
         return await this.request(`/sections/${sectionId}/assignments/${assignmentId}`);
     }
 
@@ -584,11 +601,19 @@ class APIService {
     return await this.request('/admin/courses');
   }
 
-  // 강의 생성
+  // 강의 생성 (Admin용)
   async createCourse(courseData) {
     return await this.request('/admin/courses', {
       method: 'POST',
       body: JSON.stringify(courseData),
+    });
+  }
+
+  // 강의 생성 (Super Admin용 - 일반 courses 엔드포인트)
+  async createCourseAsSuperAdmin(data) {
+    return await this.request('/courses', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 
@@ -813,13 +838,6 @@ class APIService {
     });
   }
 
-  // 강의(Course) 생성
-  async createCourse(data) {
-    return await this.request('/courses', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  }
 
   // 강의(Course) 목록 조회
   async getCourses() {
@@ -937,6 +955,100 @@ class APIService {
   async deleteComment(commentId) {
     return await this.request(`/community/comments/${commentId}`, {
       method: 'DELETE'
+    });
+  }
+
+  // ==================== 시스템 전체 공지사항 API ====================
+  
+  // 시스템 전체 공지사항 생성 (SUPER_ADMIN만)
+  async createSystemNotice(noticeData) {
+    return await this.request('/system-notices', {
+      method: 'POST',
+      body: JSON.stringify(noticeData)
+    });
+  }
+
+  // 활성화된 시스템 전체 공지사항 조회 (모든 사용자)
+  async getActiveSystemNotices() {
+    return await this.request('/system-notices/active');
+  }
+
+  // 모든 시스템 전체 공지사항 조회 (SUPER_ADMIN만)
+  async getAllSystemNotices() {
+    return await this.request('/system-notices');
+  }
+
+  // 시스템 전체 공지사항 수정 (SUPER_ADMIN만)
+  async updateSystemNotice(noticeId, noticeData) {
+    return await this.request(`/system-notices/${noticeId}`, {
+      method: 'PUT',
+      body: JSON.stringify(noticeData)
+    });
+  }
+
+  // 시스템 전체 공지사항 삭제 (SUPER_ADMIN만)
+  async deleteSystemNotice(noticeId) {
+    return await this.request(`/system-notices/${noticeId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // 시스템 전체 공지사항 활성화/비활성화 (SUPER_ADMIN만)
+  async toggleSystemNoticeActive(noticeId, isActive) {
+    return await this.request(`/system-notices/${noticeId}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active: isActive })
+    });
+  }
+
+  // ==================== 시스템 이용안내 API ====================
+  
+  // 시스템 이용안내 생성 (SUPER_ADMIN만)
+  async createSystemGuide(guideData) {
+    return await this.request('/system-guides', {
+      method: 'POST',
+      body: JSON.stringify(guideData)
+    });
+  }
+
+  // 활성화된 시스템 이용안내 조회 (모든 사용자)
+  async getActiveSystemGuides(category = null) {
+    const endpoint = category 
+      ? `/system-guides/active?category=${encodeURIComponent(category)}`
+      : '/system-guides/active';
+    return await this.request(endpoint);
+  }
+
+  // 모든 시스템 이용안내 조회 (SUPER_ADMIN만)
+  async getAllSystemGuides() {
+    return await this.request('/system-guides');
+  }
+
+  // 이용안내 카테고리 목록 조회
+  async getSystemGuideCategories() {
+    return await this.request('/system-guides/categories');
+  }
+
+  // 시스템 이용안내 수정 (SUPER_ADMIN만)
+  async updateSystemGuide(guideId, guideData) {
+    return await this.request(`/system-guides/${guideId}`, {
+      method: 'PUT',
+      body: JSON.stringify(guideData)
+    });
+  }
+
+  // 시스템 이용안내 삭제 (SUPER_ADMIN만)
+  async deleteSystemGuide(guideId) {
+    return await this.request(`/system-guides/${guideId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // 시스템 이용안내 활성화/비활성화 (SUPER_ADMIN만)
+  async toggleSystemGuideActive(guideId, isActive) {
+    return await this.request(`/system-guides/${guideId}/active`, {
+      method: 'PATCH',
+      body: JSON.stringify({ active: isActive })
     });
   }
 
