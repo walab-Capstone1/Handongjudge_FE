@@ -11,6 +11,11 @@
   margin-left: 250px;
   height: 100vh;
   overflow: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.course-notice-detail-container.sidebar-collapsed .course-notice-detail-content {
+  margin-left: 70px;
 }
 
 /* 공지사항 상세 바디 */

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CourseSidebar from '../components/CourseSidebar';
 import CourseHeader from '../components/CourseHeader';
-import { useRecoilValue } from 'recoil';
-import { authState } from '../recoil/atoms';
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { authState, sidebarCollapsedState } from '../recoil/atoms';
 import APIService from '../services/APIService';
 import './QuestionDetailPage.css';
 
@@ -19,6 +19,7 @@ const QuestionDetailPage = () => {
   const [commentContent, setCommentContent] = useState('');
   const [commentAnonymous, setCommentAnonymous] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(sidebarCollapsedState);
 
   useEffect(() => {
     fetchQuestionDetail();
@@ -183,13 +184,23 @@ const QuestionDetailPage = () => {
     });
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
   if (loading) {
     return (
-      <div className="question-detail-container">
-        <CourseSidebar sectionId={sectionId} currentMenu="community" />
+      <div className={`question-detail-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <CourseSidebar 
+          sectionId={sectionId} 
+          currentMenu="community"
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="question-detail-content">
           <CourseHeader 
             courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '로딩 중...'}
+            onToggleSidebar={handleToggleSidebar}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
           <div className="question-detail-body">
             <div className="loading">로딩 중...</div>
@@ -201,11 +212,17 @@ const QuestionDetailPage = () => {
 
   if (!question) {
     return (
-      <div className="question-detail-container">
-        <CourseSidebar sectionId={sectionId} currentMenu="community" />
+      <div className={`question-detail-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <CourseSidebar 
+          sectionId={sectionId} 
+          currentMenu="community"
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="question-detail-content">
           <CourseHeader 
             courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '오류'}
+            onToggleSidebar={handleToggleSidebar}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
           <div className="question-detail-body">
             <div className="error">질문을 찾을 수 없습니다</div>
@@ -216,11 +233,17 @@ const QuestionDetailPage = () => {
   }
 
   return (
-    <div className="question-detail-container">
-      <CourseSidebar sectionId={sectionId} currentMenu="community" />
+    <div className={`question-detail-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <CourseSidebar 
+        sectionId={sectionId} 
+        currentMenu="community"
+        isCollapsed={isSidebarCollapsed}
+      />
       <div className="question-detail-content">
         <CourseHeader 
           courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '질문 상세'}
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
         <div className="question-detail-body">
           {/* 질문 카드 */}

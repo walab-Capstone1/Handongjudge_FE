@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useRecoilValue } from "recoil";
-import { authState } from "../recoil/atoms";
+import { useRecoilValue, useRecoilState } from "recoil";
+import { authState, sidebarCollapsedState } from "../recoil/atoms";
 import CourseSidebar from "../components/CourseSidebar";
 import CourseHeader from "../components/CourseHeader";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -16,6 +16,7 @@ const CourseNoticesPage = () => {
   const [activeMenu, setActiveMenu] = useState("공지사항");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(sidebarCollapsedState);
   
   // 데이터 상태
   const [sectionInfo, setSectionInfo] = useState(null);
@@ -126,10 +127,19 @@ const CourseNoticesPage = () => {
   const newNoticesCount = notices.filter(n => n.isNew).length;
   const totalNoticesCount = notices.length;
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
   if (loading) {
     return (
-      <div className="course-notices-container">
-        <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+      <div className={`course-notices-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <CourseSidebar 
+          sectionId={sectionId} 
+          activeMenu={activeMenu} 
+          onMenuClick={handleMenuClick}
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="course-notices-content">
           <LoadingSpinner />
         </div>
@@ -139,8 +149,13 @@ const CourseNoticesPage = () => {
 
   if (error) {
     return (
-      <div className="course-notices-container">
-        <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+      <div className={`course-notices-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <CourseSidebar 
+          sectionId={sectionId} 
+          activeMenu={activeMenu} 
+          onMenuClick={handleMenuClick}
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="course-notices-content">
           <div className="error-message">
             <p>{error}</p>
@@ -152,8 +167,13 @@ const CourseNoticesPage = () => {
   }
 
   return (
-    <div className="course-notices-container">
-      <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+    <div className={`course-notices-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <CourseSidebar 
+        sectionId={sectionId} 
+        activeMenu={activeMenu} 
+        onMenuClick={handleMenuClick}
+        isCollapsed={isSidebarCollapsed}
+      />
       
       <div className="course-notices-content">
         <CourseHeader
@@ -162,6 +182,8 @@ const CourseNoticesPage = () => {
               ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber || ''}분반`
               : sectionInfo?.courseName || "강의"
           }
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
 
         <div className="notices-body">

@@ -114,10 +114,8 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
                 }`}
                 onClick={() => {
                   if (item.type === 'action' && item.id === 'courses') {
-                    // "수업" 메뉴 클릭 시 강의 목록 사이드바 토글
-                    if (!isCollapsed) {
-                      setShowCourseList(!showCourseList);
-                    }
+                    // "수업" 메뉴 클릭 시 강의 목록 사이드바 토글 (접힌 상태에서도 작동)
+                    setShowCourseList(!showCourseList);
                     return;
                   }
                   

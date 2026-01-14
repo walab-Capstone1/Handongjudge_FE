@@ -12,6 +12,11 @@
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.course-community-container.sidebar-collapsed .community-content {
+  margin-left: 70px;
 }
 
 .community-content::-webkit-scrollbar {

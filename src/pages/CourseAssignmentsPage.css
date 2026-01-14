@@ -11,6 +11,11 @@
   margin-left: 250px;
   height: 100vh;
   overflow: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.course-assignments-container.sidebar-collapsed .course-assignments-content {
+  margin-left: 70px;
 }
 
 /* 과제 메인 바디 */

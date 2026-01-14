@@ -12,6 +12,11 @@
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.question-detail-container.sidebar-collapsed .question-detail-content {
+  margin-left: 70px;
 }
 
 .question-detail-content::-webkit-scrollbar {

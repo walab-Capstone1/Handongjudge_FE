@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useRecoilValue } from "recoil";
-import { authState } from "../recoil/atoms";
+import { useRecoilValue, useRecoilState } from "recoil";
+import { authState, sidebarCollapsedState } from "../recoil/atoms";
 import CourseSidebar from "../components/CourseSidebar";
 import CourseHeader from "../components/CourseHeader";
 import APIService from "../services/APIService";
@@ -16,6 +16,7 @@ const CourseNotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("latest"); // "latest" or "oldest"
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(sidebarCollapsedState);
   
   // 통계
   const [stats, setStats] = useState({
@@ -179,10 +180,18 @@ const CourseNotificationsPage = () => {
     }
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
   if (loading) {
     return (
-      <div className="notifications-page-container">
-        <CourseSidebar sectionId={sectionId} activeMenu="알림" />
+      <div className={`notifications-page-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <CourseSidebar 
+          sectionId={sectionId} 
+          activeMenu="알림"
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="notifications-page-content">
           <CourseHeader
             courseName={
@@ -190,6 +199,8 @@ const CourseNotificationsPage = () => {
                 ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber || ''}분반`
                 : "강의"
             }
+            onToggleSidebar={handleToggleSidebar}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
           <div className="notifications-page-body">
             <div className="loading-message">로딩 중...</div>
@@ -200,8 +211,12 @@ const CourseNotificationsPage = () => {
   }
 
   return (
-    <div className="notifications-page-container">
-      <CourseSidebar sectionId={sectionId} activeMenu="알림" />
+    <div className={`notifications-page-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <CourseSidebar 
+        sectionId={sectionId} 
+        activeMenu="알림"
+        isCollapsed={isSidebarCollapsed}
+      />
       
       <div className="notifications-page-content">
         <CourseHeader
@@ -210,6 +225,8 @@ const CourseNotificationsPage = () => {
               ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber || ''}분반`
               : sectionInfo?.courseName || "강의"
           }
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
 
         <div className="notifications-page-body">

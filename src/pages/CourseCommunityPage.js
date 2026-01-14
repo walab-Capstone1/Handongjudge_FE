@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CourseSidebar from '../components/CourseSidebar';
 import CourseHeader from '../components/CourseHeader';
 import APIService from '../services/APIService';
-import { useRecoilValue } from 'recoil';
-import { authState } from '../recoil/atoms';
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { authState, sidebarCollapsedState } from '../recoil/atoms';
 import './CourseCommunityPage.css';
 
 const CourseCommunityPage = () => {
@@ -14,6 +14,7 @@ const CourseCommunityPage = () => {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(sidebarCollapsedState);
   const [sectionInfo, setSectionInfo] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [filter, setFilter] = useState('ALL'); // ALL, PENDING, RESOLVED
@@ -210,13 +211,23 @@ const CourseCommunityPage = () => {
     });
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
   if (loading && questions.length === 0) {
     return (
-      <div className="course-community-container">
-        <CourseSidebar sectionId={sectionId} currentMenu="community" />
+      <div className={`course-community-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <CourseSidebar 
+          sectionId={sectionId} 
+          currentMenu="community"
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="community-content">
           <CourseHeader 
             courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '로딩 중...'}
+            onToggleSidebar={handleToggleSidebar}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
           <div className="community-body">
             <div className="loading">로딩 중...</div>
@@ -228,11 +239,17 @@ const CourseCommunityPage = () => {
 
   if (error) {
     return (
-      <div className="course-community-container">
-        <CourseSidebar sectionId={sectionId} currentMenu="community" />
+      <div className={`course-community-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <CourseSidebar 
+          sectionId={sectionId} 
+          currentMenu="community"
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="community-content">
           <CourseHeader 
             courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '오류'}
+            onToggleSidebar={handleToggleSidebar}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
           <div className="community-body">
             <div className="error">오류: {error}</div>
@@ -243,11 +260,17 @@ const CourseCommunityPage = () => {
   }
 
   return (
-    <div className="course-community-container">
-      <CourseSidebar sectionId={sectionId} currentMenu="community" />
+    <div className={`course-community-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <CourseSidebar 
+        sectionId={sectionId} 
+        currentMenu="community"
+        isCollapsed={isSidebarCollapsed}
+      />
       <div className="community-content">
         <CourseHeader 
           courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '커뮤니티'}
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
         <div className="community-body">
           {/* 헤더 섹션 */}

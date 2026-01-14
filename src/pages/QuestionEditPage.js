@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CourseSidebar from '../components/CourseSidebar';
 import CourseHeader from '../components/CourseHeader';
 import APIService from '../services/APIService';
+import { useRecoilState } from 'recoil';
+import { sidebarCollapsedState } from '../recoil/atoms';
 import './QuestionCreatePage.css';
 
 const QuestionEditPage = () => {
@@ -11,6 +13,7 @@ const QuestionEditPage = () => {
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(sidebarCollapsedState);
   const [sectionInfo, setSectionInfo] = useState(null);
   
   const [formData, setFormData] = useState({
@@ -109,13 +112,23 @@ const QuestionEditPage = () => {
     }
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
   if (loading) {
     return (
-      <div className="question-create-container">
-        <CourseSidebar sectionId={sectionId} currentMenu="community" />
+      <div className={`question-create-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <CourseSidebar 
+          sectionId={sectionId} 
+          currentMenu="community"
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="question-create-content">
           <CourseHeader 
             courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '로딩 중...'}
+            onToggleSidebar={handleToggleSidebar}
+            isSidebarCollapsed={isSidebarCollapsed}
           />
           <div className="question-create-body">
             <div className="loading">로딩 중...</div>
@@ -126,11 +139,17 @@ const QuestionEditPage = () => {
   }
 
   return (
-    <div className="question-create-container">
-      <CourseSidebar sectionId={sectionId} currentMenu="community" />
+    <div className={`question-create-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <CourseSidebar 
+        sectionId={sectionId} 
+        currentMenu="community"
+        isCollapsed={isSidebarCollapsed}
+      />
       <div className="question-create-content">
         <CourseHeader 
           courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '질문 수정'}
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
         <div className="question-create-body">
           <div className="question-create-header">

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CourseSidebar from '../components/CourseSidebar';
 import CourseHeader from '../components/CourseHeader';
 import APIService from '../services/APIService';
+import { useRecoilState } from 'recoil';
+import { sidebarCollapsedState } from '../recoil/atoms';
 import './QuestionCreatePage.css';
 
 const QuestionCreatePage = () => {
@@ -10,6 +12,7 @@ const QuestionCreatePage = () => {
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(sidebarCollapsedState);
   const [sectionInfo, setSectionInfo] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [problems, setProblems] = useState([]);
@@ -208,12 +211,22 @@ const QuestionCreatePage = () => {
     }
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
   return (
-    <div className="question-create-container">
-      <CourseSidebar sectionId={sectionId} currentMenu="community" />
+    <div className={`question-create-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <CourseSidebar 
+        sectionId={sectionId} 
+        currentMenu="community"
+        isCollapsed={isSidebarCollapsed}
+      />
       <div className="question-create-content">
         <CourseHeader 
           courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '질문 작성'}
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
         <div className="question-create-body">
           <div className="question-create-header">

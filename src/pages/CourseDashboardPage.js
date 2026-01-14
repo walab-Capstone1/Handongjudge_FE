@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useRecoilValue } from "recoil";
-import { authState } from "../recoil/atoms";
+import { useRecoilValue, useRecoilState } from "recoil";
+import { authState, sidebarCollapsedState } from "../recoil/atoms";
 import CourseSidebar from "../components/CourseSidebar";
 import CourseHeader from "../components/CourseHeader";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -18,7 +18,7 @@ const CourseDashboardPage = () => {
   const [sortOrder, setSortOrder] = useState("asc"); // 'asc': 오름차순, 'desc': 내림차순
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(sidebarCollapsedState);
   
   // 데이터 상태
   const [sectionInfo, setSectionInfo] = useState(null);

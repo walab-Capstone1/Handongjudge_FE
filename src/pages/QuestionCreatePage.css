@@ -12,6 +12,11 @@
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.question-create-container.sidebar-collapsed .question-create-content {
+  margin-left: 70px;
 }
 
 .question-create-content::-webkit-scrollbar {
