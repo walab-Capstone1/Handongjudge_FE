@@ -18,11 +18,14 @@ const CourseDashboardPage = () => {
   const [sortOrder, setSortOrder] = useState("asc"); // 'asc': 오름차순, 'desc': 내림차순
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
   // 데이터 상태
   const [sectionInfo, setSectionInfo] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [recentNotices, setRecentNotices] = useState([]);
+  const [collapsedAssignments, setCollapsedAssignments] = useState(new Set());
 
   useEffect(() => {
     if (sectionId && auth.user) {
@@ -114,7 +117,7 @@ const CourseDashboardPage = () => {
 
       // 커뮤니티 알림 조회 (통합 알림 시스템)
       try {
-        const notificationsResponse = await APIService.getCommunityNotifications(sectionId, 0, 10);
+        const notificationsResponse = await APIService.getCommunityNotifications(sectionId, 0, 50);
         const notificationsList = notificationsResponse.data?.content || [];
           
           // 백엔드에서 이미 섹션별로 필터링된 알림을 받음
@@ -166,6 +169,28 @@ const CourseDashboardPage = () => {
       } catch (err) {
         console.error("알림 조회 실패:", err);
         setNotifications([]);
+      }
+
+      // 최근 공지사항 조회
+      try {
+        const noticesResponse = await APIService.getSectionNotices(sectionId);
+        const noticesList = noticesResponse.data || noticesResponse;
+        
+        // 최근 공지사항 5개만 표시
+        const recentNoticesList = noticesList
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 5)
+          .map(notice => ({
+            id: notice.id,
+            title: notice.title,
+            date: formatDate(notice.createdAt),
+            isNew: notice.isNew || false
+          }));
+        
+        setRecentNotices(recentNoticesList);
+      } catch (err) {
+        console.error("공지사항 조회 실패:", err);
+        setRecentNotices([]);
       }
 
     } catch (err) {
@@ -239,6 +264,11 @@ const CourseDashboardPage = () => {
     }
   };
 
+  const handleNoticeClick = (noticeId) => {
+    // 공지사항 상세페이지로 이동
+    navigate(`/sections/${sectionId}/course-notices/${noticeId}`);
+  };
+
   // 정렬 순서 변경 핸들러
   const handleSortToggle = () => {
     const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
@@ -259,10 +289,31 @@ const CourseDashboardPage = () => {
     setAssignments(sortedAssignments);
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
+  const handleToggleAssignment = (assignmentId) => {
+    setCollapsedAssignments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(assignmentId)) {
+        newSet.delete(assignmentId);
+      } else {
+        newSet.add(assignmentId);
+      }
+      return newSet;
+    });
+  };
+
   if (loading) {
     return (
       <div className="course-dashboard-container">
-        <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+        <CourseSidebar 
+          sectionId={sectionId} 
+          activeMenu={activeMenu} 
+          onMenuClick={handleMenuClick}
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="course-dashboard-content">
           <LoadingSpinner />
         </div>
@@ -273,7 +324,12 @@ const CourseDashboardPage = () => {
   if (error) {
     return (
       <div className="course-dashboard-container">
-        <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+        <CourseSidebar 
+          sectionId={sectionId} 
+          activeMenu={activeMenu} 
+          onMenuClick={handleMenuClick}
+          isCollapsed={isSidebarCollapsed}
+        />
         <div className="course-dashboard-content">
           <div className="error-message">
             <p>{error}</p>
@@ -285,8 +341,13 @@ const CourseDashboardPage = () => {
   }
 
   return (
-    <div className="course-dashboard-container">
-      <CourseSidebar sectionId={sectionId} activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+    <div className={`course-dashboard-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <CourseSidebar 
+        sectionId={sectionId} 
+        activeMenu={activeMenu} 
+        onMenuClick={handleMenuClick}
+        isCollapsed={isSidebarCollapsed}
+      />
       
       <div className="course-dashboard-content">
         <CourseHeader
@@ -295,6 +356,8 @@ const CourseDashboardPage = () => {
               ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber || ''}분반`
               : sectionInfo?.courseName || "강의"
           }
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
 
         <div className="dashboard-body">
@@ -310,8 +373,9 @@ const CourseDashboardPage = () => {
             </span>
           </div>
 
-          {/* Content wrapper for assignments and notifications */}
+          {/* Content wrapper for assignments, notifications and notices */}
           <div className="content-wrapper">
+            <div className="content-wrapper-row">
             <div className="assignments-section">
             <div className="section-header">
               <span className="section-title">과제 현황</span>
@@ -325,49 +389,66 @@ const CourseDashboardPage = () => {
 
             <div className="assignments-list">
               {assignments.length > 0 ? (
-                assignments.map((assignment) => (
-                <div key={assignment.id} className="assignment-card">
-                  <div className="assignment-header">
-                    <span className="assignment-title">{assignment.title}</span>
-                    {assignment.dDay !== null && (
-                      <div className={`d-day-badge ${assignment.dDay < 0 ? 'expired' : ''}`}>
-                        <span className="d-day-text">
-                          {assignment.dDay < 0 ? `D+${Math.abs(assignment.dDay)}` : `D-${assignment.dDay}`}
-                        </span>
+                assignments.map((assignment) => {
+                  const isCollapsed = collapsedAssignments.has(assignment.id);
+                  return (
+                    <div key={assignment.id} className={`assignment-card ${isCollapsed ? 'collapsed' : ''}`}>
+                      <div 
+                        className="assignment-header"
+                        onClick={() => handleToggleAssignment(assignment.id)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <span className={`collapse-icon ${isCollapsed ? 'collapsed' : ''}`}>▼</span>
+                        <span className="assignment-title">{assignment.title}</span>
+                        {assignment.dDay !== null && (
+                          <div className={`d-day-badge ${assignment.dDay < 0 ? 'expired' : ''}`}>
+                            <span className="d-day-text">
+                              {assignment.dDay < 0 ? `D+${Math.abs(assignment.dDay)}` : `D-${assignment.dDay}`}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex-spacer"></div>
+                        {!isCollapsed && (
+                          <span className="assignment-deadline">
+                            {formatDeadline(assignment.endDate)}
+                          </span>
+                        )}
+                        <button
+                          className="assignment-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAssignmentClick(assignment.id);
+                          }}
+                        >
+                          과제 바로가기
+                        </button>
                       </div>
-                    )}
-                    <div className="flex-spacer"></div>
-                    <span className="assignment-deadline">
-                      {formatDeadline(assignment.endDate)}
-                    </span>
-                    <button
-                      className="assignment-button"
-                      onClick={() => handleAssignmentClick(assignment.id)}
-                    >
-                      과제 바로가기
-                    </button>
-                  </div>
 
-                  <span className="progress-label">현재 과제 완료율</span>
+                      {!isCollapsed && (
+                        <>
+                          <span className="progress-label">현재 과제 완료율</span>
 
-                  <div className="progress-bar-container">
-                    <span className="progress-text">{assignment.progress}%</span>
-                    <div className="progress-bar-bg">
-                      <div
-                        className="progress-bar-fill"
-                        style={{ width: `${assignment.progress}%` }}
-                      ></div>
+                          <div className="progress-bar-container">
+                            <span className="progress-text">{assignment.progress}%</span>
+                            <div className="progress-bar-bg">
+                              <div
+                                className="progress-bar-fill"
+                                style={{ width: `${assignment.progress}%` }}
+                              ></div>
+                            </div>
+                          </div>
+
+                          <AssignmentProblemsList 
+                            problems={assignment.problems}
+                            showIndicator={true}
+                            sectionId={sectionId}
+                            assignmentId={assignment.id}
+                          />
+                        </>
+                      )}
                     </div>
-                  </div>
-
-                  <AssignmentProblemsList 
-                    problems={assignment.problems}
-                    showIndicator={true}
-                    sectionId={sectionId}
-                    assignmentId={assignment.id}
-                  />
-                </div>
-              ))
+                  );
+                })
               ) : (
                 <div className="no-assignments">
                   <span>진행 중인 과제가 없습니다.</span>
@@ -399,6 +480,32 @@ const CourseDashboardPage = () => {
                   </div>
                 )}
               </div>
+
+              <div className="notices-section">
+                <span className="section-title">공지사항</span>
+                <div className="notices-box">
+                  {recentNotices.length > 0 ? (
+                    recentNotices.map((notice) => (
+                      <div 
+                        key={notice.id} 
+                        className={`notice-item ${notice.isNew ? 'new' : ''}`}
+                        onClick={() => handleNoticeClick(notice.id)}
+                      >
+                        <span className="notice-text">
+                          {notice.isNew && <span className="new-badge">NEW</span>}
+                          {notice.title}
+                          <span className="notice-date"> [{notice.date}]</span>
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-notices">
+                      <span>공지사항이 없습니다.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             </div>
           </div>
         </div>

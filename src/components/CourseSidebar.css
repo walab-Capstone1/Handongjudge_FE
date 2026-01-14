@@ -10,6 +10,11 @@
   flex-shrink: 0;
   overflow-y: hidden;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  transition: width 0.3s ease;
+}
+
+.course-sidebar.collapsed {
+  width: 70px;
 }
 
 .sidebar-header {
@@ -24,6 +29,11 @@
   box-sizing: border-box;
   cursor: pointer;
   transition: background-color 0.2s ease;
+}
+
+.course-sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding: 20px 0;
 }
 
 .sidebar-header:hover {
@@ -58,6 +68,12 @@
   padding: 9px 20px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  justify-content: flex-start;
+}
+
+.course-sidebar.collapsed .sidebar-menu-item {
+  justify-content: center;
+  padding: 9px 0;
 }
 
 .sidebar-menu-item:hover {
@@ -71,6 +87,12 @@
   padding: 9px 20px;
 }
 
+.course-sidebar.collapsed .sidebar-menu-item.active {
+  margin: 0 10px;
+  padding: 9px 0;
+  justify-content: center;
+}
+
 .menu-icon {
   color: #FFFFFF;
   font-size: 20px;
@@ -80,6 +102,13 @@
 .menu-text {
   color: #FFFFFF;
   font-size: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.course-sidebar.collapsed .menu-text {
+  display: none;
 }
 
 .sidebar-logout {
@@ -89,6 +118,12 @@
   padding: 24px 20px;
   cursor: pointer;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: flex-start;
+}
+
+.course-sidebar.collapsed .sidebar-logout {
+  justify-content: center;
+  padding: 24px 0;
 }
 
 .sidebar-logout:hover {

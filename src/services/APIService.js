@@ -865,6 +865,81 @@ class APIService {
     });
   }
 
+  // ==================== 커뮤니티 질문 API ====================
+  
+  // 질문 상세 조회
+  async getQuestionDetail(questionId) {
+    return await this.request(`/community/questions/${questionId}`);
+  }
+
+  // 질문 추천
+  async likeQuestion(questionId) {
+    return await this.request(`/community/likes/questions/${questionId}`, {
+      method: 'POST'
+    });
+  }
+
+  // 질문 해결/미해결 변경
+  async resolveQuestion(questionId) {
+    return await this.request(`/community/questions/${questionId}/resolve`, {
+      method: 'POST'
+    });
+  }
+
+  // 질문 삭제
+  async deleteQuestion(questionId) {
+    return await this.request(`/community/questions/${questionId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==================== 커뮤니티 댓글 API ====================
+  
+  // 댓글 목록 조회
+  async getComments(questionId) {
+    return await this.request(`/community/comments?questionId=${questionId}`);
+  }
+
+  // 댓글 작성
+  async createComment(questionId, content, isAnonymous) {
+    return await this.request('/community/comments', {
+      method: 'POST',
+      body: JSON.stringify({
+        questionId: parseInt(questionId),
+        content: content,
+        isAnonymous: isAnonymous
+      })
+    });
+  }
+
+  // 댓글 추천
+  async likeComment(commentId) {
+    return await this.request(`/community/likes/comments/${commentId}`, {
+      method: 'POST'
+    });
+  }
+
+  // 댓글 채택
+  async acceptComment(commentId) {
+    return await this.request(`/community/comments/${commentId}/accept`, {
+      method: 'POST'
+    });
+  }
+
+  // 댓글 채택 해제
+  async unacceptComment(commentId) {
+    return await this.request(`/community/comments/${commentId}/accept`, {
+      method: 'DELETE'
+    });
+  }
+
+  // 댓글 삭제
+  async deleteComment(commentId) {
+    return await this.request(`/community/comments/${commentId}`, {
+      method: 'DELETE'
+    });
+  }
+
 }
 
 const apiService = new APIService();

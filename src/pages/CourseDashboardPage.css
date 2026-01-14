@@ -14,6 +14,11 @@
   margin-left: 250px;
   height: 100vh;
   overflow: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.course-dashboard-container.sidebar-collapsed .course-dashboard-content {
+  margin-left: 70px;
 }
 
 .dashboard-body {
@@ -36,6 +41,12 @@
 }
 
 .content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.content-wrapper-row {
   display: flex;
   gap: 53px;
   align-items: flex-start;
@@ -110,14 +121,40 @@
   flex-direction: column;
   border: 1px solid #B3BFF5;
   border-radius: 10px;
-  padding: 14px 24px 14px 16px;
+  padding: 12px 20px 12px 14px;
+  transition: all 0.3s ease;
+}
+
+.assignment-card.collapsed {
+  padding: 12px 20px 8px 14px;
 }
 
 .assignment-header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   gap: 8px;
+  user-select: none;
+}
+
+.assignment-card.collapsed .assignment-header {
+  margin-bottom: 0;
+}
+
+.collapse-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #667EEA;
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.collapse-icon.collapsed {
+  transform: rotate(-90deg);
 }
 
 .assignment-title {
@@ -184,14 +221,14 @@
   color: #000000;
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .progress-bar-container {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .progress-text {
@@ -224,6 +261,12 @@
   flex-direction: column;
   width: 350px;
   gap: 20px;
+}
+
+.notifications-section .notices-section {
+  margin-top: 30px;
+  width: 100%;
+  max-width: none;
 }
 
 .notifications-box {
@@ -289,13 +332,81 @@
   font-size: 14px;
 }
 
+/* 공지사항 섹션 */
+.notices-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+  gap: 20px;
+}
+
+.notices-box {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #B3BFF5;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.notice-item {
+  display: flex;
+  align-items: center;
+  background: #D9DFF9;
+  border-radius: 10px;
+  padding: 13px 10px;
+  margin-bottom: 11px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.notice-item:hover {
+  background: #c5cdf7;
+}
+
+.notice-item.new {
+  background: #E8EEFF;
+  border: 1px solid #667EEA;
+}
+
+.notice-item:last-child {
+  margin-bottom: 0;
+}
+
+.notice-text {
+  color: #667EEA;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice-date {
+  color: #868FB7;
+  font-size: 11px;
+}
+
+.no-notices {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.no-notices span {
+  color: #868FB7;
+  font-size: 14px;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .dashboard-body {
     flex-direction: column;
   }
 
-  .notifications-section {
+  .notifications-section,
+  .notices-section {
     width: 100%;
     margin-top: 30px;
   }

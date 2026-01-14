@@ -47,7 +47,7 @@ const CourseNotificationsPage = () => {
       setSectionInfo(sectionData);
 
       // 커뮤니티 알림 조회 (통합 알림 시스템)
-      const notificationsResponse = await APIService.getCommunityNotifications(sectionId, 0, 100);
+      const notificationsResponse = await APIService.getCommunityNotifications(sectionId, 0, 200);
       const notificationsList = notificationsResponse.data?.content || [];
 
       // 알림 데이터 변환

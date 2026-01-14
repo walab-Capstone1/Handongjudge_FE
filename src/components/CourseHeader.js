@@ -1,12 +1,22 @@
 import React from "react";
+import { MdMenu, MdClose } from "react-icons/md";
 import "./CourseHeader.css";
 
 const CourseHeader = ({ 
-  courseName = "[Coding Studio] 1 분반"
+  courseName = "[Coding Studio] 1 분반",
+  onToggleSidebar,
+  isSidebarCollapsed
 }) => {
   return (
-    <div className="course-header-container">
+    <div className={`course-header-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <div className="course-header-top">
+        <button 
+          className="sidebar-toggle-btn"
+          onClick={onToggleSidebar}
+          aria-label={isSidebarCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
+        >
+          {isSidebarCollapsed ? <MdMenu /> : <MdClose />}
+        </button>
         <span className="course-name">{courseName}</span>
       </div>
     </div>

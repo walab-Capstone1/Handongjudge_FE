@@ -3,21 +3,22 @@
   align-items: flex-start;
   background: #D9DFF9;
   border-radius: 10px;
-  padding: 20px 32px 20px 29px;
-  gap: 33px;
+  padding: 14px 24px 14px 20px;
+  gap: 24px;
 }
 
 .problems-indicator {
-  width: 5px;
+  width: 0;
   min-height: 85px;
   flex-shrink: 0;
-  object-fit: contain;
+  border-left: 2px dashed #667EEA;
+  margin-right: 0;
 }
 
 .problems-items {
   display: flex;
   flex-direction: column;
-  gap: 19px;
+  gap: 12px;
   flex: 1;
 }
 

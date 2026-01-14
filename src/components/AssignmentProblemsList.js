@@ -35,11 +35,7 @@ const AssignmentProblemsList = ({
   return (
     <div className="dashboard-problems-list">
       {showIndicator && (
-        <img
-          src="https://i.imgur.com/1tMFzp8.png"
-          alt="indicator"
-          className="problems-indicator"
-        />
+        <div className="problems-indicator"></div>
       )}
       <div className="problems-items">
         {problems.map((problem, index) => (

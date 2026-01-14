@@ -5,7 +5,7 @@ import { MdDashboard, MdAssignment, MdAnnouncement, MdNotifications, MdLogout, M
 import APIService from "../services/APIService";
 import "./CourseSidebar.css";
 
-const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) => {
+const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, isCollapsed = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
@@ -85,17 +85,17 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
 
   return (
     <>
-      <div className="course-sidebar">
+      <div className={`course-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
         <div 
           className="sidebar-header"
-          onClick={() => navigate("/courses")}
+          onClick={() => !isCollapsed && navigate("/courses")}
         >
           <img
             src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/blBC3g5kkQ/0xrnt7m1_expires_30_days.png"
             alt="CodeSturdy Logo"
             className="sidebar-logo"
           />
-          <span className="sidebar-title">CodeSturdy</span>
+          {!isCollapsed && <span className="sidebar-title">CodeSturdy</span>}
         </div>
 
         <div className="sidebar-menu">
@@ -115,7 +115,9 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
                 onClick={() => {
                   if (item.type === 'action' && item.id === 'courses') {
                     // "수업" 메뉴 클릭 시 강의 목록 사이드바 토글
-                    setShowCourseList(!showCourseList);
+                    if (!isCollapsed) {
+                      setShowCourseList(!showCourseList);
+                    }
                     return;
                   }
                   
@@ -126,9 +128,10 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
                     onMenuClick(item.id);
                   }
                 }}
+                title={isCollapsed ? item.label : ''}
               >
                 <IconComponent className="menu-icon" />
-                <span className="menu-text">{item.label}</span>
+                {!isCollapsed && <span className="menu-text">{item.label}</span>}
               </div>
             );
           })}
@@ -144,9 +147,10 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick }) 
               console.error("로그아웃 실패:", error);
             }
           }}
+          title={isCollapsed ? "로그아웃" : ''}
         >
           <MdLogout className="menu-icon" />
-          <span className="menu-text">로그아웃</span>
+          {!isCollapsed && <span className="menu-text">로그아웃</span>}
         </div>
       </div>
 

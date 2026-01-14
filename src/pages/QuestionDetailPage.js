@@ -4,6 +4,7 @@ import CourseSidebar from '../components/CourseSidebar';
 import CourseHeader from '../components/CourseHeader';
 import { useRecoilValue } from 'recoil';
 import { authState } from '../recoil/atoms';
+import APIService from '../services/APIService';
 import './QuestionDetailPage.css';
 
 const QuestionDetailPage = () => {
@@ -28,31 +29,12 @@ const QuestionDetailPage = () => {
     try {
       setLoading(true);
       
-      const response = await fetch(
-        `http://localhost:8080/api/community/questions/${questionId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('질문 조회 실패');
-
-      const data = await response.json();
+      const data = await APIService.getQuestionDetail(questionId);
       setQuestion(data.data);
 
       // 섹션 정보 조회
-      const sectionResponse = await fetch(
-        `http://localhost:8080/api/sections/${sectionId}/info`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-      const sectionData = await sectionResponse.json();
-      setSectionInfo(sectionData.data);
+      const sectionData = await APIService.getSectionInfo(sectionId);
+      setSectionInfo(sectionData.data || sectionData);
     } catch (err) {
       console.error('Error fetching question:', err);
       alert('질문을 불러오는 중 오류가 발생했습니다');
@@ -63,18 +45,7 @@ const QuestionDetailPage = () => {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/community/comments?questionId=${questionId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('댓글 조회 실패');
-
-      const data = await response.json();
+      const data = await APIService.getComments(questionId);
       setComments(data.data || []);
     } catch (err) {
       console.error('Error fetching comments:', err);
@@ -83,20 +54,7 @@ const QuestionDetailPage = () => {
 
   const handleLikeQuestion = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/community/likes/questions/${questionId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('추천 실패');
-
-      const data = await response.json();
-      
+      await APIService.likeQuestion(questionId);
       // 질문 정보 다시 가져오기
       fetchQuestionDetail();
     } catch (err) {
@@ -107,18 +65,7 @@ const QuestionDetailPage = () => {
 
   const handleLikeComment = async (commentId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/community/likes/comments/${commentId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('추천 실패');
-
+      await APIService.likeComment(commentId);
       // 댓글 목록 다시 가져오기
       fetchComments();
     } catch (err) {
@@ -136,25 +83,7 @@ const QuestionDetailPage = () => {
 
     try {
       setSubmittingComment(true);
-
-      const response = await fetch(
-        'http://localhost:8080/api/community/comments',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            questionId: parseInt(questionId),
-            content: commentContent,
-            isAnonymous: commentAnonymous
-          })
-        }
-      );
-
-      if (!response.ok) throw new Error('댓글 작성 실패');
-
+      await APIService.createComment(questionId, commentContent, commentAnonymous);
       setCommentContent('');
       setCommentAnonymous(false);
       fetchComments();
@@ -171,18 +100,7 @@ const QuestionDetailPage = () => {
     if (!window.confirm('이 댓글을 채택하시겠습니까?')) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/community/comments/${commentId}/accept`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('채택 실패');
-
+      await APIService.acceptComment(commentId);
       alert('댓글이 채택되었습니다!');
       fetchComments();
       fetchQuestionDetail();
@@ -196,18 +114,7 @@ const QuestionDetailPage = () => {
     if (!window.confirm('이 댓글의 채택을 해제하시겠습니까?')) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/community/comments/${commentId}/accept`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('채택 해제 실패');
-
+      await APIService.unacceptComment(commentId);
       alert('채택이 해제되었습니다!');
       fetchComments();
       fetchQuestionDetail();
@@ -221,18 +128,7 @@ const QuestionDetailPage = () => {
     if (!window.confirm('정말 이 댓글을 삭제하시겠습니까?')) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/community/comments/${commentId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('댓글 삭제 실패');
-
+      await APIService.deleteComment(commentId);
       alert('댓글이 삭제되었습니다');
       fetchComments();
       fetchQuestionDetail(); // 댓글 수 업데이트
@@ -255,18 +151,7 @@ const QuestionDetailPage = () => {
 
   const handleResolveQuestion = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/community/questions/${questionId}/resolve`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('상태 변경 실패');
-
+      await APIService.resolveQuestion(questionId);
       fetchQuestionDetail();
     } catch (err) {
       console.error('Error resolving question:', err);
@@ -278,18 +163,7 @@ const QuestionDetailPage = () => {
     if (!window.confirm('정말 이 질문을 삭제하시겠습니까?')) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/community/questions/${questionId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      if (!response.ok) throw new Error('삭제 실패');
-
+      await APIService.deleteQuestion(questionId);
       alert('질문이 삭제되었습니다');
       navigate(`/sections/${sectionId}/community`);
     } catch (err) {
