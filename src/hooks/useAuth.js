@@ -51,7 +51,6 @@ export const useAuth = () => {
               user: userInfo,
             }));
           } catch (userError) {
-            console.error('사용자 정보 조회 실패:', userError);
             // 사용자 정보 조회 실패해도 인증 상태는 유지
           }
         } else {
@@ -62,7 +61,6 @@ export const useAuth = () => {
           }));
         }
       } catch (error) {
-        console.error('인증 상태 복원 실패:', error);
         setAuth(prev => ({
           ...prev,
           isAuthenticated: false,
@@ -72,7 +70,8 @@ export const useAuth = () => {
     };
 
     restoreAuthState();
-  }, [setAuth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 앱 초기화 시 한 번만 실행
 
   // 로그인 함수
   const login = async (email, password) => {
@@ -117,7 +116,6 @@ export const useAuth = () => {
         error: null,
       });
     } catch (error) {
-      console.error('Logout error:', error);
       // 로그아웃 실패해도 로컬 상태는 초기화
       setAuth({
         isAuthenticated: false,
@@ -177,7 +175,6 @@ export const useAuth = () => {
 
   // 인증 상태 복원 함수 (더 이상 사용하지 않음 - 토큰은 메모리에만 저장)
   const restoreAuth = async () => {
-    console.log('인증 상태 복원 - 토큰은 메모리에만 저장되므로 복원 불필요');
     return null;
   };
 

@@ -1,38 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { FaGraduationCap, FaPencilAlt, FaCog, FaPlus } from "react-icons/fa";
 import Silk from "../components/Silk";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import APIService from "../services/APIService";
+import { useAuth } from "../hooks/useAuth";
 
 const IndexPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("lectures");
-  const [userName, setUserName] = useState("사용자 이름");
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const userInfo = await APIService.getUserInfo();
-        console.log('사용자 정보:', userInfo);
-        // 사용자 정보에서 이름 추출 (응답 구조에 따라 조정 필요)
-        if (userInfo.name) {
-          setUserName(userInfo.name);
-        } else if (userInfo.username) {
-          setUserName(userInfo.username);
-        } else if (userInfo.email) {
-          setUserName(userInfo.email);
-        }
-      } catch (error) {
-        console.error('사용자 정보 조회 실패:', error);
-        // 에러 발생 시 기본값 유지
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
+  
+  // useAuth에서 사용자 정보 가져오기
+  const userName = user?.name || user?.username || user?.email || "사용자 이름";
 
   const handleGoToClassroom = () => {
     navigate("/courses");

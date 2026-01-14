@@ -1,0 +1,481 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+.course-dashboard-container {
+  display: block;
+  min-height: 100vh;
+  background: #FFFFFF;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
+.course-dashboard-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 250px;
+  height: 100vh;
+  overflow: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.course-dashboard-container.sidebar-collapsed .course-dashboard-content {
+  margin-left: 70px;
+}
+
+.dashboard-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 100px;
+  padding-top: 78px;
+  margin-top: 0;
+  overflow-y: auto;
+  height: calc(100vh - 61px);
+}
+
+.dashboard-body::-webkit-scrollbar {
+  display: none;
+}
+
+.dashboard-body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.content-wrapper-row {
+  display: flex;
+  gap: 53px;
+  align-items: flex-start;
+}
+
+/* Assignments Section */
+.assignments-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 17px;
+}
+
+.section-title {
+  color: #000000;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.sort-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.sort-dropdown:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+.sort-text {
+  color: #000000;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.sort-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #667EEA;
+  transition: transform 0.2s ease;
+}
+
+.sort-arrow.asc {
+  transform: rotate(0deg);
+}
+
+.sort-arrow.desc {
+  transform: rotate(0deg);
+}
+
+.assignments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Assignment Card */
+.assignment-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #B3BFF5;
+  border-radius: 10px;
+  padding: 12px 20px 12px 14px;
+  transition: all 0.3s ease;
+}
+
+.assignment-card.collapsed {
+  padding: 12px 20px 8px 14px;
+}
+
+.assignment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+  user-select: none;
+}
+
+.assignment-card.collapsed .assignment-header {
+  margin-bottom: 0;
+}
+
+.collapse-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #667EEA;
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.collapse-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+.assignment-title {
+  color: #000000;
+  font-size: 18px;
+  font-weight: 600;
+  flex: 0 1 auto;
+  margin-right: 8px;
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.d-day-badge {
+  display: flex;
+  align-items: center;
+  background: #667EEA;
+  border-radius: 15px;
+  padding: 4px 17px;
+  flex-shrink: 0;
+}
+
+.d-day-badge.expired {
+  background: #FF6B6B;
+}
+
+.d-day-text {
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.flex-spacer {
+  flex: 1;
+}
+
+.assignment-deadline {
+  color: #000000;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-right: 15px;
+}
+
+.assignment-button {
+  display: flex;
+  align-items: center;
+  background: #667EEA;
+  border: 1px solid #667EEA;
+  border-radius: 10px;
+  padding: 7px 18px;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.assignment-button:hover {
+  background: #5568d3;
+}
+
+.progress-label {
+  color: #000000;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.progress-text {
+  color: #000000;
+  font-size: 14px;
+  min-width: 35px;
+}
+
+.progress-bar-bg {
+  flex: 1;
+  height: 10px;
+  background: #D9D9D9;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #667EEA;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+/* 문제 목록 스타일은 AssignmentProblemsList.css에서 관리 */
+
+/* Notifications Section */
+.notifications-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  gap: 20px;
+}
+
+.notifications-section .notices-section {
+  margin-top: 30px;
+  width: 100%;
+  max-width: none;
+}
+
+.notifications-box {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #B3BFF5;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  background: #D9DFF9;
+  border-radius: 10px;
+  padding: 13px 10px;
+  margin-bottom: 11px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background: #c5cdf7;
+}
+
+.notification-item.new {
+  background: #E8EEFF;
+  border: 1px solid #667EEA;
+}
+
+.notification-item:last-child {
+  margin-bottom: 0;
+}
+
+.notification-text {
+  color: #667EEA;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.new-badge {
+  background: #667EEA;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.no-notifications,
+.no-assignments {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.no-notifications span,
+.no-assignments span {
+  color: #868FB7;
+  font-size: 14px;
+}
+
+/* 공지사항 섹션 */
+.notices-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+  gap: 20px;
+}
+
+.notices-box {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #B3BFF5;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.notice-item {
+  display: flex;
+  align-items: center;
+  background: #D9DFF9;
+  border-radius: 10px;
+  padding: 13px 10px;
+  margin-bottom: 11px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.notice-item:hover {
+  background: #c5cdf7;
+}
+
+.notice-item.new {
+  background: #E8EEFF;
+  border: 1px solid #667EEA;
+}
+
+.notice-item:last-child {
+  margin-bottom: 0;
+}
+
+.notice-text {
+  color: #667EEA;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice-date {
+  color: #868FB7;
+  font-size: 11px;
+}
+
+.no-notices {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.no-notices span {
+  color: #868FB7;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard-body {
+    flex-direction: column;
+  }
+
+  .notifications-section,
+  .notices-section {
+    width: 100%;
+    margin-top: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-body {
+    padding: 0 20px;
+  }
+
+  .assignment-header {
+    flex-wrap: wrap;
+  }
+
+  .assignment-button {
+    margin-top: 10px;
+  }
+}
+
+/* Error Message */
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.error-message p {
+  color: #FF6B6B;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.error-message button {
+  background: #667EEA;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.error-message button:hover {
+  background: #5568d3;
+}
+
+/* Profile Section */
+.profile-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 24px 0;
+  margin-bottom: 32px;
+}
+
+.profile-avatar {
+  width: 79px;
+  height: 82px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-greeting {
+  color: #000000;
+  font-size: 18px;
+  margin-top: 31px;
+}
+

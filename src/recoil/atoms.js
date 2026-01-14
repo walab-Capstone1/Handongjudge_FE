@@ -21,3 +21,9 @@ export const onboardingState = atom({
     userPreferences: {},
   },
 });
+
+// 사이드바 접기 상태 atom
+export const sidebarCollapsedState = atom({
+  key: 'sidebarCollapsedState',
+  default: false,
+});

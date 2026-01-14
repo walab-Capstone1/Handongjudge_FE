@@ -26,10 +26,10 @@ const CourseCard = ({ course, onStatusUpdate }) => {
     }
   };
 
-  // sectionId가 있으면 해당 section의 상세 페이지로 라우팅
+  // sectionId가 있으면 해당 section의 대시보드로 라우팅
   const getLinkPath = () => {
     if (course.sectionId) {
-      return `/sections/${course.sectionId}`;
+      return `/sections/${course.sectionId}/dashboard`;
     }
     return "/assignments";
   };

@@ -19,26 +19,9 @@ const ClassPage = () => {
   const [enrollmentCode, setEnrollmentCode] = useState("");
   const [enrollLoading, setEnrollLoading] = useState(false);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
-  const [userName, setUserName] = useState("사용자 이름");
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const userInfo = await APIService.getUserInfo();
-        if (userInfo.name) {
-          setUserName(userInfo.name);
-        } else if (userInfo.username) {
-          setUserName(userInfo.username);
-        } else if (userInfo.email) {
-          setUserName(userInfo.email);
-        }
-      } catch (error) {
-        console.error('사용자 정보 조회 실패:', error);
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
+  
+  // useAuth에서 사용자 정보 가져오기
+  const userName = user?.name || user?.username || user?.email || "사용자 이름";
 
   useEffect(() => {
     const fetchEnrolledSections = async () => {

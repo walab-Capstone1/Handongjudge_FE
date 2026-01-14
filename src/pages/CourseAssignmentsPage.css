@@ -1,0 +1,356 @@
+.course-assignments-container {
+  display: block;
+  min-height: 100vh;
+  background: #FFFFFF;
+}
+
+.course-assignments-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 250px;
+  height: 100vh;
+  overflow: hidden;
+  transition: margin-left 0.3s ease;
+}
+
+.course-assignments-container.sidebar-collapsed .course-assignments-content {
+  margin-left: 70px;
+}
+
+/* 과제 메인 바디 */
+.assignments-body {
+  flex: 1;
+  padding: 32px 48px;
+  padding-top: 93px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  overflow-y: auto;
+  height: calc(100vh - 61px);
+}
+
+.assignments-body::-webkit-scrollbar {
+  display: none;
+}
+
+.assignments-body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.assignments-header {
+  margin-bottom: 24px;
+}
+
+.assignments-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.assignments-summary {
+  font-size: 14px;
+  color: #666666;
+}
+
+/* 아코디언 스타일 */
+.assignments-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accordion-item {
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  background: #FFFFFF;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.accordion-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  cursor: pointer;
+  background: #F8F9FF;
+  transition: background-color 0.2s ease;
+}
+
+.accordion-header:hover {
+  background: #EDF0FF;
+}
+
+.accordion-header.expanded {
+  background: #E8ECFF;
+  border-bottom: 1px solid #D0D5F0;
+}
+
+.accordion-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.accordion-arrow {
+  font-size: 12px;
+  color: #667EEA;
+  transition: transform 0.3s ease;
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.accordion-number {
+  font-size: 16px;
+  font-weight: bold;
+  color: #667EEA;
+  min-width: 30px;
+  flex-shrink: 0;
+}
+
+.accordion-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.accordion-dday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #667EEA;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 12px;
+  min-width: 50px;
+  flex-shrink: 0;
+}
+
+.accordion-dday.expired {
+  background: #FF6B6B;
+}
+
+.accordion-deadline {
+  font-size: 12px;
+  color: #666666;
+  flex-shrink: 0;
+  margin-right: 24px;
+}
+
+.accordion-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.progress-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.accordion-progress {
+  font-size: 14px;
+  font-weight: 700;
+  color: #667EEA;
+  min-width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.mini-progress-bar {
+  width: 100px;
+  height: 8px;
+  background: #E8E8E8;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  background: #667EEA;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* 아코디언 콘텐츠 */
+.accordion-content {
+  padding: 24px;
+  background: #FFFFFF;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.accordion-description {
+  padding: 16px 20px;
+  background: #F5F5F5;
+  border-radius: 6px;
+  margin-bottom: 24px;
+}
+
+.accordion-description p {
+  font-size: 14px;
+  color: #666666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 문제 섹션 */
+.accordion-problems-section {
+  margin-top: 24px;
+}
+
+.problems-subtitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 16px 0;
+}
+
+.accordion-problems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accordion-problem-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #F8F9FF;
+  border: 1px solid #E8ECFF;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.accordion-problem-item:hover {
+  background: #EDF0FF;
+  border-color: #667EEA;
+  transform: translateX(4px);
+}
+
+.problem-title {
+  font-size: 14px;
+  color: #000000;
+  font-weight: 500;
+  flex: 1;
+}
+
+.problem-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 14px;
+}
+
+.problem-badge.submitted {
+  background: #667EEA;
+  color: #FFFFFF;
+}
+
+.problem-badge.not-submitted {
+  background: #EEEEEE;
+  color: #888888;
+}
+
+/* 빈 상태 메시지 */
+.no-assignments-message,
+.no-problems-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  color: #999999;
+}
+
+.no-assignments-message p,
+.no-problems-message p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 에러 메시지 */
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.error-message p {
+  color: #FF6B6B;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.error-message button {
+  background: #667EEA;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.error-message button:hover {
+  background: #5568d3;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .assignments-body {
+    padding: 20px 16px;
+  }
+
+  .accordion-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .accordion-header-left {
+    width: 100%;
+  }
+
+  .accordion-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .accordion-problem-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
