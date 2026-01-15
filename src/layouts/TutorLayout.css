@@ -145,22 +145,61 @@
 .tutor-sidebar.collapsed .sidebar-submenu-collapsed {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.125rem;
   margin-top: 0.25rem;
-  padding-left: 0;
+  margin-left: 0.5rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid #e5e7eb;
+  position: relative;
+}
+
+/* 서브메뉴 컨테이너 상단 연결선 */
+.tutor-sidebar.collapsed .sidebar-submenu-collapsed::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -0.5rem;
+  width: 2px;
+  height: 0.5rem;
+  background: #e5e7eb;
 }
 
 .tutor-sidebar.collapsed .sidebar-sub-item-collapsed {
   justify-content: center;
-  padding: 0.625rem 0;
+  padding: 0.5rem 0;
   position: relative;
   width: 100%;
   max-width: 100%;
   min-width: auto;
   margin: 0;
   height: auto;
-  min-height: 2.5rem;
+  min-height: 2rem;
   box-sizing: border-box;
+  background: #f9fafb;
+  border-radius: 4px;
+  opacity: 0.9;
+  transition: all 0.2s ease;
+}
+
+/* 서브메뉴 아이콘 왼쪽 연결점 */
+.tutor-sidebar.collapsed .sidebar-sub-item-collapsed::before {
+  content: '';
+  position: absolute;
+  left: -0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: #667eea;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #e5e7eb;
+}
+
+.tutor-sidebar.collapsed .sidebar-sub-item-collapsed:hover {
+  background: #f3f4f6;
+  opacity: 1;
+  transform: translateX(2px);
 }
 
 .tutor-sidebar.collapsed .sidebar-sub-item-collapsed:hover::after {
@@ -189,15 +228,29 @@
   justify-content: center;
   min-width: auto;
   flex-shrink: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.tutor-sidebar.collapsed .sidebar-sub-item-collapsed:hover .sidebar-icon {
+  color: #667eea;
 }
 
 .tutor-sidebar.collapsed .sidebar-sub-item-collapsed.active {
   background: #667eea;
   color: white;
+  opacity: 1;
 }
 
 .tutor-sidebar.collapsed .sidebar-sub-item-collapsed.active .sidebar-icon {
   color: white;
+}
+
+.tutor-sidebar.collapsed .sidebar-sub-item-collapsed.active::before {
+  background: white;
+  border-color: #667eea;
+  box-shadow: 0 0 0 1px #667eea;
 }
 
 .tutor-sidebar.collapsed .sidebar-icon {
@@ -223,10 +276,22 @@
 }
 
 .tutor-sidebar.collapsed .sidebar-nav .tutor-sidebar-header {
-  padding: 1rem 0 0 0;
+  padding: 1rem 0.5rem 0 0.5rem;
   margin: 0 0 0.5rem 0;
   justify-content: center;
-  align-items: flex-end;
+  align-items: center;
+  position: relative;
+}
+
+/* 접힌 상태에서 제목 숨기기 */
+.tutor-sidebar.collapsed .tutor-sidebar-header .sidebar-title {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 .tutor-sidebar .sidebar-toggle-btn {
@@ -259,12 +324,17 @@
 
 .tutor-sidebar.collapsed .sidebar-toggle-btn {
   width: 100%;
-  margin: 0;
+  margin: 0 auto;
   padding: 0.625rem 0;
   height: 2.5rem;
+  min-height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
+  position: relative;
+  left: 0;
+  right: 0;
 }
 
 .tutor-sidebar .tutor-sidebar-header .sidebar-title {
@@ -585,10 +655,22 @@
 .tutor-sidebar .sidebar-sub-item {
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;
-  padding-left: 2.5rem;
+  padding-left: 0.75rem;
   margin-top: 0.1rem;
   display: flex;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.tutor-sidebar .sidebar-sub-item .sidebar-sub-icon {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  width: 1rem;
+  min-width: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
 }
 
 .tutor-sidebar .sidebar-sub-item.active {
@@ -596,6 +678,10 @@
   color: #667eea;
   font-weight: 600;
   margin-top: 0.25rem;
+}
+
+.tutor-sidebar .sidebar-sub-item.active .sidebar-sub-icon {
+  color: #667eea;
 }
 
 .tutor-sidebar .sidebar-submenu {

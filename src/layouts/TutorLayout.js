@@ -341,6 +341,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                                         location.pathname === subItem.path ? "active" : ""
                                       }`}
                                     >
+                                      <SubIcon className="sidebar-icon sidebar-sub-icon" />
                                       <span className="sidebar-label">{subItem.label}</span>
                                     </Link>
                                   );
@@ -495,6 +496,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                                             location.pathname === subItem.path ? "active" : ""
                                           }`}
                                         >
+                                          <SubIcon className="sidebar-icon sidebar-sub-icon" />
                                           <span className="sidebar-label">{subItem.label}</span>
                                         </Link>
                                       );
