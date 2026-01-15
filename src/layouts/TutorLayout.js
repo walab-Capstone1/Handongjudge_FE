@@ -140,6 +140,9 @@ const TutorLayout = ({ children, selectedSection = null }) => {
     localStorage.setItem('tutor_lastSelectedSectionId', section.sectionId.toString());
     
     // 현재 경로에서 sectionId만 업데이트하여 메뉴 유지
+    // expandedMenus는 이미 localStorage에 저장되어 있고, isExpanded 계산 로직에서
+    // expandedMenus[item.path]가 명시적으로 설정되어 있으면 그 값을 우선 사용하므로
+    // 수업 선택 시에도 드롭다운 상태가 유지됨
     const currentPath = location.pathname;
     if (currentPath.includes('/section/')) {
       // 기존 sectionId를 새 sectionId로 교체
@@ -295,7 +298,10 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                                !location.pathname.startsWith('/tutor/courses') &&
                                !location.pathname.startsWith('/tutor/settings'));
                   }
-                  const isExpanded = expandedMenus[item.path] ?? (isActive && item.subItems.length > 0);
+                  // expandedMenus에 명시적으로 설정된 값이 있으면 우선 사용 (수업 선택 시에도 드롭다운 상태 유지)
+                  const isExpanded = expandedMenus[item.path] !== undefined 
+                    ? expandedMenus[item.path] 
+                    : (isActive && item.subItems.length > 0);
                   
                   return (
                     <div key={item.path} className="sidebar-menu-group">
@@ -417,7 +423,10 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                       const Icon = item.icon;
                       const isActive = location.pathname === item.path || 
                                       location.pathname.startsWith(item.path + '/');
-                      const isExpanded = expandedMenus[item.path] ?? (isActive && item.subItems.length > 0);
+                      // expandedMenus에 명시적으로 설정된 값이 있으면 우선 사용 (수업 선택 시에도 드롭다운 상태 유지)
+                      const isExpanded = expandedMenus[item.path] !== undefined 
+                        ? expandedMenus[item.path] 
+                        : (isActive && item.subItems.length > 0);
                       
                       return (
                         <div key={item.path} className="sidebar-menu-group">
