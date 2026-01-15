@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Breadcrumb from "../components/Breadcrumb";
@@ -13,7 +13,8 @@ import {
   FaChevronDown,
   FaChevronRight,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaTimesCircle
 } from "react-icons/fa";
 
 import "./TutorLayout.css";
@@ -25,10 +26,23 @@ const TutorLayout = ({ children, selectedSection = null }) => {
   const [sections, setSections] = useState([]);
   const [currentSection, setCurrentSection] = useState(selectedSection);
   const [showSectionModal, setShowSectionModal] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState({});
+  const [expandedMenus, setExpandedMenus] = useState(() => {
+    // localStorage에서 드롭다운 상태 불러오기
+    const saved = localStorage.getItem('tutor_expandedMenus');
+    return saved ? JSON.parse(saved) : {};
+  });
   const [filterYear, setFilterYear] = useState('ALL');
   const [filterSemester, setFilterSemester] = useState('ALL');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    // localStorage에서 사이드바 상태 불러오기
+    const saved = localStorage.getItem('tutor_sidebarCollapsed');
+    return saved === 'true';
+  });
+
+  // expandedMenus 변경 시 localStorage에 저장
+  useEffect(() => {
+    localStorage.setItem('tutor_expandedMenus', JSON.stringify(expandedMenus));
+  }, [expandedMenus]);
 
   // URL에서 sectionId 추출
   const sectionIdFromUrl = params.sectionId || location.pathname.match(/\/section\/(\d+)/)?.[1];
@@ -52,6 +66,11 @@ const TutorLayout = ({ children, selectedSection = null }) => {
         const sectionsData = response?.data || [];
         setSections(sectionsData);
         
+        // sectionId가 필요한 경로인지 확인
+        // /tutor/courses, /tutor/problems, /tutor/settings 등은 sectionId가 필요 없음
+        const requiresSectionId = location.pathname.includes('/section/') || 
+                                  location.pathname.match(/\/tutor\/(assignments|notices|users)(\/|$)/);
+        
         // localStorage에서 마지막 선택 수업 불러오기
         const lastSelectedSectionId = localStorage.getItem('tutor_lastSelectedSectionId');
         
@@ -66,13 +85,19 @@ const TutorLayout = ({ children, selectedSection = null }) => {
           setCurrentSection(selectedSection);
           localStorage.setItem('tutor_lastSelectedSectionId', selectedSection.sectionId.toString());
         } else if (lastSelectedSectionId) {
-          // localStorage에 저장된 수업이 있으면 자동 선택
+          // localStorage에서 수업 불러오기 (항상 기억)
           const found = sectionsData.find(s => s.sectionId === parseInt(lastSelectedSectionId));
           if (found) {
             setCurrentSection(found);
-            // URL 업데이트 (페이지 새로고침 시)
-            if (!location.pathname.includes('/section/')) {
-              navigate(`/tutor/assignments/section/${found.sectionId}`, { replace: true });
+            // sectionId가 필요한 경로이고 URL에 없으면 리다이렉트
+            if (requiresSectionId && !sectionIdFromUrl) {
+              if (location.pathname === '/tutor' || location.pathname === '/tutor/') {
+                navigate(`/tutor/assignments/section/${found.sectionId}`, { replace: true });
+              } else if (location.pathname.match(/\/tutor\/(assignments|notices|users)(\/|$)/)) {
+                // 경로에 sectionId가 없으면 추가
+                const basePath = location.pathname.replace(/\/section\/\d+/, '');
+                navigate(`${basePath}/section/${found.sectionId}`, { replace: true });
+              }
             }
           }
         }
@@ -83,12 +108,62 @@ const TutorLayout = ({ children, selectedSection = null }) => {
     fetchSections();
   }, [sectionIdFromUrl, selectedSection, location.pathname, navigate]);
 
+  // 모달이 열릴 때 모든 input 필드의 focus 제거
+  useEffect(() => {
+    if (showSectionModal) {
+      // body에 클래스 추가하여 CSS로 스타일 제어 (먼저 추가)
+      document.body.classList.add('section-modal-open');
+      
+      // 약간의 지연을 두고 blur 처리 (다음 이벤트 루프에서 실행)
+      setTimeout(() => {
+        // 현재 focus된 요소가 input이면 blur
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          activeElement.blur();
+        }
+        // 모든 tutor-search-input 필드의 focus도 제거
+        const searchInputs = document.querySelectorAll('.tutor-search-input');
+        searchInputs.forEach(input => {
+          input.blur();
+        });
+      }, 0);
+    } else {
+      // 모달이 닫힐 때 클래스 제거
+      document.body.classList.remove('section-modal-open');
+    }
+  }, [showSectionModal]);
+
   // 수업 선택 핸들러
   const handleSectionSelect = (section) => {
     setCurrentSection(section);
     setShowSectionModal(false);
     localStorage.setItem('tutor_lastSelectedSectionId', section.sectionId.toString());
-    navigate(`/tutor/assignments/section/${section.sectionId}`);
+    
+    // 현재 경로에서 sectionId만 업데이트하여 메뉴 유지
+    const currentPath = location.pathname;
+    if (currentPath.includes('/section/')) {
+      // 기존 sectionId를 새 sectionId로 교체
+      const newPath = currentPath.replace(/\/section\/\d+/, `/section/${section.sectionId}`);
+      navigate(newPath);
+    } else {
+      // sectionId가 없는 경우에만 기본값(과제 관리)으로 이동
+      navigate(`/tutor/assignments/section/${section.sectionId}`);
+    }
+  };
+
+  // 수업 해제 핸들러
+  const handleSectionClear = () => {
+    setCurrentSection(null);
+    localStorage.removeItem('tutor_lastSelectedSectionId');
+    
+    // sectionId가 필요한 경로에서 나가기
+    const currentPath = location.pathname;
+    if (currentPath.includes('/section/')) {
+      // 문제 관리나 대시보드로 이동
+      if (currentPath.includes('/assignments') || currentPath.includes('/notices') || currentPath.includes('/users')) {
+        navigate('/tutor/problems');
+      }
+    }
   };
 
   // 필터링된 수업 목록
@@ -101,8 +176,8 @@ const TutorLayout = ({ children, selectedSection = null }) => {
   // 사용 가능한 년도 목록
   const availableYears = [...new Set(sections.map(s => s.year))].sort((a, b) => b - a);
 
-  // 주요 기능 메뉴 (1순위: 대시보드 + 문제관리 통합)
-  const mainMenuItems = [
+  // 주요 기능 메뉴 (1순위: 대시보드 + 문제관리 통합) - useMemo로 메모이제이션
+  const mainMenuItems = useMemo(() => [
     { 
       path: "/tutor", 
       label: "대시보드", 
@@ -118,20 +193,43 @@ const TutorLayout = ({ children, selectedSection = null }) => {
         { path: "/tutor/problems/sets", label: "문제집 관리" },
       ]
     },
-  ];
+  ], []);
 
-  // 시스템 설정 메뉴 (4순위: 최하단 고정)
-  const settingsMenuItems = [
+  // 메뉴 클릭 핸들러 - useCallback으로 메모이제이션하여 불필요한 리렌더링 방지
+  const handleMenuClick = useCallback((item, isExpanded, e) => {
+    // 접힌 상태에서는 서브메뉴를 펼칠 수 없으므로 링크가 작동하도록 함
+    if (sidebarCollapsed && item.subItems.length > 0) {
+      // 접힌 상태에서는 첫 번째 서브메뉴로 이동
+      if (item.subItems.length > 0) {
+        e.preventDefault();
+        const firstSubItem = item.subItems[0];
+        navigate(firstSubItem.path);
+      }
+      return;
+    }
+    
+    // 펼쳐진 상태에서만 서브메뉴 토글
+    if (item.subItems.length > 0) {
+      e.preventDefault();
+      setExpandedMenus(prev => ({
+        ...prev,
+        [item.path]: !isExpanded
+      }));
+    }
+  }, [sidebarCollapsed, navigate]);
+
+  // 시스템 설정 메뉴 (4순위: 최하단 고정) - useMemo로 메모이제이션
+  const settingsMenuItems = useMemo(() => [
     { 
       path: "/tutor/settings", 
       label: "시스템 설정", 
       icon: FaCog,
       subItems: [] 
     },
-  ];
+  ], []);
 
-  // 수업별 메뉴 (3순위: 수업 선택 시에만 표시)
-  const sectionMenuItems = currentSection ? [
+  // 수업별 메뉴 (3순위: 수업 선택 시에만 표시) - useMemo로 메모이제이션
+  const sectionMenuItems = useMemo(() => currentSection ? [
     { 
       path: `/tutor/assignments/section/${currentSection.sectionId}`, 
       label: "과제 관리",
@@ -153,12 +251,12 @@ const TutorLayout = ({ children, selectedSection = null }) => {
       icon: FaUsers,
       subItems: [] 
     },
-  ] : [];
+  ] : [], [currentSection]);
 
   return (
     <div className="tutor-layout">
       <Navbar />
-      <div className="tutor-container">
+      <div className={`tutor-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <aside className={`tutor-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <nav className="sidebar-nav">
             <div className="sidebar-header">
@@ -166,8 +264,10 @@ const TutorLayout = ({ children, selectedSection = null }) => {
               <button 
                 className="sidebar-toggle-btn"
                 onClick={() => {
-                  setSidebarCollapsed(!sidebarCollapsed);
-                  if (!sidebarCollapsed) {
+                  const newState = !sidebarCollapsed;
+                  setSidebarCollapsed(newState);
+                  localStorage.setItem('tutor_sidebarCollapsed', newState.toString());
+                  if (!newState) {
                     setExpandedMenus({});
                   }
                 }}
@@ -177,13 +277,24 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                 {sidebarCollapsed ? <FaBars /> : <FaTimes />}
               </button>
             </div>
+              {/* 구분선 */}
+              <div className="sidebar-divider"></div>
               {/* 1순위: 주요 기능 섹션 (대시보드 + 문제관리) */}
               <div className="sidebar-section">
                 <div className="sidebar-section-title">주요 기능</div>
                 {mainMenuItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = location.pathname === item.path || 
-                                  location.pathname.startsWith(item.path + '/');
+                  // 대시보드는 정확히 /tutor일 때만 active
+                  // 문제 관리는 /tutor/problems로 시작하는 경로에서만 active
+                  let isActive;
+                  if (item.path === '/tutor') {
+                    isActive = location.pathname === '/tutor' || location.pathname === '/tutor/';
+                  } else {
+                    isActive = location.pathname === item.path || 
+                              (location.pathname.startsWith(item.path + '/') && 
+                               !location.pathname.startsWith('/tutor/courses') &&
+                               !location.pathname.startsWith('/tutor/settings'));
+                  }
                   const isExpanded = expandedMenus[item.path] ?? (isActive && item.subItems.length > 0);
                   
                   return (
@@ -191,15 +302,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                       <Link
                         to={item.path}
                         className={`sidebar-item ${isActive ? "active" : ""}`}
-                        onClick={(e) => {
-                          if (item.subItems.length > 0) {
-                            e.preventDefault();
-                            setExpandedMenus(prev => ({
-                              ...prev,
-                              [item.path]: !isExpanded
-                            }));
-                          }
-                        }}
+                        onClick={(e) => handleMenuClick(item, isExpanded, e)}
                         title={sidebarCollapsed ? item.label : undefined}
                         data-tooltip={sidebarCollapsed ? item.label : undefined}
                       >
@@ -254,13 +357,30 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                           </div>
                         </>
                       )}
-                      <button 
-                        className="section-change-btn"
-                        onClick={() => setShowSectionModal(true)}
-                        title={sidebarCollapsed ? '수업 변경' : ''}
-                      >
-                        {sidebarCollapsed ? <FaCog /> : '수업 변경'}
-                      </button>
+                      <div className="section-card-actions">
+                        <button 
+                          className="section-change-btn"
+                          onClick={() => {
+                            // 모달 열기 전에 모든 input 필드의 focus 제거
+                            if (document.activeElement && document.activeElement.blur) {
+                              document.activeElement.blur();
+                            }
+                            setShowSectionModal(true);
+                          }}
+                          title={sidebarCollapsed ? '수업 변경' : ''}
+                        >
+                          {sidebarCollapsed ? <FaCog /> : '수업 변경'}
+                        </button>
+                        {!sidebarCollapsed && (
+                          <button 
+                            className="section-clear-btn"
+                            onClick={handleSectionClear}
+                            title="수업 해제"
+                          >
+                            <FaTimesCircle />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <div className="section-card-content section-card-empty">
@@ -269,7 +389,13 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                       )}
                       <button 
                         className="section-change-btn"
-                        onClick={() => setShowSectionModal(true)}
+                        onClick={() => {
+                          // 모달 열기 전에 모든 input 필드의 focus 제거
+                          if (document.activeElement && document.activeElement.blur) {
+                            document.activeElement.blur();
+                          }
+                          setShowSectionModal(true);
+                        }}
                         title={sidebarCollapsed ? '수업 선택' : ''}
                       >
                         {sidebarCollapsed ? <FaCog /> : '수업 선택'}
@@ -281,7 +407,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
 
               {/* 3순위: 수업별 관리 메뉴 (수업 선택 시에만 표시) */}
               {currentSection && sectionMenuItems.length > 0 && (
-                <>
+                <div className="sidebar-section-menu-wrapper visible">
                   {/* 구분선 */}
                   <div className="sidebar-divider"></div>
                   
@@ -298,15 +424,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                           <Link
                             to={item.path}
                             className={`sidebar-item sidebar-section-item ${isActive ? "active" : ""}`}
-                            onClick={(e) => {
-                              if (item.subItems.length > 0) {
-                                e.preventDefault();
-                                setExpandedMenus(prev => ({
-                                  ...prev,
-                                  [item.path]: !isExpanded
-                                }));
-                              }
-                            }}
+                            onClick={(e) => handleMenuClick(item, isExpanded, e)}
                             title={sidebarCollapsed ? item.label : undefined}
                             data-tooltip={sidebarCollapsed ? item.label : undefined}
                           >
@@ -339,7 +457,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                       );
                     })}
                   </div>
-                </>
+                </div>
               )}
 
               {/* 구분선 */}
@@ -369,83 +487,98 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                 })}
               </div>
             </nav>
-
-          {/* 수업 선택 모달 */}
-          {showSectionModal && (
-            <div className="section-modal-overlay" onClick={() => setShowSectionModal(false)}>
-              <div className="section-modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="section-modal-header">
-                  <h3>수업 선택</h3>
-                  <button 
-                    className="section-modal-close"
-                    onClick={() => setShowSectionModal(false)}
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="section-modal-body">
-                  <div className="section-modal-filters">
-                    <select
-                      value={filterYear}
-                      onChange={(e) => setFilterYear(e.target.value)}
-                      className="section-modal-filter-select"
-                    >
-                      <option value="ALL">모든 년도</option>
-                      {availableYears.map(year => (
-                        <option key={year} value={year}>{year}년</option>
-                      ))}
-                    </select>
-                    <select
-                      value={filterSemester}
-                      onChange={(e) => setFilterSemester(e.target.value)}
-                      className="section-modal-filter-select"
-                    >
-                      <option value="ALL">모든 구분</option>
-                      <option value="SPRING">1학기</option>
-                      <option value="SUMMER">여름학기</option>
-                      <option value="FALL">2학기</option>
-                      <option value="WINTER">겨울학기</option>
-                      <option value="CAMP">캠프</option>
-                      <option value="SPECIAL">특강</option>
-                      <option value="IRREGULAR">비정규 세션</option>
-                    </select>
-                  </div>
-                  <div className="section-modal-list">
-                    {filteredSections.length > 0 ? (
-                      filteredSections.map((section) => {
-                        const isSelected = currentSection?.sectionId === section.sectionId;
-                        return (
-                          <div
-                            key={section.sectionId}
-                            className={`section-modal-item ${isSelected ? 'selected' : ''}`}
-                            onClick={() => handleSectionSelect(section)}
-                          >
-                            <div className="section-modal-item-content">
-                              <div className="section-modal-item-title">{section.courseTitle}</div>
-                              <div className="section-modal-item-subtitle">
-                                {section.year}년 {getSemesterLabel(section.semester)}
-                              </div>
-                            </div>
-                            {isSelected && (
-                              <span className="section-modal-check">✓</span>
-                            )}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="section-modal-empty">조건에 맞는 수업이 없습니다.</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </aside>
         <main className="tutor-main">
           <Breadcrumb items={generateBreadcrumbs(location, sections, currentSection)} />
           <div className="tutor-content">{children}</div>
         </main>
       </div>
+      
+      {/* 수업 선택 모달 - 사이드바 밖으로 이동하여 stacking context 문제 해결 */}
+      {showSectionModal && (
+        <div 
+          className="section-modal-overlay" 
+          onClick={() => {
+            // 모달 닫기 전에 모든 input 필드의 focus 제거
+            if (document.activeElement && document.activeElement.blur) {
+              document.activeElement.blur();
+            }
+            setShowSectionModal(false);
+          }}
+        >
+          <div className="section-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="section-modal-header">
+              <h3>수업 선택</h3>
+              <button 
+                className="section-modal-close"
+                onClick={() => {
+                  // 모달 닫기 전에 모든 input 필드의 focus 제거
+                  if (document.activeElement && document.activeElement.blur) {
+                    document.activeElement.blur();
+                  }
+                  setShowSectionModal(false);
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className="section-modal-body">
+              <div className="section-modal-filters">
+                <select
+                  value={filterYear}
+                  onChange={(e) => setFilterYear(e.target.value)}
+                  className="section-modal-filter-select"
+                >
+                  <option value="ALL">모든 년도</option>
+                  {availableYears.map(year => (
+                    <option key={year} value={year}>{year}년</option>
+                  ))}
+                </select>
+                <select
+                  value={filterSemester}
+                  onChange={(e) => setFilterSemester(e.target.value)}
+                  className="section-modal-filter-select"
+                >
+                  <option value="ALL">모든 구분</option>
+                  <option value="SPRING">1학기</option>
+                  <option value="SUMMER">여름학기</option>
+                  <option value="FALL">2학기</option>
+                  <option value="WINTER">겨울학기</option>
+                  <option value="CAMP">캠프</option>
+                  <option value="SPECIAL">특강</option>
+                  <option value="IRREGULAR">비정규 세션</option>
+                </select>
+              </div>
+              <div className="section-modal-list">
+                {filteredSections.length > 0 ? (
+                  filteredSections.map((section) => {
+                    const isSelected = currentSection?.sectionId === section.sectionId;
+                    return (
+                      <div
+                        key={section.sectionId}
+                        className={`section-modal-item ${isSelected ? 'selected' : ''}`}
+                        onClick={() => handleSectionSelect(section)}
+                      >
+                        <div className="section-modal-item-content">
+                          <div className="section-modal-item-title">{section.courseTitle}</div>
+                          <div className="section-modal-item-subtitle">
+                            {section.year}년 {getSemesterLabel(section.semester)}
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <span className="section-modal-check">✓</span>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="section-modal-empty">조건에 맞는 수업이 없습니다.</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
