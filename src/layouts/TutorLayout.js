@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import TutorHeader from "../components/TutorHeader";
 import Breadcrumb from "../components/Breadcrumb";
 import APIService from "../services/APIService";
 import { 
@@ -255,11 +255,11 @@ const TutorLayout = ({ children, selectedSection = null }) => {
 
   return (
     <div className="tutor-layout">
-      <Navbar />
+      <TutorHeader />
       <div className={`tutor-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <aside className={`tutor-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <nav className="sidebar-nav">
-            <div className="sidebar-header">
+            <div className="tutor-sidebar-header">
               <h2 className="sidebar-title">{sidebarCollapsed ? '' : '관리 페이지'}</h2>
               <button 
                 className="sidebar-toggle-btn"

@@ -27,8 +27,8 @@
   border-right: 1px solid #e5e7eb;
   position: fixed;
   left: 0;
-  top: 0;
-  height: 100vh;
+  top: 65px;
+  height: calc(100vh - 65px);
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -158,22 +158,23 @@
   flex-shrink: 0;
 }
 
-.tutor-sidebar .sidebar-nav .sidebar-header {
-  padding: calc(1rem + 80px) 1.5rem 0.625rem 1.5rem;
+.tutor-sidebar .sidebar-nav .tutor-sidebar-header {
+  padding: 1rem 1.5rem 0 1.5rem;
   margin: 0 -1.5rem 0.5rem -1.5rem;
   border-bottom: none;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-start;
   gap: 0.75rem;
   flex-shrink: 0;
   background: white !important;
 }
 
-.tutor-sidebar.collapsed .sidebar-nav .sidebar-header {
-  padding: calc(1rem + 80px) 0 0.625rem 0;
+.tutor-sidebar.collapsed .sidebar-nav .tutor-sidebar-header {
+  padding: 1rem 0 0 0;
   margin: 0 0 0.5rem 0;
   justify-content: center;
+  align-items: flex-end;
 }
 
 .tutor-sidebar .sidebar-toggle-btn {
@@ -191,6 +192,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   font-weight: 600;
+  align-self: flex-end;
+  margin-bottom: 0;
 }
 
 .tutor-sidebar .sidebar-toggle-btn:hover {
@@ -212,7 +215,7 @@
   justify-content: center;
 }
 
-.tutor-sidebar .sidebar-header .sidebar-title {
+.tutor-sidebar .tutor-sidebar-header .sidebar-title {
   font-size: 0.9rem;
   font-weight: 600;
   margin: 0;
@@ -602,7 +605,9 @@
   overflow-y: auto;
   background: #fafbfc;
   margin-left: 280px;
+  margin-top: 65px;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: calc(100vh - 65px);
 }
 
 .tutor-content {
@@ -616,23 +621,27 @@
   .tutor-sidebar {
     position: fixed;
     left: 0;
-    top: 0;
-    height: 100vh;
+    top: 65px;
+    height: calc(100vh - 65px);
     z-index: 100;
     transform: translateX(0);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  .tutor-sidebar .sidebar-nav .sidebar-header {
-    padding-top: calc(1rem + 80px);
+  .tutor-sidebar .sidebar-nav .tutor-sidebar-header {
+    padding-top: 1rem;
   }
   
-  .tutor-sidebar.collapsed .sidebar-nav .sidebar-header {
-    padding-top: calc(1rem + 80px);
+  .tutor-sidebar.collapsed .sidebar-nav .tutor-sidebar-header {
+    padding-top: 1rem;
   }
   
   .tutor-sidebar.collapsed {
     transform: translateX(-100%);
+  }
+  
+  .tutor-main {
+    margin-top: 0;
   }
   
   .tutor-main {
