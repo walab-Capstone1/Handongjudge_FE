@@ -14,7 +14,11 @@ import {
   FaChevronRight,
   FaBars,
   FaTimes,
-  FaTimesCircle
+  FaTimesCircle,
+  FaEdit,
+  FaFolder,
+  FaList,
+  FaChartLine
 } from "react-icons/fa";
 
 import "./TutorLayout.css";
@@ -192,31 +196,31 @@ const TutorLayout = ({ children, selectedSection = null }) => {
       label: "문제 관리", 
       icon: FaBook,
       subItems: [
-        { path: "/tutor/problems", label: "문제 등록 및 관리" },
-        { path: "/tutor/problems/sets", label: "문제집 관리" },
+        { path: "/tutor/problems", label: "문제 등록 및 관리", icon: FaEdit },
+        { path: "/tutor/problems/sets", label: "문제집 관리", icon: FaFolder },
       ]
     },
   ], []);
 
   // 메뉴 클릭 핸들러 - useCallback으로 메모이제이션하여 불필요한 리렌더링 방지
   const handleMenuClick = useCallback((item, isExpanded, e) => {
-    // 접힌 상태에서는 서브메뉴를 펼칠 수 없으므로 링크가 작동하도록 함
+    // 접힌 상태에서도 드롭다운 토글 가능하도록 수정
     if (sidebarCollapsed && item.subItems.length > 0) {
-      // 접힌 상태에서는 첫 번째 서브메뉴로 이동
-      if (item.subItems.length > 0) {
-        e.preventDefault();
-        const firstSubItem = item.subItems[0];
-        navigate(firstSubItem.path);
-      }
+      // 접힌 상태에서 드롭다운 토글 (다른 메뉴의 드롭다운 상태는 유지)
+      e.preventDefault();
+      setExpandedMenus(prev => ({
+        ...prev,  // 기존 상태 유지
+        [item.path]: !isExpanded  // 현재 메뉴만 토글
+      }));
       return;
     }
     
-    // 펼쳐진 상태에서만 서브메뉴 토글
+    // 펼쳐진 상태에서 서브메뉴 토글
     if (item.subItems.length > 0) {
       e.preventDefault();
       setExpandedMenus(prev => ({
-        ...prev,
-        [item.path]: !isExpanded
+        ...prev,  // 기존 상태 유지
+        [item.path]: !isExpanded  // 현재 메뉴만 토글
       }));
     }
   }, [sidebarCollapsed, navigate]);
@@ -238,8 +242,8 @@ const TutorLayout = ({ children, selectedSection = null }) => {
       label: "과제 관리",
       icon: FaTasks,
       subItems: [
-        { path: `/tutor/assignments/section/${currentSection.sectionId}`, label: "과제 목록" },
-        { path: `/tutor/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황", subItems: [] },
+        { path: `/tutor/assignments/section/${currentSection.sectionId}`, label: "과제 목록", icon: FaList },
+        { path: `/tutor/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황", icon: FaChartLine, subItems: [] },
       ]
     },
     { 
@@ -270,9 +274,10 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                   const newState = !sidebarCollapsed;
                   setSidebarCollapsed(newState);
                   localStorage.setItem('tutor_sidebarCollapsed', newState.toString());
-                  if (!newState) {
-                    setExpandedMenus({});
-                  }
+                  // 사이드바를 펼칠 때도 드롭다운 상태 유지 (접힌 상태에서 펼쳐진 드롭다운 유지)
+                  // if (!newState) {
+                  //   setExpandedMenus({});
+                  // }
                 }}
                 title={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
                 aria-label={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
@@ -320,22 +325,51 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                           </span>
                         )}
                       </Link>
-                      {!sidebarCollapsed && item.subItems.length > 0 && (
-                        <div className={`sidebar-submenu ${isExpanded ? 'expanded' : ''}`}>
-                          <div>
-                            {item.subItems.map((subItem) => (
-                              <Link
-                                key={subItem.path}
-                                to={subItem.path}
-                                className={`sidebar-item sidebar-sub-item ${
-                                  location.pathname === subItem.path ? "active" : ""
-                                }`}
-                              >
-                                <span className="sidebar-label">{subItem.label}</span>
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
+                      {item.subItems.length > 0 && (
+                        <>
+                          {/* 펼쳐진 상태: 일반 서브메뉴 표시 */}
+                          {!sidebarCollapsed && (
+                            <div className={`sidebar-submenu ${isExpanded ? 'expanded' : ''}`}>
+                              <div>
+                                {item.subItems.map((subItem) => {
+                                  const SubIcon = subItem.icon || item.icon;
+                                  return (
+                                    <Link
+                                      key={subItem.path}
+                                      to={subItem.path}
+                                      className={`sidebar-item sidebar-sub-item ${
+                                        location.pathname === subItem.path ? "active" : ""
+                                      }`}
+                                    >
+                                      <span className="sidebar-label">{subItem.label}</span>
+                                    </Link>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                          {/* 접힌 상태: 드롭다운이 펼쳐져 있으면 서브메뉴 아이콘 표시 */}
+                          {sidebarCollapsed && isExpanded && (
+                            <div className="sidebar-submenu-collapsed">
+                              {item.subItems.map((subItem) => {
+                                const SubIcon = subItem.icon || item.icon;
+                                return (
+                                  <Link
+                                    key={subItem.path}
+                                    to={subItem.path}
+                                    className={`sidebar-item sidebar-sub-item-collapsed ${
+                                      location.pathname === subItem.path ? "active" : ""
+                                    }`}
+                                    title={subItem.label}
+                                    data-tooltip={subItem.label}
+                                  >
+                                    <SubIcon className="sidebar-icon" />
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   );
@@ -445,22 +479,51 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                               </span>
                             )}
                           </Link>
-                          {!sidebarCollapsed && item.subItems.length > 0 && (
-                            <div className={`sidebar-submenu ${isExpanded ? 'expanded' : ''}`}>
-                              <div>
-                                {item.subItems.map((subItem) => (
-                                  <Link
-                                    key={subItem.path}
-                                    to={subItem.path}
-                                    className={`sidebar-item sidebar-sub-item ${
-                                      location.pathname === subItem.path ? "active" : ""
-                                    }`}
-                                  >
-                                    <span className="sidebar-label">{subItem.label}</span>
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
+                          {item.subItems.length > 0 && (
+                            <>
+                              {/* 펼쳐진 상태: 일반 서브메뉴 표시 */}
+                              {!sidebarCollapsed && (
+                                <div className={`sidebar-submenu ${isExpanded ? 'expanded' : ''}`}>
+                                  <div>
+                                    {item.subItems.map((subItem) => {
+                                      const SubIcon = subItem.icon || item.icon;
+                                      return (
+                                        <Link
+                                          key={subItem.path}
+                                          to={subItem.path}
+                                          className={`sidebar-item sidebar-sub-item ${
+                                            location.pathname === subItem.path ? "active" : ""
+                                          }`}
+                                        >
+                                          <span className="sidebar-label">{subItem.label}</span>
+                                        </Link>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                              {/* 접힌 상태: 드롭다운이 펼쳐져 있으면 서브메뉴 아이콘 표시 */}
+                              {sidebarCollapsed && isExpanded && (
+                                <div className="sidebar-submenu-collapsed">
+                                  {item.subItems.map((subItem) => {
+                                    const SubIcon = subItem.icon || item.icon;
+                                    return (
+                                      <Link
+                                        key={subItem.path}
+                                        to={subItem.path}
+                                        className={`sidebar-item sidebar-sub-item-collapsed ${
+                                          location.pathname === subItem.path ? "active" : ""
+                                        }`}
+                                        title={subItem.label}
+                                        data-tooltip={subItem.label}
+                                      >
+                                        <SubIcon className="sidebar-icon" />
+                                      </Link>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       );
