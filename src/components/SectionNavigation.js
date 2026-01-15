@@ -37,24 +37,24 @@ const SectionNavigation = ({
 
   const navigationItems = [
     {
-      path: `/admin/notices/section/${sectionId}`,
+      path: `/tutor/notices/section/${sectionId}`,
       label: "공지사항 관리",
       icon: "notices"
     },
     {
-      path: `/admin/assignments/section/${sectionId}`,
+      path: `/tutor/assignments/section/${sectionId}`,
       label: "과제 관리", 
       icon: "assignments"
     },
     {
-      path: `/admin/users/section/${sectionId}`,
+      path: `/tutor/users/section/${sectionId}`,
       label: "수강생 관리",
       icon: "users"
     }
   ];
 
   const handleBackToDashboard = () => {
-    navigate('/admin');
+    navigate('/tutor');
   };
 
   return (

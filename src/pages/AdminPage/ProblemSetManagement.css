@@ -1,0 +1,13 @@
+/* ProblemSetManagement.css - 문제집 관리 페이지 스타일 */
+
+.problem-set-management {
+  padding: var(--spacing-xl);
+}
+
+.admin-problem-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-medium);
+  margin-top: var(--spacing-xs);
+  margin-bottom: 0;
+}
+

@@ -397,6 +397,13 @@ class APIService {
     });
   }
 
+  // 문제 삭제
+  async deleteProblem(problemId) {
+    return await this.request(`/problems/${problemId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // 문제 복사
   async copyProblem(problemId, newTitle = null) {
     const body = newTitle ? { newTitle } : {};
@@ -661,8 +668,8 @@ class APIService {
   }
 
   // 과제 삭제
-  async deleteAssignment(assignmentId) {
-    return await this.request(`/admin/assignments/${assignmentId}`, {
+  async deleteAssignment(sectionId, assignmentId) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}`, {
       method: 'DELETE',
     });
   }
@@ -709,8 +716,11 @@ class APIService {
 
   // 사용자 상태 변경 (활성/비활성)
   async toggleUserStatus(userId, status) {
-    return await this.request(`/admin/users/${userId}/status`, {
+    return await this.request(`/admin/system-admin/users/${userId}/status`, {
       method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ status }),
     });
   }

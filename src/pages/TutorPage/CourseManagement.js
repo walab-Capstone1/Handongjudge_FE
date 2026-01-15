@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
 import "./CourseManagement.css";
 
@@ -108,47 +108,47 @@ const CourseManagement = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <TutorLayout>
         <div className="course-management">
-          <div className="admin-loading-container">
-            <div className="admin-loading-spinner"></div>
+          <div className="tutor-loading-container">
+            <div className="tutor-loading-spinner"></div>
             <p>수업 정보를 불러오는 중...</p>
           </div>
         </div>
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <TutorLayout>
       <div className="course-management">
-        <div className="admin-page-header">
-          <div className="admin-header-left">
-            <h1 className="admin-page-title">수업 관리</h1>
-            <div className="admin-search-box">
+        <div className="tutor-page-header">
+          <div className="tutor-header-left">
+            <h1 className="tutor-page-title">수업 관리</h1>
+            <div className="tutor-search-box">
               <input
                 type="text"
                 placeholder="수업명, 교수명으로 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="admin-search-input"
+                className="tutor-search-input"
               />
             </div>
           </div>
-          <div className="admin-header-right">
+          <div className="tutor-header-right">
             <button 
-              className="admin-btn-create-section"
+              className="tutor-btn-create-section"
               onClick={() => setShowCreateModal(true)}
             >
               + 새 수업 만들기
             </button>
-            <div className="admin-header-stats">
-              <span className="admin-stat-badge">총 {sections.length}개 분반</span>
+            <div className="tutor-header-stats">
+              <span className="tutor-stat-badge">총 {sections.length}개 분반</span>
             </div>
           </div>
         </div>
 
-        <div className="admin-sections-grid">
+        <div className="tutor-sections-grid">
           {filteredSections.map((section) => (
             <div key={section.sectionId} className="section-card">
               <div className="section-header">
@@ -156,20 +156,20 @@ const CourseManagement = () => {
               </div>
 
               <div className="section-info-grid">
-                <div className="admin-info-row">
-                  <span className="admin-info-label">담당교수</span>
-                  <span className="admin-info-value">{section.instructorName}</span>
+                <div className="tutor-info-row">
+                  <span className="tutor-info-label">담당교수</span>
+                  <span className="tutor-info-value">{section.instructorName}</span>
                 </div>
-                <div className="admin-info-row">
-                  <span className="admin-info-label">공지 수</span>
-                  <span className="admin-info-value">{section.noticeCount || 0}개</span>
+                <div className="tutor-info-row">
+                  <span className="tutor-info-label">공지 수</span>
+                  <span className="tutor-info-value">{section.noticeCount || 0}개</span>
                 </div>
-                <div className="admin-info-row">
-                  <span className="admin-info-label">학생 관리</span>
-                  <span className="admin-info-value">{section.studentCount || 0}명</span>
+                <div className="tutor-info-row">
+                  <span className="tutor-info-label">학생 관리</span>
+                  <span className="tutor-info-value">{section.studentCount || 0}명</span>
                 </div>
-                <div className="admin-info-row">
-                  <span className="admin-info-label">상태</span>
+                <div className="tutor-info-row">
+                  <span className="tutor-info-label">상태</span>
                   <span className={`info-value ${section.active !== false ? 'status-active' : 'status-inactive'}`}>
                     {section.active !== false ? '활성' : '비활성'}
                   </span>
@@ -185,25 +185,25 @@ const CourseManagement = () => {
                   {section.active !== false ? '✓ 활성' : '✕ 비활성'}
                 </button>
                 <button 
-                  className="admin-btn-action"
+                  className="tutor-btn-action"
                   onClick={() => navigate(`/tutor/notices/section/${section.sectionId}`)}
                 >
                   공지사항
                 </button>
                 <button 
-                  className="admin-btn-action"
+                  className="tutor-btn-action"
                   onClick={() => navigate(`/tutor/users/section/${section.sectionId}`)}
                 >
                   학생 관리
                 </button>
                 <button 
-                  className="admin-btn-action"
-                  onClick={() => navigate(`/admin/grades/section/${section.sectionId}`)}
+                  className="tutor-btn-action"
+                  onClick={() => navigate(`/tutor/grades/section/${section.sectionId}`)}
                 >
                   성적 관리
                 </button>
                 <button 
-                  className="admin-btn-action admin-primary"
+                  className="tutor-btn-action tutor-primary"
                   onClick={() => navigate(`/tutor/assignments/section/${section.sectionId}`)}
                 >
                   과제 관리
@@ -214,7 +214,7 @@ const CourseManagement = () => {
         </div>
 
         {filteredSections.length === 0 && (
-          <div className="admin-no-sections">
+          <div className="tutor-no-sections">
             <p>
               {searchTerm 
                 ? '검색 조건에 맞는 수업이 없습니다.' 
@@ -226,25 +226,25 @@ const CourseManagement = () => {
 
         {/* 수업 생성 모달 */}
         {showCreateModal && (
-          <div className="admin-modal-overlay" onClick={() => setShowCreateModal(false)}>
-            <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay" onClick={() => setShowCreateModal(false)}>
+            <div className="tutor-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-modal-header">
                 <h2>새 수업 만들기</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => setShowCreateModal(false)}
                 >
                   ×
                 </button>
               </div>
 
-              <div className="admin-modal-body">
-                <div className="admin-form-group">
+              <div className="tutor-modal-body">
+                <div className="tutor-form-group">
                   <label>강의 선택 또는 새 강의 제목 입력</label>
                   <select
                     value={formData.courseId}
                     onChange={(e) => setFormData({...formData, courseId: e.target.value, courseTitle: ''})}
-                    className="admin-form-select"
+                    className="tutor-form-select"
                   >
                     <option value="">새 강의 만들기</option>
                     {availableCourses.map(course => (
@@ -257,22 +257,22 @@ const CourseManagement = () => {
 
                 {!formData.courseId && (
                   <>
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                       <label>새 강의 제목</label>
                   <input
                         type="text"
                         value={formData.courseTitle}
                         onChange={(e) => setFormData({...formData, courseTitle: e.target.value})}
-                        className="admin-form-input"
+                        className="tutor-form-input"
                         placeholder="예: 자바프로그래밍"
                       />
                     </div>
-                    <div className="admin-form-group">
+                    <div className="tutor-form-group">
                       <label>수업 설명</label>
                       <textarea
                         value={formData.description}
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="admin-form-input"
+                    className="tutor-form-input"
                         placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
                         rows="3"
                   />
@@ -280,26 +280,26 @@ const CourseManagement = () => {
                   </>
                 )}
 
-                <div className="admin-form-row">
-                  <div className="admin-form-group">
+                <div className="tutor-form-row">
+                  <div className="tutor-form-group">
                     <label>년도</label>
                     <input
                       type="number"
                       value={formData.year}
                       onChange={(e) => setFormData({...formData, year: e.target.value})}
-                      className="admin-form-input"
+                      className="tutor-form-input"
                       placeholder="2025"
                       min="2020"
                       max="2099"
                     />
                   </div>
 
-                  <div className="admin-form-group">
+                  <div className="tutor-form-group">
                     <label>구분</label>
                     <select
                       value={formData.semester}
                       onChange={(e) => setFormData({...formData, semester: e.target.value})}
-                      className="admin-form-select"
+                      className="tutor-form-select"
                     >
                       <option value="SPRING">1학기</option>
                       <option value="SUMMER">여름학기</option>
@@ -313,15 +313,15 @@ const CourseManagement = () => {
                 </div>
               </div>
 
-              <div className="admin-modal-footer">
+              <div className="tutor-modal-footer">
                 <button 
-                  className="admin-btn-cancel"
+                  className="tutor-btn-cancel"
                   onClick={() => setShowCreateModal(false)}
                 >
                   취소
                 </button>
                 <button 
-                  className="admin-btn-submit"
+                  className="tutor-btn-submit"
                   onClick={handleCreateSection}
                   disabled={!formData.courseId && !formData.courseTitle}
                 >
@@ -332,7 +332,7 @@ const CourseManagement = () => {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 

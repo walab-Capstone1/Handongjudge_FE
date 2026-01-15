@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
 import ReactMarkdown from "react-markdown";
 import Alert from "../../components/Alert";
@@ -132,14 +132,14 @@ const ProblemManagement = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <TutorLayout>
         <LoadingSpinner message="문제 목록을 불러오는 중..." />
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <TutorLayout>
       <div className="problem-management">
         {alertMessage && (
           <Alert 
@@ -148,11 +148,11 @@ const ProblemManagement = () => {
             onClose={() => setAlertMessage(null)}
           />
         )}
-        <div className="admin-page-header">
-          <h1 className="admin-page-title">문제 관리</h1>
-          <div className="admin-header-actions">
+        <div className="tutor-page-header">
+          <h1 className="tutor-page-title">문제 관리</h1>
+          <div className="tutor-header-actions">
             <button 
-              className="admin-btn-primary"
+              className="tutor-btn-primary"
               onClick={() => navigate('/tutor/problems/create')}
             >
               새 문제 만들기
@@ -160,37 +160,37 @@ const ProblemManagement = () => {
           </div>
         </div>
 
-        <div className="admin-filters-section">
-          <div className="admin-search-box">
+        <div className="tutor-filters-section">
+          <div className="tutor-search-box">
             <input
               type="text"
               placeholder="문제명으로 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="admin-search-input"
+              className="tutor-search-input"
             />
           </div>
         </div>
 
-        <div className="admin-problems-table-container">
+        <div className="tutor-problems-table-container">
           {filteredProblems.length > 0 ? (
-            <table className="admin-problems-table">
+            <table className="tutor-problems-table">
               <thead>
                 <tr>
-                  <th className="admin-problem-title-cell">문제 제목</th>
-                  <th className="admin-problem-meta-cell">시간 제한</th>
-                  <th className="admin-problem-meta-cell">메모리 제한</th>
-                  <th className="admin-problem-meta-cell">생성일</th>
-                  <th className="admin-problem-actions-cell">관리</th>
+                  <th className="tutor-problem-title-cell">문제 제목</th>
+                  <th className="tutor-problem-meta-cell">시간 제한</th>
+                  <th className="tutor-problem-meta-cell">메모리 제한</th>
+                  <th className="tutor-problem-meta-cell">생성일</th>
+                  <th className="tutor-problem-actions-cell">관리</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProblems.map((problem) => (
                   <tr key={problem.id}>
-                    <td className="admin-problem-title-cell">
-                      <div className="admin-problem-title-wrapper">
+                    <td className="tutor-problem-title-cell">
+                      <div className="tutor-problem-title-wrapper">
                         <span 
-                          className="admin-problem-title admin-problem-title-clickable"
+                          className="tutor-problem-title tutor-problem-title-clickable"
                           onClick={() => {
                             setSelectedProblem(problem);
                             setShowProblemModal(true);
@@ -201,32 +201,32 @@ const ProblemManagement = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="admin-problem-meta-cell">
+                    <td className="tutor-problem-meta-cell">
                       {problem.timeLimit ? `${problem.timeLimit}초` : '-'}
                     </td>
-                    <td className="admin-problem-meta-cell">
+                    <td className="tutor-problem-meta-cell">
                       {problem.memoryLimit ? `${problem.memoryLimit}MB` : '-'}
                     </td>
-                    <td className="admin-problem-meta-cell">
+                    <td className="tutor-problem-meta-cell">
                       {formatDate(problem.createdAt)}
                     </td>
-                    <td className="admin-problem-actions-cell">
-                      <div className="admin-problem-actions-inline">
+                    <td className="tutor-problem-actions-cell">
+                      <div className="tutor-problem-actions-inline">
                         <button 
-                          className="admin-btn-table-action admin-btn-edit"
+                          className="tutor-btn-table-action tutor-btn-edit"
                           onClick={() => navigate(`/tutor/problems/${problem.id}/edit`)}
                         >
                           수정
                         </button>
                         <button 
-                          className="admin-btn-table-action admin-btn-copy"
+                          className="tutor-btn-table-action tutor-btn-copy"
                           onClick={() => handleCopyClick(problem)}
                           style={{ marginLeft: '8px' }}
                         >
                           복사
                         </button>
                         <button 
-                          className="admin-btn-table-action admin-btn-delete"
+                          className="tutor-btn-table-action tutor-btn-delete"
                           onClick={() => handleDeleteClick(problem)}
                           style={{ marginLeft: '8px' }}
                         >
@@ -251,20 +251,20 @@ const ProblemManagement = () => {
         {/* 문제 설명 모달 */}
         {showProblemModal && selectedProblem && (
           <div 
-            className="admin-modal-overlay" 
+            className="tutor-modal-overlay" 
             onClick={() => {
               setShowProblemModal(false);
               setSelectedProblem(null);
             }}
           >
             <div 
-              className="admin-modal-content admin-modal-content-large" 
+              className="tutor-modal-content tutor-modal-content-large" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="admin-modal-header">
+              <div className="tutor-modal-header">
                 <h2>{selectedProblem.title}</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => {
                     setShowProblemModal(false);
                     setSelectedProblem(null);
@@ -273,7 +273,7 @@ const ProblemManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="admin-modal-body">
+              <div className="tutor-modal-body">
                 <div className="problem-description-modal-content">
                   <ReactMarkdown
                     components={{
@@ -315,7 +315,7 @@ const ProblemManagement = () => {
         {/* 삭제 확인 모달 */}
         {showDeleteModal && problemToDelete && (
           <div 
-            className="admin-modal-overlay" 
+            className="tutor-modal-overlay" 
             onClick={() => {
               if (!isDeleting) {
                 setShowDeleteModal(false);
@@ -324,13 +324,13 @@ const ProblemManagement = () => {
             }}
           >
             <div 
-              className="admin-modal-content" 
+              className="tutor-modal-content" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="admin-modal-header">
+              <div className="tutor-modal-header">
                 <h2>문제 삭제 확인</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => {
                     if (!isDeleting) {
                       setShowDeleteModal(false);
@@ -342,16 +342,16 @@ const ProblemManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="admin-modal-body">
+              <div className="tutor-modal-body">
                 <p>정말로 다음 문제를 삭제하시겠습니까?</p>
                 <p style={{ fontWeight: 'bold', marginTop: '8px' }}>{problemToDelete.title}</p>
                 <p style={{ color: '#e74c3c', marginTop: '16px', fontSize: '14px' }}>
                   ⚠️ 이 작업은 되돌릴 수 없습니다.
                 </p>
               </div>
-              <div className="admin-modal-footer">
+              <div className="tutor-modal-footer">
                 <button 
-                  className="admin-btn-secondary"
+                  className="tutor-btn-secondary"
                   onClick={() => {
                     setShowDeleteModal(false);
                     setProblemToDelete(null);
@@ -361,7 +361,7 @@ const ProblemManagement = () => {
                   취소
                 </button>
                 <button 
-                  className="admin-btn-danger"
+                  className="tutor-btn-danger"
                   onClick={handleDeleteConfirm}
                   disabled={isDeleting}
                 >
@@ -375,7 +375,7 @@ const ProblemManagement = () => {
         {/* 복사 모달 */}
         {showCopyModal && problemToCopy && (
           <div 
-            className="admin-modal-overlay" 
+            className="tutor-modal-overlay" 
             onClick={() => {
               if (!isCopying) {
                 setShowCopyModal(false);
@@ -385,13 +385,13 @@ const ProblemManagement = () => {
             }}
           >
             <div 
-              className="admin-modal-content" 
+              className="tutor-modal-content" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="admin-modal-header">
+              <div className="tutor-modal-header">
                 <h2>문제 복사</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => {
                     if (!isCopying) {
                       setShowCopyModal(false);
@@ -404,27 +404,27 @@ const ProblemManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="admin-modal-body">
+              <div className="tutor-modal-body">
                 <p>다음 문제를 복사합니다:</p>
                 <p style={{ fontWeight: 'bold', marginTop: '8px', marginBottom: '16px' }}>
                   {problemToCopy.title}
                 </p>
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                   <label htmlFor="copy-title">새 문제 제목</label>
                   <input
                     id="copy-title"
                     type="text"
                     value={copyTitle}
                     onChange={(e) => setCopyTitle(e.target.value)}
-                    className="admin-form-input"
+                    className="tutor-form-input"
                     placeholder="복사본 문제 제목을 입력하세요"
                     disabled={isCopying}
                   />
                 </div>
               </div>
-              <div className="admin-modal-footer">
+              <div className="tutor-modal-footer">
                 <button 
-                  className="admin-btn-secondary"
+                  className="tutor-btn-secondary"
                   onClick={() => {
                     setShowCopyModal(false);
                     setProblemToCopy(null);
@@ -435,7 +435,7 @@ const ProblemManagement = () => {
                   취소
                 </button>
                 <button 
-                  className="admin-btn-primary"
+                  className="tutor-btn-primary"
                   onClick={handleCopyConfirm}
                   disabled={isCopying || !copyTitle.trim()}
                 >
@@ -446,7 +446,7 @@ const ProblemManagement = () => {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 

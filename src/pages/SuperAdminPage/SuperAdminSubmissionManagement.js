@@ -200,7 +200,7 @@ const SuperAdminSubmissionManagement = () => {
                       <td>
                         <span 
                           style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                          onClick={() => navigate(`/admin/problems/${submission.problemId}/edit`)}
+                          onClick={() => navigate(`/tutor/problems/${submission.problemId}/edit`)}
                         >
                           {submission.problemTitle || '-'}
                         </span>

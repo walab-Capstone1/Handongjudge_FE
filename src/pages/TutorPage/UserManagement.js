@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import TutorLayout from "../../layouts/TutorLayout";
 import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
 import "./UserManagement.css";
@@ -175,17 +175,17 @@ const UserManagement = () => {
 
   if (loading) {
     return (
-      <AdminLayout selectedSection={currentSection}>
-        <div className="admin-loading-container">
-          <div className="admin-loading-spinner"></div>
+      <TutorLayout selectedSection={currentSection}>
+        <div className="tutor-loading-container">
+          <div className="tutor-loading-spinner"></div>
           <p>학생 데이터를 불러오는 중...</p>
         </div>
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
   return (
-    <AdminLayout selectedSection={currentSection}>
+    <TutorLayout selectedSection={currentSection}>
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <SectionNavigation 
@@ -198,20 +198,20 @@ const UserManagement = () => {
       {/* 전체 페이지인 경우 기존 헤더 유지 */}
       {!sectionId && (
         <div className="user-management">
-          <div className="admin-page-header">
-            <div className="admin-header-left">
-              <h1 className="admin-page-title">학생 관리</h1>
-              <div className="admin-search-box">
+          <div className="tutor-page-header">
+            <div className="tutor-header-left">
+              <h1 className="tutor-page-title">학생 관리</h1>
+              <div className="tutor-search-box">
                 <input
                   type="text"
                   placeholder="이름, 이메일, 팀ID로 검색..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="admin-search-input"
+                  className="tutor-search-input"
                 />
               </div>
             </div>
-            <div className="admin-header-right">
+            <div className="tutor-header-right">
               <select
                 value={filterSection}
                 onChange={(e) => setFilterSection(e.target.value)}
@@ -229,8 +229,8 @@ const UserManagement = () => {
       
       <div className="user-management">
 
-        <div className="admin-users-table-container">
-          <table className="admin-users-table">
+        <div className="tutor-users-table-container">
+          <table className="tutor-users-table">
             <thead>
                                   <tr>
                       <th>이름</th>
@@ -257,23 +257,23 @@ const UserManagement = () => {
                       {student.sectionNumber}분반
                     </span>
                   </td>
-                  <td className="admin-progress-cell">
-                    <div className="admin-progress-info">
-                      <div className="admin-progress-bar-container">
+                  <td className="tutor-progress-cell">
+                    <div className="tutor-progress-info">
+                      <div className="tutor-progress-bar-container">
                         <div 
-                          className="admin-progress-bar-fill" 
+                          className="tutor-progress-bar-fill" 
                           style={{ width: `${student.assignmentCompletionRate || 0}%` }}
                         ></div>
                       </div>
-                      <span className="admin-progress-text">
+                      <span className="tutor-progress-text">
                         {student.assignmentCompletionRate ? `${student.assignmentCompletionRate.toFixed(1)}%` : '0%'}
                       </span>
                     </div>
                   </td>
                   <td>
-                    <div className="admin-action-buttons">
+                    <div className="tutor-action-buttons">
                       <button 
-                        className="admin-btn-detail-view"
+                        className="tutor-btn-detail-view"
                         onClick={() => handleStudentDetailView(student)}
                         title="상세 보기"
                       >
@@ -285,9 +285,9 @@ const UserManagement = () => {
               ))}
                               {filteredStudents.length === 0 && (
                   <tr>
-                    <td colSpan="6" className="admin-no-data">
-                      <div className="admin-no-data-message">
-                        <span className="admin-no-data-icon"></span>
+                    <td colSpan="6" className="tutor-no-data">
+                      <div className="tutor-no-data-message">
+                        <span className="tutor-no-data-icon"></span>
                         <div>
                           {students.length === 0 ? (
                             <>
@@ -311,19 +311,19 @@ const UserManagement = () => {
 
         {/* 학생 상세보기 모달 */}
         {showDetailModal && selectedStudent && (
-          <div className="admin-modal-overlay" onClick={handleCloseDetailModal}>
+          <div className="tutor-modal-overlay" onClick={handleCloseDetailModal}>
             <div className="student-detail-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-modal-header">
+              <div className="tutor-modal-header">
                 <h2>과제별 진도율</h2>
-                <button className="admin-modal-close-btn" onClick={handleCloseDetailModal}>✕</button>
+                <button className="tutor-modal-close-btn" onClick={handleCloseDetailModal}>✕</button>
               </div>
               
-              <div className="admin-modal-body">
-                <div className="admin-assignments-progress-section">
+              <div className="tutor-modal-body">
+                <div className="tutor-assignments-progress-section">
                   {studentAssignments.length === 0 ? (
-                    <p className="admin-no-assignments">등록된 과제가 없습니다.</p>
+                    <p className="tutor-no-assignments">등록된 과제가 없습니다.</p>
                   ) : (
-                    <div className="admin-assignments-list-horizontal">
+                    <div className="tutor-assignments-list-horizontal">
                       {studentAssignments.map((assignment) => (
                         <div key={assignment.assignmentId} className="assignment-progress-card-wide">
                           <div className="assignment-progress-header">
@@ -333,21 +333,21 @@ const UserManagement = () => {
                                 <p className="assignment-description">{assignment.description}</p>
                               )}
                             </div>
-                            <span className="admin-progress-badge">{assignment.progressRate || 0}%</span>
+                            <span className="tutor-progress-badge">{assignment.progressRate || 0}%</span>
                           </div>
                           <div className="assignment-progress-body">
-                            <div className="admin-progress-stats">
+                            <div className="tutor-progress-stats">
                               <span>완료: {assignment.solvedProblems || 0} / {assignment.totalProblems || 0} 문제</span>
                             </div>
-                            <div className="admin-progress-bar-container">
+                            <div className="tutor-progress-bar-container">
                               <div 
-                                className="admin-progress-bar-fill" 
+                                className="tutor-progress-bar-fill" 
                                 style={{ width: `${assignment.progressRate || 0}%` }}
                               ></div>
                             </div>
                           </div>
                           <button 
-                            className="admin-btn-toggle-detail"
+                            className="tutor-btn-toggle-detail"
                             onClick={() => handleToggleAssignmentDetail(assignment.assignmentId)}
                           >
                             {expandedAssignment === assignment.assignmentId ? '상세보기 닫기 ▲' : '상세보기 ▼'}
@@ -355,13 +355,13 @@ const UserManagement = () => {
                           
                           {/* 문제별 상태 상세보기 */}
                           {expandedAssignment === assignment.assignmentId && (
-                            <div className="admin-problems-detail-section">
+                            <div className="tutor-problems-detail-section">
                               {assignmentProblemsDetail[assignment.assignmentId]?.length > 0 ? (
-                                <div className="admin-problems-grid">
+                                <div className="tutor-problems-grid">
                                   {assignmentProblemsDetail[assignment.assignmentId].map((problem) => (
-                                    <div key={problem.problemId} className={`admin-problem-status-card ${problem.status}`}>
-                                      <div className="admin-problem-info">
-                                        <span className="admin-problem-title">{problem.problemTitle}</span>
+                                    <div key={problem.problemId} className={`tutor-problem-status-card ${problem.status}`}>
+                                      <div className="tutor-problem-info">
+                                        <span className="tutor-problem-title">{problem.problemTitle}</span>
                                         <span className={`status-badge ${problem.status}`}>
                                           {problem.status === 'ACCEPTED' ? '✓ 완료' : 
                                            problem.status === 'SUBMITTED' ? '⋯ 제출함' : 
@@ -369,7 +369,7 @@ const UserManagement = () => {
                                         </span>
                                       </div>
                                       {problem.submissionCount > 0 && (
-                                        <div className="admin-submission-count">
+                                        <div className="tutor-submission-count">
                                           제출 횟수: {problem.submissionCount}회
                                         </div>
                                       )}
@@ -377,7 +377,7 @@ const UserManagement = () => {
                                   ))}
                                 </div>
                               ) : (
-                                <p className="admin-no-problems">문제 정보를 불러오는 중...</p>
+                                <p className="tutor-no-problems">문제 정보를 불러오는 중...</p>
                               )}
                             </div>
                           )}
@@ -392,7 +392,7 @@ const UserManagement = () => {
         )}
 
       </div>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 

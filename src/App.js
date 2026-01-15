@@ -14,15 +14,17 @@ import MyAssignmentsPage from "./pages/MyPage/MyAssignmentsPage";
 import AssignmentListPage from "./pages/AssignmentPage/AssignmentListPage";
 import AssignmentDetailPage from "./pages/AssignmentPage/AssignmentDetailPage";
 import ProblemSolvePage from "./pages/AssignmentPage/ProblemSolvePage";
-import AdminDashboard from "./pages/AdminPage/AdminDashboard";
-import CourseManagement from "./pages/AdminPage/CourseManagement";
-import AssignmentManagement from "./pages/AdminPage/AssignmentManagement";
-import AssignmentStudentProgress from "./pages/AdminPage/AssignmentStudentProgress";
-import UserManagement from "./pages/AdminPage/UserManagement";
-import NoticeManagement from "./pages/AdminPage/NoticeManagement";
-import ProblemManagement from "./pages/AdminPage/ProblemManagement";
-import ProblemCreate from "./pages/AdminPage/ProblemCreate";
-import ProblemEdit from "./pages/AdminPage/ProblemEdit";
+import TutorDashboard from "./pages/TutorPage/TutorDashboard";
+import CourseManagement from "./pages/TutorPage/CourseManagement";
+import AssignmentManagement from "./pages/TutorPage/AssignmentManagement";
+import AssignmentStudentProgress from "./pages/TutorPage/AssignmentStudentProgress";
+import UserManagement from "./pages/TutorPage/UserManagement";
+import NoticeManagement from "./pages/TutorPage/NoticeManagement";
+import ProblemManagement from "./pages/TutorPage/ProblemManagement";
+import ProblemSetManagement from "./pages/TutorPage/ProblemSetManagement";
+import ProblemCreate from "./pages/TutorPage/ProblemCreate";
+import ProblemEdit from "./pages/TutorPage/ProblemEdit";
+import SettingsPage from "./pages/TutorPage/SettingsPage";
 import AdminRoute from "./components/AdminRoute";
 import EnrollPage from "./pages/EnrollPage";
 import IndexPage from "./pages/IndexPage";
@@ -75,19 +77,25 @@ function App() {
             <Route path="/sections/:sectionId/assignments" element={<AssignmentListPage />} />
             <Route path="/sections/:sectionId/assignments/:assignmentId/detail" element={<AssignmentDetailPage />} />
             <Route path="/sections/:sectionId/assignments/:assignmentId/detail/problems/:problemId" element={<ProblemSolvePage />} />
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-            <Route path="/admin/courses" element={<AdminRoute><CourseManagement /></AdminRoute>} />
-            <Route path="/admin/assignments" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
-            <Route path="/admin/assignments/section/:sectionId" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
-            <Route path="/admin/assignments/section/:sectionId/progress" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
-            <Route path="/admin/assignments/section/:sectionId/progress/:assignmentId" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
-            <Route path="/admin/notices" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
-            <Route path="/admin/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
-            <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
-            <Route path="/admin/users/section/:sectionId" element={<AdminRoute><UserManagement /></AdminRoute>} />
-            <Route path="/admin/problems" element={<AdminRoute><ProblemManagement /></AdminRoute>} />
-            <Route path="/admin/problems/create" element={<AdminRoute><ProblemCreate /></AdminRoute>} />
-            <Route path="/admin/problems/:problemId/edit" element={<AdminRoute><ProblemEdit /></AdminRoute>} />
+            {/* 수업관리자 라우트 (기존 /admin → /tutor로 변경) */}
+            <Route path="/tutor" element={<AdminRoute><TutorDashboard /></AdminRoute>} />
+            <Route path="/tutor/courses" element={<AdminRoute><CourseManagement /></AdminRoute>} />
+            <Route path="/tutor/assignments" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
+            <Route path="/tutor/assignments/section/:sectionId" element={<AdminRoute><AssignmentManagement /></AdminRoute>} />
+            <Route path="/tutor/assignments/section/:sectionId/progress" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
+            <Route path="/tutor/assignments/section/:sectionId/progress/:assignmentId" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
+            <Route path="/tutor/notices" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
+            <Route path="/tutor/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
+            <Route path="/tutor/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+            <Route path="/tutor/users/section/:sectionId" element={<AdminRoute><UserManagement /></AdminRoute>} />
+            <Route path="/tutor/problems" element={<AdminRoute><ProblemManagement /></AdminRoute>} />
+            <Route path="/tutor/problems/create" element={<AdminRoute><ProblemCreate /></AdminRoute>} />
+            <Route path="/tutor/problems/:problemId/edit" element={<AdminRoute><ProblemEdit /></AdminRoute>} />
+            <Route path="/tutor/problems/sets" element={<AdminRoute><ProblemSetManagement /></AdminRoute>} />
+            <Route path="/tutor/settings" element={<AdminRoute><SettingsPage /></AdminRoute>} />
+            {/* 기존 /admin 라우트는 리다이렉트 (하위 호환성) */}
+            <Route path="/admin" element={<AdminRoute><TutorDashboard /></AdminRoute>} />
+            <Route path="/admin/*" element={<AdminRoute><TutorDashboard /></AdminRoute>} />
             {/* 시스템 관리자 라우트 */}
             <Route path="/super-admin" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
             <Route path="/super-admin/system-notices" element={<SuperAdminRoute><SystemNoticeManagement /></SuperAdminRoute>} />

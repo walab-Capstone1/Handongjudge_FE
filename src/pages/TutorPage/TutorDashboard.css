@@ -1,7 +1,7 @@
-/* AdminDashboard.css */
+/* TutorDashboard.css */
 @import '../../styles/variables.css';
 
-.admin-dashboard {
+.tutor-dashboard {
   padding: 0;
 }
 
@@ -15,7 +15,7 @@
   gap: 1rem;
 }
 
-.admin-loading-spinner {
+.tutor-loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid var(--color-border);
@@ -104,7 +104,7 @@
 }
 
 /* 필터 섹션 */
-.admin-filter-section {
+.tutor-filter-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -118,12 +118,12 @@
 }
 
 @media (max-width: 768px) {
-  .admin-filter-section {
+  .tutor-filter-section {
     flex-direction: column;
     align-items: stretch;
   }
   
-  .admin-filter-left {
+  .tutor-filter-left {
     flex-direction: column;
     align-items: stretch;
   }
@@ -133,14 +133,14 @@
   }
 }
 
-.admin-filter-left {
+.tutor-filter-left {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex: 1;
 }
 
-.admin-filter-right {
+.tutor-filter-right {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -149,20 +149,20 @@
   gap: 1rem;
 }
 
-.admin-filter-group {
+.tutor-filter-group {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.admin-filter-label {
+.tutor-filter-label {
   font-size: 0.9rem;
   font-weight: 600;
   color: #374151;
   white-space: nowrap;
 }
 
-.admin-filter-select {
+.tutor-filter-select {
   padding: 0.5rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -174,34 +174,34 @@
   min-width: 120px;
 }
 
-.admin-filter-select:hover {
+.tutor-filter-select:hover {
   border-color: #667eea;
 }
 
-.admin-filter-select:focus {
+.tutor-filter-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.admin-filter-stats {
+.tutor-filter-stats {
   margin-left: auto;
 }
 
-.admin-filter-count {
+.tutor-filter-count {
   font-size: 0.9rem;
   color: #6b7280;
   font-weight: 500;
 }
 
-.admin-sections-grid {
+.tutor-sections-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
 }
 
-.admin-stat-card {
+.tutor-stat-card {
   background: white;
   border-radius: 12px;
   padding: 2rem;
@@ -214,13 +214,13 @@
   position: relative;
 }
 
-.admin-stat-card:hover {
+.tutor-stat-card:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
 }
 
-.admin-stat-icon {
+.tutor-stat-icon {
   font-size: 3rem;
   padding: 1rem;
   border-radius: 50%;
@@ -232,18 +232,18 @@
   height: 80px;
 }
 
-.admin-stat-content {
+.tutor-stat-content {
   flex: 1;
 }
 
-.admin-stat-number {
+.tutor-stat-number {
   font-size: 2.5rem;
   font-weight: 800;
   color: #2d3436;
   margin: 0 0 0.5rem 0;
 }
 
-.admin-stat-label {
+.tutor-stat-label {
   font-size: 1.1rem;
   color: #636e72;
   margin: 0;
@@ -257,7 +257,7 @@
   gap: 2rem;
 }
 
-.admin-sections-overview {
+.tutor-sections-overview {
   background: white;
   border-radius: 20px;
   padding: 2rem;
@@ -265,14 +265,14 @@
   margin-bottom: 2rem;
 }
 
-.admin-sections-grid {
+.tutor-sections-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
   gap: 1.5rem;
 }
 
 
-.admin-dashboard .admin-sections-grid {
+.tutor-dashboard .tutor-sections-grid {
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
 }
 
@@ -296,12 +296,12 @@
 }
 
 
-.section-card.admin-clickable {
+.section-card.tutor-clickable {
   cursor: pointer;
 }
 
 
-.section-card.admin-disabled {
+.section-card.tutor-disabled {
   opacity: 0.6;
   /* 관리자 페이지에서는 클릭 가능하도록 pointer-events 제거 */
 }
@@ -349,7 +349,7 @@
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
-.admin-title-and-badge {
+.tutor-title-and-badge {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -376,7 +376,7 @@
   white-space: nowrap;
 }
 
-.admin-year-badge {
+.tutor-year-badge {
   background: #f3f4f6;
   color: #4b5563;
   font-size: 0.85rem;
@@ -401,7 +401,7 @@
 }
 
 
-.section-footer .admin-btn-toggle-active {
+.section-footer .tutor-btn-toggle-active {
   justify-self: start;
   flex-shrink: 0;
   width: 87px;
@@ -440,29 +440,29 @@
   margin-bottom: 0.85rem;
 }
 
-.admin-info-row {
+.tutor-info-row {
   display: flex;
   justify-content: space-between;
   padding: 0.4rem 0;
 }
 
-.admin-info-label {
+.tutor-info-label {
   font-size: 0.85rem;
   color: #64748b;
   font-weight: 500;
 }
 
-.admin-info-value {
+.tutor-info-value {
   font-size: 0.85rem;
   color: #1e293b;
   font-weight: 600;
 }
 
-.admin-info-value.status-active {
+.tutor-info-value.status-active {
   color: #10b981;
 }
 
-.admin-info-value.status-inactive {
+.tutor-info-value.status-inactive {
   color: #ef4444;
 }
 
@@ -474,7 +474,7 @@
   margin-bottom: 0;
 }
 
-.admin-btn-toggle-active {
+.tutor-btn-toggle-active {
   padding: 0.5rem 1rem;
   border: 2px solid;
   border-radius: 6px;
@@ -485,13 +485,13 @@
   flex-shrink: 0;
 }
 
-.admin-btn-toggle-active.admin-active {
+.tutor-btn-toggle-active.tutor-active {
   background: #667eea !important;
   border-color: #667eea !important;
   color: white;
 }
 
-.admin-btn-toggle-active.admin-active:hover {
+.tutor-btn-toggle-active.tutor-active:hover {
   background: #5568d3 !important;
   border-color: #5568d3 !important;
   color: white;
@@ -499,46 +499,46 @@
 
 /* 활성 버튼이 보라색이 아닌 경우 강제 적용 */
 
-.section-footer .admin-btn-toggle-active.admin-active {
+.section-footer .tutor-btn-toggle-active.tutor-active {
   background: #667eea !important;
   border-color: #667eea !important;
   color: white !important;
 }
 
 
-.section-footer .admin-btn-toggle-active.admin-active:hover {
+.section-footer .tutor-btn-toggle-active.tutor-active:hover {
   background: #5568d3 !important;
   border-color: #5568d3 !important;
   color: white !important;
 }
 
-.admin-btn-toggle-active.admin-inactive {
+.tutor-btn-toggle-active.tutor-inactive {
   background: #9ca3af !important;
   border-color: #9ca3af !important;
   color: white !important;
 }
 
-.admin-btn-toggle-active.admin-inactive:hover {
+.tutor-btn-toggle-active.tutor-inactive:hover {
   background: #6b7280 !important;
   border-color: #6b7280 !important;
   color: white !important;
 }
 
 
-.section-footer .admin-btn-toggle-active.admin-inactive {
+.section-footer .tutor-btn-toggle-active.tutor-inactive {
   background: #9ca3af !important;
   border-color: #9ca3af !important;
   color: white !important;
 }
 
 
-.section-footer .admin-btn-toggle-active.admin-inactive:hover {
+.section-footer .tutor-btn-toggle-active.tutor-inactive:hover {
   background: #6b7280 !important;
   border-color: #6b7280 !important;
   color: white !important;
 }
 
-.admin-btn-action {
+.tutor-btn-action {
   flex: 1;
   padding: 0.6rem 0.6rem;
   border: 1px solid #d1d5f0;
@@ -554,25 +554,25 @@
   text-align: center;
 }
 
-.admin-btn-action:hover {
+.tutor-btn-action:hover {
   background: white;
   border-color: #667eea;
   color: #667eea;
 }
 
-.admin-btn-action.primary {
+.tutor-btn-action.primary {
   background: #667eea;
   border-color: #667eea;
   color: white;
 }
 
-.admin-btn-action.primary:hover {
+.tutor-btn-action.primary:hover {
   background: #5568d3;
   border-color: #5568d3;
 }
 
 
-.section-stat .admin-stat-icon {
+.section-stat .tutor-stat-icon {
   font-size: 1rem;
   width: auto;
   height: auto;
@@ -583,11 +583,11 @@
 }
 
 
-.section-stat .admin-stat-text {
+.section-stat .tutor-stat-text {
   font-size: 0.9rem;
 }
 
-.admin-no-sections {
+.tutor-no-sections {
   grid-column: 1 / -1;
   text-align: center;
   padding: 3rem;
@@ -595,8 +595,8 @@
   font-style: italic;
 }
 
-.admin-recent-activity,
-.admin-quick-actions {
+.tutor-recent-activity,
+.tutor-quick-actions {
   background: white;
   border-radius: 20px;
   padding: 2rem;
@@ -623,13 +623,13 @@
   border-radius: 2px;
 }
 
-.admin-activity-list {
+.tutor-activity-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.admin-activity-item {
+.tutor-activity-item {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -639,12 +639,12 @@
   transition: all 0.2s ease;
 }
 
-.admin-activity-item:hover {
+.tutor-activity-item:hover {
   background: #e9ecef;
   transform: translateX(5px);
 }
 
-.admin-activity-icon {
+.tutor-activity-icon {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
@@ -656,29 +656,29 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.admin-activity-content {
+.tutor-activity-content {
   flex: 1;
 }
 
-.admin-activity-message {
+.tutor-activity-message {
   font-size: 1rem;
   color: #2d3436;
   margin: 0 0 0.25rem 0;
   font-weight: 500;
 }
 
-.admin-activity-time {
+.tutor-activity-time {
   font-size: 0.9rem;
   color: #636e72;
 }
 
-.admin-action-buttons {
+.tutor-action-buttons {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.admin-action-btn {
+.tutor-action-btn {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -692,40 +692,40 @@
   text-align: left;
 }
 
-.admin-action-btn.primary {
+.tutor-action-btn.primary {
   background: #667eea;
   color: white;
 }
 
-.admin-action-btn.primary:hover {
+.tutor-action-btn.primary:hover {
   background: #5568d3;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.admin-action-btn.secondary {
+.tutor-action-btn.secondary {
   background: #f093fb;
   color: white;
 }
 
-.admin-action-btn.secondary:hover {
+.tutor-action-btn.secondary:hover {
   background: #e07ce8;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(240, 147, 251, 0.3);
 }
 
-.admin-action-btn.tertiary {
+.tutor-action-btn.tertiary {
   background: #00b894;
   color: white;
 }
 
-.admin-action-btn.tertiary:hover {
+.tutor-action-btn.tertiary:hover {
   background: #009c7f;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
 }
 
-.admin-btn-icon {
+.tutor-btn-icon {
   font-size: 1.2rem;
 }
 
@@ -735,12 +735,12 @@
     grid-template-columns: 1fr;
   }
   
-  .admin-stats-grid {
+  .tutor-stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
   }
   
-  .admin-stat-card {
+  .tutor-stat-card {
     padding: 1.5rem;
   }
 }
@@ -754,42 +754,42 @@
     font-size: 1rem;
   }
   
-  .admin-stats-grid {
+  .tutor-stats-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
   
-  .admin-stat-card {
+  .tutor-stat-card {
     padding: 1.5rem;
     flex-direction: column;
     text-align: center;
   }
   
-  .admin-stat-icon {
+  .tutor-stat-icon {
     font-size: 2.5rem;
     width: 60px;
     height: 60px;
   }
   
-  .admin-stat-number {
+  .tutor-stat-number {
     font-size: 2rem;
   }
   
-  .admin-recent-activity,
-  .admin-quick-actions {
+  .tutor-recent-activity,
+  .tutor-quick-actions {
     padding: 1.5rem;
   }
 }
 
 /* 새로운 섹션 카드 스타일 */
 
-.section-card.admin-clickable {
+.section-card.tutor-clickable {
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 
-.section-card.admin-clickable:hover {
+.section-card.tutor-clickable:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border-color: #0984e3;
@@ -830,7 +830,7 @@
   gap: 0.5rem;
 }
 
-.admin-btn-icon-small {
+.tutor-btn-icon-small {
   width: 36px;
   height: 36px;
   border: 1px solid #e1e8ed;
@@ -844,7 +844,7 @@
   font-size: 1rem;
 }
 
-.admin-btn-icon-small:hover {
+.tutor-btn-icon-small:hover {
   background: #f8f9fa;
   border-color: #0984e3;
 }
@@ -860,7 +860,7 @@
   border-radius: 8px;
 }
 
-.admin-stat-item {
+.tutor-stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -870,23 +870,23 @@
   overflow: hidden; /* 내용이 넘치지 않도록 */
 }
 
-.admin-stat-icon {
+.tutor-stat-icon {
   font-size: 1.1rem; /* 아이콘 크기를 살짝 줄여서 카드 안에 잘 들어가도록 */
 }
 
-.admin-stat-label {
+.tutor-stat-label {
   font-size: 0.8rem;
   color: #636e72;
   font-weight: 500;
 }
 
-.admin-stat-value {
+.tutor-stat-value {
   font-size: 0.9rem;
   color: #2d3436;
   font-weight: 600;
 }
 
-.admin-btn-secondary {
+.tutor-btn-secondary {
   padding: 0.65rem 1rem;
   border: 1px solid #d1d5f0;
   background: white;
@@ -898,13 +898,13 @@
   transition: all 0.2s ease;
 }
 
-.admin-btn-secondary:hover {
+.tutor-btn-secondary:hover {
   background: white;
   border-color: #667eea;
   color: #667eea;
 }
 
-.admin-btn-primary {
+.tutor-btn-primary {
   padding: 0.65rem 1rem;
   border: 1px solid #667eea;
   background: #667eea;
@@ -916,13 +916,13 @@
   transition: all 0.2s ease;
 }
 
-.admin-btn-primary:hover {
+.tutor-btn-primary:hover {
   background: #5568d3;
   border-color: #5568d3;
 }
 
 /* 모달 상세 스타일 */
-.admin-modal-body {
+.tutor-modal-body {
   padding: 2rem;
 }
 
@@ -937,13 +937,13 @@
   border-radius: 12px;
 }
 
-.admin-detail-stat-item {
+.tutor-detail-stat-item {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.admin-detail-stat-icon {
+.tutor-detail-stat-icon {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
@@ -955,19 +955,19 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.admin-detail-stat-content {
+.tutor-detail-stat-content {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.admin-detail-stat-label {
+.tutor-detail-stat-label {
   font-size: 0.8rem;
   color: #636e72;
   font-weight: 500;
 }
 
-.admin-detail-stat-value {
+.tutor-detail-stat-value {
   font-size: 1rem;
   color: #2d3436;
   font-weight: 600;
@@ -980,7 +980,7 @@
   gap: 1rem;
 }
 
-.admin-btn-detail {
+.tutor-btn-detail {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -993,21 +993,21 @@
   text-align: left;
 }
 
-.admin-btn-detail:hover {
+.tutor-btn-detail:hover {
   border-color: #0984e3;
   box-shadow: 0 2px 8px rgba(9, 132, 227, 0.1);
 }
 
-.admin-btn-detail.primary {
+.tutor-btn-detail.primary {
   border-color: #667eea;
   background: #f8f9ff;
 }
 
-.admin-btn-detail.primary:hover {
+.tutor-btn-detail.primary:hover {
   background: #eef2ff;
 }
 
-.admin-btn-icon {
+.tutor-btn-icon {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
@@ -1019,19 +1019,19 @@
   flex-shrink: 0;
 }
 
-.admin-btn-detail.primary .admin-btn-icon {
+.tutor-btn-detail.primary .tutor-btn-icon {
   background: #667eea;
   color: white;
 }
 
-.admin-btn-content h4 {
+.tutor-btn-content h4 {
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
   font-weight: 600;
   color: #2d3436;
 }
 
-.admin-btn-content p {
+.tutor-btn-content p {
   margin: 0;
   font-size: 0.8rem;
   color: #636e72;
@@ -1039,7 +1039,7 @@
 }
 
 /* 수업 생성 버튼 */
-.admin-btn-create-section {
+.tutor-btn-create-section {
   background: #667eea;
   color: white;
   border: none;
@@ -1052,13 +1052,13 @@
   white-space: nowrap;
 }
 
-.admin-btn-create-section:hover {
+.tutor-btn-create-section:hover {
   background: #5568d3;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.admin-btn-copy-section {
+.tutor-btn-copy-section {
   background: white;
   color: #667eea;
   border: 2px solid #667eea;
@@ -1071,7 +1071,7 @@
   white-space: nowrap;
 }
 
-.admin-btn-copy-section:hover {
+.tutor-btn-copy-section:hover {
   background: #667eea;
   color: white;
   transform: translateY(-1px);
@@ -1079,7 +1079,7 @@
 }
 
 /* 수업 생성 모달 스타일 */
-.admin-modal-overlay {
+.tutor-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1092,7 +1092,7 @@
   z-index: 1000;
 }
 
-.admin-modal-content {
+.tutor-modal-content {
   background: white;
   border-radius: 16px;
   width: 90%;
@@ -1102,7 +1102,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.admin-modal-content-large {
+.tutor-modal-content-large {
   width: 95vw !important;
   max-width: 95vw !important;
   min-width: 800px;
@@ -1113,7 +1113,7 @@
   margin: auto;
 }
 
-.admin-modal-content-extra-large {
+.tutor-modal-content-extra-large {
   width: 98vw !important;
   max-width: 98vw !important;
   min-width: 1000px;
@@ -1124,7 +1124,7 @@
   margin: auto;
 }
 
-.admin-modal-header {
+.tutor-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1132,14 +1132,14 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.admin-modal-header h2 {
+.tutor-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
 }
 
-.admin-modal-close {
+.tutor-modal-close {
   background: none;
   border: none;
   font-size: 2rem;
@@ -1154,15 +1154,15 @@
   transition: color 0.2s ease;
 }
 
-.admin-modal-close:hover {
+.tutor-modal-close:hover {
   color: #374151;
 }
 
-.admin-form-group {
+.tutor-form-group {
   margin-bottom: 1.5rem;
 }
 
-.admin-form-group label {
+.tutor-form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -1170,8 +1170,8 @@
   font-size: 0.9rem;
 }
 
-.admin-form-input,
-.admin-form-select {
+.tutor-form-input,
+.tutor-form-select {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
@@ -1180,20 +1180,20 @@
   transition: all 0.2s ease;
 }
 
-.admin-form-input:focus,
-.admin-form-select:focus {
+.tutor-form-input:focus,
+.tutor-form-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.admin-form-row {
+.tutor-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.admin-modal-footer {
+.tutor-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -1201,8 +1201,8 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.admin-btn-cancel,
-.admin-btn-submit {
+.tutor-btn-cancel,
+.tutor-btn-submit {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -1212,25 +1212,25 @@
   border: none;
 }
 
-.admin-btn-cancel {
+.tutor-btn-cancel {
   background: #f3f4f6;
   color: #6b7280;
 }
 
-.admin-btn-cancel:hover {
+.tutor-btn-cancel:hover {
   background: #e5e7eb;
 }
 
-.admin-btn-submit {
+.tutor-btn-submit {
   background: #667eea;
   color: white;
 }
 
-.admin-btn-submit:hover:not(:disabled) {
+.tutor-btn-submit:hover:not(:disabled) {
   background: #5568d3;
 }
 
-.admin-form-hint {
+.tutor-form-hint {
   display: block;
   margin-top: 0.5rem;
   font-size: 0.85rem;
@@ -1238,24 +1238,24 @@
   line-height: 1.4;
 }
 
-.admin-btn-submit:disabled {
+.tutor-btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* 가져오기 옵션 스타일 */
-.admin-form-label-bold {
+.tutor-form-label-bold {
   font-weight: 600;
   color: #374151;
   margin-bottom: 0.75rem;
   display: block;
 }
 
-.admin-checkbox-group {
+.tutor-checkbox-group {
   margin-bottom: 1rem;
 }
 
-.admin-checkbox-label {
+.tutor-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1264,7 +1264,7 @@
   color: #374151;
 }
 
-.admin-checkbox-label input[type="checkbox"] {
+.tutor-checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -1280,7 +1280,7 @@ input[type="checkbox"]:checked {
   background-color: #667eea;
 }
 
-.admin-selection-box {
+.tutor-selection-box {
   margin-top: 1rem;
   padding: 1rem;
   background: #f8f9fa;
@@ -1290,7 +1290,7 @@ input[type="checkbox"]:checked {
   overflow-y: auto;
 }
 
-.admin-selection-header {
+.tutor-selection-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1299,27 +1299,27 @@ input[type="checkbox"]:checked {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.admin-item-count {
+.tutor-item-count {
   font-size: 0.85rem;
   color: #6b7280;
   font-weight: 500;
 }
 
-.admin-loading-items,
-.admin-no-items {
+.tutor-loading-items,
+.tutor-no-items {
   padding: 1rem;
   text-align: center;
   color: #6b7280;
   font-size: 0.9rem;
 }
 
-.admin-item-list {
+.tutor-item-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.admin-list-item {
+.tutor-list-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1330,27 +1330,27 @@ input[type="checkbox"]:checked {
   transition: all 0.2s ease;
 }
 
-.admin-list-item:hover {
+.tutor-list-item:hover {
   background: #f9fafb;
   border-color: #d1d5db;
 }
 
-.admin-list-item input[type="checkbox"] {
+.tutor-list-item input[type="checkbox"] {
   accent-color: #667eea;
 }
 
-.admin-list-item input[type="checkbox"]:checked + .admin-item-title {
+.tutor-list-item input[type="checkbox"]:checked + .tutor-item-title {
   color: #667eea;
   font-weight: 600;
 }
 
-.admin-item-title {
+.tutor-item-title {
   flex: 1;
   font-size: 0.9rem;
   color: #374151;
 }
 
-.admin-item-date {
+.tutor-item-date {
   font-size: 0.8rem;
   color: #9ca3af;
 }
@@ -1373,7 +1373,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.assignment-item.admin-expanded {
+.assignment-item.tutor-expanded {
   border-color: #667eea;
 }
 
@@ -1387,13 +1387,13 @@ input[type="checkbox"]:checked {
 }
 
 
-.assignment-item-header .admin-checkbox-label {
+.assignment-item-header .tutor-checkbox-label {
   flex: 1;
   margin: 0;
 }
 
 
-.assignment-item-header .admin-checkbox-label input[type="checkbox"] {
+.assignment-item-header .tutor-checkbox-label input[type="checkbox"] {
   accent-color: #667eea;
 }
 
@@ -1406,13 +1406,13 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-count {
+.tutor-problem-count {
   font-size: 0.8rem;
   color: #9ca3af;
   margin-left: 0.5rem;
 }
 
-.admin-btn-expand-assignment {
+.tutor-btn-expand-assignment {
   padding: 0.25rem 0.5rem;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
@@ -1422,25 +1422,25 @@ input[type="checkbox"]:checked {
   transition: all 0.2s ease;
 }
 
-.admin-btn-expand-assignment:hover:not(:disabled) {
+.tutor-btn-expand-assignment:hover:not(:disabled) {
   background: #e5e7eb;
 }
 
-.admin-btn-expand-assignment:disabled {
+.tutor-btn-expand-assignment:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 /* 문제 선택 UI */
 
-.admin-problem-selection-box {
+.tutor-problem-selection-box {
   padding: 0.75rem;
   background: #f9fafb;
   border-top: 1px solid #e5e7eb;
 }
 
 
-.admin-problem-selection-header {
+.tutor-problem-selection-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1450,7 +1450,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-list {
+.tutor-problem-list {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -1459,7 +1459,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-item {
+.tutor-problem-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1471,50 +1471,50 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-item input[type="checkbox"] {
+.tutor-problem-item input[type="checkbox"] {
   accent-color: #667eea;
 }
 
 
-.admin-problem-item:hover {
+.tutor-problem-item:hover {
   background: #f9fafb;
 }
 
 
-.admin-problem-item  .admin-problem-title {
+.tutor-problem-item  .tutor-problem-title {
   flex: 1;
   color: #374151;
 }
 
 /* 단계별 컨텐츠 */
-.admin-step-content {
+.tutor-step-content {
   min-height: 400px;
   display: flex;
   flex-direction: column;
 }
 
-.admin-step-title {
+.tutor-step-title {
   font-size: 1.3rem;
   font-weight: 600;
   color: #374151;
   margin: 0 0 0.5rem 0;
 }
 
-.admin-step-description {
+.tutor-step-description {
   font-size: 0.95rem;
   color: #6b7280;
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }
 
-.admin-modal-body-large {
+.tutor-modal-body-large {
   flex: 1;
   overflow-y: auto;
   padding: 2rem;
 }
 
 /* Large 버전 스타일 */
-.admin-selection-box-large {
+.tutor-selection-box-large {
   margin-top: 1rem;
   padding: 1.5rem;
   background: #f8f9fa;
@@ -1523,7 +1523,7 @@ input[type="checkbox"]:checked {
   flex: 1;
 }
 
-.admin-item-list-large {
+.tutor-item-list-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 0.75rem;
@@ -1531,7 +1531,7 @@ input[type="checkbox"]:checked {
   overflow-y: auto;
 }
 
-.admin-list-item-large {
+.tutor-list-item-large {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1543,30 +1543,30 @@ input[type="checkbox"]:checked {
   cursor: pointer;
 }
 
-.admin-list-item-large:hover {
+.tutor-list-item-large:hover {
   background: #f9fafb;
   border-color: #667eea;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
-.admin-list-item-large input[type="checkbox"] {
+.tutor-list-item-large input[type="checkbox"] {
   accent-color: #667eea;
 }
 
-.admin-item-info {
+.tutor-item-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.admin-item-title-large {
+.tutor-item-title-large {
   font-size: 0.95rem;
   color: #374151;
   font-weight: 500;
 }
 
-.admin-item-meta {
+.tutor-item-meta {
   font-size: 0.8rem;
   color: #9ca3af;
 }
@@ -1591,7 +1591,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.assignment-item-large.admin-expanded {
+.assignment-item-large.tutor-expanded {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
@@ -1607,7 +1607,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.assignment-item-header-large .admin-checkbox-label input[type="checkbox"] {
+.assignment-item-header-large .tutor-checkbox-label input[type="checkbox"] {
   accent-color: #667eea;
 }
 
@@ -1632,7 +1632,7 @@ input[type="checkbox"]:checked {
   color: #9ca3af;
 }
 
-.admin-btn-expand-assignment-large {
+.tutor-btn-expand-assignment-large {
   padding: 0.5rem 1rem;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
@@ -1645,27 +1645,27 @@ input[type="checkbox"]:checked {
   white-space: nowrap;
 }
 
-.admin-btn-expand-assignment-large:hover:not(:disabled) {
+.tutor-btn-expand-assignment-large:hover:not(:disabled) {
   background: #667eea;
   color: white;
   border-color: #667eea;
 }
 
-.admin-btn-expand-assignment-large:disabled {
+.tutor-btn-expand-assignment-large:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 /* 문제 선택 박스 Large */
 
-.admin-problem-selection-box-large {
+.tutor-problem-selection-box-large {
   padding: 1rem;
   background: #f9fafb;
   border-top: 1px solid #e5e7eb;
 }
 
 
-.admin-problem-selection-header-large {
+.tutor-problem-selection-header-large {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1675,7 +1675,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-list-large {
+.tutor-problem-list-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
@@ -1684,7 +1684,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-item-large {
+.tutor-problem-item-large {
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -1699,13 +1699,13 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-item-large:hover {
+.tutor-problem-item-large:hover {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 
-.admin-problem-item-large-header {
+.tutor-problem-item-large-header {
   position: absolute;
   top: 0.5rem;
   right: 1rem;
@@ -1715,7 +1715,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-item-large-header  .admin-problem-checkbox {
+.tutor-problem-item-large-header  .tutor-problem-checkbox {
   width: 1.3rem;
   height: 1.3rem;
   cursor: pointer;
@@ -1723,7 +1723,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-item-large-body {
+.tutor-problem-item-large-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1738,7 +1738,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-title-row {
+.tutor-problem-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1749,7 +1749,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-title-large {
+.tutor-problem-title-large {
   font-weight: 600;
   color: #1e293b;
   font-size: 0.95rem;
@@ -1766,7 +1766,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-number-large {
+.tutor-problem-number-large {
   font-weight: 600;
   color: #667eea;
   font-size: 0.95rem;
@@ -1774,9 +1774,9 @@ input[type="checkbox"]:checked {
 }
 
 /* 버튼 스타일 */
-.admin-btn-next,
-.admin-btn-prev,
-.admin-btn-skip {
+.tutor-btn-next,
+.tutor-btn-prev,
+.tutor-btn-skip {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
@@ -1785,45 +1785,45 @@ input[type="checkbox"]:checked {
   font-size: 0.95rem;
 }
 
-.admin-btn-next {
+.tutor-btn-next {
   background: #667eea;
   color: white;
   border: none;
 }
 
-.admin-btn-next:hover:not(:disabled) {
+.tutor-btn-next:hover:not(:disabled) {
   background: #5568d3;
 }
 
-.admin-btn-next:disabled {
+.tutor-btn-next:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.admin-btn-prev {
+.tutor-btn-prev {
   background: white;
   color: #667eea;
   border: 2px solid #667eea;
 }
 
-.admin-btn-prev:hover {
+.tutor-btn-prev:hover {
   background: #f3f4f6;
 }
 
-.admin-btn-skip {
+.tutor-btn-skip {
   background: white;
   color: #9ca3af;
   border: 2px solid #e5e7eb;
 }
 
-.admin-btn-skip:hover {
+.tutor-btn-skip:hover {
   background: #f3f4f6;
   border-color: #d1d5db;
   color: #6b7280;
 }
 
 /* 상세보기 패널 */
-.admin-detail-overlay {
+.tutor-detail-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1833,7 +1833,7 @@ input[type="checkbox"]:checked {
   z-index: 1999;
 }
 
-.admin-detail-panel {
+.tutor-detail-panel {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -1849,7 +1849,7 @@ input[type="checkbox"]:checked {
   flex-direction: column;
 }
 
-.admin-detail-panel-header {
+.tutor-detail-panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1857,14 +1857,14 @@ input[type="checkbox"]:checked {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.admin-detail-panel-header h3 {
+.tutor-detail-panel-header h3 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
   color: #374151;
 }
 
-.admin-btn-close-detail {
+.tutor-btn-close-detail {
   width: 32px;
   height: 32px;
   border: none;
@@ -1879,26 +1879,26 @@ input[type="checkbox"]:checked {
   transition: all 0.2s ease;
 }
 
-.admin-btn-close-detail:hover {
+.tutor-btn-close-detail:hover {
   background: #e5e7eb;
   color: #374151;
 }
 
-.admin-detail-panel-content {
+.tutor-detail-panel-content {
   padding: 2rem;
   padding-bottom: 3rem;
   overflow-y: auto;
   flex: 1;
 }
 
-.admin-detail-title {
+.tutor-detail-title {
   font-size: 1.2rem;
   font-weight: 600;
   color: #374151;
   margin: 0 0 1rem 0;
 }
 
-.admin-detail-meta {
+.tutor-detail-meta {
   font-size: 0.9rem;
   color: #6b7280;
   margin-bottom: 1.5rem;
@@ -1906,7 +1906,7 @@ input[type="checkbox"]:checked {
   gap: 1rem;
 }
 
-.admin-detail-body {
+.tutor-detail-body {
   font-size: 0.95rem;
   line-height: 1.8;
   color: #374151;
@@ -1920,7 +1920,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-description {
+.tutor-problem-description {
   background: #f9fafb;
   padding: 1.5rem;
   border-radius: 8px;
@@ -1928,7 +1928,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-description .admin-inline-code {
+.tutor-problem-description .tutor-inline-code {
   background: #f3f4f6;
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
@@ -1938,7 +1938,7 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-description .admin-code-block {
+.tutor-problem-description .tutor-code-block {
   background: #1f2937;
   color: #f9fafb;
   padding: 1rem;
@@ -1948,13 +1948,13 @@ input[type="checkbox"]:checked {
 }
 
 
-.admin-problem-description .admin-code-block code {
+.tutor-problem-description .tutor-code-block code {
   font-family: 'Courier New', monospace;
   font-size: 0.9em;
 }
 
 /* 상세보기 버튼 */
-.admin-btn-view-detail {
+.tutor-btn-view-detail {
   padding: 0.4rem 0.8rem;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
@@ -1968,14 +1968,14 @@ input[type="checkbox"]:checked {
   flex-shrink: 0;
 }
 
-.admin-btn-view-detail:hover {
+.tutor-btn-view-detail:hover {
   background: #667eea;
   color: white;
   border-color: #667eea;
   transform: translateY(-1px);
 }
 
-.admin-btn-view-detail-card {
+.tutor-btn-view-detail-card {
   padding: 0.4rem 0.8rem;
   background: #f3f4f6;
   color: #667eea;
@@ -1989,16 +1989,16 @@ input[type="checkbox"]:checked {
   flex-shrink: 0;
 }
 
-.admin-btn-view-detail-card:hover {
+.tutor-btn-view-detail-card:hover {
   background: #667eea;
   color: white;
   border-color: #667eea;
   transform: translateY(-1px);
 }
 
-.admin-list-item-large,
+.tutor-list-item-large,
 
-.admin-problem-item-large {
+.tutor-problem-item-large {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2006,66 +2006,66 @@ input[type="checkbox"]:checked {
 }
 
 /* 4단계 최종 확인 스타일 */
-.admin-summary-section {
+.tutor-summary-section {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   margin-top: 1rem;
 }
 
-.admin-summary-item {
+.tutor-summary-item {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 1.5rem;
 }
 
-.admin-summary-label {
+.tutor-summary-label {
   font-size: 1.1rem;
   font-weight: 600;
   color: #374151;
   margin: 0 0 1rem 0;
 }
 
-.admin-summary-content {
+.tutor-summary-content {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.admin-summary-row {
+.tutor-summary-row {
   display: flex;
   gap: 1rem;
   align-items: flex-start;
 }
 
-.admin-summary-key {
+.tutor-summary-key {
   font-weight: 500;
   color: #6b7280;
   min-width: 100px;
 }
 
-.admin-summary-value {
+.tutor-summary-value {
   color: #374151;
   flex: 1;
 }
 
-.admin-summary-list {
+.tutor-summary-list {
   margin-top: 0.5rem;
   padding-left: 1rem;
 }
 
-.admin-summary-list-item {
+.tutor-summary-list-item {
   color: #374151;
   margin: 0.5rem 0;
   line-height: 1.6;
 }
 
-.admin-summary-assignment {
+.tutor-summary-assignment {
   color: #374151;
 }
 
-.admin-summary-skipped {
+.tutor-summary-skipped {
   color: #9ca3af;
   font-style: italic;
 }

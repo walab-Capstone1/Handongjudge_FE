@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
 import { FaPalette, FaHighlighter } from "react-icons/fa";
-import { markdownToHtml } from "../../utils/markdownToHtml";
-import ReactMarkdown from "react-markdown";
 import "./ProblemCreate.css";
 
 // 미리보기 컴포넌트 (ProblemCreate와 동일)
@@ -23,34 +21,12 @@ const ProblemPreview = ({ title, description, inputFormat, outputFormat, sampleI
         <h1 className="problem-preview-title">{title}</h1>
       )}
       
-      {/* 문제 설명 (마크다운 렌더링) */}
+      {/* 문제 설명 (HTML 그대로 렌더링) */}
       {description && (
-        <div className="problem-preview-description">
-          <ReactMarkdown
-            components={{
-              h1: ({node, ...props}) => <h1 className="problem-preview-h1" {...props} />,
-              h2: ({node, ...props}) => <h2 className="problem-preview-h2" {...props} />,
-              h3: ({node, ...props}) => <h3 className="problem-preview-h3" {...props} />,
-              code: ({node, inline, className, children, ...props}) => {
-                return inline ? (
-                  <code className="problem-preview-inline-code" {...props}>
-                    {children}
-                  </code>
-                ) : (
-                  <pre className="problem-preview-code-block">
-                    <code {...props}>
-                      {children}
-                    </code>
-                  </pre>
-                );
-              },
-              p: ({node, ...props}) => <p className="problem-preview-paragraph" {...props} />,
-              hr: ({node, ...props}) => <hr className="problem-preview-hr" {...props} />,
-            }}
-          >
-            {description}
-          </ReactMarkdown>
-        </div>
+        <div 
+          className="problem-preview-description"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       )}
       
       {/* 입력 형식 */}
@@ -110,7 +86,6 @@ const ProblemEdit = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const descriptionRef = useRef(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   // 폼 데이터
   const [formData, setFormData] = useState({
@@ -128,8 +103,7 @@ const ProblemEdit = () => {
   });
 
   const [currentTag, setCurrentTag] = useState('');
-  const [originalTimeLimit, setOriginalTimeLimit] = useState('');
-  const [originalMemoryLimit, setOriginalMemoryLimit] = useState('');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     fetchProblem();
@@ -138,82 +112,93 @@ const ProblemEdit = () => {
   // 초기 로드 시에만 descriptionRef에 내용 설정
   useEffect(() => {
     if (descriptionRef.current && formData.description && isInitialLoad && !loading) {
-      const isHTML = /<[^>]+>/.test(formData.description);
-      if (isHTML) {
-        descriptionRef.current.innerHTML = formData.description;
-      } else {
-        // 마크다운 텍스트를 그대로 넣기 (줄바꿈 보존)
-        descriptionRef.current.textContent = formData.descriptionText || formData.description;
-      }
+      descriptionRef.current.innerHTML = formData.description;
       setIsInitialLoad(false);
     }
-  }, [formData.description, formData.descriptionText, loading, isInitialLoad]);
+  }, [formData.description, loading, isInitialLoad]);
 
   const fetchProblem = async () => {
     try {
       setLoading(true);
-      setIsInitialLoad(true);
       const response = await APIService.getProblemInfo(problemId);
-      
       const problem = response?.data || response;
       
-      // 전체 description을 그대로 사용 (마크다운 텍스트 그대로)
+      console.log('불러온 문제 데이터:', problem);
+      
+      // 기존 설명에서 입력 형식, 출력 형식, 예제 추출
       const description = problem.description || '';
       
-      // HTML 태그가 있으면 제거하고 텍스트만 가져오기
-      const descriptionText = description.replace(/<[^>]*>/g, '') || description;
+      let mainDescription = description;
+      let inputFormat = '';
+      let outputFormat = '';
+      let sampleInputs = [{ input: '', output: '' }];
       
-      // timeLimit과 memoryLimit 처리
-      // 백엔드에서 null로 오는 경우가 있으므로 처리
-      // null이거나 undefined인 경우 빈 문자열로 처리
-      let timeLimit = '';
-      if (problem.timeLimit != null && problem.timeLimit !== undefined) {
-        const timeLimitValue = Number(problem.timeLimit);
-        if (!isNaN(timeLimitValue) && timeLimitValue > 0) {
-          timeLimit = String(timeLimitValue);
-        }
+      // 마크다운 형식 파싱
+      const inputFormatMatch = description.match(/## 입력 형식\s*\n([\s\S]*?)(?=\n\n## |$)/);
+      const outputFormatMatch = description.match(/## 출력 형식\s*\n([\s\S]*?)(?=\n\n## |$)/);
+      const exampleMatch = description.match(/## 예제\s*\n([\s\S]*?)$/);
+      
+      if (inputFormatMatch) {
+        inputFormat = inputFormatMatch[1].trim();
+        mainDescription = mainDescription.replace(/## 입력 형식\s*\n[\s\S]*?(?=\n\n## |$)/, '').trim();
       }
       
-      let memoryLimit = '';
-      if (problem.memoryLimit != null && problem.memoryLimit !== undefined) {
-        const memoryLimitValue = Number(problem.memoryLimit);
-        if (!isNaN(memoryLimitValue) && memoryLimitValue > 0) {
-          memoryLimit = String(memoryLimitValue);
-        }
+      if (outputFormatMatch) {
+        outputFormat = outputFormatMatch[1].trim();
+        mainDescription = mainDescription.replace(/## 출력 형식\s*\n[\s\S]*?(?=\n\n## |$)/, '').trim();
       }
       
-      // 기존 값 저장 (빈 값일 때 사용)
-      setOriginalTimeLimit(timeLimit);
-      setOriginalMemoryLimit(memoryLimit);
+      if (exampleMatch) {
+        // 예제 파싱
+        const exampleText = exampleMatch[1];
+        const exampleInputRegex = /### 예제 입력 (\d+)\s*\n```\s*\n([\s\S]*?)\n```/g;
+        const exampleOutputRegex = /### 예제 출력 (\d+)\s*\n```\s*\n([\s\S]*?)\n```/g;
+        
+        const inputMatches = [...exampleText.matchAll(exampleInputRegex)];
+        const outputMatches = [...exampleText.matchAll(exampleOutputRegex)];
+        
+        const maxIndex = Math.max(
+          inputMatches.length > 0 ? Math.max(...inputMatches.map(m => parseInt(m[1]))) : 0,
+          outputMatches.length > 0 ? Math.max(...outputMatches.map(m => parseInt(m[1]))) : 0
+        );
+        
+        sampleInputs = [];
+        for (let i = 1; i <= maxIndex; i++) {
+          const inputMatch = inputMatches.find(m => parseInt(m[1]) === i);
+          const outputMatch = outputMatches.find(m => parseInt(m[1]) === i);
+          sampleInputs.push({
+            input: inputMatch ? inputMatch[2].trim() : '',
+            output: outputMatch ? outputMatch[2].trim() : ''
+          });
+        }
+        
+        if (sampleInputs.length === 0) {
+          sampleInputs = [{ input: '', output: '' }];
+        }
+        
+        mainDescription = mainDescription.replace(/## 예제[\s\S]*$/, '').trim();
+      }
       
-      setFormData({
+      // description이 HTML인지 마크다운인지 확인
+      const isHTML = /<[^>]+>/.test(mainDescription);
+      const descriptionHTML = isHTML ? mainDescription : mainDescription;
+      const descriptionText = isHTML ? mainDescription.replace(/<[^>]*>/g, '') : mainDescription;
+      
+      const newFormData = {
         title: problem.title || '',
-        description: description, // 원본 그대로 (HTML 또는 마크다운)
-        descriptionText: descriptionText, // 텍스트만
-        inputFormat: '', // 기존 문제 수정 시에는 비워둠
-        outputFormat: '', // 기존 문제 수정 시에는 비워둠
+        description: descriptionHTML, // HTML 또는 마크다운
+        descriptionText: descriptionText,
+        inputFormat: inputFormat,
+        outputFormat: outputFormat,
         tags: [], // 태그는 백엔드에서 제공하지 않으면 빈 배열
         difficulty: problem.difficulty?.toString() || '1',
-        timeLimit: timeLimit,
-        memoryLimit: memoryLimit,
-        sampleInputs: [{ input: '', output: '' }], // 기존 문제 수정 시에는 비워둠
+        timeLimit: problem.timeLimit?.toString() || '',
+        memoryLimit: problem.memoryLimit?.toString() || '',
+        sampleInputs: sampleInputs,
         testcases: []
-      });
+      };
       
-      // descriptionRef에 마크다운 텍스트 그대로 설정 (약간의 지연 후)
-      setTimeout(() => {
-        if (descriptionRef.current) {
-          // HTML이 아닌 경우 텍스트로 설정 (줄바꿈 보존)
-          const isHTML = /<[^>]+>/.test(description);
-          if (isHTML) {
-            descriptionRef.current.innerHTML = description;
-          } else {
-            // 마크다운 텍스트를 그대로 넣기 (줄바꿈 보존)
-            descriptionRef.current.textContent = descriptionText;
-          }
-          setIsInitialLoad(false);
-        }
-      }, 200);
+      setFormData(newFormData);
     } catch (err) {
       console.error('문제 조회 실패:', err);
       setError('문제를 불러오는 중 오류가 발생했습니다.');
@@ -318,7 +303,6 @@ const ProblemEdit = () => {
     }
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -332,18 +316,13 @@ const ProblemEdit = () => {
       submitFormData.append('outputFormat', formData.outputFormat);
       submitFormData.append('tags', JSON.stringify(formData.tags));
       submitFormData.append('difficulty', formData.difficulty);
-      
-      // timeLimit과 memoryLimit이 비어있으면 기존 값 사용, 그래도 없으면 최소값 설정
-      const timeLimit = formData.timeLimit || originalTimeLimit || '1';
-      const memoryLimit = formData.memoryLimit || originalMemoryLimit || '256';
-      
-      submitFormData.append('timeLimit', timeLimit);
-      submitFormData.append('memoryLimit', memoryLimit);
+      submitFormData.append('timeLimit', formData.timeLimit || '0');
+      submitFormData.append('memoryLimit', formData.memoryLimit || '0');
       submitFormData.append('sampleInputs', JSON.stringify(formData.sampleInputs));
       
       // ZIP 파일 (선택적)
       if (zipFile) {
-        submitFormData.append('zipFile', zipFile);
+        submitFormData.append('newZipFile', zipFile);
       }
 
       // 테스트케이스 파일들
@@ -376,7 +355,7 @@ const ProblemEdit = () => {
 
   const getFullDescriptionForBackend = () => {
     // 백엔드 전송용 텍스트 생성 (마크다운 형식)
-    let full = formData.descriptionText || '';
+    let full = formData.descriptionText || formData.description.replace(/<[^>]*>/g, '') || '';
     
     if (formData.inputFormat) {
       full += '\n\n## 입력 형식\n' + formData.inputFormat;
@@ -401,29 +380,29 @@ const ProblemEdit = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
-        <div className="admin-loading-container">
-          <div className="admin-loading-spinner"></div>
+      <TutorLayout>
+        <div className="tutor-loading-container">
+          <div className="tutor-loading-spinner"></div>
         </div>
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <TutorLayout>
       <div className="problem-create">
-        <div className="admin-page-header">
-          <h1 className="admin-page-title">문제 수정</h1>
+        <div className="tutor-page-header">
+          <h1 className="tutor-page-title">문제 수정</h1>
           <button 
-            className="admin-btn-secondary"
-            onClick={() => navigate('/admin/problems')}
+            className="tutor-btn-secondary"
+            onClick={() => navigate('/tutor/problems')}
           >
             취소
           </button>
         </div>
 
         {error && (
-          <div className="admin-error-message">
+          <div className="tutor-error-message">
             {error}
           </div>
         )}
@@ -606,28 +585,6 @@ const ProblemEdit = () => {
                       ref={descriptionRef}
                       contentEditable
                       className="problem-create-text-editor"
-                      onPaste={(e) => {
-                        // 붙여넣기 이벤트 가로채기
-                        e.preventDefault();
-                        const paste = (e.clipboardData || window.clipboardData).getData('text');
-                        const selection = window.getSelection();
-                        if (!selection.rangeCount) return;
-                        
-                        const range = selection.getRangeAt(0);
-                        range.deleteContents();
-                        const textNode = document.createTextNode(paste);
-                        range.insertNode(textNode);
-                        range.collapse(false);
-                        
-                        // 상태 업데이트
-                        const htmlContent = descriptionRef.current?.innerHTML || '';
-                        const textContent = descriptionRef.current?.textContent || descriptionRef.current?.innerText || '';
-                        setFormData(prev => ({ 
-                          ...prev, 
-                          description: htmlContent,
-                          descriptionText: textContent 
-                        }));
-                      }}
                       onInput={(e) => {
                         const htmlContent = e.currentTarget?.innerHTML || '';
                         const textContent = e.currentTarget?.textContent || e.currentTarget?.innerText || '';
@@ -645,23 +602,6 @@ const ProblemEdit = () => {
                           description: htmlContent,
                           descriptionText: textContent 
                         }));
-                      }}
-                      onKeyDown={(e) => {
-                        // Ctrl+Z (또는 Cmd+Z on Mac) - Undo
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-                          e.preventDefault();
-                          document.execCommand('undo', false);
-                        }
-                        // Ctrl+Shift+Z (또는 Cmd+Shift+Z on Mac) - Redo
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) {
-                          e.preventDefault();
-                          document.execCommand('redo', false);
-                        }
-                        // Ctrl+Y - Redo (alternative)
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
-                          e.preventDefault();
-                          document.execCommand('redo', false);
-                        }
                       }}
                       suppressContentEditableWarning={true}
                       data-placeholder="문제 설명을 입력하세요"
@@ -791,15 +731,15 @@ const ProblemEdit = () => {
             <div className="problem-create-actions">
               <button
                 type="button"
-                className="admin-btn-secondary"
-                onClick={() => navigate('/admin/problems')}
+                className="tutor-btn-secondary"
+                onClick={() => navigate('/tutor/problems')}
                 disabled={submitting}
               >
                 취소
               </button>
               <button
                 type="submit"
-                className="admin-btn-primary"
+                className="tutor-btn-primary"
                 disabled={submitting}
               >
                 {submitting ? '수정 중...' : '수정 완료'}
@@ -808,7 +748,7 @@ const ProblemEdit = () => {
           </div>
         </form>
       </div>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 

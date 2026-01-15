@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
 import { FaPalette, FaHighlighter } from "react-icons/fa";
 import { markdownToHtml } from "../../utils/markdownToHtml";
@@ -401,29 +401,29 @@ const ProblemEdit = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
-        <div className="admin-loading-container">
-          <div className="admin-loading-spinner"></div>
+      <TutorLayout>
+        <div className="tutor-loading-container">
+          <div className="tutor-loading-spinner"></div>
         </div>
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <TutorLayout>
       <div className="problem-create">
-        <div className="admin-page-header">
-          <h1 className="admin-page-title">문제 수정</h1>
+        <div className="tutor-page-header">
+          <h1 className="tutor-page-title">문제 수정</h1>
           <button 
-            className="admin-btn-secondary"
-            onClick={() => navigate('/admin/problems')}
+            className="tutor-btn-secondary"
+            onClick={() => navigate('/tutor/problems')}
           >
             취소
           </button>
         </div>
 
         {error && (
-          <div className="admin-error-message">
+          <div className="tutor-error-message">
             {error}
           </div>
         )}
@@ -791,15 +791,15 @@ const ProblemEdit = () => {
             <div className="problem-create-actions">
               <button
                 type="button"
-                className="admin-btn-secondary"
-                onClick={() => navigate('/admin/problems')}
+                className="tutor-btn-secondary"
+                onClick={() => navigate('/tutor/problems')}
                 disabled={submitting}
               >
                 취소
               </button>
               <button
                 type="submit"
-                className="admin-btn-primary"
+                className="tutor-btn-primary"
                 disabled={submitting}
               >
                 {submitting ? '수정 중...' : '수정 완료'}
@@ -808,7 +808,7 @@ const ProblemEdit = () => {
           </div>
         </form>
       </div>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 

@@ -51,7 +51,7 @@ const IndexPage = () => {
     navigate("/courses");
   };
   const handleManagementClick = () => {
-    navigate("/admin");
+    navigate("/tutor");
   };
 
   return (

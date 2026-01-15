@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import TutorLayout from "../../layouts/TutorLayout";
 import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
@@ -82,7 +82,7 @@ const AssignmentManagement = () => {
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (openMoreMenu !== null && !event.target.closest('.admin-more-menu')) {
+      if (openMoreMenu !== null && !event.target.closest('.tutor-more-menu')) {
         setOpenMoreMenu(null);
       }
     };
@@ -1055,26 +1055,26 @@ const AssignmentManagement = () => {
 
   if (loading) {
     return (
-      <AdminLayout selectedSection={currentSection}>
-        <div className="admin-loading-container">
-          <div className="admin-loading-spinner"></div>
+      <TutorLayout selectedSection={currentSection}>
+        <div className="tutor-loading-container">
+          <div className="tutor-loading-spinner"></div>
           <p>과제 데이터를 불러오는 중...</p>
         </div>
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
   return (
-    <AdminLayout selectedSection={currentSection}>
+    <TutorLayout selectedSection={currentSection}>
       <>
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <>
-          <div className="admin-page-header">
-            <h1 className="admin-page-title">과제 관리</h1>
-            <div className="admin-header-actions">
+          <div className="tutor-page-header">
+            <h1 className="tutor-page-title">과제 관리</h1>
+            <div className="tutor-header-actions">
               <button 
-                className="admin-btn-primary"
+                className="tutor-btn-primary"
                 onClick={() => setShowAddModal(true)}
               >
                 과제 추가하기
@@ -1082,14 +1082,14 @@ const AssignmentManagement = () => {
             </div>
           </div>
           
-          <div className="admin-filters-section">
-            <div className="admin-search-box">
+          <div className="tutor-filters-section">
+            <div className="tutor-search-box">
               <input
                 type="text"
                 placeholder="과제명으로 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="admin-search-input"
+                className="tutor-search-input"
               />
             </div>
           </div>
@@ -1099,23 +1099,23 @@ const AssignmentManagement = () => {
       {/* 전체 페이지인 경우 기존 헤더 유지 */}
       {!sectionId && (
         <div className="assignment-management">
-          <div className="admin-page-header">
-          <div className="admin-header-left">
-            <h1 className="admin-page-title">전체 과제 관리</h1>
+          <div className="tutor-page-header">
+          <div className="tutor-header-left">
+            <h1 className="tutor-page-title">전체 과제 관리</h1>
             {/* 분반별 페이지가 아닌 경우에만 검색창 표시 */}
             {!sectionId && (
-              <div className="admin-search-box">
+              <div className="tutor-search-box">
                 <input
                   type="text"
                   placeholder="과제명, 설명으로 검색..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="admin-search-input"
+                  className="tutor-search-input"
                 />
               </div>
             )}
           </div>
-          <div className="admin-header-right">
+          <div className="tutor-header-right">
             {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
             {!sectionId && (
               <select
@@ -1129,9 +1129,9 @@ const AssignmentManagement = () => {
                 ))}
               </select>
             )}
-            <div className="admin-header-actions">
+            <div className="tutor-header-actions">
               <button 
-                className="admin-btn-secondary"
+                className="tutor-btn-secondary"
                 onClick={handleStandaloneProblemCreate}
                 title="단일 문제를 생성합니다"
               >
@@ -1139,14 +1139,14 @@ const AssignmentManagement = () => {
                 새 문제 만들기
               </button>
               <button 
-                className="admin-btn-secondary"
+                className="tutor-btn-secondary"
                 onClick={handleBulkProblemCreate}
                 title="여러 문제를 한번에 생성합니다"
               >
                 문제 대량 생성
               </button>
               <button 
-                className="admin-btn-secondary admin-btn-primary-color"
+                className="tutor-btn-secondary tutor-btn-primary-color"
                 onClick={handleAddAssignment}
               >
                 새 과제 만들기
@@ -1159,8 +1159,8 @@ const AssignmentManagement = () => {
       
       <div className="assignment-management">
         {sectionId ? (
-          <div className="admin-assignments-table-container">
-            <table className="admin-assignments-table">
+          <div className="tutor-assignments-table-container">
+            <table className="tutor-assignments-table">
               <thead>
                 <tr>
                   <th>과제 제목</th>
@@ -1173,34 +1173,34 @@ const AssignmentManagement = () => {
               <tbody>
                 {filteredAssignments.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="admin-table-empty">
+                    <td colSpan="5" className="tutor-table-empty">
                       과제가 없습니다.
                     </td>
                   </tr>
                 ) : (
                   paginatedAssignments.map((assignment) => (
-                    <tr key={assignment.id} className={assignment.active === false ? 'admin-disabled' : ''}>
-                      <td className="admin-assignment-title-cell">
+                    <tr key={assignment.id} className={assignment.active === false ? 'tutor-disabled' : ''}>
+                      <td className="tutor-assignment-title-cell">
                         <div>
-                          <div className="admin-assignment-title">{assignment.title}</div>
+                          <div className="tutor-assignment-title">{assignment.title}</div>
                           {assignment.description && (
-                            <div className="admin-assignment-description">{assignment.description}</div>
+                            <div className="tutor-assignment-description">{assignment.description}</div>
                           )}
                   </div>
                       </td>
-                      <td className="admin-assignment-meta-cell">
+                      <td className="tutor-assignment-meta-cell">
                         {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }) : '미설정'}
                       </td>
-                      <td className="admin-assignment-meta-cell">{assignment.problemCount || 0}개</td>
-                      <td className="admin-assignment-meta-cell">
+                      <td className="tutor-assignment-meta-cell">{assignment.problemCount || 0}개</td>
+                      <td className="tutor-assignment-meta-cell">
                         {submissionStats[assignment.id] ? 
                           `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}` 
                           : `0/${assignment.totalStudents || 0}`}
                       </td>
-                      <td className="admin-assignment-actions-cell">
-                        <div className="admin-assignment-actions-inline">
+                      <td className="tutor-assignment-actions-cell">
+                        <div className="tutor-assignment-actions-inline">
                     <button 
-                            className="admin-btn-table-action"
+                            className="tutor-btn-table-action"
                             onClick={() => {
                               setSelectedAssignmentForProblemList(assignment);
                               setShowProblemListModal(true);
@@ -1210,20 +1210,20 @@ const AssignmentManagement = () => {
                             문제 목록 관리
                     </button>
                     <button 
-                            className="admin-btn-table-action"
+                            className="tutor-btn-table-action"
                             onClick={() => handleAddProblem(assignment)}
                           >
                             문제 추가
                           </button>
                           <button 
-                            className="admin-btn-table-action admin-btn-edit"
+                            className="tutor-btn-table-action tutor-btn-edit"
                       onClick={() => handleEdit(assignment)}
                     >
                       수정
                     </button>
-                          <div className="admin-more-menu">
+                          <div className="tutor-more-menu">
                       <button 
-                              className="admin-btn-table-action admin-btn-more"
+                              className="tutor-btn-table-action tutor-btn-more"
                         title="더보기"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1233,9 +1233,9 @@ const AssignmentManagement = () => {
                         ⋯
                       </button>
                             {openMoreMenu === assignment.id && (
-                              <div className="admin-more-dropdown">
+                              <div className="tutor-more-dropdown">
                         <button 
-                                  className="admin-btn-text-small"
+                                  className="tutor-btn-text-small"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleToggleActive(assignment.sectionId, assignment.id, assignment.active);
@@ -1245,7 +1245,7 @@ const AssignmentManagement = () => {
                           {assignment.active ? '비활성화' : '활성화'}
                         </button>
                         <button 
-                                  className="admin-btn-text-small admin-delete"
+                                  className="tutor-btn-text-small tutor-delete"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDelete(assignment.id);
@@ -1267,23 +1267,23 @@ const AssignmentManagement = () => {
             
             {/* 페이지네이션 */}
             {totalPages > 1 && (
-              <div className="admin-pagination">
-                <div className="admin-pagination-info">
+              <div className="tutor-pagination">
+                <div className="tutor-pagination-info">
                   총 {filteredAssignments.length}개 중 {startIndex + 1}-{Math.min(endIndex, filteredAssignments.length)}개 표시
                 </div>
-                <div className="admin-pagination-controls">
+                <div className="tutor-pagination-controls">
                   <button
-                    className="admin-btn-pagination"
+                    className="tutor-btn-pagination"
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
                   >
                     이전
                   </button>
-                  <div className="admin-pagination-pages">
+                  <div className="tutor-pagination-pages">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                       <button
                         key={page}
-                        className={`admin-btn-pagination-page ${currentPage === page ? 'active' : ''}`}
+                        className={`tutor-btn-pagination-page ${currentPage === page ? 'active' : ''}`}
                         onClick={() => setCurrentPage(page)}
                       >
                         {page}
@@ -1291,7 +1291,7 @@ const AssignmentManagement = () => {
                     ))}
               </div>
                   <button
-                    className="admin-btn-pagination"
+                    className="tutor-btn-pagination"
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
                   >
@@ -1302,31 +1302,31 @@ const AssignmentManagement = () => {
             )}
           </div>
         ) : (
-          <div className="admin-assignments-list">
+          <div className="tutor-assignments-list">
             {filteredAssignments.map((assignment) => (
-              <div key={assignment.id} className={`admin-assignment-list-item ${expandedAssignments[assignment.id] ? 'admin-expanded' : ''} ${assignment.active === false ? 'admin-disabled' : ''}`}>
-              <div className="admin-assignment-list-main">
-                <div className="admin-assignment-list-info">
-                  <div className="admin-assignment-list-title-section">
-                    <h3 className="admin-assignment-list-title">{assignment.title}</h3>
+              <div key={assignment.id} className={`tutor-assignment-list-item ${expandedAssignments[assignment.id] ? 'tutor-expanded' : ''} ${assignment.active === false ? 'tutor-disabled' : ''}`}>
+              <div className="tutor-assignment-list-main">
+                <div className="tutor-assignment-list-info">
+                  <div className="tutor-assignment-list-title-section">
+                    <h3 className="tutor-assignment-list-title">{assignment.title}</h3>
                     {assignment.description && (
-                      <p className="admin-assignment-list-description">{assignment.description}</p>
+                      <p className="tutor-assignment-list-description">{assignment.description}</p>
                     )}
               </div>
-                  <div className="admin-assignment-list-meta">
-                    <span className="admin-assignment-meta-item">
-                      <span className="admin-meta-label">마감일</span>
-                      <span className="admin-meta-value">
+                  <div className="tutor-assignment-list-meta">
+                    <span className="tutor-assignment-meta-item">
+                      <span className="tutor-meta-label">마감일</span>
+                      <span className="tutor-meta-value">
                   {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '미설정'}
                 </span>
                 </span>
-                    <span className="admin-assignment-meta-item">
-                      <span className="admin-meta-label">문제 수</span>
-                      <span className="admin-meta-value">{assignment.problemCount || 0}개</span>
+                    <span className="tutor-assignment-meta-item">
+                      <span className="tutor-meta-label">문제 수</span>
+                      <span className="tutor-meta-value">{assignment.problemCount || 0}개</span>
                     </span>
-                    <span className="admin-assignment-meta-item">
-                      <span className="admin-meta-label">제출현황</span>
-                      <span className="admin-meta-value">
+                    <span className="tutor-assignment-meta-item">
+                      <span className="tutor-meta-label">제출현황</span>
+                      <span className="tutor-meta-value">
                   {submissionStats[assignment.id] ? 
                     `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}` 
                     : `0/${assignment.totalStudents || 0}`}
@@ -1334,28 +1334,28 @@ const AssignmentManagement = () => {
                 </span>
               </div>
                 </div>
-                <div className="admin-assignment-list-actions">
+                <div className="tutor-assignment-list-actions">
               <button 
-                    className="admin-btn-list-action"
+                    className="tutor-btn-list-action"
                 onClick={() => toggleAssignment(assignment.id)}
               >
                 {expandedAssignments[assignment.id] ? '문제 목록 숨기기' : '문제 목록 보기'}
               </button>
                   <button 
-                    className="admin-btn-list-action"
+                    className="tutor-btn-list-action"
                     onClick={() => handleAddProblem(assignment)}
                   >
                     문제 추가
                   </button>
                   <button 
-                    className="admin-btn-list-action"
+                    className="tutor-btn-list-action"
                       onClick={() => handleEdit(assignment)}
                     >
                       수정
                     </button>
-                  <div className="admin-more-menu">
+                  <div className="tutor-more-menu">
                       <button 
-                      className="admin-btn-list-action admin-btn-more"
+                      className="tutor-btn-list-action tutor-btn-more"
                         title="더보기"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1365,9 +1365,9 @@ const AssignmentManagement = () => {
                         ⋯
                       </button>
                     {openMoreMenu === assignment.id && (
-                      <div className="admin-more-dropdown">
+                      <div className="tutor-more-dropdown">
                         <button 
-                          className="admin-btn-text-small"
+                          className="tutor-btn-text-small"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleActive(assignment.sectionId, assignment.id, assignment.active);
@@ -1377,7 +1377,7 @@ const AssignmentManagement = () => {
                           {assignment.active ? '비활성화' : '활성화'}
                         </button>
                         <button 
-                          className="admin-btn-text-small admin-delete"
+                          className="tutor-btn-text-small tutor-delete"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(assignment.id);
@@ -1394,20 +1394,20 @@ const AssignmentManagement = () => {
 
               {expandedAssignments[assignment.id] && (
                 <div className="assignment-expanded-content">
-                  <div className="admin-problems-section">
-                <div className="admin-problems-header">
-                  <h4 className="admin-problems-title">문제 목록 ({assignment.problemCount || 0}개)</h4>
+                  <div className="tutor-problems-section">
+                <div className="tutor-problems-header">
+                  <h4 className="tutor-problems-title">문제 목록 ({assignment.problemCount || 0}개)</h4>
                 </div>
-                <div className="admin-problems-list">
+                <div className="tutor-problems-list">
                   {assignment.problems && assignment.problems.length > 0 ? (
                     assignment.problems.map((problem, index) => (
-                      <div key={problem.id || index} className="admin-problem-item">
-                        <div className="admin-problem-item-left">
-                          <span className="admin-problem-number">{index + 1}.</span>
-                          <span className="admin-problem-title">{removeCopyLabel(problem.title)}</span>
+                      <div key={problem.id || index} className="tutor-problem-item">
+                        <div className="tutor-problem-item-left">
+                          <span className="tutor-problem-number">{index + 1}.</span>
+                          <span className="tutor-problem-title">{removeCopyLabel(problem.title)}</span>
                           {problem.difficulty && (
                             <span 
-                              className="admin-problem-difficulty"
+                              className="tutor-problem-difficulty"
                               style={{ color: getDifficultyColor(problem.difficulty) }}
                             >
                               [{problem.difficulty}]
@@ -1416,7 +1416,7 @@ const AssignmentManagement = () => {
                         </div>
                         
                         {/* 문제별 제출률 표시 (정답을 맞춘 학생 수 기준) */}
-                        <span className="admin-problem-submission-rate">
+                        <span className="tutor-problem-submission-rate">
                           {submissionStats[assignment.id]?.problemStats ? (
                             (() => {
                               const problemStat = submissionStats[assignment.id].problemStats.find(
@@ -1436,7 +1436,7 @@ const AssignmentManagement = () => {
                         </span>
                         
                         <button 
-                          className="admin-btn-remove-problem"
+                          className="tutor-btn-remove-problem"
                           onClick={() => handleRemoveProblem(assignment.id, problem.id)}
                           title="문제 제거"
                         >
@@ -1445,10 +1445,10 @@ const AssignmentManagement = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="admin-no-problems">
+                    <div className="tutor-no-problems">
                       <p>등록된 문제가 없습니다.</p>
                       <button 
-                        className="admin-btn-add-first-problem"
+                        className="tutor-btn-add-first-problem"
                         onClick={() => handleAddProblem(assignment)}
                       >
                         첫 번째 문제 추가하기
@@ -1458,10 +1458,10 @@ const AssignmentManagement = () => {
                 </div>
               </div>
 
-                  <div className="admin-progress-container">
-                    <div className="admin-progress-info">
-                      <span className="admin-progress-label">완료율</span>
-                      <span className="admin-progress-count">
+                  <div className="tutor-progress-container">
+                    <div className="tutor-progress-info">
+                      <span className="tutor-progress-label">완료율</span>
+                      <span className="tutor-progress-count">
                         {(() => {
                           const stats = submissionStats[assignment.id];
                           if (!stats || !stats.problemStats || stats.problemStats.length === 0) {
@@ -1484,9 +1484,9 @@ const AssignmentManagement = () => {
                         })()}
                       </span>
                     </div>
-                    <div className="admin-progress-bar">
+                    <div className="tutor-progress-bar">
                       <div 
-                        className="admin-progress-fill"
+                        className="tutor-progress-fill"
                         style={{ 
                           width: `${(() => {
                             const stats = submissionStats[assignment.id];
@@ -1517,9 +1517,9 @@ const AssignmentManagement = () => {
             </div>
           ))}
           {filteredAssignments.length === 0 && (
-            <div className="admin-no-assignments">
-              <div className="admin-no-assignments-message">
-                <span className="admin-no-assignments-icon">📝</span>
+            <div className="tutor-no-assignments">
+              <div className="tutor-no-assignments-message">
+                <span className="tutor-no-assignments-icon">📝</span>
                 <p>
                   {searchTerm || filterSection !== 'ALL' 
                     ? '검색 조건에 맞는 과제가 없습니다.' 
@@ -1534,12 +1534,12 @@ const AssignmentManagement = () => {
 
         {/* 과제 추가 모달 */}
         {showAddModal && (
-          <div className="admin-modal-overlay">
-            <div className="admin-modal-content">
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay">
+            <div className="tutor-modal-content">
+              <div className="tutor-modal-header">
                 <h2>새 과제 추가</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={handleCloseModal}
                 >
                   ✕
@@ -1547,8 +1547,8 @@ const AssignmentManagement = () => {
               </div>
               
               <form onSubmit={handleSubmit} className="assignment-form">
-                <div className="admin-form-row">
-                  <div className="admin-form-group">
+                <div className="tutor-form-row">
+                  <div className="tutor-form-group">
                     <label htmlFor="title">과제명 *</label>
                     <input
                       type="text"
@@ -1561,7 +1561,7 @@ const AssignmentManagement = () => {
                     />
                   </div>
                   
-                  <div className="admin-form-group">
+                  <div className="tutor-form-group">
                     <label htmlFor="assignmentNumber">과제 번호</label>
                     <input
                       type="text"
@@ -1574,7 +1574,7 @@ const AssignmentManagement = () => {
                   </div>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                   <label htmlFor="sectionId">분반 선택 *</label>
                   <select
                     id="sectionId"
@@ -1592,7 +1592,7 @@ const AssignmentManagement = () => {
                   </select>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                   <label htmlFor="description">과제 설명</label>
                   <textarea
                     id="description"
@@ -1604,8 +1604,8 @@ const AssignmentManagement = () => {
                   />
                 </div>
 
-                <div className="admin-form-row">
-                  <div className="admin-form-group">
+                <div className="tutor-form-row">
+                  <div className="tutor-form-group">
                     <label htmlFor="startDate">시작일</label>
                     <input
                       type="datetime-local"
@@ -1616,7 +1616,7 @@ const AssignmentManagement = () => {
                     />
                   </div>
                   
-                  <div className="admin-form-group">
+                  <div className="tutor-form-group">
                     <label htmlFor="endDate">마감일</label>
                     <input
                       type="datetime-local"
@@ -1628,17 +1628,17 @@ const AssignmentManagement = () => {
                   </div>
                 </div>
 
-                <div className="admin-form-actions">
+                <div className="tutor-form-actions">
                   <button 
                     type="button" 
-                    className="admin-btn-secondary"
+                    className="tutor-btn-secondary"
                     onClick={handleCloseModal}
                   >
                     취소
                   </button>
                   <button 
                     type="submit" 
-                    className="admin-btn-primary"
+                    className="tutor-btn-primary"
                   >
                     과제 생성
                   </button>
@@ -1650,12 +1650,12 @@ const AssignmentManagement = () => {
 
         {/* 과제 수정 모달 */}
         {showEditModal && (
-          <div className="admin-modal-overlay">
-            <div className="admin-modal-content">
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay">
+            <div className="tutor-modal-content">
+              <div className="tutor-modal-header">
                 <h2>과제 수정</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={handleCloseEditModal}
                 >
                   ✕
@@ -1663,8 +1663,8 @@ const AssignmentManagement = () => {
               </div>
               
               <form onSubmit={handleUpdateAssignment} className="assignment-form">
-                <div className="admin-form-row">
-                  <div className="admin-form-group">
+                <div className="tutor-form-row">
+                  <div className="tutor-form-group">
                     <label htmlFor="edit-title">과제명 *</label>
                     <input
                       type="text"
@@ -1677,7 +1677,7 @@ const AssignmentManagement = () => {
                     />
                   </div>
                   
-                  <div className="admin-form-group">
+                  <div className="tutor-form-group">
                     <label htmlFor="edit-assignmentNumber">과제 번호</label>
                     <input
                       type="text"
@@ -1690,7 +1690,7 @@ const AssignmentManagement = () => {
                   </div>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                   <label htmlFor="edit-sectionId">분반 선택 *</label>
                   <select
                     id="edit-sectionId"
@@ -1708,7 +1708,7 @@ const AssignmentManagement = () => {
                   </select>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                   <label htmlFor="edit-description">과제 설명</label>
                   <textarea
                     id="edit-description"
@@ -1720,8 +1720,8 @@ const AssignmentManagement = () => {
                   />
                 </div>
 
-                <div className="admin-form-row">
-                  <div className="admin-form-group">
+                <div className="tutor-form-row">
+                  <div className="tutor-form-group">
                     <label htmlFor="edit-startDate">시작일</label>
                     <input
                       type="datetime-local"
@@ -1732,7 +1732,7 @@ const AssignmentManagement = () => {
                     />
                   </div>
                   
-                  <div className="admin-form-group">
+                  <div className="tutor-form-group">
                     <label htmlFor="edit-endDate">마감일</label>
                     <input
                       type="datetime-local"
@@ -1744,17 +1744,17 @@ const AssignmentManagement = () => {
                   </div>
                 </div>
 
-                <div className="admin-form-actions">
+                <div className="tutor-form-actions">
                   <button 
                     type="button" 
-                    className="admin-btn-secondary"
+                    className="tutor-btn-secondary"
                     onClick={handleCloseEditModal}
                   >
                     취소
                   </button>
                   <button 
                     type="submit" 
-                    className="admin-btn-primary"
+                    className="tutor-btn-primary"
                   >
                     과제 수정
                   </button>
@@ -1766,32 +1766,32 @@ const AssignmentManagement = () => {
 
         {/* 문제 선택 모달 (현재 수업의 문제들) */}
         {showProblemModal && (
-          <div className="admin-modal-overlay">
-            <div className="admin-modal-content admin-problem-modal admin-problem-modal-large">
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay">
+            <div className="tutor-modal-content tutor-problem-modal tutor-problem-modal-large">
+              <div className="tutor-modal-header">
                 <h2>문제 추가 - {selectedAssignment?.title}</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={closeProblemModals}
                 >
                   ✕
                 </button>
               </div>
               
-              <div className="admin-problem-modal-body">
-                <div className="admin-problem-search-section">
+              <div className="tutor-problem-modal-body">
+                <div className="tutor-problem-search-section">
                     <input
                       type="text"
                       placeholder="문제명으로 검색..."
                       value={problemSearchTerm}
                       onChange={(e) => setProblemSearchTerm(e.target.value)}
-                      className="admin-search-input"
+                      className="tutor-search-input"
                     />
                   </div>
 
                 {filteredProblems.length > 0 && (
-                  <div className="admin-problem-selection-header">
-                    <label className="admin-checkbox-label">
+                  <div className="tutor-problem-selection-header">
+                    <label className="tutor-checkbox-label">
                       <input
                         type="checkbox"
                         checked={selectedProblemIds.length === filteredProblems.length && filteredProblems.length > 0}
@@ -1799,32 +1799,32 @@ const AssignmentManagement = () => {
                       />
                       <span>전체 선택</span>
                     </label>
-                    <span className="admin-item-count">
+                    <span className="tutor-item-count">
                       {selectedProblemIds.length} / {filteredProblems.length}개 선택됨
                     </span>
                   </div>
                 )}
 
-                <div className="admin-available-problems-grid">
+                <div className="tutor-available-problems-grid">
                   {filteredProblems.length > 0 ? (
                     filteredProblems.map((problem) => (
-                      <div key={problem.id} className="admin-problem-card">
-                        <div className="admin-problem-card-header">
+                      <div key={problem.id} className="tutor-problem-card">
+                        <div className="tutor-problem-card-header">
                           <input
                             type="checkbox"
                             checked={selectedProblemIds.includes(problem.id)}
                             onChange={() => handleProblemToggle(problem.id)}
-                            className="admin-problem-checkbox"
+                            className="tutor-problem-checkbox"
                           />
                         </div>
-                        <div className="admin-problem-card-body">
-                          <h4 className="admin-problem-card-title">{removeCopyLabel(problem.title)}</h4>
-                          <div className="admin-problem-card-meta-row">
-                            <span className="admin-problem-card-date">
+                        <div className="tutor-problem-card-body">
+                          <h4 className="tutor-problem-card-title">{removeCopyLabel(problem.title)}</h4>
+                          <div className="tutor-problem-card-meta-row">
+                            <span className="tutor-problem-card-date">
                               생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
                             </span>
                     <button 
-                              className="admin-btn-view-detail-card"
+                              className="tutor-btn-view-detail-card"
                               onClick={async (e) => {
                                 e.stopPropagation();
                                 try {
@@ -1843,18 +1843,18 @@ const AssignmentManagement = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="admin-no-available-problems">
+                    <div className="tutor-no-available-problems">
                       <p>사용 가능한 문제가 없습니다.</p>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="admin-modal-footer">
-                  <div className="admin-problem-action-buttons">
+              <div className="tutor-modal-footer">
+                  <div className="tutor-problem-action-buttons">
                     <button 
                     type="button"
-                      className="admin-btn-copy-problem"
+                      className="tutor-btn-copy-problem"
                       onClick={() => {
                       setShowProblemModal(false);
                         setShowCopyProblemModal(true);
@@ -1870,24 +1870,24 @@ const AssignmentManagement = () => {
                     </button>
                     <button 
                     type="button"
-                      className="admin-btn-create-new"
+                      className="tutor-btn-create-new"
                       onClick={handleCreateNewProblem}
                     >
                       새 문제 만들기
                     </button>
                   </div>
                 {filteredProblems.length > 0 && selectedProblemIds.length > 0 && (
-                  <div className="admin-footer-actions">
+                  <div className="tutor-footer-actions">
                         <button 
                       type="button"
-                      className="admin-btn-secondary"
+                      className="tutor-btn-secondary"
                       onClick={closeProblemModals}
                         >
                       취소
                         </button>
                       <button 
                       type="button"
-                      className="admin-btn-primary"
+                      className="tutor-btn-primary"
                       onClick={() => handleSelectProblem(selectedProblemIds)}
                       >
                       선택한 문제 추가 ({selectedProblemIds.length}개)
@@ -1901,20 +1901,20 @@ const AssignmentManagement = () => {
 
         {/* 새 문제 생성 모달 */}
         {showCreateProblemModal && (
-          <div className="admin-modal-overlay">
-            <div className="admin-modal-content">
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay">
+            <div className="tutor-modal-content">
+              <div className="tutor-modal-header">
                 <h2>새 문제 만들기</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={closeProblemModals}
                 >
                   ✕
                 </button>
               </div>
               
-              <form onSubmit={handleCreateProblemSubmit} className="admin-problem-form">
-                <div className="admin-form-group">
+              <form onSubmit={handleCreateProblemSubmit} className="tutor-problem-form">
+                <div className="tutor-form-group">
                   <label htmlFor="problemTitle">문제 제목 *</label>
                   <input
                     type="text"
@@ -1927,33 +1927,33 @@ const AssignmentManagement = () => {
                   />
                 </div>
 
-                <div className="admin-info-box">
+                <div className="tutor-info-box">
                   <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
                   <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
                   <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
                   <p>3. 파일이 없으면 빈 설명으로 생성됩니다.</p>
                 </div>
 
-                <div className="admin-form-group">
-                  <label htmlFor="descriptionFile">문제 설명 파일 <span className="admin-optional">(선택사항)</span></label>
+                <div className="tutor-form-group">
+                  <label htmlFor="descriptionFile">문제 설명 파일 <span className="tutor-optional">(선택사항)</span></label>
                   <input
                     type="file"
                     id="descriptionFile"
                     name="descriptionFile"
                     onChange={handleProblemInputChange}
                     accept=".md,.txt,.tex"
-                    className="admin-file-input"
+                    className="tutor-file-input"
                   />
-                  <small className="admin-file-help">
+                  <small className="tutor-file-help">
                     마크다운(.md), 텍스트(.txt), LaTeX(.tex) 형식의 문제 설명 파일을 업로드하세요.
                     <br/>이 파일이 있으면 ZIP 파일 내부 설명보다 우선 적용됩니다.
                     {problemFormData.descriptionFile && (
-                      <span className="admin-file-selected">선택됨: {problemFormData.descriptionFile.name}</span>
+                      <span className="tutor-file-selected">선택됨: {problemFormData.descriptionFile.name}</span>
                     )}
                   </small>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                   <label htmlFor="zipFile">문제 파일 (.zip) *</label>
                   <input
                     type="file"
@@ -1961,29 +1961,29 @@ const AssignmentManagement = () => {
                     name="zipFile"
                     onChange={handleProblemInputChange}
                     accept=".zip"
-                    className="admin-file-input"
+                    className="tutor-file-input"
                     required
                   />
-                  <small className="admin-file-help">
+                  <small className="tutor-file-help">
                     테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
                     <br/>ZIP 내부에 problem_statement 폴더가 있으면 자동으로 설명을 추출합니다.
                     {problemFormData.zipFile && (
-                      <span className="admin-file-selected">선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
+                      <span className="tutor-file-selected">선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
                     )}
                   </small>
                 </div>
 
-                <div className="admin-form-actions">
+                <div className="tutor-form-actions">
                   <button 
                     type="button" 
-                    className="admin-btn-secondary"
+                    className="tutor-btn-secondary"
                     onClick={closeProblemModals}
                   >
                     취소
                   </button>
                   <button 
                     type="submit" 
-                    className="admin-btn-primary"
+                    className="tutor-btn-primary"
                   >
                     문제 생성 및 추가
                   </button>
@@ -1995,20 +1995,20 @@ const AssignmentManagement = () => {
 
         {/* 독립적인 새 문제 생성 모달 */}
         {showStandaloneProblemModal && (
-          <div className="admin-modal-overlay">
-            <div className="admin-modal-content">
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay">
+            <div className="tutor-modal-content">
+              <div className="tutor-modal-header">
                 <h2>새 문제 만들기</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={closeStandaloneProblemModal}
                 >
                   ✕
                 </button>
               </div>
               
-              <form onSubmit={handleStandaloneProblemSubmit} className="admin-problem-form">
-                <div className="admin-form-group">
+              <form onSubmit={handleStandaloneProblemSubmit} className="tutor-problem-form">
+                <div className="tutor-form-group">
                   <label htmlFor="standaloneProblemTitle">문제 제목 *</label>
                   <input
                     type="text"
@@ -2021,33 +2021,33 @@ const AssignmentManagement = () => {
                   />
                 </div>
 
-                <div className="admin-info-box">
+                <div className="tutor-info-box">
                   <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
                   <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
                   <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
                   <p>3. 파일이 없으면 빈 설명으로 생성됩니다.</p>
                 </div>
 
-                <div className="admin-form-group">
-                  <label htmlFor="standaloneDescriptionFile">문제 설명 파일 <span className="admin-optional">(선택사항)</span></label>
+                <div className="tutor-form-group">
+                  <label htmlFor="standaloneDescriptionFile">문제 설명 파일 <span className="tutor-optional">(선택사항)</span></label>
                   <input
                     type="file"
                     id="standaloneDescriptionFile"
                     name="descriptionFile"
                     onChange={handleProblemInputChange}
                     accept=".md,.txt,.tex"
-                    className="admin-file-input"
+                    className="tutor-file-input"
                   />
-                  <small className="admin-file-help">
+                  <small className="tutor-file-help">
                     마크다운(.md), 텍스트(.txt), LaTeX(.tex) 형식의 문제 설명 파일을 업로드하세요.
                     <br/>이 파일이 있으면 ZIP 파일 내부 설명보다 우선 적용됩니다.
                     {problemFormData.descriptionFile && (
-                      <span className="admin-file-selected">선택됨: {problemFormData.descriptionFile.name}</span>
+                      <span className="tutor-file-selected">선택됨: {problemFormData.descriptionFile.name}</span>
                     )}
                   </small>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                   <label htmlFor="standaloneZipFile">문제 파일 (.zip) *</label>
                   <input
                     type="file"
@@ -2055,36 +2055,36 @@ const AssignmentManagement = () => {
                     name="zipFile"
                     onChange={handleProblemInputChange}
                     accept=".zip"
-                    className="admin-file-input"
+                    className="tutor-file-input"
                     required
                   />
-                  <small className="admin-file-help">
+                  <small className="tutor-file-help">
                     테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
                     <br/>ZIP 내부에 problem_statement 폴더가 있으면 자동으로 설명을 추출합니다.
                     {problemFormData.zipFile && (
-                      <span className="admin-file-selected">선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
+                      <span className="tutor-file-selected">선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
                     )}
                   </small>
                 </div>
 
-                <div className="admin-info-box">
+                <div className="tutor-info-box">
                   <p><strong>💡 안내:</strong></p>
                   <p>• 이 기능은 문제만 생성합니다</p>
                   <p>• 생성 후 원하는 과제에서 "문제 추가" 버튼으로 추가할 수 있습니다</p>
                   <p>• 여러 과제에 동일한 문제를 재사용할 수 있습니다</p>
                 </div>
 
-                <div className="admin-form-actions">
+                <div className="tutor-form-actions">
                   <button 
                     type="button" 
-                    className="admin-btn-secondary"
+                    className="tutor-btn-secondary"
                     onClick={closeStandaloneProblemModal}
                   >
                     취소
                   </button>
                   <button 
                     type="submit" 
-                    className="admin-btn-primary"
+                    className="tutor-btn-primary"
                   >
                     문제 생성
                   </button>
@@ -2096,20 +2096,20 @@ const AssignmentManagement = () => {
 
         {/* 대량 문제 생성 모달 */}
         {showBulkProblemModal && (
-          <div className="admin-modal-overlay">
-            <div className="admin-modal-content admin-large-modal">
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay">
+            <div className="tutor-modal-content tutor-large-modal">
+              <div className="tutor-modal-header">
                 <h2>문제 대량 생성</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={closeBulkProblemModal}
                 >
                   ✕
                 </button>
               </div>
               
-              <form onSubmit={handleBulkProblemSubmit} className="admin-bulk-problem-form">
-                <div className="admin-info-box">
+              <form onSubmit={handleBulkProblemSubmit} className="tutor-bulk-problem-form">
+                <div className="tutor-info-box">
                   <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
                   <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
                   <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
@@ -2121,15 +2121,15 @@ const AssignmentManagement = () => {
                   <p>• 생성 후 원하는 과제에서 "문제 추가" 버튼으로 추가할 수 있습니다</p>
                 </div>
 
-                <div className="admin-bulk-problems-container">
+                <div className="tutor-bulk-problems-container">
                   {bulkProblemData.problems.map((problem, index) => (
-                    <div key={index} className="admin-bulk-problem-row">
-                      <div className="admin-problem-row-header">
+                    <div key={index} className="tutor-bulk-problem-row">
+                      <div className="tutor-problem-row-header">
                         <h4>문제 {index + 1}</h4>
                         {bulkProblemData.problems.length > 1 && (
                           <button
                             type="button"
-                            className="admin-btn-remove-row"
+                            className="tutor-btn-remove-row"
                             onClick={() => removeProblemRow(index)}
                             title="이 문제 제거"
                           >
@@ -2138,8 +2138,8 @@ const AssignmentManagement = () => {
                         )}
                       </div>
                       
-                      <div className="admin-problem-row-content">
-                        <div className="admin-form-group">
+                      <div className="tutor-problem-row-content">
+                        <div className="tutor-form-group">
                           <label>문제 제목 *</label>
                           <input
                             type="text"
@@ -2150,39 +2150,39 @@ const AssignmentManagement = () => {
                           />
                         </div>
 
-                        <div className="admin-form-row">
-                          <div className="admin-form-group">
-                            <label>문제 설명 파일 <span className="admin-optional">(선택사항)</span></label>
+                        <div className="tutor-form-row">
+                          <div className="tutor-form-group">
+                            <label>문제 설명 파일 <span className="tutor-optional">(선택사항)</span></label>
                             <input
                               type="file"
                               onChange={(e) => handleBulkProblemFileChange(index, 'descriptionFile', e.target.files[0])}
                               accept=".md,.txt,.tex"
-                              className="admin-file-input"
+                              className="tutor-file-input"
                             />
-                            <small className="admin-file-help">
+                            <small className="tutor-file-help">
                               .md, .txt, .tex 형식 지원. ZIP 파일보다 우선 적용됩니다.
                             </small>
                             {problem.descriptionFile && (
-                              <small className="admin-file-selected">
+                              <small className="tutor-file-selected">
                                 선택됨: {problem.descriptionFile.name}
                               </small>
                             )}
                           </div>
 
-                          <div className="admin-form-group">
+                          <div className="tutor-form-group">
                             <label>문제 파일 (.zip) *</label>
                             <input
                               type="file"
                               onChange={(e) => handleBulkProblemFileChange(index, 'zipFile', e.target.files[0])}
                               accept=".zip"
-                              className="admin-file-input"
+                              className="tutor-file-input"
                               required
                             />
-                            <small className="admin-file-help">
+                            <small className="tutor-file-help">
                               테스트 케이스 포함. problem_statement 폴더가 있으면 설명 자동 추출.
                             </small>
                             {problem.zipFile && (
-                              <small className="admin-file-selected">
+                              <small className="tutor-file-selected">
                                 선택됨: {problem.zipFile.name} ({(problem.zipFile.size / 1024 / 1024).toFixed(2)}MB)
                               </small>
                             )}
@@ -2193,27 +2193,27 @@ const AssignmentManagement = () => {
                   ))}
                 </div>
 
-                <div className="admin-bulk-actions">
+                <div className="tutor-bulk-actions">
                   <button
                     type="button"
-                    className="admin-btn-add-row"
+                    className="tutor-btn-add-row"
                     onClick={addProblemRow}
                   >
                     문제 추가
                   </button>
                 </div>
 
-                <div className="admin-form-actions">
+                <div className="tutor-form-actions">
                   <button 
                     type="button" 
-                    className="admin-btn-secondary"
+                    className="tutor-btn-secondary"
                     onClick={closeBulkProblemModal}
                   >
                     취소
                   </button>
                   <button 
                     type="submit" 
-                    className="admin-btn-primary"
+                    className="tutor-btn-primary"
                   >
                     {bulkProblemData.problems.length}개 문제 생성
                   </button>
@@ -2226,21 +2226,21 @@ const AssignmentManagement = () => {
         {/* 문제 설명보기 패널 */}
         {selectedProblemDetail && (
           <>
-            <div className="admin-detail-overlay" onClick={() => setSelectedProblemDetail(null)}></div>
-            <div className="admin-detail-panel" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-detail-panel-header">
+            <div className="tutor-detail-overlay" onClick={() => setSelectedProblemDetail(null)}></div>
+            <div className="tutor-detail-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-detail-panel-header">
                 <h3>문제 설명</h3>
                 <button
-                  className="admin-btn-close-detail"
+                  className="tutor-btn-close-detail"
                   onClick={() => setSelectedProblemDetail(null)}
                 >
                   ×
                 </button>
       </div>
-              <div className="admin-detail-panel-content">
-                <div className="admin-problem-detail-content">
-                  <h4 className="admin-detail-title">{selectedProblemDetail.title}</h4>
-                  <div className="admin-detail-meta">
+              <div className="tutor-detail-panel-content">
+                <div className="tutor-problem-detail-content">
+                  <h4 className="tutor-detail-title">{selectedProblemDetail.title}</h4>
+                  <div className="tutor-detail-meta">
                     {selectedProblemDetail.timeLimit && (
                       <span>시간 제한: {selectedProblemDetail.timeLimit}초</span>
                     )}
@@ -2248,7 +2248,7 @@ const AssignmentManagement = () => {
                       <span>메모리 제한: {selectedProblemDetail.memoryLimit}MB</span>
                     )}
                   </div>
-                  <div className="admin-detail-body admin-problem-description">
+                  <div className="tutor-detail-body tutor-problem-description">
                     {selectedProblemDetail.description ? (
                       (() => {
                         const description = selectedProblemDetail.description;
@@ -2263,11 +2263,11 @@ const AssignmentManagement = () => {
                             components={{
                               code({node, inline, className, children, ...props}) {
                                 return inline ? (
-                                  <code className="admin-inline-code" {...props}>
+                                  <code className="tutor-inline-code" {...props}>
                                     {children}
                                   </code>
                                 ) : (
-                                  <pre className="admin-code-block">
+                                  <pre className="tutor-code-block">
                                     <code className={className} {...props}>
                                       {children}
                                     </code>
@@ -2295,7 +2295,7 @@ const AssignmentManagement = () => {
 
         {/* 문제 가져오기 모달 (수업 및 문제 선택) */}
         {showCopyProblemModal && (
-          <div className="admin-modal-overlay" onClick={() => {
+          <div className="tutor-modal-overlay" onClick={() => {
             setShowCopyProblemModal(false);
             setSelectedSectionForProblem('');
             setAssignmentsForProblem([]);
@@ -2306,11 +2306,11 @@ const AssignmentManagement = () => {
             setProblemViewMode('list');
             setSelectedProblemDetail(null);
           }}>
-            <div className="admin-modal-content admin-problem-modal admin-problem-modal-large" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-modal-header">
-                <div className="admin-modal-header-left">
+            <div className="tutor-modal-content tutor-problem-modal tutor-problem-modal-large" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-modal-header">
+                <div className="tutor-modal-header-left">
                   <button 
-                    className="admin-btn-back"
+                    className="tutor-btn-back"
                     onClick={() => {
                       setShowCopyProblemModal(false);
                       setShowProblemModal(true);
@@ -2322,7 +2322,7 @@ const AssignmentManagement = () => {
                 <h2>기존 문제 가져오기 - {selectedAssignment?.title}</h2>
                 </div>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => {
                     setShowCopyProblemModal(false);
                     setSelectedSectionForProblem('');
@@ -2339,8 +2339,8 @@ const AssignmentManagement = () => {
                 </button>
               </div>
               
-              <div className="admin-problem-modal-body">
-                <div className="admin-copy-problem-controls">
+              <div className="tutor-problem-modal-body">
+                <div className="tutor-copy-problem-controls">
                   <div className="section-select-box">
                     <label htmlFor="section-select-copy">수업 선택 *</label>
                     <select
@@ -2359,26 +2359,26 @@ const AssignmentManagement = () => {
                   </div>
 
                   {selectedSectionForProblem && (
-                    <div className="admin-copy-problem-toolbar">
-                      <div className="admin-problem-search-box">
+                    <div className="tutor-copy-problem-toolbar">
+                      <div className="tutor-problem-search-box">
                     <input
                       type="text"
                       placeholder="문제명으로 검색..."
                       value={copyProblemSearchTerm}
                       onChange={(e) => setCopyProblemSearchTerm(e.target.value)}
-                      className="admin-search-input"
+                      className="tutor-search-input"
                     />
                 </div>
 
-                      <div className="admin-view-mode-tabs">
+                      <div className="tutor-view-mode-tabs">
                         <button
-                          className={`admin-tab-button ${problemViewMode === 'list' ? 'admin-active' : ''}`}
+                          className={`tutor-tab-button ${problemViewMode === 'list' ? 'tutor-active' : ''}`}
                           onClick={() => setProblemViewMode('list')}
                         >
                           목록 보기
                         </button>
                         <button
-                          className={`admin-tab-button ${problemViewMode === 'hierarchy' ? 'admin-active' : ''}`}
+                          className={`tutor-tab-button ${problemViewMode === 'hierarchy' ? 'tutor-active' : ''}`}
                           onClick={() => setProblemViewMode('hierarchy')}
                         >
                           과제별 보기
@@ -2389,13 +2389,13 @@ const AssignmentManagement = () => {
                 </div>
 
                 {loadingAssignmentsForProblem ? (
-                  <div className="admin-loading-items">과제를 불러오는 중...</div>
+                  <div className="tutor-loading-items">과제를 불러오는 중...</div>
                 ) : selectedSectionForProblem && assignmentsForProblem.length === 0 ? (
-                  <div className="admin-no-items">선택한 수업에 과제가 없습니다.</div>
+                  <div className="tutor-no-items">선택한 수업에 과제가 없습니다.</div>
                 ) : selectedSectionForProblem ? (
                   <>
                     {problemViewMode === 'list' ? (
-                      <div className="admin-problem-list-view">
+                      <div className="tutor-problem-list-view">
                         {(() => {
                           const allProblems = [];
                           assignmentsForProblem.forEach(assignment => {
@@ -2418,8 +2418,8 @@ const AssignmentManagement = () => {
 
                           return (
                             <>
-                              <div className="admin-problem-selection-header">
-                                <label className="admin-checkbox-label">
+                              <div className="tutor-problem-selection-header">
+                                <label className="tutor-checkbox-label">
                                   <input
                                     type="checkbox"
                                     checked={allSelected}
@@ -2433,31 +2433,31 @@ const AssignmentManagement = () => {
                                   />
                                   <span>전체 선택</span>
                                 </label>
-                                <span className="admin-item-count">
+                                <span className="tutor-item-count">
                                   {selectedProblemIds.length} / {filteredProblems.length}개 선택됨
                             </span>
                           </div>
-                              <div className="admin-available-problems-grid">
+                              <div className="tutor-available-problems-grid">
 
                                 {filteredProblems.length > 0 ? (
                                   filteredProblems.map((problem) => (
-                                    <div key={problem.id} className="admin-problem-card">
-                                      <div className="admin-problem-card-header">
+                                    <div key={problem.id} className="tutor-problem-card">
+                                      <div className="tutor-problem-card-header">
                                         <input
                                           type="checkbox"
                                           checked={selectedProblemIds.includes(problem.id)}
                                           onChange={() => handleProblemToggle(problem.id)}
-                                          className="admin-problem-checkbox"
+                                          className="tutor-problem-checkbox"
                                         />
                                       </div>
-                                      <div className="admin-problem-card-body">
-                                        <h4 className="admin-problem-card-title">{removeCopyLabel(problem.title)}</h4>
-                                        <div className="admin-problem-card-meta-row">
-                                          <span className="admin-problem-card-date">
+                                      <div className="tutor-problem-card-body">
+                                        <h4 className="tutor-problem-card-title">{removeCopyLabel(problem.title)}</h4>
+                                        <div className="tutor-problem-card-meta-row">
+                                          <span className="tutor-problem-card-date">
                                             생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
                                           </span>
                           <button 
-                                            className="admin-btn-view-detail-card"
+                                            className="tutor-btn-view-detail-card"
                                             onClick={async (e) => {
                                               e.stopPropagation();
                                               try {
@@ -2476,7 +2476,7 @@ const AssignmentManagement = () => {
                         </div>
                       ))
                   ) : (
-                    <div className="admin-no-available-problems">
+                    <div className="tutor-no-available-problems">
                                     <p>검색 조건에 맞는 문제가 없습니다.</p>
                     </div>
                   )}
@@ -2486,10 +2486,10 @@ const AssignmentManagement = () => {
                         })()}
               </div>
                     ) : (
-                      <div className="admin-problem-hierarchy-view">
+                      <div className="tutor-problem-hierarchy-view">
                         {selectedProblemIds.length > 0 && (
-                          <div className="admin-problem-selection-header">
-                            <span className="admin-item-count">
+                          <div className="tutor-problem-selection-header">
+                            <span className="tutor-item-count">
                               {selectedProblemIds.length}개 문제 선택됨
                             </span>
                           </div>
@@ -2514,9 +2514,9 @@ const AssignmentManagement = () => {
                             }
 
                             return (
-                              <div key={assignment.id} className={`assignment-item-large ${isExpanded ? 'admin-expanded' : ''}`}>
+                              <div key={assignment.id} className={`assignment-item-large ${isExpanded ? 'tutor-expanded' : ''}`}>
                                 <div className="assignment-item-header-large">
-                                  <label className="admin-checkbox-label">
+                                  <label className="tutor-checkbox-label">
                                     <input
                                       type="checkbox"
                                       checked={allSelected}
@@ -2532,7 +2532,7 @@ const AssignmentManagement = () => {
                                   </label>
                                   {assignmentProblemsList.length > 0 && (
                 <button 
-                                      className="admin-btn-expand-assignment-large"
+                                      className="tutor-btn-expand-assignment-large"
                                       onClick={() => toggleAssignmentForProblem(assignment.id)}
                 >
                                       {isExpanded ? '접기 ▲' : '문제 보기 ▼'}
@@ -2541,9 +2541,9 @@ const AssignmentManagement = () => {
               </div>
                                 
                                 {isExpanded && assignmentProblemsList.length > 0 && (
-                                  <div className="admin-problem-selection-box-large">
-                                    <div className="admin-problem-selection-header-large">
-                                      <label className="admin-checkbox-label">
+                                  <div className="tutor-problem-selection-box-large">
+                                    <div className="tutor-problem-selection-header-large">
+                                      <label className="tutor-checkbox-label">
                                         <input
                                           type="checkbox"
                                           checked={allSelected}
@@ -2551,29 +2551,29 @@ const AssignmentManagement = () => {
                                         />
                                         <span>문제 전체 선택</span>
                                       </label>
-                                      <span className="admin-item-count">
+                                      <span className="tutor-item-count">
                                         {selectedProblems.length} / {assignmentProblemsList.length}개
                                       </span>
                                     </div>
-                                    <div className="admin-problem-list-large">
+                                    <div className="tutor-problem-list-large">
                                       {assignmentProblemsList.map((problem, index) => (
-                                        <div key={problem.id} className="admin-problem-item-large">
-                                          <div className="admin-problem-item-large-header">
+                                        <div key={problem.id} className="tutor-problem-item-large">
+                                          <div className="tutor-problem-item-large-header">
                                             <input
                                               type="checkbox"
                                               checked={selectedProblemIds.includes(problem.id)}
                                               onChange={() => handleProblemToggleForAdd(assignment.id, problem.id)}
-                                              className="admin-problem-checkbox"
+                                              className="tutor-problem-checkbox"
                                             />
                                           </div>
-                                          <div className="admin-problem-item-large-body">
-                                            <div className="admin-problem-title-row">
-                                              <h4 className="admin-problem-title-large">
-                                                <span className="admin-problem-number-large">{index + 1}.</span>
+                                          <div className="tutor-problem-item-large-body">
+                                            <div className="tutor-problem-title-row">
+                                              <h4 className="tutor-problem-title-large">
+                                                <span className="tutor-problem-number-large">{index + 1}.</span>
                                                 {removeCopyLabel(problem.title)}
                                               </h4>
                                               <button
-                                                className="admin-btn-view-detail-card"
+                                                className="tutor-btn-view-detail-card"
                                                 onClick={async (e) => {
                                                   e.stopPropagation();
                                                   try {
@@ -2602,14 +2602,14 @@ const AssignmentManagement = () => {
                     )}
                   </>
                 ) : (
-                  <div className="admin-no-items">수업을 선택해주세요.</div>
+                  <div className="tutor-no-items">수업을 선택해주세요.</div>
                 )}
               </div>
 
-              <div className="admin-modal-footer">
+              <div className="tutor-modal-footer">
                 <button 
                   type="button"
-                  className="admin-btn-secondary"
+                  className="tutor-btn-secondary"
                   onClick={() => {
                     setShowCopyProblemModal(false);
                     setSelectedSectionForProblem('');
@@ -2627,7 +2627,7 @@ const AssignmentManagement = () => {
                 {selectedProblemIds.length > 0 && (
                   <button 
                     type="button"
-                    className="admin-btn-primary"
+                    className="tutor-btn-primary"
                     onClick={() => {
                       handleSelectProblem(selectedProblemIds);
                       setShowCopyProblemModal(false);
@@ -2651,17 +2651,17 @@ const AssignmentManagement = () => {
 
         {/* 문제 목록 모달 */}
         {showProblemListModal && selectedAssignmentForProblemList && (
-          <div className="admin-modal-overlay" onClick={() => {
+          <div className="tutor-modal-overlay" onClick={() => {
             setShowProblemListModal(false);
             setSelectedAssignmentForProblemList(null);
             setSelectedProblemForDetail(null);
             setShowProblemDetailModal(false);
           }}>
-            <div className="admin-modal-content admin-modal-content-extra-large" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-modal-header">
+            <div className="tutor-modal-content tutor-modal-content-extra-large" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-modal-header">
                 <h2>문제 목록 관리 - {selectedAssignmentForProblemList.title}</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => {
                     setShowProblemListModal(false);
                     setSelectedAssignmentForProblemList(null);
@@ -2673,16 +2673,16 @@ const AssignmentManagement = () => {
                 </button>
               </div>
               
-              <div className="admin-modal-body">
+              <div className="tutor-modal-body">
                 {/* 문제 검색 */}
-                <div className="admin-filters-section">
-                  <div className="admin-search-box">
+                <div className="tutor-filters-section">
+                  <div className="tutor-search-box">
                     <input
                       type="text"
                       placeholder="문제 ID, 제목으로 검색..."
                       value={problemListSearchTerm}
                       onChange={(e) => setProblemListSearchTerm(e.target.value)}
-                      className="admin-search-input"
+                      className="tutor-search-input"
                     />
                   </div>
                 </div>
@@ -2699,8 +2699,8 @@ const AssignmentManagement = () => {
                     });
                     
                     return filteredProblems.length > 0 ? (
-                      <div className="admin-problems-table-container">
-                        <table className="admin-problems-table">
+                      <div className="tutor-problems-table-container">
+                        <table className="tutor-problems-table">
                           <thead>
                             <tr>
                               <th>ID</th>
@@ -2714,9 +2714,9 @@ const AssignmentManagement = () => {
                             {filteredProblems.map((problem, index) => (
                           <tr key={problem.id || index}>
                             <td>{problem.id}</td>
-                            <td className="admin-problem-title-cell">
+                            <td className="tutor-problem-title-cell">
                               <button
-                                className="admin-btn-link"
+                                className="tutor-btn-link"
                                 onClick={async () => {
                                   try {
                                     const problemDetail = await APIService.getProblemInfo(problem.id);
@@ -2747,7 +2747,7 @@ const AssignmentManagement = () => {
                             </td>
                             <td>
                               <button
-                                className="admin-btn-table-action"
+                                className="tutor-btn-table-action"
                                 onClick={async () => {
                                   try {
                                     const problemDetail = await APIService.getProblemInfo(problem.id);
@@ -2765,7 +2765,7 @@ const AssignmentManagement = () => {
                                 수정
                               </button>
                               <button
-                                className="admin-btn-table-action admin-btn-delete"
+                                className="tutor-btn-table-action tutor-btn-delete"
                                 onClick={() => handleRemoveProblem(selectedAssignmentForProblemList.id, problem.id)}
                               >
                                 제거
@@ -2777,16 +2777,16 @@ const AssignmentManagement = () => {
                         </table>
                       </div>
                     ) : (
-                      <div className="admin-no-problems">
+                      <div className="tutor-no-problems">
                         <p>검색 조건에 맞는 문제가 없습니다.</p>
                       </div>
                     );
                   })()
                 ) : (
-                  <div className="admin-no-problems">
+                  <div className="tutor-no-problems">
                     <p>등록된 문제가 없습니다.</p>
                     <button 
-                      className="admin-btn-primary"
+                      className="tutor-btn-primary"
                       onClick={() => {
                         setShowProblemListModal(false);
                         handleAddProblem(selectedAssignmentForProblemList);
@@ -2803,15 +2803,15 @@ const AssignmentManagement = () => {
 
         {/* 문제 상세 및 수정 모달 */}
         {showProblemDetailModal && selectedProblemForDetail && (
-          <div className="admin-modal-overlay" onClick={() => {
+          <div className="tutor-modal-overlay" onClick={() => {
             setShowProblemDetailModal(false);
             setSelectedProblemForDetail(null);
           }}>
-            <div className="admin-modal-content admin-large-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-modal-header">
+            <div className="tutor-modal-content tutor-large-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-modal-header">
                 <h2>문제 상세 - {selectedProblemForDetail.title}</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => {
                     setShowProblemDetailModal(false);
                     setSelectedProblemForDetail(null);
@@ -2821,9 +2821,9 @@ const AssignmentManagement = () => {
                 </button>
               </div>
               
-              <div className="admin-modal-body">
-                <div className="admin-problem-detail-content">
-                  <div className="admin-detail-meta">
+              <div className="tutor-modal-body">
+                <div className="tutor-problem-detail-content">
+                  <div className="tutor-detail-meta">
                     {selectedProblemForDetail.timeLimit && (
                       <span>시간 제한: {selectedProblemForDetail.timeLimit}초</span>
                     )}
@@ -2831,7 +2831,7 @@ const AssignmentManagement = () => {
                       <span>메모리 제한: {selectedProblemForDetail.memoryLimit}MB</span>
                     )}
                   </div>
-                  <div className="admin-detail-body admin-problem-description">
+                  <div className="tutor-detail-body tutor-problem-description">
                     {selectedProblemForDetail.description ? (
                       (() => {
                         const description = selectedProblemForDetail.description;
@@ -2853,9 +2853,9 @@ const AssignmentManagement = () => {
                   </div>
                 </div>
                 
-                <div className="admin-modal-actions">
+                <div className="tutor-modal-actions">
                   <button 
-                    className="admin-btn-secondary"
+                    className="tutor-btn-secondary"
                     onClick={() => {
                       setShowProblemDetailModal(false);
                       setSelectedProblemForDetail(null);
@@ -2864,7 +2864,7 @@ const AssignmentManagement = () => {
                   닫기
                 </button>
                   <button 
-                    className="admin-btn-primary"
+                    className="tutor-btn-primary"
                     onClick={() => {
                       // 문제 수정 페이지로 이동하거나 수정 모달 열기
                       // 여기서는 수정 기능을 추가할 수 있습니다
@@ -2879,7 +2879,7 @@ const AssignmentManagement = () => {
           </div>
         )}
       </>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 

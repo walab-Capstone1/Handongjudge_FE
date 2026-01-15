@@ -4,9 +4,9 @@ import Navbar from "../components/Navbar";
 import Breadcrumb from "../components/Breadcrumb";
 import APIService from "../services/APIService";
 
-import "./AdminLayout.css";
+import "./TutorLayout.css";
 
-const AdminLayout = ({ children, selectedSection = null }) => {
+const TutorLayout = ({ children, selectedSection = null }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
@@ -120,10 +120,10 @@ const AdminLayout = ({ children, selectedSection = null }) => {
   ] : [];
 
   return (
-    <div className="admin-layout">
+    <div className="tutor-layout">
       <Navbar />
-      <div className="admin-container">
-        <aside className={`admin-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+      <div className="tutor-container">
+        <aside className={`tutor-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <div className="sidebar-header">
             <h2 className="sidebar-title">{sidebarCollapsed ? '' : '관리 페이지'}</h2>
             <button 
@@ -326,9 +326,9 @@ const AdminLayout = ({ children, selectedSection = null }) => {
             </div>
           </nav>
         </aside>
-        <main className="admin-main">
+        <main className="tutor-main">
           <Breadcrumb items={generateBreadcrumbs(location, sections, currentSection)} />
-          <div className="admin-content">{children}</div>
+          <div className="tutor-content">{children}</div>
         </main>
       </div>
     </div>
@@ -388,4 +388,4 @@ const generateBreadcrumbs = (location, sections, currentSection) => {
   return breadcrumbItems;
 };
 
-export default AdminLayout;
+export default TutorLayout;

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
 import "./AssignmentStudentProgress.css";
-import "../AdminPage/AssignmentManagementList.css";
-import "../AdminPage/AssignmentTable.css";
+import "../TutorPage/AssignmentManagementList.css";
+import "../TutorPage/AssignmentTable.css";
 
 const AssignmentStudentProgress = () => {
   const { sectionId, assignmentId } = useParams();
@@ -137,11 +137,11 @@ const AssignmentStudentProgress = () => {
   const getStatusBadge = (status) => {
     switch(status) {
       case 'COMPLETED':
-        return <span className="admin-status-badge admin-completed">완료</span>;
+        return <span className="tutor-status-badge tutor-completed">완료</span>;
       case 'IN_PROGRESS':
-        return <span className="admin-status-badge admin-in-progress">진행중</span>;
+        return <span className="tutor-status-badge tutor-in-progress">진행중</span>;
       case 'NOT_STARTED':
-        return <span className="admin-status-badge admin-not-started">미시작</span>;
+        return <span className="tutor-status-badge tutor-not-started">미시작</span>;
       default:
         return null;
     }
@@ -179,12 +179,12 @@ const AssignmentStudentProgress = () => {
 
   if (loading) {
     return (
-      <AdminLayout selectedSection={currentSection}>
-        <div className="admin-loading-container">
-          <div className="admin-loading-spinner"></div>
+      <TutorLayout selectedSection={currentSection}>
+        <div className="tutor-loading-container">
+          <div className="tutor-loading-spinner"></div>
           <p>학생 진행 현황을 불러오는 중...</p>
         </div>
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
@@ -192,29 +192,29 @@ const AssignmentStudentProgress = () => {
   if (assignmentId) {
     // 상세 보기 (기존 코드)
     return (
-      <AdminLayout selectedSection={currentSection}>
+      <TutorLayout selectedSection={currentSection}>
         <div className="student-progress-container">
           {/* 헤더 */}
-          <div className="admin-page-header">
-            <div className="admin-header-left">
-              <button className="admin-btn-back" onClick={() => navigate(`/tutor/assignments/section/${sectionId}/progress`)}>
+          <div className="tutor-page-header">
+            <div className="tutor-header-left">
+              <button className="tutor-btn-back" onClick={() => navigate(`/tutor/assignments/section/${sectionId}/progress`)}>
                 ← 돌아가기
               </button>
               <div>
-                <h1 className="admin-page-title">{assignment?.title}</h1>
-                <p className="admin-page-subtitle">학생별 문제 풀이 현황</p>
+                <h1 className="tutor-page-title">{assignment?.title}</h1>
+                <p className="tutor-page-subtitle">학생별 문제 풀이 현황</p>
               </div>
             </div>
           </div>
 
         {/* 문제별 통계 */}
         {problems.length > 0 && (
-          <div className="admin-problems-summary">
-            <div className="admin-summary-header">
-              <h3 className="admin-summary-title">문제별 제출 현황</h3>
-              <span className="admin-total-students-label">총 {studentProgress.length}명</span>
+          <div className="tutor-problems-summary">
+            <div className="tutor-summary-header">
+              <h3 className="tutor-summary-title">문제별 제출 현황</h3>
+              <span className="tutor-total-students-label">총 {studentProgress.length}명</span>
             </div>
-            <div className="admin-problems-list">
+            <div className="tutor-problems-list">
               {problems.map((problem, index) => {
               const solvedCount = studentProgress.filter(student => 
                 student.solvedProblems?.includes(problem.id)
@@ -225,43 +225,43 @@ const AssignmentStudentProgress = () => {
               const isExpanded = expandedProblems.has(problem.id);
               
               return (
-                <div key={problem.id} className={`admin-problem-stat-card ${isExpanded ? 'expanded' : ''}`}>
+                <div key={problem.id} className={`tutor-problem-stat-card ${isExpanded ? 'expanded' : ''}`}>
                   <div 
-                    className="admin-problem-stat-header admin-clickable"
+                    className="tutor-problem-stat-header tutor-clickable"
                     onClick={() => toggleProblem(problem.id)}
                   >
-                    <div className="admin-header-left">
-                      <span className="admin-problem-number">문제 {index + 1}</span>
-                      <span className="admin-problem-title">{removeCopyLabel(problem.title)}</span>
+                    <div className="tutor-header-left">
+                      <span className="tutor-problem-number">문제 {index + 1}</span>
+                      <span className="tutor-problem-title">{removeCopyLabel(problem.title)}</span>
                     </div>
-                    <div className="admin-header-right">
-                      <span className="admin-problem-summary">
+                    <div className="tutor-header-right">
+                      <span className="tutor-problem-summary">
                         {solvedCount}/{totalStudents}명 완료 ({percentage}%)
                       </span>
-                      <span className={`admin-toggle-icon ${isExpanded ? 'admin-expanded' : ''}`}>▼</span>
+                      <span className={`tutor-toggle-icon ${isExpanded ? 'tutor-expanded' : ''}`}>▼</span>
                     </div>
                   </div>
                   {isExpanded && (
-                    <div className="admin-problem-stat-details">
-                      <div className="admin-problem-stat-info">
-                        <div className="admin-problem-stat-item admin-solved">
-                          <span className="admin-stat-label">완료</span>
-                          <div className="admin-stat-row">
-                            <span className="admin-stat-value">{solvedCount}명</span>
-                            <span className="admin-stat-percent">{percentage}%</span>
+                    <div className="tutor-problem-stat-details">
+                      <div className="tutor-problem-stat-info">
+                        <div className="tutor-problem-stat-item tutor-solved">
+                          <span className="tutor-stat-label">완료</span>
+                          <div className="tutor-stat-row">
+                            <span className="tutor-stat-value">{solvedCount}명</span>
+                            <span className="tutor-stat-percent">{percentage}%</span>
                           </div>
                         </div>
-                        <div className="admin-problem-stat-item admin-unsolved">
-                          <span className="admin-stat-label">미완료</span>
-                          <div className="admin-stat-row">
-                            <span className="admin-stat-value">{unsolvedCount}명</span>
-                            <span className="admin-stat-percent">{100 - percentage}%</span>
+                        <div className="tutor-problem-stat-item tutor-unsolved">
+                          <span className="tutor-stat-label">미완료</span>
+                          <div className="tutor-stat-row">
+                            <span className="tutor-stat-value">{unsolvedCount}명</span>
+                            <span className="tutor-stat-percent">{100 - percentage}%</span>
                           </div>
                         </div>
                       </div>
-                      <div className="admin-problem-stat-bar">
+                      <div className="tutor-problem-stat-bar">
                         <div 
-                          className="admin-problem-stat-fill admin-solved-fill"
+                          className="tutor-problem-stat-fill tutor-solved-fill"
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
@@ -275,37 +275,37 @@ const AssignmentStudentProgress = () => {
         )}
 
         {/* 필터 */}
-        <div className="admin-filters-section">
-          <div className="admin-search-box">
+        <div className="tutor-filters-section">
+          <div className="tutor-search-box">
             <input
               type="text"
-              className="admin-search-input"
+              className="tutor-search-input"
               placeholder="학생 이름 또는 학번 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="admin-status-filters">
+          <div className="tutor-status-filters">
             <button 
-              className={`admin-filter-btn ${filterStatus === 'ALL' ? 'admin-active' : ''}`}
+              className={`tutor-filter-btn ${filterStatus === 'ALL' ? 'tutor-active' : ''}`}
               onClick={() => setFilterStatus('ALL')}
             >
               전체
             </button>
             <button 
-              className={`admin-filter-btn ${filterStatus === 'COMPLETED' ? 'admin-active' : ''}`}
+              className={`tutor-filter-btn ${filterStatus === 'COMPLETED' ? 'tutor-active' : ''}`}
               onClick={() => setFilterStatus('COMPLETED')}
             >
               완료
             </button>
             <button 
-              className={`admin-filter-btn ${filterStatus === 'IN_PROGRESS' ? 'admin-active' : ''}`}
+              className={`tutor-filter-btn ${filterStatus === 'IN_PROGRESS' ? 'tutor-active' : ''}`}
               onClick={() => setFilterStatus('IN_PROGRESS')}
             >
               진행중
             </button>
             <button 
-              className={`admin-filter-btn ${filterStatus === 'NOT_STARTED' ? 'admin-active' : ''}`}
+              className={`tutor-filter-btn ${filterStatus === 'NOT_STARTED' ? 'tutor-active' : ''}`}
               onClick={() => setFilterStatus('NOT_STARTED')}
             >
               미시작
@@ -314,14 +314,14 @@ const AssignmentStudentProgress = () => {
         </div>
 
         {/* 학생 목록 */}
-        <div className="admin-students-list">
+        <div className="tutor-students-list">
           {filteredStudents.length === 0 ? (
-            <div className="admin-no-data">
+            <div className="tutor-no-data">
               <p>조건에 맞는 학생이 없습니다.</p>
             </div>
           ) : (
-            <div className="admin-table-container">
-              <table className="admin-students-table">
+            <div className="tutor-table-container">
+              <table className="tutor-students-table">
                 <thead>
                   <tr>
                     <th>학번</th>
@@ -343,26 +343,26 @@ const AssignmentStudentProgress = () => {
                         <td className="student-name">{student.studentName}</td>
                         <td>{getStatusBadge(status)}</td>
                         <td>
-                          <div className="admin-progress-cell">
-                            <div className="admin-mini-progress-bar">
+                          <div className="tutor-progress-cell">
+                            <div className="tutor-mini-progress-bar">
                               <div 
-                                className="admin-mini-progress-fill"
+                                className="tutor-mini-progress-fill"
                                 style={{ width: `${percentage}%` }}
                               ></div>
                             </div>
-                            <span className="admin-progress-text">
+                            <span className="tutor-progress-text">
                               {student.solvedProblems?.length || 0}/{problems.length}
                             </span>
                           </div>
                         </td>
                         <td>
-                          <div className="admin-problems-status">
+                          <div className="tutor-problems-status">
                             {problems.map((problem, index) => {
                               const isSolved = student.solvedProblems?.includes(problem.id);
                               return (
                                 <div 
                                   key={problem.id}
-                                  className={`admin-problem-badge ${isSolved ? 'solved' : 'unsolved'}`}
+                                  className={`tutor-problem-badge ${isSolved ? 'solved' : 'unsolved'}`}
                                   title={`${removeCopyLabel(problem.title)} - ${isSolved ? '완료' : '미완료'}`}
                                 >
                                   {index + 1}
@@ -370,7 +370,7 @@ const AssignmentStudentProgress = () => {
                               );
                             })}
                             <button 
-                              className="admin-btn-detail"
+                              className="tutor-btn-detail"
                               onClick={() => {
                                 setSelectedStudent(student);
                                 setShowDetailModal(true);
@@ -383,7 +383,7 @@ const AssignmentStudentProgress = () => {
                         </td>
                         <td className="assignment-completion-time-cell">
                           {student.assignmentCompletedAt ? (
-                            <div className="admin-completion-time-display">
+                            <div className="tutor-completion-time-display">
                               {new Date(student.assignmentCompletedAt).toLocaleString('ko-KR', {
                                 year: 'numeric',
                                 month: 'short',
@@ -393,7 +393,7 @@ const AssignmentStudentProgress = () => {
                               })}
                             </div>
                           ) : (
-                            <div className="admin-completion-time-display admin-not-completed">
+                            <div className="tutor-completion-time-display tutor-not-completed">
                               미완료
                             </div>
                           )}
@@ -409,26 +409,26 @@ const AssignmentStudentProgress = () => {
 
         {/* 상세보기 모달 */}
         {showDetailModal && selectedStudent && (
-          <div className="admin-modal-overlay" onClick={() => setShowDetailModal(false)}>
-            <div className="admin-modal-content admin-detail-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay" onClick={() => setShowDetailModal(false)}>
+            <div className="tutor-modal-content tutor-detail-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-modal-header">
                 <h2>제출 시간 상세</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => setShowDetailModal(false)}
                 >
                   ✕
                 </button>
               </div>
               
-              <div className="admin-detail-modal-content">
+              <div className="tutor-detail-modal-content">
                 <div className="student-info">
                   <h3>{selectedStudent.studentName} ({selectedStudent.studentId})</h3>
                 </div>
 
-                <div className="admin-problems-detail-list">
+                <div className="tutor-problems-detail-list">
                   <h4>문제별 제출 시간</h4>
-                  <table className="admin-detail-table">
+                  <table className="tutor-detail-table">
                     <thead>
                       <tr>
                         <th>문제 번호</th>
@@ -453,7 +453,7 @@ const AssignmentStudentProgress = () => {
                             </td>
                             <td>
                               {submissionTime ? (
-                                <span className="admin-submission-time">
+                                <span className="tutor-submission-time">
                                   {new Date(submissionTime).toLocaleString('ko-KR', {
                                     year: 'numeric',
                                     month: 'long',
@@ -464,7 +464,7 @@ const AssignmentStudentProgress = () => {
                                   })}
                                 </span>
                               ) : (
-                                <span className="admin-submission-time admin-not-completed">-</span>
+                                <span className="tutor-submission-time tutor-not-completed">-</span>
                               )}
                             </td>
                           </tr>
@@ -475,9 +475,9 @@ const AssignmentStudentProgress = () => {
                 </div>
               </div>
 
-              <div className="admin-modal-actions">
+              <div className="tutor-modal-actions">
                 <button 
-                  className="admin-btn-secondary"
+                  className="tutor-btn-secondary"
                   onClick={() => setShowDetailModal(false)}
                 >
                   닫기
@@ -487,7 +487,7 @@ const AssignmentStudentProgress = () => {
           </div>
         )}
         </div>
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
@@ -498,36 +498,36 @@ const AssignmentStudentProgress = () => {
   });
 
   return (
-    <AdminLayout selectedSection={currentSection}>
+    <TutorLayout selectedSection={currentSection}>
       <div className="assignment-progress-container">
-        <div className="admin-page-header">
-          <h1 className="admin-page-title">과제별 풀이 현황</h1>
+        <div className="tutor-page-header">
+          <h1 className="tutor-page-title">과제별 풀이 현황</h1>
         </div>
 
-        <div className="admin-filters-section">
-          <div className="admin-search-box">
+        <div className="tutor-filters-section">
+          <div className="tutor-search-box">
             <input
               type="text"
               placeholder="과제명으로 검색..."
               value={progressSearchTerm}
               onChange={(e) => setProgressSearchTerm(e.target.value)}
-              className="admin-search-input"
+              className="tutor-search-input"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="admin-loading-container">
-            <div className="admin-loading-spinner"></div>
+          <div className="tutor-loading-container">
+            <div className="tutor-loading-spinner"></div>
             <p>과제 목록을 불러오는 중...</p>
           </div>
         ) : assignments.length === 0 ? (
-          <div className="admin-no-data">
+          <div className="tutor-no-data">
             <p>등록된 과제가 없습니다.</p>
           </div>
         ) : (
-          <div className="admin-assignments-table-container">
-            <table className="admin-assignments-table">
+          <div className="tutor-assignments-table-container">
+            <table className="tutor-assignments-table">
               <thead>
                 <tr>
                   <th>과제 제목</th>
@@ -539,7 +539,7 @@ const AssignmentStudentProgress = () => {
               <tbody>
                 {filteredProgressAssignments.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="admin-table-empty">
+                    <td colSpan="4" className="tutor-table-empty">
                       검색 조건에 맞는 과제가 없습니다.
                     </td>
                   </tr>
@@ -547,22 +547,22 @@ const AssignmentStudentProgress = () => {
                   filteredProgressAssignments.map((assignment) => (
                     <tr 
                       key={assignment.id} 
-                      className="admin-clickable"
+                      className="tutor-clickable"
                       onClick={() => navigate(`/tutor/assignments/section/${sectionId}/progress/${assignment.id}`)}
                     >
-                      <td className="admin-assignment-title-cell">
+                      <td className="tutor-assignment-title-cell">
                         <div>
-                          <div className="admin-assignment-title">{assignment.title}</div>
+                          <div className="tutor-assignment-title">{assignment.title}</div>
                           {assignment.description && (
-                            <div className="admin-assignment-description">{assignment.description}</div>
+                            <div className="tutor-assignment-description">{assignment.description}</div>
                           )}
                         </div>
                       </td>
-                      <td className="admin-assignment-meta-cell">
+                      <td className="tutor-assignment-meta-cell">
                         {assignment.endDate ? new Date(assignment.endDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '미설정'}
                       </td>
-                      <td className="admin-assignment-meta-cell">{assignment.problemCount || 0}개</td>
-                      <td className="admin-assignment-meta-cell">
+                      <td className="tutor-assignment-meta-cell">{assignment.problemCount || 0}개</td>
+                      <td className="tutor-assignment-meta-cell">
                         {submissionStats[assignment.id] ? 
                           `${submissionStats[assignment.id].submittedStudents || 0}/${submissionStats[assignment.id].totalStudents || 0}` 
                           : `0/0`}
@@ -575,7 +575,7 @@ const AssignmentStudentProgress = () => {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 

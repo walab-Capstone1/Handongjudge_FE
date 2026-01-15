@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import TutorLayout from "../../layouts/TutorLayout";
 import { useAuth } from "../../hooks/useAuth";
 import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
 import ReactMarkdown from "react-markdown";
-import "./AdminDashboard.css";
+import "./TutorDashboard.css";
 
-const AdminDashboard = () => {
+const TutorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [sections, setSections] = useState([]);
@@ -437,18 +437,18 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <TutorLayout>
         <div className="dashboard-loading">
-          <div className="admin-loading-spinner"></div>
+          <div className="tutor-loading-spinner"></div>
           <p>분반 정보를 불러오는 중...</p>
         </div>
-      </AdminLayout>
+      </TutorLayout>
     );
   }
 
   return (
-    <AdminLayout>
-      <div className="admin-dashboard">
+    <TutorLayout>
+      <div className="tutor-dashboard">
         <div className="dashboard-header">
           <h1 className="dashboard-title">담당 분반 목록</h1>
           <p className="dashboard-subtitle">
@@ -490,12 +490,12 @@ const AdminDashboard = () => {
         )}
 
         {/* 필터 섹션 */}
-        <div className="admin-filter-section">
-          <div className="admin-filter-left">
-            <div className="admin-filter-group">
-              <label className="admin-filter-label">년도</label>
+        <div className="tutor-filter-section">
+          <div className="tutor-filter-left">
+            <div className="tutor-filter-group">
+              <label className="tutor-filter-label">년도</label>
               <select 
-                className="admin-filter-select"
+                className="tutor-filter-select"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
               >
@@ -506,10 +506,10 @@ const AdminDashboard = () => {
                 ))}
               </select>
             </div>
-            <div className="admin-filter-group">
-              <label className="admin-filter-label">학기</label>
+            <div className="tutor-filter-group">
+              <label className="tutor-filter-label">학기</label>
               <select 
-                className="admin-filter-select"
+                className="tutor-filter-select"
                 value={selectedSemester}
                 onChange={(e) => setSelectedSemester(e.target.value)}
               >
@@ -520,19 +520,19 @@ const AdminDashboard = () => {
                 ))}
               </select>
             </div>
-            <div className="admin-filter-stats">
-              <span className="admin-filter-count">총 {filteredSections.length}개 수업</span>
+            <div className="tutor-filter-stats">
+              <span className="tutor-filter-count">총 {filteredSections.length}개 수업</span>
             </div>
           </div>
-          <div className="admin-filter-right">
+          <div className="tutor-filter-right">
             <button 
-              className="admin-btn-copy-section"
+              className="tutor-btn-copy-section"
               onClick={() => setShowCopyModal(true)}
             >
               수업 가져오기
             </button>
             <button 
-              className="admin-btn-create-section"
+              className="tutor-btn-create-section"
               onClick={() => setShowCreateModal(true)}
             >
               새 수업 만들기
@@ -540,46 +540,46 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="admin-sections-grid">
+        <div className="tutor-sections-grid">
           {filteredSections.map((section) => (
             <div 
               key={section.sectionId} 
-              className={`section-card admin-clickable ${section.active === false ? 'admin-disabled' : ''}`}
+              className={`section-card tutor-clickable ${section.active === false ? 'tutor-disabled' : ''}`}
               onClick={() => handleSectionClick(section)}
             >
               <div className="section-header">
                 <div className="section-title-area">
-                  <div className="admin-title-and-badge">
+                  <div className="tutor-title-and-badge">
                     <h3 className="section-title">{section.courseTitle}</h3>
                   </div>
-                  <span className="admin-year-badge">
+                  <span className="tutor-year-badge">
                     {section.year || '2024'}년 {getSemesterLabel(section.semester)}
                   </span>
                 </div>
               </div>
 
               <div className="section-info-grid">
-                <div className="admin-info-row">
-                  <span className="admin-info-label">담당교수</span>
-                  <span className="admin-info-value">{section.instructorName}</span>
+                <div className="tutor-info-row">
+                  <span className="tutor-info-label">담당교수</span>
+                  <span className="tutor-info-value">{section.instructorName}</span>
                 </div>
-                <div className="admin-info-row">
-                  <span className="admin-info-label">수강인원</span>
-                  <span className="admin-info-value">{section.studentCount || 0}명</span>
+                <div className="tutor-info-row">
+                  <span className="tutor-info-label">수강인원</span>
+                  <span className="tutor-info-value">{section.studentCount || 0}명</span>
                 </div>
-                <div className="admin-info-row">
-                  <span className="admin-info-label">과제</span>
-                  <span className="admin-info-value">{section.assignmentCount || 0}개</span>
+                <div className="tutor-info-row">
+                  <span className="tutor-info-label">과제</span>
+                  <span className="tutor-info-value">{section.assignmentCount || 0}개</span>
                 </div>
-                <div className="admin-info-row">
-                  <span className="admin-info-label">공지사항</span>
-                  <span className="admin-info-value">{section.noticeCount || 0}개</span>
+                <div className="tutor-info-row">
+                  <span className="tutor-info-label">공지사항</span>
+                  <span className="tutor-info-value">{section.noticeCount || 0}개</span>
                 </div>
               </div>
 
               <div className="section-footer">
                 <button 
-                  className={`admin-btn-toggle-active ${section.active !== false ? 'admin-active' : 'admin-inactive'}`}
+                  className={`tutor-btn-toggle-active ${section.active !== false ? 'tutor-active' : 'tutor-inactive'}`}
                   onClick={(e) => handleToggleActive(section.sectionId, section.active !== false, e)}
                   title={section.active !== false ? '비활성화하기' : '활성화하기'}
                 >
@@ -599,15 +599,15 @@ const AdminDashboard = () => {
             </div>
           ))}
           {filteredSections.length === 0 && sections.length > 0 && (
-            <div className="admin-no-sections">
-              <div className="admin-no-sections-message">
+            <div className="tutor-no-sections">
+              <div className="tutor-no-sections-message">
                 <p>해당 조건에 맞는 수업이 없습니다.</p>
               </div>
             </div>
           )}
           {sections.length === 0 && (
-            <div className="admin-no-sections">
-              <div className="admin-no-sections-message">
+            <div className="tutor-no-sections">
+              <div className="tutor-no-sections-message">
                 <p>담당하고 있는 분반이 없습니다.</p>
               </div>
             </div>
@@ -616,61 +616,61 @@ const AdminDashboard = () => {
 
         {/* 수업 생성 모달 */}
         {showCreateModal && (
-          <div className="admin-modal-overlay" onClick={() => setShowCreateModal(false)}>
-            <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-modal-header">
+          <div className="tutor-modal-overlay" onClick={() => setShowCreateModal(false)}>
+            <div className="tutor-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-modal-header">
                 <h2>새 수업 만들기</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => setShowCreateModal(false)}
                 >
                   ×
                 </button>
               </div>
 
-              <div className="admin-modal-body">
-                <div className="admin-form-group">
+              <div className="tutor-modal-body">
+                <div className="tutor-form-group">
                   <label>강의 제목</label>
                   <input
                     type="text"
                     value={formData.courseTitle}
                     onChange={(e) => setFormData({...formData, courseTitle: e.target.value})}
-                    className="admin-form-input"
+                    className="tutor-form-input"
                     placeholder="예: 자바프로그래밍"
                   />
                 </div>
 
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                   <label>수업 설명</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="admin-form-input"
+                    className="tutor-form-input"
                     placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
                     rows="3"
                   />
                 </div>
 
-                <div className="admin-form-row">
-                  <div className="admin-form-group">
+                <div className="tutor-form-row">
+                  <div className="tutor-form-group">
                     <label>년도</label>
                     <input
                       type="number"
                       value={formData.year}
                       onChange={(e) => setFormData({...formData, year: e.target.value})}
-                      className="admin-form-input"
+                      className="tutor-form-input"
                       placeholder="2025"
                       min="2020"
                       max="2099"
                     />
                   </div>
 
-                  <div className="admin-form-group">
+                  <div className="tutor-form-group">
                     <label>구분</label>
                     <select
                       value={formData.semester}
                       onChange={(e) => setFormData({...formData, semester: e.target.value})}
-                      className="admin-form-select"
+                      className="tutor-form-select"
                     >
                       <option value="SPRING">1학기</option>
                       <option value="SUMMER">여름학기</option>
@@ -684,15 +684,15 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="admin-modal-footer">
+              <div className="tutor-modal-footer">
                 <button 
-                  className="admin-btn-cancel"
+                  className="tutor-btn-cancel"
                   onClick={() => setShowCreateModal(false)}
                 >
                   취소
                 </button>
                 <button 
-                  className="admin-btn-submit"
+                  className="tutor-btn-submit"
                   onClick={handleCreateSection}
                   disabled={!formData.courseTitle}
                 >
@@ -705,17 +705,17 @@ const AdminDashboard = () => {
 
         {/* 수업 가져오기 모달 */}
         {showCopyModal && (
-          <div className="admin-modal-overlay" onClick={() => {
+          <div className="tutor-modal-overlay" onClick={() => {
             setShowCopyModal(false);
             setCopyStep(1);
             setSelectedNoticeDetail(null);
             setSelectedProblemDetail(null);
           }}>
-            <div className={`admin-modal-content ${copyStep === 1 ? '' : 'admin-modal-content-large'}`} onClick={(e) => e.stopPropagation()}>
-              <div className="admin-modal-header">
+            <div className={`tutor-modal-content ${copyStep === 1 ? '' : 'tutor-modal-content-large'}`} onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-modal-header">
                 <h2>수업 가져오기</h2>
                 <button 
-                  className="admin-modal-close"
+                  className="tutor-modal-close"
                   onClick={() => {
                     setShowCopyModal(false);
                     setCopyStep(1);
@@ -727,18 +727,18 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              <div className={copyStep === 1 ? "admin-modal-body" : "admin-modal-body admin-modal-body-large"}>
+              <div className={copyStep === 1 ? "tutor-modal-body" : "tutor-modal-body tutor-modal-body-large"}>
                 {/* 1단계: 기본 정보 */}
                 {copyStep === 1 && (
-                  <div className="admin-step-content">
-                    <h3 className="admin-step-title">1단계: 기본 정보 입력</h3>
+                  <div className="tutor-step-content">
+                    <h3 className="tutor-step-title">1단계: 기본 정보 입력</h3>
                     
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                       <label>복사할 수업 선택 *</label>
                   <select
                     value={copyFormData.sourceSectionId}
                         onChange={(e) => handleSourceSectionChange(e.target.value)}
-                    className="admin-form-select"
+                    className="tutor-form-select"
                   >
                     <option value="">수업을 선택하세요</option>
                     {sections.map((section) => (
@@ -749,48 +749,48 @@ const AdminDashboard = () => {
                   </select>
                 </div>
 
-                <div className="admin-form-group">
+                <div className="tutor-form-group">
                       <label>새 수업 제목 *</label>
                   <input
                         type="text"
                         value={copyFormData.courseTitle}
                         onChange={(e) => setCopyFormData({...copyFormData, courseTitle: e.target.value})}
-                    className="admin-form-input"
+                    className="tutor-form-input"
                         placeholder="예: 자바프로그래밍"
                       />
                     </div>
 
-                    <div className="admin-form-group">
+                    <div className="tutor-form-group">
                       <label>수업 설명</label>
                       <textarea
                         value={copyFormData.description}
                         onChange={(e) => setCopyFormData({...copyFormData, description: e.target.value})}
-                        className="admin-form-input"
+                        className="tutor-form-input"
                         placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
                         rows="4"
                   />
                 </div>
 
-                <div className="admin-form-row">
-                  <div className="admin-form-group">
+                <div className="tutor-form-row">
+                  <div className="tutor-form-group">
                         <label>년도 *</label>
                     <input
                       type="number"
                       value={copyFormData.year}
                       onChange={(e) => setCopyFormData({...copyFormData, year: e.target.value})}
-                      className="admin-form-input"
+                      className="tutor-form-input"
                       placeholder="2025"
                       min="2020"
                       max="2099"
                     />
                   </div>
 
-                  <div className="admin-form-group">
+                  <div className="tutor-form-group">
                         <label>구분 *</label>
                     <select
                       value={copyFormData.semester}
                       onChange={(e) => setCopyFormData({...copyFormData, semester: e.target.value})}
-                      className="admin-form-select"
+                      className="tutor-form-select"
                     >
                       <option value="SPRING">1학기</option>
                       <option value="SUMMER">여름학기</option>
@@ -807,18 +807,18 @@ const AdminDashboard = () => {
 
                 {/* 2단계: 공지사항 선택 */}
                 {copyStep === 2 && (
-                  <div className="admin-step-content">
-                    <h3 className="admin-step-title">2단계: 공지사항 선택</h3>
-                    <p className="admin-step-description">가져올 공지사항을 선택하세요. 건너뛰면 공지사항을 가져오지 않습니다.</p>
+                  <div className="tutor-step-content">
+                    <h3 className="tutor-step-title">2단계: 공지사항 선택</h3>
+                    <p className="tutor-step-description">가져올 공지사항을 선택하세요. 건너뛰면 공지사항을 가져오지 않습니다.</p>
                     
                     {loadingNotices ? (
-                      <div className="admin-loading-items">공지사항을 불러오는 중...</div>
+                      <div className="tutor-loading-items">공지사항을 불러오는 중...</div>
                     ) : sourceNotices.length === 0 ? (
-                      <div className="admin-no-items">가져올 공지사항이 없습니다.</div>
+                      <div className="tutor-no-items">가져올 공지사항이 없습니다.</div>
                     ) : (
-                      <div className="admin-selection-box-large">
-                        <div className="admin-selection-header">
-                          <label className="admin-checkbox-label">
+                      <div className="tutor-selection-box-large">
+                        <div className="tutor-selection-header">
+                          <label className="tutor-checkbox-label">
                             <input
                               type="checkbox"
                               checked={copyFormData.selectedNoticeIds.length === sourceNotices.length && sourceNotices.length > 0}
@@ -826,29 +826,29 @@ const AdminDashboard = () => {
                             />
                             <span>전체 선택</span>
                           </label>
-                          <span className="admin-item-count">
+                          <span className="tutor-item-count">
                             {copyFormData.selectedNoticeIds.length} / {sourceNotices.length}개 선택됨
                           </span>
                         </div>
                         
-                        <div className="admin-item-list-large">
+                        <div className="tutor-item-list-large">
                           {sourceNotices.map((notice) => (
-                            <div key={notice.id} className="admin-list-item-large">
-                              <label className="admin-checkbox-label">
+                            <div key={notice.id} className="tutor-list-item-large">
+                              <label className="tutor-checkbox-label">
                                 <input
                                   type="checkbox"
                                   checked={copyFormData.selectedNoticeIds.includes(notice.id)}
                                   onChange={() => handleNoticeToggle(notice.id)}
                                 />
-                                <div className="admin-item-info">
-                                  <span className="admin-item-title-large">{notice.title}</span>
-                                  <span className="admin-item-meta">
+                                <div className="tutor-item-info">
+                                  <span className="tutor-item-title-large">{notice.title}</span>
+                                  <span className="tutor-item-meta">
                                     {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
                                   </span>
                                 </div>
                               </label>
                               <button
-                                className="admin-btn-view-detail"
+                                className="tutor-btn-view-detail"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedNoticeDetail(notice);
@@ -866,18 +866,18 @@ const AdminDashboard = () => {
 
                 {/* 3단계: 과제 및 문제 선택 */}
                 {copyStep === 3 && (
-                  <div className="admin-step-content">
-                    <h3 className="admin-step-title">3단계: 과제 및 문제 선택</h3>
-                    <p className="admin-step-description">가져올 과제와 문제를 선택하세요. 과제를 클릭하면 해당 과제의 문제 목록을 볼 수 있습니다.</p>
+                  <div className="tutor-step-content">
+                    <h3 className="tutor-step-title">3단계: 과제 및 문제 선택</h3>
+                    <p className="tutor-step-description">가져올 과제와 문제를 선택하세요. 과제를 클릭하면 해당 과제의 문제 목록을 볼 수 있습니다.</p>
                     
                     {loadingAssignments ? (
-                      <div className="admin-loading-items">과제를 불러오는 중...</div>
+                      <div className="tutor-loading-items">과제를 불러오는 중...</div>
                     ) : sourceAssignments.length === 0 ? (
-                      <div className="admin-no-items">가져올 과제가 없습니다.</div>
+                      <div className="tutor-no-items">가져올 과제가 없습니다.</div>
                     ) : (
-                      <div className="admin-selection-box-large">
-                        <div className="admin-selection-header">
-                          <label className="admin-checkbox-label">
+                      <div className="tutor-selection-box-large">
+                        <div className="tutor-selection-header">
+                          <label className="tutor-checkbox-label">
                             <input
                               type="checkbox"
                               checked={copyFormData.selectedAssignmentIds.length === sourceAssignments.length && sourceAssignments.length > 0}
@@ -885,7 +885,7 @@ const AdminDashboard = () => {
                             />
                             <span>전체 선택</span>
                           </label>
-                          <span className="admin-item-count">
+                          <span className="tutor-item-count">
                             {copyFormData.selectedAssignmentIds.length} / {sourceAssignments.length}개 과제 선택됨
                           </span>
                         </div>
@@ -897,9 +897,9 @@ const AdminDashboard = () => {
                             const isExpanded = expandedAssignments[assignment.id];
                             
                             return (
-                              <div key={assignment.id} className={`assignment-item-large ${isExpanded ? 'admin-expanded' : ''}`}>
+                              <div key={assignment.id} className={`assignment-item-large ${isExpanded ? 'tutor-expanded' : ''}`}>
                                 <div className="assignment-item-header-large">
-                                  <label className="admin-checkbox-label">
+                                  <label className="tutor-checkbox-label">
                                     <input
                                       type="checkbox"
                                       checked={isAssignmentSelected}
@@ -915,7 +915,7 @@ const AdminDashboard = () => {
                                   </label>
                                   {assignment.problems && assignment.problems.length > 0 && (
                                     <button
-                                      className="admin-btn-expand-assignment-large"
+                                      className="tutor-btn-expand-assignment-large"
                                       onClick={() => toggleAssignmentExpand(assignment.id)}
                                       disabled={!isAssignmentSelected}
                                     >
@@ -925,9 +925,9 @@ const AdminDashboard = () => {
                                 </div>
                                 
                                 {isExpanded && isAssignmentSelected && assignment.problems && assignment.problems.length > 0 && (
-                                  <div className="admin-problem-selection-box-large">
-                                    <div className="admin-problem-selection-header-large">
-                                      <label className="admin-checkbox-label">
+                                  <div className="tutor-problem-selection-box-large">
+                                    <div className="tutor-problem-selection-header-large">
+                                      <label className="tutor-checkbox-label">
                                         <input
                                           type="checkbox"
                                           checked={selectedProblems.length === assignment.problems.length}
@@ -935,29 +935,29 @@ const AdminDashboard = () => {
                                         />
                                         <span>문제 전체 선택</span>
                                       </label>
-                                      <span className="admin-item-count">
+                                      <span className="tutor-item-count">
                                         {selectedProblems.length} / {assignment.problems.length}개
                                       </span>
                                     </div>
-                                    <div className="admin-problem-list-large">
+                                    <div className="tutor-problem-list-large">
                                       {assignment.problems.map((problem, index) => (
-                                        <div key={problem.id} className="admin-problem-item-large">
-                                          <div className="admin-problem-item-large-header">
+                                        <div key={problem.id} className="tutor-problem-item-large">
+                                          <div className="tutor-problem-item-large-header">
                                             <input
                                               type="checkbox"
                                               checked={selectedProblems.includes(problem.id)}
                                               onChange={() => handleProblemToggle(assignment.id, problem.id)}
-                                              className="admin-problem-checkbox"
+                                              className="tutor-problem-checkbox"
                                             />
                                           </div>
-                                          <div className="admin-problem-item-large-body">
-                                            <div className="admin-problem-title-row">
-                                              <h4 className="admin-problem-title-large">
-                                                <span className="admin-problem-number-large">{index + 1}.</span>
+                                          <div className="tutor-problem-item-large-body">
+                                            <div className="tutor-problem-title-row">
+                                              <h4 className="tutor-problem-title-large">
+                                                <span className="tutor-problem-number-large">{index + 1}.</span>
                                                 {removeCopyLabel(problem.title)}
                                               </h4>
                                               <button
-                                                className="admin-btn-view-detail-card"
+                                                className="tutor-btn-view-detail-card"
                                                 onClick={async (e) => {
                                                   e.stopPropagation();
                                                   try {
@@ -989,51 +989,51 @@ const AdminDashboard = () => {
 
                 {/* 4단계: 최종 확인 */}
                 {copyStep === 4 && (
-                  <div className="admin-step-content">
-                    <h3 className="admin-step-title">4단계: 최종 확인</h3>
-                    <p className="admin-step-description">선택하신 내용을 확인하고 수업을 생성하세요.</p>
+                  <div className="tutor-step-content">
+                    <h3 className="tutor-step-title">4단계: 최종 확인</h3>
+                    <p className="tutor-step-description">선택하신 내용을 확인하고 수업을 생성하세요.</p>
                     
-                    <div className="admin-summary-section">
-                      <div className="admin-summary-item">
-                        <h4 className="admin-summary-label">수업 정보</h4>
-                        <div className="admin-summary-content">
-                          <div className="admin-summary-row">
-                            <span className="admin-summary-key">제목:</span>
-                            <span className="admin-summary-value">{copyFormData.courseTitle}</span>
+                    <div className="tutor-summary-section">
+                      <div className="tutor-summary-item">
+                        <h4 className="tutor-summary-label">수업 정보</h4>
+                        <div className="tutor-summary-content">
+                          <div className="tutor-summary-row">
+                            <span className="tutor-summary-key">제목:</span>
+                            <span className="tutor-summary-value">{copyFormData.courseTitle}</span>
                           </div>
                           {copyFormData.description && (
-                            <div className="admin-summary-row">
-                              <span className="admin-summary-key">설명:</span>
-                              <span className="admin-summary-value">{copyFormData.description}</span>
+                            <div className="tutor-summary-row">
+                              <span className="tutor-summary-key">설명:</span>
+                              <span className="tutor-summary-value">{copyFormData.description}</span>
                             </div>
                           )}
-                          <div className="admin-summary-row">
-                            <span className="admin-summary-key">년도:</span>
-                            <span className="admin-summary-value">{copyFormData.year}년</span>
+                          <div className="tutor-summary-row">
+                            <span className="tutor-summary-key">년도:</span>
+                            <span className="tutor-summary-value">{copyFormData.year}년</span>
                           </div>
-                          <div className="admin-summary-row">
-                            <span className="admin-summary-key">구분:</span>
-                            <span className="admin-summary-value">{getSemesterLabel(copyFormData.semester)}</span>
+                          <div className="tutor-summary-row">
+                            <span className="tutor-summary-key">구분:</span>
+                            <span className="tutor-summary-value">{getSemesterLabel(copyFormData.semester)}</span>
                           </div>
                         </div>
                       </div>
 
                       {copyFormData.copyNotices ? (
-                        <div className="admin-summary-item">
-                          <h4 className="admin-summary-label">공지사항</h4>
-                          <div className="admin-summary-content">
-                            <div className="admin-summary-row">
-                              <span className="admin-summary-key">가져올 공지사항:</span>
-                              <span className="admin-summary-value">
+                        <div className="tutor-summary-item">
+                          <h4 className="tutor-summary-label">공지사항</h4>
+                          <div className="tutor-summary-content">
+                            <div className="tutor-summary-row">
+                              <span className="tutor-summary-key">가져올 공지사항:</span>
+                              <span className="tutor-summary-value">
                                 {copyFormData.selectedNoticeIds.length}개 선택됨
                               </span>
                             </div>
                             {copyFormData.selectedNoticeIds.length > 0 && (
-                              <div className="admin-summary-list">
+                              <div className="tutor-summary-list">
                                 {sourceNotices
                                   .filter(n => copyFormData.selectedNoticeIds.includes(n.id))
                                   .map(notice => (
-                                    <div key={notice.id} className="admin-summary-list-item">
+                                    <div key={notice.id} className="tutor-summary-list-item">
                                       • {notice.title}
                                     </div>
                                   ))}
@@ -1042,33 +1042,33 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="admin-summary-item">
-                          <h4 className="admin-summary-label">공지사항</h4>
-                          <div className="admin-summary-content">
-                            <span className="admin-summary-skipped">건너뛰기</span>
+                        <div className="tutor-summary-item">
+                          <h4 className="tutor-summary-label">공지사항</h4>
+                          <div className="tutor-summary-content">
+                            <span className="tutor-summary-skipped">건너뛰기</span>
                           </div>
                         </div>
                       )}
 
                       {copyFormData.copyAssignments ? (
-                        <div className="admin-summary-item">
-                          <h4 className="admin-summary-label">과제 및 문제</h4>
-                          <div className="admin-summary-content">
-                            <div className="admin-summary-row">
-                              <span className="admin-summary-key">가져올 과제:</span>
-                              <span className="admin-summary-value">
+                        <div className="tutor-summary-item">
+                          <h4 className="tutor-summary-label">과제 및 문제</h4>
+                          <div className="tutor-summary-content">
+                            <div className="tutor-summary-row">
+                              <span className="tutor-summary-key">가져올 과제:</span>
+                              <span className="tutor-summary-value">
                                 {copyFormData.selectedAssignmentIds.length}개 선택됨
                               </span>
                             </div>
                             {copyFormData.selectedAssignmentIds.length > 0 && (
-                              <div className="admin-summary-list">
+                              <div className="tutor-summary-list">
                                 {sourceAssignments
                                   .filter(a => copyFormData.selectedAssignmentIds.includes(a.id))
                                   .map(assignment => {
                                     const selectedProblems = copyFormData.assignmentProblems[assignment.id] || [];
                                     return (
-                                      <div key={assignment.id} className="admin-summary-list-item">
-                                        <div className="admin-summary-assignment">
+                                      <div key={assignment.id} className="tutor-summary-list-item">
+                                        <div className="tutor-summary-assignment">
                                           • {assignment.title} ({selectedProblems.length}개 문제)
                                         </div>
                                       </div>
@@ -1079,10 +1079,10 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="admin-summary-item">
-                          <h4 className="admin-summary-label">과제 및 문제</h4>
-                          <div className="admin-summary-content">
-                            <span className="admin-summary-skipped">건너뛰기</span>
+                        <div className="tutor-summary-item">
+                          <h4 className="tutor-summary-label">과제 및 문제</h4>
+                          <div className="tutor-summary-content">
+                            <span className="tutor-summary-skipped">건너뛰기</span>
                           </div>
                         </div>
                       )}
@@ -1093,12 +1093,12 @@ const AdminDashboard = () => {
               </div>
 
 
-              <div className="admin-modal-footer">
+              <div className="tutor-modal-footer">
                 {/* 1단계 버튼 */}
                 {copyStep === 1 && (
                   <>
                 <button 
-                  className="admin-btn-cancel"
+                  className="tutor-btn-cancel"
                       onClick={() => {
                         setShowCopyModal(false);
                         setCopyStep(1);
@@ -1107,7 +1107,7 @@ const AdminDashboard = () => {
                   취소
                 </button>
                     <button 
-                      className="admin-btn-next"
+                      className="tutor-btn-next"
                       onClick={() => setCopyStep(2)}
                       disabled={!copyFormData.sourceSectionId || !copyFormData.courseTitle}
                     >
@@ -1120,13 +1120,13 @@ const AdminDashboard = () => {
                 {copyStep === 2 && (
                   <>
                     <button 
-                      className="admin-btn-prev"
+                      className="tutor-btn-prev"
                       onClick={() => setCopyStep(1)}
                     >
                       이전
                     </button>
                     <button 
-                      className="admin-btn-skip"
+                      className="tutor-btn-skip"
                       onClick={() => {
                         setCopyFormData(prev => ({...prev, copyNotices: false, selectedNoticeIds: []}));
                         setCopyStep(3);
@@ -1135,7 +1135,7 @@ const AdminDashboard = () => {
                       건너뛰기
                     </button>
                     <button 
-                      className="admin-btn-next"
+                      className="tutor-btn-next"
                       onClick={() => {
                         setCopyFormData(prev => ({...prev, copyNotices: true}));
                         setCopyStep(3);
@@ -1151,13 +1151,13 @@ const AdminDashboard = () => {
                 {copyStep === 3 && (
                   <>
                     <button 
-                      className="admin-btn-prev"
+                      className="tutor-btn-prev"
                       onClick={() => setCopyStep(2)}
                     >
                       이전
                     </button>
                     <button 
-                      className="admin-btn-skip"
+                      className="tutor-btn-skip"
                       onClick={() => {
                         setCopyFormData(prev => ({...prev, copyAssignments: false, selectedAssignmentIds: [], assignmentProblems: {}}));
                         setCopyStep(4);
@@ -1166,7 +1166,7 @@ const AdminDashboard = () => {
                       건너뛰기
                     </button>
                     <button 
-                      className="admin-btn-next"
+                      className="tutor-btn-next"
                       onClick={() => {
                         setCopyFormData(prev => ({...prev, copyAssignments: true}));
                         setCopyStep(4);
@@ -1182,13 +1182,13 @@ const AdminDashboard = () => {
                 {copyStep === 4 && (
                   <>
                     <button 
-                      className="admin-btn-prev"
+                      className="tutor-btn-prev"
                       onClick={() => setCopyStep(3)}
                     >
                       이전
                     </button>
                 <button 
-                  className="admin-btn-submit"
+                  className="tutor-btn-submit"
                   onClick={handleCopySection}
                 >
                       수업 만들기
@@ -1203,15 +1203,15 @@ const AdminDashboard = () => {
         {/* 상세보기 패널 */}
         {(selectedNoticeDetail || selectedProblemDetail) && (
           <>
-            <div className="admin-detail-overlay" onClick={() => {
+            <div className="tutor-detail-overlay" onClick={() => {
               setSelectedNoticeDetail(null);
               setSelectedProblemDetail(null);
             }}></div>
-            <div className="admin-detail-panel" onClick={(e) => e.stopPropagation()}>
-              <div className="admin-detail-panel-header">
+            <div className="tutor-detail-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-detail-panel-header">
                 <h3>{selectedNoticeDetail ? '공지사항 상세' : '문제 설명'}</h3>
                 <button
-                  className="admin-btn-close-detail"
+                  className="tutor-btn-close-detail"
                   onClick={() => {
                     setSelectedNoticeDetail(null);
                     setSelectedProblemDetail(null);
@@ -1220,22 +1220,22 @@ const AdminDashboard = () => {
                   ×
                 </button>
               </div>
-              <div className="admin-detail-panel-content">
+              <div className="tutor-detail-panel-content">
                 {selectedNoticeDetail && (
                   <div className="notice-detail-content">
-                    <h4 className="admin-detail-title">{selectedNoticeDetail.title}</h4>
-                    <div className="admin-detail-meta">
+                    <h4 className="tutor-detail-title">{selectedNoticeDetail.title}</h4>
+                    <div className="tutor-detail-meta">
                       작성일: {new Date(selectedNoticeDetail.createdAt).toLocaleDateString('ko-KR')}
                     </div>
-                    <div className="admin-detail-body">
+                    <div className="tutor-detail-body">
                       {selectedNoticeDetail.content}
                     </div>
                   </div>
                 )}
                 {selectedProblemDetail && (
-                  <div className="admin-problem-detail-content">
-                    <h4 className="admin-detail-title">{selectedProblemDetail.title}</h4>
-                    <div className="admin-detail-meta">
+                  <div className="tutor-problem-detail-content">
+                    <h4 className="tutor-detail-title">{selectedProblemDetail.title}</h4>
+                    <div className="tutor-detail-meta">
                       {selectedProblemDetail.timeLimit && (
                         <span>시간 제한: {selectedProblemDetail.timeLimit}초</span>
                       )}
@@ -1243,7 +1243,7 @@ const AdminDashboard = () => {
                         <span>메모리 제한: {selectedProblemDetail.memoryLimit}MB</span>
                       )}
                     </div>
-                    <div className="admin-detail-body admin-problem-description">
+                    <div className="tutor-detail-body tutor-problem-description">
                       {selectedProblemDetail.description ? (
                         (() => {
                           const description = selectedProblemDetail.description;
@@ -1258,11 +1258,11 @@ const AdminDashboard = () => {
                               components={{
                                 code({node, inline, className, children, ...props}) {
                                   return inline ? (
-                                    <code className="admin-inline-code" {...props}>
+                                    <code className="tutor-inline-code" {...props}>
                                       {children}
                                     </code>
                                   ) : (
-                                    <pre className="admin-code-block">
+                                    <pre className="tutor-code-block">
                                       <code className={className} {...props}>
                                         {children}
                                       </code>
@@ -1288,8 +1288,8 @@ const AdminDashboard = () => {
           </>
         )}
       </div>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 
-export default AdminDashboard;
+export default TutorDashboard;

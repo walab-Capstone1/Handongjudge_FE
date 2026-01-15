@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import AdminLayout from "../../layouts/AdminLayout";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
-import { FaPalette, FaHighlighter } from "react-icons/fa";
-import { markdownToHtml } from "../../utils/markdownToHtml";
 import ReactMarkdown from "react-markdown";
+import { FaPalette, FaHighlighter } from "react-icons/fa";
 import "./ProblemCreate.css";
 
-// 미리보기 컴포넌트 (ProblemCreate와 동일)
+// 미리보기 컴포넌트
 const ProblemPreview = ({ title, description, inputFormat, outputFormat, sampleInputs }) => {
   const hasContent = description || inputFormat || outputFormat || 
                      (sampleInputs && sampleInputs.some(s => s.input || s.output));
@@ -23,34 +22,12 @@ const ProblemPreview = ({ title, description, inputFormat, outputFormat, sampleI
         <h1 className="problem-preview-title">{title}</h1>
       )}
       
-      {/* 문제 설명 (마크다운 렌더링) */}
+      {/* 문제 설명 (HTML 그대로 렌더링) */}
       {description && (
-        <div className="problem-preview-description">
-          <ReactMarkdown
-            components={{
-              h1: ({node, ...props}) => <h1 className="problem-preview-h1" {...props} />,
-              h2: ({node, ...props}) => <h2 className="problem-preview-h2" {...props} />,
-              h3: ({node, ...props}) => <h3 className="problem-preview-h3" {...props} />,
-              code: ({node, inline, className, children, ...props}) => {
-                return inline ? (
-                  <code className="problem-preview-inline-code" {...props}>
-                    {children}
-                  </code>
-                ) : (
-                  <pre className="problem-preview-code-block">
-                    <code {...props}>
-                      {children}
-                    </code>
-                  </pre>
-                );
-              },
-              p: ({node, ...props}) => <p className="problem-preview-paragraph" {...props} />,
-              hr: ({node, ...props}) => <hr className="problem-preview-hr" {...props} />,
-            }}
-          >
-            {description}
-          </ReactMarkdown>
-        </div>
+        <div 
+          className="problem-preview-description"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       )}
       
       {/* 입력 형식 */}
@@ -102,15 +79,14 @@ const ProblemPreview = ({ title, description, inputFormat, outputFormat, sampleI
   );
 };
 
-const ProblemEdit = () => {
+const ProblemCreate = () => {
   const navigate = useNavigate();
-  const { problemId } = useParams();
   const [zipFile, setZipFile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [parsedTestCases, setParsedTestCases] = useState([]); // ZIP에서 파싱한 테스트케이스
+  const [showParsedTestCases, setShowParsedTestCases] = useState(false); // 파싱된 테스트케이스 표시 여부
   const descriptionRef = useRef(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   // 폼 데이터
   const [formData, setFormData] = useState({
@@ -128,101 +104,21 @@ const ProblemEdit = () => {
   });
 
   const [currentTag, setCurrentTag] = useState('');
-  const [originalTimeLimit, setOriginalTimeLimit] = useState('');
-  const [originalMemoryLimit, setOriginalMemoryLimit] = useState('');
 
+  // description이 변경되면 contentEditable에 반영
   useEffect(() => {
-    fetchProblem();
-  }, [problemId]);
-
-  // 초기 로드 시에만 descriptionRef에 내용 설정
-  useEffect(() => {
-    if (descriptionRef.current && formData.description && isInitialLoad && !loading) {
-      const isHTML = /<[^>]+>/.test(formData.description);
-      if (isHTML) {
-        descriptionRef.current.innerHTML = formData.description;
-      } else {
-        // 마크다운 텍스트를 그대로 넣기 (줄바꿈 보존)
-        descriptionRef.current.textContent = formData.descriptionText || formData.description;
+    if (descriptionRef.current) {
+      const currentContent = descriptionRef.current.innerHTML || '';
+      const newContent = formData.description || '';
+      
+      // 현재 내용과 다를 때만 업데이트 (무한 루프 방지)
+      if (currentContent !== newContent) {
+        descriptionRef.current.innerHTML = newContent;
       }
-      setIsInitialLoad(false);
     }
-  }, [formData.description, formData.descriptionText, loading, isInitialLoad]);
+  }, [formData.description]);
 
-  const fetchProblem = async () => {
-    try {
-      setLoading(true);
-      setIsInitialLoad(true);
-      const response = await APIService.getProblemInfo(problemId);
-      
-      const problem = response?.data || response;
-      
-      // 전체 description을 그대로 사용 (마크다운 텍스트 그대로)
-      const description = problem.description || '';
-      
-      // HTML 태그가 있으면 제거하고 텍스트만 가져오기
-      const descriptionText = description.replace(/<[^>]*>/g, '') || description;
-      
-      // timeLimit과 memoryLimit 처리
-      // 백엔드에서 null로 오는 경우가 있으므로 처리
-      // null이거나 undefined인 경우 빈 문자열로 처리
-      let timeLimit = '';
-      if (problem.timeLimit != null && problem.timeLimit !== undefined) {
-        const timeLimitValue = Number(problem.timeLimit);
-        if (!isNaN(timeLimitValue) && timeLimitValue > 0) {
-          timeLimit = String(timeLimitValue);
-        }
-      }
-      
-      let memoryLimit = '';
-      if (problem.memoryLimit != null && problem.memoryLimit !== undefined) {
-        const memoryLimitValue = Number(problem.memoryLimit);
-        if (!isNaN(memoryLimitValue) && memoryLimitValue > 0) {
-          memoryLimit = String(memoryLimitValue);
-        }
-      }
-      
-      // 기존 값 저장 (빈 값일 때 사용)
-      setOriginalTimeLimit(timeLimit);
-      setOriginalMemoryLimit(memoryLimit);
-      
-      setFormData({
-        title: problem.title || '',
-        description: description, // 원본 그대로 (HTML 또는 마크다운)
-        descriptionText: descriptionText, // 텍스트만
-        inputFormat: '', // 기존 문제 수정 시에는 비워둠
-        outputFormat: '', // 기존 문제 수정 시에는 비워둠
-        tags: [], // 태그는 백엔드에서 제공하지 않으면 빈 배열
-        difficulty: problem.difficulty?.toString() || '1',
-        timeLimit: timeLimit,
-        memoryLimit: memoryLimit,
-        sampleInputs: [{ input: '', output: '' }], // 기존 문제 수정 시에는 비워둠
-        testcases: []
-      });
-      
-      // descriptionRef에 마크다운 텍스트 그대로 설정 (약간의 지연 후)
-      setTimeout(() => {
-        if (descriptionRef.current) {
-          // HTML이 아닌 경우 텍스트로 설정 (줄바꿈 보존)
-          const isHTML = /<[^>]+>/.test(description);
-          if (isHTML) {
-            descriptionRef.current.innerHTML = description;
-          } else {
-            // 마크다운 텍스트를 그대로 넣기 (줄바꿈 보존)
-            descriptionRef.current.textContent = descriptionText;
-          }
-          setIsInitialLoad(false);
-        }
-      }, 200);
-    } catch (err) {
-      console.error('문제 조회 실패:', err);
-      setError('문제를 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleZipFileChange = (e) => {
+  const handleZipFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -233,6 +129,107 @@ const ProblemEdit = () => {
 
     setZipFile(file);
     setError(null);
+    setLoading(true);
+
+    try {
+      // ZIP 파일 파싱
+      const formData = new FormData();
+      formData.append('zipFile', file);
+      
+      console.log('ZIP 파일 파싱 시작:', file.name);
+      const parsedData = await APIService.parseZipFile(formData);
+      console.log('파싱된 데이터:', parsedData);
+      
+      // 파싱된 데이터로 폼 채우기
+      if (parsedData) {
+        // 제목 설정
+        if (parsedData.title) {
+          setFormData(prev => ({
+            ...prev,
+            title: parsedData.title
+          }));
+        }
+
+        // 시간 제한 설정
+        if (parsedData.timeLimit !== null && parsedData.timeLimit !== undefined) {
+          setFormData(prev => ({
+            ...prev,
+            timeLimit: String(parsedData.timeLimit)
+          }));
+        }
+
+        // 메모리 제한 설정
+        if (parsedData.memoryLimit !== null && parsedData.memoryLimit !== undefined) {
+          setFormData(prev => ({
+            ...prev,
+            memoryLimit: String(parsedData.memoryLimit)
+          }));
+        }
+
+        // 설명 설정
+        if (parsedData.description) {
+          // 먼저 마크다운 제목을 HTML로 변환 (## 제목 또는 ##제목 모두 지원)
+          let processedDescription = convertMarkdownHeadingsToHtml(parsedData.description);
+          
+          // HTML 태그가 이미 포함되어 있는지 확인
+          const hasHtmlTags = /<[a-z][\s\S]*>/i.test(processedDescription);
+          
+          let htmlDescription;
+          if (hasHtmlTags) {
+            // 이미 HTML 태그가 있으면 그대로 사용 (제목은 이미 변환됨)
+            htmlDescription = processedDescription;
+          } else {
+            // 마크다운을 HTML로 변환
+            htmlDescription = processedDescription
+              .replace(/\n/g, '<br>')
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\*(.*?)\*/g, '<em>$1</em>');
+          }
+          
+          setFormData(prev => ({
+            ...prev,
+            description: htmlDescription,
+            descriptionText: parsedData.description // 원본도 저장
+          }));
+          
+          // contentEditable에 직접 설정
+          if (descriptionRef.current) {
+            descriptionRef.current.innerHTML = htmlDescription;
+          }
+        }
+
+        // 테스트케이스 처리 (대소문자 구분 없이)
+        const testCases = parsedData.testCases || parsedData.testcases || [];
+        console.log('테스트케이스:', testCases);
+        if (testCases.length > 0) {
+          // 샘플 테스트케이스를 예제로 변환
+          const sampleTestCases = testCases.filter(tc => tc.type === 'sample');
+          if (sampleTestCases.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              sampleInputs: sampleTestCases.map(tc => ({
+                input: tc.input || '',
+                output: tc.output || ''
+              }))
+            }));
+          }
+
+          // 모든 테스트케이스 저장 (표시용)
+          setParsedTestCases(testCases);
+          
+          const secretCount = testCases.filter(tc => tc.type === 'secret').length;
+          const sampleCount = testCases.filter(tc => tc.type === 'sample').length;
+          console.log(`ZIP 파일에서 ${sampleCount}개의 샘플 테스트케이스와 ${secretCount}개의 비밀 테스트케이스를 찾았습니다.`);
+        } else {
+          setParsedTestCases([]);
+        }
+      }
+    } catch (err) {
+      console.error('ZIP 파일 파싱 실패:', err);
+      setError(`ZIP 파일 파싱 중 오류가 발생했습니다: ${err.message || '알 수 없는 오류'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -321,7 +318,7 @@ const ProblemEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
+    setLoading(true);
     setError(null);
 
     try {
@@ -332,13 +329,8 @@ const ProblemEdit = () => {
       submitFormData.append('outputFormat', formData.outputFormat);
       submitFormData.append('tags', JSON.stringify(formData.tags));
       submitFormData.append('difficulty', formData.difficulty);
-      
-      // timeLimit과 memoryLimit이 비어있으면 기존 값 사용, 그래도 없으면 최소값 설정
-      const timeLimit = formData.timeLimit || originalTimeLimit || '1';
-      const memoryLimit = formData.memoryLimit || originalMemoryLimit || '256';
-      
-      submitFormData.append('timeLimit', timeLimit);
-      submitFormData.append('memoryLimit', memoryLimit);
+      submitFormData.append('timeLimit', formData.timeLimit || '0');
+      submitFormData.append('memoryLimit', formData.memoryLimit || '0');
       submitFormData.append('sampleInputs', JSON.stringify(formData.sampleInputs));
       
       // ZIP 파일 (선택적)
@@ -351,16 +343,48 @@ const ProblemEdit = () => {
         submitFormData.append(`testcase_${index}`, file);
       });
 
-      await APIService.updateProblem(problemId, submitFormData);
+      const response = await APIService.createProblem(submitFormData);
       
-      alert('문제가 성공적으로 수정되었습니다.');
-      navigate('/tutor/problems');
+      if (response?.data || response) {
+        alert('문제가 성공적으로 생성되었습니다.');
+        navigate('/tutor/problems');
+      }
     } catch (err) {
-      console.error('문제 수정 실패:', err);
-      setError('문제 수정 중 오류가 발생했습니다.');
+      console.error('문제 생성 실패:', err);
+      setError('문제 생성 중 오류가 발생했습니다.');
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
+  };
+
+  // 마크다운 제목을 HTML로 변환하는 함수
+  const convertMarkdownHeadingsToHtml = (html) => {
+    if (!html) return html;
+    
+    // HTML 태그가 이미 있는 경우와 없는 경우를 구분
+    // 줄 단위로 처리
+    const lines = html.split(/\n/);
+    const convertedLines = lines.map(line => {
+      // HTML 태그가 포함된 줄은 그대로 유지
+      if (line.match(/<[^>]+>/)) {
+        return line;
+      }
+      
+      // 마크다운 제목 패턴 확인 (#, ##, ###, ####, #####, ######)
+      // 공백이 있어도 없어도 인식: ## 제목 또는 ##제목
+      const trimmedLine = line.trim();
+      const headingMatch = trimmedLine.match(/^(#{1,6})\s*(.+)$/);
+      if (headingMatch) {
+        const hashCount = headingMatch[1].length;
+        const titleText = headingMatch[2].trim();
+        const headingLevel = Math.min(Math.max(hashCount, 1), 6);
+        return `<h${headingLevel}>${titleText}</h${headingLevel}>`;
+      }
+      
+      return line;
+    });
+    
+    return convertedLines.join('\n');
   };
 
   const getFullDescription = () => {
@@ -399,31 +423,21 @@ const ProblemEdit = () => {
     return full;
   };
 
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="admin-loading-container">
-          <div className="admin-loading-spinner"></div>
-        </div>
-      </AdminLayout>
-    );
-  }
-
   return (
-    <AdminLayout>
+    <TutorLayout>
       <div className="problem-create">
-        <div className="admin-page-header">
-          <h1 className="admin-page-title">문제 수정</h1>
+        <div className="tutor-page-header">
+          <h1 className="tutor-page-title">새 문제 만들기</h1>
           <button 
-            className="admin-btn-secondary"
-            onClick={() => navigate('/admin/problems')}
+            className="tutor-btn-secondary"
+            onClick={() => navigate('/tutor/problems')}
           >
             취소
           </button>
         </div>
 
         {error && (
-          <div className="admin-error-message">
+          <div className="tutor-error-message">
             {error}
           </div>
         )}
@@ -537,12 +551,35 @@ const ProblemEdit = () => {
                     accept=".zip"
                     onChange={handleZipFileChange}
                     className="problem-create-file-input"
+                    disabled={loading}
                   />
-                  <label htmlFor="zipFileInput" className="problem-create-file-label-inline">
-                    {zipFile ? `✓ ${zipFile.name}` : 'ZIP 파일 선택'}
-                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                    <label htmlFor="zipFileInput" className="problem-create-file-label-inline">
+                      {loading ? '파싱 중...' : zipFile ? `✓ ${zipFile.name}` : 'ZIP 파일 선택'}
+                    </label>
+                    {zipFile && !loading && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setZipFile(null);
+                          setParsedTestCases([]);
+                          // ZIP 파일 입력 초기화
+                          const fileInput = document.getElementById('zipFileInput');
+                          if (fileInput) {
+                            fileInput.value = '';
+                          }
+                        }}
+                        className="problem-create-remove-zip-btn"
+                        title="ZIP 파일 제거"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
                   <span className="problem-create-help-text">
-                    새 ZIP 파일을 업로드하면 기존 ZIP을 대체합니다 (선택사항)
+                    {loading 
+                      ? 'ZIP 파일 내용을 분석 중입니다...'
+                      : '문제 ZIP 파일이 있다면 업로드하세요. 자동으로 내용이 채워집니다.'}
                   </span>
                 </div>
               </div>
@@ -553,6 +590,24 @@ const ProblemEdit = () => {
                 <div className="problem-create-description-editor">
                   <div className="problem-create-editor-wrapper">
                     <div className="problem-create-editor-toolbar">
+                      <select 
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            applyFormat('formatBlock', e.target.value);
+                            e.target.value = ''; // 선택 초기화
+                          }
+                        }}
+                        className="problem-create-heading-select"
+                        title="제목 스타일"
+                      >
+                        <option value="">제목 스타일</option>
+                        <option value="h1">제목 1</option>
+                        <option value="h2">제목 2</option>
+                        <option value="h3">제목 3</option>
+                        <option value="h4">제목 4</option>
+                        <option value="p">일반 텍스트</option>
+                      </select>
+                      <div className="problem-create-toolbar-divider"></div>
                       <button type="button" onClick={() => applyFormat('bold')} title="Bold">
                         <strong>B</strong>
                       </button>
@@ -578,6 +633,28 @@ const ProblemEdit = () => {
                       }} title="Code Block">
                         &lt;&gt;
                       </button>
+                      <div className="problem-create-toolbar-divider"></div>
+                      <select 
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            // fontSize 명령 사용 (1~7)
+                            document.execCommand('fontSize', false, e.target.value);
+                            descriptionRef.current?.focus();
+                            e.target.value = ''; // 선택 초기화
+                          }
+                        }}
+                        className="problem-create-heading-select"
+                        title="글자 크기"
+                      >
+                        <option value="">글자 크기</option>
+                        <option value="1">매우 작게</option>
+                        <option value="2">작게</option>
+                        <option value="3">보통</option>
+                        <option value="4">크게</option>
+                        <option value="5">매우 크게</option>
+                        <option value="6">아주 크게</option>
+                        <option value="7">최대 크기</option>
+                      </select>
                       <div className="problem-create-toolbar-divider"></div>
                       <div className="problem-create-color-wrapper">
                         <label htmlFor="textColorPicker" className="problem-create-color-label" title="텍스트 색상">
@@ -647,6 +724,119 @@ const ProblemEdit = () => {
                         }));
                       }}
                       onKeyDown={(e) => {
+                        // Enter 키로 마크다운 제목 변환 (#, ##, ###, ####, #####, ######)
+                        if (e.key === 'Enter') {
+                          const editor = descriptionRef.current;
+                          if (!editor) return;
+                          
+                          const selection = window.getSelection();
+                          if (selection.rangeCount === 0) return;
+                          
+                          const range = selection.getRangeAt(0);
+                          
+                          // 현재 커서 위치의 텍스트 노드 찾기
+                          let textNode = range.startContainer;
+                          if (textNode.nodeType !== Node.TEXT_NODE) {
+                            // 텍스트 노드가 아니면 가장 가까운 텍스트 노드 찾기
+                            const walker = document.createTreeWalker(
+                              textNode,
+                              NodeFilter.SHOW_TEXT,
+                              null
+                            );
+                            textNode = walker.nextNode() || textNode;
+                          }
+                          
+                          if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+                            const text = textNode.textContent;
+                            const cursorPos = range.startOffset;
+                            
+                            // 현재 줄의 시작부터 커서까지의 텍스트 확인
+                            const lineStart = text.lastIndexOf('\n', cursorPos - 1) + 1;
+                            const lineText = text.substring(lineStart, cursorPos);
+                            
+                              // 마크다운 제목 패턴 확인 (#, ##, ###, ####, #####, ######)
+                              // 패턴: 1~6개의 # 뒤에 공백(0개 이상), 그 다음 텍스트
+                              // ## 제목 또는 ##제목 모두 지원
+                              const headingMatch = lineText.trim().match(/^(#{1,6})\s*(.+)$/);
+                            if (headingMatch) {
+                              e.preventDefault();
+                              
+                              const hashCount = headingMatch[1].length; // # 개수 (1~6)
+                              const titleText = headingMatch[2].trim(); // 제목 텍스트
+                              
+                              // # 개수에 따라 적절한 헤딩 태그 선택 (h1~h6)
+                              const headingLevel = Math.min(Math.max(hashCount, 1), 6);
+                              const headingTag = `h${headingLevel}`;
+                              
+                              // 현재 HTML 내용 가져오기
+                              const currentHTML = editor.innerHTML;
+                              
+                              // 커서 위치를 HTML 기준으로 찾기
+                              const textBeforeCursor = text.substring(0, lineStart);
+                              const textAfterCursor = text.substring(cursorPos);
+                              
+                              // HTML에서 해당 위치 찾기 (간단한 방법: 텍스트 기준으로 분할)
+                              const htmlParts = currentHTML.split(/(<[^>]+>)/);
+                              let htmlBefore = '';
+                              let htmlAfter = '';
+                              let found = false;
+                              
+                              // 더 간단한 방법: 전체 텍스트를 다시 생성
+                              const beforeText = text.substring(0, lineStart);
+                              const afterText = text.substring(cursorPos);
+                              
+                              // 제목 태그로 변환
+                              const headingElement = document.createElement(headingTag);
+                              headingElement.textContent = titleText;
+                              
+                              // DOM 조작
+                              const parent = textNode.parentNode;
+                              
+                              // 기존 텍스트 노드를 분할
+                              if (lineStart > 0) {
+                                const beforeNode = document.createTextNode(beforeText);
+                                parent.insertBefore(beforeNode, textNode);
+                              }
+                              
+                              // 제목 요소 삽입
+                              parent.insertBefore(headingElement, textNode);
+                              
+                              // 나머지 텍스트 처리
+                              if (afterText.length > 0) {
+                                const afterNode = document.createTextNode('\n' + afterText);
+                                parent.insertBefore(afterNode, textNode);
+                              }
+                              
+                              // 원본 텍스트 노드 제거
+                              parent.removeChild(textNode);
+                              
+                              // 커서를 새 줄로 이동
+                              const newRange = document.createRange();
+                              const newTextNode = parent.childNodes[parent.childNodes.length - 1];
+                              if (newTextNode && newTextNode.nodeType === Node.TEXT_NODE) {
+                                newRange.setStart(newTextNode, 0);
+                              } else {
+                                // 텍스트 노드가 없으면 제목 뒤에 빈 텍스트 노드 생성
+                                const emptyText = document.createTextNode('');
+                                parent.appendChild(emptyText);
+                                newRange.setStart(emptyText, 0);
+                              }
+                              newRange.collapse(true);
+                              selection.removeAllRanges();
+                              selection.addRange(newRange);
+                              
+                              // 상태 업데이트
+                              const htmlContent = editor.innerHTML;
+                              setFormData(prev => ({ 
+                                ...prev, 
+                                description: htmlContent
+                              }));
+                              
+                              return;
+                            }
+                          }
+                        }
+                        
                         // Ctrl+Z (또는 Cmd+Z on Mac) - Undo
                         if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
                           e.preventDefault();
@@ -785,31 +975,72 @@ const ProblemEdit = () => {
                     </div>
                   ))}
                 </div>
+
+                {/* ZIP에서 파싱된 테스트케이스 표시 (접기/펼치기 가능) */}
+                {parsedTestCases.length > 0 && (
+                  <div className="problem-create-parsed-testcases-section">
+                    <button
+                      type="button"
+                      onClick={() => setShowParsedTestCases(!showParsedTestCases)}
+                      className="problem-create-parsed-testcases-toggle"
+                    >
+                      <span>{showParsedTestCases ? '▼' : '▶'}</span>
+                      <span>ZIP 파일에서 발견된 테스트케이스 ({parsedTestCases.length}개)</span>
+                    </button>
+                    {showParsedTestCases && (
+                      <div className="problem-create-parsed-testcases">
+                        {parsedTestCases.map((testCase, idx) => (
+                          <div key={idx} className="problem-create-parsed-testcase-item">
+                            <div className="problem-create-parsed-testcase-header">
+                              <span>
+                                <strong>{testCase.name}</strong> ({testCase.type === 'sample' ? '샘플' : '비밀'})
+                              </span>
+                            </div>
+                            <div className="problem-create-parsed-testcase-content">
+                              <div>
+                                <strong>입력:</strong>
+                                <pre>{testCase.input || '(없음)'}</pre>
+                              </div>
+                              <div>
+                                <strong>출력:</strong>
+                                <pre>{testCase.output || '(없음)'}</pre>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <span className="problem-create-help-text">
+                          이 테스트케이스들은 ZIP 파일에 포함되어 있습니다. 문제 생성 시 자동으로 포함됩니다.
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="problem-create-actions">
               <button
                 type="button"
-                className="admin-btn-secondary"
-                onClick={() => navigate('/admin/problems')}
-                disabled={submitting}
+                className="tutor-btn-secondary"
+                onClick={() => navigate('/tutor/problems')}
+                disabled={loading}
               >
                 취소
               </button>
               <button
                 type="submit"
-                className="admin-btn-primary"
-                disabled={submitting}
+                className="tutor-btn-primary"
+                disabled={loading}
               >
-                {submitting ? '수정 중...' : '수정 완료'}
+                {loading ? '생성 중...' : '문제 생성'}
               </button>
             </div>
           </div>
         </form>
       </div>
-    </AdminLayout>
+    </TutorLayout>
   );
 };
 
-export default ProblemEdit;
+export default ProblemCreate;
+
