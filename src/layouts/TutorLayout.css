@@ -6,17 +6,10 @@
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
 }
 
-.tutor-container.sidebar-collapsed .tutor-main {
-  margin-left: 60px;
-}
-
-.tutor-container {
-  display: flex;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  min-height: calc(100vh - 80px);
-  background: transparent;
+/* 헤더와 사이드바를 논리적으로 묶는 래퍼 */
+.tutor-navigation-wrapper {
+  position: relative;
+  z-index: 1000;
 }
 
 .tutor-sidebar {
@@ -601,19 +594,28 @@
 }
 
 .tutor-main {
-  flex: 1;
+  position: fixed;
+  top: 65px;
+  left: 280px;
+  right: 0;
+  bottom: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #fafbfc;
-  margin-left: 280px;
-  margin-top: 65px;
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: calc(100vh - 65px);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: calc(100% - 280px);
+}
+
+.tutor-layout.sidebar-collapsed .tutor-main {
+  left: 60px;
+  width: calc(100% - 60px);
 }
 
 .tutor-content {
   background: transparent;
   padding: 2rem;
-  min-height: calc(100vh - 200px);
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
 /* 반응형 디자인 */
@@ -641,16 +643,17 @@
   }
   
   .tutor-main {
-    margin-top: 0;
+    left: 0;
+    width: 100%;
   }
   
-  .tutor-main {
-    margin-left: 0;
+  .tutor-layout.sidebar-collapsed .tutor-main {
+    left: 0;
+    width: 100%;
   }
   
   .tutor-content {
     padding: 1.5rem;
-    min-height: auto;
   }
 }
 

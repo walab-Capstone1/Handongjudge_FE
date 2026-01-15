@@ -254,9 +254,9 @@ const TutorLayout = ({ children, selectedSection = null }) => {
   ] : [], [currentSection]);
 
   return (
-    <div className="tutor-layout">
-      <TutorHeader />
-      <div className={`tutor-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className={`tutor-layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div className="tutor-navigation-wrapper">
+        <TutorHeader />
         <aside className={`tutor-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <nav className="sidebar-nav">
             <div className="tutor-sidebar-header">
@@ -488,11 +488,11 @@ const TutorLayout = ({ children, selectedSection = null }) => {
               </div>
             </nav>
         </aside>
-        <main className="tutor-main">
-          <Breadcrumb items={generateBreadcrumbs(location, sections, currentSection)} />
-          <div className="tutor-content">{children}</div>
-        </main>
       </div>
+      <main className="tutor-main">
+        <Breadcrumb items={generateBreadcrumbs(location, sections, currentSection)} />
+        <div className="tutor-content">{children}</div>
+      </main>
       
       {/* 수업 선택 모달 - 사이드바 밖으로 이동하여 stacking context 문제 해결 */}
       {showSectionModal && (
