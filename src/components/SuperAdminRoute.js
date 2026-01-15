@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-const AdminRoute = ({ children }) => {
+const SuperAdminRoute = ({ children }) => {
   const { user, isAuthenticated, loading } = useAuth();
 
   if (loading) {
@@ -23,8 +23,8 @@ const AdminRoute = ({ children }) => {
     return <Navigate to="/" replace />;
   }
 
-  // role이 ADMIN 또는 SUPER_ADMIN이 아니면 접근 거부
-  if (user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
+  // role이 SUPER_ADMIN이 아니면 접근 거부
+  if (user?.role !== 'SUPER_ADMIN') {
     return (
       <div style={{
         display: 'flex',
@@ -39,7 +39,7 @@ const AdminRoute = ({ children }) => {
           🚫 접근 권한이 없습니다
         </h1>
         <p style={{ fontSize: '1.2rem', color: '#636e72', marginBottom: '2rem' }}>
-          관리자 페이지는 교수만 접근할 수 있습니다.
+          시스템 관리자 페이지는 시스템 관리자만 접근할 수 있습니다.
         </p>
         <button
           onClick={() => window.history.back()}
@@ -63,4 +63,5 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
-export default AdminRoute;
+export default SuperAdminRoute;
+

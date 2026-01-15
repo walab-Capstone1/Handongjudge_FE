@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { FaGraduationCap, FaPencilAlt, FaCog, FaPlus } from "react-icons/fa";
@@ -6,14 +6,42 @@ import Silk from "../components/Silk";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
+import APIService from "../services/APIService";
 
 const IndexPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("lectures");
+  const [systemNotices, setSystemNotices] = useState([]);
+  const [systemGuides, setSystemGuides] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // useAuth에서 사용자 정보 가져오기
   const userName = user?.name || user?.username || user?.email || "사용자 이름";
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+
+  useEffect(() => {
+    fetchSystemData();
+  }, []);
+
+  const fetchSystemData = async () => {
+    try {
+      setLoading(true);
+      const [noticesResponse, guidesResponse] = await Promise.all([
+        APIService.getActiveSystemNotices().catch(() => []),
+        APIService.getActiveSystemGuides().catch(() => [])
+      ]);
+      
+      setSystemNotices(Array.isArray(noticesResponse) ? noticesResponse.slice(0, 5) : []);
+      setSystemGuides(Array.isArray(guidesResponse) ? guidesResponse.slice(0, 5) : []);
+    } catch (error) {
+      console.error('시스템 데이터 조회 실패:', error);
+      setSystemNotices([]);
+      setSystemGuides([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoToClassroom = () => {
     navigate("/courses");
@@ -67,7 +95,7 @@ const IndexPage = () => {
           </Tab>
           <Tab
             active={activeTab === "system"}
-            onClick={() => setActiveTab("system")}
+            onClick={() => isSuperAdmin ? navigate('/super-admin') : setActiveTab("system")}
           >
             <FaCog />
             시스템 관리
@@ -79,46 +107,58 @@ const IndexPage = () => {
         <ContentPanel>
           <PanelHeader>
             <PanelTitle>공지사항 - Notice</PanelTitle>
-            <PanelActionButton>
-              <FaPlus />
-            </PanelActionButton>
+            {isSuperAdmin && (
+              <PanelActionButton onClick={() => navigate('/super-admin/system-notices')} title="공지사항 관리">
+                <FaPlus />
+              </PanelActionButton>
+            )}
           </PanelHeader>
           <PanelList>
-            <PanelItem>
-              <ItemText>Code Stury 정경 시간 사전 공지</ItemText>
-              <ItemDate>2026.1.20</ItemDate>
-            </PanelItem>
-            <PanelItem>
-              <ItemText>Code Stury 점검시간 사전 공지</ItemText>
-              <ItemDate>2026.1.20</ItemDate>
-            </PanelItem>
-            <PanelItem>
-              <ItemText>Code Stury 점검 시간 사전 공지</ItemText>
-              <ItemDate>2026.1.20</ItemDate>
-            </PanelItem>
+            {loading ? (
+              <PanelItem>
+                <ItemText>로딩 중...</ItemText>
+              </PanelItem>
+            ) : systemNotices.length === 0 ? (
+              <PanelItem>
+                <ItemText>등록된 공지사항이 없습니다.</ItemText>
+              </PanelItem>
+            ) : (
+              systemNotices.map((notice) => (
+                <PanelItem key={notice.id}>
+                  <ItemText>{notice.title}</ItemText>
+                  <ItemDate>{new Date(notice.createdAt).toLocaleDateString('ko-KR')}</ItemDate>
+                </PanelItem>
+              ))
+            )}
           </PanelList>
         </ContentPanel>
 
         <ContentPanel>
           <PanelHeader>
             <PanelTitle>이용안내 - Guide</PanelTitle>
-            <PanelActionButton>
-              <FaPlus />
-            </PanelActionButton>
+            {isSuperAdmin && (
+              <PanelActionButton onClick={() => navigate('/super-admin/system-guides')} title="이용안내 관리">
+                <FaPlus />
+              </PanelActionButton>
+            )}
           </PanelHeader>
           <PanelList>
-            <PanelItem>
-              <ItemText>Code Stury 문제 등록 업데이트</ItemText>
-              <ItemDate>2026.1.20</ItemDate>
-            </PanelItem>
-            <PanelItem>
-              <ItemText>Code Stury 사이트 이용문의사항</ItemText>
-              <ItemDate>2026.1.20</ItemDate>
-            </PanelItem>
-            <PanelItem>
-              <ItemText>Code Stury 문제 제출 기능 업데이트</ItemText>
-              <ItemDate>2026.1.20</ItemDate>
-            </PanelItem>
+            {loading ? (
+              <PanelItem>
+                <ItemText>로딩 중...</ItemText>
+              </PanelItem>
+            ) : systemGuides.length === 0 ? (
+              <PanelItem>
+                <ItemText>등록된 이용안내가 없습니다.</ItemText>
+              </PanelItem>
+            ) : (
+              systemGuides.map((guide) => (
+                <PanelItem key={guide.id}>
+                  <ItemText>{guide.title}</ItemText>
+                  <ItemDate>{new Date(guide.createdAt).toLocaleDateString('ko-KR')}</ItemDate>
+                </PanelItem>
+              ))
+            )}
           </PanelList>
         </ContentPanel>
       </MainContent>

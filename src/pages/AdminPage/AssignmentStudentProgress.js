@@ -99,7 +99,7 @@ const AssignmentStudentProgress = () => {
   const fetchAssignmentDetail = async () => {
     if (!assignmentId) return;
     try {
-      const response = await APIService.getAssignmentInfo(sectionId, assignmentId);
+      const response = await APIService.getAssignmentInfoBySection(sectionId, assignmentId);
       setAssignment(response);
       
       // 문제 목록 조회
