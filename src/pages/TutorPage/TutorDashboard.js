@@ -56,7 +56,7 @@ const TutorDashboard = () => {
   // 각 수업별 상세 통계 계산
   const calculateSectionStats = async (sectionId) => {
     try {
-      // 1. 과제 목록 조회
+      // 1. 과제 목록 조회 (평균 제출률 계산용)
       const assignmentsResponse = await APIService.getAssignmentsBySection(sectionId);
       const assignments = assignmentsResponse?.data || assignmentsResponse || [];
       
@@ -72,13 +72,58 @@ const TutorDashboard = () => {
         };
       }
 
-      // 2. 각 과제별 제출 통계 조회
+      // 2. 마감 직전 과제 조회 (새 API 사용)
+      const upcomingAssignments = await APIService.getUpcomingAssignments(sectionId, 3);
+      let upcomingDeadlines = upcomingAssignments.map(assignment => ({
+        assignmentId: assignment.assignmentId,
+        title: assignment.title,
+        endDate: assignment.endDate,
+        submissionRate: assignment.submissionRate || 0
+      }));
+
+      // 3. 마감 직전 과제가 없으면 모든 활성 과제를 마감일 순으로 정렬
+      if (upcomingDeadlines.length === 0) {
+        const now = new Date();
+        const activeAssignments = assignments.filter(a => a.active && a.endDate);
+        
+        // 마감일이 미래인 과제만 필터링하고 마감일 순으로 정렬
+        const futureAssignments = activeAssignments
+          .filter(a => {
+            const endDate = new Date(a.endDate);
+            return endDate > now;
+          })
+          .sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+
+        // 각 과제의 제출 통계 조회
+        for (const assignment of futureAssignments.slice(0, 3)) {
+          try {
+            const statsResponse = await APIService.getAssignmentSubmissionStats(assignment.id, sectionId);
+            if (statsResponse) {
+              upcomingDeadlines.push({
+                assignmentId: assignment.id,
+                title: assignment.title,
+                endDate: assignment.endDate,
+                submissionRate: statsResponse.submissionRate || 0
+              });
+            }
+          } catch (error) {
+            console.error(`과제 ${assignment.id} 통계 조회 실패:`, error);
+            // 통계 조회 실패 시에도 과제 정보는 추가 (제출률 0)
+            upcomingDeadlines.push({
+              assignmentId: assignment.id,
+              title: assignment.title,
+              endDate: assignment.endDate,
+              submissionRate: 0
+            });
+          }
+        }
+      }
+
+      // 4. 각 과제별 제출 통계 조회 (평균 제출률 계산용)
       let totalSubmissionRate = 0;
       let validAssignments = 0;
-      const upcomingDeadlines = [];
       let pendingGrading = 0;
       const now = new Date();
-      const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
       for (const assignment of assignments) {
         if (!assignment.active) continue;
@@ -89,19 +134,6 @@ const TutorDashboard = () => {
             const submissionRate = statsResponse.submissionRate || 0;
             totalSubmissionRate += submissionRate;
             validAssignments++;
-
-            // 임박한 마감일 체크 (2-3일 내)
-            if (assignment.endDate) {
-              const endDate = new Date(assignment.endDate);
-              if (endDate > now && endDate <= threeDaysLater) {
-                upcomingDeadlines.push({
-                  assignmentId: assignment.id,
-                  title: assignment.title,
-                  endDate: assignment.endDate,
-                  submissionRate: submissionRate
-                });
-              }
-            }
 
             // 제출률이 낮은 과제는 채점 대기로 간주 (50% 미만)
             if (submissionRate < 50 && assignment.endDate) {
@@ -118,11 +150,11 @@ const TutorDashboard = () => {
 
       const averageSubmissionRate = validAssignments > 0 ? totalSubmissionRate / validAssignments : 0;
 
-      // 3. 위험 학생 수 계산 (제출률이 50% 미만인 학생)
+      // 5. 위험 학생 수 계산 (제출률이 50% 미만인 학생)
       // 실제로는 학생별 제출 현황을 조회해야 하지만, 여기서는 과제별 통계로 추정
       const atRiskStudents = Math.ceil((100 - averageSubmissionRate) / 100 * (sections.find(s => s.sectionId === sectionId)?.studentCount || 0));
 
-      // 4. 해결 필요 이슈 개수
+      // 6. 해결 필요 이슈 개수
       const issues = upcomingDeadlines.length + pendingGrading;
 
       return {
@@ -655,6 +687,31 @@ const TutorDashboard = () => {
     }
   };
 
+  // D-day 계산 함수
+  const calculateDDay = (endDate) => {
+    if (!endDate) return null;
+    const end = new Date(endDate);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    const diffTime = end - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return '마감';
+    if (diffDays === 0) return 'D-day';
+    return `D-${diffDays}`;
+  };
+
+  // 과제별 풀이 현황으로 이동
+  const handleAssignmentProgressClick = (e, sectionId, assignmentId) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    if (assignmentId) {
+      navigate(`/tutor/assignments/section/${sectionId}/progress/${assignmentId}`);
+    } else {
+      navigate(`/tutor/assignments/section/${sectionId}/progress`);
+    }
+  };
+
   // 년도 필터링
   const years = ['ALL', ...new Set(sections.map(s => s.year).filter(Boolean))].sort((a, b) => {
     if (a === 'ALL') return -1;
@@ -865,11 +922,11 @@ const TutorDashboard = () => {
                 return (
                   <div
                     key={section.sectionId}
-                    className={`health-card health-card-${healthStatus.status} ${!isActive ? 'inactive' : ''}`}
+                    className={`health-card ${!isActive ? 'inactive' : ''}`}
                     onClick={() => isActive && handleSectionClick(section)}
                   >
                     <div className="health-card-header">
-                      <div className="health-status-indicator" style={{ backgroundColor: healthStatus.color }}>
+                      <div className="health-status-indicator">
                         <div className="health-status-dot"></div>
                       </div>
                       <div className="health-card-title-area">
@@ -882,41 +939,41 @@ const TutorDashboard = () => {
                     </div>
                     
                     <div className="health-card-body">
-                      <div className="health-metrics">
-                        <div className="health-metric">
-                          <span className="health-metric-label">평균 제출률</span>
-                          <div className="health-metric-value-row">
-                            <span className="health-metric-value">{stat.averageSubmissionRate || 0}%</span>
-                            <div className="health-progress-bar">
-                              <div 
-                                className="health-progress-fill" 
-                                style={{ 
-                                  width: `${stat.averageSubmissionRate || 0}%`,
-                                  backgroundColor: healthStatus.color
-                                }}
-                              ></div>
-                            </div>
-                          </div>
+                      {stat.upcomingDeadlines && stat.upcomingDeadlines.length > 0 ? (
+                        <div className="upcoming-assignments-list">
+                          {stat.upcomingDeadlines.slice(0, 3).map((deadline, index) => {
+                            const dDay = calculateDDay(deadline.endDate);
+                            return (
+                              <div
+                                key={deadline.assignmentId || index}
+                                className="upcoming-assignment-item"
+                                onClick={(e) => isActive && handleAssignmentProgressClick(e, section.sectionId, deadline.assignmentId)}
+                              >
+                                <div className="upcoming-assignment-header">
+                                  <span className="upcoming-assignment-title">{deadline.title}</span>
+                                  <span className={`upcoming-assignment-dday ${dDay === 'D-day' || dDay === '마감' ? 'urgent' : ''}`}>
+                                    {dDay}
+                                  </span>
+                                </div>
+                                <div className="upcoming-assignment-meta">
+                                  <span className="upcoming-assignment-rate">제출률: {deadline.submissionRate?.toFixed(1) || 0}%</span>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                        <div className="health-metric">
-                          <span className="health-metric-label">위험 학생 수</span>
-                          <span className="health-metric-value">{stat.atRiskStudents || 0}명</span>
+                      ) : (
+                        <div className="no-upcoming-assignments">
+                          <p>마감 직전 과제가 없습니다.</p>
                         </div>
-                        <div className="health-metric">
-                          <span className="health-metric-label">해결 필요 이슈</span>
-                          <span className="health-metric-value">{stat.issues || 0}개</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="health-card-footer">
-                      <span className="health-status-badge" style={{ color: healthStatus.color, borderColor: healthStatus.color }}>
-                        {healthStatus.label}
-                      </span>
-                      {isActive && (
-                        <span className="health-card-hint">클릭하여 상세 보기</span>
                       )}
                     </div>
+                    
+                    {isActive && (
+                      <div className="health-card-footer">
+                        <span className="health-card-hint">클릭하여 상세 보기</span>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1115,10 +1172,6 @@ const TutorDashboard = () => {
                       <span className="comparison-summary-label">평균 제출률</span>
                       <span className="comparison-summary-value">{comparison.averageSubmissionRate}%</span>
                     </div>
-                    <div className="comparison-summary-item">
-                      <span className="comparison-summary-label">평균 위험 학생 수</span>
-                      <span className="comparison-summary-value">{comparison.averageAtRisk}명</span>
-                    </div>
                   </div>
                   <div className="comparison-sections">
                     {comparison.sections.map((section) => (
@@ -1143,9 +1196,6 @@ const TutorDashboard = () => {
                                 style={{ width: `${section.submissionRate}%` }}
                               ></div>
                             </div>
-                          </div>
-                          <div className="comparison-metric">
-                            <span>위험 학생: {section.atRiskStudents}명</span>
                           </div>
                         </div>
                       </div>

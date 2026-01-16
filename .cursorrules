@@ -1,0 +1,69 @@
+# CSS 스코프 제한 규칙
+
+## Tutor 페이지 CSS 작성 규칙
+
+Tutor 페이지(`src/pages/TutorPage/`)의 CSS 파일을 작성할 때는 반드시 페이지별 컨테이너 클래스로 스코프를 제한해야 합니다.
+
+### 규칙:
+1. **공통 클래스명 사용 시 스코프 제한 필수**
+   - `.tutor-search-input`, `.tutor-btn-primary`, `.tutor-page-header` 등 공통 클래스명은 반드시 페이지 컨테이너 클래스로 스코프를 제한해야 합니다.
+   - 예: `.notice-management .tutor-search-input` (O), `.tutor-search-input` (X)
+
+2. **페이지별 컨테이너 클래스명**
+   - NoticeManagement: `.notice-management`
+   - ProblemSetManagement: `.problem-set-management`
+   - CourseManagement: `.course-management`
+   - UserManagement: `.user-management`
+   - AssignmentManagement: `.assignment-management`
+   - AssignmentStudentProgress: `.assignment-progress-container`, `.student-progress-container`
+   - ProblemManagement: `.problem-management`
+
+3. **모달이 열려있을 때 focus 스타일 무시 규칙 추가**
+   모든 tutor 페이지의 input 필드에 다음 규칙을 추가해야 합니다:
+   ```css
+   body.section-modal-open .[페이지-컨테이너] .tutor-search-input:focus {
+     outline: none !important;
+     border-color: #e1e8ed !important;
+     box-shadow: none !important;
+     background: white !important;
+   }
+   ```
+
+4. **CSS 작성 예시**
+   ```css
+   /* 올바른 예시 */
+   .notice-management .tutor-search-input {
+     width: 100%;
+     padding: 0.75rem 1rem;
+     border: 1px solid #e1e8ed;
+     border-radius: 8px;
+   }
+   
+   .notice-management .tutor-search-input:focus {
+     outline: none;
+     border-color: #0984e3;
+     box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+   }
+   
+   /* 잘못된 예시 - 전역 스타일 */
+   .tutor-search-input {
+     width: 100%;
+     padding: 0.75rem 1rem;
+   }
+   ```
+
+5. **예외 사항**
+   - Layout 컴포넌트(`TutorLayout.css`, `AdminLayout.css` 등)는 전역 스타일 사용 가능
+   - 공통 컴포넌트(`components/`)의 CSS는 해당 컴포넌트 컨테이너로 스코프 제한
+   - 전역 스타일이 필요한 경우 `src/styles/globals.css`에 추가
+
+### 적용 대상:
+- `src/pages/TutorPage/*.css` 파일
+- 새로운 tutor 페이지 CSS 파일 작성 시
+
+### 검증:
+CSS 파일을 작성한 후 다음을 확인:
+1. 페이지 컨테이너 클래스로 스코프가 제한되어 있는가?
+2. 다른 페이지에 영향을 주지 않는가?
+3. 모달 열림 시 focus 스타일 무시 규칙이 추가되어 있는가?
+

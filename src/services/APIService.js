@@ -516,6 +516,17 @@ class APIService {
     }
   }
 
+  // 마감 직전 과제 조회
+  async getUpcomingAssignments(sectionId, days = 3) {
+    try {
+      const response = await this.request(`/sections/${sectionId}/assignments/upcoming?days=${days}`);
+      return response?.data || response || [];
+    } catch (error) {
+      console.error('마감 직전 과제 조회 실패:', error);
+      return [];
+    }
+  }
+
   // 전체 과제 제출 통계 조회 (교수용) - 백엔드에 해당 엔드포인트가 없어서 주석 처리
   // async getAllAssignmentsSubmissionStats() {
   //   try {

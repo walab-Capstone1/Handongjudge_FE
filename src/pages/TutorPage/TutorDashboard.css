@@ -13,7 +13,7 @@
 .dashboard-landscape-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 1.5rem;
+  gap: 1rem;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -32,9 +32,10 @@
   min-height: 0;
   overflow: hidden;
   background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
 }
 
 .notifications-list {
@@ -48,11 +49,11 @@
 
 .notification-item {
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.75rem;
+  padding: 0.75rem;
   background: #f9fafb;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -69,17 +70,17 @@
 }
 
 .notification-icon {
-  font-size: 1.25rem;
+  font-size: 0.9rem;
   color: #667eea;
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .notification-content {
@@ -91,7 +92,7 @@
 }
 
 .notification-title {
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #1e293b;
   line-height: 1.4;
@@ -100,15 +101,17 @@
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .notification-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: #6b7280;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
 }
 
 .notification-section {
@@ -146,25 +149,27 @@
 
 
 .dashboard-header {
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .dashboard-title {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-dark);
-  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
   text-align: left;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .dashboard-subtitle {
-  font-size: var(--font-size-base);
-  color: var(--color-text-medium);
+  font-size: 0.875rem;
+  color: #6b7280;
   margin: 0;
-  font-weight: var(--font-weight-normal);
+  font-weight: 400;
   text-align: left;
+  line-height: 1.5;
 }
 
 /* 통계 섹션 */
@@ -223,13 +228,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg);
-  background: var(--color-white);
-  border-radius: var(--border-radius-lg);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--box-shadow-sm);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 @media (max-width: 768px) {
@@ -271,22 +276,26 @@
 }
 
 .tutor-filter-label {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #374151;
+  color: #6b7280;
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .tutor-filter-select {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 6px;
   background: white;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: #374151;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 120px;
+  min-width: 100px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .tutor-filter-select:hover {
@@ -304,9 +313,10 @@
 }
 
 .tutor-filter-count {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: #6b7280;
   font-weight: 500;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .tutor-sections-grid {
@@ -2191,16 +2201,17 @@ input[type="checkbox"]:checked {
 .section-title {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 1.5rem;
+  gap: 0.5rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .section-title-icon {
   color: #667eea;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 /* 건강도 현황 섹션 */
@@ -2243,20 +2254,26 @@ input[type="checkbox"]:checked {
 
 .health-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
   align-content: start;
 }
 
 .health-card {
   background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.health-card:hover {
+  background: #f9fafb;
+  border-color: #667eea;
 }
 
 .health-card::before {
@@ -2265,28 +2282,11 @@ input[type="checkbox"]:checked {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px;
   background: #e5e7eb;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
-.health-card-healthy::before {
-  background: #10b981;
-}
-
-.health-card-warning::before {
-  background: #f59e0b;
-}
-
-.health-card-danger::before {
-  background: #ef4444;
-}
-
-.health-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: #667eea;
-}
 
 .health-card.inactive {
   opacity: 0.6;
@@ -2296,25 +2296,26 @@ input[type="checkbox"]:checked {
 .health-card-header {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  gap: 0.625rem;
+  margin-bottom: 0.75rem;
 }
 
 .health-status-indicator {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
-  margin-top: 0.5rem;
+  margin-top: 0.375rem;
   position: relative;
+  background: #e5e7eb;
 }
 
 .health-status-dot {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: white;
-  box-shadow: 0 0 0 3px currentColor;
+  background: #e5e7eb;
+  box-shadow: none;
 }
 
 .health-card-title-area {
@@ -2322,30 +2323,113 @@ input[type="checkbox"]:checked {
 }
 
 .health-card-title {
-  font-size: 1.25rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .health-card-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.15rem 0.45rem;
   background: #f3f4f6;
   color: #6b7280;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
   font-weight: 500;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  line-height: 1.3;
 }
 
 .health-card-body {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.upcoming-assignments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.upcoming-assignment-item {
+  padding: 0.5rem 0.625rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upcoming-assignment-item:hover {
+  background: #f3f4f6;
+  border-color: #667eea;
+  transform: translateX(2px);
+}
+
+.upcoming-assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  gap: 0.5rem;
+}
+
+.upcoming-assignment-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1e293b;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  line-height: 1.4;
+}
+
+.upcoming-assignment-dday {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #667eea;
+  padding: 0.15rem 0.4rem;
+  background: #e0e7ff;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  line-height: 1.3;
+}
+
+.upcoming-assignment-dday.urgent {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.upcoming-assignment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upcoming-assignment-rate {
+  font-size: 0.6875rem;
+  color: #6b7280;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  line-height: 1.3;
+}
+
+.no-upcoming-assignments {
+  text-align: center;
+  padding: 1.5rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .health-metrics {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .health-metric {
@@ -2355,9 +2439,12 @@ input[type="checkbox"]:checked {
 }
 
 .health-metric-label {
-  font-size: 0.85rem;
-  color: #6b7280;
+  font-size: 0.75rem;
+  color: #9ca3af;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .health-metric-value-row {
@@ -2367,17 +2454,18 @@ input[type="checkbox"]:checked {
 }
 
 .health-metric-value {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #1e293b;
-  min-width: 60px;
+  min-width: 50px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .health-progress-bar {
   flex: 1;
-  height: 8px;
+  height: 6px;
   background: #e5e7eb;
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
@@ -2389,23 +2477,29 @@ input[type="checkbox"]:checked {
 
 .health-card-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  padding-top: 1rem;
+  padding-top: 0.625rem;
+  margin-top: 0.5rem;
   border-top: 1px solid #e5e7eb;
 }
 
 .health-status-badge {
-  padding: 0.35rem 0.75rem;
-  border: 2px solid;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.75rem;
   font-weight: 600;
+  color: #6b7280;
+  background: #f9fafb;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .health-card-hint {
-  font-size: 0.8rem;
+  font-size: 0.6875rem;
   color: #9ca3af;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  font-weight: 500;
 }
 
 .dashboard-empty-state {
