@@ -576,9 +576,21 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
 
 .tutor-sections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .tutor-sections-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .tutor-sections-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .tutor-stat-card {
@@ -647,13 +659,25 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
 
 .tutor-sections-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
+  grid-template-columns: repeat(3, 1fr) !important;
   gap: 1.5rem;
 }
 
 
 .tutor-dashboard .tutor-sections-grid {
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+@media (max-width: 1024px) {
+  .tutor-dashboard .tutor-sections-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .tutor-dashboard .tutor-sections-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 
@@ -666,6 +690,9 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(102, 126, 234, 0.1);
   cursor: pointer;
+  overflow: visible;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 
@@ -691,6 +718,8 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   margin-bottom: 1rem;
   padding-bottom: 0.85rem;
   border-bottom: 1px solid #e0e3f5;
+  overflow: visible;
+  min-width: 0;
 }
 
 
@@ -699,6 +728,8 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
+  overflow: visible;
 }
 
 
@@ -734,6 +765,8 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   align-items: center;
   gap: 0.5rem;
   flex: 1;
+  min-width: 0;
+  overflow: visible;
 }
 
 
@@ -743,6 +776,9 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   color: #1e293b;
   margin: 0;
   line-height: 1.3;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 
@@ -778,6 +814,8 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   align-items: center;
   position: relative;
   gap: 1rem;
+  overflow: visible;
+  min-width: 0;
 }
 
 
@@ -1195,6 +1233,9 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   color: #2d3436;
   margin: 0 0 0.5rem 0;
   line-height: 1.3;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 
@@ -1202,6 +1243,8 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   color: #636e72;
   font-size: 0.9rem;
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 
@@ -1238,6 +1281,8 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   padding: 1rem 0.5rem; /* 좌우 패딩을 줄여서 내부 요소들이 카드 안에 잘 들어가도록 */
   background: #f8f9fa;
   border-radius: 8px;
+  overflow: visible;
+  min-width: 0;
 }
 
 .tutor-stat-item {
@@ -1247,7 +1292,9 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   text-align: center;
   gap: 0.25rem;
   min-width: 0; /* flex item이 최소 크기를 가지지 않도록 */
-  overflow: hidden; /* 내용이 넘치지 않도록 */
+  overflow: visible; /* 내용이 잘리지 않도록 */
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .tutor-stat-icon {
@@ -1258,12 +1305,18 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   font-size: 0.8rem;
   color: #636e72;
   font-weight: 500;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .tutor-stat-value {
   font-size: 0.9rem;
   color: #2d3436;
   font-weight: 600;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .tutor-btn-secondary {
@@ -2509,7 +2562,7 @@ input[type="checkbox"]:checked {
 
 .health-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
   align-content: start;
 }
@@ -3098,7 +3151,7 @@ input[type="checkbox"]:checked {
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
   .health-cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .workload-grid {

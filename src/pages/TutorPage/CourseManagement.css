@@ -192,9 +192,21 @@ body.section-modal-open .course-management .course-management-search-input:focus
 /* 수업 그리드 - TutorDashboard 스타일과 일치 */
 .course-management .tutor-sections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .course-management .tutor-sections-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .course-management .tutor-sections-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 수업 카드 - 컴팩트하고 미니멀한 디자인 */
@@ -209,7 +221,9 @@ body.section-modal-open .course-management .course-management-search-input:focus
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
-  overflow: hidden;
+  overflow: visible;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .course-management .tutor-course-section-card:hover {
@@ -232,6 +246,8 @@ body.section-modal-open .course-management .course-management-search-input:focus
   margin-bottom: 0;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #f1f3f5;
+  overflow: visible;
+  min-width: 0;
 }
 
 .course-management .tutor-course-card-title {
@@ -242,11 +258,10 @@ body.section-modal-open .course-management .course-management-search-input:focus
   line-height: 1.3;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  overflow: visible;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
@@ -276,6 +291,8 @@ body.section-modal-open .course-management .course-management-search-input:focus
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem 0.75rem;
   padding: 0.25rem 0;
+  overflow: visible;
+  min-width: 0;
 }
 
 .course-management .tutor-course-card-stat-item {
@@ -284,6 +301,10 @@ body.section-modal-open .course-management .course-management-search-input:focus
   gap: 0.375rem;
   font-size: 0.8rem;
   color: #64748b;
+  min-width: 0;
+  overflow: visible;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .course-management .tutor-course-card-stat-label {
@@ -291,9 +312,11 @@ body.section-modal-open .course-management .course-management-search-input:focus
   color: #64748b;
   font-weight: 500;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  white-space: nowrap;
+  white-space: normal;
   min-width: 42px;
   text-align: left;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .course-management .tutor-course-card-stat-value {
@@ -301,9 +324,12 @@ body.section-modal-open .course-management .course-management-search-input:focus
   font-weight: 600;
   color: #1e293b;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  white-space: nowrap;
+  white-space: normal;
   flex: 1;
   text-align: left;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 /* 액션 버튼 - 컴팩트 */
@@ -313,6 +339,9 @@ body.section-modal-open .course-management .course-management-search-input:focus
   padding-top: 0.5rem;
   border-top: 1px solid #f1f3f5;
   align-items: center;
+  overflow: visible;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .course-management .tutor-course-card-btn-toggle-status {
@@ -414,9 +443,9 @@ body.section-modal-open .course-management .course-management-search-input:focus
 }
 
 /* 반응형 디자인 */
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
   .course-management .tutor-sections-grid {
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
 }
