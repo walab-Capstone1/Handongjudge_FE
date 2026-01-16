@@ -212,7 +212,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
     },
     { 
       path: "/tutor/courses", 
-      label: "새 수업 추가", 
+      label: "내 수업", 
       icon: FaPlus,
       subItems: []
     },

@@ -101,6 +101,28 @@ const CourseManagement = () => {
     }
   };
 
+  const getSemesterLabel = (semester) => {
+    switch(semester) {
+      case 'SPRING': return '1학기';
+      case 'SUMMER': return '여름학기';
+      case 'FALL': return '2학기';
+      case 'WINTER': return '겨울학기';
+      case 'CAMP': return '캠프';
+      case 'SPECIAL': return '특강';
+      case 'IRREGULAR': return '비정규 세션';
+      default: return semester || '';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
+
   const filteredSections = sections.filter(section =>
     section.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
     section.instructorName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -109,7 +131,7 @@ const CourseManagement = () => {
   if (loading) {
     return (
       <TutorLayout>
-        <div className="course-management">
+        <div className="course-management tutor-courses">
           <div className="tutor-loading-container">
             <div className="tutor-loading-spinner"></div>
             <p>수업 정보를 불러오는 중...</p>
@@ -121,7 +143,7 @@ const CourseManagement = () => {
 
   return (
     <TutorLayout>
-      <div className="course-management">
+      <div className="course-management tutor-courses">
         <div className="tutor-page-header">
           <div className="tutor-header-left">
             <h1 className="tutor-page-title">수업 관리</h1>
@@ -150,64 +172,76 @@ const CourseManagement = () => {
 
         <div className="tutor-sections-grid">
           {filteredSections.map((section) => (
-            <div key={section.sectionId} className="section-card">
-              <div className="section-header">
-                <h3 className="section-title">{section.courseTitle}</h3>
+            <div key={section.sectionId} className="tutor-course-section-card">
+              {/* 헤더: 제목과 상태 배지 */}
+              <div className="tutor-course-card-header">
+                <h3 className="tutor-course-card-title">{section.courseTitle}</h3>
+                <span className={`tutor-course-card-status-badge ${section.active !== false ? 'active' : 'inactive'}`}>
+                  {section.active !== false ? '활성' : '비활성'}
+                </span>
               </div>
 
-              <div className="section-info-grid">
-                <div className="tutor-info-row">
-                  <span className="tutor-info-label">담당교수</span>
-                  <span className="tutor-info-value">{section.instructorName}</span>
+              {/* 컴팩트한 통계 정보 및 메타 정보 */}
+              <div className="tutor-course-card-stats-compact">
+                <div className="tutor-course-card-stat-item">
+                  <span className="tutor-course-card-stat-label">학생</span>
+                  <span className="tutor-course-card-stat-value">{section.studentCount || 0}명</span>
                 </div>
-                <div className="tutor-info-row">
-                  <span className="tutor-info-label">공지 수</span>
-                  <span className="tutor-info-value">{section.noticeCount || 0}개</span>
+                <div className="tutor-course-card-stat-item">
+                  <span className="tutor-course-card-stat-label">공지</span>
+                  <span className="tutor-course-card-stat-value">{section.noticeCount || 0}개</span>
                 </div>
-                <div className="tutor-info-row">
-                  <span className="tutor-info-label">학생 관리</span>
-                  <span className="tutor-info-value">{section.studentCount || 0}명</span>
+                <div className="tutor-course-card-stat-item">
+                  <span className="tutor-course-card-stat-label">학기</span>
+                  <span className="tutor-course-card-stat-value">{section.year || new Date().getFullYear()}년 {getSemesterLabel(section.semester)}</span>
                 </div>
-                <div className="tutor-info-row">
-                  <span className="tutor-info-label">상태</span>
-                  <span className={`info-value ${section.active !== false ? 'status-active' : 'status-inactive'}`}>
-                    {section.active !== false ? '활성' : '비활성'}
-                  </span>
-                </div>
+                {section.createdAt && (
+                  <div className="tutor-course-card-stat-item">
+                    <span className="tutor-course-card-stat-label">생성일</span>
+                    <span className="tutor-course-card-stat-value">{formatDate(section.createdAt)}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="section-actions">
+              {/* 컴팩트한 액션 버튼 영역 */}
+              <div className="tutor-course-card-actions-compact">
                 <button 
-                  className={`btn-toggle-active ${section.active !== false ? 'active' : 'inactive'}`}
+                  className={`tutor-course-card-btn-toggle-status ${section.active !== false ? 'active' : 'inactive'}`}
                   onClick={() => handleToggleActive(section.sectionId, section.active !== false)}
                   title={section.active !== false ? '비활성화하기' : '활성화하기'}
                 >
-                  {section.active !== false ? '✓ 활성' : '✕ 비활성'}
+                  {section.active !== false ? '활성' : '비활성'}
                 </button>
-                <button 
-                  className="tutor-btn-action"
-                  onClick={() => navigate(`/tutor/notices/section/${section.sectionId}`)}
-                >
-                  공지사항
-                </button>
-                <button 
-                  className="tutor-btn-action"
-                  onClick={() => navigate(`/tutor/users/section/${section.sectionId}`)}
-                >
-                  학생 관리
-                </button>
-                <button 
-                  className="tutor-btn-action"
-                  onClick={() => navigate(`/tutor/grades/section/${section.sectionId}`)}
-                >
-                  성적 관리
-                </button>
-                <button 
-                  className="tutor-btn-action tutor-primary"
-                  onClick={() => navigate(`/tutor/assignments/section/${section.sectionId}`)}
-                >
-                  과제 관리
-                </button>
+                <div className="tutor-course-card-action-buttons-compact">
+                  <button 
+                    className="tutor-course-card-action-btn-compact"
+                    onClick={() => navigate(`/tutor/notices/section/${section.sectionId}`)}
+                    title="공지사항"
+                  >
+                    공지
+                  </button>
+                  <button 
+                    className="tutor-course-card-action-btn-compact"
+                    onClick={() => navigate(`/tutor/users/section/${section.sectionId}`)}
+                    title="학생 관리"
+                  >
+                    학생
+                  </button>
+                  <button 
+                    className="tutor-course-card-action-btn-compact"
+                    onClick={() => navigate(`/tutor/grades/section/${section.sectionId}`)}
+                    title="성적 관리"
+                  >
+                    성적
+                  </button>
+                  <button 
+                    className="tutor-course-card-action-btn-compact primary"
+                    onClick={() => navigate(`/tutor/assignments/section/${section.sectionId}`)}
+                    title="과제 관리"
+                  >
+                    과제
+                  </button>
+                </div>
               </div>
             </div>
           ))}
