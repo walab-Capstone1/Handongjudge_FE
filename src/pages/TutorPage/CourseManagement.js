@@ -9,6 +9,9 @@ const CourseManagement = () => {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterYear, setFilterYear] = useState('ALL');
+  const [filterSemester, setFilterSemester] = useState('ALL');
+  const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL', 'ACTIVE', 'INACTIVE'
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
     courseId: '',
@@ -123,15 +126,33 @@ const CourseManagement = () => {
     return `${year}.${month}.${day}`;
   };
 
-  const filteredSections = sections.filter(section =>
-    section.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    section.instructorName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 사용 가능한 년도 목록 추출
+  const availableYears = [...new Set(sections.map(s => s.year).filter(Boolean))].sort((a, b) => b - a);
+
+  const filteredSections = sections.filter(section => {
+    // 검색어 필터
+    const matchesSearch = !searchTerm || 
+      section.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (section.instructorName && section.instructorName.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    // 년도 필터
+    const matchesYear = filterYear === 'ALL' || section.year === parseInt(filterYear);
+    
+    // 학기 필터
+    const matchesSemester = filterSemester === 'ALL' || section.semester === filterSemester;
+    
+    // 상태 필터
+    const matchesStatus = filterStatus === 'ALL' || 
+      (filterStatus === 'ACTIVE' && section.active !== false) ||
+      (filterStatus === 'INACTIVE' && section.active === false);
+    
+    return matchesSearch && matchesYear && matchesSemester && matchesStatus;
+  });
 
   if (loading) {
     return (
       <TutorLayout>
-        <div className="course-management tutor-courses">
+        <div className="course-management">
           <div className="tutor-loading-container">
             <div className="tutor-loading-spinner"></div>
             <p>수업 정보를 불러오는 중...</p>
@@ -143,30 +164,78 @@ const CourseManagement = () => {
 
   return (
     <TutorLayout>
-      <div className="course-management tutor-courses">
-        <div className="tutor-page-header">
-          <div className="tutor-header-left">
-            <h1 className="tutor-page-title">수업 관리</h1>
-            <div className="tutor-search-box">
-              <input
-                type="text"
-                placeholder="수업명, 교수명으로 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="tutor-search-input"
-              />
+        <div className="course-management">
+        {/* 타이틀 헤더 섹션 */}
+        <div className="course-management-title-header">
+          <div className="course-management-title-left">
+            <h1 className="course-management-title">수업 관리</h1>
+            <div className="course-management-title-stats">
+              <span className="course-management-stat-badge">총 {sections.length}개 분반</span>
+              <span className="course-management-stat-badge">표시 {filteredSections.length}개</span>
             </div>
           </div>
-          <div className="tutor-header-right">
+          <div className="course-management-title-right">
             <button 
-              className="tutor-btn-create-section"
+              className="course-management-btn-create"
               onClick={() => setShowCreateModal(true)}
             >
               + 새 수업 만들기
             </button>
-            <div className="tutor-header-stats">
-              <span className="tutor-stat-badge">총 {sections.length}개 분반</span>
-            </div>
+          </div>
+        </div>
+        
+        {/* 필터 섹션 */}
+        <div className="course-management-filters-section">
+          <div className="course-management-search-box">
+            <input
+              type="text"
+              placeholder="수업명, 교수명으로 검색..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="course-management-search-input"
+            />
+          </div>
+          
+          <div className="course-management-filter-group">
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="course-management-filter-select"
+            >
+              <option value="ALL">전체 년도</option>
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}년</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="course-management-filter-group">
+            <select
+              value={filterSemester}
+              onChange={(e) => setFilterSemester(e.target.value)}
+              className="course-management-filter-select"
+            >
+              <option value="ALL">전체 학기</option>
+              <option value="SPRING">1학기</option>
+              <option value="SUMMER">여름학기</option>
+              <option value="FALL">2학기</option>
+              <option value="WINTER">겨울학기</option>
+              <option value="CAMP">캠프</option>
+              <option value="SPECIAL">특강</option>
+              <option value="IRREGULAR">비정규 세션</option>
+            </select>
+          </div>
+          
+          <div className="course-management-filter-group">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="course-management-filter-select"
+            >
+              <option value="ALL">전체 상태</option>
+              <option value="ACTIVE">활성</option>
+              <option value="INACTIVE">비활성</option>
+            </select>
           </div>
         </div>
 
@@ -250,7 +319,7 @@ const CourseManagement = () => {
         {filteredSections.length === 0 && (
           <div className="tutor-no-sections">
             <p>
-              {searchTerm 
+              {searchTerm || filterYear !== 'ALL' || filterSemester !== 'ALL' || filterStatus !== 'ALL'
                 ? '검색 조건에 맞는 수업이 없습니다.' 
                 : '담당하고 있는 수업이 없습니다.'
               }
