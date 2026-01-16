@@ -65,6 +65,15 @@ const TutorLayout = ({ children, selectedSection = null }) => {
     }
   };
 
+  // 학기 정보 간략 표시 (예: "2024-1")
+  const getCompactSemesterInfo = (year, semester) => {
+    const semesterNum = semester === 'SPRING' ? '1' : 
+                       semester === 'FALL' ? '2' : 
+                       semester === 'SUMMER' ? 'S' : 
+                       semester === 'WINTER' ? 'W' : '1';
+    return `${year}-${semesterNum}`;
+  };
+
   // 수업 목록 가져오기
   useEffect(() => {
     const fetchSections = async () => {
@@ -415,16 +424,12 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                   {currentSection ? (
                     <div className="section-card-content">
                       {!sidebarCollapsed && (
-                        <>
-                          <div className="section-card-header">
-                            <h3 className="section-card-title">{currentSection.courseTitle}</h3>
-                          </div>
-                          <div className="section-card-meta">
-                            <span className="section-card-badge">
-                              {currentSection.year}년 {getSemesterLabel(currentSection.semester)}
-                            </span>
-                          </div>
-                        </>
+                        <div className="section-card-header">
+                          <h3 className="section-card-title">{currentSection.courseTitle}</h3>
+                          <span className="section-card-badge">
+                            {getCompactSemesterInfo(currentSection.year, currentSection.semester)}
+                          </span>
+                        </div>
                       )}
                       <div className="section-card-actions">
                         <button 
