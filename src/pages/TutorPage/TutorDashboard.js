@@ -5,7 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
 import ReactMarkdown from "react-markdown";
-import { FaExclamationTriangle, FaCheckCircle, FaClock, FaUsers, FaChartLine, FaArrowUp, FaArrowDown, FaMinus, FaBell, FaComments } from "react-icons/fa";
+import { FaExclamationTriangle, FaCheckCircle, FaClock, FaUsers, FaChartLine, FaArrowUp, FaArrowDown, FaMinus } from "react-icons/fa";
 import "./TutorDashboard.css";
 
 const TutorDashboard = () => {
@@ -49,11 +49,6 @@ const TutorDashboard = () => {
   // 새로운 상태: 각 수업별 상세 통계
   const [sectionStats, setSectionStats] = useState({}); // { sectionId: { submissionRate, atRiskStudents, issues, ... } }
   const [loadingSectionStats, setLoadingSectionStats] = useState(false);
-  // 수업 알림 상태
-  const [notifications, setNotifications] = useState([]);
-  const [loadingNotifications, setLoadingNotifications] = useState(false);
-  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   // 각 수업별 상세 통계 계산
   const calculateSectionStats = async (sectionId) => {
@@ -239,148 +234,9 @@ const TutorDashboard = () => {
       }
     };
 
-    const fetchNotifications = async () => {
-      try {
-        setLoadingNotifications(true);
-        // 모든 수업의 알림 조회 (sectionId 없이)
-        const notificationsResponse = await APIService.getCommunityNotifications(null, 0, 20);
-        const notificationsList = notificationsResponse.data?.content || [];
-        
-        // 알림 데이터 변환
-        const processedNotifications = notificationsList.map(notif => {
-          let title = '';
-          let link = '';
-          let sectionTitle = '';
-          
-          switch (notif.type) {
-            case 'NOTICE_CREATED':
-              title = notif.noticeTitle || '공지사항';
-              link = notif.sectionId && notif.noticeId ? `/sections/${notif.sectionId}/course-notices/${notif.noticeId}` : null;
-              break;
-            case 'ASSIGNMENT_CREATED':
-              title = notif.assignmentTitle || '새 과제';
-              link = notif.sectionId && notif.assignmentId ? `/sections/${notif.sectionId}/course-assignments?assignmentId=${notif.assignmentId}` : null;
-              break;
-            case 'QUESTION_COMMENT':
-              title = notif.message || '커뮤니티에 새 댓글이 달렸습니다';
-              link = notif.sectionId && notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
-              break;
-            case 'COMMENT_ACCEPTED':
-              title = notif.message || '댓글이 채택되었습니다';
-              link = notif.sectionId && notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
-              break;
-            default:
-              title = notif.message || '알림';
-              link = notif.sectionId ? `/sections/${notif.sectionId}/community` : null;
-          }
-          
-          // API에서 직접 courseTitle을 가져오거나, 없으면 sections에서 찾기
-          if (notif.courseTitle) {
-            sectionTitle = notif.courseTitle;
-          } else {
-            const section = sections.find(s => s.sectionId === notif.sectionId);
-            if (section) {
-              sectionTitle = section.courseTitle;
-            }
-          }
-          
-          return {
-            ...notif,
-            displayTitle: title,
-            displayLink: link,
-            sectionTitle: sectionTitle || '알 수 없는 수업',
-            createdAt: notif.createdAt
-          };
-        });
-        
-        setNotifications(processedNotifications);
-        // 읽지 않은 알림 개수 계산
-        const unread = processedNotifications.filter(n => !n.isRead).length;
-        setUnreadCount(unread);
-      } catch (error) {
-        console.error('알림 조회 실패:', error);
-        setNotifications([]);
-        setUnreadCount(0);
-      } finally {
-        setLoadingNotifications(false);
-      }
-    };
-
     fetchSections();
     fetchStats();
   }, []);
-
-  // 수업 목록이 업데이트되면 알림 다시 조회
-  useEffect(() => {
-    if (sections.length > 0) {
-      const fetchNotifications = async () => {
-        try {
-          setLoadingNotifications(true);
-          const notificationsResponse = await APIService.getCommunityNotifications(null, 0, 20);
-          const notificationsList = notificationsResponse.data?.content || [];
-          
-          const processedNotifications = notificationsList.map(notif => {
-            let title = '';
-            let link = '';
-            let sectionTitle = '';
-            
-            switch (notif.type) {
-              case 'NOTICE_CREATED':
-                title = notif.noticeTitle || '공지사항';
-                link = notif.sectionId && notif.noticeId ? `/sections/${notif.sectionId}/course-notices/${notif.noticeId}` : null;
-                break;
-              case 'ASSIGNMENT_CREATED':
-                title = notif.assignmentTitle || '새 과제';
-                link = notif.sectionId && notif.assignmentId ? `/sections/${notif.sectionId}/course-assignments?assignmentId=${notif.assignmentId}` : null;
-                break;
-              case 'QUESTION_COMMENT':
-                title = notif.message || '커뮤니티에 새 댓글이 달렸습니다';
-                link = notif.sectionId && notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
-                break;
-              case 'COMMENT_ACCEPTED':
-                title = notif.message || '댓글이 채택되었습니다';
-                link = notif.sectionId && notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
-                break;
-              default:
-                title = notif.message || '알림';
-                link = notif.sectionId ? `/sections/${notif.sectionId}/community` : null;
-            }
-            
-            // API에서 직접 courseTitle을 가져오거나, 없으면 sections에서 찾기
-            if (notif.courseTitle) {
-              sectionTitle = notif.courseTitle;
-            } else {
-              const section = sections.find(s => s.sectionId === notif.sectionId);
-              if (section) {
-                sectionTitle = section.courseTitle;
-              }
-            }
-            
-            return {
-              ...notif,
-              displayTitle: title,
-              displayLink: link,
-              sectionTitle: sectionTitle || '알 수 없는 수업',
-              createdAt: notif.createdAt
-            };
-          });
-          
-          setNotifications(processedNotifications);
-          // 읽지 않은 알림 개수 계산
-          const unread = processedNotifications.filter(n => !n.isRead).length;
-          setUnreadCount(unread);
-        } catch (error) {
-          console.error('알림 조회 실패:', error);
-          setNotifications([]);
-          setUnreadCount(0);
-        } finally {
-          setLoadingNotifications(false);
-        }
-      };
-      
-      fetchNotifications();
-    }
-  }, [sections]);
 
   const handleSectionClick = (section) => {
     // 관리자 페이지에서는 비활성화된 수업도 접근 가능
@@ -1014,130 +870,6 @@ const TutorDashboard = () => {
           </div>
         </div>
 
-        {/* 오른쪽 알림 아이콘 및 패널 */}
-        <div className="tutor-notification-container">
-          <button 
-            className={`tutor-notification-icon-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
-            onClick={() => setShowNotificationPanel(!showNotificationPanel)}
-            title="수업 알림"
-          >
-            <FaBell />
-            {unreadCount > 0 && (
-              <span className="tutor-notification-badge">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
-          </button>
-          
-          {showNotificationPanel && (
-            <>
-              <div 
-                className="tutor-notification-overlay"
-                onClick={() => setShowNotificationPanel(false)}
-              ></div>
-              <div className="tutor-notification-panel">
-                <div className="tutor-notification-panel-header">
-                  <h2 className="tutor-notification-panel-title">
-                    <FaBell className="section-title-icon" />
-                    교수 수업 알림
-                  </h2>
-                  <button 
-                    className="tutor-notification-close-btn"
-                    onClick={() => setShowNotificationPanel(false)}
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="tutor-notification-panel-body">
-                  {loadingNotifications ? (
-                    <div className="dashboard-loading">
-                      <div className="tutor-loading-spinner"></div>
-                      <p>알림을 불러오는 중...</p>
-                    </div>
-                  ) : notifications.length > 0 ? (
-                    <div className="notifications-list">
-                      {notifications.map((notif, index) => (
-                        <div
-                          key={notif.id || index}
-                          className={`notification-item ${!notif.isRead ? 'unread' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            let targetPath = null;
-                            
-                            // 알림 타입에 따라 정확한 경로로 리다이렉트
-                            switch (notif.type) {
-                              case 'NOTICE_CREATED':
-                                if (notif.sectionId && notif.noticeId) {
-                                  targetPath = `/sections/${notif.sectionId}/course-notices/${notif.noticeId}`;
-                                } else if (notif.sectionId) {
-                                  targetPath = `/sections/${notif.sectionId}/course-notices`;
-                                }
-                                break;
-                              case 'ASSIGNMENT_CREATED':
-                                if (notif.sectionId && notif.assignmentId) {
-                                  targetPath = `/sections/${notif.sectionId}/course-assignments?assignmentId=${notif.assignmentId}`;
-                                } else if (notif.sectionId) {
-                                  targetPath = `/sections/${notif.sectionId}/course-assignments`;
-                                }
-                                break;
-                              case 'QUESTION_COMMENT':
-                              case 'COMMENT_ACCEPTED':
-                              case 'COMMENT_REPLY':
-                                if (notif.sectionId && notif.questionId) {
-                                  targetPath = `/sections/${notif.sectionId}/community/${notif.questionId}`;
-                                } else if (notif.sectionId) {
-                                  targetPath = `/sections/${notif.sectionId}/community`;
-                                }
-                                break;
-                              default:
-                                if (notif.displayLink) {
-                                  targetPath = notif.displayLink;
-                                } else if (notif.sectionId) {
-                                  targetPath = `/sections/${notif.sectionId}/community`;
-                                }
-                            }
-                            
-                            if (targetPath) {
-                              navigate(targetPath);
-                              setShowNotificationPanel(false);
-                            }
-                          }}
-                        >
-                          <div className="notification-icon">
-                            {notif.type === 'QUESTION_COMMENT' || notif.type === 'COMMENT_ACCEPTED' ? (
-                              <FaComments />
-                            ) : (
-                              <FaBell />
-                            )}
-                          </div>
-                          <div className="notification-content">
-                            <div className="notification-title">{notif.displayTitle}</div>
-                            <div className="notification-meta">
-                              <span className="notification-section">{notif.sectionTitle}</span>
-                              <span className="notification-time">
-                                {new Date(notif.createdAt).toLocaleString('ko-KR', {
-                                  year: 'numeric',
-                                  month: '2-digit',
-                                  day: '2-digit',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="dashboard-empty-state">
-                      <p>알림이 없습니다.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
 
         {/* 워크로드 관리 섹션 (제거 예정 - 주석 처리) */}
         {false && (

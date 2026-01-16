@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import TutorHeader from "../components/TutorHeader";
+import TutorNotificationPanel from "../components/TutorNotificationPanel";
 import APIService from "../services/APIService";
 import { 
   FaHome, 
@@ -594,6 +595,9 @@ const TutorLayout = ({ children, selectedSection = null }) => {
       <main className="tutor-main">
         <div className="tutor-content">{children}</div>
       </main>
+      
+      {/* 튜터 알림 패널 - 모든 튜터 페이지에서 사용 */}
+      <TutorNotificationPanel />
       
       {/* 수업 선택 모달 - 사이드바 밖으로 이동하여 stacking context 문제 해결 */}
       {showSectionModal && (

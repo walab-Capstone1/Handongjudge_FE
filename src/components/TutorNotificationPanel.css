@@ -1,0 +1,356 @@
+/* TutorNotificationPanel.css - 튜터 페이지 전용 알림 패널 스타일 */
+
+/* 오른쪽 알림 아이콘 및 패널 */
+.tutor-notification-container {
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  z-index: 1000;
+}
+
+.tutor-notification-icon-btn {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 3px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  color: white;
+  font-size: 1.5rem;
+}
+
+.tutor-notification-icon-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.5);
+}
+
+/* 새 알림이 있을 때 펄스 애니메이션 */
+.tutor-notification-icon-btn.has-unread {
+  animation: tutor-notification-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tutor-notification-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 24px rgba(102, 126, 234, 0.8), 0 0 0 8px rgba(102, 126, 234, 0.2);
+  }
+}
+
+.tutor-notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  padding: 0 6px;
+  animation: tutor-notification-bounce 1s ease-in-out infinite;
+}
+
+@keyframes tutor-notification-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.tutor-notification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+  animation: tutor-notification-fadeIn 0.2s ease;
+}
+
+@keyframes tutor-notification-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tutor-notification-panel {
+  position: fixed;
+  right: 2rem;
+  bottom: 90px;
+  width: 420px;
+  max-height: calc(100vh - 200px);
+  min-height: 300px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  border: 2px solid #667eea;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: tutor-notification-slideInUp 0.3s ease;
+}
+
+@keyframes tutor-notification-slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.tutor-notification-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-bottom: 2px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex-shrink: 0;
+}
+
+.tutor-notification-panel-header .tutor-notification-panel-title {
+  color: white;
+}
+
+.tutor-notification-panel-header .section-title-icon {
+  color: white;
+}
+
+.tutor-notification-panel-header .tutor-notification-close-btn {
+  color: white;
+}
+
+.tutor-notification-panel-header .tutor-notification-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.tutor-notification-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.tutor-notification-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tutor-notification-close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.tutor-notification-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem;
+  min-height: 0;
+}
+
+/* 스크롤바 스타일링 */
+.tutor-notification-panel-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tutor-notification-panel-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.tutor-notification-panel-body::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
+}
+
+.tutor-notification-panel-body::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: visible;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.notification-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.notification-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #667eea;
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.notification-item:hover {
+  background: #f0f4ff;
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.notification-item:hover::before {
+  transform: scaleY(1);
+}
+
+.notification-item.unread {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  border-left: 4px solid #3b82f6;
+}
+
+.notification-item.unread::before {
+  background: #3b82f6;
+  transform: scaleY(1);
+}
+
+.notification-icon {
+  font-size: 0.9rem;
+  color: #667eea;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notification-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notification-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+.notification-section {
+  font-weight: 500;
+  color: #667eea;
+}
+
+.notification-time {
+  flex-shrink: 0;
+}
+
+.tutor-notification-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 1rem;
+}
+
+.tutor-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: tutor-notification-spin 1s linear infinite;
+}
+
+@keyframes tutor-notification-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.tutor-notification-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
