@@ -738,7 +738,7 @@ const TutorDashboard = () => {
   return (
     <TutorLayout>
       <div className="tutor-dashboard">
-        <div className="dashboard-header">
+        <div className="tutor-dashboard-header">
           <h1 className="dashboard-title">전체 수업 운영 현황</h1>
           <p className="dashboard-subtitle">
             모든 수업의 전반적인 상황을 한눈에 파악하고, 우선순위를 결정하세요.
