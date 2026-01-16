@@ -50,9 +50,11 @@ function App() {
       <RecoilRoot>
         <Router>
           <Routes>
-            <Route path="/" element={<Onboarding />} />
+            <Route path="/" element={<IndexPage />} />
+            <Route path="/login" element={<Onboarding />} />
             <Route path="/index" element={<IndexPage />} />
             <Route path="/courses" element={<ClassPage />} />
+            <Route path="/dashboard" element={<CourseDashboardPage />} />
             <Route path="/sections/:sectionId/dashboard" element={<CourseDashboardPage />} />
             <Route path="/sections/:sectionId/course-assignments" element={<CourseAssignmentsPage />} />
             <Route path="/sections/:sectionId/course-notices" element={<CourseNoticesPage />} />

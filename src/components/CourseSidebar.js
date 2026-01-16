@@ -15,13 +15,18 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
   const courseListRef = useRef(null);
   
   // sectionId가 없을 때 에러 방지
+  // sectionId가 null이거나 undefined이거나 NaN이면 과제, 공지사항, 커뮤니티, 알림 메뉴 숨김
+  // 처음에는 대시보드만 표시하고, 수업 카드를 클릭하면 나머지 메뉴가 나타남
+  const hasSectionId = sectionId !== null && sectionId !== undefined && !isNaN(sectionId) && sectionId > 0;
+  
   const menuItems = [
-    { id: "courses", label: "수업", type: "action", icon: MdMenuBook },
-    { id: "dashboard", label: "대시보드", path: sectionId ? `/sections/${sectionId}/dashboard` : '#', icon: MdDashboard },
-    { id: "assignment", label: "과제", path: sectionId ? `/sections/${sectionId}/course-assignments` : '#', icon: MdAssignment },
-    { id: "notice", label: "공지사항", path: sectionId ? `/sections/${sectionId}/course-notices` : '#', icon: MdAnnouncement },
-    { id: "community", label: "커뮤니티", path: sectionId ? `/sections/${sectionId}/community` : '#', icon: MdForum },
-    { id: "notification", label: "알림", path: sectionId ? `/sections/${sectionId}/alarm` : '#', icon: MdNotifications },
+    { id: "dashboard", label: "대시보드", path: hasSectionId ? `/sections/${sectionId}/dashboard` : '/dashboard', icon: MdDashboard },
+    ...(hasSectionId ? [
+      { id: "assignment", label: "과제", path: `/sections/${sectionId}/course-assignments`, icon: MdAssignment },
+      { id: "notice", label: "공지사항", path: `/sections/${sectionId}/course-notices`, icon: MdAnnouncement },
+      { id: "community", label: "커뮤니티", path: `/sections/${sectionId}/community`, icon: MdForum },
+      { id: "notification", label: "알림", path: `/sections/${sectionId}/alarm`, icon: MdNotifications },
+    ] : []),
   ];
 
   // 수강 중인 강의 목록 가져오기
@@ -88,7 +93,7 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
       <div className={`course-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
         <div 
           className="sidebar-header"
-          onClick={() => !isCollapsed && navigate("/courses")}
+          onClick={() => !isCollapsed && navigate("/index")}
         >
           <img
             src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/blBC3g5kkQ/0xrnt7m1_expires_30_days.png"
@@ -99,19 +104,24 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
         </div>
 
         <div className="sidebar-menu">
-          {menuItems.map((item) => {
+          {menuItems.map((item, index) => {
             const IconComponent = item.icon;
             // 현재 경로를 기반으로 활성 메뉴 판단
             const isActive = location.pathname.includes(item.id === 'assignment' ? 'course-assignments' : 
                                                         item.id === 'notice' ? 'course-notices' :
                                                         item.id === 'notification' ? 'alarm' :
                                                         item.id);
+            // 대시보드가 아닌 메뉴는 애니메이션 지연 적용
+            const isSubMenu = item.id !== 'dashboard';
             return (
               <div
                 key={item.id}
                 className={`sidebar-menu-item ${
                   isActive ? "active" : ""
-                }`}
+                } ${isSubMenu ? "sub-menu-item" : ""}`}
+                style={isSubMenu ? {
+                  animationDelay: `${(index - 1) * 0.1}s`
+                } : {}}
                 onClick={() => {
                   if (item.type === 'action' && item.id === 'courses') {
                     // "수업" 메뉴 클릭 시 강의 목록 사이드바 토글 (접힌 상태에서도 작동)
@@ -140,7 +150,7 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
           onClick={async () => {
             try {
               await logout();
-              navigate("/");
+              navigate("/index");
             } catch (error) {
               console.error("로그아웃 실패:", error);
             }
