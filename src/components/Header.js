@@ -1,19 +1,26 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import APIService from '../services/APIService';
+import { useAuth } from '../hooks/useAuth';
 
-const Header = ({ userName = "사용자 이름", logoutText = "로그아웃", onUserNameClick }) => {
+const Header = ({ onUserNameClick }) => {
   const navigate = useNavigate();
+  const { logout, user, isAuthenticated } = useAuth();
+
+  const userName = user?.name || user?.username || user?.email || "";
 
   const handleLogout = async () => {
     try {
-      await APIService.logout();
-      navigate("/");
+      await logout();
+      window.location.href = "/index";
     } catch (error) {
       console.error('로그아웃 실패:', error);
-      navigate("/");
+      window.location.href = "/index";
     }
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
   };
 
   const handleLogoClick = () => {
@@ -30,8 +37,16 @@ const Header = ({ userName = "사용자 이름", logoutText = "로그아웃", on
           <LogoText>CodeSturdy</LogoText>
         </Logo>
         <HeaderLinks>
-          <HeaderLink onClick={onUserNameClick}>{userName}</HeaderLink>
-          <HeaderLink onClick={handleLogout}>{logoutText}</HeaderLink>
+          {isAuthenticated ? (
+            <>
+              {userName && (
+                <HeaderLink onClick={onUserNameClick || (() => {})}>{userName}</HeaderLink>
+              )}
+              <HeaderLink onClick={handleLogout}>로그아웃</HeaderLink>
+            </>
+          ) : (
+            <HeaderLink onClick={handleLogin}>로그인</HeaderLink>
+          )}
         </HeaderLinks>
       </HeaderWrapper>
     </HeaderContainer>
@@ -49,8 +64,8 @@ const HeaderWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
-  max-width: 1152px;
+  padding: 20px 80px;
+  max-width: 1440px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -62,11 +77,13 @@ const Logo = styled.div`
   gap: 12px;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  margin-left: -20px;
 
   &:hover {
     opacity: 0.8;
   }
 `;
+
 
 const LogoIcon = styled.div`
   width: 40px;
@@ -87,12 +104,15 @@ const LogoText = styled.h1`
   font-weight: bold;
   color: #1f2937;
   margin: 0;
+  padding-left: 0;
+  text-indent: 0;
 `;
 
 const HeaderLinks = styled.div`
   display: flex;
   gap: 24px;
   align-items: center;
+  margin-right: -50px;
 `;
 
 const HeaderLink = styled.a`

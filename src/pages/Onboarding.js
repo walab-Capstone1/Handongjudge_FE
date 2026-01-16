@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { onboardingState } from "../recoil/atoms";
 import {
@@ -15,12 +15,16 @@ import { SiKakaotalk } from "react-icons/si";
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [onboarding, setOnboarding] = useRecoilState(onboardingState);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  
+  // IndexPage에서 전달된 redirectTo 받기
+  const redirectTo = location.state?.redirectTo;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -37,7 +41,8 @@ const Onboarding = () => {
       state: { 
         type: "login", 
         email: formData.email, 
-        password: formData.password 
+        password: formData.password,
+        redirectTo: redirectTo // IndexPage에서 전달된 redirectTo 전달
       } 
     });
   };
@@ -56,8 +61,8 @@ const Onboarding = () => {
     <OnboardingContainer>
       <Header>
         <Logo>
-          <LogoImage src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="HandongJudge" />
-          <span>HandongJudge</span>
+          <LogoImage src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="CodeSturdy" />
+          <span>CodeSturdy</span>
         </Logo>
         <EnterpriseLink>기업서비스</EnterpriseLink>
       </Header>
