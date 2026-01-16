@@ -983,57 +983,6 @@ const TutorDashboard = () => {
         </div>
         )}
 
-        {/* 3. 수업 간 비교 분석 */}
-        {comparisonData.length > 0 && (
-          <div className="dashboard-comparison-section">
-            <h2 className="section-title">
-              <FaChartLine className="section-title-icon" />
-              수업 간 비교 분석
-            </h2>
-            <div className="comparison-grid">
-              {comparisonData.map((comparison, index) => (
-                <div key={index} className="comparison-card">
-                  <h3 className="comparison-card-title">{comparison.courseTitle}</h3>
-                  <div className="comparison-summary">
-                    <div className="comparison-summary-item">
-                      <span className="comparison-summary-label">평균 제출률</span>
-                      <span className="comparison-summary-value">{comparison.averageSubmissionRate}%</span>
-                    </div>
-                  </div>
-                  <div className="comparison-sections">
-                    {comparison.sections.map((section) => (
-                      <div key={section.sectionId} className="comparison-section-item">
-                        <div className="comparison-section-header">
-                          <span className="comparison-section-name">
-                            {section.sectionNumber || ''}분반 ({section.studentCount}명)
-                          </span>
-                          <span 
-                            className="comparison-section-status" 
-                            style={{ color: section.healthStatus.color }}
-                          >
-                            {section.healthStatus.label}
-                          </span>
-                        </div>
-                        <div className="comparison-section-metrics">
-                          <div className="comparison-metric">
-                            <span>제출률: {section.submissionRate}%</span>
-                            <div className="comparison-metric-bar">
-                              <div 
-                                className="comparison-metric-fill" 
-                                style={{ width: `${section.submissionRate}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* 수업 생성 모달 */}
         {showCreateModal && (
           <div className="tutor-modal-overlay" onClick={() => setShowCreateModal(false)}>
