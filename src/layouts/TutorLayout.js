@@ -290,6 +290,12 @@ const TutorLayout = ({ children, selectedSection = null }) => {
       subItems: [] 
     },
     { 
+      path: `/tutor/grades/section/${currentSection.sectionId}`, 
+      label: "성적 관리", 
+      icon: FaChartBar,
+      subItems: [] 
+    },
+    { 
       path: `/tutor/notifications/section/${currentSection.sectionId}`, 
       label: "수업 알림", 
       icon: FaBell,

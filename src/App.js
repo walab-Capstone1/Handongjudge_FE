@@ -19,6 +19,7 @@ import CourseManagement from "./pages/TutorPage/CourseManagement";
 import AssignmentManagement from "./pages/TutorPage/AssignmentManagement";
 import AssignmentStudentProgress from "./pages/TutorPage/AssignmentStudentProgress";
 import UserManagement from "./pages/TutorPage/UserManagement";
+import GradeManagement from "./pages/TutorPage/GradeManagement";
 import NoticeManagement from "./pages/TutorPage/NoticeManagement";
 import ProblemManagement from "./pages/TutorPage/ProblemManagement";
 import ProblemSetManagement from "./pages/TutorPage/ProblemSetManagement";
@@ -88,6 +89,8 @@ function App() {
             <Route path="/tutor/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/tutor/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
             <Route path="/tutor/users/section/:sectionId" element={<AdminRoute><UserManagement /></AdminRoute>} />
+            <Route path="/tutor/grades" element={<AdminRoute><GradeManagement /></AdminRoute>} />
+            <Route path="/tutor/grades/section/:sectionId" element={<AdminRoute><GradeManagement /></AdminRoute>} />
             <Route path="/tutor/problems" element={<AdminRoute><ProblemManagement /></AdminRoute>} />
             <Route path="/tutor/problems/create" element={<AdminRoute><ProblemCreate /></AdminRoute>} />
             <Route path="/tutor/problems/:problemId/edit" element={<AdminRoute><ProblemEdit /></AdminRoute>} />

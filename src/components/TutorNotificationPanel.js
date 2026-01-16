@@ -108,7 +108,7 @@ const TutorNotificationPanel = () => {
   // 드래그 시작
   const handleMouseDown = (e) => {
     if (e.button !== 0) return; // 왼쪽 버튼만
-    if (e.target.closest('.tutor-notification-badge')) return; // 배지 클릭은 무시
+    if (e.target.closest('.tutor-alarm-badge')) return; // 배지 클릭은 무시
     
     // 드래그 시작 위치 저장
     setDragStartPos({ x: e.clientX, y: e.clientY });
@@ -344,7 +344,7 @@ const TutorNotificationPanel = () => {
   return (
     <div 
       ref={containerRef}
-      className="tutor-notification-container"
+      className="tutor-alarm-container"
       style={{
         right: `${currentRight}px`,
         bottom: `${currentBottom}px`,
@@ -353,7 +353,7 @@ const TutorNotificationPanel = () => {
     >
       <button 
         ref={iconRef}
-        className={`tutor-notification-icon-btn ${unreadCount > 0 ? 'has-unread' : ''} ${isDragging && hasDragged ? 'dragging' : ''}`}
+        className={`tutor-alarm-icon-btn ${unreadCount > 0 ? 'tutor-alarm-has-unread' : ''} ${isDragging && hasDragged ? 'tutor-alarm-dragging' : ''}`}
         onMouseDown={(e) => {
           setIsDragging(true);
           handleMouseDown(e);
@@ -366,7 +366,7 @@ const TutorNotificationPanel = () => {
       >
         <FaBell />
         {unreadCount > 0 && (
-          <span className="tutor-notification-badge">
+          <span className="tutor-alarm-badge">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -375,54 +375,54 @@ const TutorNotificationPanel = () => {
       {showNotificationPanel && (
         <>
           <div 
-            className="tutor-notification-overlay"
+            className="tutor-alarm-overlay"
             onClick={() => setShowNotificationPanel(false)}
           ></div>
           <div 
-            className="tutor-notification-panel"
+            className="tutor-alarm-panel"
             style={{
               right: `${panelPosition.right}px`,
               bottom: `${panelPosition.bottom}px`
             }}
           >
-            <div className="tutor-notification-panel-header">
-              <h2 className="tutor-notification-panel-title">
-                <FaBell className="section-title-icon" />
+            <div className="tutor-alarm-panel-header">
+              <h2 className="tutor-alarm-panel-title">
+                <FaBell className="tutor-alarm-title-icon" />
                 교수 수업 알림
               </h2>
               <button 
-                className="tutor-notification-close-btn"
+                className="tutor-alarm-close-btn"
                 onClick={() => setShowNotificationPanel(false)}
               >
                 ×
               </button>
             </div>
-            <div className="tutor-notification-panel-body">
+            <div className="tutor-alarm-panel-body">
               {loadingNotifications ? (
-                <div className="tutor-notification-loading">
-                  <div className="tutor-loading-spinner"></div>
+                <div className="tutor-alarm-loading">
+                  <div className="tutor-alarm-loading-spinner"></div>
                   <p>알림을 불러오는 중...</p>
                 </div>
               ) : notifications.length > 0 ? (
-                <div className="notifications-list">
+                <div className="tutor-alarm-list">
                   {notifications.map((notif, index) => (
                     <div
                       key={notif.id || index}
-                      className={`notification-item ${!notif.isRead ? 'unread' : ''}`}
+                      className={`tutor-alarm-item ${!notif.isRead ? 'tutor-alarm-unread' : ''}`}
                       onClick={(e) => handleNotificationClick(notif, e)}
                     >
-                      <div className="notification-icon">
+                      <div className="tutor-alarm-icon">
                         {notif.type === 'QUESTION_COMMENT' || notif.type === 'COMMENT_ACCEPTED' ? (
                           <FaComments />
                         ) : (
                           <FaBell />
                         )}
                       </div>
-                      <div className="notification-content">
-                        <div className="notification-title">{notif.displayTitle}</div>
-                        <div className="notification-meta">
-                          <span className="notification-section">{notif.sectionTitle}</span>
-                          <span className="notification-time">
+                      <div className="tutor-alarm-content">
+                        <div className="tutor-alarm-title">{notif.displayTitle}</div>
+                        <div className="tutor-alarm-meta">
+                          <span className="tutor-alarm-section">{notif.sectionTitle}</span>
+                          <span className="tutor-alarm-time">
                             {new Date(notif.createdAt).toLocaleString('ko-KR', {
                               year: 'numeric',
                               month: '2-digit',
@@ -437,7 +437,7 @@ const TutorNotificationPanel = () => {
                   ))}
                 </div>
               ) : (
-                <div className="tutor-notification-empty">
+                <div className="tutor-alarm-empty">
                   <p>알림이 없습니다.</p>
                 </div>
               )}
