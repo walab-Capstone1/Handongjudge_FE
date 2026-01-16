@@ -13,7 +13,6 @@ import {
   FaChevronRight,
   FaBars,
   FaTimes,
-  FaTimesCircle,
   FaEdit,
   FaFolder,
   FaList,
@@ -151,6 +150,13 @@ const TutorLayout = ({ children, selectedSection = null }) => {
 
   // 수업 선택 핸들러
   const handleSectionSelect = (section) => {
+    // 이미 선택된 수업을 다시 클릭하면 해제
+    if (currentSection?.sectionId === section.sectionId) {
+      handleSectionClear();
+      setShowSectionModal(false);
+      return;
+    }
+    
     setCurrentSection(section);
     setShowSectionModal(false);
     localStorage.setItem('tutor_lastSelectedSectionId', section.sectionId.toString());
@@ -445,15 +451,6 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                         >
                           {sidebarCollapsed ? <FaCog /> : '수업 변경'}
                         </button>
-                        {!sidebarCollapsed && (
-                          <button 
-                            className="section-clear-btn"
-                            onClick={handleSectionClear}
-                            title="수업 해제"
-                          >
-                            <FaTimesCircle />
-                          </button>
-                        )}
                       </div>
                     </div>
                   ) : (

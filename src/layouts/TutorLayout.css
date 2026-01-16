@@ -437,15 +437,16 @@
 .tutor-sidebar .section-card-badge {
   display: inline-flex;
   align-items: center;
-  background: #667eea;
-  color: white;
-  font-size: 0.7rem;
+  background: #e0e7ff;
+  color: #667eea;
+  font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
   flex-shrink: 0;
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1.3;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .tutor-sidebar .section-card-actions {
