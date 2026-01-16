@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBell, FaComments } from "react-icons/fa";
 import APIService from "../services/APIService";
@@ -8,7 +8,8 @@ import "./TutorNotificationPanel.css";
  * TutorNotificationPanel - 튜터 페이지 전용 알림 패널 컴포넌트
  * 
  * 모든 튜터 페이지에서 사용할 수 있는 알림 패널입니다.
- * 오른쪽 하단에 고정되어 있으며, 읽지 않은 알림이 있을 때 시각적 피드백을 제공합니다.
+ * 드래그 가능하며, 사용자가 설정한 위치를 기억합니다.
+ * 읽지 않은 알림이 있을 때 시각적 피드백을 제공합니다.
  */
 const TutorNotificationPanel = () => {
   const navigate = useNavigate();
@@ -17,6 +18,62 @@ const TutorNotificationPanel = () => {
   const [showNotificationPanel, setShowNotificationPanel] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [sections, setSections] = useState([]);
+  
+  // 드래그 관련 상태
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ right: null, bottom: null }); // px 단위, null이면 기본값
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 }); // 드래그 시작 위치
+  const [hasDragged, setHasDragged] = useState(false); // 실제로 드래그했는지 여부
+  const iconRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // localStorage에서 위치 불러오기
+  useEffect(() => {
+    const savedPosition = localStorage.getItem('tutor_notification_position');
+    if (savedPosition) {
+      try {
+        const pos = JSON.parse(savedPosition);
+        if (pos.right !== null && pos.bottom !== null) {
+          setPosition(pos);
+        }
+      } catch (error) {
+        console.error('위치 정보 불러오기 실패:', error);
+      }
+    }
+  }, []);
+
+  // 위치를 localStorage에 저장
+  useEffect(() => {
+    if (position.right !== null && position.bottom !== null) {
+      localStorage.setItem('tutor_notification_position', JSON.stringify(position));
+    }
+  }, [position]);
+
+  // 화면 크기 변경 시 위치 재조정
+  useEffect(() => {
+    const handleResize = () => {
+      if (position.right !== null && position.bottom !== null) {
+        // 현재 위치가 화면 밖으로 나갔는지 체크
+        const iconSize = 56;
+        const minMargin = 16;
+        const maxRight = window.innerWidth - iconSize - minMargin;
+        const maxBottom = window.innerHeight - iconSize - minMargin;
+        
+        if (position.right > maxRight || position.bottom > maxBottom) {
+          // 위치를 화면 안으로 조정
+          const adjusted = constrainPosition(
+            window.innerWidth - position.right - iconSize,
+            window.innerHeight - position.bottom - iconSize
+          );
+          setPosition(adjusted);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [position]);
 
   // 수업 목록 가져오기 (알림의 수업 이름 표시용)
   useEffect(() => {
@@ -31,6 +88,88 @@ const TutorNotificationPanel = () => {
     };
     fetchSections();
   }, []);
+
+  // 경계 체크 및 자동 조정 함수
+  const constrainPosition = (x, y) => {
+    const iconSize = 56; // px
+    const minMargin = 16; // px
+    const maxX = window.innerWidth - iconSize - minMargin;
+    const maxY = window.innerHeight - iconSize - minMargin;
+    
+    const constrainedX = Math.max(minMargin, Math.min(x, maxX));
+    const constrainedY = Math.max(minMargin, Math.min(y, maxY));
+    
+    return {
+      right: window.innerWidth - constrainedX - iconSize,
+      bottom: window.innerHeight - constrainedY - iconSize
+    };
+  };
+
+  // 드래그 시작
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return; // 왼쪽 버튼만
+    if (e.target.closest('.tutor-notification-badge')) return; // 배지 클릭은 무시
+    
+    // 드래그 시작 위치 저장
+    setDragStartPos({ x: e.clientX, y: e.clientY });
+    setHasDragged(false);
+    
+    if (iconRef.current) {
+      const rect = iconRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - (rect.left + rect.width / 2),
+        y: e.clientY - (rect.top + rect.height / 2)
+      });
+    }
+    // preventDefault는 호출하지 않음 (클릭 이벤트가 정상 작동하도록)
+  };
+
+  // 드래그 중
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e) => {
+      // 이동 거리 계산
+      const deltaX = Math.abs(e.clientX - dragStartPos.x);
+      const deltaY = Math.abs(e.clientY - dragStartPos.y);
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      // 5px 이상 이동했을 때만 드래그로 간주
+      if (distance > 5) {
+        if (!hasDragged) {
+          setHasDragged(true);
+          e.preventDefault(); // 드래그 시작 시에만 preventDefault
+        }
+        
+        const newX = e.clientX - dragOffset.x;
+        const newY = e.clientY - dragOffset.y;
+        
+        const constrained = constrainPosition(newX, newY);
+        setPosition(constrained);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      setHasDragged(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragOffset, dragStartPos, hasDragged]);
+
+  // 아이콘 클릭 (드래그가 아닐 때만)
+  const handleIconClick = (e) => {
+    // 실제로 드래그하지 않았을 때만 클릭으로 처리
+    if (!hasDragged) {
+      setShowNotificationPanel(!showNotificationPanel);
+    }
+  };
 
   // 알림 조회
   const fetchNotifications = async () => {
@@ -156,12 +295,74 @@ const TutorNotificationPanel = () => {
     }
   };
 
+  // 기본 위치 및 현재 위치 계산
+  const getDefaultPosition = () => {
+    if (typeof window === 'undefined') return { right: 32, bottom: 32 };
+    return {
+      right: window.innerWidth - 56 - 32, // 아이콘 크기 + 여백
+      bottom: 32
+    };
+  };
+
+  const defaultPos = getDefaultPosition();
+  const currentRight = position.right !== null ? position.right : defaultPos.right;
+  const currentBottom = position.bottom !== null ? position.bottom : defaultPos.bottom;
+
+  // 패널 위치 계산 (아이콘 위에 표시, 화면 밖으로 나가지 않도록)
+  const getPanelPosition = () => {
+    if (typeof window === 'undefined') return { right: 32, bottom: 100 };
+    
+    const panelHeight = 400; // 대략적인 패널 높이
+    const panelWidth = 420;
+    let panelRight = currentRight;
+    let panelBottom = currentBottom + 56 + 16; // 아이콘 높이 + 여백
+    
+    // 패널이 화면 밖으로 나가는지 체크
+    if (panelBottom + panelHeight > window.innerHeight) {
+      // 패널을 아이콘 아래에 표시
+      panelBottom = currentBottom - panelHeight - 16;
+      if (panelBottom < 0) {
+        panelBottom = 16;
+      }
+    }
+    
+    // 패널이 오른쪽으로 나가는지 체크
+    if (panelRight + panelWidth > window.innerWidth) {
+      panelRight = window.innerWidth - panelWidth - 16;
+    }
+    
+    // 패널이 왼쪽으로 나가는지 체크
+    if (panelRight < 0) {
+      panelRight = 16;
+    }
+    
+    return { right: panelRight, bottom: panelBottom };
+  };
+
+  const panelPosition = getPanelPosition();
+
   return (
-    <div className="tutor-notification-container">
+    <div 
+      ref={containerRef}
+      className="tutor-notification-container"
+      style={{
+        right: `${currentRight}px`,
+        bottom: `${currentBottom}px`,
+        cursor: isDragging ? 'grabbing' : 'default'
+      }}
+    >
       <button 
-        className={`tutor-notification-icon-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
-        onClick={() => setShowNotificationPanel(!showNotificationPanel)}
-        title="수업 알림"
+        ref={iconRef}
+        className={`tutor-notification-icon-btn ${unreadCount > 0 ? 'has-unread' : ''} ${isDragging && hasDragged ? 'dragging' : ''}`}
+        onMouseDown={(e) => {
+          setIsDragging(true);
+          handleMouseDown(e);
+        }}
+        onClick={handleIconClick}
+        title="수업 알림 (드래그하여 이동)"
+        style={{
+          cursor: isDragging && hasDragged ? 'grabbing' : 'grab'
+        }}
       >
         <FaBell />
         {unreadCount > 0 && (
@@ -177,7 +378,13 @@ const TutorNotificationPanel = () => {
             className="tutor-notification-overlay"
             onClick={() => setShowNotificationPanel(false)}
           ></div>
-          <div className="tutor-notification-panel">
+          <div 
+            className="tutor-notification-panel"
+            style={{
+              right: `${panelPosition.right}px`,
+              bottom: `${panelPosition.bottom}px`
+            }}
+          >
             <div className="tutor-notification-panel-header">
               <h2 className="tutor-notification-panel-title">
                 <FaBell className="section-title-icon" />
