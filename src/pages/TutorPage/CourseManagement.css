@@ -515,16 +515,19 @@ body.section-modal-open .course-management .course-management-search-input:focus
 /* 수업 생성 모달 스타일 - TutorDashboard 스타일과 일치 */
 .course-management .tutor-modal-overlay {
   position: fixed;
-  top: 0;
+  top: 65px; /* 헤더 높이만큼 아래에서 시작 */
   left: 0;
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* 상단 정렬 */
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000; /* 헤더(z-index: 1000)보다 높게 설정 */
   animation: fadeIn 0.2s ease;
+  padding-top: 2rem; /* 상단 여백 */
+  overflow-y: auto; /* 스크롤 가능 */
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -541,10 +544,11 @@ body.section-modal-open .course-management .course-management-search-input:focus
   border-radius: 16px;
   width: 90%;
   max-width: 600px;
-  max-height: 90vh;
+  max-height: calc(90vh - 65px); /* 헤더 높이를 고려한 최대 높이 */
   overflow: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideInUp 0.3s ease;
+  margin-top: 0; /* 상단 여백 제거 */
 }
 
 @keyframes slideInUp {
@@ -683,4 +687,611 @@ body.section-modal-open .course-management .course-management-search-input:focus
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* 수업 복사 버튼 */
+.course-management .course-management-btn-copy {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 10px;
+  padding: 0.875rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.course-management .course-management-btn-copy:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* 복사 모달 - 큰 크기 */
+.course-management .tutor-modal-content-large {
+  max-width: 800px;
+  max-height: calc(85vh - 65px); /* 헤더 높이를 고려한 최대 높이 */
+  width: 90%;
+}
+
+.course-management .tutor-modal-body-large {
+  max-height: calc(85vh - 265px); /* 헤더(65px) + 모달 헤더/푸터(200px) 고려 */
+  overflow-y: auto;
+}
+
+/* 조회 모달 */
+.course-management .tutor-modal-content-view {
+  max-width: 700px;
+  max-height: calc(85vh - 65px);
+  width: 90%;
+}
+
+/* 단계별 콘텐츠 */
+.course-management .tutor-step-content {
+  padding: 1rem 0;
+}
+
+.course-management .tutor-step-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-step-description {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+.course-management .tutor-step-highlight {
+  color: #667eea;
+  font-weight: 600;
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f0f4ff;
+  border-left: 3px solid #667eea;
+  border-radius: 4px;
+}
+
+/* 체크박스 레이블 */
+.course-management .tutor-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+  flex-shrink: 0;
+}
+
+.course-management .tutor-checkbox-label input[type="checkbox"]:checked {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+.course-management .tutor-checkbox-label-item {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 큰 체크박스 레이블 (1단계에서 사용) */
+.course-management .tutor-checkbox-label-large {
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.course-management .tutor-checkbox-label-large:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.course-management .tutor-checkbox-label-large input[type="checkbox"]:checked ~ .tutor-checkbox-content {
+  color: #667eea;
+}
+
+.course-management .tutor-checkbox-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.course-management .tutor-checkbox-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.course-management .tutor-checkbox-description {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* 선택 박스 */
+.course-management .tutor-selection-box-large {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #f9fafb;
+}
+
+.course-management .tutor-selection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.course-management .tutor-item-count {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 아이템 리스트 */
+.course-management .tutor-item-list-large {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.course-management .tutor-item-list-compact {
+  max-height: 350px;
+}
+
+.course-management .tutor-list-item-large {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  gap: 1rem;
+}
+
+.course-management .tutor-list-item-large:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+/* 선택된 항목 스타일 */
+.course-management .tutor-list-item-large.selected {
+  border-color: #667eea;
+  background: #f0f4ff;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.course-management .tutor-list-item-large.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #667eea;
+  border-radius: 8px 0 0 8px;
+}
+
+/* 비선택된 항목 스타일 */
+.course-management .tutor-list-item-large:not(.selected) {
+  opacity: 0.7;
+  background: #f9fafb;
+}
+
+.course-management .tutor-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.course-management .tutor-item-title-large {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-item-meta {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 수정 버튼 */
+.course-management .tutor-btn-edit {
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-btn-edit:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+/* 조회 버튼 */
+.course-management .tutor-btn-view {
+  padding: 0.5rem 1rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.course-management .tutor-btn-view:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.course-management .tutor-btn-edit-small {
+  padding: 0.375rem 0.75rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-btn-edit-small:hover {
+  background: #5568d3;
+}
+
+/* 수정 폼 */
+.course-management .tutor-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.course-management .tutor-edit-form-inline {
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.course-management .tutor-edit-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.course-management .tutor-edit-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-edit-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.course-management .tutor-edit-textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  resize: vertical;
+}
+
+.course-management .tutor-edit-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.course-management .tutor-btn-save-edit {
+  padding: 0.5rem 1rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  align-self: flex-start;
+}
+
+.course-management .tutor-btn-save-edit:hover {
+  background: #059669;
+}
+
+/* 과제 리스트 */
+.course-management .tutor-assignment-list-large {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.course-management .tutor-assignment-item-large {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  background: white;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* 선택된 과제 스타일 */
+.course-management .tutor-assignment-item-large.selected {
+  border-color: #667eea;
+  background: #f0f4ff;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.course-management .tutor-assignment-item-large.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #667eea;
+  border-radius: 8px 0 0 8px;
+}
+
+/* 비선택된 과제 스타일 */
+.course-management .tutor-assignment-item-large:not(.selected) {
+  opacity: 0.7;
+  background: #f9fafb;
+}
+
+.course-management .tutor-assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.course-management .tutor-assignment-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.course-management .tutor-assignment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.course-management .tutor-assignment-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-assignment-meta {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-btn-expand {
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+}
+
+.course-management .tutor-btn-expand:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+/* 문제 리스트 */
+.course-management .tutor-problems-list {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.course-management .tutor-problems-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.course-management .tutor-problem-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+  gap: 0.75rem;
+}
+
+/* 선택된 문제 스타일 */
+.course-management .tutor-problem-item.selected {
+  border-color: #667eea;
+  background: #f0f4ff;
+  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.1);
+}
+
+.course-management .tutor-problem-item.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #667eea;
+  border-radius: 6px 0 0 6px;
+}
+
+/* 비선택된 문제 스타일 */
+.course-management .tutor-problem-item:not(.selected) {
+  opacity: 0.6;
+}
+
+.course-management .tutor-problem-info {
+  flex: 1;
+}
+
+.course-management .tutor-problem-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 로딩 및 빈 상태 */
+.course-management .tutor-loading-items,
+.course-management .tutor-no-items {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 요약 박스 */
+.course-management .tutor-summary-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #f9fafb;
+}
+
+.course-management .tutor-summary-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-summary-item:last-child {
+  border-bottom: none;
+}
+
+.course-management .tutor-summary-item strong {
+  color: #1e293b;
+  margin-right: 0.5rem;
+}
+
+/* 공지사항 조회 모달 스타일 */
+.course-management .tutor-notice-view {
+  padding: 1rem 0;
+}
+
+.course-management .tutor-notice-view-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-notice-view-meta {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-notice-view-content {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #374151;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  min-height: 200px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-notice-view-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 모달이 열려있을 때 input focus 스타일 무시 */
+body.section-modal-open .course-management .tutor-edit-input:focus,
+body.section-modal-open .course-management .tutor-edit-textarea:focus {
+  outline: none !important;
+  border-color: #e1e8ed !important;
+  box-shadow: none !important;
+  background: white !important;
 }

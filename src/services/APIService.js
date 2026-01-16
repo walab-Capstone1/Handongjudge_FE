@@ -417,7 +417,7 @@ class APIService {
   }
 
   // 수업 복사
-  async copySection(sectionId, sectionNumber, year, semester, courseTitle, description, copyNotices, copyAssignments, selectedNoticeIds, selectedAssignmentIds, assignmentProblems) {
+  async copySection(sectionId, sectionNumber, year, semester, courseTitle, description, copyNotices, copyAssignments, selectedNoticeIds, selectedAssignmentIds, assignmentProblems, noticeEdits, assignmentEdits, problemEdits) {
     return await this.request(`/sections/${sectionId}/copy`, {
       method: 'POST',
       headers: {
@@ -433,7 +433,10 @@ class APIService {
         copyAssignments: copyAssignments !== false, // 기본값 true
         selectedNoticeIds: selectedNoticeIds || [],
         selectedAssignmentIds: selectedAssignmentIds || [],
-        assignmentProblems: assignmentProblems || {}
+        assignmentProblems: assignmentProblems || {},
+        noticeEdits: noticeEdits || {},
+        assignmentEdits: assignmentEdits || {},
+        problemEdits: problemEdits || {}
       }),
     });
   }
