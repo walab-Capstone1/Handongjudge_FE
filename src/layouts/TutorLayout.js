@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import TutorHeader from "../components/TutorHeader";
-import Breadcrumb from "../components/Breadcrumb";
 import APIService from "../services/APIService";
 import { 
   FaHome, 
@@ -18,7 +17,11 @@ import {
   FaEdit,
   FaFolder,
   FaList,
-  FaChartLine
+  FaChartLine,
+  FaPlus,
+  FaComments,
+  FaBell,
+  FaChartBar
 } from "react-icons/fa";
 
 import "./TutorLayout.css";
@@ -189,7 +192,13 @@ const TutorLayout = ({ children, selectedSection = null }) => {
       path: "/tutor", 
       label: "대시보드", 
       icon: FaHome,
-      subItems: [] 
+      subItems: []
+    },
+    { 
+      path: "/tutor/courses", 
+      label: "새 수업 추가", 
+      icon: FaPlus,
+      subItems: []
     },
     { 
       path: "/tutor/problems", 
@@ -253,9 +262,27 @@ const TutorLayout = ({ children, selectedSection = null }) => {
       subItems: [] 
     },
     { 
+      path: `/sections/${currentSection.sectionId}/community`, 
+      label: "커뮤니티 관리", 
+      icon: FaComments,
+      subItems: [] 
+    },
+    { 
       path: `/tutor/users/section/${currentSection.sectionId}`, 
       label: "수강생 관리", 
       icon: FaUsers,
+      subItems: [] 
+    },
+    { 
+      path: `/tutor/notifications/section/${currentSection.sectionId}`, 
+      label: "수업 알림", 
+      icon: FaBell,
+      subItems: [] 
+    },
+    { 
+      path: `/tutor/stats/section/${currentSection.sectionId}`, 
+      label: "수업 통계", 
+      icon: FaChartBar,
       subItems: [] 
     },
   ] : [], [currentSection]);
@@ -266,29 +293,30 @@ const TutorLayout = ({ children, selectedSection = null }) => {
         <TutorHeader />
         <aside className={`tutor-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <nav className="sidebar-nav">
-            <div className="tutor-sidebar-header">
-              <h2 className="sidebar-title">{sidebarCollapsed ? '' : '관리 페이지'}</h2>
-              <button 
-                className="sidebar-toggle-btn"
-                onClick={() => {
-                  const newState = !sidebarCollapsed;
-                  setSidebarCollapsed(newState);
-                  localStorage.setItem('tutor_sidebarCollapsed', newState.toString());
-                  // 사이드바를 펼칠 때도 드롭다운 상태 유지 (접힌 상태에서 펼쳐진 드롭다운 유지)
-                  // if (!newState) {
-                  //   setExpandedMenus({});
-                  // }
-                }}
-                title={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
-                aria-label={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
-              >
-                {sidebarCollapsed ? <FaBars /> : <FaTimes />}
-              </button>
-            </div>
-              {/* 구분선 */}
-              <div className="sidebar-divider"></div>
-              {/* 1순위: 주요 기능 섹션 (대시보드 + 문제관리) */}
-              <div className="sidebar-section">
+            <div className="sidebar-scrollable">
+              <div className="tutor-sidebar-header">
+                <h2 className="sidebar-title">{sidebarCollapsed ? '' : '관리 페이지'}</h2>
+                <button 
+                  className="sidebar-toggle-btn"
+                  onClick={() => {
+                    const newState = !sidebarCollapsed;
+                    setSidebarCollapsed(newState);
+                    localStorage.setItem('tutor_sidebarCollapsed', newState.toString());
+                    // 사이드바를 펼칠 때도 드롭다운 상태 유지 (접힌 상태에서 펼쳐진 드롭다운 유지)
+                    // if (!newState) {
+                    //   setExpandedMenus({});
+                    // }
+                  }}
+                  title={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+                  aria-label={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+                >
+                  {sidebarCollapsed ? <FaBars /> : <FaTimes />}
+                </button>
+              </div>
+                {/* 구분선 */}
+                <div className="sidebar-divider"></div>
+                {/* 1순위: 주요 기능 섹션 (대시보드 + 문제관리) */}
+                <div className="sidebar-section">
                 <div className="sidebar-section-title">주요 기능</div>
                 {mainMenuItems.map((item) => {
                   const Icon = item.icon;
@@ -533,12 +561,10 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* 구분선 */}
-              <div className="sidebar-divider"></div>
-
-              {/* 4순위: 시스템 설정 (최하단 고정) */}
-              <div className="sidebar-section sidebar-settings-menu">
+            {/* 4순위: 시스템 설정 (최하단 고정) */}
+            <div className="sidebar-section sidebar-settings-menu">
                 <div className="sidebar-section-title">설정</div>
                 {settingsMenuItems.map((item) => {
                   const Icon = item.icon;
@@ -564,7 +590,6 @@ const TutorLayout = ({ children, selectedSection = null }) => {
         </aside>
       </div>
       <main className="tutor-main">
-        <Breadcrumb items={generateBreadcrumbs(location, sections, currentSection)} />
         <div className="tutor-content">{children}</div>
       </main>
       
@@ -655,59 +680,6 @@ const TutorLayout = ({ children, selectedSection = null }) => {
       )}
     </div>
   );
-};
-
-// Breadcrumb 생성 함수
-const generateBreadcrumbs = (location, sections, currentSection) => {
-  const pathnames = location.pathname.split('/').filter(x => x);
-  let breadcrumbItems = [{ label: 'Home', path: '/' }];
-
-  let currentPath = '';
-  pathnames.forEach((name, index) => {
-    currentPath += `/${name}`;
-    let label = name;
-    let path = currentPath;
-
-    // 경로별 라벨 설정
-    if (name === 'tutor') {
-      label = '관리 페이지';
-      path = '/tutor';
-    } else if (name === 'problems') {
-      label = '문제 관리';
-    } else if (name === 'sets') {
-      label = '문제집 관리';
-    } else if (name === 'settings') {
-      label = '시스템 설정';
-    } else if (name === 'assignments' && pathnames[index - 1] === 'tutor') {
-      label = '과제 관리';
-    } else if (name === 'notices' && pathnames[index - 1] === 'tutor') {
-      label = '공지사항 관리';
-    } else if (name === 'users' && pathnames[index - 1] === 'tutor') {
-      label = '수강생 관리';
-    } else if (name === 'section' && pathnames[index + 1]) {
-      const id = pathnames[index + 1];
-      const section = sections.find(s => s.sectionId === parseInt(id));
-      if (section) {
-        label = `${section.courseTitle} ${section.sectionNumber}분반`;
-        path = `/tutor/assignments/section/${id}`;
-      } else {
-        label = `Section ${id}`;
-      }
-    } else if (name === 'progress' && pathnames[index - 1] === 'assignments') {
-      label = '풀이 현황';
-    } else if (name === 'create') {
-      label = '생성';
-    } else if (name === 'edit' && pathnames[index - 1]) {
-      label = '수정';
-    }
-    
-    // 'section' 세그먼트 자체는 건너뛰기 (ID가 뒤에 오는 경우)
-    if (name !== 'section' || !pathnames[index + 1] || isNaN(pathnames[index + 1])) {
-      breadcrumbItems.push({ label, path });
-    }
-  });
-
-  return breadcrumbItems;
 };
 
 export default TutorLayout;

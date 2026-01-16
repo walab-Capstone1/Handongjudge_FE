@@ -367,13 +367,28 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.tutor-sidebar .sidebar-scrollable {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   gap: 0.125rem;
   padding: 0 1.5rem 1.5rem 1.5rem;
   overflow-y: auto;
   overflow-x: hidden;
+  min-height: 0;
 }
 
 .tutor-sidebar.collapsed .sidebar-nav {
+  padding: 0;
+}
+
+.tutor-sidebar.collapsed .sidebar-scrollable {
   padding: 0 0.5rem 1.5rem 0.5rem;
 }
 
@@ -381,7 +396,7 @@
 /* 수업 선택 카드 */
 .tutor-sidebar .sidebar-section-card {
   padding: 0;
-  margin-bottom: 0.375rem;
+  margin-bottom: 0.25rem;
   flex-shrink: 0;
 }
 
@@ -489,6 +504,7 @@
   transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   opacity: 1;
+  flex-shrink: 0;
 }
 
 .tutor-sidebar .sidebar-section-menu-wrapper:not(.visible) {
@@ -502,13 +518,19 @@
 }
 
 .tutor-sidebar .sidebar-section-menu {
-  flex: 1;
+  flex-shrink: 0;
 }
 
 /* 시스템 설정 메뉴 (최하단 고정) */
 .tutor-sidebar .sidebar-settings-menu {
-  margin-top: auto;
-  padding-top: 0.75rem;
+  padding: 1rem 1.5rem 0.5rem 1.5rem;
+  flex-shrink: 0;
+  border-top: 1px solid #e5e7eb;
+  background: white;
+}
+
+.tutor-sidebar.collapsed .sidebar-settings-menu {
+  padding: 1rem 0.5rem 0.5rem 0.5rem;
 }
 
 .tutor-sidebar .sidebar-section-item.disabled {
@@ -534,7 +556,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.625rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   color: #6b7280;
   text-decoration: none;
   border-radius: 6px;
@@ -543,8 +565,9 @@
   font-size: 0.9rem;
   position: relative;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  min-height: 2.5rem;
+  min-height: 2.25rem;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .tutor-sidebar .sidebar-item:hover {
@@ -590,12 +613,13 @@
 
 /* 섹션 제목 */
 .tutor-sidebar .sidebar-section {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
 .tutor-sidebar.collapsed .sidebar-section {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   padding: 0;
   margin-left: 0;
   margin-right: 0;
@@ -607,16 +631,18 @@
   color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0.375rem 0.75rem;
+  padding: 0.25rem 0.75rem;
   margin-bottom: 0.125rem;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   padding-left: 0.75rem;
   padding-right: 0.75rem;
+  flex-shrink: 0;
 }
 
 .tutor-sidebar .sidebar-menu-group {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 
 .tutor-sidebar.collapsed .sidebar-menu-group {
@@ -630,12 +656,12 @@
 .tutor-sidebar .sidebar-divider {
   height: 1px;
   background: #e5e7eb;
-  margin: 0.5rem 0;
+  margin: 0.375rem 0;
   flex-shrink: 0;
 }
 
 .tutor-sidebar.collapsed .sidebar-divider {
-  margin: 0.375rem 0;
+  margin: 0.25rem 0;
 }
 
 .tutor-sidebar .sidebar-arrow {
@@ -653,13 +679,14 @@
 }
 
 .tutor-sidebar .sidebar-sub-item {
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.75rem;
   font-size: 0.85rem;
   padding-left: 0.75rem;
-  margin-top: 0.1rem;
+  margin-top: 0.05rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .tutor-sidebar .sidebar-sub-item .sidebar-sub-icon {
@@ -677,7 +704,7 @@
   background: #e0e7ff;
   color: #667eea;
   font-weight: 600;
-  margin-top: 0.25rem;
+  margin-top: 0.1rem;
 }
 
 .tutor-sidebar .sidebar-sub-item.active .sidebar-sub-icon {
@@ -689,8 +716,10 @@
   grid-template-rows: 0fr;
   margin-left: 0.75rem;
   padding-left: 0.375rem;
+  margin-top: 0.05rem;
   transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .tutor-sidebar .sidebar-submenu.expanded {
@@ -744,8 +773,7 @@
   left: 280px;
   right: 0;
   bottom: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   background: #fafbfc;
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   width: calc(100% - 280px);
@@ -759,7 +787,9 @@
 .tutor-content {
   background: transparent;
   padding: 2rem;
-  min-height: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
 }
 

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import TutorLayout from "../../layouts/TutorLayout";
 import { useAuth } from "../../hooks/useAuth";
 import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
 import ReactMarkdown from "react-markdown";
+import { FaExclamationTriangle, FaCheckCircle, FaClock, FaUsers, FaChartLine, FaArrowUp, FaArrowDown, FaMinus, FaBell, FaComments } from "react-icons/fa";
 import "./TutorDashboard.css";
 
 const TutorDashboard = () => {
@@ -45,6 +46,125 @@ const TutorDashboard = () => {
   const [selectedProblemDetail, setSelectedProblemDetail] = useState(null);
   const [stats, setStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(false);
+  // 새로운 상태: 각 수업별 상세 통계
+  const [sectionStats, setSectionStats] = useState({}); // { sectionId: { submissionRate, atRiskStudents, issues, ... } }
+  const [loadingSectionStats, setLoadingSectionStats] = useState(false);
+  // 수업 알림 상태
+  const [notifications, setNotifications] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+
+  // 각 수업별 상세 통계 계산
+  const calculateSectionStats = async (sectionId) => {
+    try {
+      // 1. 과제 목록 조회
+      const assignmentsResponse = await APIService.getAssignmentsBySection(sectionId);
+      const assignments = assignmentsResponse?.data || assignmentsResponse || [];
+      
+      if (assignments.length === 0) {
+        return {
+          averageSubmissionRate: 0,
+          atRiskStudents: 0,
+          issues: 0,
+          upcomingDeadlines: [],
+          pendingGrading: 0,
+          totalAssignments: 0,
+          activeAssignments: 0
+        };
+      }
+
+      // 2. 각 과제별 제출 통계 조회
+      let totalSubmissionRate = 0;
+      let validAssignments = 0;
+      const upcomingDeadlines = [];
+      let pendingGrading = 0;
+      const now = new Date();
+      const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+      for (const assignment of assignments) {
+        if (!assignment.active) continue;
+        
+        try {
+          const statsResponse = await APIService.getAssignmentSubmissionStats(assignment.id, sectionId);
+          if (statsResponse) {
+            const submissionRate = statsResponse.submissionRate || 0;
+            totalSubmissionRate += submissionRate;
+            validAssignments++;
+
+            // 임박한 마감일 체크 (2-3일 내)
+            if (assignment.endDate) {
+              const endDate = new Date(assignment.endDate);
+              if (endDate > now && endDate <= threeDaysLater) {
+                upcomingDeadlines.push({
+                  assignmentId: assignment.id,
+                  title: assignment.title,
+                  endDate: assignment.endDate,
+                  submissionRate: submissionRate
+                });
+              }
+            }
+
+            // 제출률이 낮은 과제는 채점 대기로 간주 (50% 미만)
+            if (submissionRate < 50 && assignment.endDate) {
+              const endDate = new Date(assignment.endDate);
+              if (endDate < now) {
+                pendingGrading++;
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`과제 ${assignment.id} 통계 조회 실패:`, error);
+        }
+      }
+
+      const averageSubmissionRate = validAssignments > 0 ? totalSubmissionRate / validAssignments : 0;
+
+      // 3. 위험 학생 수 계산 (제출률이 50% 미만인 학생)
+      // 실제로는 학생별 제출 현황을 조회해야 하지만, 여기서는 과제별 통계로 추정
+      const atRiskStudents = Math.ceil((100 - averageSubmissionRate) / 100 * (sections.find(s => s.sectionId === sectionId)?.studentCount || 0));
+
+      // 4. 해결 필요 이슈 개수
+      const issues = upcomingDeadlines.length + pendingGrading;
+
+      return {
+        averageSubmissionRate: Math.round(averageSubmissionRate * 10) / 10,
+        atRiskStudents,
+        issues,
+        upcomingDeadlines,
+        pendingGrading,
+        totalAssignments: assignments.length,
+        activeAssignments: assignments.filter(a => a.active).length
+      };
+    } catch (error) {
+      console.error(`수업 ${sectionId} 통계 계산 실패:`, error);
+      return {
+        averageSubmissionRate: 0,
+        atRiskStudents: 0,
+        issues: 0,
+        upcomingDeadlines: [],
+        pendingGrading: 0,
+        totalAssignments: 0,
+        activeAssignments: 0
+      };
+    }
+  };
+
+  // 건강도 판정 함수
+  const getHealthStatus = (sectionStat) => {
+    if (!sectionStat) return { status: 'unknown', label: '알 수 없음', color: '#9ca3af' };
+    
+    const { averageSubmissionRate, atRiskStudents } = sectionStat;
+    
+    // 건강함: 제출률 80% 이상, 위험 학생 3명 이하
+    if (averageSubmissionRate >= 80 && atRiskStudents <= 3) {
+      return { status: 'healthy', label: '건강함', color: '#10b981' };
+    }
+    // 위험: 제출률 60% 미만, 위험 학생 10명 초과
+    if (averageSubmissionRate < 60 || atRiskStudents > 10) {
+      return { status: 'danger', label: '위험', color: '#ef4444' };
+    }
+    // 주의: 그 외
+    return { status: 'warning', label: '주의', color: '#f59e0b' };
+  };
 
   useEffect(() => {
     const fetchSections = async () => {
@@ -54,9 +174,21 @@ const TutorDashboard = () => {
         const dashboardData = dashboardResponse?.data || [];
         setSections(dashboardData);
         setLoading(false);
+
+        // 각 수업별 통계 계산
+        setLoadingSectionStats(true);
+        const statsMap = {};
+        for (const section of dashboardData) {
+          if (section.active !== false) {
+            statsMap[section.sectionId] = await calculateSectionStats(section.sectionId);
+          }
+        }
+        setSectionStats(statsMap);
+        setLoadingSectionStats(false);
       } catch (error) {
         setSections([]);
         setLoading(false);
+        setLoadingSectionStats(false);
       }
     };
 
@@ -73,9 +205,123 @@ const TutorDashboard = () => {
       }
     };
 
+    const fetchNotifications = async () => {
+      try {
+        setLoadingNotifications(true);
+        // 모든 수업의 알림 조회 (sectionId 없이)
+        const notificationsResponse = await APIService.getCommunityNotifications(null, 0, 20);
+        const notificationsList = notificationsResponse.data?.content || [];
+        
+        // 알림 데이터 변환
+        const processedNotifications = notificationsList.map(notif => {
+          let title = '';
+          let link = '';
+          let sectionTitle = '';
+          
+          switch (notif.type) {
+            case 'NOTICE_CREATED':
+              title = notif.noticeTitle || '공지사항';
+              link = notif.sectionId && notif.noticeId ? `/sections/${notif.sectionId}/course-notices/${notif.noticeId}` : null;
+              break;
+            case 'QUESTION_COMMENT':
+              title = notif.message || '커뮤니티에 새 댓글이 달렸습니다';
+              link = notif.sectionId && notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
+              break;
+            case 'COMMENT_ACCEPTED':
+              title = notif.message || '댓글이 채택되었습니다';
+              link = notif.sectionId && notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
+              break;
+            default:
+              title = notif.message || '알림';
+              link = notif.sectionId ? `/sections/${notif.sectionId}/community` : null;
+          }
+          
+          // 섹션 정보 찾기
+          const section = sections.find(s => s.sectionId === notif.sectionId);
+          if (section) {
+            sectionTitle = section.courseTitle;
+          }
+          
+          return {
+            ...notif,
+            displayTitle: title,
+            displayLink: link,
+            sectionTitle: sectionTitle || '알 수 없는 수업',
+            createdAt: notif.createdAt
+          };
+        });
+        
+        setNotifications(processedNotifications);
+      } catch (error) {
+        console.error('알림 조회 실패:', error);
+        setNotifications([]);
+      } finally {
+        setLoadingNotifications(false);
+      }
+    };
+
     fetchSections();
     fetchStats();
   }, []);
+
+  // 수업 목록이 업데이트되면 알림 다시 조회
+  useEffect(() => {
+    if (sections.length > 0) {
+      const fetchNotifications = async () => {
+        try {
+          setLoadingNotifications(true);
+          const notificationsResponse = await APIService.getCommunityNotifications(null, 0, 20);
+          const notificationsList = notificationsResponse.data?.content || [];
+          
+          const processedNotifications = notificationsList.map(notif => {
+            let title = '';
+            let link = '';
+            let sectionTitle = '';
+            
+            switch (notif.type) {
+              case 'NOTICE_CREATED':
+                title = notif.noticeTitle || '공지사항';
+                link = notif.sectionId && notif.noticeId ? `/sections/${notif.sectionId}/course-notices/${notif.noticeId}` : null;
+                break;
+              case 'QUESTION_COMMENT':
+                title = notif.message || '커뮤니티에 새 댓글이 달렸습니다';
+                link = notif.sectionId && notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
+                break;
+              case 'COMMENT_ACCEPTED':
+                title = notif.message || '댓글이 채택되었습니다';
+                link = notif.sectionId && notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
+                break;
+              default:
+                title = notif.message || '알림';
+                link = notif.sectionId ? `/sections/${notif.sectionId}/community` : null;
+            }
+            
+            const section = sections.find(s => s.sectionId === notif.sectionId);
+            if (section) {
+              sectionTitle = section.courseTitle;
+            }
+            
+            return {
+              ...notif,
+              displayTitle: title,
+              displayLink: link,
+              sectionTitle: sectionTitle || '알 수 없는 수업',
+              createdAt: notif.createdAt
+            };
+          });
+          
+          setNotifications(processedNotifications);
+        } catch (error) {
+          console.error('알림 조회 실패:', error);
+          setNotifications([]);
+        } finally {
+          setLoadingNotifications(false);
+        }
+      };
+      
+      fetchNotifications();
+    }
+  }, [sections]);
 
   const handleSectionClick = (section) => {
     // 관리자 페이지에서는 비활성화된 수업도 접근 가능
@@ -435,6 +681,109 @@ const TutorDashboard = () => {
     return matchesYear && matchesSemester;
   });
 
+  // 워크로드 관리 데이터 계산
+  const workloadData = useMemo(() => {
+    const upcomingDeadlines = [];
+    let totalPendingGrading = 0;
+    let totalStudentsNeedingConsultation = 0;
+
+    filteredSections.forEach(section => {
+      const stat = sectionStats[section.sectionId];
+      if (stat) {
+        upcomingDeadlines.push(...stat.upcomingDeadlines.map(d => ({
+          ...d,
+          sectionId: section.sectionId,
+          sectionName: `${section.courseTitle} ${section.sectionNumber || ''}분반`
+        })));
+        totalPendingGrading += stat.pendingGrading;
+        // 위험 학생이 5명 이상이면 상담 필요로 간주
+        if (stat.atRiskStudents >= 5) {
+          totalStudentsNeedingConsultation += stat.atRiskStudents;
+        }
+      }
+    });
+
+    // 마감일 순으로 정렬
+    upcomingDeadlines.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+
+    return {
+      upcomingDeadlines: upcomingDeadlines.slice(0, 5), // 최대 5개만 표시
+      pendingGrading: totalPendingGrading,
+      studentsNeedingConsultation: totalStudentsNeedingConsultation
+    };
+  }, [filteredSections, sectionStats]);
+
+  // 수업별 예상 소요 시간 계산
+  const calculateTimeAllocation = useMemo(() => {
+    const allocations = [];
+    let totalIssues = 0;
+
+    filteredSections.forEach(section => {
+      const stat = sectionStats[section.sectionId];
+      if (stat) {
+        totalIssues += stat.issues;
+        allocations.push({
+          sectionId: section.sectionId,
+          sectionName: `${section.courseTitle} ${section.sectionNumber || ''}분반`,
+          issues: stat.issues,
+          healthStatus: getHealthStatus(stat)
+        });
+      }
+    });
+
+    // 이슈 수에 비례하여 시간 할당
+    if (totalIssues === 0) {
+      return allocations.map(a => ({ ...a, timePercentage: Math.round(100 / allocations.length) }));
+    }
+
+    return allocations.map(a => ({
+      ...a,
+      timePercentage: Math.round((a.issues / totalIssues) * 100)
+    })).sort((a, b) => b.timePercentage - a.timePercentage);
+  }, [filteredSections, sectionStats]);
+
+  // 수업 간 비교 분석 (같은 과목의 분반 간 비교)
+  const comparisonData = useMemo(() => {
+    const courseGroups = {};
+    
+    filteredSections.forEach(section => {
+      const courseTitle = section.courseTitle;
+      if (!courseGroups[courseTitle]) {
+        courseGroups[courseTitle] = [];
+      }
+      const stat = sectionStats[section.sectionId];
+      courseGroups[courseTitle].push({
+        sectionId: section.sectionId,
+        sectionNumber: section.sectionNumber,
+        year: section.year,
+        semester: section.semester,
+        studentCount: section.studentCount || 0,
+        submissionRate: stat?.averageSubmissionRate || 0,
+        atRiskStudents: stat?.atRiskStudents || 0,
+        healthStatus: getHealthStatus(stat)
+      });
+    });
+
+    // 2개 이상의 분반이 있는 과목만 비교
+    const comparisons = [];
+    Object.keys(courseGroups).forEach(courseTitle => {
+      const sections = courseGroups[courseTitle];
+      if (sections.length >= 2) {
+        const avgSubmissionRate = sections.reduce((sum, s) => sum + s.submissionRate, 0) / sections.length;
+        const avgAtRisk = sections.reduce((sum, s) => sum + s.atRiskStudents, 0) / sections.length;
+        
+        comparisons.push({
+          courseTitle,
+          sections,
+          averageSubmissionRate: Math.round(avgSubmissionRate * 10) / 10,
+          averageAtRisk: Math.round(avgAtRisk * 10) / 10
+        });
+      }
+    });
+
+    return comparisons;
+  }, [filteredSections, sectionStats]);
+
   if (loading) {
     return (
       <TutorLayout>
@@ -450,44 +799,11 @@ const TutorDashboard = () => {
     <TutorLayout>
       <div className="tutor-dashboard">
         <div className="dashboard-header">
-          <h1 className="dashboard-title">담당 분반 목록</h1>
+          <h1 className="dashboard-title">전체 수업 운영 현황</h1>
           <p className="dashboard-subtitle">
-            분반을 클릭하면 해당 수업의 관리 페이지로 이동합니다.
+            모든 수업의 전반적인 상황을 한눈에 파악하고, 우선순위를 결정하세요.
           </p>
         </div>
-
-        {/* 통계 섹션 */}
-        {stats && (
-          <div className="dashboard-stats-section">
-            <h2 className="stats-section-title">전체 통계</h2>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-label">전체 수업</div>
-                <div className="stat-value">{stats.totalSections || 0}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">전체 과제</div>
-                <div className="stat-value">{stats.totalAssignments || 0}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">전체 문제</div>
-                <div className="stat-value">{stats.totalProblems || 0}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">전체 수강생</div>
-                <div className="stat-value">{stats.totalStudents || 0}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">최근 제출 (7일)</div>
-                <div className="stat-value">{stats.recentSubmissions || 0}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">최근 과제 (7일)</div>
-                <div className="stat-value">{stats.recentAssignments || 0}</div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 필터 섹션 */}
         <div className="tutor-filter-section">
@@ -524,95 +840,322 @@ const TutorDashboard = () => {
               <span className="tutor-filter-count">총 {filteredSections.length}개 수업</span>
             </div>
           </div>
-          <div className="tutor-filter-right">
-            <button 
-              className="tutor-btn-copy-section"
-              onClick={() => setShowCopyModal(true)}
-            >
-              수업 가져오기
-            </button>
-            <button 
-              className="tutor-btn-create-section"
-              onClick={() => setShowCreateModal(true)}
-            >
-              새 수업 만들기
-            </button>
+        </div>
+
+        {/* 랜드스케이프 배치: 수업 카드 + 알림 */}
+        <div className="dashboard-landscape-layout">
+          {/* 왼쪽: 전체 수업 카드 */}
+          <div className="dashboard-sections-panel">
+            <h2 className="section-title">
+              <FaChartLine className="section-title-icon" />
+              전체 수업 운영 현황
+            </h2>
+          {loadingSectionStats ? (
+            <div className="dashboard-loading">
+              <div className="tutor-loading-spinner"></div>
+              <p>수업 통계를 계산하는 중...</p>
+            </div>
+          ) : (
+            <div className="health-cards-grid">
+              {filteredSections.map((section) => {
+                const stat = sectionStats[section.sectionId] || {};
+                const healthStatus = getHealthStatus(stat);
+                const isActive = section.active !== false;
+                
+                return (
+                  <div
+                    key={section.sectionId}
+                    className={`health-card health-card-${healthStatus.status} ${!isActive ? 'inactive' : ''}`}
+                    onClick={() => isActive && handleSectionClick(section)}
+                  >
+                    <div className="health-card-header">
+                      <div className="health-status-indicator" style={{ backgroundColor: healthStatus.color }}>
+                        <div className="health-status-dot"></div>
+                      </div>
+                      <div className="health-card-title-area">
+                        <h3 className="health-card-title">{section.courseTitle}</h3>
+                        <span className="health-card-badge">
+                          {section.year || '2024'}년 {getSemesterLabel(section.semester)}
+                          {section.sectionNumber && ` ${section.sectionNumber}분반`}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="health-card-body">
+                      <div className="health-metrics">
+                        <div className="health-metric">
+                          <span className="health-metric-label">평균 제출률</span>
+                          <div className="health-metric-value-row">
+                            <span className="health-metric-value">{stat.averageSubmissionRate || 0}%</span>
+                            <div className="health-progress-bar">
+                              <div 
+                                className="health-progress-fill" 
+                                style={{ 
+                                  width: `${stat.averageSubmissionRate || 0}%`,
+                                  backgroundColor: healthStatus.color
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="health-metric">
+                          <span className="health-metric-label">위험 학생 수</span>
+                          <span className="health-metric-value">{stat.atRiskStudents || 0}명</span>
+                        </div>
+                        <div className="health-metric">
+                          <span className="health-metric-label">해결 필요 이슈</span>
+                          <span className="health-metric-value">{stat.issues || 0}개</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="health-card-footer">
+                      <span className="health-status-badge" style={{ color: healthStatus.color, borderColor: healthStatus.color }}>
+                        {healthStatus.label}
+                      </span>
+                      {isActive && (
+                        <span className="health-card-hint">클릭하여 상세 보기</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {filteredSections.length === 0 && (
+                <div className="dashboard-empty-state">
+                  <p>조건에 맞는 수업이 없습니다.</p>
+                </div>
+              )}
+            </div>
+          )}
+          </div>
+
+          {/* 오른쪽: 수업 알림 */}
+          <div className="dashboard-notifications-panel">
+            <h2 className="section-title">
+              <FaBell className="section-title-icon" />
+              교수 수업 알림
+            </h2>
+            {loadingNotifications ? (
+              <div className="dashboard-loading">
+                <div className="tutor-loading-spinner"></div>
+                <p>알림을 불러오는 중...</p>
+              </div>
+            ) : notifications.length > 0 ? (
+              <div className="notifications-list">
+                {notifications.map((notif, index) => (
+                  <div
+                    key={notif.id || index}
+                    className={`notification-item ${!notif.read ? 'unread' : ''}`}
+                    onClick={() => {
+                      if (notif.displayLink) {
+                        navigate(notif.displayLink);
+                      } else if (notif.sectionId) {
+                        navigate(`/sections/${notif.sectionId}/community`);
+                      }
+                    }}
+                  >
+                    <div className="notification-icon">
+                      {notif.type === 'QUESTION_COMMENT' || notif.type === 'COMMENT_ACCEPTED' ? (
+                        <FaComments />
+                      ) : (
+                        <FaBell />
+                      )}
+                    </div>
+                    <div className="notification-content">
+                      <div className="notification-title">{notif.displayTitle}</div>
+                      <div className="notification-meta">
+                        <span className="notification-section">{notif.sectionTitle}</span>
+                        <span className="notification-time">
+                          {new Date(notif.createdAt).toLocaleString('ko-KR', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="dashboard-empty-state">
+                <p>알림이 없습니다.</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="tutor-sections-grid">
-          {filteredSections.map((section) => (
-            <div 
-              key={section.sectionId} 
-              className={`section-card tutor-clickable ${section.active === false ? 'tutor-disabled' : ''}`}
-              onClick={() => handleSectionClick(section)}
-            >
-              <div className="section-header">
-                <div className="section-title-area">
-                  <div className="tutor-title-and-badge">
-                    <h3 className="section-title">{section.courseTitle}</h3>
+        {/* 워크로드 관리 섹션 (제거 예정 - 주석 처리) */}
+        {false && (
+        <div className="dashboard-workload-section">
+          <h2 className="section-title">
+            <FaClock className="section-title-icon" />
+            워크로드 관리
+          </h2>
+          <div className="workload-grid">
+            {/* 임박한 마감 일정 */}
+            <div className="workload-card">
+              <h3 className="workload-card-title">임박한 마감 일정</h3>
+              {workloadData.upcomingDeadlines.length > 0 ? (
+                <div className="workload-list">
+                  {workloadData.upcomingDeadlines.map((deadline, index) => {
+                    const endDate = new Date(deadline.endDate);
+                    const now = new Date();
+                    const hoursLeft = Math.floor((endDate - now) / (1000 * 60 * 60));
+                    const isUrgent = hoursLeft <= 24;
+                    
+                    return (
+                      <div key={index} className={`workload-item ${isUrgent ? 'urgent' : ''}`}>
+                        <div className="workload-item-header">
+                          <span className="workload-item-title">{deadline.title}</span>
+                          <span className="workload-item-time">
+                            {hoursLeft <= 0 ? '마감됨' : `${hoursLeft}시간 남음`}
+                          </span>
+                        </div>
+                        <div className="workload-item-meta">
+                          <span className="workload-item-section">{deadline.sectionName}</span>
+                          <span className="workload-item-rate">제출률: {deadline.submissionRate.toFixed(1)}%</span>
+                        </div>
+                        {deadline.submissionRate < 50 && (
+                          <button 
+                            className="workload-action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // 리마인더 발송 기능 (추후 구현)
+                              alert('리마인더 발송 기능은 추후 구현 예정입니다.');
+                            }}
+                          >
+                            리마인더 발송
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="workload-empty">임박한 마감 일정이 없습니다.</div>
+              )}
+            </div>
+
+            {/* 처리 대기 업무 */}
+            <div className="workload-card">
+              <h3 className="workload-card-title">처리 대기 업무</h3>
+              <div className="workload-tasks">
+                <div className="workload-task">
+                  <FaExclamationTriangle className="workload-task-icon" />
+                  <div className="workload-task-content">
+                    <span className="workload-task-label">채점 대기 중인 과제</span>
+                    <span className="workload-task-value">{workloadData.pendingGrading}건</span>
+                    <span className="workload-task-time">예상 소요: {workloadData.pendingGrading * 30}분</span>
                   </div>
-                  <span className="tutor-year-badge">
-                    {section.year || '2024'}년 {getSemesterLabel(section.semester)}
-                  </span>
+                </div>
+                <div className="workload-task">
+                  <FaUsers className="workload-task-icon" />
+                  <div className="workload-task-content">
+                    <span className="workload-task-label">개별 상담 필요 학생</span>
+                    <span className="workload-task-value">{workloadData.studentsNeedingConsultation}명</span>
+                    <span className="workload-task-time">예상 소요: {workloadData.studentsNeedingConsultation * 15}분</span>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="section-info-grid">
-                <div className="tutor-info-row">
-                  <span className="tutor-info-label">담당교수</span>
-                  <span className="tutor-info-value">{section.instructorName}</span>
+            {/* 수업별 예상 소요 시간 */}
+            <div className="workload-card workload-card-full">
+              <h3 className="workload-card-title">이번 주 수업별 예상 소요 시간</h3>
+              {calculateTimeAllocation.length > 0 ? (
+                <div className="time-allocation-list">
+                  {calculateTimeAllocation.map((allocation) => (
+                    <div key={allocation.sectionId} className="time-allocation-item">
+                      <div className="time-allocation-header">
+                        <span className="time-allocation-section">{allocation.sectionName}</span>
+                        <span className="time-allocation-percentage">{allocation.timePercentage}%</span>
+                      </div>
+                      <div className="time-allocation-bar">
+                        <div 
+                          className="time-allocation-fill" 
+                          style={{ 
+                            width: `${allocation.timePercentage}%`,
+                            backgroundColor: allocation.healthStatus.color
+                          }}
+                        ></div>
+                      </div>
+                      <div className="time-allocation-footer">
+                        <span className="time-allocation-status" style={{ color: allocation.healthStatus.color }}>
+                          {allocation.healthStatus.label}
+                        </span>
+                        <span className="time-allocation-issues">{allocation.issues}개 이슈</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="tutor-info-row">
-                  <span className="tutor-info-label">수강인원</span>
-                  <span className="tutor-info-value">{section.studentCount || 0}명</span>
-                </div>
-                <div className="tutor-info-row">
-                  <span className="tutor-info-label">과제</span>
-                  <span className="tutor-info-value">{section.assignmentCount || 0}개</span>
-                </div>
-                <div className="tutor-info-row">
-                  <span className="tutor-info-label">공지사항</span>
-                  <span className="tutor-info-value">{section.noticeCount || 0}개</span>
-                </div>
-              </div>
-
-              <div className="section-footer">
-                <button 
-                  className={`tutor-btn-toggle-active ${section.active !== false ? 'tutor-active' : 'tutor-inactive'}`}
-                  onClick={(e) => handleToggleActive(section.sectionId, section.active !== false, e)}
-                  title={section.active !== false ? '비활성화하기' : '활성화하기'}
-                >
-                  {section.active !== false ? '활성' : '비활성'}
-                </button>
-                <span className="section-hint">클릭하여 관리하기</span>
-                {section.enrollmentCode && (
-                  <button
-                    className="section-copy-link-btn"
-                    onClick={(e) => handleCopyEnrollmentLink(section.enrollmentCode, e)}
-                    title="수업 참가 링크 복사"
-                  >
-                    🔗
-                  </button>
-                )}
-              </div>
+              ) : (
+                <div className="workload-empty">수업 데이터가 없습니다.</div>
+              )}
             </div>
-          ))}
-          {filteredSections.length === 0 && sections.length > 0 && (
-            <div className="tutor-no-sections">
-              <div className="tutor-no-sections-message">
-                <p>해당 조건에 맞는 수업이 없습니다.</p>
-              </div>
-            </div>
-          )}
-          {sections.length === 0 && (
-            <div className="tutor-no-sections">
-              <div className="tutor-no-sections-message">
-                <p>담당하고 있는 분반이 없습니다.</p>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
+        )}
+
+        {/* 3. 수업 간 비교 분석 */}
+        {comparisonData.length > 0 && (
+          <div className="dashboard-comparison-section">
+            <h2 className="section-title">
+              <FaChartLine className="section-title-icon" />
+              수업 간 비교 분석
+            </h2>
+            <div className="comparison-grid">
+              {comparisonData.map((comparison, index) => (
+                <div key={index} className="comparison-card">
+                  <h3 className="comparison-card-title">{comparison.courseTitle}</h3>
+                  <div className="comparison-summary">
+                    <div className="comparison-summary-item">
+                      <span className="comparison-summary-label">평균 제출률</span>
+                      <span className="comparison-summary-value">{comparison.averageSubmissionRate}%</span>
+                    </div>
+                    <div className="comparison-summary-item">
+                      <span className="comparison-summary-label">평균 위험 학생 수</span>
+                      <span className="comparison-summary-value">{comparison.averageAtRisk}명</span>
+                    </div>
+                  </div>
+                  <div className="comparison-sections">
+                    {comparison.sections.map((section) => (
+                      <div key={section.sectionId} className="comparison-section-item">
+                        <div className="comparison-section-header">
+                          <span className="comparison-section-name">
+                            {section.sectionNumber || ''}분반 ({section.studentCount}명)
+                          </span>
+                          <span 
+                            className="comparison-section-status" 
+                            style={{ color: section.healthStatus.color }}
+                          >
+                            {section.healthStatus.label}
+                          </span>
+                        </div>
+                        <div className="comparison-section-metrics">
+                          <div className="comparison-metric">
+                            <span>제출률: {section.submissionRate}%</span>
+                            <div className="comparison-metric-bar">
+                              <div 
+                                className="comparison-metric-fill" 
+                                style={{ width: `${section.submissionRate}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          <div className="comparison-metric">
+                            <span>위험 학생: {section.atRiskStudents}명</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 수업 생성 모달 */}
         {showCreateModal && (
