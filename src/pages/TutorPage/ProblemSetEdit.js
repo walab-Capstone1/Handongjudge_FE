@@ -322,7 +322,9 @@ const ProblemSetEdit = () => {
                         <div className="problem-set-edit-actions-inline">
                           <button
                             className="problem-set-edit-btn-view"
-                            onClick={() => navigate(`/tutor/problems/${problem.id}/view`)}
+                            onClick={() => navigate(`/tutor/problems/${problem.id}/view`, {
+                              state: { problemSetId: problemSetId }
+                            })}
                             title="문제 보기"
                           >
                             보기

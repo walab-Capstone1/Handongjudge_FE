@@ -99,13 +99,6 @@ const ProblemSetManagement = () => {
     <TutorLayout>
       <div className="problem-set-management">
         <div className="problem-set-management-title-header">
-          <button
-            className="problem-set-management-btn-back-to-list"
-            onClick={() => navigate('/tutor/problems')}
-            title="문제 관리 페이지로 돌아가기"
-          >
-            ← 문제 관리
-          </button>
           <div className="problem-set-management-title-left">
             <h1 className="problem-set-management-title">문제집 관리</h1>
             <div className="problem-set-management-title-stats">

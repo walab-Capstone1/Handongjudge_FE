@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -9,9 +9,11 @@ import "./ProblemView.css";
 const ProblemView = () => {
   const { problemId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [problem, setProblem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const problemSetId = location.state?.problemSetId;
 
   useEffect(() => {
     if (problemId) {
@@ -97,14 +99,20 @@ const ProblemView = () => {
   return (
     <TutorLayout>
       <div className="problem-view">
+        <button
+          className="problem-view-btn-back-to-list"
+          onClick={() => {
+            if (problemSetId) {
+              navigate(`/tutor/problems/sets/${problemSetId}/edit`);
+            } else {
+              navigate('/tutor/problems');
+            }
+          }}
+          title={problemSetId ? "문제집으로 돌아가기" : "문제 관리 페이지로 돌아가기"}
+        >
+          {problemSetId ? "← 문제집 목록" : "← 문제 관리"}
+        </button>
         <div className="problem-view-header">
-          <button
-            className="problem-view-btn-back-to-list"
-            onClick={() => navigate('/tutor/problems')}
-            title="문제 관리 페이지로 돌아가기"
-          >
-            ← 문제 관리
-          </button>
           <div className="problem-view-header-info">
             <h1 className="problem-view-title">{problem.title}</h1>
             <div className="problem-view-meta">
