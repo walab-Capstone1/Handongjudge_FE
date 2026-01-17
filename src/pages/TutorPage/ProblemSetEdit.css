@@ -404,8 +404,12 @@
   flex: 1;
 }
 
-.problem-set-edit .problem-set-edit-modal-search {
+.problem-set-edit .problem-set-edit-modal-filter-section {
   margin-bottom: 1.5rem;
+}
+
+.problem-set-edit .problem-set-edit-modal-search {
+  margin-bottom: 1rem;
 }
 
 .problem-set-edit .problem-set-edit-modal-search-input {
@@ -426,6 +430,43 @@
   background: white;
 }
 
+.problem-set-edit .problem-set-edit-modal-filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.problem-set-edit .problem-set-edit-modal-filter-btn {
+  padding: 0.625rem 1.25rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  color: #6b7280;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.problem-set-edit .problem-set-edit-modal-filter-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.problem-set-edit .problem-set-edit-modal-filter-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.problem-set-edit .problem-set-edit-modal-filter-btn.active:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
 /* 모달이 열려있을 때 search input focus 스타일 무시 */
 body.section-modal-open .problem-set-edit .problem-set-edit-modal-search-input:focus {
   outline: none !important;
@@ -441,6 +482,8 @@ body.section-modal-open .problem-set-edit .problem-set-edit-modal-search-input:f
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e5e7eb;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .problem-set-edit .problem-set-edit-modal-select-all {
@@ -463,9 +506,17 @@ body.section-modal-open .problem-set-edit .problem-set-edit-modal-search-input:f
 
 .problem-set-edit .problem-set-edit-modal-selected-count {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #667eea;
   font-weight: 600;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.problem-set-edit .problem-set-edit-modal-filter-count {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-weight: 500;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  margin-left: auto;
 }
 
 .problem-set-edit .problem-set-edit-modal-problems-list {
@@ -497,18 +548,59 @@ body.section-modal-open .problem-set-edit .problem-set-edit-modal-search-input:f
   border-color: #667eea;
 }
 
+.problem-set-edit .problem-set-edit-modal-problem-item.added {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.problem-set-edit .problem-set-edit-modal-problem-item.added:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.problem-set-edit .problem-set-edit-modal-problem-item.added .problem-set-edit-modal-problem-title {
+  color: #9ca3af;
+}
+
 .problem-set-edit .problem-set-edit-modal-problem-item input[type="checkbox"] {
   width: 1.25rem;
   height: 1.25rem;
   cursor: pointer;
   accent-color: #667eea;
+  flex-shrink: 0;
+}
+
+.problem-set-edit .problem-set-edit-modal-problem-item input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .problem-set-edit .problem-set-edit-modal-problem-info {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
   flex: 1;
+  min-width: 0;
+}
+
+.problem-set-edit .problem-set-edit-modal-problem-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.problem-set-edit .problem-set-edit-modal-problem-id-badge {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  flex-shrink: 0;
 }
 
 .problem-set-edit .problem-set-edit-modal-problem-title {
@@ -516,6 +608,27 @@ body.section-modal-open .problem-set-edit .problem-set-edit-modal-search-input:f
   color: #1e293b;
   font-size: 0.95rem;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  flex: 1;
+  min-width: 0;
+}
+
+.problem-set-edit .problem-set-edit-modal-problem-added-badge {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  border: 1px solid #fecaca;
+  flex-shrink: 0;
+}
+
+.problem-set-edit .problem-set-edit-modal-problem-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .problem-set-edit .problem-set-edit-modal-problem-difficulty {

@@ -22,6 +22,7 @@ const ProblemSetEdit = () => {
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('success');
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterType, setFilterType] = useState('available'); // 'all', 'available', 'added'
   const PROBLEMS_PER_PAGE = 10;
 
   useEffect(() => {
@@ -30,6 +31,19 @@ const ProblemSetEdit = () => {
       fetchAllProblems();
     }
   }, [problemSetId]);
+
+  // 모달이 열릴 때 body에 클래스 추가
+  useEffect(() => {
+    if (showAddModal) {
+      document.body.classList.add('section-modal-open');
+    } else {
+      document.body.classList.remove('section-modal-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('section-modal-open');
+    };
+  }, [showAddModal]);
 
   const fetchProblemSet = async () => {
     try {
@@ -138,6 +152,11 @@ const ProblemSetEdit = () => {
   };
 
   const handleProblemToggle = (problemId) => {
+    // 이미 추가된 문제는 선택할 수 없음
+    if (isProblemAdded(problemId)) {
+      return;
+    }
+
     setSelectedProblemIds(prev => {
       if (prev.includes(problemId)) {
         return prev.filter(id => id !== problemId);
@@ -148,15 +167,23 @@ const ProblemSetEdit = () => {
   };
 
   const handleSelectAll = () => {
-    const availableProblems = getAvailableProblems();
-    const allSelected = availableProblems.every(p => selectedProblemIds.includes(p.id));
+    // 현재 필터된 문제 중 추가 가능한 문제만 선택
+    const filtered = getFilteredProblems();
+    const availableProblems = filtered.filter(p => !isProblemAdded(p.id));
+    const allSelected = availableProblems.length > 0 && 
+      availableProblems.every(p => selectedProblemIds.includes(p.id));
     
     if (allSelected) {
       // 모든 문제 선택 해제
-      setSelectedProblemIds([]);
+      const availableIds = availableProblems.map(p => p.id);
+      setSelectedProblemIds(prev => prev.filter(id => !availableIds.includes(id)));
     } else {
-      // 모든 문제 선택
-      setSelectedProblemIds(availableProblems.map(p => p.id));
+      // 모든 추가 가능한 문제 선택
+      setSelectedProblemIds(prev => {
+        const newIds = availableProblems.map(p => p.id);
+        const combined = [...new Set([...prev, ...newIds])];
+        return combined;
+      });
     }
   };
 
@@ -165,22 +192,46 @@ const ProblemSetEdit = () => {
     return allProblems.filter(p => !existingProblemIds.includes(p.id));
   };
 
-  const getFilteredAvailableProblems = () => {
-    const available = getAvailableProblems();
-    if (!searchTerm) return available;
-    return available.filter(p => 
-      p.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const getAddedProblems = () => {
+    const existingProblemIds = problems.map(p => p.id);
+    return allProblems.filter(p => existingProblemIds.includes(p.id));
+  };
+
+  const isProblemAdded = (problemId) => {
+    return problems.some(p => p.id === problemId);
+  };
+
+  const getFilteredProblems = () => {
+    let filtered = [];
+    
+    // 필터 타입에 따라 문제 선택
+    if (filterType === 'all') {
+      filtered = allProblems;
+    } else if (filterType === 'available') {
+      filtered = getAvailableProblems();
+    } else if (filterType === 'added') {
+      filtered = getAddedProblems();
+    }
+
+    // 검색어로 필터링
+    if (searchTerm) {
+      filtered = filtered.filter(p => 
+        p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.id?.toString().includes(searchTerm)
+      );
+    }
+
+    return filtered;
   };
 
   const getPaginatedProblems = () => {
-    const filtered = getFilteredAvailableProblems();
+    const filtered = getFilteredProblems();
     const startIndex = (currentPage - 1) * PROBLEMS_PER_PAGE;
     return filtered.slice(startIndex, startIndex + PROBLEMS_PER_PAGE);
   };
 
   const getTotalPages = () => {
-    return Math.ceil(getFilteredAvailableProblems().length / PROBLEMS_PER_PAGE);
+    return Math.ceil(getFilteredProblems().length / PROBLEMS_PER_PAGE);
   };
 
   const formatDate = (dateString) => {
@@ -234,12 +285,8 @@ const ProblemSetEdit = () => {
     );
   }
 
-  const availableProblems = getAvailableProblems();
-  const filteredAvailable = getFilteredAvailableProblems();
   const paginatedProblems = getPaginatedProblems();
   const totalPages = getTotalPages();
-  const allSelected = availableProblems.length > 0 && 
-    paginatedProblems.every(p => selectedProblemIds.includes(p.id));
 
   return (
     <TutorLayout>
@@ -364,6 +411,7 @@ const ProblemSetEdit = () => {
                 setSelectedProblemIds([]);
                 setSearchTerm('');
                 setCurrentPage(1);
+                setFilterType('available');
               }
             }}
           >
@@ -381,6 +429,7 @@ const ProblemSetEdit = () => {
                       setSelectedProblemIds([]);
                       setSearchTerm('');
                       setCurrentPage(1);
+                      setFilterType('available');
                     }
                   }}
                   disabled={isAdding}
@@ -389,64 +438,120 @@ const ProblemSetEdit = () => {
                 </button>
               </div>
               <div className="problem-set-edit-modal-body">
-                <div className="problem-set-edit-modal-search">
-                  <input
-                    type="text"
-                    placeholder="문제명으로 검색..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="problem-set-edit-modal-search-input"
-                  />
+                <div className="problem-set-edit-modal-filter-section">
+                  <div className="problem-set-edit-modal-search">
+                    <input
+                      type="text"
+                      placeholder="문제명 또는 ID로 검색..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="problem-set-edit-modal-search-input"
+                    />
+                  </div>
+                  <div className="problem-set-edit-modal-filter-buttons">
+                    <button
+                      className={`problem-set-edit-modal-filter-btn ${filterType === 'all' ? 'active' : ''}`}
+                      onClick={() => {
+                        setFilterType('all');
+                        setCurrentPage(1);
+                      }}
+                    >
+                      모든 문제
+                    </button>
+                    <button
+                      className={`problem-set-edit-modal-filter-btn ${filterType === 'available' ? 'active' : ''}`}
+                      onClick={() => {
+                        setFilterType('available');
+                        setCurrentPage(1);
+                      }}
+                    >
+                      추가 가능
+                    </button>
+                    <button
+                      className={`problem-set-edit-modal-filter-btn ${filterType === 'added' ? 'active' : ''}`}
+                      onClick={() => {
+                        setFilterType('added');
+                        setCurrentPage(1);
+                      }}
+                    >
+                      이미 추가됨
+                    </button>
+                  </div>
                 </div>
 
-                {filteredAvailable.length > 0 ? (
+                {getFilteredProblems().length > 0 ? (
                   <>
                     <div className="problem-set-edit-modal-actions">
-                      <button
-                        className="problem-set-edit-modal-select-all"
-                        onClick={handleSelectAll}
-                      >
-                        {allSelected ? '전체 해제' : '전체 선택'}
-                      </button>
+                      {filterType !== 'added' && (
+                        <button
+                          className="problem-set-edit-modal-select-all"
+                          onClick={handleSelectAll}
+                        >
+                          {getFilteredProblems().filter(p => !isProblemAdded(p.id)).length > 0 &&
+                           getFilteredProblems().filter(p => !isProblemAdded(p.id)).every(p => selectedProblemIds.includes(p.id))
+                            ? '전체 해제' : '전체 선택'}
+                        </button>
+                      )}
                       <span className="problem-set-edit-modal-selected-count">
                         {selectedProblemIds.length}개 선택됨
+                      </span>
+                      <span className="problem-set-edit-modal-filter-count">
+                        총 {getFilteredProblems().length}개 문제
                       </span>
                     </div>
 
                     <div className="problem-set-edit-modal-problems-list">
-                      {paginatedProblems.map((problem) => (
-                        <div 
-                          key={problem.id}
-                          className={`problem-set-edit-modal-problem-item ${
-                            selectedProblemIds.includes(problem.id) ? 'selected' : ''
-                          }`}
-                          onClick={() => handleProblemToggle(problem.id)}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedProblemIds.includes(problem.id)}
-                            onChange={() => handleProblemToggle(problem.id)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                          <div className="problem-set-edit-modal-problem-info">
-                            <span className="problem-set-edit-modal-problem-title">
-                              {problem.title}
-                            </span>
-                            <span 
-                              className="problem-set-edit-modal-problem-difficulty"
-                              style={{ 
-                                backgroundColor: getDifficultyColor(problem.difficulty) + '20',
-                                color: getDifficultyColor(problem.difficulty)
-                              }}
-                            >
-                              {getDifficultyLabel(problem.difficulty)}
-                            </span>
+                      {paginatedProblems.map((problem) => {
+                        const isAdded = isProblemAdded(problem.id);
+                        const isSelected = selectedProblemIds.includes(problem.id);
+                        
+                        return (
+                          <div 
+                            key={problem.id}
+                            className={`problem-set-edit-modal-problem-item ${
+                              isSelected ? 'selected' : ''
+                            } ${isAdded ? 'added' : ''}`}
+                            onClick={() => handleProblemToggle(problem.id)}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleProblemToggle(problem.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              disabled={isAdded}
+                            />
+                            <div className="problem-set-edit-modal-problem-info">
+                              <div className="problem-set-edit-modal-problem-title-wrapper">
+                                <span className="problem-set-edit-modal-problem-id-badge">
+                                  #{problem.id}
+                                </span>
+                                <span className="problem-set-edit-modal-problem-title">
+                                  {problem.title}
+                                </span>
+                                {isAdded && (
+                                  <span className="problem-set-edit-modal-problem-added-badge">
+                                    이미 추가됨
+                                  </span>
+                                )}
+                              </div>
+                              <div className="problem-set-edit-modal-problem-meta">
+                                <span 
+                                  className="problem-set-edit-modal-problem-difficulty"
+                                  style={{ 
+                                    backgroundColor: getDifficultyColor(problem.difficulty) + '20',
+                                    color: getDifficultyColor(problem.difficulty)
+                                  }}
+                                >
+                                  {getDifficultyLabel(problem.difficulty)}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {totalPages > 1 && (
@@ -485,6 +590,7 @@ const ProblemSetEdit = () => {
                     setSelectedProblemIds([]);
                     setSearchTerm('');
                     setCurrentPage(1);
+                    setFilterType('available');
                   }}
                   disabled={isAdding}
                 >
