@@ -851,6 +851,13 @@ class APIService {
     });
   }
 
+  // 분반(Section) 삭제
+  async deleteSection(sectionId) {
+    return await this.request(`/sections/${sectionId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // 공지사항 활성화/비활성화 토글
   async toggleNoticeActive(noticeId, isActive) {
     return await this.request(`/notices/${noticeId}/active`, {

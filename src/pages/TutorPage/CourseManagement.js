@@ -130,19 +130,18 @@ const CourseManagement = () => {
     }
   };
 
-  const handleDeleteCourse = async (courseId, courseTitle) => {
-    if (!window.confirm(`정말로 수업 "${courseTitle}"을(를) 삭제하시겠습니까?\n\n주의: 관련된 분반이 있으면 삭제할 수 없습니다.`)) {
+  const handleDeleteSection = async (sectionId, sectionTitle) => {
+    if (!window.confirm(`정말로 분반 "${sectionTitle}"을(를) 삭제하시겠습니까?`)) {
       return;
     }
 
     try {
-      await APIService.deleteCourseByApi(courseId);
-      alert('수업이 삭제되었습니다.');
+      await APIService.deleteSection(sectionId);
+      alert('분반이 삭제되었습니다.');
       fetchSections(); // 목록 새로고침
-      fetchAvailableCourses(); // Course 목록도 새로고침
     } catch (error) {
-      console.error('수업 삭제 실패:', error);
-      alert(error.message || '수업 삭제에 실패했습니다.');
+      console.error('분반 삭제 실패:', error);
+      alert(error.message || '분반 삭제에 실패했습니다.');
     }
   };
 
@@ -627,8 +626,8 @@ const CourseManagement = () => {
                   </button>
                   <button 
                     className="tutor-course-card-action-btn-compact delete"
-                    onClick={() => handleDeleteCourse(section.courseId, section.courseTitle)}
-                    title="수업 삭제"
+                    onClick={() => handleDeleteSection(section.sectionId, section.courseTitle)}
+                    title="분반 삭제"
                   >
                     삭제
                   </button>
