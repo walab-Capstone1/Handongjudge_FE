@@ -153,21 +153,33 @@ const ProblemEdit = () => {
     try {
       setLoading(true);
       setIsInitialLoad(true);
-      const response = await APIService.getProblemInfo(problemId);
       
+      // 1. 기본 문제 정보 조회
+      const response = await APIService.getProblemInfo(problemId);
       const problem = response?.data || response;
       
-      // 전체 description을 그대로 사용 (마크다운 텍스트 그대로)
-      const description = problem.description || '';
+      // 2. ZIP 파일 파싱하여 테스트 케이스 등 상세 정보 가져오기
+      let parsedData = null;
+      try {
+        parsedData = await APIService.parseProblemZip(problemId);
+        console.log('ZIP 파싱 결과:', parsedData);
+        console.log('테스트케이스:', parsedData?.testCases || parsedData?.testcases);
+      } catch (err) {
+        console.warn('ZIP 파일 파싱 실패 (계속 진행):', err);
+        // ZIP 파싱 실패해도 기본 정보는 사용 가능
+      }
+      
+      // 전체 description을 그대로 사용 (parsedData 우선, 없으면 problem에서)
+      const description = parsedData?.description || problem.description || '';
       
       // HTML 태그가 있으면 제거하고 텍스트만 가져오기
       const descriptionText = description.replace(/<[^>]*>/g, '') || description;
       
-      // timeLimit과 memoryLimit 처리
-      // 백엔드에서 null로 오는 경우가 있으므로 처리
-      // null이거나 undefined인 경우 빈 문자열로 처리
+      // timeLimit과 memoryLimit 처리 (parsedData 우선, 없으면 problem에서)
       let timeLimit = '';
-      if (problem.timeLimit != null && problem.timeLimit !== undefined) {
+      if (parsedData?.timeLimit != null) {
+        timeLimit = String(parsedData.timeLimit);
+      } else if (problem.timeLimit != null && problem.timeLimit !== undefined) {
         const timeLimitValue = Number(problem.timeLimit);
         if (!isNaN(timeLimitValue) && timeLimitValue > 0) {
           timeLimit = String(timeLimitValue);
@@ -175,40 +187,97 @@ const ProblemEdit = () => {
       }
       
       let memoryLimit = '';
-      if (problem.memoryLimit != null && problem.memoryLimit !== undefined) {
+      if (parsedData?.memoryLimit != null) {
+        memoryLimit = String(parsedData.memoryLimit);
+      } else if (problem.memoryLimit != null && problem.memoryLimit !== undefined) {
         const memoryLimitValue = Number(problem.memoryLimit);
         if (!isNaN(memoryLimitValue) && memoryLimitValue > 0) {
           memoryLimit = String(memoryLimitValue);
         }
       }
       
-      // 기존 값 저장 (빈 값일 때 사용)
+      // 기존 값 저장
       setOriginalTimeLimit(timeLimit);
       setOriginalMemoryLimit(memoryLimit);
       
+      // 태그 파싱 (parsedData 우선, 없으면 problem에서)
+      let tags = [];
+      if (parsedData?.tags) {
+        if (typeof parsedData.tags === 'string') {
+          try {
+            const parsedTags = JSON.parse(parsedData.tags);
+            if (Array.isArray(parsedTags)) {
+              tags = parsedTags.map(tag => tag && tag.trim()).filter(Boolean);
+            } else if (parsedTags && parsedTags.trim()) {
+              tags = [parsedTags.trim()];
+            }
+          } catch (e) {
+            if (parsedData.tags.trim()) {
+              tags = [parsedData.tags.trim()];
+            }
+          }
+        } else if (Array.isArray(parsedData.tags)) {
+          tags = parsedData.tags.map(tag => tag && tag.trim()).filter(Boolean);
+        }
+      } else if (problem.tags) {
+        if (Array.isArray(problem.tags)) {
+          tags = problem.tags.map(tag => tag && tag.trim()).filter(Boolean);
+        } else if (typeof problem.tags === 'string') {
+          try {
+            const parsedTags = JSON.parse(problem.tags);
+            if (Array.isArray(parsedTags)) {
+              tags = parsedTags.map(tag => tag && tag.trim()).filter(Boolean);
+            } else if (parsedTags && parsedTags.trim()) {
+              tags = [parsedTags.trim()];
+            }
+          } catch (e) {
+            if (problem.tags.trim()) {
+              tags = [problem.tags.trim()];
+            }
+          }
+        }
+      }
+      
+      // 테스트 케이스에서 sample 타입만 필터링하여 예제 입출력으로 변환
+      let sampleInputs = [{ input: '', output: '' }];
+      if (parsedData) {
+        const testCases = parsedData.testCases || parsedData.testcases || [];
+        console.log('파싱된 테스트케이스:', testCases);
+        
+        if (testCases.length > 0) {
+          const sampleTestCases = testCases.filter(tc => tc.type === 'sample');
+          console.log('샘플 테스트케이스:', sampleTestCases);
+          
+          if (sampleTestCases.length > 0) {
+            sampleInputs = sampleTestCases.map(tc => ({
+              input: tc.input || '',
+              output: tc.output || ''
+            }));
+          }
+        }
+      }
+      
       setFormData({
-        title: problem.title || '',
-        description: description, // 원본 그대로 (HTML 또는 마크다운)
-        descriptionText: descriptionText, // 텍스트만
+        title: parsedData?.title || problem.title || '',
+        description: description,
+        descriptionText: descriptionText,
         inputFormat: '', // 기존 문제 수정 시에는 비워둠
         outputFormat: '', // 기존 문제 수정 시에는 비워둠
-        tags: [], // 태그는 백엔드에서 제공하지 않으면 빈 배열
-        difficulty: problem.difficulty?.toString() || '1',
+        tags: tags,
+        difficulty: parsedData?.difficulty || problem.difficulty?.toString() || '1',
         timeLimit: timeLimit,
         memoryLimit: memoryLimit,
-        sampleInputs: [{ input: '', output: '' }], // 기존 문제 수정 시에는 비워둠
-        testcases: []
+        sampleInputs: sampleInputs, // 파싱된 예제 입출력 사용
+        testcases: [] // 테스트케이스 파일은 표시하지 않음 (ZIP에 포함되어 있음)
       });
       
-      // descriptionRef에 마크다운 텍스트 그대로 설정 (약간의 지연 후)
+      // descriptionRef에 마크다운 텍스트 그대로 설정
       setTimeout(() => {
         if (descriptionRef.current) {
-          // HTML이 아닌 경우 텍스트로 설정 (줄바꿈 보존)
           const isHTML = /<[^>]+>/.test(description);
           if (isHTML) {
             descriptionRef.current.innerHTML = description;
           } else {
-            // 마크다운 텍스트를 그대로 넣기 (줄바꿈 보존)
             descriptionRef.current.textContent = descriptionText;
           }
           setIsInitialLoad(false);

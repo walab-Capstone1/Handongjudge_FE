@@ -130,6 +130,7 @@ const ProblemEdit = () => {
   const [currentTag, setCurrentTag] = useState('');
   const [originalTimeLimit, setOriginalTimeLimit] = useState('');
   const [originalMemoryLimit, setOriginalMemoryLimit] = useState('');
+  const [enableFullEdit, setEnableFullEdit] = useState(false); // 문제 변환 모드 활성화 여부
 
   useEffect(() => {
     fetchProblem();
@@ -149,25 +150,49 @@ const ProblemEdit = () => {
     }
   }, [formData.description, formData.descriptionText, loading, isInitialLoad]);
 
+  // 문제 변환 모드가 활성화될 때 descriptionRef에 기존 내용 설정
+  useEffect(() => {
+    if (enableFullEdit && descriptionRef.current && formData.description) {
+      const isHTML = /<[^>]+>/.test(formData.description);
+      if (isHTML) {
+        descriptionRef.current.innerHTML = formData.description;
+      } else {
+        descriptionRef.current.textContent = formData.descriptionText || formData.description;
+      }
+    }
+  }, [enableFullEdit, formData.description, formData.descriptionText]);
+
   const fetchProblem = async () => {
     try {
       setLoading(true);
       setIsInitialLoad(true);
-      const response = await APIService.getProblemInfo(problemId);
       
+      // 1. 기본 문제 정보 조회
+      const response = await APIService.getProblemInfo(problemId);
       const problem = response?.data || response;
       
-      // 전체 description을 그대로 사용 (마크다운 텍스트 그대로)
-      const description = problem.description || '';
+      // 2. ZIP 파일 파싱하여 테스트 케이스 등 상세 정보 가져오기
+      let parsedData = null;
+      try {
+        parsedData = await APIService.parseProblemZip(problemId);
+        console.log('ZIP 파싱 결과:', parsedData);
+        console.log('테스트케이스:', parsedData?.testCases || parsedData?.testcases);
+      } catch (err) {
+        console.warn('ZIP 파일 파싱 실패 (계속 진행):', err);
+        // ZIP 파싱 실패해도 기본 정보는 사용 가능
+      }
+      
+      // 전체 description을 그대로 사용 (parsedData 우선, 없으면 problem에서)
+      const description = parsedData?.description || problem.description || '';
       
       // HTML 태그가 있으면 제거하고 텍스트만 가져오기
       const descriptionText = description.replace(/<[^>]*>/g, '') || description;
       
-      // timeLimit과 memoryLimit 처리
-      // 백엔드에서 null로 오는 경우가 있으므로 처리
-      // null이거나 undefined인 경우 빈 문자열로 처리
+      // timeLimit과 memoryLimit 처리 (parsedData 우선, 없으면 problem에서)
       let timeLimit = '';
-      if (problem.timeLimit != null && problem.timeLimit !== undefined) {
+      if (parsedData?.timeLimit != null) {
+        timeLimit = String(parsedData.timeLimit);
+      } else if (problem.timeLimit != null && problem.timeLimit !== undefined) {
         const timeLimitValue = Number(problem.timeLimit);
         if (!isNaN(timeLimitValue) && timeLimitValue > 0) {
           timeLimit = String(timeLimitValue);
@@ -175,40 +200,100 @@ const ProblemEdit = () => {
       }
       
       let memoryLimit = '';
-      if (problem.memoryLimit != null && problem.memoryLimit !== undefined) {
+      if (parsedData?.memoryLimit != null) {
+        memoryLimit = String(parsedData.memoryLimit);
+      } else if (problem.memoryLimit != null && problem.memoryLimit !== undefined) {
         const memoryLimitValue = Number(problem.memoryLimit);
         if (!isNaN(memoryLimitValue) && memoryLimitValue > 0) {
           memoryLimit = String(memoryLimitValue);
         }
       }
       
-      // 기존 값 저장 (빈 값일 때 사용)
+      // 기존 값 저장
       setOriginalTimeLimit(timeLimit);
       setOriginalMemoryLimit(memoryLimit);
       
+      // 태그 파싱 (parsedData 우선, 없으면 problem에서)
+      let tags = [];
+      if (parsedData?.tags) {
+        if (typeof parsedData.tags === 'string') {
+          try {
+            const parsedTags = JSON.parse(parsedData.tags);
+            if (Array.isArray(parsedTags)) {
+              tags = parsedTags.map(tag => tag && tag.trim()).filter(Boolean);
+            } else if (parsedTags && parsedTags.trim()) {
+              tags = [parsedTags.trim()];
+            }
+          } catch (e) {
+            if (parsedData.tags.trim()) {
+              tags = [parsedData.tags.trim()];
+            }
+          }
+        } else if (Array.isArray(parsedData.tags)) {
+          tags = parsedData.tags.map(tag => tag && tag.trim()).filter(Boolean);
+        }
+      } else if (problem.tags) {
+        if (Array.isArray(problem.tags)) {
+          tags = problem.tags.map(tag => tag && tag.trim()).filter(Boolean);
+        } else if (typeof problem.tags === 'string') {
+          try {
+            const parsedTags = JSON.parse(problem.tags);
+            if (Array.isArray(parsedTags)) {
+              tags = parsedTags.map(tag => tag && tag.trim()).filter(Boolean);
+            } else if (parsedTags && parsedTags.trim()) {
+              tags = [parsedTags.trim()];
+            }
+          } catch (e) {
+            if (problem.tags.trim()) {
+              tags = [problem.tags.trim()];
+            }
+          }
+        }
+      }
+      
+      // 테스트 케이스에서 sample 타입만 필터링하여 예제 입출력으로 변환
+      let sampleInputs = [{ input: '', output: '' }];
+      if (parsedData) {
+        const testCases = parsedData.testCases || parsedData.testcases || [];
+        console.log('파싱된 테스트케이스:', testCases);
+        
+        if (testCases.length > 0) {
+          const sampleTestCases = testCases.filter(tc => tc.type === 'sample');
+          console.log('샘플 테스트케이스:', sampleTestCases);
+          
+          if (sampleTestCases.length > 0) {
+            sampleInputs = sampleTestCases.map(tc => ({
+              input: tc.input || '',
+              output: tc.output || ''
+            }));
+          }
+        }
+      }
+      
       setFormData({
-        title: problem.title || '',
-        description: description, // 원본 그대로 (HTML 또는 마크다운)
-        descriptionText: descriptionText, // 텍스트만
+        title: parsedData?.title || problem.title || '',
+        description: description,
+        descriptionText: descriptionText,
         inputFormat: '', // 기존 문제 수정 시에는 비워둠
         outputFormat: '', // 기존 문제 수정 시에는 비워둠
-        tags: [], // 태그는 백엔드에서 제공하지 않으면 빈 배열
-        difficulty: problem.difficulty?.toString() || '1',
+        tags: tags,
+        difficulty: parsedData?.difficulty || problem.difficulty?.toString() || '1',
         timeLimit: timeLimit,
         memoryLimit: memoryLimit,
-        sampleInputs: [{ input: '', output: '' }], // 기존 문제 수정 시에는 비워둠
-        testcases: []
+        sampleInputs: sampleInputs, // 파싱된 예제 입출력 사용
+        testcases: [] // 테스트케이스 파일은 표시하지 않음 (ZIP에 포함되어 있음)
       });
       
-      // descriptionRef에 마크다운 텍스트 그대로 설정 (약간의 지연 후)
+      // 문제 변환 모드 초기화
+      setEnableFullEdit(false);
+      
+      // descriptionRef에 마크다운 텍스트 그대로 설정
       setTimeout(() => {
         if (descriptionRef.current) {
-          // HTML이 아닌 경우 텍스트로 설정 (줄바꿈 보존)
           const isHTML = /<[^>]+>/.test(description);
           if (isHTML) {
             descriptionRef.current.innerHTML = description;
           } else {
-            // 마크다운 텍스트를 그대로 넣기 (줄바꿈 보존)
             descriptionRef.current.textContent = descriptionText;
           }
           setIsInitialLoad(false);
@@ -222,7 +307,7 @@ const ProblemEdit = () => {
     }
   };
 
-  const handleZipFileChange = (e) => {
+  const handleZipFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -233,6 +318,86 @@ const ProblemEdit = () => {
 
     setZipFile(file);
     setError(null);
+
+    // ZIP 파일 파싱 및 폼 업데이트
+    try {
+      const formData = new FormData();
+      formData.append('zipFile', file);
+      
+      console.log('ZIP 파일 파싱 시작:', file.name);
+      const parsedData = await APIService.parseZipFile(formData);
+      console.log('파싱된 데이터:', parsedData);
+      
+      if (parsedData) {
+        // 제목 업데이트 (있을 경우)
+        if (parsedData.title) {
+          setFormData(prev => ({
+            ...prev,
+            title: parsedData.title
+          }));
+        }
+
+        // 시간 제한 업데이트
+        if (parsedData.timeLimit !== null && parsedData.timeLimit !== undefined) {
+          setFormData(prev => ({
+            ...prev,
+            timeLimit: String(parsedData.timeLimit)
+          }));
+          // originalTimeLimit도 업데이트
+          setOriginalTimeLimit(String(parsedData.timeLimit));
+        }
+
+        // 메모리 제한 업데이트
+        if (parsedData.memoryLimit !== null && parsedData.memoryLimit !== undefined) {
+          setFormData(prev => ({
+            ...prev,
+            memoryLimit: String(parsedData.memoryLimit)
+          }));
+          // originalMemoryLimit도 업데이트
+          setOriginalMemoryLimit(String(parsedData.memoryLimit));
+        }
+
+        // 문제 설명 업데이트
+        if (parsedData.description) {
+          // 마크다운을 HTML로 변환
+          const htmlDescription = parsedData.description
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+          
+          const descriptionText = parsedData.description.replace(/<[^>]*>/g, '');
+          
+          setFormData(prev => ({ 
+            ...prev, 
+            description: htmlDescription,
+            descriptionText: descriptionText
+          }));
+          
+          // contentEditable에 직접 설정 (enableFullEdit 모드일 때만)
+          if (enableFullEdit && descriptionRef.current) {
+            descriptionRef.current.innerHTML = htmlDescription;
+          }
+        }
+
+        // 예제 입출력 업데이트 (테스트케이스가 있는 경우)
+        const testCases = parsedData.testCases || parsedData.testcases || [];
+        if (testCases.length > 0) {
+          const sampleTestCases = testCases.filter(tc => tc.type === 'sample');
+          if (sampleTestCases.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              sampleInputs: sampleTestCases.map(tc => ({
+                input: tc.input || '',
+                output: tc.output || ''
+              }))
+            }));
+          }
+        }
+      }
+    } catch (err) {
+      console.error('ZIP 파일 파싱 실패:', err);
+      setError(`ZIP 파일 파싱 중 오류가 발생했습니다: ${err.message || '알 수 없는 오류'}`);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -327,29 +492,36 @@ const ProblemEdit = () => {
     try {
       const submitFormData = new FormData();
       submitFormData.append('title', formData.title);
-      submitFormData.append('description', getFullDescriptionForBackend());
-      submitFormData.append('inputFormat', formData.inputFormat);
-      submitFormData.append('outputFormat', formData.outputFormat);
       submitFormData.append('tags', JSON.stringify(formData.tags));
       submitFormData.append('difficulty', formData.difficulty);
       
-      // timeLimit과 memoryLimit이 비어있으면 기존 값 사용, 그래도 없으면 최소값 설정
-      const timeLimit = formData.timeLimit || originalTimeLimit || '1';
-      const memoryLimit = formData.memoryLimit || originalMemoryLimit || '256';
+      // metadataUpdated 플래그: enableFullEdit가 false면 true (메타데이터만 업데이트), true면 false (전체 업데이트)
+      submitFormData.append('metadataUpdated', enableFullEdit ? 'false' : 'true');
       
-      submitFormData.append('timeLimit', timeLimit);
-      submitFormData.append('memoryLimit', memoryLimit);
-      submitFormData.append('sampleInputs', JSON.stringify(formData.sampleInputs));
-      
-      // ZIP 파일 (선택적)
-      if (zipFile) {
-        submitFormData.append('zipFile', zipFile);
-      }
+      // 문제 변환 모드가 활성화된 경우에만 나머지 필드 전송
+      if (enableFullEdit) {
+        submitFormData.append('description', getFullDescriptionForBackend());
+        submitFormData.append('inputFormat', formData.inputFormat);
+        submitFormData.append('outputFormat', formData.outputFormat);
+        
+        // timeLimit과 memoryLimit이 비어있으면 기존 값 사용, 그래도 없으면 최소값 설정
+        const timeLimit = formData.timeLimit || originalTimeLimit || '1';
+        const memoryLimit = formData.memoryLimit || originalMemoryLimit || '256';
+        
+        submitFormData.append('timeLimit', timeLimit);
+        submitFormData.append('memoryLimit', memoryLimit);
+        submitFormData.append('sampleInputs', JSON.stringify(formData.sampleInputs));
+        
+        // ZIP 파일 (선택적)
+        if (zipFile) {
+          submitFormData.append('newZipFile', zipFile);
+        }
 
-      // 테스트케이스 파일들
-      formData.testcases.forEach((file, index) => {
-        submitFormData.append(`testcase_${index}`, file);
-      });
+        // 테스트케이스 파일들
+        formData.testcases.forEach((file, index) => {
+          submitFormData.append(`testcase_${index}`, file);
+        });
+      }
 
       await APIService.updateProblem(problemId, submitFormData);
       
@@ -425,6 +597,57 @@ const ProblemEdit = () => {
         {error && (
           <div className="tutor-error-message">
             {error}
+          </div>
+        )}
+
+        {!enableFullEdit && (
+          <div style={{ 
+            marginBottom: '20px', 
+            padding: '16px', 
+            backgroundColor: '#fff3cd', 
+            border: '1px solid #ffc107', 
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <strong style={{ color: '#856404' }}>⚠️ 메타데이터 수정 모드</strong>
+              <p style={{ margin: '8px 0 0 0', color: '#856404', fontSize: '14px' }}>
+                현재 제목, 난이도, 태그만 수정 가능합니다. 다른 필드를 수정하려면 '문제 변환' 버튼을 클릭하세요.
+                <br />
+                <span style={{ fontSize: '13px', fontStyle: 'italic' }}>
+                  (문제 변환 시 Domjudge까지 변환하는 전체 업데이트가 수행되며, 새로운 문제로 취급됩니다)
+                </span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('문제 변환 모드를 활성화하시겠습니까?\n\n이 모드에서는 문제 설명, 시간/메모리 제한, 테스트케이스 등을 수정할 수 있습니다.\n\n⚠️ 주의: 이러한 변경사항은 Domjudge까지 변환하는 전체 업데이트를 수행하며, 새로운 문제로 취급됩니다.')) {
+                  setEnableFullEdit(true);
+                }
+              }}
+              className="tutor-btn-primary"
+              style={{ marginLeft: '16px', whiteSpace: 'nowrap' }}
+            >
+              문제 변환
+            </button>
+          </div>
+        )}
+
+        {enableFullEdit && (
+          <div style={{ 
+            marginBottom: '20px', 
+            padding: '16px', 
+            backgroundColor: '#d1ecf1', 
+            border: '1px solid #0c5460', 
+            borderRadius: '8px'
+          }}>
+            <strong style={{ color: '#0c5460' }}>⚠️ 문제 변환 모드 활성화</strong>
+            <p style={{ margin: '8px 0 0 0', color: '#0c5460', fontSize: '14px' }}>
+              모든 필드를 수정할 수 있습니다. 변경사항은 Domjudge까지 변환하는 전체 업데이트를 수행하며, 새로운 문제로 취급됩니다.
+            </p>
           </div>
         )}
 
@@ -510,6 +733,12 @@ const ProblemEdit = () => {
                     min="0"
                     step="0.1"
                     placeholder="예: 2.0"
+                    disabled={!enableFullEdit}
+                    style={{ 
+                      backgroundColor: enableFullEdit ? 'white' : '#f5f5f5',
+                      cursor: enableFullEdit ? 'text' : 'not-allowed',
+                      opacity: enableFullEdit ? 1 : 0.7
+                    }}
                   />
                 </div>
 
@@ -523,6 +752,12 @@ const ProblemEdit = () => {
                     className="problem-create-input"
                     min="0"
                     placeholder="예: 256"
+                    disabled={!enableFullEdit}
+                    style={{ 
+                      backgroundColor: enableFullEdit ? 'white' : '#f5f5f5',
+                      cursor: enableFullEdit ? 'text' : 'not-allowed',
+                      opacity: enableFullEdit ? 1 : 0.7
+                    }}
                   />
                 </div>
               </div>
@@ -537,8 +772,16 @@ const ProblemEdit = () => {
                     accept=".zip"
                     onChange={handleZipFileChange}
                     className="problem-create-file-input"
+                    disabled={!enableFullEdit}
                   />
-                  <label htmlFor="zipFileInput" className="problem-create-file-label-inline">
+                  <label 
+                    htmlFor="zipFileInput" 
+                    className="problem-create-file-label-inline"
+                    style={{ 
+                      cursor: enableFullEdit ? 'pointer' : 'not-allowed',
+                      opacity: enableFullEdit ? 1 : 0.7
+                    }}
+                  >
                     {zipFile ? `✓ ${zipFile.name}` : 'ZIP 파일 선택'}
                   </label>
                   <span className="problem-create-help-text">
@@ -549,7 +792,29 @@ const ProblemEdit = () => {
 
               {/* 문제 설명 */}
               <div className="problem-create-form-section problem-create-description-section">
-                <label className="problem-create-label">문제 설명 *</label>
+                <label className="problem-create-label">문제 설명 {enableFullEdit ? '*' : ''}</label>
+                {!enableFullEdit && (
+                  <div className="problem-create-description-editor">
+                    <div className="problem-create-editor-wrapper" style={{ background: '#f5f5f5' }}>
+                      <div style={{ 
+                        padding: '12px', 
+                        minHeight: '300px',
+                        whiteSpace: 'pre-wrap',
+                        color: '#666',
+                        overflow: 'auto'
+                      }}>
+                        {formData.descriptionText || formData.description || '(문제 설명 없음)'}
+                      </div>
+                    </div>
+                    <div className="problem-create-preview">
+                      <div className="problem-create-preview-header">미리보기</div>
+                      <div className="problem-create-preview-content">
+                        <ProblemPreview {...getFullDescription()} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {enableFullEdit && (
                 <div className="problem-create-description-editor">
                   <div className="problem-create-editor-wrapper">
                     <div className="problem-create-editor-toolbar">
@@ -674,117 +939,195 @@ const ProblemEdit = () => {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
 
               {/* 입력/출력 형식 */}
               <div className="problem-create-form-row">
                 <div className="problem-create-form-section">
                   <label className="problem-create-label">입력 형식</label>
-                  <textarea
-                    name="inputFormat"
-                    value={formData.inputFormat}
-                    onChange={handleInputChange}
-                    className="problem-create-textarea"
-                    rows={4}
-                    placeholder="입력 형식을 설명하세요"
-                  />
+                  {!enableFullEdit ? (
+                    <div style={{ 
+                      padding: '12px', 
+                      backgroundColor: '#f5f5f5', 
+                      borderRadius: '4px',
+                      minHeight: '80px',
+                      whiteSpace: 'pre-wrap',
+                      color: '#666'
+                    }}>
+                      {formData.inputFormat || '(입력 형식 없음)'}
+                    </div>
+                  ) : (
+                    <textarea
+                      name="inputFormat"
+                      value={formData.inputFormat}
+                      onChange={handleInputChange}
+                      className="problem-create-textarea"
+                      rows={4}
+                      placeholder="입력 형식을 설명하세요"
+                    />
+                  )}
                 </div>
 
                 <div className="problem-create-form-section">
                   <label className="problem-create-label">출력 형식</label>
-                  <textarea
-                    name="outputFormat"
-                    value={formData.outputFormat}
-                    onChange={handleInputChange}
-                    className="problem-create-textarea"
-                    rows={4}
-                    placeholder="출력 형식을 설명하세요"
-                  />
+                  {!enableFullEdit ? (
+                    <div style={{ 
+                      padding: '12px', 
+                      backgroundColor: '#f5f5f5', 
+                      borderRadius: '4px',
+                      minHeight: '80px',
+                      whiteSpace: 'pre-wrap',
+                      color: '#666'
+                    }}>
+                      {formData.outputFormat || '(출력 형식 없음)'}
+                    </div>
+                  ) : (
+                    <textarea
+                      name="outputFormat"
+                      value={formData.outputFormat}
+                      onChange={handleInputChange}
+                      className="problem-create-textarea"
+                      rows={4}
+                      placeholder="출력 형식을 설명하세요"
+                    />
+                  )}
                 </div>
               </div>
 
               {/* 예제 입출력 */}
               <div className="problem-create-form-section">
                 <label className="problem-create-label">예제 입출력</label>
-                {formData.sampleInputs.map((sample, idx) => (
-                  <div key={idx} className="problem-create-sample-item">
-                    <div className="problem-create-sample-header">
-                      <span>예제 #{idx + 1}</span>
-                      {formData.sampleInputs.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeSampleInput(idx)}
-                          className="problem-create-sample-remove"
-                        >
-                          삭제
-                        </button>
-                      )}
-                    </div>
-                    <div className="problem-create-sample-grid">
-                      <div>
-                        <label className="problem-create-sample-label">입력</label>
-                        <textarea
-                          value={sample.input}
-                          onChange={(e) => handleSampleInputChange(idx, 'input', e.target.value)}
-                          className="problem-create-textarea"
-                          rows={3}
-                          placeholder="예제 입력"
-                        />
-                      </div>
-                      <div>
-                        <label className="problem-create-sample-label">출력</label>
-                        <textarea
-                          value={sample.output}
-                          onChange={(e) => handleSampleInputChange(idx, 'output', e.target.value)}
-                          className="problem-create-textarea"
-                          rows={3}
-                          placeholder="예제 출력"
-                        />
-                      </div>
-                    </div>
+                {!enableFullEdit ? (
+                  <div style={{ 
+                    padding: '12px', 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: '4px',
+                    color: '#666'
+                  }}>
+                    {formData.sampleInputs && formData.sampleInputs.some(s => s.input || s.output) ? (
+                      formData.sampleInputs.map((sample, idx) => {
+                        if (!sample.input && !sample.output) return null;
+                        return (
+                          <div key={idx} style={{ marginBottom: '16px' }}>
+                            <strong>예제 #{idx + 1}</strong>
+                            <div style={{ marginTop: '8px' }}>
+                              <div><strong>입력:</strong></div>
+                              <pre style={{ backgroundColor: 'white', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>{sample.input || '(없음)'}</pre>
+                              <div style={{ marginTop: '8px' }}><strong>출력:</strong></div>
+                              <pre style={{ backgroundColor: 'white', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>{sample.output || '(없음)'}</pre>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      '(예제 입출력 없음)'
+                    )}
                   </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addSampleInput}
-                  className="problem-create-add-btn"
-                >
-                  + 예제 추가
-                </button>
+                ) : (
+                  <>
+                    {formData.sampleInputs.map((sample, idx) => (
+                      <div key={idx} className="problem-create-sample-item">
+                        <div className="problem-create-sample-header">
+                          <span>예제 #{idx + 1}</span>
+                          {formData.sampleInputs.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeSampleInput(idx)}
+                              className="problem-create-sample-remove"
+                            >
+                              삭제
+                            </button>
+                          )}
+                        </div>
+                        <div className="problem-create-sample-grid">
+                          <div>
+                            <label className="problem-create-sample-label">입력</label>
+                            <textarea
+                              value={sample.input}
+                              onChange={(e) => handleSampleInputChange(idx, 'input', e.target.value)}
+                              className="problem-create-textarea"
+                              rows={3}
+                              placeholder="예제 입력"
+                            />
+                          </div>
+                          <div>
+                            <label className="problem-create-sample-label">출력</label>
+                            <textarea
+                              value={sample.output}
+                              onChange={(e) => handleSampleInputChange(idx, 'output', e.target.value)}
+                              className="problem-create-textarea"
+                              rows={3}
+                              placeholder="예제 출력"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addSampleInput}
+                      className="problem-create-add-btn"
+                    >
+                      + 예제 추가
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* 테스트케이스 */}
               <div className="problem-create-form-section">
                 <label className="problem-create-label">테스트케이스 파일</label>
-                <div className="problem-create-file-upload-wrapper">
-                  <input
-                    type="file"
-                    id="testcaseInput"
-                    multiple
-                    onChange={handleTestcaseAdd}
-                    className="problem-create-file-input"
-                  />
-                  <label htmlFor="testcaseInput" className="problem-create-file-label-inline">
-                    파일 선택
-                  </label>
-                  <span className="problem-create-help-text">
-                    테스트케이스 입력(.in) 및 출력(.ans) 파일
-                  </span>
-                </div>
-                <div className="problem-create-testcase-list">
-                  {formData.testcases.map((file, idx) => (
-                    <div key={idx} className="problem-create-testcase-item">
-                      <span>{file.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleTestcaseRemove(idx)}
-                        className="problem-create-testcase-remove"
-                      >
-                        ×
-                      </button>
+                {!enableFullEdit ? (
+                  <div style={{ 
+                    padding: '12px', 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: '4px',
+                    color: '#666'
+                  }}>
+                    {formData.testcases.length > 0 ? (
+                      <div>
+                        {formData.testcases.map((file, idx) => (
+                          <div key={idx} style={{ marginBottom: '4px' }}>{file.name}</div>
+                        ))}
+                      </div>
+                    ) : (
+                      '(테스트케이스 파일 없음)'
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="problem-create-file-upload-wrapper">
+                      <input
+                        type="file"
+                        id="testcaseInput"
+                        multiple
+                        onChange={handleTestcaseAdd}
+                        className="problem-create-file-input"
+                      />
+                      <label htmlFor="testcaseInput" className="problem-create-file-label-inline">
+                        파일 선택
+                      </label>
+                      <span className="problem-create-help-text">
+                        테스트케이스 입력(.in) 및 출력(.ans) 파일
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <div className="problem-create-testcase-list">
+                      {formData.testcases.map((file, idx) => (
+                        <div key={idx} className="problem-create-testcase-item">
+                          <span>{file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleTestcaseRemove(idx)}
+                            className="problem-create-testcase-remove"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

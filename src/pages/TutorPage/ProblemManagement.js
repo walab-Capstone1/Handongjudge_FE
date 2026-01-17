@@ -371,30 +371,35 @@ const ProblemManagement = () => {
             onClose={() => setAlertMessage(null)}
           />
         )}
-        <div className="tutor-page-header">
-          <h1 className="tutor-page-title">문제 관리</h1>
-          <div className="tutor-header-actions">
+        <div className="problem-management-title-header">
+          <div className="problem-management-title-left">
+            <h1 className="problem-management-title">문제 관리</h1>
+            <div className="problem-management-title-stats">
+              <span className="problem-management-stat-badge">총 {problems.length}개 문제</span>
+              <span className="problem-management-stat-badge">표시 {filteredProblems.length}개</span>
+            </div>
+          </div>
+          <div className="problem-management-title-right">
             <button 
-              className="tutor-btn-primary"
+              className="problem-management-btn-create"
               onClick={() => navigate('/tutor/problems/create')}
             >
-              새 문제 만들기
+              + 새 문제 만들기
             </button>
           </div>
         </div>
 
-        <div className="tutor-filters-section">
-          <div className="tutor-search-box">
+        <div className="problem-management-filters-section">
+          <div className="problem-management-search-box">
             <input
               type="text"
               placeholder="문제명으로 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="tutor-search-input"
+              className="problem-management-search-input"
             />
           </div>
-          <div className="tutor-filter-group">
-            <label htmlFor="filter-usage" className="tutor-filter-label">사용 여부</label>
+          <div className="problem-management-filter-group">
             <select
               id="filter-usage"
               value={filterUsageStatus}
@@ -405,17 +410,16 @@ const ProblemManagement = () => {
                   setFilterAssignment('ALL');
                 }
               }}
-              className="tutor-filter-select"
+              className="problem-management-filter-select"
             >
-              <option value="ALL">전체</option>
+              <option value="ALL">전체 사용 여부</option>
               <option value="USED">사용 중</option>
               <option value="UNUSED">미사용</option>
             </select>
           </div>
           {filterUsageStatus === 'USED' && (
             <>
-              <div className="tutor-filter-group">
-                <label htmlFor="filter-course" className="tutor-filter-label">수업</label>
+              <div className="problem-management-filter-group">
                 <select
                   id="filter-course"
                   value={filterCourse}
@@ -423,10 +427,10 @@ const ProblemManagement = () => {
                     setFilterCourse(e.target.value);
                     setFilterAssignment('ALL');
                   }}
-                  className="tutor-filter-select"
+                  className="problem-management-filter-select"
                   disabled={loadingUsageData}
                 >
-                  <option value="ALL">전체</option>
+                  <option value="ALL">전체 수업</option>
                   {sections.map((section) => (
                     <option key={section.sectionId} value={section.sectionId}>
                       {section.courseTitle} ({section.year}년 {section.semester === 'SPRING' ? '1학기' : section.semester === 'SUMMER' ? '여름학기' : section.semester === 'FALL' ? '2학기' : '겨울학기'} {section.sectionNumber ? `- ${section.sectionNumber}분반` : ''})
@@ -435,16 +439,15 @@ const ProblemManagement = () => {
                 </select>
               </div>
               {filterCourse !== 'ALL' && (
-                <div className="tutor-filter-group">
-                  <label htmlFor="filter-assignment" className="tutor-filter-label">과제</label>
+                <div className="problem-management-filter-group">
                   <select
                     id="filter-assignment"
                     value={filterAssignment}
                     onChange={(e) => setFilterAssignment(e.target.value)}
-                    className="tutor-filter-select"
+                    className="problem-management-filter-select"
                     disabled={loadingUsageData}
                   >
-                    <option value="ALL">전체</option>
+                    <option value="ALL">전체 과제</option>
                     {assignments.map((assignment) => (
                       <option key={assignment.id} value={assignment.id}>
                         {assignment.assignmentNumber && `${assignment.assignmentNumber}. `}
@@ -456,15 +459,14 @@ const ProblemManagement = () => {
               )}
             </>
           )}
-          <div className="tutor-filter-group">
-            <label htmlFor="filter-difficulty" className="tutor-filter-label">난이도</label>
+          <div className="problem-management-filter-group">
             <select
               id="filter-difficulty"
               value={filterDifficulty}
               onChange={(e) => setFilterDifficulty(e.target.value)}
-              className="tutor-filter-select"
+              className="problem-management-filter-select"
             >
-              <option value="ALL">전체</option>
+              <option value="ALL">전체 난이도</option>
               <option value="1">1 (쉬움)</option>
               <option value="2">2 (보통)</option>
               <option value="3">3 (어려움)</option>
@@ -473,15 +475,14 @@ const ProblemManagement = () => {
             </select>
           </div>
           {availableTags.length > 0 && (
-            <div className="tutor-filter-group">
-              <label htmlFor="filter-tag" className="tutor-filter-label">태그</label>
+            <div className="problem-management-filter-group">
               <select
                 id="filter-tag"
                 value={filterTag}
                 onChange={(e) => setFilterTag(e.target.value)}
-                className="tutor-filter-select"
+                className="problem-management-filter-select"
               >
-                <option value="ALL">전체</option>
+                <option value="ALL">전체 태그</option>
                 {availableTags.map((tag) => (
                   <option key={tag} value={tag}>
                     {tag}
@@ -492,90 +493,103 @@ const ProblemManagement = () => {
           )}
         </div>
 
-        <div className="tutor-problems-table-container">
+        <div className="problem-management-table-container">
           {filteredProblems.length > 0 ? (
-            <table className="tutor-problems-table">
+            <table className="problem-management-table">
               <thead>
                 <tr>
-                  <th className="tutor-problem-id-cell">ID</th>
-                  <th className="tutor-problem-title-cell">문제 제목</th>
-                  <th className="tutor-problem-meta-cell">시간 제한</th>
-                  <th className="tutor-problem-meta-cell">메모리 제한</th>
-                  <th className="tutor-problem-meta-cell">생성일</th>
-                  <th className="tutor-problem-actions-cell">관리</th>
+                  <th className="problem-management-id-cell">ID</th>
+                  <th className="problem-management-title-cell">문제 제목</th>
+                  <th className="problem-management-meta-cell">시간 제한</th>
+                  <th className="problem-management-meta-cell">메모리 제한</th>
+                  <th className="problem-management-meta-cell">생성일</th>
+                  <th className="problem-management-actions-cell">관리</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProblems.map((problem) => (
                   <tr key={problem.id}>
-                    <td className="tutor-problem-id-cell">
-                      <span style={{ color: '#64748b', fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                    <td className="problem-management-id-cell">
+                      <span className="problem-management-id-text">
                         #{problem.id}
                       </span>
                     </td>
-                    <td className="tutor-problem-title-cell">
-                      <div className="tutor-problem-title-wrapper">
-                        <span 
-                          className="tutor-problem-title tutor-problem-title-clickable"
-                          onClick={() => {
-                            setSelectedProblem(problem);
-                            setShowProblemModal(true);
-                          }}
-                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                        >
-                          {problem.title}
-                        </span>
-                        {problem.isUsed && (
-                          <span 
-                            className="tutor-problem-usage-badge"
-                            title={`${problem.assignmentCount || 0}개 과제에서 사용 중`}
-                          >
-                            사용 중
-                            {problem.assignmentCount > 0 && (
-                              <span className="tutor-usage-count"> ({problem.assignmentCount})</span>
+                    <td className="problem-management-title-cell">
+                      <div className="problem-management-title-wrapper">
+                        <div className="problem-management-title-content">
+                          <div className="problem-management-title-row">
+                            <span 
+                              className="problem-management-title-text problem-management-title-clickable"
+                              onClick={() => {
+                                setSelectedProblem(problem);
+                                setShowProblemModal(true);
+                              }}
+                            >
+                              {problem.title}
+                            </span>
+                            {problem.isUsed && (
+                              <span 
+                                className="problem-management-usage-badge"
+                                title={`${problem.assignmentCount || 0}개 과제에서 사용 중`}
+                              >
+                                사용 중
+                                {problem.assignmentCount > 0 && (
+                                  <span className="problem-management-usage-count"> ({problem.assignmentCount})</span>
+                                )}
+                              </span>
                             )}
-                          </span>
-                        )}
+                          </div>
+                          {/* 태그 표시 */}
+                          {getProblemTags(problem).length > 0 && (
+                            <div className="problem-management-tags">
+                              {getProblemTags(problem).map((tag, idx) => (
+                                <span 
+                                  key={idx} 
+                                  className="problem-management-tag"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
-                    <td className="tutor-problem-meta-cell">
+                    <td className="problem-management-meta-cell">
                       {problem.timeLimit ? `${problem.timeLimit}초` : '-'}
                     </td>
-                    <td className="tutor-problem-meta-cell">
+                    <td className="problem-management-meta-cell">
                       {problem.memoryLimit ? `${problem.memoryLimit}MB` : '-'}
                     </td>
-                    <td className="tutor-problem-meta-cell">
+                    <td className="problem-management-meta-cell">
                       {formatDate(problem.createdAt)}
                     </td>
-                    <td className="tutor-problem-actions-cell">
-                      <div className="tutor-problem-actions-inline">
+                    <td className="problem-management-actions-cell">
+                      <div className="problem-management-actions-inline">
                         <button 
-                          className="tutor-btn-table-action tutor-btn-edit"
+                          className="problem-management-btn-action problem-management-btn-edit"
                           onClick={() => navigate(`/tutor/problems/${problem.id}/edit`)}
                         >
                           수정
                         </button>
                         <button 
-                          className="tutor-btn-table-action tutor-btn-copy"
+                          className="problem-management-btn-action problem-management-btn-copy"
                           onClick={() => handleCopyClick(problem)}
-                          style={{ marginLeft: '8px' }}
                         >
                           복사
                         </button>
                         {problem.isUsed && (
                           <button 
-                            className="tutor-btn-table-action tutor-btn-usage"
+                            className="problem-management-btn-action problem-management-btn-usage"
                             onClick={() => handleUsageClick(problem)}
-                            style={{ marginLeft: '8px' }}
                             title="사용 현황 보기"
                           >
                             사용 현황
                           </button>
                         )}
                         <button 
-                          className="tutor-btn-table-action tutor-btn-delete"
+                          className="problem-management-btn-action problem-management-btn-delete"
                           onClick={() => handleDeleteClick(problem)}
-                          style={{ marginLeft: '8px' }}
                         >
                           삭제
                         </button>
@@ -598,20 +612,20 @@ const ProblemManagement = () => {
         {/* 문제 설명 모달 */}
         {showProblemModal && selectedProblem && (
           <div 
-            className="tutor-modal-overlay" 
+            className="problem-management-modal-overlay" 
             onClick={() => {
               setShowProblemModal(false);
               setSelectedProblem(null);
             }}
           >
             <div 
-              className="tutor-modal-content tutor-modal-content-large" 
+              className="problem-management-modal-content problem-management-modal-content-large" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="tutor-modal-header">
+              <div className="problem-management-modal-header">
                 <h2>{selectedProblem.title}</h2>
                 <button 
-                  className="tutor-modal-close"
+                  className="problem-management-modal-close"
                   onClick={() => {
                     setShowProblemModal(false);
                     setSelectedProblem(null);
@@ -620,8 +634,30 @@ const ProblemManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="tutor-modal-body">
-                <div className="problem-description-modal-content">
+              <div className="problem-management-modal-body">
+                <div className="problem-management-description-content">
+                  {/* 태그 표시 */}
+                  {getProblemTags(selectedProblem).length > 0 && (
+                    <div style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {getProblemTags(selectedProblem).map((tag, idx) => (
+                        <span 
+                          key={idx} 
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '0.4rem 0.8rem',
+                            background: '#eef2ff',
+                            color: '#667eea',
+                            borderRadius: '6px',
+                            fontSize: '0.875rem',
+                            fontWeight: '500'
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <ReactMarkdown
                     components={{
                       h1: ({node, ...props}) => (
@@ -662,7 +698,7 @@ const ProblemManagement = () => {
         {/* 삭제 확인 모달 */}
         {showDeleteModal && problemToDelete && (
           <div 
-            className="tutor-modal-overlay" 
+            className="problem-management-modal-overlay" 
             onClick={() => {
               if (!isDeleting) {
                 setShowDeleteModal(false);
@@ -671,13 +707,13 @@ const ProblemManagement = () => {
             }}
           >
             <div 
-              className="tutor-modal-content" 
+              className="problem-management-modal-content" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="tutor-modal-header">
+              <div className="problem-management-modal-header">
                 <h2>문제 삭제 확인</h2>
                 <button 
-                  className="tutor-modal-close"
+                  className="problem-management-modal-close"
                   onClick={() => {
                     if (!isDeleting) {
                       setShowDeleteModal(false);
@@ -689,16 +725,16 @@ const ProblemManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="tutor-modal-body">
+              <div className="problem-management-modal-body">
                 <p>정말로 다음 문제를 삭제하시겠습니까?</p>
                 <p style={{ fontWeight: 'bold', marginTop: '8px' }}>{problemToDelete.title}</p>
                 <p style={{ color: '#e74c3c', marginTop: '16px', fontSize: '14px' }}>
                   ⚠️ 이 작업은 되돌릴 수 없습니다.
                 </p>
               </div>
-              <div className="tutor-modal-footer">
+              <div className="problem-management-modal-footer">
                 <button 
-                  className="tutor-btn-secondary"
+                  className="problem-management-btn-cancel"
                   onClick={() => {
                     setShowDeleteModal(false);
                     setProblemToDelete(null);
@@ -708,7 +744,7 @@ const ProblemManagement = () => {
                   취소
                 </button>
                 <button 
-                  className="tutor-btn-danger"
+                  className="problem-management-btn-danger"
                   onClick={handleDeleteConfirm}
                   disabled={isDeleting}
                 >
@@ -722,7 +758,7 @@ const ProblemManagement = () => {
         {/* 복사 모달 */}
         {showCopyModal && problemToCopy && (
           <div 
-            className="tutor-modal-overlay" 
+            className="problem-management-modal-overlay" 
             onClick={() => {
               if (!isCopying) {
                 setShowCopyModal(false);
@@ -732,13 +768,13 @@ const ProblemManagement = () => {
             }}
           >
             <div 
-              className="tutor-modal-content" 
+              className="problem-management-modal-content" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="tutor-modal-header">
+              <div className="problem-management-modal-header">
                 <h2>문제 복사</h2>
                 <button 
-                  className="tutor-modal-close"
+                  className="problem-management-modal-close"
                   onClick={() => {
                     if (!isCopying) {
                       setShowCopyModal(false);
@@ -751,27 +787,27 @@ const ProblemManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="tutor-modal-body">
+              <div className="problem-management-modal-body">
                 <p>다음 문제를 복사합니다:</p>
                 <p style={{ fontWeight: 'bold', marginTop: '8px', marginBottom: '16px' }}>
                   {problemToCopy.title}
                 </p>
-                <div className="tutor-form-group">
+                <div className="problem-management-form-group">
                   <label htmlFor="copy-title">새 문제 제목</label>
                   <input
                     id="copy-title"
                     type="text"
                     value={copyTitle}
                     onChange={(e) => setCopyTitle(e.target.value)}
-                    className="tutor-form-input"
+                    className="problem-management-form-input"
                     placeholder="복사본 문제 제목을 입력하세요"
                     disabled={isCopying}
                   />
                 </div>
               </div>
-              <div className="tutor-modal-footer">
+              <div className="problem-management-modal-footer">
                 <button 
-                  className="tutor-btn-secondary"
+                  className="problem-management-btn-cancel"
                   onClick={() => {
                     setShowCopyModal(false);
                     setProblemToCopy(null);
@@ -782,7 +818,7 @@ const ProblemManagement = () => {
                   취소
                 </button>
                 <button 
-                  className="tutor-btn-primary"
+                  className="problem-management-btn-submit"
                   onClick={handleCopyConfirm}
                   disabled={isCopying || !copyTitle.trim()}
                 >
@@ -796,7 +832,7 @@ const ProblemManagement = () => {
         {/* 사용 현황 모달 */}
         {showUsageModal && problemForUsage && (
           <div 
-            className="tutor-modal-overlay" 
+            className="problem-management-modal-overlay" 
             onClick={() => {
               if (!loadingUsage) {
                 setShowUsageModal(false);
@@ -806,13 +842,13 @@ const ProblemManagement = () => {
             }}
           >
             <div 
-              className="tutor-modal-content tutor-modal-content-large" 
+              className="problem-management-modal-content problem-management-modal-content-large" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="tutor-modal-header">
+              <div className="problem-management-modal-header">
                 <h2>문제 사용 현황</h2>
                 <button 
-                  className="tutor-modal-close"
+                  className="problem-management-modal-close"
                   onClick={() => {
                     if (!loadingUsage) {
                       setShowUsageModal(false);
@@ -825,7 +861,7 @@ const ProblemManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="tutor-modal-body">
+              <div className="problem-management-modal-body">
                 <p style={{ fontWeight: 'bold', marginBottom: '20px', fontSize: '16px' }}>
                   {problemForUsage.title}
                 </p>
@@ -904,9 +940,9 @@ const ProblemManagement = () => {
                   </div>
                 )}
               </div>
-              <div className="tutor-modal-footer">
+              <div className="problem-management-modal-footer">
                 <button 
-                  className="tutor-btn-secondary"
+                  className="problem-management-btn-cancel"
                   onClick={() => {
                     setShowUsageModal(false);
                     setProblemForUsage(null);

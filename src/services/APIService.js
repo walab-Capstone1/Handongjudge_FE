@@ -354,6 +354,13 @@ class APIService {
     }
   }
 
+  // 문제의 ZIP 파일 파싱 (수정 페이지용)
+  async parseProblemZip(problemId) {
+    return await this.request(`/problems/${problemId}/parse`, {
+      method: 'GET'
+    });
+  }
+
   // 문제 수정
   async updateProblem(problemId, formData) {
     const url = `${this.baseURL}/problems/${problemId}`;
