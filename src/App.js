@@ -23,8 +23,10 @@ import GradeManagement from "./pages/TutorPage/GradeManagement";
 import NoticeManagement from "./pages/TutorPage/NoticeManagement";
 import ProblemManagement from "./pages/TutorPage/ProblemManagement";
 import ProblemSetManagement from "./pages/TutorPage/ProblemSetManagement";
+import ProblemSetEdit from "./pages/TutorPage/ProblemSetEdit";
 import ProblemCreate from "./pages/TutorPage/ProblemCreate";
 import ProblemEdit from "./pages/TutorPage/ProblemEdit";
+import ProblemView from "./pages/TutorPage/ProblemView";
 import SettingsPage from "./pages/TutorPage/SettingsPage";
 import AdminRoute from "./components/AdminRoute";
 import EnrollPage from "./pages/EnrollPage";
@@ -94,7 +96,9 @@ function App() {
             <Route path="/tutor/problems" element={<AdminRoute><ProblemManagement /></AdminRoute>} />
             <Route path="/tutor/problems/create" element={<AdminRoute><ProblemCreate /></AdminRoute>} />
             <Route path="/tutor/problems/:problemId/edit" element={<AdminRoute><ProblemEdit /></AdminRoute>} />
+            <Route path="/tutor/problems/:problemId/view" element={<AdminRoute><ProblemView /></AdminRoute>} />
             <Route path="/tutor/problems/sets" element={<AdminRoute><ProblemSetManagement /></AdminRoute>} />
+            <Route path="/tutor/problems/sets/:problemSetId/edit" element={<AdminRoute><ProblemSetEdit /></AdminRoute>} />
             <Route path="/tutor/settings" element={<AdminRoute><SettingsPage /></AdminRoute>} />
             {/* 기존 /admin 라우트는 리다이렉트 (하위 호환성) */}
             <Route path="/admin" element={<AdminRoute><TutorDashboard /></AdminRoute>} />

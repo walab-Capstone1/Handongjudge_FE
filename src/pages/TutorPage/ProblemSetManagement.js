@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
+import EmptyState from "../../components/EmptyState";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import "./ProblemSetManagement.css";
 
 const ProblemSetManagement = () => {
@@ -21,10 +23,8 @@ const ProblemSetManagement = () => {
   const fetchProblemSets = async () => {
     try {
       setLoading(true);
-      // TODO: 백엔드 API 연동
-      // const response = await APIService.getProblemSets();
-      // setProblemSets(response.data || []);
-      setProblemSets([]); // 임시로 빈 배열
+      const response = await APIService.getProblemSets();
+      setProblemSets(Array.isArray(response) ? response : (response?.data || []));
     } catch (error) {
       console.error('문제집 목록 조회 실패:', error);
       setProblemSets([]);
@@ -41,22 +41,45 @@ const ProblemSetManagement = () => {
 
     try {
       setIsCreating(true);
-      // TODO: 백엔드 API 연동
-      // await APIService.createProblemSet({
-      //   title: newSetTitle,
-      //   description: newSetDescription
-      // });
-      alert('문제집 생성 기능은 백엔드 API 연동 후 구현됩니다.');
+      await APIService.createProblemSet({
+        title: newSetTitle.trim(),
+        description: newSetDescription.trim() || null,
+        tags: '[]' // 기본값: 빈 태그 배열
+      });
       setShowCreateModal(false);
       setNewSetTitle('');
       setNewSetDescription('');
       fetchProblemSets();
     } catch (error) {
       console.error('문제집 생성 실패:', error);
-      alert('문제집 생성에 실패했습니다.');
+      alert('문제집 생성에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
     } finally {
       setIsCreating(false);
     }
+  };
+
+  const handleDeleteSet = async (problemSet) => {
+    if (!window.confirm(`정말로 "${problemSet.title}" 문제집을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+      return;
+    }
+
+    try {
+      await APIService.deleteProblemSet(problemSet.id);
+      fetchProblemSets();
+    } catch (error) {
+      console.error('문제집 삭제 실패:', error);
+      alert('문제집 삭제에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
   };
 
   const filteredSets = problemSets.filter(set => 
@@ -67,9 +90,7 @@ const ProblemSetManagement = () => {
   if (loading) {
     return (
       <TutorLayout>
-        <div className="tutor-loading-container">
-          <div className="tutor-loading-spinner"></div>
-        </div>
+        <LoadingSpinner message="문제집 목록을 불러오는 중..." />
       </TutorLayout>
     );
   }
@@ -77,70 +98,85 @@ const ProblemSetManagement = () => {
   return (
     <TutorLayout>
       <div className="problem-set-management">
-        <div className="tutor-page-header">
-          <h1 className="tutor-page-title">문제집 관리</h1>
-          <div className="tutor-header-actions">
+        <div className="problem-set-management-title-header">
+          <button
+            className="problem-set-management-btn-back-to-list"
+            onClick={() => navigate('/tutor/problems')}
+            title="문제 관리 페이지로 돌아가기"
+          >
+            ← 문제 관리
+          </button>
+          <div className="problem-set-management-title-left">
+            <h1 className="problem-set-management-title">문제집 관리</h1>
+            <div className="problem-set-management-title-stats">
+              <span className="problem-set-management-stat-badge">총 {problemSets.length}개 문제집</span>
+              <span className="problem-set-management-stat-badge">표시 {filteredSets.length}개</span>
+            </div>
+          </div>
+          <div className="problem-set-management-title-right">
             <button 
-              className="tutor-btn-primary"
+              className="problem-set-management-btn-create"
               onClick={() => setShowCreateModal(true)}
             >
-              새 문제집 만들기
+              + 새 문제집 만들기
             </button>
           </div>
         </div>
 
-        <div className="tutor-filters-section">
-          <div className="tutor-search-box">
+        <div className="problem-set-management-filters-section">
+          <div className="problem-set-management-search-box">
             <input
               type="text"
               placeholder="문제집명으로 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="tutor-search-input"
+              className="problem-set-management-search-input"
             />
           </div>
         </div>
 
-        <div className="tutor-problems-table-container">
+        <div className="problem-set-management-table-container">
           {filteredSets.length > 0 ? (
-            <table className="tutor-problems-table">
+            <table className="problem-set-management-table">
               <thead>
                 <tr>
-                  <th className="tutor-problem-title-cell">문제집 제목</th>
-                  <th className="tutor-problem-meta-cell">문제 수</th>
-                  <th className="tutor-problem-meta-cell">생성일</th>
-                  <th className="tutor-problem-actions-cell">관리</th>
+                  <th className="problem-set-management-title-cell">문제집 제목</th>
+                  <th className="problem-set-management-meta-cell">문제 수</th>
+                  <th className="problem-set-management-meta-cell">생성일</th>
+                  <th className="problem-set-management-actions-cell">관리</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredSets.map((set) => (
                   <tr key={set.id}>
-                    <td className="tutor-problem-title-cell">
-                      <div>
-                        <span className="tutor-problem-title">{set.title}</span>
-                        {set.description && (
-                          <p className="tutor-problem-description">{set.description}</p>
-                        )}
+                    <td className="problem-set-management-title-cell">
+                      <div 
+                        className="problem-set-management-title-wrapper"
+                        onClick={() => navigate(`/tutor/problems/sets/${set.id}/edit`)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="problem-set-management-title-content">
+                          <span className="problem-set-management-title-text">{set.title}</span>
+                          {set.description && (
+                            <p className="problem-set-management-description">{set.description}</p>
+                          )}
+                        </div>
                       </div>
                     </td>
-                    <td className="tutor-problem-meta-cell">
+                    <td className="problem-set-management-meta-cell">
                       {set.problemCount || 0}개
                     </td>
-                    <td className="tutor-problem-meta-cell">
-                      {set.createdAt ? new Date(set.createdAt).toLocaleDateString('ko-KR') : '-'}
+                    <td className="problem-set-management-meta-cell">
+                      {formatDate(set.createdAt)}
                     </td>
-                    <td className="tutor-problem-actions-cell">
-                      <div className="tutor-problem-actions-inline">
+                    <td className="problem-set-management-actions-cell">
+                      <div className="problem-set-management-actions-inline">
                         <button 
-                          className="tutor-btn-table-action tutor-btn-edit"
-                          onClick={() => alert('문제집 편집 기능은 구현 예정입니다.')}
-                        >
-                          편집
-                        </button>
-                        <button 
-                          className="tutor-btn-table-action tutor-btn-delete"
-                          onClick={() => alert('문제집 삭제 기능은 구현 예정입니다.')}
-                          style={{ marginLeft: '8px' }}
+                          className="problem-set-management-btn-action problem-set-management-btn-delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSet(set);
+                          }}
                         >
                           삭제
                         </button>
@@ -151,23 +187,19 @@ const ProblemSetManagement = () => {
               </tbody>
             </table>
           ) : (
-            <div className="tutor-table-empty">
-              <p>등록된 문제집이 없습니다.</p>
-              <button 
-                className="tutor-btn-primary"
-                onClick={() => setShowCreateModal(true)}
-                style={{ marginTop: '16px' }}
-              >
-                첫 문제집 만들기
-              </button>
-            </div>
+            <EmptyState
+              title="등록된 문제집이 없습니다"
+              message="새로운 문제집을 만들어보세요"
+              actionLabel="새 문제집 만들기"
+              onAction={() => setShowCreateModal(true)}
+            />
           )}
         </div>
 
         {/* 문제집 생성 모달 */}
         {showCreateModal && (
           <div 
-            className="tutor-modal-overlay" 
+            className="problem-set-management-modal-overlay" 
             onClick={() => {
               if (!isCreating) {
                 setShowCreateModal(false);
@@ -177,13 +209,13 @@ const ProblemSetManagement = () => {
             }}
           >
             <div 
-              className="tutor-modal-content" 
+              className="problem-set-management-modal-content" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="tutor-modal-header">
+              <div className="problem-set-management-modal-header">
                 <h2>새 문제집 만들기</h2>
                 <button 
-                  className="tutor-modal-close"
+                  className="problem-set-management-modal-close"
                   onClick={() => {
                     if (!isCreating) {
                       setShowCreateModal(false);
@@ -196,35 +228,35 @@ const ProblemSetManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="tutor-modal-body">
-                <div className="tutor-form-group">
+              <div className="problem-set-management-modal-body">
+                <div className="problem-set-management-form-group">
                   <label htmlFor="set-title">문제집 제목 *</label>
                   <input
                     id="set-title"
                     type="text"
                     value={newSetTitle}
                     onChange={(e) => setNewSetTitle(e.target.value)}
-                    className="tutor-form-input"
+                    className="problem-set-management-form-input"
                     placeholder="문제집 제목을 입력하세요"
                     disabled={isCreating}
                   />
                 </div>
-                <div className="tutor-form-group">
+                <div className="problem-set-management-form-group">
                   <label htmlFor="set-description">설명 (선택)</label>
                   <textarea
                     id="set-description"
                     value={newSetDescription}
                     onChange={(e) => setNewSetDescription(e.target.value)}
-                    className="tutor-form-textarea"
+                    className="problem-set-management-form-textarea"
                     placeholder="문제집에 대한 설명을 입력하세요"
                     rows="4"
                     disabled={isCreating}
                   />
                 </div>
               </div>
-              <div className="tutor-modal-footer">
+              <div className="problem-set-management-modal-footer">
                 <button 
-                  className="tutor-btn-secondary"
+                  className="problem-set-management-btn-cancel"
                   onClick={() => {
                     setShowCreateModal(false);
                     setNewSetTitle('');
@@ -235,7 +267,7 @@ const ProblemSetManagement = () => {
                   취소
                 </button>
                 <button 
-                  className="tutor-btn-primary"
+                  className="problem-set-management-btn-submit"
                   onClick={handleCreateSet}
                   disabled={isCreating || !newSetTitle.trim()}
                 >

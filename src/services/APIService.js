@@ -1102,6 +1102,56 @@ class APIService {
     });
   }
 
+  // ========== 문제집 관리 API ==========
+
+  // 문제집 목록 조회
+  async getProblemSets() {
+    return await this.request('/problem-sets');
+  }
+
+  // 문제집 상세 조회
+  async getProblemSet(problemSetId) {
+    return await this.request(`/problem-sets/${problemSetId}`);
+  }
+
+  // 문제집 생성
+  async createProblemSet(data) {
+    return await this.request('/problem-sets', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 문제집 수정
+  async updateProblemSet(problemSetId, data) {
+    return await this.request(`/problem-sets/${problemSetId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 문제집 삭제
+  async deleteProblemSet(problemSetId) {
+    return await this.request(`/problem-sets/${problemSetId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // 문제집에 문제 추가
+  async addProblemToSet(problemSetId, problemId, order = null) {
+    return await this.request(`/problem-sets/${problemSetId}/problems`, {
+      method: 'POST',
+      body: JSON.stringify({ problemId, order }),
+    });
+  }
+
+  // 문제집에서 문제 제거
+  async removeProblemFromSet(problemSetId, problemId) {
+    return await this.request(`/problem-sets/${problemSetId}/problems/${problemId}`, {
+      method: 'DELETE',
+    });
+  }
+
 }
 
 const apiService = new APIService();
