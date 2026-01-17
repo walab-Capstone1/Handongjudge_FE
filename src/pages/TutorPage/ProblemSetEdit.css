@@ -4,6 +4,32 @@
   padding: 0;
 }
 
+/* 돌아가기 버튼 - 헤더 위에 배치 */
+.problem-set-edit-btn-back-to-list {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.problem-set-edit-btn-back-to-list:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #1f2937;
+  transform: translateX(-2px);
+}
+
 /* 타이틀 헤더 섹션 */
 .problem-set-edit .problem-set-edit-title-header {
   display: flex;
@@ -17,7 +43,6 @@
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
-  position: relative;
 }
 
 .problem-set-edit .problem-set-edit-title-left {
@@ -26,7 +51,6 @@
   gap: 1rem;
   flex: 1;
   min-width: 0;
-  margin-left: 140px; /* 돌아가기 버튼 공간 확보 */
 }
 
 .problem-set-edit .problem-set-edit-title-wrapper {
@@ -38,34 +62,6 @@
   justify-content: center;
 }
 
-/* 돌아가기 버튼 - 헤더 왼쪽 상단에 배치 */
-.problem-set-edit .problem-set-edit-btn-back-to-list {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: rgba(255, 255, 255, 0.25);
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  color: white;
-  border-radius: 8px;
-  padding: 0.625rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.problem-set-edit .problem-set-edit-btn-back-to-list:hover {
-  background: rgba(255, 255, 255, 0.35);
-  border-color: rgba(255, 255, 255, 0.6);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
 
 .problem-set-edit .problem-set-edit-title {
   font-size: 1.75rem;
@@ -630,20 +626,13 @@ body.section-modal-open .problem-set-edit .problem-set-edit-modal-search-input:f
   .problem-set-edit .problem-set-edit-title-header {
     flex-direction: column;
     align-items: stretch;
-    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
-  }
-
-  .problem-set-edit .problem-set-edit-btn-back-to-list {
-    position: static;
-    margin-bottom: 1rem;
-    align-self: flex-start;
+    padding: 1.5rem;
   }
 
   .problem-set-edit .problem-set-edit-title-left {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-    margin-left: 0;
   }
 
   .problem-set-edit .problem-set-edit-title-right {

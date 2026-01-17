@@ -252,14 +252,14 @@ const ProblemSetEdit = () => {
           />
         )}
 
+        <button
+          className="problem-set-edit-btn-back-to-list"
+          onClick={() => navigate('/tutor/problems/sets')}
+          title="문제집 목록으로 돌아가기"
+        >
+          ← 문제집 목록
+        </button>
         <div className="problem-set-edit-title-header">
-          <button
-            className="problem-set-edit-btn-back-to-list"
-            onClick={() => navigate('/tutor/problems/sets')}
-            title="문제집 목록으로 돌아가기"
-          >
-            ← 문제집 목록
-          </button>
           <div className="problem-set-edit-title-left">
             <div className="problem-set-edit-title-wrapper">
               <h1 className="problem-set-edit-title">{problemSet.title}</h1>
