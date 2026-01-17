@@ -405,6 +405,11 @@ class APIService {
   }
 
   // 문제 복사
+  // 문제가 사용되는 과제 목록 조회
+  async getProblemAssignments(problemId) {
+    return await this.request(`/problems/${problemId}/assignments`);
+  }
+
   async copyProblem(problemId, newTitle = null) {
     const body = newTitle ? { newTitle } : {};
     return await this.request(`/problems/${problemId}/copy`, {

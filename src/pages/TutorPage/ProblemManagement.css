@@ -132,6 +132,16 @@ body.section-modal-open .problem-management .tutor-search-input:focus {
   color: white;
 }
 
+.tutor-btn-usage {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.tutor-btn-usage:hover {
+  background: #10b981;
+  color: white;
+}
+
 .tutor-table-empty {
   text-align: center;
   padding: 3rem 1.5rem;
@@ -146,6 +156,24 @@ body.section-modal-open .problem-management .tutor-search-input:focus {
 
 .tutor-problem-title-clickable:hover {
   color: #667eea;
+}
+
+.tutor-problem-usage-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background: #10b981;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tutor-usage-count {
+  margin-left: 0.25rem;
+  opacity: 0.9;
+  font-weight: 500;
 }
 
 /* 문제 설명 모달 스타일 */

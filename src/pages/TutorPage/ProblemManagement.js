@@ -24,6 +24,10 @@ const ProblemManagement = () => {
   const [isCopying, setIsCopying] = useState(false);
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('success');
+  const [showUsageModal, setShowUsageModal] = useState(false);
+  const [problemUsage, setProblemUsage] = useState([]);
+  const [loadingUsage, setLoadingUsage] = useState(false);
+  const [problemForUsage, setProblemForUsage] = useState(null);
 
   useEffect(() => {
     fetchProblems();
@@ -130,6 +134,39 @@ const ProblemManagement = () => {
     }
   };
 
+  const handleUsageClick = async (problem) => {
+    setProblemForUsage(problem);
+    setShowUsageModal(true);
+    setLoadingUsage(true);
+    setProblemUsage([]);
+    
+    try {
+      const response = await APIService.getProblemAssignments(problem.id);
+      const assignments = Array.isArray(response) ? response : (response?.data || []);
+      setProblemUsage(assignments);
+    } catch (error) {
+      console.error('문제 사용 현황 조회 실패:', error);
+      setAlertMessage('문제 사용 현황 조회에 실패했습니다. ' + (error.message || ''));
+      setAlertType('error');
+      setTimeout(() => setAlertMessage(null), 5000);
+      setProblemUsage([]);
+    } finally {
+      setLoadingUsage(false);
+    }
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   if (loading) {
     return (
       <TutorLayout>
@@ -199,6 +236,17 @@ const ProblemManagement = () => {
                         >
                           {problem.title}
                         </span>
+                        {problem.isUsed && (
+                          <span 
+                            className="tutor-problem-usage-badge"
+                            title={`${problem.assignmentCount || 0}개 과제에서 사용 중`}
+                          >
+                            사용 중
+                            {problem.assignmentCount > 0 && (
+                              <span className="tutor-usage-count"> ({problem.assignmentCount})</span>
+                            )}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="tutor-problem-meta-cell">
@@ -225,6 +273,16 @@ const ProblemManagement = () => {
                         >
                           복사
                         </button>
+                        {problem.isUsed && (
+                          <button 
+                            className="tutor-btn-table-action tutor-btn-usage"
+                            onClick={() => handleUsageClick(problem)}
+                            style={{ marginLeft: '8px' }}
+                            title="사용 현황 보기"
+                          >
+                            사용 현황
+                          </button>
+                        )}
                         <button 
                           className="tutor-btn-table-action tutor-btn-delete"
                           onClick={() => handleDeleteClick(problem)}
@@ -440,6 +498,116 @@ const ProblemManagement = () => {
                   disabled={isCopying || !copyTitle.trim()}
                 >
                   {isCopying ? '복사 중...' : '복사'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 사용 현황 모달 */}
+        {showUsageModal && problemForUsage && (
+          <div 
+            className="tutor-modal-overlay" 
+            onClick={() => {
+              if (!loadingUsage) {
+                setShowUsageModal(false);
+                setProblemForUsage(null);
+                setProblemUsage([]);
+              }
+            }}
+          >
+            <div 
+              className="tutor-modal-content tutor-modal-content-large" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="tutor-modal-header">
+                <h2>문제 사용 현황</h2>
+                <button 
+                  className="tutor-modal-close"
+                  onClick={() => {
+                    if (!loadingUsage) {
+                      setShowUsageModal(false);
+                      setProblemForUsage(null);
+                      setProblemUsage([]);
+                    }
+                  }}
+                  disabled={loadingUsage}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="tutor-modal-body">
+                <p style={{ fontWeight: 'bold', marginBottom: '20px', fontSize: '16px' }}>
+                  {problemForUsage.title}
+                </p>
+                
+                {loadingUsage ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <LoadingSpinner message="사용 현황을 불러오는 중..." />
+                  </div>
+                ) : problemUsage.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                    <p>이 문제는 현재 어떤 과제에서도 사용되지 않습니다.</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p style={{ marginBottom: '16px', color: '#666' }}>
+                      총 {problemUsage.length}개의 과제에서 사용 중입니다.
+                    </p>
+                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '2px solid #e1e8ed', backgroundColor: '#f8f9fa' }}>
+                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>수업</th>
+                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>과제</th>
+                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>시작일</th>
+                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>종료일</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {problemUsage.map((usage, index) => (
+                            <tr key={usage.assignmentId} style={{ borderBottom: '1px solid #e1e8ed' }}>
+                              <td style={{ padding: '12px' }}>
+                                <div>
+                                  <div style={{ fontWeight: '500' }}>{usage.courseTitle}</div>
+                                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                    {usage.year}년 {usage.semester} {usage.sectionNumber ? `- ${usage.sectionNumber}분반` : ''}
+                                  </div>
+                                </div>
+                              </td>
+                              <td style={{ padding: '12px' }}>
+                                {usage.assignmentNumber && (
+                                  <span style={{ color: '#666', marginRight: '8px' }}>
+                                    {usage.assignmentNumber}
+                                  </span>
+                                )}
+                                {usage.assignmentTitle}
+                              </td>
+                              <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
+                                {formatDateTime(usage.assignmentStartDate)}
+                              </td>
+                              <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
+                                {formatDateTime(usage.assignmentEndDate)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="tutor-modal-footer">
+                <button 
+                  className="tutor-btn-secondary"
+                  onClick={() => {
+                    setShowUsageModal(false);
+                    setProblemForUsage(null);
+                    setProblemUsage([]);
+                  }}
+                  disabled={loadingUsage}
+                >
+                  닫기
                 </button>
               </div>
             </div>
