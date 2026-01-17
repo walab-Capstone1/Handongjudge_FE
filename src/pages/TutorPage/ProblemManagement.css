@@ -2,6 +2,17 @@
   padding: 0;
 }
 
+.problem-management .tutor-filters-section {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.problem-management .tutor-search-box {
+  flex: 1;
+}
+
 .problem-management .tutor-search-input {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -12,14 +23,57 @@
   transition: border-color 0.2s ease;
 }
 
+.problem-management .tutor-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 140px;
+}
+
+.problem-management .tutor-filter-group:has(#filter-course) {
+  min-width: 200px;
+}
+
+.problem-management .tutor-filter-group:has(#filter-assignment) {
+  min-width: 180px;
+}
+
+.problem-management .tutor-filter-group:has(#filter-tag) {
+  min-width: 150px;
+}
+
+.problem-management .tutor-filter-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.problem-management .tutor-filter-select {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: white;
+  color: #1e293b;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.problem-management .tutor-filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 .problem-management .tutor-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* 모달이 열려있을 때 search input focus 스타일 무시 */
-body.section-modal-open .problem-management .tutor-search-input:focus {
+/* 모달이 열려있을 때 search input 및 filter select focus 스타일 무시 */
+body.section-modal-open .problem-management .tutor-search-input:focus,
+body.section-modal-open .problem-management .tutor-filter-select:focus {
   outline: none !important;
   border-color: #e1e8ed !important;
   box-shadow: none !important;
@@ -72,6 +126,12 @@ body.section-modal-open .problem-management .tutor-search-input:focus {
   background: #f8fafc;
 }
 
+.tutor-problem-id-cell {
+  min-width: 80px;
+  text-align: center;
+  color: #64748b;
+}
+
 .tutor-problem-title-cell {
   min-width: 300px;
 }
@@ -106,30 +166,70 @@ body.section-modal-open .problem-management .tutor-search-input:focus {
 
 .tutor-btn-table-action {
   padding: 0.5rem 1rem;
-  border: none;
+  border: 1px solid;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   background: white;
-  color: #667eea;
-  border: 1px solid #667eea;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.tutor-btn-table-action::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.tutor-btn-table-action:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .tutor-btn-table-action:hover {
-  background: #667eea;
-  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tutor-btn-table-action:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tutor-btn-edit {
   border-color: #667eea;
   color: #667eea;
+  position: relative;
 }
 
 .tutor-btn-edit:hover {
   background: #667eea;
   color: white;
+  border-color: #667eea;
+}
+
+.tutor-btn-copy {
+  border-color: #8b5cf6;
+  color: #8b5cf6;
+}
+
+.tutor-btn-copy:hover {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
 }
 
 .tutor-btn-usage {
@@ -140,6 +240,18 @@ body.section-modal-open .problem-management .tutor-search-input:focus {
 .tutor-btn-usage:hover {
   background: #10b981;
   color: white;
+  border-color: #10b981;
+}
+
+.tutor-btn-delete {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.tutor-btn-delete:hover {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
 }
 
 .tutor-table-empty {
@@ -244,5 +356,20 @@ body.section-modal-open .problem-management .tutor-search-input:focus {
   font-size: 0.9em;
   white-space: pre;
   display: block;
+}
+
+/* 사용 현황 모달 테이블 행 스타일 */
+.problem-management .tutor-modal-body table tbody tr {
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.problem-management .tutor-modal-body table tbody tr:hover {
+  background-color: #f0f7ff !important;
+  transform: translateX(2px);
+}
+
+.problem-management .tutor-modal-body table tbody tr:active {
+  transform: translateX(0);
+  background-color: #e0f2fe !important;
 }
 

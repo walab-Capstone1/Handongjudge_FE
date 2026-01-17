@@ -28,10 +28,39 @@ const ProblemManagement = () => {
   const [problemUsage, setProblemUsage] = useState([]);
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [problemForUsage, setProblemForUsage] = useState(null);
+  const [filterUsageStatus, setFilterUsageStatus] = useState('ALL'); // 'ALL', 'USED', 'UNUSED'
+  const [filterDifficulty, setFilterDifficulty] = useState('ALL'); // 'ALL', '1', '2', '3', etc.
+  const [filterCourse, setFilterCourse] = useState('ALL'); // 'ALL', sectionId
+  const [filterAssignment, setFilterAssignment] = useState('ALL'); // 'ALL', assignmentId
+  const [filterTag, setFilterTag] = useState('ALL'); // 'ALL', tagName
+  const [sections, setSections] = useState([]); // 수업 목록
+  const [assignments, setAssignments] = useState([]); // 과제 목록 (선택된 수업의)
+  const [problemUsageMap, setProblemUsageMap] = useState({}); // 문제별 사용 현황 맵 { problemId: [{ sectionId, assignmentId, ... }] }
+  const [loadingUsageData, setLoadingUsageData] = useState(false);
+  const [availableTags, setAvailableTags] = useState([]); // 사용 가능한 태그 목록
 
   useEffect(() => {
     fetchProblems();
+    fetchSections();
   }, []);
+
+  useEffect(() => {
+    if (filterUsageStatus === 'USED' && problems.length > 0) {
+      fetchProblemUsageData();
+    } else {
+      setProblemUsageMap({});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterUsageStatus, problems.length]);
+
+  useEffect(() => {
+    if (filterCourse !== 'ALL') {
+      fetchAssignmentsForSection(filterCourse);
+    } else {
+      setAssignments([]);
+      setFilterAssignment('ALL');
+    }
+  }, [filterCourse]);
 
   const fetchProblems = async () => {
     try {
@@ -55,17 +84,174 @@ const ProblemManagement = () => {
       }
       
       setProblems(problemsData);
+      
+      // 모든 문제에서 태그 추출하여 고유 태그 목록 생성
+      const allTags = new Set();
+      problemsData.forEach(problem => {
+        if (problem.tags) {
+          // tags가 배열인 경우
+          if (Array.isArray(problem.tags)) {
+            problem.tags.forEach(tag => {
+              if (tag && tag.trim()) {
+                allTags.add(tag.trim());
+              }
+            });
+          } 
+          // tags가 문자열인 경우 (JSON 문자열일 수 있음)
+          else if (typeof problem.tags === 'string') {
+            try {
+              const parsedTags = JSON.parse(problem.tags);
+              if (Array.isArray(parsedTags)) {
+                parsedTags.forEach(tag => {
+                  if (tag && tag.trim()) {
+                    allTags.add(tag.trim());
+                  }
+                });
+              } else if (parsedTags && parsedTags.trim()) {
+                allTags.add(parsedTags.trim());
+              }
+            } catch (e) {
+              // JSON 파싱 실패 시 일반 문자열로 처리
+              if (problem.tags.trim()) {
+                allTags.add(problem.tags.trim());
+              }
+            }
+          }
+        }
+      });
+      setAvailableTags(Array.from(allTags).sort());
     } catch (error) {
       console.error('문제 목록 조회 실패:', error);
       setProblems([]);
+      setAvailableTags([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchSections = async () => {
+    try {
+      const response = await APIService.getInstructorDashboard();
+      const sectionsData = response?.data || response || [];
+      setSections(Array.isArray(sectionsData) ? sectionsData : []);
+    } catch (error) {
+      console.error('수업 목록 조회 실패:', error);
+      setSections([]);
+    }
+  };
+
+  const fetchAssignmentsForSection = async (sectionId) => {
+    try {
+      const response = await APIService.getAssignmentsBySection(sectionId);
+      const assignmentsData = response?.data || response || [];
+      setAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
+    } catch (error) {
+      console.error('과제 목록 조회 실패:', error);
+      setAssignments([]);
+    }
+  };
+
+  const fetchProblemUsageData = async () => {
+    if (problems.length === 0) return;
+    
+    try {
+      setLoadingUsageData(true);
+      const usageMap = {};
+      
+      // 사용 중인 문제들에 대해서만 사용 현황 조회
+      const usedProblems = problems.filter(p => p.isUsed === true);
+      
+      await Promise.all(
+        usedProblems.map(async (problem) => {
+          try {
+            const response = await APIService.getProblemAssignments(problem.id);
+            const assignments = Array.isArray(response) ? response : (response?.data || []);
+            usageMap[problem.id] = assignments;
+          } catch (error) {
+            console.error(`문제 ${problem.id} 사용 현황 조회 실패:`, error);
+            usageMap[problem.id] = [];
+          }
+        })
+      );
+      
+      setProblemUsageMap(usageMap);
+    } catch (error) {
+      console.error('문제 사용 현황 조회 실패:', error);
+      setProblemUsageMap({});
+    } finally {
+      setLoadingUsageData(false);
+    }
+  };
+
+  // 문제의 태그를 추출하는 헬퍼 함수
+  const getProblemTags = (problem) => {
+    if (!problem.tags) return [];
+    
+    // tags가 배열인 경우
+    if (Array.isArray(problem.tags)) {
+      return problem.tags.map(tag => tag && tag.trim()).filter(Boolean);
+    }
+    
+    // tags가 문자열인 경우 (JSON 문자열일 수 있음)
+    if (typeof problem.tags === 'string') {
+      try {
+        const parsedTags = JSON.parse(problem.tags);
+        if (Array.isArray(parsedTags)) {
+          return parsedTags.map(tag => tag && tag.trim()).filter(Boolean);
+        } else if (parsedTags && parsedTags.trim()) {
+          return [parsedTags.trim()];
+        }
+      } catch (e) {
+        // JSON 파싱 실패 시 일반 문자열로 처리
+        if (problem.tags.trim()) {
+          return [problem.tags.trim()];
+        }
+      }
+    }
+    
+    return [];
+  };
+
   const filteredProblems = problems.filter(problem => {
+    // 검색어 필터
     const matchesSearch = problem.title?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+    
+    // 사용 여부 필터
+    let matchesUsage = true;
+    if (filterUsageStatus === 'USED') {
+      matchesUsage = problem.isUsed === true;
+    } else if (filterUsageStatus === 'UNUSED') {
+      matchesUsage = !problem.isUsed;
+    }
+    
+    // 난이도 필터
+    let matchesDifficulty = true;
+    if (filterDifficulty !== 'ALL') {
+      matchesDifficulty = problem.difficulty === filterDifficulty;
+    }
+    
+    // 태그 필터
+    let matchesTag = true;
+    if (filterTag !== 'ALL') {
+      const problemTags = getProblemTags(problem);
+      matchesTag = problemTags.includes(filterTag);
+    }
+    
+    // 수업/과제 필터 (사용 중인 문제에만 적용)
+    let matchesCourseAndAssignment = true;
+    if (filterUsageStatus === 'USED' && problem.isUsed === true) {
+      const usageList = problemUsageMap[problem.id] || [];
+      
+      if (filterCourse !== 'ALL' || filterAssignment !== 'ALL') {
+        matchesCourseAndAssignment = usageList.some(usage => {
+          const matchesCourse = filterCourse === 'ALL' || usage.sectionId === parseInt(filterCourse);
+          const matchesAssignment = filterAssignment === 'ALL' || usage.assignmentId === parseInt(filterAssignment);
+          return matchesCourse && matchesAssignment;
+        });
+      }
+    }
+    
+    return matchesSearch && matchesUsage && matchesDifficulty && matchesTag && matchesCourseAndAssignment;
   });
 
   const formatDate = (dateString) => {
@@ -207,6 +393,103 @@ const ProblemManagement = () => {
               className="tutor-search-input"
             />
           </div>
+          <div className="tutor-filter-group">
+            <label htmlFor="filter-usage" className="tutor-filter-label">사용 여부</label>
+            <select
+              id="filter-usage"
+              value={filterUsageStatus}
+              onChange={(e) => {
+                setFilterUsageStatus(e.target.value);
+                if (e.target.value !== 'USED') {
+                  setFilterCourse('ALL');
+                  setFilterAssignment('ALL');
+                }
+              }}
+              className="tutor-filter-select"
+            >
+              <option value="ALL">전체</option>
+              <option value="USED">사용 중</option>
+              <option value="UNUSED">미사용</option>
+            </select>
+          </div>
+          {filterUsageStatus === 'USED' && (
+            <>
+              <div className="tutor-filter-group">
+                <label htmlFor="filter-course" className="tutor-filter-label">수업</label>
+                <select
+                  id="filter-course"
+                  value={filterCourse}
+                  onChange={(e) => {
+                    setFilterCourse(e.target.value);
+                    setFilterAssignment('ALL');
+                  }}
+                  className="tutor-filter-select"
+                  disabled={loadingUsageData}
+                >
+                  <option value="ALL">전체</option>
+                  {sections.map((section) => (
+                    <option key={section.sectionId} value={section.sectionId}>
+                      {section.courseTitle} ({section.year}년 {section.semester === 'SPRING' ? '1학기' : section.semester === 'SUMMER' ? '여름학기' : section.semester === 'FALL' ? '2학기' : '겨울학기'} {section.sectionNumber ? `- ${section.sectionNumber}분반` : ''})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {filterCourse !== 'ALL' && (
+                <div className="tutor-filter-group">
+                  <label htmlFor="filter-assignment" className="tutor-filter-label">과제</label>
+                  <select
+                    id="filter-assignment"
+                    value={filterAssignment}
+                    onChange={(e) => setFilterAssignment(e.target.value)}
+                    className="tutor-filter-select"
+                    disabled={loadingUsageData}
+                  >
+                    <option value="ALL">전체</option>
+                    {assignments.map((assignment) => (
+                      <option key={assignment.id} value={assignment.id}>
+                        {assignment.assignmentNumber && `${assignment.assignmentNumber}. `}
+                        {assignment.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </>
+          )}
+          <div className="tutor-filter-group">
+            <label htmlFor="filter-difficulty" className="tutor-filter-label">난이도</label>
+            <select
+              id="filter-difficulty"
+              value={filterDifficulty}
+              onChange={(e) => setFilterDifficulty(e.target.value)}
+              className="tutor-filter-select"
+            >
+              <option value="ALL">전체</option>
+              <option value="1">1 (쉬움)</option>
+              <option value="2">2 (보통)</option>
+              <option value="3">3 (어려움)</option>
+              <option value="4">4 (매우 어려움)</option>
+              <option value="5">5 (극도 어려움)</option>
+            </select>
+          </div>
+          {availableTags.length > 0 && (
+            <div className="tutor-filter-group">
+              <label htmlFor="filter-tag" className="tutor-filter-label">태그</label>
+              <select
+                id="filter-tag"
+                value={filterTag}
+                onChange={(e) => setFilterTag(e.target.value)}
+                className="tutor-filter-select"
+              >
+                <option value="ALL">전체</option>
+                {availableTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="tutor-problems-table-container">
@@ -214,6 +497,7 @@ const ProblemManagement = () => {
             <table className="tutor-problems-table">
               <thead>
                 <tr>
+                  <th className="tutor-problem-id-cell">ID</th>
                   <th className="tutor-problem-title-cell">문제 제목</th>
                   <th className="tutor-problem-meta-cell">시간 제한</th>
                   <th className="tutor-problem-meta-cell">메모리 제한</th>
@@ -224,6 +508,11 @@ const ProblemManagement = () => {
               <tbody>
                 {filteredProblems.map((problem) => (
                   <tr key={problem.id}>
+                    <td className="tutor-problem-id-cell">
+                      <span style={{ color: '#64748b', fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                        #{problem.id}
+                      </span>
+                    </td>
                     <td className="tutor-problem-title-cell">
                       <div className="tutor-problem-title-wrapper">
                         <span 
@@ -566,7 +855,25 @@ const ProblemManagement = () => {
                         </thead>
                         <tbody>
                           {problemUsage.map((usage, index) => (
-                            <tr key={usage.assignmentId} style={{ borderBottom: '1px solid #e1e8ed' }}>
+                            <tr 
+                              key={usage.assignmentId} 
+                              style={{ 
+                                borderBottom: '1px solid #e1e8ed',
+                                cursor: 'pointer',
+                                transition: 'background-color 0.2s ease'
+                              }}
+                              onClick={() => {
+                                if (usage.sectionId && usage.assignmentId && problemForUsage?.id) {
+                                  navigate(`/sections/${usage.sectionId}/assignments/${usage.assignmentId}/detail/problems/${problemForUsage.id}`);
+                                }
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f0f7ff';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                              }}
+                            >
                               <td style={{ padding: '12px' }}>
                                 <div>
                                   <div style={{ fontWeight: '500' }}>{usage.courseTitle}</div>
