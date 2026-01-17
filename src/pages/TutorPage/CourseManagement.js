@@ -130,6 +130,22 @@ const CourseManagement = () => {
     }
   };
 
+  const handleDeleteCourse = async (courseId, courseTitle) => {
+    if (!window.confirm(`정말로 수업 "${courseTitle}"을(를) 삭제하시겠습니까?\n\n주의: 관련된 분반이 있으면 삭제할 수 없습니다.`)) {
+      return;
+    }
+
+    try {
+      await APIService.deleteCourseByApi(courseId);
+      alert('수업이 삭제되었습니다.');
+      fetchSections(); // 목록 새로고침
+      fetchAvailableCourses(); // Course 목록도 새로고침
+    } catch (error) {
+      console.error('수업 삭제 실패:', error);
+      alert(error.message || '수업 삭제에 실패했습니다.');
+    }
+  };
+
   const getSemesterLabel = (semester) => {
     switch(semester) {
       case 'SPRING': return '1학기';
@@ -608,6 +624,13 @@ const CourseManagement = () => {
                     title="과제 관리"
                   >
                     과제
+                  </button>
+                  <button 
+                    className="tutor-course-card-action-btn-compact delete"
+                    onClick={() => handleDeleteCourse(section.courseId, section.courseTitle)}
+                    title="수업 삭제"
+                  >
+                    삭제
                   </button>
                 </div>
               </div>

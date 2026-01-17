@@ -420,6 +420,17 @@ body.section-modal-open .course-management .course-management-search-input:focus
   border-color: #5568d3;
 }
 
+.course-management .tutor-course-card-action-btn-compact.delete {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
+}
+
+.course-management .tutor-course-card-action-btn-compact.delete:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
 .course-management .tutor-no-sections {
   grid-column: 1 / -1;
   text-align: center;

@@ -873,6 +873,13 @@ class APIService {
     return await this.request('/courses');
   }
 
+  // 강의 삭제 (일반 courses 엔드포인트)
+  async deleteCourseByApi(courseId) {
+    return await this.request(`/courses/${courseId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // 현재 로그인한 사용자 ID 조회
   async getCurrentUserId() {
     const userInfo = await this.getUserInfo();
