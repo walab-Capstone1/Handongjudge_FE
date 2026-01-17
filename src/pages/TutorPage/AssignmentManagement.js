@@ -5,17 +5,51 @@ import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
 import ReactMarkdown from "react-markdown";
+import { useAssignments } from "../../hooks/useAssignments";
+import { useSubmissionStats } from "../../hooks/useSubmissionStats";
+import { useAssignmentProblems } from "../../hooks/useAssignmentProblems";
+import { getDifficultyColor, getSemesterLabel, getSubmissionRate } from "../../utils/assignmentUtils";
+import AssignmentAddModal from "../../components/AssignmentModals/AssignmentAddModal";
+import AssignmentEditModal from "../../components/AssignmentModals/AssignmentEditModal";
+import AssignmentTableView from "../../components/AssignmentViews/AssignmentTableView";
+import AssignmentListView from "../../components/AssignmentViews/AssignmentListView";
+import ProblemSelectModal from "../../components/ProblemModals/ProblemSelectModal";
+import ProblemCreateModal from "../../components/ProblemModals/ProblemCreateModal";
+import StandaloneProblemCreateModal from "../../components/ProblemModals/StandaloneProblemCreateModal";
+import BulkProblemCreateModal from "../../components/ProblemModals/BulkProblemCreateModal";
+import ProblemListModal from "../../components/ProblemModals/ProblemListModal";
+import ProblemDetailModal from "../../components/ProblemModals/ProblemDetailModal";
 import "./AssignmentManagement.css";
 import "./AssignmentManagementList.css";
 import "./AssignmentTable.css";
 import "./Pagination.css";
+import "../../components/AssignmentModals/AssignmentModals.css";
 
 const AssignmentManagement = () => {
   const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기
   const navigate = useNavigate();
-  const [assignments, setAssignments] = useState([]);
-  const [sections, setSections] = useState([]);
-  const [loading, setLoading] = useState(true);
+  
+  // 커스텀 훅 사용
+  const { assignments, setAssignments, sections, currentSection, loading, refetch: refetchAssignments } = useAssignments(sectionId);
+  const { submissionStats, refetch: refetchSubmissionStats } = useSubmissionStats(assignments, sectionId);
+  const {
+    availableProblems,
+    setAvailableProblems,
+    copyableProblems,
+    setCopyableProblems,
+    assignmentsForProblem,
+    setAssignmentsForProblem,
+    assignmentProblems,
+    setAssignmentProblems,
+    expandedAssignmentsForProblem,
+    setExpandedAssignmentsForProblem,
+    loadingAssignmentsForProblem,
+    fetchAvailableProblems,
+    fetchCopyableProblems,
+    handleSectionChangeForProblem,
+    toggleAssignmentForProblem
+  } = useAssignmentProblems();
+  
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showProblemModal, setShowProblemModal] = useState(false);
@@ -23,22 +57,16 @@ const AssignmentManagement = () => {
   const [showStandaloneProblemModal, setShowStandaloneProblemModal] = useState(false);
   const [showBulkProblemModal, setShowBulkProblemModal] = useState(false);
   const [showCopyProblemModal, setShowCopyProblemModal] = useState(false);
-  const [copyableProblems, setCopyableProblems] = useState([]);
   const [copyProblemSearchTerm, setCopyProblemSearchTerm] = useState('');
   const [selectedSectionForProblem, setSelectedSectionForProblem] = useState('');
   const [currentProblemPage, setCurrentProblemPage] = useState(1);
   const PROBLEMS_PER_PAGE = 10;
   const [selectedProblemIds, setSelectedProblemIds] = useState([]);
   const [selectedProblemDetail, setSelectedProblemDetail] = useState(null);
-  const [assignmentsForProblem, setAssignmentsForProblem] = useState([]);
-  const [expandedAssignmentsForProblem, setExpandedAssignmentsForProblem] = useState({});
-  const [assignmentProblems, setAssignmentProblems] = useState({});
-  const [loadingAssignmentsForProblem, setLoadingAssignmentsForProblem] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
   const [problemViewMode, setProblemViewMode] = useState('list'); // 'list' or 'hierarchy'
   const [selectedAssignment, setSelectedAssignment] = useState(null);
-  const [availableProblems, setAvailableProblems] = useState([]);
   const [problemSearchTerm, setProblemSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -56,8 +84,6 @@ const AssignmentManagement = () => {
   const [bulkProblemData, setBulkProblemData] = useState({
     problems: [{ title: '', descriptionFile: null, zipFile: null }]
   });
-  const [submissionStats, setSubmissionStats] = useState({});
-  const [currentSection, setCurrentSection] = useState(null);
   const [expandedAssignments, setExpandedAssignments] = useState({});
   const [showProblemListModal, setShowProblemListModal] = useState(false);
   const [selectedAssignmentForProblemList, setSelectedAssignmentForProblemList] = useState(null);
@@ -68,16 +94,7 @@ const AssignmentManagement = () => {
   const [openMoreMenu, setOpenMoreMenu] = useState(null);
   const ASSIGNMENTS_PER_PAGE = 10;
 
-  useEffect(() => {
-    fetchAssignments();
-    fetchSections();
-  }, [sectionId]); // sectionId가 변경될 때마다 다시 조회
-
-  useEffect(() => {
-    if (assignments.length > 0) {
-      fetchSubmissionStats();
-    }
-  }, [assignments]); // 과제 목록이 변경될 때마다 제출 통계 조회
+  // 커스텀 훅이 자동으로 데이터를 가져옴
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -95,186 +112,7 @@ const AssignmentManagement = () => {
     }
   }, [openMoreMenu]);
 
-  const fetchAssignments = async () => {
-    try {
-      setLoading(true);
-      
-      // 1. 먼저 dashboard에서 분반 정보 가져오기
-      const dashboardResponse = await APIService.getInstructorDashboard();
-      const sectionsData = dashboardResponse?.data || [];
-      setSections(sectionsData);
-      
-      // 현재 분반 정보 설정
-      if (sectionId) {
-        const currentSectionData = sectionsData.find(section => 
-          section.sectionId === parseInt(sectionId)
-        );
-        setCurrentSection(currentSectionData);
-      }
-      
-      // 2. 과제 조회 (분반별 또는 전체)
-      let allAssignments = [];
-      
-      if (sectionId) {
-        // 분반별 과제 관리: 해당 분반의 과제만 조회
-        try {
-          const currentSection = sectionsData.find(section => section.sectionId === parseInt(sectionId));
-          if (currentSection) {
-            const sectionAssignments = await APIService.getAssignmentsBySection(parseInt(sectionId));
-            
-            // 각 과제의 문제 수 조회
-            const assignmentsWithDetails = await Promise.all(
-              (sectionAssignments || []).map(async (assignment) => {
-                try {
-                  const problems = await APIService.getAssignmentProblems(parseInt(sectionId), assignment.id);
-                  
-                  return {
-                    ...assignment,
-                    sectionName: `${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`,
-                    sectionId: parseInt(sectionId),
-                    problemCount: problems?.length || 0,
-                    problems: problems || [],
-                    dueDate: assignment.endDate,
-                    submissionCount: 0,
-                    totalStudents: currentSection.totalStudents || 0
-                  };
-                } catch (error) {
-                  return {
-                    ...assignment,
-                    sectionName: `${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`,
-                    sectionId: parseInt(sectionId),
-                    problemCount: 0,
-                    problems: [],
-                    dueDate: assignment.endDate,
-                    submissionCount: 0,
-                    totalStudents: currentSection.totalStudents || 0
-                  };
-                }
-              })
-            );
-            
-            allAssignments = assignmentsWithDetails;
-          }
-        } catch (error) {
-          console.error('분반별 과제 조회 실패:', error);
-        }
-      } else {
-        // 전체 과제 관리: 모든 분반의 과제 조회
-        for (const section of sectionsData) {
-          try {
-            const sectionAssignments = await APIService.getAssignmentsBySection(section.sectionId);
-            
-            // 각 과제의 문제 수 조회
-            const assignmentsWithDetails = await Promise.all(
-              (sectionAssignments || []).map(async (assignment) => {
-                try {
-                  const problems = await APIService.getAssignmentProblems(section.sectionId, assignment.id);
-                  
-                  return {
-                    ...assignment,
-                    sectionName: `${section.courseTitle} - ${section.sectionNumber}분반`,
-                    sectionId: section.sectionId,
-                    problemCount: problems?.length || 0,
-                    problems: problems || [],
-                    dueDate: assignment.endDate,
-                    submissionCount: 0,
-                    totalStudents: section.totalStudents || 0
-                  };
-                } catch (error) {
-                  return {
-                    ...assignment,
-                    sectionName: `${section.courseTitle} - ${section.sectionNumber}분반`,
-                    sectionId: section.sectionId,
-                    problemCount: 0,
-                    problems: [],
-                    dueDate: assignment.endDate,
-                    submissionCount: 0,
-                    totalStudents: section.totalStudents || 0
-                  };
-                }
-              })
-            );
-            
-            allAssignments = [...allAssignments, ...assignmentsWithDetails];
-          } catch (error) {
-            // 분반 과제 조회 실패 시 무시
-          }
-        }
-      }
-      
-      setAssignments(allAssignments);
-      setLoading(false);
-    } catch (error) {
-      setAssignments([]);
-      setLoading(false);
-    }
-  };
-
-  const fetchSections = async () => {
-    // fetchAssignments에서 이미 처리됨
-  };
-
-  const fetchSubmissionStats = async () => {
-    try {
-      console.log('제출 통계 조회 시작:', { assignments: assignments.length, sectionId });
-      console.log('과제 목록:', assignments);
-      const stats = {};
-      
-      for (const assignment of assignments) {
-        console.log(`과제 ${assignment.id} 처리 중:`, assignment);
-        
-        if (sectionId) {
-          // 분반별 과제 제출 통계
-          console.log(`분반별 과제 ${assignment.id} 제출 통계 조회 중...`);
-          const response = await APIService.getAssignmentSubmissionStats(assignment.id, sectionId);
-          console.log(`과제 ${assignment.id} 응답:`, response);
-          
-          // API 응답이 있으면 사용, 없으면 기본값 설정
-          if (response) {
-            console.log(`과제 ${assignment.id} 응답 데이터:`, {
-              totalStudents: response.totalStudents,
-              problemStats: response.problemStats
-            });
-            
-            // 백엔드에서 이미 정확한 데이터를 제공하므로 그대로 사용
-            stats[assignment.id] = response;
-          } else {
-            console.log(`과제 ${assignment.id} API 응답 없음`);
-            // 백엔드 API 응답이 없으면 해당 과제는 통계에서 제외
-          }
-        } else {
-          // 전체 과제 제출 통계 (교수용) - 분반별로 개별 호출
-          console.log(`전체 과제 ${assignment.id} 제출 통계 조회 중...`);
-          console.log(`과제 ${assignment.id}의 sectionId:`, assignment.sectionId);
-          
-          if (!assignment.sectionId) {
-            console.error(`과제 ${assignment.id}의 sectionId가 없습니다!`);
-            continue; // 이 과제는 건너뛰기
-          }
-          
-          const response = await APIService.getAssignmentSubmissionStats(assignment.id, assignment.sectionId);
-          
-          if (response) {
-            console.log(`과제 ${assignment.id} 전체 통계 데이터:`, response);
-            
-            // 백엔드에서 이미 정확한 데이터를 제공하므로 그대로 사용
-            stats[assignment.id] = response;
-          } else {
-            console.log(`과제 ${assignment.id} 전체 통계 데이터 없음`);
-            // 백엔드 API 응답이 없으면 해당 과제는 통계에서 제외
-          }
-        }
-      }
-      
-      console.log('최종 제출 통계:', stats);
-      setSubmissionStats(stats);
-    } catch (error) {
-      console.error('제출 통계 조회 실패:', error);
-      
-      // 에러 발생 시 빈 통계 설정
-      setSubmissionStats({});
-    }
-  };
+  // 커스텀 훅이 자동으로 fetchAssignments와 fetchSubmissionStats를 처리함
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -332,7 +170,7 @@ const AssignmentManagement = () => {
       console.log('과제 생성 응답:', response);
       alert('과제가 성공적으로 생성되었습니다.');
       handleCloseModal();
-      fetchAssignments(); // 목록 새로고침
+      refetchAssignments(); // 목록 새로고침
     } catch (error) {
       console.error('과제 생성 실패:', error);
       alert('과제 생성에 실패했습니다.');
@@ -391,7 +229,7 @@ const AssignmentManagement = () => {
       console.log('과제 수정 응답:', response);
       alert('과제가 성공적으로 수정되었습니다.');
       handleCloseEditModal();
-      fetchAssignments(); // 목록 새로고침
+      refetchAssignments(); // 목록 새로고침
     } catch (error) {
       console.error('과제 수정 실패:', error);
       alert('과제 수정에 실패했습니다.');
@@ -407,7 +245,7 @@ const AssignmentManagement = () => {
         }
         await APIService.deleteAssignment(sectionId, assignmentId);
         alert('과제가 성공적으로 삭제되었습니다.');
-        fetchAssignments(); // 목록 새로고침
+        refetchAssignments(); // 목록 새로고침
       } catch (error) {
         console.error('과제 삭제 실패:', error);
         alert('과제 삭제에 실패했습니다. ' + (error.message || ''));
@@ -419,7 +257,7 @@ const AssignmentManagement = () => {
     try {
       const newActive = !currentActive;
       await APIService.toggleAssignmentActive(sectionId, assignmentId, newActive);
-      fetchAssignments(); // 목록 새로고침
+      refetchAssignments(); // 목록 새로고침
     } catch (error) {
       console.error('과제 활성화 상태 변경 실패:', error);
       alert('과제 활성화 상태 변경에 실패했습니다.');
@@ -436,64 +274,11 @@ const AssignmentManagement = () => {
     await fetchAvailableProblems();
   };
 
-  const handleSectionChangeForProblem = async (sectionId) => {
+  const handleSectionChangeForProblemWrapper = async (sectionId) => {
     setSelectedSectionForProblem(sectionId);
-    setExpandedAssignmentsForProblem({});
-    setAssignmentProblems({});
     setSelectedProblemIds([]);
     setCopyProblemSearchTerm('');
-    
-    if (!sectionId) {
-      setAssignmentsForProblem([]);
-        return;
-      }
-
-    try {
-      setLoadingAssignmentsForProblem(true);
-      const assignments = await APIService.getAssignmentsBySection(parseInt(sectionId));
-      const assignmentsData = assignments.data || assignments;
-      
-      // 각 과제의 문제 목록 가져오기
-      const assignmentsWithProblems = await Promise.all(
-        assignmentsData.map(async (assignment) => {
-          try {
-            const problemsResponse = await APIService.getAssignmentProblems(parseInt(sectionId), assignment.id);
-          const problems = problemsResponse.data || problemsResponse;
-            return {
-              ...assignment,
-              problems: Array.isArray(problems) ? problems : (problems.problems || [])
-            };
-          } catch (error) {
-            console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
-            return {
-              ...assignment,
-              problems: []
-            };
-          }
-        })
-      );
-      
-      setAssignmentsForProblem(assignmentsWithProblems);
-      
-      // assignmentProblems 맵 초기화
-      const problemsMap = {};
-      assignmentsWithProblems.forEach(assignment => {
-        problemsMap[assignment.id] = assignment.problems || [];
-      });
-      setAssignmentProblems(problemsMap);
-        } catch (error) {
-      console.error('과제 목록 조회 실패:', error);
-      setAssignmentsForProblem([]);
-    } finally {
-      setLoadingAssignmentsForProblem(false);
-    }
-  };
-
-  const toggleAssignmentForProblem = (assignmentId) => {
-    setExpandedAssignmentsForProblem(prev => ({
-      ...prev,
-      [assignmentId]: !prev[assignmentId]
-    }));
+    await handleSectionChangeForProblem(sectionId);
   };
 
   const handleProblemToggleForAdd = (assignmentId, problemId) => {
@@ -528,57 +313,7 @@ const AssignmentManagement = () => {
     }
   };
 
-  const fetchAvailableProblems = async () => {
-    try {
-      // 모든 문제 가져오기 (instructor가 만든 문제들)
-      const allProblems = await APIService.getAllProblems();
-      setAvailableProblems(allProblems);
-    } catch (error) {
-      console.error('문제 목록 조회 실패:', error);
-      setAvailableProblems([]);
-    }
-  };
-
-  const fetchCopyableProblems = async (sectionId = null) => {
-    try {
-      if (!sectionId) {
-        setCopyableProblems([]);
-        return;
-      }
-
-      // 선택한 섹션의 모든 과제 조회
-      const assignments = await APIService.getAssignmentsBySection(sectionId);
-      const assignmentsData = assignments.data || assignments;
-
-      // 모든 과제의 문제들을 수집 (중복 제거)
-      const problemMap = new Map();
-      
-      for (const assignment of assignmentsData) {
-        try {
-          const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignment.id);
-          const problems = problemsResponse.data || problemsResponse;
-          
-          if (Array.isArray(problems)) {
-            problems.forEach(problem => {
-              if (!problemMap.has(problem.id)) {
-                problemMap.set(problem.id, problem);
-              }
-            });
-          }
-        } catch (error) {
-          console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
-        }
-      }
-
-      // Map을 배열로 변환
-      const problemsArray = Array.from(problemMap.values());
-      setCopyableProblems(problemsArray);
-      setCurrentProblemPage(1); // 페이지 초기화
-    } catch (error) {
-      console.error('복사 가능한 문제 목록 조회 실패:', error);
-      setCopyableProblems([]);
-    }
-  };
+  // fetchAvailableProblems와 fetchCopyableProblems는 커스텀 훅에서 제공됨
 
   const handleCopyProblem = async (problemId, newTitle = null) => {
     try {
@@ -590,7 +325,7 @@ const AssignmentManagement = () => {
       if (selectedAssignment) {
         await APIService.addProblemToAssignment(selectedAssignment.id, newProblemId);
         alert('복사된 문제가 과제에 추가되었습니다.');
-        fetchAssignments();
+        refetchAssignments();
       }
     } catch (error) {
       console.error('문제 복사 실패:', error);
@@ -610,7 +345,7 @@ const AssignmentManagement = () => {
       alert(`${problemIds.length}개의 문제가 성공적으로 복사되어 추가되었습니다.`);
       setShowProblemModal(false);
       setSelectedProblemIds([]);
-      fetchAssignments(); // 목록 새로고침
+      refetchAssignments(); // 목록 새로고침
     } catch (error) {
       console.error('문제 추가 실패:', error);
       alert('문제 추가에 실패했습니다. ' + (error.message || ''));
@@ -640,7 +375,7 @@ const AssignmentManagement = () => {
       try {
         await APIService.removeProblemFromAssignment(assignmentId, problemId);
         alert('문제가 성공적으로 제거되었습니다.');
-        fetchAssignments(); // 목록 새로고침
+        refetchAssignments(); // 목록 새로고침
       } catch (error) {
         console.error('문제 제거 실패:', error);
         alert('문제 제거에 실패했습니다.');
@@ -748,7 +483,7 @@ const AssignmentManagement = () => {
       alert('문제가 성공적으로 생성되었습니다. 문제 목록에서 원하는 과제에 추가할 수 있습니다.');
       setShowCreateProblemModal(false);
       resetProblemForm();
-      fetchAssignments(); // 목록 새로고침
+      refetchAssignments(); // 목록 새로고침
     } catch (error) {
       console.error('문제 생성 실패:', error);
       
@@ -988,25 +723,7 @@ const AssignmentManagement = () => {
     }));
   };
 
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty?.toLowerCase()) {
-      case 'easy': return '#52c41a';
-      case 'medium': return '#faad14';
-      case 'hard': return '#ff4d4f';
-      default: return '#666';
-    }
-  };
-
-  const getSemesterLabel = (semester) => {
-    const labels = {
-      'SPRING': '1학기',
-      'FALL': '2학기',
-      'CAMP': '캠프',
-      'SPECIAL': '특강',
-      'IRREGULAR': '비정규 세션'
-    };
-    return labels[semester] || semester;
-  };
+  // 유틸리티 함수는 assignmentUtils.js에서 import됨
 
   // 문제 필터링 (현재 수업의 문제들)
   const filteredProblems = availableProblems.filter(problem =>
@@ -1031,9 +748,7 @@ const AssignmentManagement = () => {
     return allProblems;
   };
 
-  const getSubmissionRate = (submitted, total) => {
-    return total > 0 ? Math.round((submitted / total) * 100) : 0;
-  };
+  // getSubmissionRate는 assignmentUtils.js에서 import됨
 
   // 필터링된 과제 목록
   const filteredAssignments = assignments.filter(assignment => {
@@ -1162,1069 +877,131 @@ const AssignmentManagement = () => {
       )}
       
       {sectionId ? (
-          <div className="tutor-assignments-table-container">
-            <table className="tutor-assignments-table">
-              <thead>
-                <tr>
-                  <th>과제 제목</th>
-                  <th>마감일</th>
-                  <th>문제 수</th>
-                  <th>제출 현황</th>
-                  <th>관리</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAssignments.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="tutor-table-empty">
-                      과제가 없습니다.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedAssignments.map((assignment) => (
-                    <tr key={assignment.id} className={assignment.active === false ? 'tutor-disabled' : ''}>
-                      <td className="tutor-assignment-title-cell">
-                        <div>
-                          <div className="tutor-assignment-title">{assignment.title}</div>
-                          {assignment.description && (
-                            <div className="tutor-assignment-description">{assignment.description}</div>
-                          )}
-                  </div>
-                      </td>
-                      <td className="tutor-assignment-meta-cell">
-                        {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }) : '미설정'}
-                      </td>
-                      <td className="tutor-assignment-meta-cell">{assignment.problemCount || 0}개</td>
-                      <td className="tutor-assignment-meta-cell">
-                        {submissionStats[assignment.id] ? 
-                          `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}` 
-                          : `0/${assignment.totalStudents || 0}`}
-                      </td>
-                      <td className="tutor-assignment-actions-cell">
-                        <div className="tutor-assignment-actions-inline">
-                    <button 
-                            className="tutor-btn-table-action"
-                            onClick={() => {
-                              setSelectedAssignmentForProblemList(assignment);
-                              setShowProblemListModal(true);
-                              setProblemListSearchTerm('');
-                            }}
-                          >
-                            문제 목록 관리
-                    </button>
-                    <button 
-                            className="tutor-btn-table-action"
-                            onClick={() => handleAddProblem(assignment)}
-                          >
-                            문제 추가
-                          </button>
-                          <button 
-                            className="tutor-btn-table-action tutor-btn-edit"
-                      onClick={() => handleEdit(assignment)}
-                    >
-                      수정
-                    </button>
-                          <div className="tutor-more-menu">
-                      <button 
-                              className="tutor-btn-table-action tutor-btn-more"
-                        title="더보기"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenMoreMenu(openMoreMenu === assignment.id ? null : assignment.id);
-                        }}
-                      >
-                        ⋯
-                      </button>
-                            {openMoreMenu === assignment.id && (
-                              <div className="tutor-more-dropdown">
-                        <button 
-                                  className="tutor-btn-text-small"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleToggleActive(assignment.sectionId, assignment.id, assignment.active);
-                                    setOpenMoreMenu(null);
-                                  }}
-                        >
-                          {assignment.active ? '비활성화' : '활성화'}
-                        </button>
-                        <button 
-                                  className="tutor-btn-text-small tutor-delete"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(assignment.id);
-                                    setOpenMoreMenu(null);
-                                  }}
-                        >
-                          삭제
-                        </button>
-                      </div>
-                            )}
-                    </div>
-                  </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-            
-            {/* 페이지네이션 */}
-            {totalPages > 1 && (
-              <div className="tutor-pagination">
-                <div className="tutor-pagination-info">
-                  총 {filteredAssignments.length}개 중 {startIndex + 1}-{Math.min(endIndex, filteredAssignments.length)}개 표시
-                </div>
-                <div className="tutor-pagination-controls">
-                  <button
-                    className="tutor-btn-pagination"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    이전
-                  </button>
-                  <div className="tutor-pagination-pages">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <button
-                        key={page}
-                        className={`tutor-btn-pagination-page ${currentPage === page ? 'active' : ''}`}
-                        onClick={() => setCurrentPage(page)}
-                      >
-                        {page}
-                      </button>
-                    ))}
-              </div>
-                  <button
-                    className="tutor-btn-pagination"
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    다음
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+        <AssignmentTableView
+          paginatedAssignments={paginatedAssignments}
+          submissionStats={submissionStats}
+          openMoreMenu={openMoreMenu}
+          onToggleMoreMenu={(id) => setOpenMoreMenu(openMoreMenu === id ? null : id)}
+          onProblemListManage={(assignment) => {
+            setSelectedAssignmentForProblemList(assignment);
+            setShowProblemListModal(true);
+            setProblemListSearchTerm('');
+          }}
+          onAddProblem={handleAddProblem}
+          onEdit={handleEdit}
+          onToggleActive={handleToggleActive}
+          onDelete={handleDelete}
+          paginationProps={{
+            currentPage,
+            totalPages,
+            startIndex,
+            endIndex,
+            totalItems: filteredAssignments.length,
+            onPageChange: setCurrentPage
+          }}
+        />
         ) : (
-          <div className="tutor-assignments-list">
-            {filteredAssignments.map((assignment) => (
-              <div key={assignment.id} className={`tutor-assignment-list-item ${expandedAssignments[assignment.id] ? 'tutor-expanded' : ''} ${assignment.active === false ? 'tutor-disabled' : ''}`}>
-              <div className="tutor-assignment-list-main">
-                <div className="tutor-assignment-list-info">
-                  <div className="tutor-assignment-list-title-section">
-                    <h3 className="tutor-assignment-list-title">{assignment.title}</h3>
-                    {assignment.description && (
-                      <p className="tutor-assignment-list-description">{assignment.description}</p>
-                    )}
-              </div>
-                  <div className="tutor-assignment-list-meta">
-                    <span className="tutor-assignment-meta-item">
-                      <span className="tutor-meta-label">마감일</span>
-                      <span className="tutor-meta-value">
-                  {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '미설정'}
-                </span>
-                </span>
-                    <span className="tutor-assignment-meta-item">
-                      <span className="tutor-meta-label">문제 수</span>
-                      <span className="tutor-meta-value">{assignment.problemCount || 0}개</span>
-                    </span>
-                    <span className="tutor-assignment-meta-item">
-                      <span className="tutor-meta-label">제출현황</span>
-                      <span className="tutor-meta-value">
-                  {submissionStats[assignment.id] ? 
-                    `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}` 
-                    : `0/${assignment.totalStudents || 0}`}
-                      </span>
-                </span>
-              </div>
-                </div>
-                <div className="tutor-assignment-list-actions">
-              <button 
-                    className="tutor-btn-list-action"
-                onClick={() => toggleAssignment(assignment.id)}
-              >
-                {expandedAssignments[assignment.id] ? '문제 목록 숨기기' : '문제 목록 보기'}
-              </button>
-                  <button 
-                    className="tutor-btn-list-action"
-                    onClick={() => handleAddProblem(assignment)}
-                  >
-                    문제 추가
-                  </button>
-                  <button 
-                    className="tutor-btn-list-action"
-                      onClick={() => handleEdit(assignment)}
-                    >
-                      수정
-                    </button>
-                  <div className="tutor-more-menu">
-                      <button 
-                      className="tutor-btn-list-action tutor-btn-more"
-                        title="더보기"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenMoreMenu(openMoreMenu === assignment.id ? null : assignment.id);
-                        }}
-                      >
-                        ⋯
-                      </button>
-                    {openMoreMenu === assignment.id && (
-                      <div className="tutor-more-dropdown">
-                        <button 
-                          className="tutor-btn-text-small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleActive(assignment.sectionId, assignment.id, assignment.active);
-                            setOpenMoreMenu(null);
-                          }}
-                        >
-                          {assignment.active ? '비활성화' : '활성화'}
-                        </button>
-                        <button 
-                          className="tutor-btn-text-small tutor-delete"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(assignment.id);
-                            setOpenMoreMenu(null);
-                          }}
-                        >
-                          삭제
-                  </button>
-                </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {expandedAssignments[assignment.id] && (
-                <div className="assignment-expanded-content">
-                  <div className="tutor-problems-section">
-                <div className="tutor-problems-header">
-                  <h4 className="tutor-problems-title">문제 목록 ({assignment.problemCount || 0}개)</h4>
-                </div>
-                <div className="tutor-problems-list">
-                  {assignment.problems && assignment.problems.length > 0 ? (
-                    assignment.problems.map((problem, index) => (
-                      <div key={problem.id || index} className="tutor-problem-item">
-                        <div className="tutor-problem-item-left">
-                          <span className="tutor-problem-number">{index + 1}.</span>
-                          <span className="tutor-problem-title">{removeCopyLabel(problem.title)}</span>
-                          {problem.difficulty && (
-                            <span 
-                              className="tutor-problem-difficulty"
-                              style={{ color: getDifficultyColor(problem.difficulty) }}
-                            >
-                              [{problem.difficulty}]
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* 문제별 제출률 표시 (정답을 맞춘 학생 수 기준) */}
-                        <span className="tutor-problem-submission-rate">
-                          {submissionStats[assignment.id]?.problemStats ? (
-                            (() => {
-                              const problemStat = submissionStats[assignment.id].problemStats.find(
-                                stat => stat.problemId === problem.id
-                              );
-                              return problemStat ? (
-                                <>
-                                  제출 현황: {problemStat.correctSubmissions || 0}/{problemStat.totalStudents}
-                                </>
-                              ) : (
-                                `제출 현황: 0/${submissionStats[assignment.id]?.totalStudents || assignment.totalStudents || 0}`
-                              );
-                            })()
-                          ) : (
-                            `제출 현황: 0/${submissionStats[assignment.id]?.totalStudents || assignment.totalStudents || 0}`
-                          )}
-                        </span>
-                        
-                        <button 
-                          className="tutor-btn-remove-problem"
-                          onClick={() => handleRemoveProblem(assignment.id, problem.id)}
-                          title="문제 제거"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="tutor-no-problems">
-                      <p>등록된 문제가 없습니다.</p>
-                      <button 
-                        className="tutor-btn-add-first-problem"
-                        onClick={() => handleAddProblem(assignment)}
-                      >
-                        첫 번째 문제 추가하기
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-                  <div className="tutor-progress-container">
-                    <div className="tutor-progress-info">
-                      <span className="tutor-progress-label">완료율</span>
-                      <span className="tutor-progress-count">
-                        {(() => {
-                          const stats = submissionStats[assignment.id];
-                          if (!stats || !stats.problemStats || stats.problemStats.length === 0) {
-                            return `0 / ${stats?.totalStudents || assignment.totalStudents || 0}명`;
-                          }
-                          
-                          const totalStudents = stats.totalStudents || assignment.totalStudents || 0;
-                          const totalProblems = assignment.problems?.length || 0;
-                          
-                          if (totalStudents === 0 || totalProblems === 0) {
-                            return `0 / ${totalStudents}명`;
-                          }
-                          
-                          // 모든 문제를 다 푼 학생 수 계산
-                          const completedStudents = stats.problemStats.reduce((min, problemStat) => {
-                            return Math.min(min, problemStat.submittedStudents || 0);
-                          }, totalStudents);
-                          
-                          return `${completedStudents} / ${totalStudents}명`;
-                        })()}
-                      </span>
-                    </div>
-                    <div className="tutor-progress-bar">
-                      <div 
-                        className="tutor-progress-fill"
-                        style={{ 
-                          width: `${(() => {
-                            const stats = submissionStats[assignment.id];
-                            if (!stats || !stats.problemStats || stats.problemStats.length === 0) {
-                              return 0;
-                            }
-                            
-                            const totalStudents = stats.totalStudents || assignment.totalStudents || 0;
-                            const totalProblems = assignment.problems?.length || 0;
-                            
-                            if (totalStudents === 0 || totalProblems === 0) {
-                              return 0;
-                            }
-                            
-                            // 모든 문제를 다 푼 학생 수 계산
-                            const completedStudents = stats.problemStats.reduce((min, problemStat) => {
-                              return Math.min(min, problemStat.submittedStudents || 0);
-                            }, totalStudents);
-                            
-                            return Math.round((completedStudents / totalStudents) * 100);
-                          })()}%` 
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-          {filteredAssignments.length === 0 && (
-            <div className="tutor-no-assignments">
-              <div className="tutor-no-assignments-message">
-                <span className="tutor-no-assignments-icon">📝</span>
-                <p>
-                  {searchTerm || filterSection !== 'ALL' 
-                    ? '검색 조건에 맞는 과제가 없습니다.' 
-                    : '아직 생성된 과제가 없습니다.'
-                  }
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
+          <AssignmentListView
+            filteredAssignments={filteredAssignments}
+            submissionStats={submissionStats}
+            expandedAssignments={expandedAssignments}
+            searchTerm={searchTerm}
+            filterSection={filterSection}
+            openMoreMenu={openMoreMenu}
+            onToggleAssignment={toggleAssignment}
+            onToggleMoreMenu={(id) => setOpenMoreMenu(openMoreMenu === id ? null : id)}
+            onAddProblem={handleAddProblem}
+            onEdit={handleEdit}
+            onToggleActive={handleToggleActive}
+            onDelete={handleDelete}
+            onRemoveProblem={handleRemoveProblem}
+          />
         )}
 
         {/* 과제 추가 모달 */}
-        {showAddModal && (
-          <div className="tutor-modal-overlay">
-            <div className="tutor-modal-content">
-              <div className="tutor-modal-header">
-                <h2>새 과제 추가</h2>
-                <button 
-                  className="tutor-modal-close"
-                  onClick={handleCloseModal}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <form onSubmit={handleSubmit} className="assignment-form">
-                <div className="tutor-form-row">
-                  <div className="tutor-form-group">
-                    <label htmlFor="title">과제명 *</label>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      placeholder="과제명을 입력하세요"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="tutor-form-group">
-                    <label htmlFor="assignmentNumber">과제 번호</label>
-                    <input
-                      type="text"
-                      id="assignmentNumber"
-                      name="assignmentNumber"
-                      value={formData.assignmentNumber}
-                      onChange={handleInputChange}
-                      placeholder="예: HW1, Assignment1"
-                    />
-                  </div>
-                </div>
 
-                <div className="tutor-form-group">
-                  <label htmlFor="sectionId">분반 선택 *</label>
-                  <select
-                    id="sectionId"
-                    name="sectionId"
-                    value={formData.sectionId}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">분반을 선택하세요</option>
-                    {sections.map((section) => (
-                      <option key={section.sectionId} value={section.sectionId}>
-                        {section.courseTitle} (분반 {section.sectionNumber || section.sectionId})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="tutor-form-group">
-                  <label htmlFor="description">과제 설명</label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    placeholder="과제에 대한 상세 설명을 입력하세요"
-                    rows="4"
-                  />
-                </div>
-
-                <div className="tutor-form-row">
-                  <div className="tutor-form-group">
-                    <label htmlFor="startDate">시작일</label>
-                    <input
-                      type="datetime-local"
-                      id="startDate"
-                      name="startDate"
-                      value={formData.startDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="tutor-form-group">
-                    <label htmlFor="endDate">마감일</label>
-                    <input
-                      type="datetime-local"
-                      id="endDate"
-                      name="endDate"
-                      value={formData.endDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="tutor-form-actions">
-                  <button 
-                    type="button" 
-                    className="tutor-btn-secondary"
-                    onClick={handleCloseModal}
-                  >
-                    취소
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="tutor-btn-primary"
-                  >
-                    과제 생성
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* 과제 추가 모달 */}
+        <AssignmentAddModal
+          isOpen={showAddModal}
+          formData={formData}
+          sections={sections}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmit}
+          onInputChange={handleInputChange}
+        />
 
         {/* 과제 수정 모달 */}
-        {showEditModal && (
-          <div className="tutor-modal-overlay">
-            <div className="tutor-modal-content">
-              <div className="tutor-modal-header">
-                <h2>과제 수정</h2>
-                <button 
-                  className="tutor-modal-close"
-                  onClick={handleCloseEditModal}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <form onSubmit={handleUpdateAssignment} className="assignment-form">
-                <div className="tutor-form-row">
-                  <div className="tutor-form-group">
-                    <label htmlFor="edit-title">과제명 *</label>
-                    <input
-                      type="text"
-                      id="edit-title"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      placeholder="과제명을 입력하세요"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="tutor-form-group">
-                    <label htmlFor="edit-assignmentNumber">과제 번호</label>
-                    <input
-                      type="text"
-                      id="edit-assignmentNumber"
-                      name="assignmentNumber"
-                      value={formData.assignmentNumber}
-                      onChange={handleInputChange}
-                      placeholder="예: HW1, Assignment1"
-                    />
-                  </div>
-                </div>
-
-                <div className="tutor-form-group">
-                  <label htmlFor="edit-sectionId">분반 선택 *</label>
-                  <select
-                    id="edit-sectionId"
-                    name="sectionId"
-                    value={formData.sectionId}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">분반을 선택하세요</option>
-                    {sections.map((section) => (
-                      <option key={section.sectionId} value={section.sectionId}>
-                        {section.courseTitle} (분반 {section.sectionNumber || section.sectionId})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="tutor-form-group">
-                  <label htmlFor="edit-description">과제 설명</label>
-                  <textarea
-                    id="edit-description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    placeholder="과제에 대한 상세 설명을 입력하세요"
-                    rows="4"
-                  />
-                </div>
-
-                <div className="tutor-form-row">
-                  <div className="tutor-form-group">
-                    <label htmlFor="edit-startDate">시작일</label>
-                    <input
-                      type="datetime-local"
-                      id="edit-startDate"
-                      name="startDate"
-                      value={formData.startDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="tutor-form-group">
-                    <label htmlFor="edit-endDate">마감일</label>
-                    <input
-                      type="datetime-local"
-                      id="edit-endDate"
-                      name="endDate"
-                      value={formData.endDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="tutor-form-actions">
-                  <button 
-                    type="button" 
-                    className="tutor-btn-secondary"
-                    onClick={handleCloseEditModal}
-                  >
-                    취소
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="tutor-btn-primary"
-                  >
-                    과제 수정
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <AssignmentEditModal
+          isOpen={showEditModal}
+          formData={formData}
+          selectedAssignment={selectedAssignment}
+          sections={sections}
+          onClose={handleCloseEditModal}
+          onSubmit={handleUpdateAssignment}
+          onInputChange={handleInputChange}
+        />
 
         {/* 문제 선택 모달 (현재 수업의 문제들) */}
-        {showProblemModal && (
-          <div className="tutor-modal-overlay">
-            <div className="tutor-modal-content tutor-problem-modal tutor-problem-modal-large">
-              <div className="tutor-modal-header">
-                <h2>문제 추가 - {selectedAssignment?.title}</h2>
-                <button 
-                  className="tutor-modal-close"
-                  onClick={closeProblemModals}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="tutor-problem-modal-body">
-                <div className="tutor-problem-search-section">
-                    <input
-                      type="text"
-                      placeholder="문제명으로 검색..."
-                      value={problemSearchTerm}
-                      onChange={(e) => setProblemSearchTerm(e.target.value)}
-                      className="tutor-search-input"
-                    />
-                  </div>
-
-                {filteredProblems.length > 0 && (
-                  <div className="tutor-problem-selection-header">
-                    <label className="tutor-checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={selectedProblemIds.length === filteredProblems.length && filteredProblems.length > 0}
-                        onChange={handleSelectAllProblems}
-                      />
-                      <span>전체 선택</span>
-                    </label>
-                    <span className="tutor-item-count">
-                      {selectedProblemIds.length} / {filteredProblems.length}개 선택됨
-                    </span>
-                  </div>
-                )}
-
-                <div className="tutor-available-problems-grid">
-                  {filteredProblems.length > 0 ? (
-                    filteredProblems.map((problem) => (
-                      <div key={problem.id} className="tutor-problem-card">
-                        <div className="tutor-problem-card-header">
-                          <input
-                            type="checkbox"
-                            checked={selectedProblemIds.includes(problem.id)}
-                            onChange={() => handleProblemToggle(problem.id)}
-                            className="tutor-problem-checkbox"
-                          />
-                        </div>
-                        <div className="tutor-problem-card-body">
-                          <h4 className="tutor-problem-card-title">{removeCopyLabel(problem.title)}</h4>
-                          <div className="tutor-problem-card-meta-row">
-                            <span className="tutor-problem-card-date">
-                              생성일: {new Date(problem.createdAt).toLocaleDateString('ko-KR')}
-                            </span>
-                    <button 
-                              className="tutor-btn-view-detail-card"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                try {
-                                  const problemInfo = await APIService.getProblemInfo(problem.id);
-                                  setSelectedProblemDetail(problemInfo.data || problemInfo);
-                                } catch (error) {
-                                  console.error('문제 정보 조회 실패:', error);
-                                  alert('문제 정보를 불러오는데 실패했습니다.');
-                                }
-                              }}
-                            >
-                              설명보기
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="tutor-no-available-problems">
-                      <p>사용 가능한 문제가 없습니다.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="tutor-modal-footer">
-                  <div className="tutor-problem-action-buttons">
-                    <button 
-                    type="button"
-                      className="tutor-btn-copy-problem"
-                      onClick={() => {
-                      setShowProblemModal(false);
-                        setShowCopyProblemModal(true);
-                      setSelectedSectionForProblem('');
-                      setAssignmentsForProblem([]);
-                      setExpandedAssignmentsForProblem({});
-                      setAssignmentProblems({});
-                      setCopyProblemSearchTerm('');
-                      setProblemViewMode('list');
-                      }}
-                    >
-                      기존 문제 가져오기
-                    </button>
-                    <button 
-                    type="button"
-                      className="tutor-btn-create-new"
-                      onClick={handleCreateNewProblem}
-                    >
-                      새 문제 만들기
-                    </button>
-                  </div>
-                {filteredProblems.length > 0 && selectedProblemIds.length > 0 && (
-                  <div className="tutor-footer-actions">
-                        <button 
-                      type="button"
-                      className="tutor-btn-secondary"
-                      onClick={closeProblemModals}
-                        >
-                      취소
-                        </button>
-                      <button 
-                      type="button"
-                      className="tutor-btn-primary"
-                      onClick={() => handleSelectProblem(selectedProblemIds)}
-                      >
-                      선택한 문제 추가 ({selectedProblemIds.length}개)
-                      </button>
-                    </div>
-                  )}
-              </div>
-            </div>
-          </div>
-        )}
+        <ProblemSelectModal
+          isOpen={showProblemModal}
+          selectedAssignment={selectedAssignment}
+          filteredProblems={filteredProblems}
+          selectedProblemIds={selectedProblemIds}
+          problemSearchTerm={problemSearchTerm}
+          onClose={closeProblemModals}
+          onProblemToggle={handleProblemToggle}
+          onSelectAll={handleSelectAllProblems}
+          onSearchChange={(value) => setProblemSearchTerm(value)}
+          onSelectProblems={handleSelectProblem}
+          onCopyProblem={() => {
+            setShowProblemModal(false);
+            setShowCopyProblemModal(true);
+            setSelectedSectionForProblem('');
+            handleSectionChangeForProblem(null);
+            setCopyProblemSearchTerm('');
+            setProblemViewMode('list');
+          }}
+          onCreateNew={handleCreateNewProblem}
+          onProblemDetail={async (problemId) => {
+            try {
+              const problemInfo = await APIService.getProblemInfo(problemId);
+              setSelectedProblemDetail(problemInfo.data || problemInfo);
+            } catch (error) {
+              console.error('문제 정보 조회 실패:', error);
+              alert('문제 정보를 불러오는데 실패했습니다.');
+            }
+          }}
+        />
 
         {/* 새 문제 생성 모달 */}
-        {showCreateProblemModal && (
-          <div className="tutor-modal-overlay">
-            <div className="tutor-modal-content">
-              <div className="tutor-modal-header">
-                <h2>새 문제 만들기</h2>
-                <button 
-                  className="tutor-modal-close"
-                  onClick={closeProblemModals}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <form onSubmit={handleCreateProblemSubmit} className="tutor-problem-form">
-                <div className="tutor-form-group">
-                  <label htmlFor="problemTitle">문제 제목 *</label>
-                  <input
-                    type="text"
-                    id="problemTitle"
-                    name="title"
-                    value={problemFormData.title}
-                    onChange={handleProblemInputChange}
-                    placeholder="문제 제목을 입력하세요"
-                    required
-                  />
-                </div>
-
-                <div className="tutor-info-box">
-                  <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
-                  <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
-                  <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
-                  <p>3. 파일이 없으면 빈 설명으로 생성됩니다.</p>
-                </div>
-
-                <div className="tutor-form-group">
-                  <label htmlFor="descriptionFile">문제 설명 파일 <span className="tutor-optional">(선택사항)</span></label>
-                  <input
-                    type="file"
-                    id="descriptionFile"
-                    name="descriptionFile"
-                    onChange={handleProblemInputChange}
-                    accept=".md,.txt,.tex"
-                    className="tutor-file-input"
-                  />
-                  <small className="tutor-file-help">
-                    마크다운(.md), 텍스트(.txt), LaTeX(.tex) 형식의 문제 설명 파일을 업로드하세요.
-                    <br/>이 파일이 있으면 ZIP 파일 내부 설명보다 우선 적용됩니다.
-                    {problemFormData.descriptionFile && (
-                      <span className="tutor-file-selected">선택됨: {problemFormData.descriptionFile.name}</span>
-                    )}
-                  </small>
-                </div>
-
-                <div className="tutor-form-group">
-                  <label htmlFor="zipFile">문제 파일 (.zip) *</label>
-                  <input
-                    type="file"
-                    id="zipFile"
-                    name="zipFile"
-                    onChange={handleProblemInputChange}
-                    accept=".zip"
-                    className="tutor-file-input"
-                    required
-                  />
-                  <small className="tutor-file-help">
-                    테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
-                    <br/>ZIP 내부에 problem_statement 폴더가 있으면 자동으로 설명을 추출합니다.
-                    {problemFormData.zipFile && (
-                      <span className="tutor-file-selected">선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
-                    )}
-                  </small>
-                </div>
-
-                <div className="tutor-form-actions">
-                  <button 
-                    type="button" 
-                    className="tutor-btn-secondary"
-                    onClick={closeProblemModals}
-                  >
-                    취소
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="tutor-btn-primary"
-                  >
-                    문제 생성 및 추가
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <ProblemCreateModal
+          isOpen={showCreateProblemModal}
+          formData={problemFormData}
+          onClose={closeProblemModals}
+          onSubmit={handleCreateProblemSubmit}
+          onInputChange={handleProblemInputChange}
+        />
 
         {/* 독립적인 새 문제 생성 모달 */}
-        {showStandaloneProblemModal && (
-          <div className="tutor-modal-overlay">
-            <div className="tutor-modal-content">
-              <div className="tutor-modal-header">
-                <h2>새 문제 만들기</h2>
-                <button 
-                  className="tutor-modal-close"
-                  onClick={closeStandaloneProblemModal}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <form onSubmit={handleStandaloneProblemSubmit} className="tutor-problem-form">
-                <div className="tutor-form-group">
-                  <label htmlFor="standaloneProblemTitle">문제 제목 *</label>
-                  <input
-                    type="text"
-                    id="standaloneProblemTitle"
-                    name="title"
-                    value={problemFormData.title}
-                    onChange={handleProblemInputChange}
-                    placeholder="문제 제목을 입력하세요"
-                    required
-                  />
-                </div>
-
-                <div className="tutor-info-box">
-                  <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
-                  <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
-                  <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
-                  <p>3. 파일이 없으면 빈 설명으로 생성됩니다.</p>
-                </div>
-
-                <div className="tutor-form-group">
-                  <label htmlFor="standaloneDescriptionFile">문제 설명 파일 <span className="tutor-optional">(선택사항)</span></label>
-                  <input
-                    type="file"
-                    id="standaloneDescriptionFile"
-                    name="descriptionFile"
-                    onChange={handleProblemInputChange}
-                    accept=".md,.txt,.tex"
-                    className="tutor-file-input"
-                  />
-                  <small className="tutor-file-help">
-                    마크다운(.md), 텍스트(.txt), LaTeX(.tex) 형식의 문제 설명 파일을 업로드하세요.
-                    <br/>이 파일이 있으면 ZIP 파일 내부 설명보다 우선 적용됩니다.
-                    {problemFormData.descriptionFile && (
-                      <span className="tutor-file-selected">선택됨: {problemFormData.descriptionFile.name}</span>
-                    )}
-                  </small>
-                </div>
-
-                <div className="tutor-form-group">
-                  <label htmlFor="standaloneZipFile">문제 파일 (.zip) *</label>
-                  <input
-                    type="file"
-                    id="standaloneZipFile"
-                    name="zipFile"
-                    onChange={handleProblemInputChange}
-                    accept=".zip"
-                    className="tutor-file-input"
-                    required
-                  />
-                  <small className="tutor-file-help">
-                    테스트 케이스와 정답이 포함된 ZIP 파일을 업로드하세요. (최대 50MB)
-                    <br/>ZIP 내부에 problem_statement 폴더가 있으면 자동으로 설명을 추출합니다.
-                    {problemFormData.zipFile && (
-                      <span className="tutor-file-selected">선택됨: {problemFormData.zipFile.name} ({(problemFormData.zipFile.size / 1024 / 1024).toFixed(2)}MB)</span>
-                    )}
-                  </small>
-                </div>
-
-                <div className="tutor-info-box">
-                  <p><strong>💡 안내:</strong></p>
-                  <p>• 이 기능은 문제만 생성합니다</p>
-                  <p>• 생성 후 원하는 과제에서 "문제 추가" 버튼으로 추가할 수 있습니다</p>
-                  <p>• 여러 과제에 동일한 문제를 재사용할 수 있습니다</p>
-                </div>
-
-                <div className="tutor-form-actions">
-                  <button 
-                    type="button" 
-                    className="tutor-btn-secondary"
-                    onClick={closeStandaloneProblemModal}
-                  >
-                    취소
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="tutor-btn-primary"
-                  >
-                    문제 생성
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <StandaloneProblemCreateModal
+          isOpen={showStandaloneProblemModal}
+          formData={problemFormData}
+          onClose={closeStandaloneProblemModal}
+          onSubmit={handleStandaloneProblemSubmit}
+          onInputChange={handleProblemInputChange}
+        />
 
         {/* 대량 문제 생성 모달 */}
-        {showBulkProblemModal && (
-          <div className="tutor-modal-overlay">
-            <div className="tutor-modal-content tutor-large-modal">
-              <div className="tutor-modal-header">
-                <h2>문제 대량 생성</h2>
-                <button 
-                  className="tutor-modal-close"
-                  onClick={closeBulkProblemModal}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <form onSubmit={handleBulkProblemSubmit} className="tutor-bulk-problem-form">
-                <div className="tutor-info-box">
-                  <p><strong>📄 문제 설명 파일 우선순위:</strong></p>
-                  <p>1. 별도 업로드 파일 (최우선) - .md, .txt, .tex 지원</p>
-                  <p>2. ZIP 파일 내 problem_statement 폴더의 파일 (.tex → .md → .txt 순)</p>
-                  <p>3. 파일이 없으면 빈 설명으로 생성됩니다.</p>
-                  <br/>
-                  <p><strong>💡 안내:</strong></p>
-                  <p>• 여러 문제를 한번에 생성할 수 있습니다</p>
-                  <p>• ZIP 파일은 필수, 설명 파일은 선택사항입니다</p>
-                  <p>• 생성 후 원하는 과제에서 "문제 추가" 버튼으로 추가할 수 있습니다</p>
-                </div>
-
-                <div className="tutor-bulk-problems-container">
-                  {bulkProblemData.problems.map((problem, index) => (
-                    <div key={index} className="tutor-bulk-problem-row">
-                      <div className="tutor-problem-row-header">
-                        <h4>문제 {index + 1}</h4>
-                        {bulkProblemData.problems.length > 1 && (
-                          <button
-                            type="button"
-                            className="tutor-btn-remove-row"
-                            onClick={() => removeProblemRow(index)}
-                            title="이 문제 제거"
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                      
-                      <div className="tutor-problem-row-content">
-                        <div className="tutor-form-group">
-                          <label>문제 제목 *</label>
-                          <input
-                            type="text"
-                            value={problem.title}
-                            onChange={(e) => handleBulkProblemInputChange(index, 'title', e.target.value)}
-                            placeholder="문제 제목을 입력하세요"
-                            required
-                          />
-                        </div>
-
-                        <div className="tutor-form-row">
-                          <div className="tutor-form-group">
-                            <label>문제 설명 파일 <span className="tutor-optional">(선택사항)</span></label>
-                            <input
-                              type="file"
-                              onChange={(e) => handleBulkProblemFileChange(index, 'descriptionFile', e.target.files[0])}
-                              accept=".md,.txt,.tex"
-                              className="tutor-file-input"
-                            />
-                            <small className="tutor-file-help">
-                              .md, .txt, .tex 형식 지원. ZIP 파일보다 우선 적용됩니다.
-                            </small>
-                            {problem.descriptionFile && (
-                              <small className="tutor-file-selected">
-                                선택됨: {problem.descriptionFile.name}
-                              </small>
-                            )}
-                          </div>
-
-                          <div className="tutor-form-group">
-                            <label>문제 파일 (.zip) *</label>
-                            <input
-                              type="file"
-                              onChange={(e) => handleBulkProblemFileChange(index, 'zipFile', e.target.files[0])}
-                              accept=".zip"
-                              className="tutor-file-input"
-                              required
-                            />
-                            <small className="tutor-file-help">
-                              테스트 케이스 포함. problem_statement 폴더가 있으면 설명 자동 추출.
-                            </small>
-                            {problem.zipFile && (
-                              <small className="tutor-file-selected">
-                                선택됨: {problem.zipFile.name} ({(problem.zipFile.size / 1024 / 1024).toFixed(2)}MB)
-                              </small>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="tutor-bulk-actions">
-                  <button
-                    type="button"
-                    className="tutor-btn-add-row"
-                    onClick={addProblemRow}
-                  >
-                    문제 추가
-                  </button>
-                </div>
-
-                <div className="tutor-form-actions">
-                  <button 
-                    type="button" 
-                    className="tutor-btn-secondary"
-                    onClick={closeBulkProblemModal}
-                  >
-                    취소
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="tutor-btn-primary"
-                  >
-                    {bulkProblemData.problems.length}개 문제 생성
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <BulkProblemCreateModal
+          isOpen={showBulkProblemModal}
+          bulkProblemData={bulkProblemData}
+          onClose={closeBulkProblemModal}
+          onSubmit={handleBulkProblemSubmit}
+          onInputChange={handleBulkProblemInputChange}
+          onFileChange={handleBulkProblemFileChange}
+          onAddRow={addProblemRow}
+          onRemoveRow={removeProblemRow}
+        />
 
         {/* 문제 설명보기 패널 */}
         {selectedProblemDetail && (
@@ -2635,9 +1412,7 @@ const AssignmentManagement = () => {
                       handleSelectProblem(selectedProblemIds);
                       setShowCopyProblemModal(false);
                       setSelectedSectionForProblem('');
-                      setAssignmentsForProblem([]);
-                      setExpandedAssignmentsForProblem({});
-                      setAssignmentProblems({});
+                      handleSectionChangeForProblem(null);
                       setSelectedProblemIds([]);
                       setCopyProblemSearchTerm('');
                       setProblemViewMode('list');
@@ -2653,234 +1428,44 @@ const AssignmentManagement = () => {
         )}
 
         {/* 문제 목록 모달 */}
-        {showProblemListModal && selectedAssignmentForProblemList && (
-          <div className="tutor-modal-overlay" onClick={() => {
+        <ProblemListModal
+          isOpen={showProblemListModal}
+          selectedAssignment={selectedAssignmentForProblemList}
+          submissionStats={submissionStats}
+          searchTerm={problemListSearchTerm}
+          onClose={() => {
             setShowProblemListModal(false);
             setSelectedAssignmentForProblemList(null);
             setSelectedProblemForDetail(null);
             setShowProblemDetailModal(false);
-          }}>
-            <div className="tutor-modal-content tutor-modal-content-extra-large" onClick={(e) => e.stopPropagation()}>
-              <div className="tutor-modal-header">
-                <h2>문제 목록 관리 - {selectedAssignmentForProblemList.title}</h2>
-                <button 
-                  className="tutor-modal-close"
-                  onClick={() => {
-                    setShowProblemListModal(false);
-                    setSelectedAssignmentForProblemList(null);
-                    setSelectedProblemForDetail(null);
-                    setShowProblemDetailModal(false);
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="tutor-modal-body">
-                {/* 문제 검색 */}
-                <div className="tutor-filters-section">
-                  <div className="tutor-search-box">
-                    <input
-                      type="text"
-                      placeholder="문제 ID, 제목으로 검색..."
-                      value={problemListSearchTerm}
-                      onChange={(e) => setProblemListSearchTerm(e.target.value)}
-                      className="tutor-search-input"
-                    />
-                  </div>
-                </div>
-
-                {selectedAssignmentForProblemList.problems && selectedAssignmentForProblemList.problems.length > 0 ? (
-                  (() => {
-                    const filteredProblems = selectedAssignmentForProblemList.problems.filter(problem => {
-                      if (!problemListSearchTerm) return true;
-                      const searchLower = problemListSearchTerm.toLowerCase();
-                      return (
-                        problem.id?.toString().includes(searchLower) ||
-                        problem.title?.toLowerCase().includes(searchLower)
-                      );
-                    });
-                    
-                    return filteredProblems.length > 0 ? (
-                      <div className="tutor-problems-table-container">
-                        <table className="tutor-problems-table">
-                          <thead>
-                            <tr>
-                              <th>ID</th>
-                              <th>제목</th>
-                              <th>난이도</th>
-                              <th>상태</th>
-                              <th>관리</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredProblems.map((problem, index) => (
-                          <tr key={problem.id || index}>
-                            <td>{problem.id}</td>
-                            <td className="tutor-problem-title-cell">
-                              <button
-                                className="tutor-btn-link"
-                                onClick={async () => {
-                                  try {
-                                    const problemDetail = await APIService.getProblemInfo(problem.id);
-                                    setSelectedProblemForDetail({
-                                      ...problemDetail,
-                                      id: problem.id
-                                    });
-                                    setShowProblemDetailModal(true);
-                                  } catch (error) {
-                                    console.error('문제 상세 정보 조회 실패:', error);
-                                    alert('문제 상세 정보를 불러오는데 실패했습니다.');
-                                  }
-                                }}
-                              >
-                                {removeCopyLabel(problem.title)}
-                              </button>
-                            </td>
-                            <td>{problem.difficulty || 'N/A'}</td>
-                            <td>
-                              {submissionStats[selectedAssignmentForProblemList.id]?.problemStats ? (
-                                (() => {
-                                  const problemStat = submissionStats[selectedAssignmentForProblemList.id].problemStats.find(
-                                    stat => stat.problemId === problem.id
-                                  );
-                                  return problemStat ? `${problemStat.solvedCount}/${problemStat.totalStudents}명 완료` : '0/0명';
-                                })()
-                              ) : '0/0명'}
-                            </td>
-                            <td>
-                              <button
-                                className="tutor-btn-table-action"
-                                onClick={async () => {
-                                  try {
-                                    const problemDetail = await APIService.getProblemInfo(problem.id);
-                                    setSelectedProblemForDetail({
-                                      ...problemDetail,
-                                      id: problem.id
-                                    });
-                                    setShowProblemDetailModal(true);
-                                  } catch (error) {
-                                    console.error('문제 상세 정보 조회 실패:', error);
-                                    alert('문제 상세 정보를 불러오는데 실패했습니다.');
-                                  }
-                                }}
-                              >
-                                수정
-                              </button>
-                              <button
-                                className="tutor-btn-table-action tutor-btn-delete"
-                                onClick={() => handleRemoveProblem(selectedAssignmentForProblemList.id, problem.id)}
-                              >
-                                제거
-                              </button>
-                            </td>
-                          </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <div className="tutor-no-problems">
-                        <p>검색 조건에 맞는 문제가 없습니다.</p>
-                      </div>
-                    );
-                  })()
-                ) : (
-                  <div className="tutor-no-problems">
-                    <p>등록된 문제가 없습니다.</p>
-                    <button 
-                      className="tutor-btn-primary"
-                      onClick={() => {
-                        setShowProblemListModal(false);
-                        handleAddProblem(selectedAssignmentForProblemList);
-                      }}
-                    >
-                      첫 번째 문제 추가하기
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+          }}
+          onAddProblem={handleAddProblem}
+          onRemoveProblem={handleRemoveProblem}
+          onProblemDetail={async (problemId) => {
+            try {
+              const problemDetail = await APIService.getProblemInfo(problemId);
+              setSelectedProblemForDetail({
+                ...problemDetail,
+                id: problemId
+              });
+              setShowProblemDetailModal(true);
+            } catch (error) {
+              console.error('문제 상세 정보 조회 실패:', error);
+              alert('문제 상세 정보를 불러오는데 실패했습니다.');
+            }
+          }}
+          onSearchChange={(value) => setProblemListSearchTerm(value)}
+        />
 
         {/* 문제 상세 및 수정 모달 */}
-        {showProblemDetailModal && selectedProblemForDetail && (
-          <div className="tutor-modal-overlay" onClick={() => {
+        <ProblemDetailModal
+          isOpen={showProblemDetailModal}
+          problemDetail={selectedProblemForDetail}
+          onClose={() => {
             setShowProblemDetailModal(false);
             setSelectedProblemForDetail(null);
-          }}>
-            <div className="tutor-modal-content tutor-large-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="tutor-modal-header">
-                <h2>문제 상세 - {selectedProblemForDetail.title}</h2>
-                <button 
-                  className="tutor-modal-close"
-                  onClick={() => {
-                    setShowProblemDetailModal(false);
-                    setSelectedProblemForDetail(null);
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="tutor-modal-body">
-                <div className="tutor-problem-detail-content">
-                  <div className="tutor-detail-meta">
-                    {selectedProblemForDetail.timeLimit && (
-                      <span>시간 제한: {selectedProblemForDetail.timeLimit}초</span>
-                    )}
-                    {selectedProblemForDetail.memoryLimit && (
-                      <span>메모리 제한: {selectedProblemForDetail.memoryLimit}MB</span>
-                    )}
-                  </div>
-                  <div className="tutor-detail-body tutor-problem-description">
-                    {selectedProblemForDetail.description ? (
-                      (() => {
-                        const description = selectedProblemForDetail.description;
-                        const isMarkdown = description.includes('# ') || 
-                          description.includes('## ') || 
-                          description.includes('```') ||
-                          description.includes('**') ||
-                          !description.includes('<');
-                        
-                        if (isMarkdown) {
-                          return <ReactMarkdown>{description}</ReactMarkdown>;
-                        } else {
-                          return <div dangerouslySetInnerHTML={{ __html: description }} />;
-                        }
-                      })()
-                    ) : (
-                      <p>문제 설명이 없습니다.</p>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="tutor-modal-actions">
-                  <button 
-                    className="tutor-btn-secondary"
-                    onClick={() => {
-                      setShowProblemDetailModal(false);
-                      setSelectedProblemForDetail(null);
-                    }}
-                >
-                  닫기
-                </button>
-                  <button 
-                    className="tutor-btn-primary"
-                    onClick={() => {
-                      // 문제 수정 페이지로 이동하거나 수정 모달 열기
-                      // 여기서는 수정 기능을 추가할 수 있습니다
-                      alert('문제 수정 기능은 추후 구현 예정입니다.');
-                    }}
-                  >
-                    수정
-                </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          }}
+        />
      
     </TutorLayout>
   );
