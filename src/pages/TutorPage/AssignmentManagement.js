@@ -1070,7 +1070,7 @@ const AssignmentManagement = () => {
 
   return (
     <TutorLayout selectedSection={currentSection}>
-      <>
+      <div className="assignment-management">
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (
         <>
@@ -1102,67 +1102,66 @@ const AssignmentManagement = () => {
       
       {/* 전체 페이지인 경우 기존 헤더 유지 */}
       {!sectionId && (
-        <div className="assignment-management">
+        <>
           <div className="tutor-page-header">
-          <div className="tutor-header-left">
-            <h1 className="tutor-page-title">전체 과제 관리</h1>
-            {/* 분반별 페이지가 아닌 경우에만 검색창 표시 */}
-            {!sectionId && (
-              <div className="tutor-search-box">
-                <input
-                  type="text"
-                  placeholder="과제명, 설명으로 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="tutor-search-input"
-                />
+            <div className="tutor-header-left">
+              <h1 className="tutor-page-title">전체 과제 관리</h1>
+              {/* 분반별 페이지가 아닌 경우에만 검색창 표시 */}
+              {!sectionId && (
+                <div className="tutor-search-box">
+                  <input
+                    type="text"
+                    placeholder="과제명, 설명으로 검색..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="tutor-search-input"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="tutor-header-right">
+              {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
+              {!sectionId && (
+                <select
+                  value={filterSection}
+                  onChange={(e) => setFilterSection(e.target.value)}
+                  className="section-filter"
+                >
+                  <option value="ALL">모든 수업</option>
+                  {uniqueSections.map((section, index) => (
+                    <option key={index} value={section}>{section}</option>
+                  ))}
+                </select>
+              )}
+              <div className="tutor-header-actions">
+                <button 
+                  className="tutor-btn-secondary"
+                  onClick={handleStandaloneProblemCreate}
+                  title="단일 문제를 생성합니다"
+                >
+                  <span>📝</span>
+                  새 문제 만들기
+                </button>
+                <button 
+                  className="tutor-btn-secondary"
+                  onClick={handleBulkProblemCreate}
+                  title="여러 문제를 한번에 생성합니다"
+                >
+                  문제 대량 생성
+                </button>
+                <button 
+                  className="tutor-btn-secondary tutor-btn-primary-color"
+                  onClick={handleAddAssignment}
+                >
+                  새 과제 만들기
+                </button>
               </div>
-            )}
-          </div>
-          <div className="tutor-header-right">
-            {/* 분반별 페이지가 아닌 경우에만 필터 표시 */}
-            {!sectionId && (
-              <select
-                value={filterSection}
-                onChange={(e) => setFilterSection(e.target.value)}
-                className="section-filter"
-              >
-                <option value="ALL">모든 수업</option>
-                {uniqueSections.map((section, index) => (
-                  <option key={index} value={section}>{section}</option>
-                ))}
-              </select>
-            )}
-            <div className="tutor-header-actions">
-              <button 
-                className="tutor-btn-secondary"
-                onClick={handleStandaloneProblemCreate}
-                title="단일 문제를 생성합니다"
-              >
-                <span>📝</span>
-                새 문제 만들기
-              </button>
-              <button 
-                className="tutor-btn-secondary"
-                onClick={handleBulkProblemCreate}
-                title="여러 문제를 한번에 생성합니다"
-              >
-                문제 대량 생성
-              </button>
-              <button 
-                className="tutor-btn-secondary tutor-btn-primary-color"
-                onClick={handleAddAssignment}
-              >
-                새 과제 만들기
-              </button>
             </div>
           </div>
-        </div>
-        </div>
+        </>
       )}
       
-      <div className="assignment-management">
-        {sectionId ? (
+      {sectionId ? (
           <div className="tutor-assignments-table-container">
             <table className="tutor-assignments-table">
               <thead>
@@ -2882,7 +2881,7 @@ const AssignmentManagement = () => {
             </div>
           </div>
         )}
-      </>
+     
     </TutorLayout>
   );
 };

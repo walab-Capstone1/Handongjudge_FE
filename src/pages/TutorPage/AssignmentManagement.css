@@ -1,8 +1,11 @@
+/* AssignmentManagement.css - Tutor 스타일과 일치하는 과제 관리 페이지 */
+
 .assignment-management {
   padding: 0;
 }
 
-.tutor-loading-container {
+/* 로딩 스타일 */
+.assignment-management .tutor-loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,7 +15,7 @@
   background-color: white;
 }
 
-.tutor-loading-spinner {
+.assignment-management .tutor-loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
@@ -26,82 +29,89 @@
   100% { transform: rotate(360deg); }
 }
 
-.tutor-page-header {
+/* 타이틀 헤더 섹션 - Tutor 테마에 맞게 개선 */
+.assignment-management .tutor-page-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e1e8ed;
-  flex-wrap: nowrap;
-  gap: 1rem;
+  justify-content: space-between;
+  padding: 1.75rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.assignment-management .tutor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
   min-width: 0;
 }
 
-.tutor-page-title {
-  flex-shrink: 0;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.tutor-header-actions {
+.assignment-management .tutor-header-right {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
-.tutor-header-stats {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.tutor-stat-badge {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  color: #2d3436;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.tutor-stat-badge.tutor-active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+.assignment-management .tutor-page-title {
+  font-size: 1.875rem;
+  font-weight: 700;
   color: white;
-  border-color: #667eea;
+  margin: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.tutor-filters-section {
+.assignment-management .tutor-header-actions {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
   align-items: center;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
-.tutor-search-box {
+/* 필터 섹션 */
+.assignment-management .tutor-filters-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.assignment-management .tutor-search-box {
   position: relative;
   flex: 1;
-  min-width: 300px;
+  min-width: 250px;
+  max-width: 400px;
 }
 
 .assignment-management .tutor-search-input {
   width: 100%;
-  padding: 0.8rem 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
   background: white;
-  transition: all 0.3s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .assignment-management .tutor-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
 }
 
 /* 모달이 열려있을 때 search input focus 스타일 무시 */
@@ -112,168 +122,173 @@ body.section-modal-open .assignment-management .tutor-search-input:focus {
   background: white !important;
 }
 
-
-
-.section-filter {
-  padding: 0.8rem 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 1rem;
+.assignment-management .section-filter {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
   background: white;
+  color: #1e293b;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 150px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  min-width: 140px;
 }
 
-
-.section-filter:focus {
+.assignment-management .section-filter:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.tutor-page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #2d3436;
-  margin: 0;
+.assignment-management .section-filter:hover {
+  border-color: #9ca3af;
 }
 
-.tutor-btn-primary {
+/* 버튼 스타일 */
+.assignment-management .tutor-btn-primary {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 0.875rem 1.75rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+}
+
+.assignment-management .tutor-btn-primary:hover {
   background: #667eea;
   color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 12px;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.assignment-management .tutor-btn-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 0.875rem 1.5rem;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
 }
 
-.tutor-btn-primary:hover {
-  background: #5568d3;
+.assignment-management .tutor-btn-secondary:hover {
+  background: #f8f9ff;
+  border-color: #5568d3;
+  color: #5568d3;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
-.tutor-btn-icon {
-  font-size: 1.2rem;
+.assignment-management .tutor-btn-secondary.tutor-btn-primary-color {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.tutor-assignments-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 1.5rem;
-  align-items: start;
+.assignment-management .tutor-btn-secondary.tutor-btn-primary-color:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-
-.assignment-card {
+/* 테이블 스타일 (분반별 페이지) */
+.assignment-management .tutor-assignments-table-container {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid #e9ecef;
-  position: relative;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  overflow: visible;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-
-.assignment-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+.assignment-management .tutor-assignments-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-
-.assignment-card.tutor-expanded {
-  grid-column: span 2;
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
-  border-color: #667eea;
+.assignment-management .tutor-assignments-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
-
-.assignment-card.tutor-disabled {
-  opacity: 0.6;
-}
-
-
-.assignment-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-
-.assignment-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.tutor-title-and-course {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-
-.assignment-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2d3436;
-  margin: 0;
-  flex: 1;
-  line-height: 1.3;
-}
-
-
-.assignment-course {
-  color: #667eea;
+.assignment-management .tutor-assignments-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
   font-weight: 600;
-  font-size: 0.85rem;
-  margin: 0;
-  line-height: 1.2;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
+.assignment-management .tutor-assignments-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
 
-.assignment-compact-stats {
+.assignment-management .tutor-assignments-table tbody tr:hover {
+  background-color: #f8f9ff;
+}
+
+.assignment-management .tutor-assignments-table tbody tr.tutor-disabled {
+  opacity: 0.6;
+  background-color: #f9fafb;
+}
+
+.assignment-management .tutor-assignments-table td {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.9rem;
+  color: #374151;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-assignment-title-cell {
+  min-width: 200px;
+}
+
+.assignment-management .tutor-assignment-title {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.assignment-management .tutor-assignment-description {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.assignment-management .tutor-assignment-meta-cell {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.assignment-management .tutor-assignment-actions-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.assignment-management .tutor-assignment-actions-inline {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
+  align-items: center;
   flex-wrap: wrap;
 }
 
-.tutor-compact-stat {
-  font-size: 0.85rem;
-  color: #6b7280;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.tutor-stat-label-compact {
-  font-weight: 600;
-  color: #4b5563;
-}
-
-
-.assignment-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.tutor-btn-text-small {
-  padding: 0.4rem 0.8rem;
+.assignment-management .tutor-btn-table-action {
+  padding: 0.5rem 1rem;
   border: 1px solid #e5e7eb;
   background: white;
   border-radius: 6px;
@@ -282,722 +297,494 @@ body.section-modal-open .assignment-management .tutor-search-input:focus {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  color: #667eea;
 }
 
-.tutor-btn-text-small.edit {
+.assignment-management .tutor-btn-table-action:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+.assignment-management .tutor-btn-table-action.tutor-btn-edit {
   color: #667eea;
   border-color: #667eea;
 }
 
-.tutor-btn-text-small.edit:hover {
+.assignment-management .tutor-btn-table-action.tutor-btn-edit:hover {
   background: #667eea;
   color: white;
 }
 
-.tutor-btn-text-small.delete {
-  color: #ef4444;
-  border-color: #ef4444;
-}
-
-.tutor-btn-text-small.delete:hover {
-  background: #ef4444;
-  color: white;
-}
-
-.tutor-btn-icon-small {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.tutor-btn-icon-small.edit {
-  color: #000000;
-}
-
-.tutor-btn-icon-small.delete {
-  color: #e74c3c;
-}
-
-.tutor-btn-icon-small.edit:hover {
-  background: #e3f2fd;
-}
-
-.tutor-btn-icon-small.delete:hover {
-  background: #ffebee;
-}
-
-.tutor-edit-icon {
-  width: 14px;
-  height: 14px;
-  position: relative;
-}
-
-.tutor-edit-icon::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 14px;
-  height: 14px;
-  border: 2px solid currentColor;
-  border-radius: 2px;
-}
-
-.tutor-edit-icon::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  width: 12px;
-  height: 2px;
-  background: currentColor;
-  transform: rotate(45deg);
-  transform-origin: 0 0;
-}
-
-.tutor-delete-icon {
-  width: 14px;
-  height: 14px;
-  position: relative;
-}
-
-.tutor-delete-icon::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 14px;
-  height: 2px;
-  background: currentColor;
-  transform: translateY(-50%) rotate(45deg);
-}
-
-.tutor-delete-icon::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 14px;
-  height: 2px;
-  background: currentColor;
-  transform: translateY(-50%) rotate(-45deg);
-}
-
-
-.assignment-description {
-  color: #636e72;
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0 0 1.5rem 0;
-}
-
-
-.assignment-actions-row {
-  display: flex;
-  gap: 0.75rem;
-  width: 100%;
-  margin-top: 0.5rem;
-}
-
-.tutor-btn-toggle-problems {
-  flex: 1;
-  padding: 0.75rem 1rem;
+.assignment-management .tutor-btn-table-action.tutor-btn-more {
   background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #64748b;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.assignment-management .tutor-btn-table-action.tutor-btn-more:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.assignment-management .tutor-more-menu {
+  position: relative;
+}
+
+.assignment-management .tutor-more-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #667eea;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tutor-btn-toggle-problems:hover {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-}
-
-
-.assignment-expanded-content {
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
-  animation: slideDown 0.3s ease-out;
-  overflow: visible;
-  width: 100%;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
-.assignment-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-}
-
-.tutor-stat-item {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 120px;
+  padding: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.tutor-stat-label {
-  font-size: 0.9rem;
+.assignment-management .tutor-btn-text-small {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #636e72;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tutor-stat-value {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #2d3436;
-}
-
-.tutor-stat-value.due-date {
-  color: #e17055;
-}
-
-.tutor-stat-value.submission-rate {
-  color: #00b894;
-}
-
-
-.tutor-problems-section {
-  margin-bottom: 1.5rem;
-  overflow: visible;
-  width: 100%;
-}
-
-
-.tutor-problems-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2d3436;
-  margin: 0 0 1rem 0;
-}
-
-/* AssignmentManagement 전용 문제 목록 - 한 줄씩 표시 */
-
-.assignment-expanded-content  .tutor-problems-list {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0.5rem;
-  overflow: visible;
-  width: 100%;
-}
-
-
-.assignment-expanded-content  .tutor-problem-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  padding: 0.8rem 0.8rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
-  gap: 0.75rem;
-  width: 100%;
+  cursor: pointer;
   transition: all 0.2s ease;
-  max-width: 100%;
-  box-sizing: border-box;
+  text-align: left;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  color: #374151;
 }
 
-
-.assignment-expanded-content  .tutor-problem-item:hover {
-  background: #e9ecef;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+.assignment-management .tutor-btn-text-small:hover {
+  background: #f3f4f6;
 }
 
-
-.assignment-expanded-content  .tutor-problem-item-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 0; /* 오버플로우 방지 */
-  overflow: hidden; /* 내용이 넘치지 않도록 */
-  max-width: 100%;
+.assignment-management .tutor-btn-text-small.tutor-delete {
+  color: #ef4444;
 }
 
+.assignment-management .tutor-btn-text-small.tutor-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
 
-.assignment-expanded-content  .tutor-problem-number {
-  font-weight: 700;
-  color: #667eea;
+.assignment-management .tutor-table-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
   font-size: 1rem;
-  flex-shrink: 0;
-  min-width: 24px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
+/* 리스트 스타일 (전체 페이지) */
+.assignment-management .tutor-assignments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
-.assignment-expanded-content  .tutor-problem-title {
-  font-weight: 600;
-  color: #2d3436;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.assignment-management .tutor-assignment-list-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.assignment-management .tutor-assignment-list-item:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.assignment-management .tutor-assignment-list-item.tutor-disabled {
+  opacity: 0.6;
+  background: #f9fafb;
+}
+
+.assignment-management .tutor-assignment-list-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.assignment-management .tutor-assignment-list-info {
   flex: 1;
   min-width: 0;
 }
 
-
-.assignment-expanded-content  .tutor-problem-submission-rate {
-  font-size: 0.8rem;
-  color: #495057;
-  padding: 0.25rem 0.6rem;
-  background: white;
-  border-radius: 6px;
-  border: 1px solid #dee2e6;
-  border-left: 3px solid #0984e3;
-  white-space: nowrap; /* 줄바꿈 방지 */
-  font-weight: 500;
-  justify-self: end; /* grid에서 오른쪽 정렬 */
+.assignment-management .tutor-assignment-list-title-section {
+  margin-bottom: 1rem;
 }
 
+.assignment-management .tutor-assignment-list-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
 
-.assignment-expanded-content .tutor-btn-remove-problem {
-  background: #ff6b6b;
+.assignment-management .tutor-assignment-list-description {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.assignment-management .tutor-assignment-list-meta {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.assignment-management .tutor-assignment-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.assignment-management .tutor-meta-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assignment-management .tutor-meta-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.assignment-management .tutor-assignment-list-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.assignment-management .tutor-btn-list-action {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  color: #667eea;
+}
+
+.assignment-management .tutor-btn-list-action:hover {
+  background: #667eea;
   color: white;
-  border: none;
-  padding: 0;
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+/* 페이지네이션 */
+.assignment-management .tutor-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.assignment-management .tutor-pagination-info {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.assignment-management .tutor-btn-pagination {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e5e7eb;
+  background: white;
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 28px;
-  width: 28px;
-  height: 28px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  color: #374151;
+}
+
+.assignment-management .tutor-btn-pagination:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.assignment-management .tutor-btn-pagination:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.assignment-management .tutor-pagination-pages {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  justify-self: end; /* grid에서 오른쪽 정렬 */
-  flex-shrink: 0;
+  gap: 0.25rem;
 }
 
-
-.assignment-expanded-content .tutor-btn-remove-problem:hover {
-  background: #ff5252;
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+.assignment-management .tutor-btn-pagination-page {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  color: #374151;
+  min-width: 40px;
 }
 
-
-
-
-.assignment-expanded-content  .tutor-problem-difficulty {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
+.assignment-management .tutor-btn-pagination-page:hover {
+  background: #f3f4f6;
+  border-color: #cbd5e1;
 }
 
-.tutor-progress-bar {
-  width: 100%;
-  height: 6px;
-  background: #e9ecef;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.tutor-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #00b894, #55efc4);
-  transition: width 0.3s ease;
-  border-radius: 3px;
+.assignment-management .tutor-btn-pagination-page.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
 }
 
 /* 모달 스타일 */
-.tutor-modal-overlay {
+.assignment-management .tutor-modal-overlay {
   position: fixed;
-  top: 0;
+  top: 65px;
   left: 0;
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.tutor-modal-content {
-  background: white;
-  border-radius: 20px;
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+  padding-top: 2rem;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.tutor-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2rem 2rem 1rem 2rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.tutor-modal-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2d3436;
-  margin: 0;
-}
-
-.tutor-modal-close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  color: #636e72;
-}
-
-.tutor-modal-close:hover {
-  background: #f1f3f4;
-  color: #2d3436;
-}
-
-
-.assignment-form {
-  padding: 2rem;
-}
-
-.tutor-form-group {
-  margin-bottom: 1.5rem;
-}
-
-.tutor-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.tutor-form-label {
-  display: block;
-  font-weight: 600;
-  color: #2d3436;
-  margin-bottom: 0.5rem;
-}
-
-.tutor-form-input,
-.tutor-form-textarea,
-.tutor-form-select {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 1rem;
-  transition: all 0.2s ease;
   box-sizing: border-box;
 }
 
-.tutor-form-input:focus,
-.tutor-form-textarea:focus,
-.tutor-form-select:focus {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.assignment-management .tutor-modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  max-height: calc(90vh - 65px);
+  overflow: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideInUp 0.3s ease;
+  margin-top: 0;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.assignment-management .tutor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.75rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.assignment-management .tutor-modal-header h2,
+.assignment-management .tutor-modal-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-modal-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 1.75rem;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.assignment-management .tutor-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.assignment-management .assignment-form,
+.assignment-management .tutor-modal-body {
+  padding: 2rem;
+}
+
+.assignment-management .tutor-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.assignment-management .tutor-form-group label,
+.assignment-management .tutor-form-label {
+  display: block;
+  margin-bottom: 0.625rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-form-input,
+.assignment-management .tutor-form-textarea,
+.assignment-management .tutor-form-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.assignment-management .tutor-form-input:focus,
+.assignment-management .tutor-form-textarea:focus,
+.assignment-management .tutor-form-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.tutor-form-textarea {
+/* 모달이 열려있을 때 input focus 스타일 무시 */
+body.section-modal-open .assignment-management .tutor-form-input:focus,
+body.section-modal-open .assignment-management .tutor-form-textarea:focus,
+body.section-modal-open .assignment-management .tutor-form-select:focus {
+  outline: none !important;
+  border-color: #e1e8ed !important;
+  box-shadow: none !important;
+  background: white !important;
+}
+
+.assignment-management .tutor-form-textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-.tutor-form-actions {
-  display: flex;
+.assignment-management .tutor-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
+}
+
+.assignment-management .tutor-form-actions {
+  display: flex;
   justify-content: flex-end;
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.tutor-btn-secondary {
-  background: #f1f3f4;
-  color: #636e72;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1rem;
-}
-
-.tutor-btn-secondary:hover {
-  background: #e9ecef;
-  color: #2d3436;
-}
-
-.tutor-btn-secondary.btn-primary-color {
-  background: #667eea;
-  color: white;
-}
-
-.tutor-btn-secondary.btn-primary-color:hover {
-  background: #5568d3;
-  color: white;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 1200px) {
-   .assignment-card.tutor-expanded {
-    grid-column: span 3;
-  }
-}
-
-@media (max-width: 768px) {
-  .tutor-page-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .tutor-assignments-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-   .assignment-card {
-    padding: 1.25rem;
-  }
-
-   .assignment-card.tutor-expanded {
-    grid-column: span 1;
-  }
-  
-   .assignment-title {
-    font-size: 1.1rem;
-  }
-
-   .assignment-compact-stats {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .tutor-stat-item {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-   .assignment-expanded-content  .tutor-problems-list {
-    gap: 0.25rem;
-  }
-  
-   .assignment-expanded-content  .tutor-problem-item {
-    padding: 0.6rem 0.8rem;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    gap: 0.5rem;
-  }
-  
-   .assignment-expanded-content  .tutor-problem-submission-rate {
-    justify-self: start;
-  }
-  
-   .assignment-expanded-content .tutor-btn-remove-problem {
-    justify-self: start;
-    width: auto;
-    min-width: auto;
-    padding: 0.3rem 0.8rem;
-  }
-  
-  .tutor-form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .tutor-modal-content {
-    margin: 1rem;
-  }
-  
-  .tutor-modal-header,
-   .assignment-form {
-    padding: 1.5rem;
-  }
-  
-  .tutor-form-actions {
-    flex-direction: column;
-  }
-}
-
-.tutor-no-assignments {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.tutor-no-assignments-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  color: #636e72;
-}
-
-.tutor-no-assignments-icon {
-  font-size: 4rem;
-  opacity: 0.5;
-}
-
-/* 문제 목록 스타일 - problem-number는 위에서 이미 정의됨 */
-
-
-.tutor-problem-id {
-  font-size: 0.8rem;
-  color: #636e72;
-  background: #f8f9fa;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  margin-left: 0.5rem;
-}
-
-.tutor-no-problems {
-  color: #636e72;
-  font-style: italic;
-  text-align: center;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
   gap: 1rem;
-  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
 
-/* 문제 관리 관련 스타일 */
-
-.tutor-problems-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.tutor-btn-add-problem {
-  flex: 1;
-  background: #667eea;
-  color: white;
+.assignment-management .tutor-btn-cancel {
+  background: #f3f4f6;
+  color: #6b7280;
   border: none;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.75rem;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-.tutor-btn-add-problem:hover {
-  background: #5568d3;
-  transform: translateY(-1px);
+.assignment-management .tutor-btn-cancel:hover {
+  background: #e5e7eb;
 }
 
-.tutor-btn-add-first-problem {
-  background: #667eea;
+.assignment-management .tutor-btn-submit {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 12px;
+  padding: 0.875rem 1.75rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-.tutor-btn-add-first-problem:hover {
-  background: #5568d3;
+.assignment-management .tutor-btn-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%);
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-/* assignment-expanded-content 내부의 btn-remove-problem은 이미 위에서 정의됨 */
-/* 모달 등 다른 곳에서 사용하는 버튼 스타일 */
-.tutor-btn-remove-problem:not(.assignment-expanded-content .tutor-btn-remove-problem) {
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-left: auto;
+.assignment-management .tutor-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.tutor-btn-remove-problem:not(.assignment-expanded-content .tutor-btn-remove-problem):hover {
-  background: #ff5252;
-  transform: scale(1.05);
-}
-
-/* 모달 등에서 사용하는 버튼에 대한 명시적 스타일 */
-
-.tutor-problem-modal .tutor-btn-remove-problem,
-.tutor-available-problem-item .tutor-btn-remove-problem {
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-left: auto;
-}
-
-
-.tutor-problem-modal .tutor-btn-remove-problem:hover,
-.tutor-available-problem-item .tutor-btn-remove-problem:hover {
-  background: #ff5252;
-  transform: scale(1.05);
-}
-
-/* 문제 선택 모달 스타일 */
-
-.tutor-problem-modal {
-  width: 90%;
-  max-width: 700px;
-  max-height: 90vh;
-}
-
-
-.tutor-problem-modal-content {
-  padding: 1.5rem;
-  max-height: 70vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-
-.tutor-problem-search-section {
+/* 문제 관련 스타일 */
+.assignment-management .tutor-problem-search-section {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
@@ -1005,16 +792,14 @@ body.section-modal-open .assignment-management .tutor-search-input:focus {
   flex-wrap: nowrap;
 }
 
-
-.tutor-problem-search-section .tutor-search-box {
+.assignment-management .tutor-problem-search-section .tutor-search-box {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
 }
 
-
-.tutor-problem-search-section .tutor-search-input {
+.assignment-management .tutor-problem-search-section .tutor-search-input {
   width: 100%;
   padding: 0.6rem 1rem;
   border: 2px solid #e9ecef;
@@ -1024,8 +809,7 @@ body.section-modal-open .assignment-management .tutor-search-input:focus {
   transition: all 0.3s ease;
 }
 
-
-.tutor-problem-search-section .tutor-search-input:focus {
+.assignment-management .tutor-problem-search-section .tutor-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -1039,860 +823,13 @@ body.section-modal-open .assignment-management .tutor-problem-search-section .tu
   background: white !important;
 }
 
-@media (max-width: 600px) {
-   .tutor-problem-search-section {
-    flex-wrap: wrap;
-  }
-  
-   .tutor-problem-search-section .tutor-search-box {
-    width: 100%;
-    min-width: 100%;
-  }
-}
-
-.tutor-btn-create-new {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  border: none;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.tutor-btn-create-new:hover {
-  background: linear-gradient(135deg, #5a6fd8, #6a4190);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.tutor-available-problems {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  overflow-y: auto;
-  max-height: calc(70vh - 150px);
-  padding-right: 0.5rem;
-}
-
-.tutor-available-problem-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  padding: 1rem 1.25rem;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border: 2px solid #e9ecef;
-  transition: all 0.3s ease;
-  gap: 1rem;
-}
-
-.tutor-available-problem-item:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-  background: white;
-}
-
-.tutor-available-problem-item  .tutor-problem-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.tutor-available-problem-item  .tutor-problem-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2d3436;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tutor-available-problem-item  .tutor-problem-created {
-  font-size: 0.8rem;
-  color: #95a5a6;
-  margin: 0;
-}
-
-.tutor-btn-select-problem {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.tutor-btn-select-problem:hover {
-  background: #5568d3;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-
-.tutor-problem-action-buttons {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.tutor-btn-copy-problem {
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.tutor-btn-copy-problem:hover {
-  background: #667eea;
-  color: white;
-  transform: translateY(-1px);
-}
-
-.tutor-btn-create-new {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.tutor-btn-create-new:hover {
-  background: #5568d3;
-  transform: translateY(-1px);
-}
-
-.tutor-copy-problem-info {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 1rem 0;
-}
-
-.tutor-copy-problem-info .tutor-info-text {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #495057;
-  line-height: 1.5;
-}
-
-.tutor-btn-copy-problem-item {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.tutor-btn-copy-problem-item:hover {
-  background: #5568d3;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.tutor-no-available-problems {
-  text-align: center;
-  padding: 3rem;
-  color: #636e72;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-}
-
-/* 문제 생성 폼 스타일 */
-
-.tutor-problem-form {
-  padding: 1.5rem;
-}
-
-.tutor-file-input {
-  width: 100%;
-  padding: 0.8rem;
-  border: 2px dashed #e9ecef;
-  border-radius: 8px;
-  background: #f8f9fa;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.tutor-file-input:hover {
-  border-color: #667eea;
-  background: #f0f4ff;
-}
-
-.tutor-file-help {
-  display: block;
-  color: #636e72;
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-  line-height: 1.4;
-}
-
-.tutor-file-selected {
-  color: #28a745;
-  font-weight: 600;
-  display: inline-block;
-  margin-left: 8px;
-}
-
-.tutor-optional {
-  color: #999;
-  font-weight: normal;
-  font-size: 0.9rem;
-}
-
-.tutor-info-box {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 1rem 0;
-}
-
-.tutor-info-box p {
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
-  color: #495057;
-}
-
-.tutor-info-box p:first-child {
-  margin-bottom: 0.5rem;
-}
-
-.tutor-header-actions {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  flex-wrap: nowrap;
-  min-width: 0;
-}
-
-.tutor-header-actions button {
-  white-space: nowrap;
-  flex-shrink: 0;
-  min-width: fit-content;
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-}
-
-.tutor-header-actions button span {
-  margin-right: 0.5rem;
-}
-
-/* 반응형을 위한 미디어 쿼리 */
-@media (max-width: 1024px) {
-  .tutor-page-header {
-    flex-wrap: wrap;
-  }
-  
-  .tutor-header-actions {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .tutor-header-actions button {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;
-  }
-}
-
-/* 대량 문제 생성 모달 스타일 */
-.tutor-large-modal {
-  max-width: 900px;
-  width: 90vw;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.tutor-bulk-problems-container {
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 1rem 0;
-}
-
-.tutor-bulk-problem-row {
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: #f8f9fa;
-}
-
-.tutor-bulk-problem-row:last-child {
-  margin-bottom: 0;
-}
-
-
-.tutor-problem-row-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #dee2e6;
-}
-
-
-.tutor-problem-row-header h4 {
-  margin: 0;
-  color: #495057;
-}
-
-.tutor-btn-remove-row {
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tutor-btn-remove-row:hover {
-  background: #c82333;
-}
-
-
-.tutor-problem-row-content .tutor-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.tutor-bulk-actions {
-  text-align: center;
-  margin: 1rem 0;
-}
-
-.tutor-btn-add-row {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: background-color 0.2s ease;
-}
-
-.tutor-btn-add-row:hover {
-  background: #218838;
-}
-
-@media (max-width: 768px) {
-   .tutor-problem-row-content .tutor-form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .tutor-large-modal {
-    width: 95vw;
-  }
-}
-
-/* 모달 스타일 */
-.tutor-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 2rem;
-}
-
-.tutor-modal-content {
-  background: white;
-  border-radius: 12px;
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.tutor-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid #e1e8ed;
-}
-
-.tutor-modal-header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.tutor-modal-header-left h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2d3436;
-}
-
-.tutor-modal-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2d3436;
-}
-
-.tutor-btn-back {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 1.2rem;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.tutor-btn-back:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
-  color: #1e293b;
-}
-
-.tutor-modal-close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #636e72;
-  padding: 0.5rem;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.tutor-modal-close:hover {
-  background: #f8f9fa;
-  color: #2d3436;
-}
-
-
-.assignment-form {
-  padding: 2rem;
-}
-
-.tutor-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.tutor-form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
-
-.tutor-form-group label {
-  font-weight: 600;
-  color: #2d3436;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.tutor-form-group input,
-.tutor-form-group select,
-.tutor-form-group textarea {
-  padding: 0.75rem;
-  border: 1px solid #e1e8ed;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.tutor-form-group input:focus,
-.tutor-form-group select:focus,
-.tutor-form-group textarea:focus {
-  outline: none;
-  border-color: #0984e3;
-  box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
-}
-
-.tutor-form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.tutor-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e1e8ed;
-}
-
-.tutor-btn-primary span {
-  margin-right: 0.5rem;
-}
-
-/* 반응형 모달 */
-@media (max-width: 768px) {
-  .tutor-modal-overlay {
-    padding: 1rem;
-  }
-
-  .tutor-modal-content {
-    max-height: 95vh;
-  }
-
-  .tutor-modal-header,
-   .assignment-form {
-    padding: 1rem;
-  }
-
-  .tutor-form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .tutor-form-actions {
-    flex-direction: column;
-  }
-}
-
-.tutor-no-assignments-message p {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-
-/* Problem Meta Info and Limits for Admin */
-
-.tutor-problem-meta-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 8px 0;
-}
-
-
-.tutor-problem-limits-admin {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tutor-limit-badge-admin {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 3px 8px;
-  border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.tutor-limit-badge-admin.time-limit {
-  background: rgba(88, 166, 255, 0.1);
-  color: #0969da;
-  border: 1px solid rgba(88, 166, 255, 0.2);
-}
-
-.tutor-limit-badge-admin.memory-limit {
-  background: rgba(255, 107, 107, 0.1);
-  color: #d63384;
-  border: 1px solid rgba(255, 107, 107, 0.2);
-}
-
-/* ============================================
-   Problem Modal Styles (Separated)
-   ============================================ */
-
-/* Problem Modal Large - 95vw width */
-
-.tutor-problem-modal-large {
-  width: 95vw !important;
-  max-width: 95vw !important;
-  min-width: 800px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Problem Modal Body */
-
-.tutor-problem-modal-body {
-  padding: 1.5rem;
-  padding-bottom: 1.5rem;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-height: 0;
-  background: white;
-}
-
-/* Problem Search Section (for large modals) */
-
-.tutor-problem-modal-body  .tutor-problem-search-section {
-  flex-shrink: 0;
-  margin-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  max-width: 500px;
-}
-
-
-.tutor-problem-modal-body  .tutor-problem-search-section .tutor-search-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  background: white;
-  transition: all 0.3s ease;
-}
-
-
-.tutor-problem-modal-body  .tutor-problem-search-section .tutor-search-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-/* 모달이 열려있을 때 search input focus 스타일 무시 */
-body.section-modal-open .assignment-management .tutor-problem-modal-body .tutor-problem-search-section .tutor-search-input:focus {
-  outline: none !important;
-  border-color: #e1e8ed !important;
-  box-shadow: none !important;
-  background: white !important;
-}
-
-/* Problem Grid Layout */
-.tutor-available-problems-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-  flex: 1;
-  overflow-y: auto;
-}
-
-
-.tutor-problem-card {
-  background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  padding-top: 0.5rem;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  position: relative;
-}
-
-
-.tutor-problem-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-}
-
-
-.tutor-problem-card-header {
-  position: absolute;
-  top: 0.5rem;
-  right: 1rem;
-  display: flex;
-  justify-content: flex-end;
-  margin: 0;
-  padding: 0;
-  z-index: 1;
-}
-
-
-.tutor-problem-checkbox {
-  width: 1.3rem;
-  height: 1.3rem;
-  cursor: pointer;
-  accent-color: #667eea;
-}
-
-
-.tutor-problem-card-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0;
-  padding-top: 0;
-}
-
-
-.tutor-problem-card-title {
-  font-weight: 600;
-  color: #1e293b;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  margin: 0;
-  padding: 0;
-  margin-top: 0;
-  padding-top: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
-}
-
-
-.tutor-problem-card-date {
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-
-.tutor-problem-card-meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.tutor-btn-view-detail-card {
-  padding: 0.4rem 0.8rem;
-  background: #f3f4f6;
-  color: #667eea;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.tutor-btn-view-detail-card:hover {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-  transform: translateY(-1px);
-}
-
-/* Copy Problem Modal Controls */
-.tutor-copy-problem-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex-shrink: 0;
-  margin-bottom: 2rem;
-}
-
-
-.section-select-box {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-
-.section-select-box label {
-  font-weight: 600;
-  color: #2d3436;
-  font-size: 0.9rem;
-}
-
-
-.section-select-box  .section-select {
-  padding: 0.75rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 1rem;
-  background: white;
-  transition: all 0.2s ease;
-}
-
-
-.section-select-box  .section-select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.tutor-copy-problem-toolbar {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-shrink: 0;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-
-.tutor-problem-search-box {
+.assignment-management .tutor-problem-search-box {
   flex: 1;
   max-width: calc(100% - 200px);
   min-width: 200px;
 }
 
-
-.tutor-problem-search-box .tutor-search-input {
+.assignment-management .tutor-problem-search-box .tutor-search-input {
   width: 99%;
   padding: 0.6rem 0.9rem;
   border: 2px solid #e9ecef;
@@ -1902,8 +839,7 @@ body.section-modal-open .assignment-management .tutor-problem-modal-body .tutor-
   transition: all 0.3s ease;
 }
 
-
-.tutor-problem-search-box .tutor-search-input:focus {
+.assignment-management .tutor-problem-search-box .tutor-search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -1917,7 +853,272 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   background: white !important;
 }
 
-.tutor-view-mode-tabs {
+.assignment-management .tutor-btn-create-new {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-btn-create-new:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.assignment-management .tutor-available-problems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+  max-height: calc(70vh - 150px);
+  padding-right: 0.5rem;
+}
+
+.assignment-management .tutor-available-problem-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  gap: 1rem;
+}
+
+.assignment-management .tutor-available-problem-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  background: white;
+}
+
+.assignment-management .tutor-available-problem-item .tutor-problem-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.assignment-management .tutor-available-problem-item .tutor-problem-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3436;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-available-problem-item .tutor-problem-created {
+  font-size: 0.8rem;
+  color: #95a5a6;
+  margin: 0;
+}
+
+.assignment-management .tutor-btn-select-problem {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-btn-select-problem:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.assignment-management .tutor-no-available-problems {
+  text-align: center;
+  padding: 3rem;
+  color: #636e72;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 문제 카드 그리드 */
+.assignment-management .tutor-available-problems-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.assignment-management .tutor-problem-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  padding-top: 0.5rem;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.assignment-management .tutor-problem-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.assignment-management .tutor-problem-card-header {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0;
+  z-index: 1;
+}
+
+.assignment-management .tutor-problem-checkbox {
+  width: 1.3rem;
+  height: 1.3rem;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.assignment-management .tutor-problem-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.assignment-management .tutor-problem-card-title {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-problem-card-date {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.assignment-management .tutor-problem-card-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.assignment-management .tutor-btn-view-detail-card {
+  padding: 0.4rem 0.8rem;
+  background: #f3f4f6;
+  color: #667eea;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-btn-view-detail-card:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+/* 큰 모달 스타일 */
+.assignment-management .tutor-modal-content-large,
+.assignment-management .tutor-problem-modal-large {
+  max-width: 95vw !important;
+  width: 95vw !important;
+  min-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.assignment-management .tutor-problem-modal-body {
+  padding: 1.5rem;
+  padding-bottom: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+  background: white;
+}
+
+.assignment-management .tutor-problem-modal-body .tutor-problem-search-section {
+  flex-shrink: 0;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 500px;
+}
+
+.assignment-management .tutor-problem-modal-body .tutor-problem-search-section .tutor-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.assignment-management .tutor-problem-modal-body .tutor-problem-search-section .tutor-search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* 모달이 열려있을 때 search input focus 스타일 무시 */
+body.section-modal-open .assignment-management .tutor-problem-modal-body .tutor-problem-search-section .tutor-search-input:focus {
+  outline: none !important;
+  border-color: #e1e8ed !important;
+  box-shadow: none !important;
+  background: white !important;
+}
+
+/* 뷰 모드 탭 */
+.assignment-management .tutor-view-mode-tabs {
   display: flex;
   gap: 0.25rem;
   background: #f1f5f9;
@@ -1928,7 +1129,7 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   align-items: center;
 }
 
-.tutor-tab-button {
+.assignment-management .tutor-tab-button {
   flex: 1;
   padding: 0.4rem 0.8rem;
   background: transparent;
@@ -1942,24 +1143,23 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   white-space: nowrap;
   line-height: 1.2;
   margin-bottom: 0px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-.tutor-tab-button:hover {
+.assignment-management .tutor-tab-button:hover {
   background: #e2e8f0;
   color: #475569;
 }
 
-.tutor-tab-button.tutor-active {
+.assignment-management .tutor-tab-button.tutor-active {
   background: white;
   color: #667eea;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Problem List View and Hierarchy View */
-
-.tutor-problem-list-view,
-
-.tutor-problem-hierarchy-view {
+/* 문제 리스트 뷰 및 계층 뷰 */
+.assignment-management .tutor-problem-list-view,
+.assignment-management .tutor-problem-hierarchy-view {
   flex: 1;
   overflow-y: auto;
   display: flex;
@@ -1972,16 +1172,14 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   margin-bottom: 0;
 }
 
-/* Assignment List Large (Hierarchy View) */
-
-.assignment-list-large {
+/* 계층 뷰 스타일 */
+.assignment-management .assignment-list-large {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-
-.assignment-item-large {
+.assignment-management .assignment-item-large {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -1989,14 +1187,12 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   transition: all 0.2s ease;
 }
 
-
-.assignment-item-large:hover {
+.assignment-management .assignment-item-large:hover {
   border-color: #cbd5e1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-
-.assignment-item-header-large {
+.assignment-management .assignment-item-header-large {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2004,8 +1200,7 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   background: #f9fafb;
 }
 
-
-.assignment-item-header-large .tutor-checkbox-label {
+.assignment-management .assignment-item-header-large .tutor-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -2013,35 +1208,33 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   cursor: pointer;
 }
 
-
-.assignment-item-header-large .tutor-checkbox-label input[type="checkbox"] {
+.assignment-management .assignment-item-header-large .tutor-checkbox-label input[type="checkbox"] {
   width: 1.2rem;
   height: 1.2rem;
   cursor: pointer;
   accent-color: #667eea;
 }
 
-
-.assignment-info-large {
+.assignment-management .assignment-info-large {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-
-.assignment-title-large {
+.assignment-management .assignment-title-large {
   font-weight: 600;
   color: #1e293b;
   font-size: 1rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-
-.assignment-meta {
+.assignment-management .assignment-meta {
   font-size: 0.85rem;
   color: #64748b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-.tutor-btn-expand-assignment-large {
+.assignment-management .tutor-btn-expand-assignment-large {
   padding: 0.5rem 1rem;
   background: transparent;
   color: #667eea;
@@ -2051,22 +1244,21 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-.tutor-btn-expand-assignment-large:hover {
+.assignment-management .tutor-btn-expand-assignment-large:hover {
   background: #667eea;
   color: white;
 }
 
-
-.tutor-problem-selection-box-large {
+.assignment-management .tutor-problem-selection-box-large {
   padding: 1rem;
   background: white;
   border-top: 1px solid #e5e7eb;
 }
 
-
-.tutor-problem-selection-header-large {
+.assignment-management .tutor-problem-selection-header-large {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2076,41 +1268,38 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   margin-bottom: 0.75rem;
 }
 
-
-.tutor-problem-selection-header-large .tutor-checkbox-label {
+.assignment-management .tutor-problem-selection-header-large .tutor-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   font-weight: 600;
   color: #374151;
   cursor: pointer;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-
-.tutor-problem-selection-header-large .tutor-checkbox-label input[type="checkbox"] {
+.assignment-management .tutor-problem-selection-header-large .tutor-checkbox-label input[type="checkbox"] {
   width: 1.1rem;
   height: 1.1rem;
   cursor: pointer;
   accent-color: #667eea;
 }
 
-
-.tutor-problem-selection-header-large .tutor-item-count {
+.assignment-management .tutor-problem-selection-header-large .tutor-item-count {
   font-weight: 600;
   color: #667eea;
   font-size: 0.85rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-
-.tutor-problem-list-large {
+.assignment-management .tutor-problem-list-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
   padding-bottom: 1rem;
 }
 
-
-.tutor-problem-item-large {
+.assignment-management .tutor-problem-item-large {
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -2124,14 +1313,12 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   overflow: hidden;
 }
 
-
-.tutor-problem-item-large:hover {
+.assignment-management .tutor-problem-item-large:hover {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-
-.tutor-problem-item-large-header {
+.assignment-management .tutor-problem-item-large-header {
   position: absolute;
   top: 0.5rem;
   right: 1rem;
@@ -2140,16 +1327,14 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   z-index: 1;
 }
 
-
-.tutor-problem-item-large-header  .tutor-problem-checkbox {
+.assignment-management .tutor-problem-item-large-header .tutor-problem-checkbox {
   width: 1.3rem;
   height: 1.3rem;
   cursor: pointer;
   accent-color: #667eea;
 }
 
-
-.tutor-problem-item-large-body {
+.assignment-management .tutor-problem-item-large-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -2163,8 +1348,7 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   box-sizing: border-box;
 }
 
-
-.tutor-problem-title-row {
+.assignment-management .tutor-problem-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2174,62 +1358,325 @@ body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-
   box-sizing: border-box;
 }
 
-
-.tutor-problem-title-large {
+.assignment-management .tutor-problem-title-large {
   font-weight: 600;
   color: #1e293b;
   font-size: 0.95rem;
   line-height: 1.4;
   margin: 0;
   padding: 0;
-  margin-top: 0;
-  padding-top: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
   min-width: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-
-.tutor-problem-number-large {
+.assignment-management .tutor-problem-number-large {
   font-weight: 600;
   color: #667eea;
   font-size: 0.95rem;
   margin-right: 0.5rem;
 }
 
-
-.tutor-problem-item-large-actions {
+.assignment-management .tutor-problem-item-large-actions {
   display: flex;
   justify-content: center;
   margin-top: 0.25rem;
 }
 
-.tutor-btn-view-problem {
+.assignment-management .tutor-btn-view-problem {
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
 }
 
-/* Footer Actions */
-.tutor-footer-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+/* 파일 입력 스타일 */
+.assignment-management .tutor-file-input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px dashed #e9ecef;
+  border-radius: 8px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.tutor-modal-footer  .tutor-problem-action-buttons {
+.assignment-management .tutor-file-input:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.assignment-management .tutor-file-help {
+  display: block;
+  color: #636e72;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-file-selected {
+  color: #28a745;
+  font-weight: 600;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.assignment-management .tutor-optional {
+  color: #999;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.assignment-management .tutor-info-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.assignment-management .tutor-info-box p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #495057;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-info-box p:first-child {
+  margin-bottom: 0.5rem;
+}
+
+/* 대량 문제 생성 스타일 */
+.assignment-management .tutor-large-modal {
+  max-width: 900px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.assignment-management .tutor-bulk-problems-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.assignment-management .tutor-bulk-problem-row {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #f8f9fa;
+}
+
+.assignment-management .tutor-bulk-problem-row:last-child {
   margin-bottom: 0;
 }
 
-/* Loading and Empty States for Modals */
-.tutor-loading-items,
-.tutor-no-items {
+.assignment-management .tutor-problem-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.assignment-management .tutor-problem-row-header h4 {
+  margin: 0;
+  color: #495057;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-btn-remove-row {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.assignment-management .tutor-btn-remove-row:hover {
+  background: #c82333;
+}
+
+.assignment-management .tutor-problem-row-content .tutor-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.assignment-management .tutor-bulk-actions {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.assignment-management .tutor-btn-add-row {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-btn-add-row:hover {
+  background: #218838;
+}
+
+/* 빈 상태 */
+.assignment-management .tutor-no-assignments {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-management .tutor-no-assignments-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  color: #636e72;
+}
+
+.assignment-management .tutor-no-assignments-message p {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-no-assignments-icon {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+.assignment-management .tutor-loading-items,
+.assignment-management .tutor-no-items {
   text-align: center;
   padding: 2rem 1rem;
   color: #64748b;
   font-size: 1rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .assignment-management .tutor-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.5rem;
+  }
+
+  .assignment-management .tutor-header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .assignment-management .tutor-header-right {
+    width: 100%;
+  }
+
+  .assignment-management .tutor-filters-section {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.25rem;
+    gap: 0.75rem;
+  }
+
+  .assignment-management .tutor-search-box {
+    max-width: 100%;
+    min-width: auto;
+  }
+
+  .assignment-management .section-filter {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .assignment-management .tutor-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .assignment-management .tutor-problem-modal-large {
+    min-width: auto;
+    width: 95vw !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .assignment-management .tutor-page-header {
+    padding: 1.25rem;
+  }
+
+  .assignment-management .tutor-page-title {
+    font-size: 1.5rem;
+  }
+
+  .assignment-management .tutor-header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .assignment-management .tutor-btn-primary,
+  .assignment-management .tutor-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .assignment-management .tutor-assignments-table {
+    font-size: 0.85rem;
+  }
+
+  .assignment-management .tutor-assignments-table th,
+  .assignment-management .tutor-assignments-table td {
+    padding: 0.75rem 1rem;
+  }
+
+  .assignment-management .tutor-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-management .tutor-problem-row-content .tutor-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-management .tutor-modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .assignment-management .tutor-modal-header,
+  .assignment-management .assignment-form,
+  .assignment-management .tutor-modal-body {
+    padding: 1.5rem;
+  }
+
+  .assignment-management .tutor-form-actions {
+    flex-direction: column;
+  }
+
+  .assignment-management .tutor-available-problems-grid,
+  .assignment-management .tutor-problem-list-large {
+    grid-template-columns: 1fr;
+  }
 }
