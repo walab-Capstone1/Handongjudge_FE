@@ -201,7 +201,8 @@
 .community-search-bar {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  align-items: center;
 }
 
 .community-search-bar input {
@@ -248,12 +249,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: 10px 20px;
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  min-height: auto;
 }
 
 .question-card:hover {
@@ -269,9 +271,32 @@
 
 .question-header {
   display: flex;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
+}
+
+.question-badges-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.question-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.question-author-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
 }
 
 .pin-badge {
@@ -316,22 +341,37 @@
 }
 
 .question-title {
-  font-size: 18px;
+  font-size: 20px !important;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 12px 0;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.4;
+}
+
+h3.question-title {
+  font-size: 20px !important;
 }
 
 .question-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
   color: #666;
   flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.question-author-date .author {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.question-author-date .separator {
+  color: #ccc;
 }
 
 .question-meta .author {
@@ -341,6 +381,22 @@
 
 .question-meta .separator {
   color: #ccc;
+}
+
+.question-tags .tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: #E8EDFF;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #667EEA;
+}
+
+.question-tags .separator {
+  color: #ccc;
+  font-size: 12px;
 }
 
 .question-meta .tag {
@@ -354,25 +410,27 @@
 /* 질문 통계 */
 .question-stats {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
-  padding-left: 24px;
+  padding-left: 20px;
   border-left: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .question-stats .stat {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  flex-direction: column;
 }
 
 .question-stats .label {
-  font-size: 13px;
+  font-size: 11px;
   color: #666;
 }
 
 .question-stats .value {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: #1a1a1a;
 }
@@ -489,7 +547,11 @@
   }
 
   .question-title {
-    font-size: 16px;
+    font-size: 20px !important;
+  }
+  
+  h3.question-title {
+    font-size: 20px !important;
   }
 }
 

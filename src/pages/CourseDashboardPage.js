@@ -28,6 +28,9 @@ const CourseDashboardPage = () => {
   const [allNotifications, setAllNotifications] = useState([]);
   const [sectionInfo, setSectionInfo] = useState(null);
   const [sectionNewItems, setSectionNewItems] = useState({});
+  const [enrollmentCode, setEnrollmentCode] = useState("");
+  const [enrollLoading, setEnrollLoading] = useState(false);
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
 
   useEffect(() => {
     if (auth.user) {
@@ -75,7 +78,7 @@ const CourseDashboardPage = () => {
           const noticesWithSection = notices.map(notice => ({
             ...notice,
             sectionId: section.sectionId,
-            sectionName: `${section.courseTitle} - ${section.sectionNumber}분반`
+            sectionName: section.courseTitle
           }));
           noticesList = [...noticesList, ...noticesWithSection];
 
@@ -85,7 +88,7 @@ const CourseDashboardPage = () => {
           const assignmentsWithSection = assignments.map(assignment => ({
             ...assignment,
             sectionId: section.sectionId,
-            sectionName: `${section.courseTitle} - ${section.sectionNumber}분반`
+            sectionName: section.courseTitle
           }));
           assignmentsList = [...assignmentsList, ...assignmentsWithSection];
 
@@ -96,7 +99,7 @@ const CourseDashboardPage = () => {
             const notificationsWithSection = notifications.map(notif => ({
               ...notif,
               sectionId: section.sectionId,
-              sectionName: `${section.courseTitle} - ${section.sectionNumber}분반`
+              sectionName: section.courseTitle
             }));
             notificationsList = [...notificationsList, ...notificationsWithSection];
 
@@ -285,6 +288,82 @@ const CourseDashboardPage = () => {
     setIsSidebarCollapsed(prev => !prev);
   };
 
+  // URL이나 입력값에서 참가 코드 추출
+  const extractEnrollmentCode = (input) => {
+    const trimmed = input.trim();
+    
+    // URL 패턴 체크: /enroll/코드 형식
+    const urlPattern = /\/enroll\/([^\/\s?#]+)/;
+    const urlMatch = trimmed.match(urlPattern);
+    if (urlMatch) {
+      return urlMatch[1];
+    }
+    
+    // 전체 URL인 경우 (http://... 또는 https://...)
+    try {
+      const url = new URL(trimmed);
+      const pathMatch = url.pathname.match(/\/enroll\/([^\/\s?#]+)/);
+      if (pathMatch) {
+        return pathMatch[1];
+      }
+    } catch (e) {
+      // URL이 아닌 경우 그대로 사용
+    }
+    
+    // 참가 코드만 입력한 경우 그대로 반환
+    return trimmed;
+  };
+
+  const handleEnrollByCode = async () => {
+    if (!enrollmentCode.trim()) {
+      alert('참가 코드를 입력하세요.');
+      return;
+    }
+    
+    // 입력값에서 참가 코드 추출 (링크 또는 코드 모두 지원)
+    const code = extractEnrollmentCode(enrollmentCode);
+    
+    if (!code) {
+      alert('유효한 참가 코드나 링크를 입력하세요.');
+      return;
+    }
+
+    // 로그인하지 않은 경우
+    if (!auth.user) {
+      // sessionStorage에 enrollmentCode 저장
+      sessionStorage.setItem('pendingEnrollmentCode', code);
+      // 모달 닫기
+      setShowEnrollModal(false);
+      setEnrollmentCode("");
+      // 로그인 페이지로 이동
+      navigate("/login", {
+        state: {
+          redirectTo: `/enroll/${code}`,
+          message: '수업 참가를 위해 로그인이 필요합니다.'
+        }
+      });
+      return;
+    }
+    
+    try {
+      setEnrollLoading(true);
+      const resp = await APIService.enrollByCode(code);
+      if (resp && resp.success) {
+        alert(`${resp.courseTitle} 수강 신청이 완료되었습니다!`);
+        setEnrollmentCode("");
+        setShowEnrollModal(false);
+        // 대시보드 데이터 새로고침
+        fetchDashboardData();
+      } else {
+        alert(resp?.message || '수강 신청에 실패했습니다.');
+      }
+    } catch (e) {
+      alert(e.message || '수강 신청 중 오류가 발생했습니다.');
+    } finally {
+      setEnrollLoading(false);
+    }
+  };
+
   // 수업 카드 데이터 변환
   const transformSectionData = (section, sectionNewItems) => {
     // sectionNumber가 null이면 분반 표시하지 않음
@@ -420,6 +499,12 @@ const CourseDashboardPage = () => {
             <div className="courses-section">
             <div className="section-header">
                 <span className="section-title">수업 목록</span>
+                <button
+                  className="enroll-button"
+                  onClick={() => setShowEnrollModal(true)}
+                >
+                  + 수업 참가
+                </button>
             </div>
 
               <div className="courses-grid">
@@ -488,13 +573,6 @@ const CourseDashboardPage = () => {
                       >
                         <div className="assignment-summary-header">
                           <span className="assignment-summary-title">{assignment.title}</span>
-                          {dDay !== null && (
-                            <div className={`d-day-badge ${isExpired ? 'expired' : ''}`}>
-                              <span className="d-day-text">
-                                {isExpired ? `D+${Math.abs(dDay)}` : `D-${dDay}`}
-                              </span>
-                            </div>
-                          )}
                         </div>
                         <div className="assignment-summary-info">
                           <span className="assignment-summary-section">{assignment.sectionName}</span>
@@ -519,19 +597,19 @@ const CourseDashboardPage = () => {
                   allNotices.map((notice) => (
                     <div 
                       key={`${notice.sectionId}-${notice.id}`}
-                        className={`notice-item ${notice.isNew ? 'new' : ''}`}
+                        className={`dashboard-notice-item ${notice.isNew ? 'new' : ''}`}
                       onClick={() => handleNoticeClick(notice)}
                       >
-                        <span className="notice-text">
+                        <div className="dashboard-notice-header">
                           {notice.isNew && <span className="new-badge">NEW</span>}
-                        <span className="notice-title">{notice.title}</span>
-                        {notice.date && (
-                          <span className="notice-date"> [{notice.date}]</span>
-                        )}
-                        {notice.sectionName && (
-                          <span className="notice-section"> ({notice.sectionName})</span>
-                        )}
-                        </span>
+                          <span className="dashboard-notice-title">{notice.title}</span>
+                          {notice.sectionName && (
+                            <span className="dashboard-notice-section">{notice.sectionName}</span>
+                          )}
+                          {notice.date && (
+                            <span className="dashboard-notice-date">{notice.date}</span>
+                          )}
+                        </div>
                       </div>
                     ))
                   ) : (
@@ -544,6 +622,39 @@ const CourseDashboardPage = () => {
           </div>
         </div>
       </div>
+
+      {/* 수업 참가 모달 */}
+      {showEnrollModal && (
+        <div className="enroll-modal-overlay" onClick={() => setShowEnrollModal(false)}>
+          <div className="enroll-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="enroll-modal-header">
+              <h2>수업 참가</h2>
+              <button className="enroll-modal-close" onClick={() => setShowEnrollModal(false)}>×</button>
+            </div>
+            <div className="enroll-modal-body">
+              <label>참가 코드 또는 링크</label>
+              <input
+                type="text"
+                className="enroll-input"
+                placeholder={`예: ABCD1234 또는 ${window.location.origin}/enroll/ABCD1234`}
+                value={enrollmentCode}
+                onChange={(e) => setEnrollmentCode(e.target.value)}
+              />
+              <p className="enroll-help-text">참가 코드만 입력하거나 전체 링크를 붙여넣으세요.</p>
+            </div>
+            <div className="enroll-modal-actions">
+              <button className="enroll-cancel" onClick={() => setShowEnrollModal(false)}>취소</button>
+              <button
+                className="enroll-button-modal"
+                onClick={handleEnrollByCode}
+                disabled={enrollLoading}
+              >
+                {enrollLoading ? '처리 중...' : '참가하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

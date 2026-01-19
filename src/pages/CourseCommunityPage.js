@@ -225,7 +225,7 @@ const CourseCommunityPage = () => {
         />
         <div className="community-content">
           <CourseHeader 
-            courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '로딩 중...'}
+            courseName={sectionInfo ? sectionInfo.courseTitle : '로딩 중...'}
             onToggleSidebar={handleToggleSidebar}
             isSidebarCollapsed={isSidebarCollapsed}
           />
@@ -247,7 +247,7 @@ const CourseCommunityPage = () => {
         />
         <div className="community-content">
           <CourseHeader 
-            courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '오류'}
+            courseName={sectionInfo ? sectionInfo.courseTitle : '오류'}
             onToggleSidebar={handleToggleSidebar}
             isSidebarCollapsed={isSidebarCollapsed}
           />
@@ -268,7 +268,7 @@ const CourseCommunityPage = () => {
       />
       <div className="community-content">
         <CourseHeader 
-          courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '커뮤니티'}
+          courseName={sectionInfo ? sectionInfo.courseTitle : '커뮤니티'}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
         />
@@ -284,88 +284,6 @@ const CourseCommunityPage = () => {
             </button>
           </div>
 
-          {/* 통계 바 */}
-          <div className="community-stats-bar">
-            <div 
-              className={`stat-filter ${filter === 'ALL' ? 'active' : ''}`}
-              onClick={() => setFilter('ALL')}
-            >
-              <span className="stat-label">전체</span>
-              <span className="stat-count">{stats.total}</span>
-            </div>
-            <div 
-              className={`stat-filter ${filter === 'PENDING' ? 'active' : ''}`}
-              onClick={() => setFilter('PENDING')}
-            >
-              <span className="stat-label">미해결</span>
-              <span className="stat-count">{questions.filter(q => q.status === 'PENDING').length}</span>
-            </div>
-            <div 
-              className={`stat-filter ${filter === 'RESOLVED' ? 'active' : ''}`}
-              onClick={() => setFilter('RESOLVED')}
-            >
-              <span className="stat-label">해결됨</span>
-              <span className="stat-count">{questions.filter(q => q.status === 'RESOLVED').length}</span>
-            </div>
-          </div>
-
-          {/* 필터 바 */}
-          <div className="community-filter-bar">
-            <div className="filter-group">
-              <label className="filter-label">과제</label>
-              <select
-                className="filter-select"
-                value={assignmentFilter}
-                onChange={(e) => {
-                  setAssignmentFilter(e.target.value);
-                  setProblemFilter('ALL');
-                  setCurrentPage(0);
-                }}
-              >
-                <option value="ALL">전체</option>
-                {assignments.map(assignment => (
-                  <option key={assignment.id} value={assignment.id}>
-                    {assignment.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {assignmentFilter !== 'ALL' && problems.length > 0 && (
-              <div className="filter-group">
-                <label className="filter-label">문제</label>
-                <select
-                  className="filter-select"
-                  value={problemFilter}
-                  onChange={(e) => {
-                    setProblemFilter(e.target.value);
-                    setCurrentPage(0);
-                  }}
-                >
-                  <option value="ALL">전체</option>
-                  {problems.map(problem => (
-                    <option key={problem.id} value={problem.id}>
-                      {problem.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {(assignmentFilter !== 'ALL' || problemFilter !== 'ALL') && (
-              <button
-                className="filter-clear-btn"
-                onClick={() => {
-                  setAssignmentFilter('ALL');
-                  setProblemFilter('ALL');
-                  setProblems([]);
-                  setCurrentPage(0);
-                }}
-              >
-                필터 초기화
-              </button>
-            )}
-          </div>
 
           {/* 검색 바 */}
           <div className="community-search-bar">
@@ -395,36 +313,38 @@ const CourseCommunityPage = () => {
                 >
                   <div className="question-main">
                     <div className="question-header">
-                      {question.isPinned && (
-                        <span className="pin-badge">고정</span>
+                      <div className="question-badges-group">
+                        {question.isPinned && (
+                          <span className="pin-badge">고정</span>
+                        )}
+                        <span className={`status-badge ${question.status.toLowerCase()}`}>
+                          {question.status === 'RESOLVED' ? '해결됨' : '미해결'}
+                        </span>
+                        {question.isAnonymous && (
+                          <span className="anonymous-badge">익명</span>
+                        )}
+                      </div>
+                      {(question.assignmentTitle || question.problemTitle) && (
+                        <div className="question-tags">
+                          {question.assignmentTitle && (
+                            <span className="tag">{question.assignmentTitle}</span>
+                          )}
+                          {question.problemTitle && (
+                            <>
+                              {question.assignmentTitle && <span className="separator">·</span>}
+                              <span className="tag">{question.problemTitle}</span>
+                            </>
+                          )}
+                        </div>
                       )}
-                      <span className={`status-badge ${question.status.toLowerCase()}`}>
-                        {question.status === 'RESOLVED' ? '해결됨' : '미해결'}
-                      </span>
-                      {question.isAnonymous && (
-                        <span className="anonymous-badge">익명</span>
-                      )}
+                      <div className="question-author-date">
+                        <span className="author">{question.authorDisplayName}</span>
+                        <span className="separator">·</span>
+                        <span className="date">{formatDate(question.createdAt)}</span>
+                      </div>
                     </div>
                     
                     <h3 className="question-title">{question.title}</h3>
-                    
-                    <div className="question-meta">
-                      <span className="author">{question.authorDisplayName}</span>
-                      <span className="separator">·</span>
-                      <span className="date">{formatDate(question.createdAt)}</span>
-                      {question.assignmentTitle && (
-                        <>
-                          <span className="separator">·</span>
-                          <span className="tag">{question.assignmentTitle}</span>
-                        </>
-                      )}
-                      {question.problemTitle && (
-                        <>
-                          <span className="separator">·</span>
-                          <span className="tag">{question.problemTitle}</span>
-                        </>
-                      )}
-                    </div>
                   </div>
 
                   <div className="question-stats">

@@ -154,8 +154,7 @@
 }
 
 .notification-item,
-.assignment-summary-item,
-.notice-item {
+.assignment-summary-item {
   display: flex;
   align-items: flex-start;
   background: #D9DFF9;
@@ -169,20 +168,35 @@
   box-sizing: border-box;
 }
 
+.dashboard-notice-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #D9DFF9;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  line-height: 1.3;
+  min-height: auto;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 0;
+}
+
 .notification-item:hover,
 .assignment-summary-item:hover,
-.notice-item:hover {
+.dashboard-notice-item:hover {
   background: #c5cdf7;
 }
 
 .notification-item.new,
-.notice-item.new {
+.dashboard-notice-item.new {
   background: #E8EEFF;
   border: 1px solid #667EEA;
 }
 
-.notification-text,
-.notice-text {
+.notification-text {
   color: #667EEA;
   font-size: 11px;
   display: flex;
@@ -195,25 +209,62 @@
   word-break: break-word;
 }
 
-.notice-title {
+.dashboard-notice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 0;
+  line-height: 1.1;
+}
+
+.dashboard-notice-title {
+  color: #000000;
+  font-size: 11px;
+  font-weight: 600;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.1;
+  margin: 0;
   word-break: break-word;
-  font-size: 11px;
+  text-align: left;
+}
+
+.dashboard-notice-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+  margin-top: 0;
+  line-height: 1.1;
 }
 
 .notification-date,
-.notice-date {
+.dashboard-notice-date {
+  color: #667EEA;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.notification-section {
   color: #868FB7;
   font-size: 10px;
   white-space: nowrap;
 }
 
-.notification-section,
-.notice-section {
+.dashboard-notice-section {
   color: #868FB7;
   font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .new-badge {
@@ -297,7 +348,8 @@
 .assignment-summary-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 12px;
   width: 100%;
   margin-top: 2px;
 }
@@ -308,7 +360,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
+  text-align: right;
 }
 
 .assignment-summary-deadline {
@@ -373,4 +425,154 @@
 
 .error-message button:hover {
   background: #5568d3;
+}
+
+/* 수업 참가 버튼 */
+.enroll-button {
+  background: #667EEA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.enroll-button:hover {
+  background: #5568d3;
+}
+
+/* 수업 참가 모달 */
+.enroll-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.enroll-modal {
+  width: 90%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.enroll-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.enroll-modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.enroll-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.enroll-modal-close:hover {
+  color: #374151;
+}
+
+.enroll-modal-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.enroll-modal-body label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.enroll-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.enroll-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.enroll-help-text {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.enroll-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.enroll-cancel {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.enroll-cancel:hover {
+  background: #e5e7eb;
+}
+
+.enroll-button-modal {
+  background: #667EEA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.enroll-button-modal:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.enroll-button-modal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
