@@ -566,6 +566,19 @@ class APIService {
     }
   }
 
+  // 튜터가 학생의 accept된 코드 조회
+  async getStudentAcceptedCode(sectionId, assignmentId, userId, problemId) {
+    try {
+      const response = await this.request(
+        `/sections/${sectionId}/assignments/${assignmentId}/students/${userId}/problems/${problemId}/accepted-code`
+      );
+      return response;
+    } catch (error) {
+      console.error('학생 코드 조회 실패:', error);
+      throw error;
+    }
+  }
+
   // ==================== 공지사항 관련 API ====================
 
   // 공지사항 생성

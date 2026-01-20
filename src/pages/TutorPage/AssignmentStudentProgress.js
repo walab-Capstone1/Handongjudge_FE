@@ -23,6 +23,9 @@ const AssignmentStudentProgress = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [submissionStats, setSubmissionStats] = useState({});
   const [progressSearchTerm, setProgressSearchTerm] = useState('');
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [selectedCodeData, setSelectedCodeData] = useState(null);
+  const [loadingCode, setLoadingCode] = useState(false);
 
   useEffect(() => {
     fetchSectionInfo();
@@ -175,6 +178,34 @@ const AssignmentStudentProgress = () => {
       }
       return newSet;
     });
+  };
+
+  const handleBadgeClick = async (student, problem) => {
+    const isSolved = student.solvedProblems?.includes(problem.id);
+    if (!isSolved) return;
+
+    try {
+      setLoadingCode(true);
+      setSelectedCodeData({
+        student: student,
+        problem: problem
+      });
+      const codeData = await APIService.getStudentAcceptedCode(
+        parseInt(sectionId),
+        parseInt(assignmentId),
+        student.userId,
+        problem.id
+      );
+      setSelectedCodeData(prev => ({
+        ...prev,
+        codeData: codeData
+      }));
+      setShowCodeModal(true);
+    } catch (error) {
+      alert('코드를 불러오는데 실패했습니다: ' + (error.message || '알 수 없는 오류'));
+    } finally {
+      setLoadingCode(false);
+    }
   };
 
   if (loading) {
@@ -362,8 +393,9 @@ const AssignmentStudentProgress = () => {
                               return (
                                 <div 
                                   key={problem.id}
-                                  className={`tutor-problem-badge ${isSolved ? 'solved' : 'unsolved'}`}
-                                  title={`${removeCopyLabel(problem.title)} - ${isSolved ? '완료' : '미완료'}`}
+                                  className={`tutor-problem-badge ${isSolved ? 'solved' : 'unsolved'} ${isSolved ? 'tutor-badge-clickable' : ''}`}
+                                  title={`${removeCopyLabel(problem.title)} - ${isSolved ? '완료 (클릭하여 코드 조회)' : '미완료'}`}
+                                  onClick={() => isSolved && handleBadgeClick(student, problem)}
                                 >
                                   {index + 1}
                                 </div>
@@ -406,6 +438,84 @@ const AssignmentStudentProgress = () => {
             </div>
           )}
         </div>
+
+        {/* 코드 조회 모달 */}
+        {showCodeModal && selectedCodeData && (
+          <div className="tutor-modal-overlay" onClick={() => setShowCodeModal(false)}>
+            <div className="tutor-modal-content tutor-code-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="tutor-modal-header">
+                <h2>학생 코드 조회</h2>
+                <button 
+                  className="tutor-modal-close"
+                  onClick={() => setShowCodeModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="tutor-code-modal-content">
+                {loadingCode ? (
+                  <div className="tutor-loading-container">
+                    <div className="tutor-loading-spinner"></div>
+                    <p>코드를 불러오는 중...</p>
+                  </div>
+                ) : selectedCodeData.codeData ? (
+                  <>
+                    <div className="tutor-code-info">
+                      <div className="tutor-code-info-row">
+                        <span className="tutor-code-label">학생:</span>
+                        <span className="tutor-code-value">{selectedCodeData.codeData.studentName} ({selectedCodeData.codeData.studentId})</span>
+                      </div>
+                      <div className="tutor-code-info-row">
+                        <span className="tutor-code-label">문제:</span>
+                        <span className="tutor-code-value">{removeCopyLabel(selectedCodeData.codeData.problemTitle)}</span>
+                      </div>
+                      <div className="tutor-code-info-row">
+                        <span className="tutor-code-label">언어:</span>
+                        <span className="tutor-code-value">{selectedCodeData.codeData.language}</span>
+                      </div>
+                      <div className="tutor-code-info-row">
+                        <span className="tutor-code-label">제출 시간:</span>
+                        <span className="tutor-code-value">
+                          {new Date(selectedCodeData.codeData.submittedAt).toLocaleString('ko-KR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                      <div className="tutor-code-info-row">
+                        <span className="tutor-code-label">결과:</span>
+                        <span className="tutor-code-value tutor-result-accepted">정답 (AC)</span>
+                      </div>
+                    </div>
+                    <div className="tutor-code-editor-container">
+                      <pre className="tutor-code-display">
+                        <code>{selectedCodeData.codeData.code}</code>
+                      </pre>
+                    </div>
+                  </>
+                ) : (
+                  <div className="tutor-no-data">
+                    <p>코드 데이터를 불러올 수 없습니다.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="tutor-modal-actions">
+                <button 
+                  className="tutor-btn-secondary"
+                  onClick={() => setShowCodeModal(false)}
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 상세보기 모달 */}
         {showDetailModal && selectedStudent && (

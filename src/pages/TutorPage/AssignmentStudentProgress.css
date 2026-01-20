@@ -164,7 +164,9 @@
 .student-progress-container .tutor-problem-stat-card.expanded {
   border-color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-  grid-column: span 2;
+  width: 100%;
+  max-width: none;
+  grid-column: 1 / -1;
 }
 
 .assignment-progress-container .tutor-problem-stat-card.expanded::before,
@@ -686,6 +688,11 @@ body.section-modal-open .student-progress-container .tutor-search-input:focus {
   color: white;
   box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
   border: none;
+}
+
+.assignment-progress-container .tutor-problem-badge.solved.tutor-badge-clickable,
+.student-progress-container .tutor-problem-badge.solved.tutor-badge-clickable {
+  cursor: pointer;
 }
 
 .assignment-progress-container .tutor-problem-badge.solved:hover,
@@ -1255,4 +1262,96 @@ body.section-modal-open .student-progress-container .tutor-search-input:focus {
   background: #e5e7eb;
   border-color: #d1d5db;
   transform: translateY(-1px);
+}
+
+/* 코드 조회 모달 스타일 */
+.assignment-progress-container .tutor-code-modal,
+.student-progress-container .tutor-code-modal {
+  max-width: 1000px;
+  max-height: 90vh;
+}
+
+.assignment-progress-container .tutor-code-modal-content,
+.student-progress-container .tutor-code-modal-content {
+  padding: 2rem;
+  max-height: calc(90vh - 200px);
+  overflow-y: auto;
+}
+
+.assignment-progress-container .tutor-code-info,
+.student-progress-container .tutor-code-info {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-code-info-row,
+.student-progress-container .tutor-code-info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-code-info-row:last-child,
+.student-progress-container .tutor-code-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.assignment-progress-container .tutor-code-label,
+.student-progress-container .tutor-code-label {
+  font-weight: 700;
+  color: #374151;
+  min-width: 100px;
+  font-size: 0.95rem;
+}
+
+.assignment-progress-container .tutor-code-value,
+.student-progress-container .tutor-code-value {
+  color: #1e293b;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.assignment-progress-container .tutor-code-value.tutor-result-accepted,
+.student-progress-container .tutor-code-value.tutor-result-accepted {
+  color: #10b981;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  background: #f0fdf4;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.assignment-progress-container .tutor-code-editor-container,
+.student-progress-container .tutor-code-editor-container {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  overflow-x: auto;
+  border: 1px solid #334155;
+}
+
+.assignment-progress-container .tutor-code-display,
+.student-progress-container .tutor-code-display {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: #e2e8f0;
+  font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.assignment-progress-container .tutor-code-display code,
+.student-progress-container .tutor-code-display code {
+  display: block;
+  color: inherit;
+  font-family: inherit;
+  background: transparent;
+  padding: 0;
 }
