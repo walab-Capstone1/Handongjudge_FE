@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { onboardingState } from "../recoil/atoms";
 import {
@@ -15,12 +15,20 @@ import { SiKakaotalk } from "react-icons/si";
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [onboarding, setOnboarding] = useRecoilState(onboardingState);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  
+  // IndexPage에서 전달된 redirectTo 받기
+  const redirectTo = location.state?.redirectTo;
+  const loginMessage = location.state?.message;
+  
+  // sessionStorage에서 pendingEnrollmentCode 확인
+  const pendingEnrollmentCode = sessionStorage.getItem('pendingEnrollmentCode');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -37,7 +45,8 @@ const Onboarding = () => {
       state: { 
         type: "login", 
         email: formData.email, 
-        password: formData.password 
+        password: formData.password,
+        redirectTo: redirectTo // IndexPage에서 전달된 redirectTo 전달
       } 
     });
   };
@@ -56,8 +65,8 @@ const Onboarding = () => {
     <OnboardingContainer>
       <Header>
         <Logo>
-          <LogoImage src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="HandongJudge" />
-          <span>HandongJudge</span>
+          <LogoImage src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="CodeSturdy" />
+          <span>CodeSturdy</span>
         </Logo>
         <EnterpriseLink>기업서비스</EnterpriseLink>
       </Header>
@@ -65,7 +74,7 @@ const Onboarding = () => {
       <MainContent>
         <LeftSection>
           <WelcomeText>
-            반가워요, 개발자의 성장을 돕는 한동대학교 온라인 저지입니다.
+            반가워요, 개발자의 성장을 돕는 CodeSturdy입니다.
           </WelcomeText>
           <Illustrations>
             <IllustrationItem>
@@ -88,8 +97,12 @@ const Onboarding = () => {
 
         <RightSection>
           <LoginCard>
-            <LoginTitle>한동대학교 온라인 저지 로그인</LoginTitle>
-            
+            <LoginTitle>CodeSturdy 로그인</LoginTitle>
+            {(loginMessage || pendingEnrollmentCode) && (
+              <LoginMessage>
+                {loginMessage || '수업 참가를 위해 로그인이 필요합니다.'}
+              </LoginMessage>
+            )}
             <LoginForm onSubmit={handleSubmit}>
               <InputGroup>
                 <InputIcon>
@@ -347,8 +360,17 @@ const LoginTitle = styled.h1`
   font-weight: 700;
   color: black;
   text-align: center;
-  margin: 30px 0;
+  margin: 30px 0 10px 0;
   padding: 0 40px;
+`;
+
+const LoginMessage = styled.p`
+  font-size: 14px;
+  color: #667EEA;
+  text-align: center;
+  margin: 0 0 20px 0;
+  padding: 0 40px;
+  font-weight: 500;
 `;
 
 const LoginForm = styled.form`

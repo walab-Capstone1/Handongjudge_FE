@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { FaGraduationCap, FaPencilAlt, FaCog, FaPlus } from "react-icons/fa";
@@ -10,21 +10,17 @@ import APIService from "../services/APIService";
 
 const IndexPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("lectures");
   const [systemNotices, setSystemNotices] = useState([]);
   const [systemGuides, setSystemGuides] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // useAuth에서 사용자 정보 가져오기
-  const userName = user?.name || user?.username || user?.email || "사용자 이름";
+  const userName = user?.name || user?.username || user?.email || "";
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
-  useEffect(() => {
-    fetchSystemData();
-  }, []);
-
-  const fetchSystemData = async () => {
+  const fetchSystemData = useCallback(async () => {
     try {
       setLoading(true);
       const [noticesResponse, guidesResponse] = await Promise.all([
@@ -41,22 +37,51 @@ const IndexPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchSystemData();
+  }, [fetchSystemData]);
 
   const handleGoToClassroom = () => {
-    navigate("/courses");
+    if (!isAuthenticated) {
+      navigate("/login", { state: { redirectTo: "/dashboard" } });
+      return;
+    }
+    navigate("/dashboard");
   };
 
   const handleLecturesClick = () => {
-    navigate("/courses");
+    if (!isAuthenticated) {
+      navigate("/login", { state: { redirectTo: "/dashboard" } });
+      return;
+    }
+    navigate("/dashboard");
   };
+
   const handleManagementClick = () => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { redirectTo: "/admin" } });
+      return;
+    }
     navigate("/admin");
+  };
+
+  const handleSystemManagementClick = () => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { redirectTo: "/super-admin" } });
+      return;
+    }
+    if (isSuperAdmin) {
+      navigate('/super-admin');
+    } else {
+      setActiveTab("system");
+    }
   };
 
   return (
     <IndexContainer>
-      <Header userName={userName} />
+      <Header onUserNameClick={() => {}} />
 
       <HeroAndTabSection>
         <HeroBackground>
@@ -95,7 +120,7 @@ const IndexPage = () => {
           </Tab>
           <Tab
             active={activeTab === "system"}
-            onClick={() => isSuperAdmin ? navigate('/super-admin') : setActiveTab("system")}
+            onClick={handleSystemManagementClick}
           >
             <FaCog />
             시스템 관리
@@ -173,19 +198,21 @@ const IndexContainer = styled.div`
   min-height: 100vh;
   background: #f5f5f5;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
 `;
 
 const HeroAndTabSection = styled.section`
   position: relative;
   width: 100%;
   overflow: hidden;
-  min-height: 460px; /* HeroSection 400px + TabNavigation 약 60px */
+  min-height: 540px; /* HeroSection 480px + TabNavigation 약 60px */
 `;
 
 const HeroSection = styled.section`
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 480px;
   z-index: 1;
 `;
 
@@ -199,7 +226,7 @@ const HeroContentWrapper = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 150px 80px 60px 80px;
+  padding: 180px 80px 60px 80px;
 `;
 
 const HeroBackground = styled.div`
@@ -208,7 +235,7 @@ const HeroBackground = styled.div`
   left: 0;
   width: 100vw;
   height: 100%;
-  min-height: 460px;
+  min-height: 540px;
   z-index: 0;
   overflow: hidden;
   margin-left: calc(-50vw + 50%);
@@ -229,6 +256,7 @@ const HeroContent = styled.div`
   position: relative;
   z-index: 1;
   max-width: 600px;
+  margin-left: 52px;
 `;
 
 const HeroTitle = styled.h1`
@@ -237,6 +265,8 @@ const HeroTitle = styled.h1`
   color: white;
   margin: 0 0 20px 0;
   line-height: 1.2;
+  padding-left: 0;
+  text-indent: 0;
 `;
 
 const HeroDescription = styled.p`
@@ -332,6 +362,7 @@ const MainContent = styled.div`
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  flex: 1;
 `;
 
 const ContentPanel = styled.div`

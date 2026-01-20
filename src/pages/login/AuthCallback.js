@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import APIService from "../../services/APIService";
 import styled from "styled-components";
 
 const AuthCallback = () => {
@@ -46,22 +47,51 @@ const AuthCallback = () => {
               const userInfo = await response.json();
               console.log("소셜 로그인 성공:", userInfo);
               
-              // pending enrollmentCode 확인
+              // pending enrollmentCode 확인 (최우선)
               const pendingEnrollmentCode = sessionStorage.getItem('pendingEnrollmentCode');
               
               if (pendingEnrollmentCode) {
-                // enrollmentCode가 있으면 해당 페이지로 이동
                 sessionStorage.removeItem('pendingEnrollmentCode');
-                setStatus("로그인 성공! 수업 참가 페이지로 이동합니다.");
-                setTimeout(() => {
-                  window.location.href = `/enroll/${pendingEnrollmentCode}`;
-                }, 1500);
+                setStatus("소셜 로그인 성공! 수업 참가 처리 중...");
+                try {
+                  // 자동으로 수업 참가 처리
+                  const enrollResponse = await APIService.enrollByCode(pendingEnrollmentCode);
+                  if (enrollResponse && enrollResponse.success) {
+                    setStatus(`${enrollResponse.courseTitle} 수강 신청이 완료되었습니다!`);
+                    setTimeout(() => {
+                      window.location.href = '/main';
+                    }, 1500);
+                  } else {
+                    // 참가 실패 시 enroll 페이지로 이동
+                    setStatus("수업 참가 처리 중...");
+                    setTimeout(() => {
+                      window.location.href = `/enroll/${pendingEnrollmentCode}`;
+                    }, 1500);
+                  }
+                } catch (enrollError) {
+                  console.error('수업 참가 실패:', enrollError);
+                  // 에러 발생 시 enroll 페이지로 이동
+                  setStatus("수업 참가 페이지로 이동합니다.");
+                  setTimeout(() => {
+                    window.location.href = `/enroll/${pendingEnrollmentCode}`;
+                  }, 1500);
+                }
               } else {
-                // 없으면 인덱스 페이지로
-                setStatus("소셜 로그인 성공! 인덱스 페이지로 이동합니다.");
-                setTimeout(() => {
-                  window.location.href = "/index";
-                }, 1500);
+                // redirectTo 확인 (URL 파라미터 또는 state)
+                const redirectTo = urlParams.get('redirectTo') || location.state?.redirectTo;
+                
+                if (redirectTo) {
+                  setStatus("소셜 로그인 성공! 이동합니다.");
+                  setTimeout(() => {
+                    window.location.href = redirectTo;
+                  }, 1500);
+                } else {
+                  // 없으면 인덱스 페이지로
+                  setStatus("소셜 로그인 성공! 인덱스 페이지로 이동합니다.");
+                  setTimeout(() => {
+                    window.location.href = "/index";
+                  }, 1500);
+                }
               }
             } else {
               const errorData = await response.json();
@@ -88,16 +118,39 @@ const AuthCallback = () => {
           setStatus("로그인 중...");
           await login(email, password);
           
-          // pending enrollmentCode 확인
+          // pending enrollmentCode 확인 (최우선)
           const pendingEnrollmentCode = sessionStorage.getItem('pendingEnrollmentCode');
           
           if (pendingEnrollmentCode) {
             sessionStorage.removeItem('pendingEnrollmentCode');
-            setStatus("로그인 성공! 수업 참가 페이지로 이동합니다.");
-            setTimeout(() => navigate(`/enroll/${pendingEnrollmentCode}`), 1500);
+            setStatus("로그인 성공! 수업 참가 처리 중...");
+            try {
+              // 자동으로 수업 참가 처리
+              const enrollResponse = await APIService.enrollByCode(pendingEnrollmentCode);
+              if (enrollResponse && enrollResponse.success) {
+                setStatus(`${enrollResponse.courseTitle} 수강 신청이 완료되었습니다!`);
+                setTimeout(() => navigate('/main'), 1500);
+              } else {
+                // 참가 실패 시 enroll 페이지로 이동
+                setStatus("수업 참가 처리 중...");
+                setTimeout(() => navigate(`/enroll/${pendingEnrollmentCode}`), 1500);
+              }
+            } catch (enrollError) {
+              console.error('수업 참가 실패:', enrollError);
+              // 에러 발생 시 enroll 페이지로 이동
+              setStatus("수업 참가 페이지로 이동합니다.");
+              setTimeout(() => navigate(`/enroll/${pendingEnrollmentCode}`), 1500);
+            }
           } else {
-            setStatus("로그인 성공! 인덱스 페이지로 이동합니다.");
-            setTimeout(() => navigate("/index"), 1500);
+            // redirectTo 확인
+            const redirectTo = location.state?.redirectTo;
+            if (redirectTo) {
+              setStatus("로그인 성공! 이동합니다.");
+              setTimeout(() => navigate(redirectTo), 1500);
+            } else {
+              setStatus("로그인 성공! 인덱스 페이지로 이동합니다.");
+              setTimeout(() => navigate("/index"), 1500);
+            }
           }
         } else if (type === "social") {
           setStatus(`${provider} 로그인 중...`);
@@ -109,8 +162,41 @@ const AuthCallback = () => {
           }
 
           await socialLogin(provider, token);
-          setStatus("소셜 로그인 성공! 인덱스 페이지로 이동합니다.");
-          setTimeout(() => navigate("/index"), 1500);
+          
+          // pending enrollmentCode 확인 (최우선)
+          const pendingEnrollmentCode = sessionStorage.getItem('pendingEnrollmentCode');
+          
+          if (pendingEnrollmentCode) {
+            sessionStorage.removeItem('pendingEnrollmentCode');
+            setStatus("소셜 로그인 성공! 수업 참가 처리 중...");
+            try {
+              // 자동으로 수업 참가 처리
+              const enrollResponse = await APIService.enrollByCode(pendingEnrollmentCode);
+              if (enrollResponse && enrollResponse.success) {
+                setStatus(`${enrollResponse.courseTitle} 수강 신청이 완료되었습니다!`);
+                setTimeout(() => navigate('/main'), 1500);
+              } else {
+                // 참가 실패 시 enroll 페이지로 이동
+                setStatus("수업 참가 처리 중...");
+                setTimeout(() => navigate(`/enroll/${pendingEnrollmentCode}`), 1500);
+              }
+            } catch (enrollError) {
+              console.error('수업 참가 실패:', enrollError);
+              // 에러 발생 시 enroll 페이지로 이동
+              setStatus("수업 참가 페이지로 이동합니다.");
+              setTimeout(() => navigate(`/enroll/${pendingEnrollmentCode}`), 1500);
+            }
+          } else {
+            // redirectTo 확인
+            const redirectTo = location.state?.redirectTo;
+            if (redirectTo) {
+              setStatus("소셜 로그인 성공! 이동합니다.");
+              setTimeout(() => navigate(redirectTo), 1500);
+            } else {
+              setStatus("소셜 로그인 성공! 인덱스 페이지로 이동합니다.");
+              setTimeout(() => navigate("/index"), 1500);
+            }
+          }
         }
       } catch (error) {
         console.error("Auth callback error:", error);

@@ -39,24 +39,56 @@ const CourseCard = ({ course, onStatusUpdate }) => {
     e.preventDefault(); // Link 이벤트 방지
     e.stopPropagation();
     
-    if (status.type === "announcement") {
-      // 분반 상세 페이지의 공지사항 탭으로 이동
-      navigate(`/sections/${course.sectionId}?tab=notices`);
-      
-      // 상태 업데이트 콜백 호출 (메인 페이지에서 대시보드 새로고침)
-      if (onStatusUpdate) {
-        setTimeout(() => {
-          console.log('🔥 공지사항 배지 클릭 후 대시보드 업데이트 시작');
-          onStatusUpdate();
-        }, 2000); // 2초 후 업데이트 (읽음 처리 완료 대기)
+    // 알림 읽음 처리
+    if (status.notificationId) {
+      try {
+        await APIService.markCommunityNotificationAsRead(status.notificationId);
+      } catch (error) {
+        console.error('알림 읽음 처리 실패:', error);
       }
-    } else if (status.type === "assignment") {
-      // 분반 상세 페이지의 과제 탭으로 이동
-      navigate(`/sections/${course.sectionId}?tab=assignments`);
+    }
+    
+    if (status.type === "announcement") {
+      // 공지사항 상세 페이지로 이동
+      if (status.noticeId) {
+        navigate(`/sections/${course.sectionId}/course-notices/${status.noticeId}`);
+      } else {
+        navigate(`/sections/${course.sectionId}/course-notices`);
+      }
       
       // 상태 업데이트 콜백 호출
       if (onStatusUpdate) {
-        setTimeout(() => onStatusUpdate(), 1000);
+        setTimeout(() => {
+          onStatusUpdate();
+        }, 500);
+      }
+    } else if (status.type === "assignment") {
+      // 과제 페이지로 이동
+      if (status.assignmentId) {
+        navigate(`/sections/${course.sectionId}/course-assignments?assignmentId=${status.assignmentId}`);
+      } else {
+        navigate(`/sections/${course.sectionId}/course-assignments`);
+      }
+      
+      // 상태 업데이트 콜백 호출
+      if (onStatusUpdate) {
+        setTimeout(() => {
+          onStatusUpdate();
+        }, 500);
+      }
+    } else if (status.type === "notification") {
+      // 알림 페이지로 이동 (커뮤니티 질문으로 이동)
+      if (status.questionId) {
+        navigate(`/sections/${course.sectionId}/community/${status.questionId}`);
+      } else {
+        navigate(`/sections/${course.sectionId}/alarm`);
+      }
+      
+      // 상태 업데이트 콜백 호출
+      if (onStatusUpdate) {
+        setTimeout(() => {
+          onStatusUpdate();
+        }, 500);
       }
     }
   };
@@ -85,12 +117,10 @@ const CourseCard = ({ course, onStatusUpdate }) => {
         <div className="card-title">
           <h3>{course.title}</h3>
         </div>
-        <div className="batch-badge">{course.batch}</div>
+        {course.batch && <div className="batch-badge">{course.batch}</div>}
       </div>
       
       <div className="card-content">
-        <h4 className="course-name">{course.courseName}</h4>
-        
         <div className="status-tags">
           {course.status.map((status, index) => (
             <span 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import CourseCard from "../components/CourseCard";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -8,6 +8,7 @@ import APIService from "../services/APIService";
 import "./MainPage.css";
 
 const MainPage = () => {
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [enrolledSections, setEnrolledSections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -167,6 +168,23 @@ const MainPage = () => {
       alert('유효한 참가 코드나 링크를 입력하세요.');
       return;
     }
+
+    // 로그인하지 않은 경우
+    if (!isAuthenticated) {
+      // sessionStorage에 enrollmentCode 저장
+      sessionStorage.setItem('pendingEnrollmentCode', code);
+      // 모달 닫기
+      setShowEnrollModal(false);
+      setEnrollmentCode("");
+      // 로그인 페이지로 이동
+      navigate("/login", {
+        state: {
+          redirectTo: `/enroll/${code}`,
+          message: '수업 참가를 위해 로그인이 필요합니다.'
+        }
+      });
+      return;
+    }
     
     try {
       setEnrollLoading(true);
@@ -174,6 +192,7 @@ const MainPage = () => {
       if (resp && resp.success) {
         alert(`${resp.courseTitle} 수강 신청이 완료되었습니다!`);
         setEnrollmentCode("");
+        setShowEnrollModal(false);
         // 목록 새로고침
         const refreshed = await APIService.getUserEnrolledSections();
         setEnrolledSections(refreshed.data || refreshed);
