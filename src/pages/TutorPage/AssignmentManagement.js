@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import TutorLayout from "../../layouts/TutorLayout";
 import SectionNavigation from "../../components/SectionNavigation";
@@ -1074,8 +1075,8 @@ const AssignmentManagement = () => {
       </div>
 
         {/* 문제 가져오기 모달 (수업 및 문제 선택) */}
-        {showCopyProblemModal && (
-          <div className="tutor-modal-overlay" onClick={() => {
+        {showCopyProblemModal && createPortal(
+          <div className="assignment-management-copy-problem-modal-overlay" onClick={() => {
             setShowCopyProblemModal(false);
             setSelectedSectionForProblem('');
             setAssignmentsForProblem([]);
@@ -1086,11 +1087,11 @@ const AssignmentManagement = () => {
             setProblemViewMode('list');
             setSelectedProblemDetail(null);
           }}>
-            <div className="tutor-modal-content tutor-problem-modal tutor-problem-modal-large" onClick={(e) => e.stopPropagation()}>
-              <div className="tutor-modal-header">
-                <div className="tutor-modal-header-left">
+            <div className="assignment-management-copy-problem-modal-content assignment-management-tutor-problem-modal assignment-management-tutor-problem-modal-large" onClick={(e) => e.stopPropagation()}>
+              <div className="assignment-management-copy-problem-modal-header">
+                <div className="assignment-management-copy-problem-modal-header-left">
                   <button 
-                    className="tutor-btn-back"
+                    className="assignment-management-tutor-btn-back"
                     onClick={() => {
                       setShowCopyProblemModal(false);
                       setShowProblemModal(true);
@@ -1102,7 +1103,7 @@ const AssignmentManagement = () => {
                 <h2>기존 문제 가져오기 - {selectedAssignment?.title}</h2>
                 </div>
                 <button 
-                  className="tutor-modal-close"
+                  className="assignment-management-copy-problem-modal-close"
                   onClick={() => {
                     setShowCopyProblemModal(false);
                     setSelectedSectionForProblem('');
@@ -1119,14 +1120,26 @@ const AssignmentManagement = () => {
                 </button>
               </div>
               
-              <div className="tutor-problem-modal-body">
+              <div className="assignment-management-copy-problem-modal-body">
                 <div className="tutor-copy-problem-controls">
                   <div className="section-select-box">
                     <label htmlFor="section-select-copy">수업 선택 *</label>
                     <select
                       id="section-select-copy"
                       value={selectedSectionForProblem}
-                      onChange={(e) => handleSectionChangeForProblem(e.target.value)}
+                      onChange={(e) => {
+                        const sectionId = e.target.value;
+                        setSelectedSectionForProblem(sectionId);
+                        setSelectedProblemIds([]);
+                        setCopyProblemSearchTerm('');
+                        if (sectionId) {
+                          handleSectionChangeForProblem(sectionId);
+                        } else {
+                          setAssignmentsForProblem([]);
+                          setExpandedAssignmentsForProblem({});
+                          setAssignmentProblems({});
+                        }
+                      }}
                       className="section-select"
                     >
                       <option value="">수업을 선택하세요</option>
@@ -1386,7 +1399,7 @@ const AssignmentManagement = () => {
                 )}
               </div>
 
-              <div className="tutor-modal-footer">
+              <div className="assignment-management-copy-problem-modal-footer">
                 <button 
                   type="button"
                   className="tutor-btn-secondary"
@@ -1424,7 +1437,8 @@ const AssignmentManagement = () => {
                 )}
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* 문제 목록 모달 */}

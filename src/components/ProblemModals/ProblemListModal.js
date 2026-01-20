@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { removeCopyLabel } from '../../utils/problemUtils';
 import APIService from '../../services/APIService';
 import '../../components/AssignmentModals/AssignmentModals.css';
@@ -37,20 +38,20 @@ const ProblemListModal = ({
     );
   }) || [];
 
-  return (
-    <div className="tutor-modal-overlay" onClick={onClose}>
-      <div className="tutor-modal-content tutor-modal-content-extra-large" onClick={(e) => e.stopPropagation()}>
-        <div className="tutor-modal-header">
+  return createPortal(
+    <div className="assignment-management-problem-list-modal-overlay" onClick={onClose}>
+      <div className="assignment-management-problem-list-modal-content assignment-management-problem-list-modal-content-extra-large" onClick={(e) => e.stopPropagation()}>
+        <div className="assignment-management-problem-list-modal-header">
           <h2>문제 목록 관리 - {selectedAssignment.title}</h2>
           <button 
-            className="tutor-modal-close"
+            className="assignment-management-problem-list-modal-close"
             onClick={onClose}
           >
             ✕
           </button>
         </div>
         
-        <div className="tutor-modal-body">
+        <div className="assignment-management-problem-list-modal-body">
           {/* 문제 검색 */}
           <div className="tutor-filters-section">
             <div className="tutor-search-box">
@@ -141,7 +142,8 @@ const ProblemListModal = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

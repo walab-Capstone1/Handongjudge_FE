@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { removeCopyLabel } from '../../utils/problemUtils';
 import APIService from '../../services/APIService';
 import '../../components/AssignmentModals/AssignmentModals.css';
@@ -38,7 +39,7 @@ const ProblemSelectModal = ({
 
   const allSelected = selectedProblemIds.length === filteredProblems.length && filteredProblems.length > 0;
 
-  return (
+  return createPortal(
     <div className="tutor-modal-overlay">
       <div className="tutor-modal-content tutor-problem-modal tutor-problem-modal-large">
         <div className="tutor-modal-header">
@@ -151,7 +152,8 @@ const ProblemSelectModal = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -9,14 +9,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.75rem 2rem;
+  padding: 1.5rem 1.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .problem-set-management .problem-set-management-title-left {
@@ -90,12 +90,12 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.5rem 2rem;
+  padding: 1.25rem 1.5rem;
   background: white;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
@@ -139,50 +139,90 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* 테이블 스타일 */
 .problem-set-management .problem-set-management-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
 }
 
 .problem-set-management .problem-set-management-table thead {
-  background: #f8fafc;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
 .problem-set-management .problem-set-management-table th {
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1rem;
   text-align: left;
   font-weight: 600;
-  font-size: 0.875rem;
-  color: #475569;
-  border-bottom: 2px solid #e2e8f0;
+  font-size: 0.8125rem;
+  color: white;
+  border-bottom: none;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+}
+
+.problem-set-management .problem-set-management-table th:first-child {
+  padding-left: 1.25rem;
+}
+
+.problem-set-management .problem-set-management-table th:last-child {
+  padding-right: 1.25rem;
 }
 
 .problem-set-management .problem-set-management-table th.problem-set-management-meta-cell {
   text-align: right;
+  width: 90px;
 }
 
 .problem-set-management .problem-set-management-table th.problem-set-management-actions-cell {
   text-align: right;
+  width: 100px;
 }
 
-.problem-set-management .problem-set-management-table td {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-  color: #64748b;
-  font-size: 0.95rem;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+.problem-set-management .problem-set-management-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.problem-set-management .problem-set-management-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .problem-set-management .problem-set-management-table tbody tr:hover {
-  background: #f8fafc;
+  background: #f8f9ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.problem-set-management .problem-set-management-table td {
+  padding: 0.875rem 0.875rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #64748b;
+  font-size: 0.8125rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  vertical-align: middle;
+}
+
+.problem-set-management .problem-set-management-table td:first-child {
+  padding-left: 1.25rem;
+}
+
+.problem-set-management .problem-set-management-table td:last-child {
+  padding-right: 1.25rem;
 }
 
 .problem-set-management .problem-set-management-title-cell {
-  min-width: 300px;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  overflow: hidden;
 }
 
 .problem-set-management .problem-set-management-title-wrapper {
@@ -190,11 +230,11 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   align-items: center;
   gap: 0.75rem;
   transition: all 0.2s ease;
+  padding: 0.25rem 0;
 }
 
 .problem-set-management .problem-set-management-title-wrapper:hover {
   opacity: 0.9;
-  transform: translateX(2px);
 }
 
 .problem-set-management .problem-set-management-title-content {
@@ -205,11 +245,12 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
 }
 
 .problem-set-management .problem-set-management-title-text {
-  font-weight: 500;
+  font-weight: 600;
   color: #1e293b;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   transition: color 0.2s ease;
+  line-height: 1.5;
 }
 
 .problem-set-management .problem-set-management-title-wrapper:hover .problem-set-management-title-text {
@@ -217,16 +258,18 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
 }
 
 .problem-set-management .problem-set-management-description {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #64748b;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  margin-top: 0.25rem;
 }
 
 .problem-set-management .problem-set-management-meta-cell {
   text-align: right;
   color: #64748b;
+  white-space: nowrap;
 }
 
 .problem-set-management .problem-set-management-actions-cell {
@@ -242,14 +285,14 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
 
 /* 테이블 액션 버튼 */
 .problem-set-management .problem-set-management-btn-action {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  border: none;
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: white;
+  background: #f3f4f6;
   color: #6b7280;
   display: inline-flex;
   align-items: center;
@@ -258,20 +301,16 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   min-width: auto;
   line-height: 1.4;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .problem-set-management .problem-set-management-btn-action:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
+  background-color: #e5e7eb;
   color: #374151;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .problem-set-management .problem-set-management-btn-action:active {
   transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   background-color: #f3f4f6;
 }
 
@@ -290,34 +329,40 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
 /* 삭제 버튼 */
 .problem-set-management .problem-set-management-btn-delete {
   color: #6b7280;
-  border-color: #e5e7eb;
+  background: #f3f4f6;
 }
 
 .problem-set-management .problem-set-management-btn-delete:hover {
   background-color: #fee2e2;
-  border-color: #ef4444;
   color: #ef4444;
 }
 
-/* 모달 스타일 */
-.problem-set-management .problem-set-management-modal-overlay {
+/* 모달 스타일 - CSS 스코프 제한 규칙 적용 */
+.problem-set-management .problem-set-management-create-modal-overlay {
   position: fixed;
   top: 65px;
-  left: 0;
-  right: 0;
+  left: 280px;
+  right: calc(100vw / 3);
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   z-index: 10000;
-  animation: problem-set-management-fadeIn 0.2s ease;
+  animation: problem-set-management-create-fadeIn 0.2s ease;
   padding-top: 2rem;
   overflow-y: auto;
   box-sizing: border-box;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes problem-set-management-fadeIn {
+/* 사이드바가 접혔을 때 */
+.tutor-layout.sidebar-collapsed .problem-set-management .problem-set-management-create-modal-overlay {
+  left: 60px;
+  right: calc(100vw / 3);
+}
+
+@keyframes problem-set-management-create-fadeIn {
   from {
     opacity: 0;
   }
@@ -326,7 +371,7 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   }
 }
 
-.problem-set-management .problem-set-management-modal-content {
+.problem-set-management .problem-set-management-create-modal-content {
   background: white;
   border-radius: 16px;
   width: 90%;
@@ -334,11 +379,11 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   max-height: calc(90vh - 65px);
   overflow: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: problem-set-management-slideInUp 0.3s ease;
+  animation: problem-set-management-create-slideInUp 0.3s ease;
   margin-top: 0;
 }
 
-@keyframes problem-set-management-slideInUp {
+@keyframes problem-set-management-create-slideInUp {
   from {
     transform: translateY(20px);
     opacity: 0;
@@ -349,7 +394,7 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   }
 }
 
-.problem-set-management .problem-set-management-modal-header {
+.problem-set-management .problem-set-management-create-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -359,7 +404,7 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   color: white;
 }
 
-.problem-set-management .problem-set-management-modal-header h2 {
+.problem-set-management .problem-set-management-create-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
@@ -367,7 +412,7 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-.problem-set-management .problem-set-management-modal-close {
+.problem-set-management .problem-set-management-create-modal-close {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   font-size: 1.75rem;
@@ -383,16 +428,16 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   transition: all 0.2s ease;
 }
 
-.problem-set-management .problem-set-management-modal-close:hover {
+.problem-set-management .problem-set-management-create-modal-close:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: rotate(90deg);
 }
 
-.problem-set-management .problem-set-management-modal-body {
+.problem-set-management .problem-set-management-create-modal-body {
   padding: 2rem;
 }
 
-.problem-set-management .problem-set-management-modal-footer {
+.problem-set-management .problem-set-management-create-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -540,9 +585,25 @@ body.section-modal-open .problem-set-management .problem-set-management-form-tex
 
   .problem-set-management .problem-set-management-table-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .problem-set-management .problem-set-management-table {
-    min-width: 800px;
+    min-width: 600px;
+  }
+
+  .problem-set-management .problem-set-management-table th,
+  .problem-set-management .problem-set-management-table td {
+    padding: 0.875rem 1rem;
+  }
+
+  .problem-set-management .problem-set-management-table th:first-child,
+  .problem-set-management .problem-set-management-table td:first-child {
+    padding-left: 1rem;
+  }
+
+  .problem-set-management .problem-set-management-table th:last-child,
+  .problem-set-management .problem-set-management-table td:last-child {
+    padding-right: 1rem;
   }
 }

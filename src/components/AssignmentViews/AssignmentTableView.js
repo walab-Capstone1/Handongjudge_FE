@@ -33,11 +33,11 @@ const AssignmentTableView = ({
       <table className="tutor-assignments-table">
         <thead>
           <tr>
-            <th>과제 제목</th>
-            <th>마감일</th>
-            <th>문제 수</th>
-            <th>제출 현황</th>
-            <th>관리</th>
+            <th className="tutor-assignment-title-cell">과제 제목</th>
+            <th className="tutor-assignment-due-date-cell">마감일</th>
+            <th className="tutor-assignment-problem-count-cell">문제 수</th>
+            <th className="tutor-assignment-submission-cell">제출 현황</th>
+            <th className="tutor-assignment-actions-cell">관리</th>
           </tr>
         </thead>
         <tbody>
@@ -58,70 +58,63 @@ const AssignmentTableView = ({
                     )}
                   </div>
                 </td>
-                <td className="tutor-assignment-meta-cell">
+                <td className="tutor-assignment-due-date-cell">
                   {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }) : '미설정'}
                 </td>
-                <td className="tutor-assignment-meta-cell">{assignment.problemCount || 0}개</td>
-                <td className="tutor-assignment-meta-cell">
+                <td className="tutor-assignment-problem-count-cell">{assignment.problemCount || 0}개</td>
+                <td className="tutor-assignment-submission-cell">
                   {submissionStats[assignment.id] ? 
                     `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}` 
                     : `0/${assignment.totalStudents || 0}`}
                 </td>
                 <td className="tutor-assignment-actions-cell">
                   <div className="tutor-assignment-actions-inline">
-                    <button 
-                      className="tutor-btn-table-action"
-                      onClick={() => onProblemListManage(assignment)}
-                    >
-                      문제 목록 관리
-                    </button>
-                    <button 
-                      className="tutor-btn-table-action"
-                      onClick={() => onAddProblem(assignment)}
-                    >
-                      문제 추가
-                    </button>
-                    <button 
-                      className="tutor-btn-table-action tutor-btn-edit"
-                      onClick={() => onEdit(assignment)}
-                    >
-                      수정
-                    </button>
-                    <div className="tutor-more-menu">
+                    <div className="tutor-assignment-primary-actions">
                       <button 
-                        className="tutor-btn-table-action tutor-btn-more"
-                        title="더보기"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleMoreMenu(assignment.id);
-                        }}
+                        className="tutor-btn-table-action"
+                        onClick={() => onProblemListManage(assignment)}
+                        title="문제 목록 관리"
                       >
-                        ⋯
+                        목록
                       </button>
-                      {openMoreMenu === assignment.id && (
-                        <div className="tutor-more-dropdown">
-                          <button 
-                            className="tutor-btn-text-small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleActive(assignment.sectionId, assignment.id, assignment.active);
-                              onToggleMoreMenu(null);
-                            }}
-                          >
-                            {assignment.active ? '비활성화' : '활성화'}
-                          </button>
-                          <button 
-                            className="tutor-btn-text-small tutor-delete"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDelete(assignment.id);
-                              onToggleMoreMenu(null);
-                            }}
-                          >
-                            삭제
-                          </button>
-                        </div>
-                      )}
+                      <button 
+                        className="tutor-btn-table-action"
+                        onClick={() => onAddProblem(assignment)}
+                        title="문제 추가"
+                      >
+                        추가
+                      </button>
+                      <button 
+                        className="tutor-btn-table-action tutor-btn-edit"
+                        onClick={() => onEdit(assignment)}
+                        title="수정"
+                      >
+                        수정
+                      </button>
+                    </div>
+                    <div className="tutor-assignment-secondary-actions">
+                      <div className="tutor-secondary-actions-layer">
+                        <button 
+                          className="tutor-btn-table-action tutor-btn-secondary-action"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleActive(assignment.sectionId, assignment.id, assignment.active);
+                          }}
+                          title={assignment.active ? '비활성화' : '활성화'}
+                        >
+                          {assignment.active ? '비활성화' : '활성화'}
+                        </button>
+                        <button 
+                          className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(assignment.id);
+                          }}
+                          title="삭제"
+                        >
+                          삭제
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </td>

@@ -192,7 +192,7 @@ const ProblemSetManagement = () => {
         {/* 문제집 생성 모달 */}
         {showCreateModal && (
           <div 
-            className="problem-set-management-modal-overlay" 
+            className="problem-set-management-create-modal-overlay" 
             onClick={() => {
               if (!isCreating) {
                 setShowCreateModal(false);
@@ -202,13 +202,13 @@ const ProblemSetManagement = () => {
             }}
           >
             <div 
-              className="problem-set-management-modal-content" 
+              className="problem-set-management-create-modal-content" 
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="problem-set-management-modal-header">
+              <div className="problem-set-management-create-modal-header">
                 <h2>새 문제집 만들기</h2>
                 <button 
-                  className="problem-set-management-modal-close"
+                  className="problem-set-management-create-modal-close"
                   onClick={() => {
                     if (!isCreating) {
                       setShowCreateModal(false);
@@ -221,7 +221,7 @@ const ProblemSetManagement = () => {
                   ×
                 </button>
               </div>
-              <div className="problem-set-management-modal-body">
+              <div className="problem-set-management-create-modal-body">
                 <div className="problem-set-management-form-group">
                   <label htmlFor="set-title">문제집 제목 *</label>
                   <input
@@ -247,7 +247,7 @@ const ProblemSetManagement = () => {
                   />
                 </div>
               </div>
-              <div className="problem-set-management-modal-footer">
+              <div className="problem-set-management-create-modal-footer">
                 <button 
                   className="problem-set-management-btn-cancel"
                   onClick={() => {

@@ -241,7 +241,7 @@ body.section-modal-open .assignment-management .tutor-search-input:focus {
 }
 
 .assignment-management .tutor-assignments-table tbody tr.tutor-disabled {
-  opacity: 0.6;
+  opacity: 0.65;
   background-color: #f9fafb;
 }
 
@@ -411,7 +411,7 @@ body.section-modal-open .assignment-management .tutor-search-input:focus {
 }
 
 .assignment-management .tutor-assignment-list-item.tutor-disabled {
-  opacity: 0.6;
+  opacity: 0.65;
   background: #f9fafb;
 }
 
@@ -581,6 +581,43 @@ body.section-modal-open .assignment-management .tutor-search-input:focus {
 }
 
 /* 모달 스타일 */
+/* 문제 목록 모달 오버레이 - Portal로 body에 렌더링되므로 전역 스타일 (AssignmentModals.css에서 정의) */
+
+/* 문제 가져오기 모달 오버레이 - 유니크 클래스명 (CSS 스코프 규칙 적용) */
+.assignment-management .assignment-management-copy-problem-modal-overlay {
+  position: fixed;
+  top: 65px;
+  left: 280px;
+  right: calc(100vw / 3);
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 10000;
+  animation: assignment-management-copy-problem-fadeIn 0.2s ease;
+  padding-top: 2rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 사이드바가 접혔을 때 */
+.tutor-layout.sidebar-collapsed .assignment-management .assignment-management-copy-problem-modal-overlay {
+  left: 60px;
+  right: calc(100vw / 3);
+}
+
+@keyframes assignment-management-copy-problem-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 기존 tutor-modal-overlay (하위 호환성 유지) */
 .assignment-management .tutor-modal-overlay {
   position: fixed;
   top: 65px;

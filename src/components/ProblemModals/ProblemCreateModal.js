@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import '../../components/AssignmentModals/AssignmentModals.css';
 
 /**
@@ -18,7 +19,7 @@ const ProblemCreateModal = ({
 }) => {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="tutor-modal-overlay">
       <div className="tutor-modal-content">
         <div className="tutor-modal-header">
@@ -108,7 +109,8 @@ const ProblemCreateModal = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
