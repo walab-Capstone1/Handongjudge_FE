@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import TutorLayout from "../../layouts/TutorLayout";
-import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
 import "./NoticeManagement.css";
 
@@ -181,31 +180,61 @@ const NoticeManagement = () => {
   if (loading) {
     return (
       <TutorLayout>
-        <div className="tutor-loading-container">
-          <div className="tutor-loading-spinner"></div>
-          <p>공지사항을 불러오는 중...</p>
+        <div className="notice-management">
+          <div className="tutor-loading-container">
+            <div className="tutor-loading-spinner"></div>
+            <p>공지사항을 불러오는 중...</p>
+          </div>
         </div>
       </TutorLayout>
     );
   }
 
+  const handleCopyEnrollmentLink = () => {
+    if (currentSection?.enrollmentCode) {
+      const enrollmentLink = `${window.location.origin}/enroll/${currentSection.enrollmentCode}`;
+      navigator.clipboard.writeText(enrollmentLink).then(() => {
+        alert('수업 참가 링크가 복사되었습니다!');
+      }).catch((err) => {
+        console.error('복사 실패:', err);
+        alert('링크 복사에 실패했습니다.');
+      });
+    }
+  };
+
   return (
     <TutorLayout selectedSection={currentSection}>
-      {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
-      {sectionId && currentSection && (
-        <SectionNavigation 
-          sectionId={sectionId}
-          sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
-          enrollmentCode={currentSection.enrollmentCode}
-          showCreateButton={true}
-          onCreateClick={handleCreateNotice}
-          createButtonText="새 공지사항 작성"
-        />
-      )}
-      
-      {/* 전체 페이지인 경우 기존 헤더 유지 */}
-      {!sectionId && (
-        <div className="notice-management">
+      <div className="notice-management">
+        {/* 분반별 페이지인 경우 헤더 디자인 */}
+        {sectionId && currentSection && (
+          <div className="tutor-page-header">
+            <div className="tutor-header-left">
+              <h1 className="tutor-page-title">
+                {currentSection.courseTitle} - {currentSection.sectionNumber}분반
+              </h1>
+            </div>
+            <div className="tutor-header-right">
+              {currentSection.enrollmentCode && (
+                <button
+                  className="tutor-btn-link-copy"
+                  onClick={handleCopyEnrollmentLink}
+                  title="수업 참가 링크 복사"
+                >
+                  🔗 수업 링크 복사
+                </button>
+              )}
+              <button
+                className="tutor-btn-primary"
+                onClick={handleCreateNotice}
+              >
+                새 공지사항 작성
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {/* 전체 페이지인 경우 기존 헤더 유지 */}
+        {!sectionId && (
           <div className="tutor-page-header">
             <div className="tutor-header-left">
               <h1 className="tutor-page-title">전체 공지사항 관리</h1>
@@ -244,10 +273,7 @@ const NoticeManagement = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
-      
-      <div className="notice-management">
+        )}
 
         <div className="tutor-notices-list">
           {filteredNotices.map((notice) => (
