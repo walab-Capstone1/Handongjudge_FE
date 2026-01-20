@@ -202,6 +202,7 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
           </div>
         </div>
       )}
+
     </>
   );
 };

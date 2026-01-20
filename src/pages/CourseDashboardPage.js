@@ -31,6 +31,134 @@ const CourseDashboardPage = () => {
   const [enrollmentCode, setEnrollmentCode] = useState("");
   const [enrollLoading, setEnrollLoading] = useState(false);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
+  
+  // 더미 데이터: 관리 중인 수업 목록
+  const [managingSections] = useState([
+    {
+      id: 999,
+      title: "데이터베이스 시스템",
+      subtitle: "강의 ID: DB001",
+      batch: "",
+      courseName: "[데이터베이스 시스템]",
+      status: [],
+      instructor: "김교수",
+      color: "blue",
+      sectionId: 999,
+      courseId: "DB001",
+      active: true
+    },
+    {
+      id: 998,
+      title: "알고리즘",
+      subtitle: "강의 ID: ALG001",
+      batch: "",
+      courseName: "[알고리즘]",
+      status: [],
+      instructor: "이교수",
+      color: "green",
+      sectionId: 998,
+      courseId: "ALG001",
+      active: true
+    },
+    {
+      id: 997,
+      title: "운영체제",
+      subtitle: "강의 ID: OS001",
+      batch: "",
+      courseName: "[운영체제]",
+      status: [],
+      instructor: "박교수",
+      color: "purple",
+      sectionId: 997,
+      courseId: "OS001",
+      active: true
+    },
+    {
+      id: 996,
+      title: "컴퓨터 구조",
+      subtitle: "강의 ID: CA001",
+      batch: "",
+      courseName: "[컴퓨터 구조]",
+      status: [],
+      instructor: "최교수",
+      color: "orange",
+      sectionId: 996,
+      courseId: "CA001",
+      active: true
+    },
+    {
+      id: 995,
+      title: "소프트웨어 공학",
+      subtitle: "강의 ID: SE001",
+      batch: "",
+      courseName: "[소프트웨어 공학]",
+      status: [],
+      instructor: "정교수",
+      color: "red",
+      sectionId: 995,
+      courseId: "SE001",
+      active: true
+    },
+    {
+      id: 994,
+      title: "네트워크 프로그래밍",
+      subtitle: "강의 ID: NP001",
+      batch: "",
+      courseName: "[네트워크 프로그래밍]",
+      status: [],
+      instructor: "강교수",
+      color: "blue",
+      sectionId: 994,
+      courseId: "NP001",
+      active: true
+    }
+  ]);
+  
+  // 더미 데이터: 공개된 클래스
+  const [publicSections] = useState([
+    {
+      id: 997,
+      title: "웹 프로그래밍 기초",
+      subtitle: "강의 ID: WEB001",
+      batch: "",
+      courseName: "[웹 프로그래밍 기초]",
+      status: [],
+      instructor: "박교수",
+      color: "purple",
+      sectionId: 997,
+      courseId: "WEB001",
+      active: true,
+      enrollmentCode: "WEB001-2024"
+    },
+    {
+      id: 996,
+      title: "머신러닝 입문",
+      subtitle: "강의 ID: ML001",
+      batch: "",
+      courseName: "[머신러닝 입문]",
+      status: [],
+      instructor: "최교수",
+      color: "orange",
+      sectionId: 996,
+      courseId: "ML001",
+      active: true,
+      enrollmentCode: "ML001-2024"
+    },
+    {
+      id: 995,
+      title: "컴퓨터 네트워크",
+      subtitle: "강의 ID: NET001",
+      batch: "",
+      courseName: "[컴퓨터 네트워크]",
+      status: [],
+      instructor: "정교수",
+      color: "red",
+      sectionId: 995,
+      courseId: "NET001",
+      active: true,
+      enrollmentCode: "NET001-2024"
+    }
+  ]);
 
   useEffect(() => {
     if (auth.user) {
@@ -495,32 +623,88 @@ const CourseDashboardPage = () => {
             </span>
           </div>
 
-            {/* 수업 목록 */}
+            {/* 참여한 수업 목록 */}
             <div className="courses-section">
             <div className="section-header">
-                <span className="section-title">수업 목록</span>
-                <button
-                  className="enroll-button"
+                <span className="section-title">참여한 수업 목록</span>
+                <button 
+                  className="join-class-btn"
                   onClick={() => setShowEnrollModal(true)}
                 >
                   + 수업 참가
                 </button>
+              </div>
+              <div className="courses-scroll-container">
+                <div className="courses-grid">
+                  {transformedSections.length > 0 ? (
+                    transformedSections.map((course) => (
+                      <CourseCard 
+                        key={course.id} 
+                        course={course}
+                        onStatusUpdate={fetchDashboardData}
+                      />
+                    ))
+                  ) : (
+                    <div className="no-courses">
+                      <span>수강 중인 수업이 없습니다.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-              <div className="courses-grid">
-                {transformedSections.length > 0 ? (
-                  transformedSections.map((course) => (
-                    <CourseCard 
-                      key={course.id} 
-                      course={course}
-                      onStatusUpdate={fetchDashboardData}
-                    />
-                  ))
-                ) : (
-                  <div className="no-courses">
-                    <span>수강 중인 수업이 없습니다.</span>
+            {/* 관리 중인 수업 목록 */}
+            <div className="courses-section">
+              <div className="section-header">
+                <span className="section-title">관리 중인 수업 목록</span>
+              </div>
+              <div className="courses-scroll-container">
+                <div className="courses-grid">
+                  {managingSections.length > 0 ? (
+                    managingSections.map((course) => (
+                      <CourseCard 
+                        key={course.id} 
+                        course={course}
+                        onStatusUpdate={fetchDashboardData}
+                      />
+                    ))
+                  ) : (
+                    <div className="no-courses">
+                      <span>관리 중인 수업이 없습니다.</span>
+                          </div>
+                        )}
+                      </div>
+                            </div>
+                          </div>
+
+            {/* 공개된 클래스 */}
+            <div className="courses-section">
+              <div className="section-header">
+                <span className="section-title">공개된 클래스</span>
+              </div>
+              <div className="courses-scroll-container">
+                <div className="courses-grid">
+                  {publicSections.length > 0 ? (
+                    publicSections.map((course) => (
+                      <CourseCard 
+                        key={course.id} 
+                        course={course}
+                        onStatusUpdate={fetchDashboardData}
+                        showEnrollButton={true}
+                        onEnroll={() => {
+                          if (course.enrollmentCode) {
+                            setEnrollmentCode(course.enrollmentCode);
+                            setShowEnrollModal(true);
+                          }
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <div className="no-courses">
+                      <span>공개된 클래스가 없습니다.</span>
+                    </div>
+                  )}
                 </div>
-              )}
               </div>
             </div>
           </div>
@@ -617,9 +801,9 @@ const CourseDashboardPage = () => {
                       <span>공지사항이 없습니다.</span>
                     </div>
                   )}
+                </div>
+              </div>
             </div>
-            </div>
-          </div>
         </div>
       </div>
 

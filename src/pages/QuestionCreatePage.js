@@ -16,6 +16,7 @@ const QuestionCreatePage = () => {
   const [sectionInfo, setSectionInfo] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [problems, setProblems] = useState([]);
+  const [assignmentsWithProblems, setAssignmentsWithProblems] = useState([]);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -54,6 +55,26 @@ const QuestionCreatePage = () => {
 
       const assignmentsData = await APIService.getAssignmentsBySection(sectionId);
       setAssignments(assignmentsData || []);
+      
+      // 각 과제의 문제 목록도 함께 가져오기
+      const assignmentsWithProblemsData = await Promise.all(
+        (assignmentsData || []).map(async (assignment) => {
+          try {
+            const problemsData = await APIService.getAssignmentProblems(sectionId, assignment.id);
+            return {
+              ...assignment,
+              problems: problemsData?.data || problemsData || []
+            };
+          } catch (error) {
+            console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
+            return {
+              ...assignment,
+              problems: []
+            };
+          }
+        })
+      );
+      setAssignmentsWithProblems(assignmentsWithProblemsData);
     } catch (err) {
       console.error('Error fetching initial data:', err);
     }
@@ -251,45 +272,65 @@ const QuestionCreatePage = () => {
               <span className="char-count">{formData.title.length}/200</span>
             </div>
 
-            {/* 과제 선택 */}
+            {/* 관련 과제/문제 선택 (통합 드롭다운) */}
             <div className="form-group">
-              <label className="form-label">관련 과제 (선택)</label>
+              <label className="form-label">관련 과제/문제 (선택)</label>
               <select
                 className="form-select"
-                value={formData.assignmentId}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  assignmentId: e.target.value,
-                  problemId: '' 
-                })}
+                value={formData.assignmentId && formData.problemId ? `assignment-${formData.assignmentId}-problem-${formData.problemId}` : 
+                       formData.assignmentId ? `assignment-${formData.assignmentId}` : ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.startsWith('assignment-') && value.includes('-problem-')) {
+                    // 문제 선택
+                    const parts = value.split('-problem-');
+                    const assignmentId = parts[0].replace('assignment-', '');
+                    const problemId = parts[1];
+                    setFormData({ 
+                      ...formData, 
+                      assignmentId: assignmentId,
+                      problemId: problemId
+                    });
+                  } else if (value.startsWith('assignment-')) {
+                    // 과제만 선택
+                    const assignmentId = value.replace('assignment-', '');
+                    setFormData({ 
+                      ...formData, 
+                      assignmentId: assignmentId,
+                      problemId: '' 
+                    });
+                  } else {
+                    // 선택 없음
+                    setFormData({ 
+                      ...formData, 
+                      assignmentId: '',
+                      problemId: '' 
+                    });
+                  }
+                }}
               >
-                <option value="">과제를 선택하세요</option>
-                {assignments.map(assignment => (
-                  <option key={assignment.id} value={assignment.id}>
-                    {assignment.title}
-                  </option>
+                <option value="">과제/문제를 선택하세요</option>
+                {assignmentsWithProblems.map(assignment => (
+                  <React.Fragment key={assignment.id}>
+                    <option 
+                      value={`assignment-${assignment.id}`}
+                      style={{ fontWeight: 'bold', backgroundColor: '#f0f0f0' }}
+                    >
+                      📁 {assignment.title}
+                    </option>
+                    {assignment.problems && assignment.problems.length > 0 && assignment.problems.map(problem => (
+                      <option 
+                        key={problem.id} 
+                        value={`assignment-${assignment.id}-problem-${problem.id}`}
+                        style={{ paddingLeft: '24px' }}
+                      >
+                        &nbsp;&nbsp;└ {problem.title}
+                      </option>
+                    ))}
+                  </React.Fragment>
                 ))}
               </select>
             </div>
-
-            {/* 문제 선택 */}
-            {formData.assignmentId && problems.length > 0 && (
-              <div className="form-group">
-                <label className="form-label">관련 문제 (선택)</label>
-                <select
-                  className="form-select"
-                  value={formData.problemId}
-                  onChange={(e) => setFormData({ ...formData, problemId: e.target.value })}
-                >
-                  <option value="">문제를 선택하세요</option>
-                  {problems.map(problem => (
-                    <option key={problem.id} value={problem.id}>
-                      {problem.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             {/* 내용 */}
             <div className="form-group">
