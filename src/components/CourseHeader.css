@@ -1,12 +1,17 @@
 .course-header-container {
-  background: #FFFFFF;
-  padding: 0 0 0 0;
-  border-bottom: 1px solid #E0E0E0;
   position: fixed;
   top: 0;
   left: 250px;
   right: 0;
+  height: 61px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E0E0E0;
   z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-sizing: border-box;
   transition: left 0.3s ease;
 }
 
@@ -17,39 +22,42 @@
 .course-header-top {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 0 0 0 16px;
-  height: 61px;
-  box-sizing: border-box;
-  gap: 16px;
+  gap: 12px;
+}
+
+.course-header-user {
+  display: flex;
+  align-items: center;
 }
 
 .sidebar-toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: transparent;
+  width: 32px;
+  height: 32px;
   border: none;
-  border-radius: 8px;
+  background: transparent;
   cursor: pointer;
   color: #667EEA;
   font-size: 24px;
-  transition: background-color 0.2s ease;
-  flex-shrink: 0;
+  transition: all 0.2s ease;
+  border-radius: 4px;
 }
 
 .sidebar-toggle-btn:hover {
-  background-color: rgba(102, 126, 234, 0.1);
+  background: rgba(102, 126, 234, 0.1);
 }
 
 .course-name {
-  color: #000000;
   font-size: 18px;
   font-weight: 600;
-  line-height: 1;
-  display: flex;
-  align-items: center;
+  color: #000000;
+  margin: 0;
 }
 
+.user-info {
+  color: #000000;
+  font-size: 16px;
+  font-weight: 500;
+}

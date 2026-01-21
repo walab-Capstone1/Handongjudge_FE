@@ -1,0 +1,33 @@
+.quiz-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #667EEA;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(102, 126, 234, 0.2);
+  height: fit-content;
+}
+
+.quiz-timer.warning {
+  background: #f5576c;
+}
+
+.quiz-timer.expired {
+  background: #868e96;
+}
+
+.timer-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.timer-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+

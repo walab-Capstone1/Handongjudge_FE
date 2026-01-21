@@ -1,128 +1,306 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../recoil/atoms";
 import CourseSidebar from "../components/CourseSidebar";
 import CourseHeader from "../components/CourseHeader";
 import LoadingSpinner from "../components/LoadingSpinner";
-import AssignmentProblemsList from "../components/AssignmentProblemsList";
+import CourseCard from "../components/CourseCard";
 import APIService from "../services/APIService";
 import "./CourseDashboardPage.css";
 
 const CourseDashboardPage = () => {
-  const { sectionId } = useParams();
   const navigate = useNavigate();
+  const { sectionId: sectionIdParam } = useParams();
+  // sectionId가 undefined일 수 있으므로 명시적으로 처리
+  const sectionId = sectionIdParam || null;
   const auth = useRecoilValue(authState);
   
   const [activeMenu, setActiveMenu] = useState("대시보드");
-  const [sortOrder, setSortOrder] = useState("asc"); // 'asc': 오름차순, 'desc': 내림차순
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(sidebarCollapsedState);
   
   // 데이터 상태
+  const [enrolledSections, setEnrolledSections] = useState([]);
+  const [allNotices, setAllNotices] = useState([]);
+  const [allAssignments, setAllAssignments] = useState([]);
+  const [allNotifications, setAllNotifications] = useState([]);
   const [sectionInfo, setSectionInfo] = useState(null);
-  const [assignments, setAssignments] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [recentNotices, setRecentNotices] = useState([]);
-  const [collapsedAssignments, setCollapsedAssignments] = useState(new Set());
+  const [sectionNewItems, setSectionNewItems] = useState({});
+  const [enrollmentCode, setEnrollmentCode] = useState("");
+  const [enrollLoading, setEnrollLoading] = useState(false);
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+  
+  // 더미 데이터: 관리 중인 수업 목록
+  const [managingSections] = useState([
+    {
+      id: 999,
+      title: "데이터베이스 시스템",
+      subtitle: "강의 ID: DB001",
+      batch: "",
+      courseName: "[데이터베이스 시스템]",
+      status: [],
+      instructor: "김교수",
+      color: "blue",
+      sectionId: 999,
+      courseId: "DB001",
+      active: true
+    },
+    {
+      id: 998,
+      title: "알고리즘",
+      subtitle: "강의 ID: ALG001",
+      batch: "",
+      courseName: "[알고리즘]",
+      status: [],
+      instructor: "이교수",
+      color: "green",
+      sectionId: 998,
+      courseId: "ALG001",
+      active: true
+    },
+    {
+      id: 997,
+      title: "운영체제",
+      subtitle: "강의 ID: OS001",
+      batch: "",
+      courseName: "[운영체제]",
+      status: [],
+      instructor: "박교수",
+      color: "purple",
+      sectionId: 997,
+      courseId: "OS001",
+      active: true
+    },
+    {
+      id: 996,
+      title: "컴퓨터 구조",
+      subtitle: "강의 ID: CA001",
+      batch: "",
+      courseName: "[컴퓨터 구조]",
+      status: [],
+      instructor: "최교수",
+      color: "orange",
+      sectionId: 996,
+      courseId: "CA001",
+      active: true
+    },
+    {
+      id: 995,
+      title: "소프트웨어 공학",
+      subtitle: "강의 ID: SE001",
+      batch: "",
+      courseName: "[소프트웨어 공학]",
+      status: [],
+      instructor: "정교수",
+      color: "red",
+      sectionId: 995,
+      courseId: "SE001",
+      active: true
+    },
+    {
+      id: 994,
+      title: "네트워크 프로그래밍",
+      subtitle: "강의 ID: NP001",
+      batch: "",
+      courseName: "[네트워크 프로그래밍]",
+      status: [],
+      instructor: "강교수",
+      color: "blue",
+      sectionId: 994,
+      courseId: "NP001",
+      active: true
+    }
+  ]);
+  
+  // 더미 데이터: 공개된 클래스
+  const [publicSections] = useState([
+    {
+      id: 997,
+      title: "웹 프로그래밍 기초",
+      subtitle: "강의 ID: WEB001",
+      batch: "",
+      courseName: "[웹 프로그래밍 기초]",
+      status: [],
+      instructor: "박교수",
+      color: "purple",
+      sectionId: 997,
+      courseId: "WEB001",
+      active: true,
+      enrollmentCode: "WEB001-2024"
+    },
+    {
+      id: 996,
+      title: "머신러닝 입문",
+      subtitle: "강의 ID: ML001",
+      batch: "",
+      courseName: "[머신러닝 입문]",
+      status: [],
+      instructor: "최교수",
+      color: "orange",
+      sectionId: 996,
+      courseId: "ML001",
+      active: true,
+      enrollmentCode: "ML001-2024"
+    },
+    {
+      id: 995,
+      title: "컴퓨터 네트워크",
+      subtitle: "강의 ID: NET001",
+      batch: "",
+      courseName: "[컴퓨터 네트워크]",
+      status: [],
+      instructor: "정교수",
+      color: "red",
+      sectionId: 995,
+      courseId: "NET001",
+      active: true,
+      enrollmentCode: "NET001-2024"
+    }
+  ]);
 
   useEffect(() => {
-    if (sectionId && auth.user) {
+    if (auth.user) {
       fetchDashboardData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectionId, auth.user]);
+  }, [auth.user, sectionId]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // 섹션 정보 조회
+      // sectionId가 있으면 해당 수업 정보 조회
+      if (sectionId) {
+        try {
       const sectionResponse = await APIService.getSectionInfo(sectionId);
       const sectionData = sectionResponse.data || sectionResponse;
       setSectionInfo(sectionData);
+        } catch (err) {
+          console.error("수업 정보 조회 실패:", err);
+        }
+      } else {
+        setSectionInfo(null);
+      }
 
-      // 과제 목록 조회
-      const assignmentsResponse = await APIService.getAssignmentsBySection(sectionId);
-      const assignmentsList = assignmentsResponse.data || assignmentsResponse;
+      // 모든 수업 조회
+      const sectionsResponse = await APIService.getUserEnrolledSections();
+      const sectionsData = sectionsResponse.data || sectionsResponse;
+      setEnrolledSections(sectionsData);
 
-      // 각 과제에 대한 진도율과 문제 상태 조회
-      const assignmentsWithProgress = await Promise.all(
-        assignmentsList.map(async (assignment) => {
+      // 모든 수업의 공지사항, 과제, 알림 수집
+      let noticesList = [];
+      let assignmentsList = [];
+      let notificationsList = [];
+      // 각 수업별로 새로운 과제/공지사항 정보 저장
+      let sectionNewItems = {};
+
+      // 각 수업별로 데이터 수집
+      for (const section of sectionsData) {
+        try {
+          // 공지사항 조회
+          const noticesResponse = await APIService.getSectionNotices(section.sectionId);
+          const notices = noticesResponse.data || noticesResponse;
+          const noticesWithSection = notices.map(notice => ({
+            ...notice,
+            sectionId: section.sectionId,
+            sectionName: section.courseTitle
+          }));
+          noticesList = [...noticesList, ...noticesWithSection];
+
+          // 과제 조회
+          const assignmentsResponse = await APIService.getAssignmentsBySection(section.sectionId);
+          const assignments = assignmentsResponse.data || assignmentsResponse;
+          const assignmentsWithSection = assignments.map(assignment => ({
+            ...assignment,
+            sectionId: section.sectionId,
+            sectionName: section.courseTitle
+          }));
+          assignmentsList = [...assignmentsList, ...assignmentsWithSection];
+
+          // 알림 조회 (각 수업별)
           try {
-            // 과제의 문제 목록 조회
-            const problemsResponse = await APIService.getAssignmentProblems(sectionId, assignment.id);
-            const problemsList = problemsResponse.data || problemsResponse;
+            const notificationsResponse = await APIService.getCommunityNotifications(section.sectionId, 0, 50);
+            const notifications = notificationsResponse.data?.content || [];
+            const notificationsWithSection = notifications.map(notif => ({
+              ...notif,
+              sectionId: section.sectionId,
+              sectionName: section.courseTitle
+            }));
+            notificationsList = [...notificationsList, ...notificationsWithSection];
 
-            // 학생의 문제별 제출 상태 조회
-            let problemsStatus = [];
-            try {
-              const statusResponse = await APIService.getStudentAssignmentProblemsStatus(
-                auth.user.id,
-                sectionId,
-                assignment.id
-              );
-              problemsStatus = statusResponse.data || statusResponse;
-            } catch (statusErr) {
-              // 상태 조회 실패 시 기본값 사용
-            }
+            // 읽지 않은 새로운 과제/공지사항/알림 찾기
+            const unreadNotifications = notifications.filter(notif => !notif.isRead);
+            const newAssignment = unreadNotifications.find(notif => notif.type === 'ASSIGNMENT_CREATED');
+            const newNotice = unreadNotifications.find(notif => notif.type === 'NOTICE_CREATED');
+            // 과제/공지사항이 아닌 다른 알림들 (커뮤니티 관련 알림)
+            const otherNotifications = unreadNotifications.filter(notif => 
+              notif.type !== 'ASSIGNMENT_CREATED' && 
+              notif.type !== 'NOTICE_CREATED' &&
+              (notif.type === 'QUESTION_COMMENT' || 
+               notif.type === 'COMMENT_ACCEPTED' || 
+               notif.type === 'QUESTION_LIKED' || 
+               notif.type === 'COMMENT_LIKED')
+            );
+            const newNotification = otherNotifications.length > 0 ? otherNotifications[0] : null; // 가장 최신 알림 하나만
 
-            // 문제 목록과 상태를 결합
-            const problems = problemsList.map(problem => {
-              const status = problemsStatus.find(s => s.problemId === problem.id);
-              // status가 'SUBMITTED' 또는 'COMPLETED'면 제출된 것으로 간주
-              const isSubmitted = status && (status.status === 'SUBMITTED' || status.status === 'COMPLETED');
-              return {
-                id: problem.id,
-                title: problem.title,
-                completed: isSubmitted,
-                status: status ? status.status : 'NOT_SUBMITTED'
-              };
-            });
-
-            // 진도율 계산: 제출한 문제 / 전체 문제 * 100
-            const totalProblems = problems.length;
-            const submittedProblems = problems.filter(p => p.completed).length;
-            const progress = totalProblems > 0 ? Math.round((submittedProblems / totalProblems) * 100) : 0;
-
-            // D-day 계산
-            const dDay = calculateDDay(assignment.endDate);
-
-            return {
-              ...assignment,
-              progress,
-              dDay,
-              problems
+            sectionNewItems[section.sectionId] = {
+              newAssignment: newAssignment ? {
+                id: newAssignment.id,
+                assignmentId: newAssignment.assignmentId,
+                title: newAssignment.assignmentTitle || '과제'
+              } : null,
+              newNotice: newNotice ? {
+                id: newNotice.id,
+                noticeId: newNotice.noticeId,
+                title: newNotice.noticeTitle || '공지사항'
+              } : null,
+              newNotification: newNotification ? {
+                id: newNotification.id,
+                questionId: newNotification.questionId,
+                type: newNotification.type,
+                title: newNotification.message || '새 알림'
+              } : null
             };
-          } catch (err) {
-            console.error(`과제 ${assignment.id} 상태 조회 실패:`, err);
-            return {
-              ...assignment,
-              progress: 0,
-              dDay: calculateDDay(assignment.endDate),
-              problems: []
+          } catch (notifErr) {
+            console.error(`수업 ${section.sectionId} 알림 조회 실패:`, notifErr);
+            sectionNewItems[section.sectionId] = {
+              newAssignment: null,
+              newNotice: null,
+              newNotification: null
             };
           }
-        })
-      );
+        } catch (err) {
+          console.error(`수업 ${section.sectionId} 데이터 조회 실패:`, err);
+          sectionNewItems[section.sectionId] = {
+            newAssignment: null,
+            newNotice: null,
+            newNotification: null
+          };
+        }
+      }
 
-      // 초기에는 오름차순으로 정렬 (빠른 마감일이 먼저)
-      const sortedAssignments = assignmentsWithProgress.sort((a, b) => {
-        return new Date(a.endDate) - new Date(b.endDate);
-      });
+      // 공지사항 정렬: 최신 작성일 기준 내림차순
+      const sortedNotices = noticesList
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5); // 최근 5개만 표시
 
-      setAssignments(sortedAssignments);
+      // 과제 정렬: 마감일이 가까운 순, 마감된 과제는 하단으로
+      const now = new Date();
+      const activeAssignments = assignmentsList.filter(a => new Date(a.endDate) >= now);
+      const expiredAssignments = assignmentsList.filter(a => new Date(a.endDate) < now);
+      
+      activeAssignments.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+      expiredAssignments.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+      
+      const sortedAssignments = [...activeAssignments, ...expiredAssignments].slice(0, 5); // 최대 5개만 표시
 
-      // 커뮤니티 알림 조회 (통합 알림 시스템)
-      try {
-        const notificationsResponse = await APIService.getCommunityNotifications(sectionId, 0, 50);
-        const notificationsList = notificationsResponse.data?.content || [];
-          
-          // 백엔드에서 이미 섹션별로 필터링된 알림을 받음
-          const sectionNotifications = notificationsList
-            .slice(0, 5) // 최대 5개
+      // 알림 정렬: 최근 발생한 알림이 최상단
+      const sortedNotifications = notificationsList
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5) // 최대 5개만 표시
             .map(notif => {
               // 알림 타입에 따라 다른 정보 표시
               let title = '';
@@ -131,24 +309,24 @@ const CourseDashboardPage = () => {
               switch (notif.type) {
                 case 'NOTICE_CREATED':
                   title = `새 공지사항: ${notif.noticeTitle || '공지사항'}`;
-                  link = notif.noticeId ? `/sections/${sectionId}/course-notices/${notif.noticeId}` : null;
+              link = notif.noticeId ? `/sections/${notif.sectionId}/course-notices/${notif.noticeId}` : null;
                   break;
                 case 'ASSIGNMENT_CREATED':
                   title = `새 과제: ${notif.assignmentTitle || '과제'}`;
-                  link = notif.assignmentId ? `/sections/${sectionId}/course-assignments?assignmentId=${notif.assignmentId}` : null;
+              link = notif.assignmentId ? `/sections/${notif.sectionId}/course-assignments?assignmentId=${notif.assignmentId}` : null;
                   break;
                 case 'QUESTION_COMMENT':
                   title = notif.message || '내 질문에 댓글이 달렸습니다';
-                  link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+              link = notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
                   break;
                 case 'COMMENT_ACCEPTED':
                   title = notif.message || '내 댓글이 채택되었습니다';
-                  link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+              link = notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
                   break;
                 case 'QUESTION_LIKED':
                 case 'COMMENT_LIKED':
                   title = notif.message || '추천을 받았습니다';
-                  link = notif.questionId ? `/sections/${sectionId}/community/${notif.questionId}` : null;
+              link = notif.questionId ? `/sections/${notif.sectionId}/community/${notif.questionId}` : null;
                   break;
                 default:
                   title = notif.message || '새 알림';
@@ -161,37 +339,15 @@ const CourseDashboardPage = () => {
                 date: formatDate(notif.createdAt),
                 isNew: !notif.isRead,
                 type: notif.type,
-                link: link
+            link: link,
+            sectionName: notif.sectionName
               };
             });
           
-          setNotifications(sectionNotifications);
-      } catch (err) {
-        console.error("알림 조회 실패:", err);
-        setNotifications([]);
-      }
-
-      // 최근 공지사항 조회
-      try {
-        const noticesResponse = await APIService.getSectionNotices(sectionId);
-        const noticesList = noticesResponse.data || noticesResponse;
-        
-        // 최근 공지사항 5개만 표시
-        const recentNoticesList = noticesList
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .slice(0, 5)
-          .map(notice => ({
-            id: notice.id,
-            title: notice.title,
-            date: formatDate(notice.createdAt),
-            isNew: notice.isNew || false
-          }));
-        
-        setRecentNotices(recentNoticesList);
-      } catch (err) {
-        console.error("공지사항 조회 실패:", err);
-        setRecentNotices([]);
-      }
+      setAllNotices(sortedNotices);
+      setAllAssignments(sortedAssignments);
+      setAllNotifications(sortedNotifications);
+      setSectionNewItems(sectionNewItems);
 
     } catch (err) {
       console.error("대시보드 데이터 조회 실패:", err);
@@ -199,15 +355,6 @@ const CourseDashboardPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const calculateDDay = (endDate) => {
-    if (!endDate) return null;
-    const now = new Date();
-    const end = new Date(endDate);
-    const diffTime = end - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
   };
 
   const formatDate = (dateString) => {
@@ -224,28 +371,17 @@ const CourseDashboardPage = () => {
     return `${formatDate(dateString)} 마감`;
   };
 
-  const handleMenuClick = (menuId) => {
-    switch (menuId) {
-      case "dashboard":
-        // 현재 페이지
-        break;
-      case "assignment":
-        navigate(`/sections/${sectionId}/course-assignments`);
-        break;
-      case "notice":
-        navigate(`/sections/${sectionId}/course-notices`);
-        break;
-      case "notification":
-        // 알림 페이지로 이동 (구현 필요)
-        break;
-      default:
-        break;
-    }
+  const calculateDDay = (endDate) => {
+    if (!endDate) return null;
+    const now = new Date();
+    const end = new Date(endDate);
+    const diffTime = end - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
 
-  const handleAssignmentClick = (assignmentId) => {
-    // 과제 페이지로 이동하면서 해당 과제 아이템을 펼치도록 assignmentId를 URL 파라미터로 전달
-    navigate(`/sections/${sectionId}/course-assignments?assignmentId=${assignmentId}`);
+  const handleMenuClick = (menuId) => {
+    // 사이드바 메뉴 클릭 시 아무 동작도 하지 않음 (통합 대시보드이므로)
   };
 
   const handleNotificationClick = async (notification) => {
@@ -257,6 +393,8 @@ const CourseDashboardPage = () => {
       if (notification.isNew && notification.id) {
         try {
           await APIService.markCommunityNotificationAsRead(notification.id);
+          // 알림 목록 새로고침
+          fetchDashboardData();
         } catch (err) {
           console.error('알림 읽음 처리 실패:', err);
         }
@@ -264,52 +402,164 @@ const CourseDashboardPage = () => {
     }
   };
 
-  const handleNoticeClick = (noticeId) => {
-    // 공지사항 상세페이지로 이동
-    navigate(`/sections/${sectionId}/course-notices/${noticeId}`);
+  const handleNoticeClick = (notice) => {
+    // 공지사항 상세페이지로 이동 (이미 수업 정보가 포함되어 있으므로 바로 이동)
+    navigate(`/sections/${notice.sectionId}/course-notices/${notice.id}`);
   };
 
-  // 정렬 순서 변경 핸들러
-  const handleSortToggle = () => {
-    const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
-    setSortOrder(newSortOrder);
-
-    // 과제 목록 재정렬
-    const sortedAssignments = [...assignments].sort((a, b) => {
-      const dateA = new Date(a.endDate);
-      const dateB = new Date(b.endDate);
-      
-      if (newSortOrder === "asc") {
-        return dateA - dateB; // 오름차순: 빠른 마감일이 먼저
-      } else {
-        return dateB - dateA; // 내림차순: 늦은 마감일이 먼저
-      }
-    });
-
-    setAssignments(sortedAssignments);
+  const handleAssignmentClick = (assignment) => {
+    // 과제 페이지로 이동 (이미 수업 정보가 포함되어 있으므로 바로 이동)
+    navigate(`/sections/${assignment.sectionId}/course-assignments?assignmentId=${assignment.id}`);
   };
 
   const handleToggleSidebar = () => {
     setIsSidebarCollapsed(prev => !prev);
   };
 
-  const handleToggleAssignment = (assignmentId) => {
-    setCollapsedAssignments(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(assignmentId)) {
-        newSet.delete(assignmentId);
-      } else {
-        newSet.add(assignmentId);
+  // URL이나 입력값에서 참가 코드 추출
+  const extractEnrollmentCode = (input) => {
+    const trimmed = input.trim();
+    
+    // URL 패턴 체크: /enroll/코드 형식
+    const urlPattern = /\/enroll\/([^\/\s?#]+)/;
+    const urlMatch = trimmed.match(urlPattern);
+    if (urlMatch) {
+      return urlMatch[1];
+    }
+    
+    // 전체 URL인 경우 (http://... 또는 https://...)
+    try {
+      const url = new URL(trimmed);
+      const pathMatch = url.pathname.match(/\/enroll\/([^\/\s?#]+)/);
+      if (pathMatch) {
+        return pathMatch[1];
       }
-      return newSet;
-    });
+    } catch (e) {
+      // URL이 아닌 경우 그대로 사용
+    }
+    
+    // 참가 코드만 입력한 경우 그대로 반환
+    return trimmed;
+  };
+
+  const handleEnrollByCode = async () => {
+    if (!enrollmentCode.trim()) {
+      alert('참가 코드를 입력하세요.');
+      return;
+    }
+    
+    // 입력값에서 참가 코드 추출 (링크 또는 코드 모두 지원)
+    const code = extractEnrollmentCode(enrollmentCode);
+    
+    if (!code) {
+      alert('유효한 참가 코드나 링크를 입력하세요.');
+      return;
+    }
+
+    // 로그인하지 않은 경우
+    if (!auth.user) {
+      // sessionStorage에 enrollmentCode 저장
+      sessionStorage.setItem('pendingEnrollmentCode', code);
+      // 모달 닫기
+      setShowEnrollModal(false);
+      setEnrollmentCode("");
+      // 로그인 페이지로 이동
+      navigate("/login", {
+        state: {
+          redirectTo: `/enroll/${code}`,
+          message: '수업 참가를 위해 로그인이 필요합니다.'
+        }
+      });
+      return;
+    }
+    
+    try {
+      setEnrollLoading(true);
+      const resp = await APIService.enrollByCode(code);
+      if (resp && resp.success) {
+        alert(`${resp.courseTitle} 수강 신청이 완료되었습니다!`);
+        setEnrollmentCode("");
+        setShowEnrollModal(false);
+        // 대시보드 데이터 새로고침
+        fetchDashboardData();
+      } else {
+        alert(resp?.message || '수강 신청에 실패했습니다.');
+      }
+    } catch (e) {
+      alert(e.message || '수강 신청 중 오류가 발생했습니다.');
+    } finally {
+      setEnrollLoading(false);
+    }
+  };
+
+  // 수업 카드 데이터 변환
+  const transformSectionData = (section, sectionNewItems) => {
+    // sectionNumber가 null이면 분반 표시하지 않음
+    const batch = section.sectionNumber ? `${section.sectionNumber}분반` : '';
+    const courseName = section.sectionNumber 
+      ? `[${section.courseTitle}] ${section.sectionNumber}분반`
+      : `[${section.courseTitle}]`;
+    
+    // 새로운 과제/공지사항/알림 배지 생성
+    const status = [];
+    const newItems = sectionNewItems[section.sectionId] || { newAssignment: null, newNotice: null, newNotification: null };
+    
+    if (newItems.newAssignment) {
+      status.push({
+        type: "assignment",
+        text: "새로운 과제",
+        color: "blue",
+        notificationId: newItems.newAssignment.id,
+        assignmentId: newItems.newAssignment.assignmentId
+      });
+    }
+    
+    if (newItems.newNotice) {
+      status.push({
+        type: "announcement",
+        text: "새로운 공지사항",
+        color: "green",
+        notificationId: newItems.newNotice.id,
+        noticeId: newItems.newNotice.noticeId
+      });
+    }
+    
+    if (newItems.newNotification) {
+      status.push({
+        type: "notification",
+        text: "새로운 알림",
+        color: "yellow",
+        notificationId: newItems.newNotification.id,
+        questionId: newItems.newNotification.questionId,
+        notificationType: newItems.newNotification.type
+      });
+    }
+    
+    return {
+      id: section.sectionId,
+      title: section.courseTitle,
+      subtitle: `강의 ID: ${section.courseId}`,
+      batch: batch,
+      courseName: courseName,
+      status: status,
+      instructor: section.instructorName || "담당 교수",
+      color: getRandomColor(section.sectionId),
+      sectionId: section.sectionId,
+      courseId: section.courseId,
+      active: section.active
+    };
+  };
+
+  const getRandomColor = (id) => {
+    const colors = ['purple', 'orange', 'red', 'blue', 'green'];
+    return colors[id % colors.length];
   };
 
   if (loading) {
     return (
       <div className="course-dashboard-container">
         <CourseSidebar 
-          sectionId={sectionId} 
+          sectionId={sectionId ? parseInt(sectionId) : null}
           activeMenu={activeMenu} 
           onMenuClick={handleMenuClick}
           isCollapsed={isSidebarCollapsed}
@@ -325,7 +575,7 @@ const CourseDashboardPage = () => {
     return (
       <div className="course-dashboard-container">
         <CourseSidebar 
-          sectionId={sectionId} 
+          sectionId={sectionId ? parseInt(sectionId) : null}
           activeMenu={activeMenu} 
           onMenuClick={handleMenuClick}
           isCollapsed={isSidebarCollapsed}
@@ -340,10 +590,12 @@ const CourseDashboardPage = () => {
     );
   }
 
+  const transformedSections = enrolledSections.map(section => transformSectionData(section, sectionNewItems));
+
   return (
     <div className={`course-dashboard-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <CourseSidebar 
-        sectionId={sectionId} 
+        sectionId={sectionId ? parseInt(sectionId) : null}
         activeMenu={activeMenu} 
         onMenuClick={handleMenuClick}
         isCollapsed={isSidebarCollapsed}
@@ -351,16 +603,14 @@ const CourseDashboardPage = () => {
       
       <div className="course-dashboard-content">
         <CourseHeader
-          courseName={
-            sectionInfo?.courseTitle 
-              ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber || ''}분반`
-              : sectionInfo?.courseName || "강의"
-          }
+          courseName={sectionId ? (sectionInfo?.courseTitle ? (sectionInfo.sectionNumber ? `${sectionInfo.courseTitle} ${sectionInfo.sectionNumber}분반` : `${sectionInfo.courseTitle}`) : "수업 대시보드") : "전체 수업 대시보드"}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
         />
 
         <div className="dashboard-body">
+          {/* 좌측 컬럼: 프로필 + 수업 목록 */}
+          <div className="left-column">
           {/* Profile Section */}
           <div className="profile-section">
             <img
@@ -373,95 +623,100 @@ const CourseDashboardPage = () => {
             </span>
           </div>
 
-          {/* Content wrapper for assignments, notifications and notices */}
-          <div className="content-wrapper">
-            <div className="content-wrapper-row">
-            <div className="assignments-section">
+            {/* 참여한 수업 목록 */}
+            <div className="courses-section">
             <div className="section-header">
-              <span className="section-title">과제 현황</span>
-              <div className="sort-dropdown" onClick={handleSortToggle}>
-                <span className="sort-text">마감일 순</span>
-                <div className={`sort-arrow ${sortOrder === "desc" ? "desc" : "asc"}`}>
-                  {sortOrder === "asc" ? "▲" : "▼"}
+                <span className="section-title">참여한 수업 목록</span>
+                <button 
+                  className="join-class-btn"
+                  onClick={() => setShowEnrollModal(true)}
+                >
+                  + 수업 참가
+                </button>
+              </div>
+              <div className="courses-scroll-container">
+                <div className="courses-grid">
+                  {transformedSections.length > 0 ? (
+                    transformedSections.map((course) => (
+                      <CourseCard 
+                        key={course.id} 
+                        course={course}
+                        onStatusUpdate={fetchDashboardData}
+                      />
+                    ))
+                  ) : (
+                    <div className="no-courses">
+                      <span>수강 중인 수업이 없습니다.</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="assignments-list">
-              {assignments.length > 0 ? (
-                assignments.map((assignment) => {
-                  const isCollapsed = collapsedAssignments.has(assignment.id);
-                  return (
-                    <div key={assignment.id} className={`assignment-card ${isCollapsed ? 'collapsed' : ''}`}>
-                      <div 
-                        className="assignment-header"
-                        onClick={() => handleToggleAssignment(assignment.id)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <span className={`collapse-icon ${isCollapsed ? 'collapsed' : ''}`}>▼</span>
-                        <span className="assignment-title">{assignment.title}</span>
-                        {assignment.dDay !== null && (
-                          <div className={`d-day-badge ${assignment.dDay < 0 ? 'expired' : ''}`}>
-                            <span className="d-day-text">
-                              {assignment.dDay < 0 ? `D+${Math.abs(assignment.dDay)}` : `D-${assignment.dDay}`}
-                            </span>
+            {/* 관리 중인 수업 목록 */}
+            <div className="courses-section">
+              <div className="section-header">
+                <span className="section-title">관리 중인 수업 목록</span>
+              </div>
+              <div className="courses-scroll-container">
+                <div className="courses-grid">
+                  {managingSections.length > 0 ? (
+                    managingSections.map((course) => (
+                      <CourseCard 
+                        key={course.id} 
+                        course={course}
+                        onStatusUpdate={fetchDashboardData}
+                      />
+                    ))
+                  ) : (
+                    <div className="no-courses">
+                      <span>관리 중인 수업이 없습니다.</span>
                           </div>
                         )}
-                        <div className="flex-spacer"></div>
-                        {!isCollapsed && (
-                          <span className="assignment-deadline">
-                            {formatDeadline(assignment.endDate)}
-                          </span>
-                        )}
-                        <button
-                          className="assignment-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAssignmentClick(assignment.id);
-                          }}
-                        >
-                          과제 바로가기
-                        </button>
                       </div>
-
-                      {!isCollapsed && (
-                        <>
-                          <span className="progress-label">현재 과제 완료율</span>
-
-                          <div className="progress-bar-container">
-                            <span className="progress-text">{assignment.progress}%</span>
-                            <div className="progress-bar-bg">
-                              <div
-                                className="progress-bar-fill"
-                                style={{ width: `${assignment.progress}%` }}
-                              ></div>
                             </div>
                           </div>
 
-                          <AssignmentProblemsList 
-                            problems={assignment.problems}
-                            showIndicator={true}
-                            sectionId={sectionId}
-                            assignmentId={assignment.id}
-                          />
-                        </>
-                      )}
+            {/* 공개된 클래스 */}
+            <div className="courses-section">
+              <div className="section-header">
+                <span className="section-title">공개된 클래스</span>
+              </div>
+              <div className="courses-scroll-container">
+                <div className="courses-grid">
+                  {publicSections.length > 0 ? (
+                    publicSections.map((course) => (
+                      <CourseCard 
+                        key={course.id} 
+                        course={course}
+                        onStatusUpdate={fetchDashboardData}
+                        showEnrollButton={true}
+                        onEnroll={() => {
+                          if (course.enrollmentCode) {
+                            setEnrollmentCode(course.enrollmentCode);
+                            setShowEnrollModal(true);
+                          }
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <div className="no-courses">
+                      <span>공개된 클래스가 없습니다.</span>
                     </div>
-                  );
-                })
-              ) : (
-                <div className="no-assignments">
-                  <span>진행 중인 과제가 없습니다.</span>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
-            <div className="notifications-section">
+          {/* 우측 컬럼: 알림 / 과제 / 공지사항 */}
+          <div className="right-column">
+            {/* 알림 섹션 */}
+            <div className="notifications-subsection">
               <span className="section-title">알림</span>
               <div className="notifications-box">
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
+                {allNotifications.length > 0 ? (
+                  allNotifications.map((notification) => (
                     <div 
                       key={notification.id} 
                       className={`notification-item ${notification.isNew ? 'new' : ''}`}
@@ -471,6 +726,9 @@ const CourseDashboardPage = () => {
                         {notification.isNew && <span className="new-badge">NEW</span>}
                         {notification.title}
                         <span className="notification-date"> [{notification.date}]</span>
+                        {notification.sectionName && (
+                          <span className="notification-section"> ({notification.sectionName})</span>
+                        )}
                       </span>
                     </div>
                   ))
@@ -480,22 +738,62 @@ const CourseDashboardPage = () => {
                   </div>
                 )}
               </div>
+            </div>
 
-              <div className="notices-section">
-                <span className="section-title">공지사항</span>
-                <div className="notices-box">
-                  {recentNotices.length > 0 ? (
-                    recentNotices.map((notice) => (
+            {/* 과제 섹션 */}
+            <div className="assignments-subsection">
+              <span className="section-title">과제</span>
+              <div className="assignments-summary-box">
+                {allAssignments.length > 0 ? (
+                  allAssignments.map((assignment) => {
+                    const dDay = calculateDDay(assignment.endDate);
+                    const isExpired = dDay !== null && dDay < 0;
+                    
+                    return (
                       <div 
-                        key={notice.id} 
-                        className={`notice-item ${notice.isNew ? 'new' : ''}`}
-                        onClick={() => handleNoticeClick(notice.id)}
+                        key={`${assignment.sectionId}-${assignment.id}`}
+                        className={`assignment-summary-item ${isExpired ? 'expired' : ''}`}
+                        onClick={() => handleAssignmentClick(assignment)}
                       >
-                        <span className="notice-text">
+                        <div className="assignment-summary-header">
+                          <span className="assignment-summary-title">{assignment.title}</span>
+                        </div>
+                        <div className="assignment-summary-info">
+                          <span className="assignment-summary-section">{assignment.sectionName}</span>
+                          <span className="assignment-summary-deadline">{formatDeadline(assignment.endDate)}</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="no-assignments">
+                    <span>과제가 없습니다.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 공지사항 섹션 */}
+            <div className="notices-subsection">
+              <span className="section-title">공지사항</span>
+              <div className="notices-box">
+                {allNotices.length > 0 ? (
+                  allNotices.map((notice) => (
+                    <div 
+                      key={`${notice.sectionId}-${notice.id}`}
+                        className={`dashboard-notice-item ${notice.isNew ? 'new' : ''}`}
+                      onClick={() => handleNoticeClick(notice)}
+                      >
+                        <div className="dashboard-notice-header">
                           {notice.isNew && <span className="new-badge">NEW</span>}
-                          {notice.title}
-                          <span className="notice-date"> [{notice.date}]</span>
-                        </span>
+                          <span className="dashboard-notice-title">{notice.title}</span>
+                          {notice.sectionName && (
+                            <span className="dashboard-notice-section">{notice.sectionName}</span>
+                          )}
+                          {notice.date && (
+                            <span className="dashboard-notice-date">{notice.date}</span>
+                          )}
+                        </div>
                       </div>
                     ))
                   ) : (
@@ -506,13 +804,43 @@ const CourseDashboardPage = () => {
                 </div>
               </div>
             </div>
+        </div>
+      </div>
+
+      {/* 수업 참가 모달 */}
+      {showEnrollModal && (
+        <div className="enroll-modal-overlay" onClick={() => setShowEnrollModal(false)}>
+          <div className="enroll-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="enroll-modal-header">
+              <h2>수업 참가</h2>
+              <button className="enroll-modal-close" onClick={() => setShowEnrollModal(false)}>×</button>
+            </div>
+            <div className="enroll-modal-body">
+              <label>참가 코드 또는 링크</label>
+              <input
+                type="text"
+                className="enroll-input"
+                placeholder={`예: ABCD1234 또는 ${window.location.origin}/enroll/ABCD1234`}
+                value={enrollmentCode}
+                onChange={(e) => setEnrollmentCode(e.target.value)}
+              />
+              <p className="enroll-help-text">참가 코드만 입력하거나 전체 링크를 붙여넣으세요.</p>
+            </div>
+            <div className="enroll-modal-actions">
+              <button className="enroll-cancel" onClick={() => setShowEnrollModal(false)}>취소</button>
+              <button
+                className="enroll-button-modal"
+                onClick={handleEnrollByCode}
+                disabled={enrollLoading}
+              >
+                {enrollLoading ? '처리 중...' : '참가하기'}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
 export default CourseDashboardPage;
-

@@ -241,7 +241,7 @@ const QuestionDetailPage = () => {
       />
       <div className="question-detail-content">
         <CourseHeader 
-          courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '질문 상세'}
+          courseName={sectionInfo ? sectionInfo.courseTitle : '질문 상세'}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
         />
@@ -266,6 +266,12 @@ const QuestionDetailPage = () => {
               </div>
 
               <div className="question-header-actions">
+                <button 
+                  className="btn-back"
+                  onClick={() => navigate(`/sections/${sectionId}/community`)}
+                >
+                  ← 목록으로
+                </button>
                 {question.isAuthor && (
                   <>
                     <button 
@@ -446,16 +452,6 @@ const QuestionDetailPage = () => {
                 ))
               )}
             </div>
-          </div>
-
-          {/* 목록으로 버튼 */}
-          <div className="back-to-list">
-            <button 
-              className="btn-back"
-              onClick={() => navigate(`/sections/${sectionId}/community`)}
-            >
-              ← 목록으로
-            </button>
           </div>
         </div>
       </div>

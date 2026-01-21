@@ -14,6 +14,21 @@ const EnrollPage = () => {
 
   // useEffect 제거 - 자동 리다이렉트 없음
 
+  // 로그인하지 않은 경우 - 자동으로 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated && enrollmentCode) {
+      // sessionStorage에 enrollmentCode 저장
+      sessionStorage.setItem('pendingEnrollmentCode', enrollmentCode);
+      // 로그인 페이지로 이동
+      navigate("/login", {
+        state: {
+          redirectTo: `/enroll/${enrollmentCode}`,
+          message: '수업 참가를 위해 로그인이 필요합니다.'
+        }
+      });
+    }
+  }, [authLoading, isAuthenticated, enrollmentCode, navigate]);
+
   const handleEnroll = async () => {
     try {
       setEnrollLoading(true);
@@ -24,7 +39,7 @@ const EnrollPage = () => {
       if (response.success) {
         alert(`${response.courseTitle} 수강 신청이 완료되었습니다!`);
         // 수강 신청 완료 후 대시보드로 이동
-        window.location.href = '/main';
+        navigate('/main');
       } else {
         setError(response.message || '수강 신청에 실패했습니다.');
       }
@@ -51,42 +66,14 @@ const EnrollPage = () => {
     );
   }
 
-  // 로그인하지 않은 경우
+  // 로그인하지 않은 경우 로딩 화면 표시 (리다이렉트 중)
   if (!isAuthenticated) {
     return (
       <div className="enroll-page">
         <div className="enroll-container">
           <div className="enroll-card">
-            <div className="enroll-header">
-              <h1 className="enroll-title">로그인이 필요합니다</h1>
-              <p className="enroll-subtitle">
-                수업 참가를 위해 먼저 로그인해주세요
-              </p>
-            </div>
-
-            <div className="enroll-body">
-              <div className="enrollment-code-display">
-                <label>참가 코드</label>
-                <div className="code-box">{enrollmentCode}</div>
-              </div>
-
-              <div className="enroll-info">
-                <p>
-                  이 참가 코드로 수업에 참가하려면 로그인이 필요합니다.
-                </p>
-              </div>
-
-              <div className="enroll-actions">
-                <button
-                  className="btn-enroll"
-                  onClick={() => {
-                    sessionStorage.setItem('pendingEnrollmentCode', enrollmentCode);
-                    window.location.href = '/';
-                  }}
-                >
-                  로그인하러 가기
-                </button>
-              </div>
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+              <p>로그인 페이지로 이동 중...</p>
             </div>
           </div>
         </div>
@@ -126,7 +113,7 @@ const EnrollPage = () => {
             <div className="enroll-actions">
               <button
                 className="btn-cancel"
-                onClick={() => window.location.href = '/main'}
+                onClick={() => navigate('/main')}
                 disabled={enrollLoading}
               >
                 취소

@@ -227,7 +227,7 @@ const CourseAssignmentsPage = () => {
         <CourseHeader
           courseName={
             sectionInfo?.courseTitle 
-              ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber || ''}분반`
+              ? sectionInfo.courseTitle
               : sectionInfo?.courseName || "강의"
           }
           onToggleSidebar={handleToggleSidebar}

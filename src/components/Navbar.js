@@ -14,11 +14,11 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logout(); // useAuth의 logout 함수가 이미 APIService.logout()을 호출함
-      navigate('/'); // 온보딩 페이지로 이동
+      navigate('/index'); // 인덱스 페이지로 이동
     } catch (error) {
       console.error('로그아웃 실패:', error);
       // useAuth의 logout 함수가 에러 처리도 담당하므로 여기서는 단순히 페이지 이동만
-      navigate('/');
+      navigate('/index');
     }
   };
 
@@ -27,8 +27,8 @@ const Navbar = () => {
       <div className="navbar-container">
         <div className="nav-left">
           <Link to="/main" className="logo-link">
-            <img src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="HandongJudge" className="logo-image" />
-            <span>HandongJudge</span>
+            <img src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="CodeSturdy" className="logo-image" />
+            <span>CodeSturdy</span>
           </Link>
           <Link to="/main" className="nav-link">강의</Link>
           {/* 마이페이지 비활성화 (기능은 유지) */}

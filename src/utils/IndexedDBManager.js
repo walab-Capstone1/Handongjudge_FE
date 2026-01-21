@@ -1,6 +1,6 @@
 class IndexedDBManager {
   constructor() {
-    this.dbName = 'HanDongJudgeDB';
+    this.dbName = 'CodeSturdyDB';
     this.dbVersion = 1;
     this.storeName = 'codeStorage';
     this.db = null;

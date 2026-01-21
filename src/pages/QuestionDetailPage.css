@@ -47,16 +47,18 @@
 .question-detail-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 16px;
   flex-wrap: wrap;
   gap: 12px;
+  position: relative;
 }
 
 .question-header-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .question-badges {
@@ -500,21 +502,16 @@
   color: white;
 }
 
-/* 목록으로 버튼 */
-.back-to-list {
-  text-align: center;
-  padding: 20px 0;
-}
-
 .btn-back {
-  padding: 12px 32px;
+  padding: 8px 16px;
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 6px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  color: #666;
 }
 
 .btn-back:hover {

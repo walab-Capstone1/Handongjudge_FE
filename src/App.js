@@ -41,6 +41,8 @@ import CourseCommunityPage from "./pages/CourseCommunityPage";
 import QuestionCreatePage from "./pages/QuestionCreatePage";
 import QuestionDetailPage from "./pages/QuestionDetailPage";
 import QuestionEditPage from "./pages/QuestionEditPage";
+import CodingQuizPage from "./pages/CodingQuizPage";
+import CodingQuizSolvePage from "./pages/CodingQuizSolvePage";
 import SuperAdminDashboard from "./pages/SuperAdminPage/SuperAdminDashboard";
 import SystemNoticeManagement from "./pages/SuperAdminPage/SystemNoticeManagement";
 import SystemGuideManagement from "./pages/SuperAdminPage/SystemGuideManagement";
@@ -55,9 +57,11 @@ function App() {
       <RecoilRoot>
         <Router>
           <Routes>
-            <Route path="/" element={<Onboarding />} />
+            <Route path="/" element={<IndexPage />} />
+            <Route path="/login" element={<Onboarding />} />
             <Route path="/index" element={<IndexPage />} />
             <Route path="/courses" element={<ClassPage />} />
+            <Route path="/dashboard" element={<CourseDashboardPage />} />
             <Route path="/sections/:sectionId/dashboard" element={<CourseDashboardPage />} />
             <Route path="/sections/:sectionId/course-assignments" element={<CourseAssignmentsPage />} />
             <Route path="/sections/:sectionId/course-notices" element={<CourseNoticesPage />} />
@@ -66,6 +70,8 @@ function App() {
             <Route path="/sections/:sectionId/community/new" element={<QuestionCreatePage />} />
             <Route path="/sections/:sectionId/community/:questionId" element={<QuestionDetailPage />} />
             <Route path="/sections/:sectionId/community/:questionId/edit" element={<QuestionEditPage />} />
+            <Route path="/sections/:sectionId/coding-quiz" element={<CodingQuizPage />} />
+            <Route path="/sections/:sectionId/coding-quiz/:quizId" element={<CodingQuizSolvePage />} />
             <Route path="/sections/:sectionId/alarm" element={<CourseNotificationsPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/signup" element={<SignUpPageSocial />} />
