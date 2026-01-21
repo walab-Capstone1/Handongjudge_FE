@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { FaLink } from "react-icons/fa";
 import "./SectionNavigation.css";
 
 const SectionNavigation = ({ 
@@ -57,31 +58,28 @@ const SectionNavigation = ({
     navigate('/tutor');
   };
 
+  // sectionName에서 과목명만 추출 (예: "과목명 - 1분반" -> "과목명")
+  const courseTitle = sectionName ? sectionName.split(' - ')[0] : sectionName;
+
   return (
     <div className="section-navigation">
       <div className="section-nav-header">
-        <div className="section-info">
-          <h2 className="section-title">{sectionName}</h2>
-          <div className="section-info-buttons">
-            {enrollmentCode && (
-              <button 
-                className="enrollment-link-button"
-                onClick={handleCopyEnrollmentLink}
-                title="수업 참가 링크 복사"
-              >
-                🔗 수업 링크 복사
-              </button>
-            )}
-            <button 
-              className="back-to-dashboard"
-              onClick={handleBackToDashboard}
-              title="대시보드로 돌아가기"
-            >
-              <span className="back-icon">←</span>
-              대시보드
-            </button>
-          </div>
+        <div className="section-header-left">
+          <h2 className="section-title">수강생 관리</h2>
+          {courseTitle && (
+            <span className="section-course-name">{courseTitle}</span>
+          )}
         </div>
+        {enrollmentCode && (
+          <button 
+            className="enrollment-link-button"
+            onClick={handleCopyEnrollmentLink}
+            title="수업 참가 링크 복사"
+          >
+            <FaLink />
+            수업 링크 복사
+          </button>
+        )}
       </div>
       
       <div className="section-nav-content">

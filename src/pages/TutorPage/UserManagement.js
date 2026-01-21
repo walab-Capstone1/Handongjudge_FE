@@ -3,7 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import TutorLayout from "../../layouts/TutorLayout";
 import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
+import AssignmentPagination from "../../components/Pagination/AssignmentPagination";
 import "./UserManagement.css";
+import "./Pagination.css";
 
 const UserManagement = () => {
   const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기
@@ -15,6 +17,14 @@ const UserManagement = () => {
   // 모달 관련 상태 제거됨
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
+  
+  // 정렬 관련 상태
+  const [sortField, setSortField] = useState('name'); // 'name', 'email', 'progress', 'joinedAt'
+  const [sortDirection, setSortDirection] = useState('asc'); // 'asc', 'desc'
+  
+  // 페이지네이션 관련 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const STUDENTS_PER_PAGE = 10;
   
   // 학생 상세보기 모달 상태
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -31,26 +41,44 @@ const UserManagement = () => {
     try {
       setLoading(true);
       
-      // 실제 API로 교수 담당 학생들 조회
-      const studentsResponse = await APIService.getInstructorStudents();
-      const studentsData = studentsResponse?.data || [];
-      
-      // 분반 정보도 함께 가져오기
+      // 분반 정보 가져오기
       const dashboardResponse = await APIService.getInstructorDashboard();
       const sectionsData = dashboardResponse?.data || [];
       
       // 현재 분반 정보 설정
       if (sectionId) {
+        const parsedSectionId = parseInt(sectionId);
+        if (isNaN(parsedSectionId)) {
+          console.error('잘못된 sectionId:', sectionId);
+          setLoading(false);
+          return;
+        }
+        
         const currentSectionData = sectionsData.find(section => 
-          section.sectionId === parseInt(sectionId)
+          section.sectionId === parsedSectionId
         );
         setCurrentSection(currentSectionData);
+        
+        // 특정 분반의 학생 목록 조회
+        try {
+          const studentsResponse = await APIService.getSectionStudents(parsedSectionId);
+          const studentsData = studentsResponse?.data || studentsResponse || [];
+          setStudents(studentsData);
+        } catch (error) {
+          console.error('분반 학생 목록 조회 실패:', error);
+          setStudents([]);
+        }
+      } else {
+        // 전체 교수 담당 학생들 조회
+        const studentsResponse = await APIService.getInstructorStudents();
+        const studentsData = studentsResponse?.data || [];
+        setStudents(studentsData);
       }
       
-      setStudents(studentsData);
       setSections(sectionsData);
       setLoading(false);
     } catch (error) {
+      console.error('학생 목록 조회 실패:', error);
       setStudents([]);
       setSections([]);
       setLoading(false);
@@ -141,6 +169,7 @@ const UserManagement = () => {
     setAssignmentProblemsDetail({});
   };
 
+  // 필터링
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -149,8 +178,74 @@ const UserManagement = () => {
     return matchesSearch && matchesSection;
   });
 
+  // 정렬 함수
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+    setCurrentPage(1); // 정렬 시 첫 페이지로
+  };
+
+  // 정렬된 학생 목록
+  const sortedStudents = [...filteredStudents].sort((a, b) => {
+    let aValue, bValue;
+    
+    switch (sortField) {
+      case 'name':
+        aValue = a.name || '';
+        bValue = b.name || '';
+        break;
+      case 'email':
+        aValue = a.email || '';
+        bValue = b.email || '';
+        break;
+      case 'progress':
+        aValue = a.assignmentCompletionRate || 0;
+        bValue = b.assignmentCompletionRate || 0;
+        break;
+      case 'joinedAt':
+        aValue = a.joinedAt ? new Date(a.joinedAt).getTime() : 0;
+        bValue = b.joinedAt ? new Date(b.joinedAt).getTime() : 0;
+        break;
+      default:
+        return 0;
+    }
+    
+    if (typeof aValue === 'string') {
+      return sortDirection === 'asc' 
+        ? aValue.localeCompare(bValue, 'ko')
+        : bValue.localeCompare(aValue, 'ko');
+    } else {
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+  });
+
+  // 페이지네이션
+  const totalPages = Math.ceil(sortedStudents.length / STUDENTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * STUDENTS_PER_PAGE;
+  const endIndex = startIndex + STUDENTS_PER_PAGE;
+  const paginatedStudents = sortedStudents.slice(startIndex, endIndex);
+
+  // 검색어나 필터 변경 시 첫 페이지로
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterSection]);
+
   // 고유한 섹션 목록 추출
   const uniqueSections = [...new Set(students.map(student => student.sectionName))].filter(Boolean);
+
+  // 정렬 아이콘 렌더링 함수
+  const getSortIcon = (field) => {
+    if (sortField !== field) {
+      return <span className="user-management-sort-icon">⇅</span>;
+    }
+    return sortDirection === 'asc' 
+      ? <span className="user-management-sort-icon user-management-sort-asc">↑</span>
+      : <span className="user-management-sort-icon user-management-sort-desc">↓</span>;
+  };
 
   const getRoleColor = (role) => {
     switch (role) {
@@ -176,9 +271,11 @@ const UserManagement = () => {
   if (loading) {
     return (
       <TutorLayout selectedSection={currentSection}>
-        <div className="tutor-loading-container">
-          <div className="tutor-loading-spinner"></div>
-          <p>학생 데이터를 불러오는 중...</p>
+        <div className="user-management">
+          <div className="user-management-loading-container">
+            <div className="user-management-loading-spinner"></div>
+            <p>학생 데이터를 불러오는 중...</p>
+          </div>
         </div>
       </TutorLayout>
     );
@@ -198,24 +295,24 @@ const UserManagement = () => {
       {/* 전체 페이지인 경우 기존 헤더 유지 */}
       {!sectionId && (
         <div className="user-management">
-          <div className="tutor-page-header">
-            <div className="tutor-header-left">
-              <h1 className="tutor-page-title">학생 관리</h1>
-              <div className="tutor-search-box">
+          <div className="user-management-header">
+            <div className="user-management-header-left">
+              <h1 className="user-management-title">학생 관리</h1>
+              <div className="user-management-search-box">
                 <input
                   type="text"
                   placeholder="이름, 이메일, 팀ID로 검색..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="tutor-search-input"
+                  className="user-management-search-input"
                 />
               </div>
             </div>
-            <div className="tutor-header-right">
+            <div className="user-management-header-right">
               <select
                 value={filterSection}
                 onChange={(e) => setFilterSection(e.target.value)}
-                className="section-filter"
+                className="user-management-section-filter"
               >
                 <option value="ALL">모든 수업</option>
                 {uniqueSections.map((section, index) => (
@@ -226,54 +323,96 @@ const UserManagement = () => {
           </div>
         </div>
       )}
+
+      {/* 분반별 페이지인 경우 검색 및 필터 */}
+      {sectionId && (
+        <div className="user-management">
+          <div className="user-management-filters">
+            <div className="user-management-search-box">
+              <input
+                type="text"
+                placeholder="이름, 이메일, 팀ID로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="user-management-search-input"
+              />
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="user-management">
-
-        <div className="tutor-users-table-container">
-          <table className="tutor-users-table">
+        <div className="user-management-table-container">
+          <table className="user-management-table">
             <thead>
-                                  <tr>
-                      <th>이름</th>
-                      <th>이메일</th>
-                      <th>과목</th>
-                      <th>분반</th>
-                      <th>전체 과제 진도율</th>
-                      <th>작업</th>
-                    </tr>
+              <tr>
+                <th 
+                  className="user-management-th-sortable"
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="user-management-th-content">
+                    이름
+                    {getSortIcon('name')}
+                  </div>
+                </th>
+                <th 
+                  className="user-management-th-sortable"
+                  onClick={() => handleSort('email')}
+                >
+                  <div className="user-management-th-content">
+                    이메일
+                    {getSortIcon('email')}
+                  </div>
+                </th>
+                <th>과목</th>
+                <th>분반</th>
+                <th 
+                  className="user-management-th-sortable"
+                  onClick={() => handleSort('progress')}
+                >
+                  <div className="user-management-th-content">
+                    전체 과제 진도율
+                    {getSortIcon('progress')}
+                  </div>
+                </th>
+                <th>작업</th>
+              </tr>
             </thead>
             <tbody>
-              {filteredStudents.map((student) => (
+              {paginatedStudents.map((student) => (
                 <tr key={student.userId}>
-                  <td className="user-name">
-                    <div className="user-avatar">
-                      {student.name.charAt(0)}
+                  <td className="user-management-name-cell">
+                    <div className="user-management-name-content">
+                      <div className="user-management-avatar">
+                        {student.name.charAt(0)}
+                      </div>
+                      {student.name}
                     </div>
-                    {student.name}
                   </td>
-                  <td>{student.email}</td>
-                  <td>{student.courseTitle}</td>
-                  <td>
-                    <span className="section-badge">
+                  <td className="user-management-email-cell">{student.email}</td>
+                  <td className="user-management-course-cell">{student.courseTitle}</td>
+                  <td className="user-management-section-cell">
+                    <span className="user-management-section-badge">
                       {student.sectionNumber}분반
                     </span>
                   </td>
-                  <td className="tutor-progress-cell">
-                    <div className="tutor-progress-info">
-                      <div className="tutor-progress-bar-container">
+                  <td className="user-management-progress-cell">
+                    <div className="user-management-progress-info">
+                      <div className="user-management-progress-bar-container">
                         <div 
-                          className="tutor-progress-bar-fill" 
+                          className="user-management-progress-bar-fill" 
                           style={{ width: `${student.assignmentCompletionRate || 0}%` }}
                         ></div>
                       </div>
-                      <span className="tutor-progress-text">
+                      <span className="user-management-progress-text">
                         {student.assignmentCompletionRate ? `${student.assignmentCompletionRate.toFixed(1)}%` : '0%'}
                       </span>
                     </div>
                   </td>
-                  <td>
-                    <div className="tutor-action-buttons">
+                  <td className="user-management-actions-cell">
+                    <div className="user-management-action-buttons">
                       <button 
-                        className="tutor-btn-detail-view"
+                        className="user-management-btn-detail"
                         onClick={() => handleStudentDetailView(student)}
                         title="상세 보기"
                       >
@@ -283,71 +422,83 @@ const UserManagement = () => {
                   </td>
                 </tr>
               ))}
-                              {filteredStudents.length === 0 && (
-                  <tr>
-                    <td colSpan="6" className="tutor-no-data">
-                      <div className="tutor-no-data-message">
-                        <span className="tutor-no-data-icon"></span>
-                        <div>
-                          {students.length === 0 ? (
-                            <>
-                              <p><strong>담당하고 있는 학생이 없습니다</strong></p>
-                              <p>현재 어떤 분반도 담당하고 있지 않거나, 담당 분반에 등록된 학생이 없습니다.</p>
-                            </>
-                          ) : (
-                            <>
-                              <p><strong>검색 조건에 맞는 학생이 없습니다</strong></p>
-                              <p>다른 검색어나 필터 조건을 사용해보세요.</p>
-                            </>
-                          )}
-                        </div>
+              {paginatedStudents.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="user-management-no-data">
+                    <div className="user-management-no-data-message">
+                      <span className="user-management-no-data-icon"></span>
+                      <div>
+                        {students.length === 0 ? (
+                          <>
+                            <p><strong>담당하고 있는 학생이 없습니다</strong></p>
+                            <p>현재 어떤 분반도 담당하고 있지 않거나, 담당 분반에 등록된 학생이 없습니다.</p>
+                          </>
+                        ) : (
+                          <>
+                            <p><strong>검색 조건에 맞는 학생이 없습니다</strong></p>
+                            <p>다른 검색어나 필터 조건을 사용해보세요.</p>
+                          </>
+                        )}
                       </div>
-                    </td>
-                  </tr>
-                )}
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <AssignmentPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            totalItems={sortedStudents.length}
+            onPageChange={setCurrentPage}
+          />
+        )}
+
         {/* 학생 상세보기 모달 */}
         {showDetailModal && selectedStudent && (
-          <div className="tutor-modal-overlay" onClick={handleCloseDetailModal}>
-            <div className="student-detail-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="tutor-modal-header">
+          <div className="user-management-modal-overlay" onClick={handleCloseDetailModal}>
+            <div className="user-management-detail-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="user-management-modal-header">
                 <h2>과제별 진도율</h2>
-                <button className="tutor-modal-close-btn" onClick={handleCloseDetailModal}>✕</button>
+                <button className="user-management-modal-close-btn" onClick={handleCloseDetailModal}>✕</button>
               </div>
               
-              <div className="tutor-modal-body">
-                <div className="tutor-assignments-progress-section">
+              <div className="user-management-modal-body">
+                <div className="user-management-assignments-progress-section">
                   {studentAssignments.length === 0 ? (
-                    <p className="tutor-no-assignments">등록된 과제가 없습니다.</p>
+                    <p className="user-management-no-assignments">등록된 과제가 없습니다.</p>
                   ) : (
-                    <div className="tutor-assignments-list-horizontal">
+                    <div className="user-management-assignments-list">
                       {studentAssignments.map((assignment) => (
-                        <div key={assignment.assignmentId} className="assignment-progress-card-wide">
-                          <div className="assignment-progress-header">
-                            <div className="assignment-title-section">
+                        <div key={assignment.assignmentId} className="user-management-assignment-card">
+                          <div className="user-management-assignment-header">
+                            <div className="user-management-assignment-title-section">
                               <h4>{assignment.assignmentTitle}</h4>
                               {assignment.description && (
-                                <p className="assignment-description">{assignment.description}</p>
+                                <p className="user-management-assignment-description">{assignment.description}</p>
                               )}
                             </div>
-                            <span className="tutor-progress-badge">{assignment.progressRate || 0}%</span>
+                            <span className="user-management-progress-badge">{assignment.progressRate || 0}%</span>
                           </div>
-                          <div className="assignment-progress-body">
-                            <div className="tutor-progress-stats">
+                          <div className="user-management-assignment-body">
+                            <div className="user-management-progress-stats">
                               <span>완료: {assignment.solvedProblems || 0} / {assignment.totalProblems || 0} 문제</span>
                             </div>
-                            <div className="tutor-progress-bar-container">
+                            <div className="user-management-progress-bar-container">
                               <div 
-                                className="tutor-progress-bar-fill" 
+                                className="user-management-progress-bar-fill" 
                                 style={{ width: `${assignment.progressRate || 0}%` }}
                               ></div>
                             </div>
                           </div>
                           <button 
-                            className="tutor-btn-toggle-detail"
+                            className="user-management-btn-toggle-detail"
                             onClick={() => handleToggleAssignmentDetail(assignment.assignmentId)}
                           >
                             {expandedAssignment === assignment.assignmentId ? '상세보기 닫기 ▲' : '상세보기 ▼'}
@@ -355,21 +506,21 @@ const UserManagement = () => {
                           
                           {/* 문제별 상태 상세보기 */}
                           {expandedAssignment === assignment.assignmentId && (
-                            <div className="tutor-problems-detail-section">
+                            <div className="user-management-problems-detail-section">
                               {assignmentProblemsDetail[assignment.assignmentId]?.length > 0 ? (
-                                <div className="tutor-problems-grid">
+                                <div className="user-management-problems-grid">
                                   {assignmentProblemsDetail[assignment.assignmentId].map((problem) => (
-                                    <div key={problem.problemId} className={`tutor-problem-status-card ${problem.status}`}>
-                                      <div className="tutor-problem-info">
-                                        <span className="tutor-problem-title">{problem.problemTitle}</span>
-                                        <span className={`status-badge ${problem.status}`}>
+                                    <div key={problem.problemId} className={`user-management-problem-card user-management-problem-${problem.status}`}>
+                                      <div className="user-management-problem-info">
+                                        <span className="user-management-problem-title">{problem.problemTitle}</span>
+                                        <span className={`user-management-status-badge user-management-status-${problem.status}`}>
                                           {problem.status === 'ACCEPTED' ? '✓ 완료' : 
                                            problem.status === 'SUBMITTED' ? '⋯ 제출함' : 
                                            '○ 미제출'}
                                         </span>
                                       </div>
                                       {problem.submissionCount > 0 && (
-                                        <div className="tutor-submission-count">
+                                        <div className="user-management-submission-count">
                                           제출 횟수: {problem.submissionCount}회
                                         </div>
                                       )}
@@ -377,7 +528,7 @@ const UserManagement = () => {
                                   ))}
                                 </div>
                               ) : (
-                                <p className="tutor-no-problems">문제 정보를 불러오는 중...</p>
+                                <p className="user-management-no-problems">문제 정보를 불러오는 중...</p>
                               )}
                             </div>
                           )}
