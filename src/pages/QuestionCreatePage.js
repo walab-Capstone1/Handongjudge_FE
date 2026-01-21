@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CourseSidebar from '../components/CourseSidebar';
 import CourseHeader from '../components/CourseHeader';
+import TipTapEditor from '../components/TipTapEditor';
 import APIService from '../services/APIService';
 import { useRecoilState } from 'recoil';
 import { sidebarCollapsedState } from '../recoil/atoms';
@@ -16,6 +17,7 @@ const QuestionCreatePage = () => {
   const [sectionInfo, setSectionInfo] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [problems, setProblems] = useState([]);
+  const [assignmentsWithProblems, setAssignmentsWithProblems] = useState([]);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -50,10 +52,31 @@ const QuestionCreatePage = () => {
   const fetchInitialData = async () => {
     try {
       const sectionData = await APIService.getSectionInfo(sectionId);
-      setSectionInfo(sectionData);
+      // 응답이 {data: {...}} 형태일 수도 있으므로 처리
+      setSectionInfo(sectionData?.data || sectionData);
 
       const assignmentsData = await APIService.getAssignmentsBySection(sectionId);
       setAssignments(assignmentsData || []);
+      
+      // 각 과제의 문제 목록도 함께 가져오기
+      const assignmentsWithProblemsData = await Promise.all(
+        (assignmentsData || []).map(async (assignment) => {
+          try {
+            const problemsData = await APIService.getAssignmentProblems(sectionId, assignment.id);
+            return {
+              ...assignment,
+              problems: problemsData?.data || problemsData || []
+            };
+          } catch (error) {
+            console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
+            return {
+              ...assignment,
+              problems: []
+            };
+          }
+        })
+      );
+      setAssignmentsWithProblems(assignmentsWithProblemsData);
     } catch (err) {
       console.error('Error fetching initial data:', err);
     }
@@ -155,7 +178,12 @@ const QuestionCreatePage = () => {
       return;
     }
 
-    if (!formData.content.trim()) {
+    // HTML 태그를 제거하고 텍스트만 추출하여 검증
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = formData.content;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    
+    if (!textContent.trim()) {
       alert('내용을 입력해주세요');
       return;
     }
@@ -224,7 +252,7 @@ const QuestionCreatePage = () => {
       />
       <div className="question-create-content">
         <CourseHeader 
-          courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '질문 작성'}
+          courseName={sectionInfo?.courseTitle || '질문 작성'}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
         />
@@ -251,57 +279,75 @@ const QuestionCreatePage = () => {
               <span className="char-count">{formData.title.length}/200</span>
             </div>
 
-            {/* 과제 선택 */}
+            {/* 관련 과제/문제 선택 (통합 드롭다운) */}
             <div className="form-group">
-              <label className="form-label">관련 과제 (선택)</label>
+              <label className="form-label">관련 과제/문제 (선택)</label>
               <select
                 className="form-select"
-                value={formData.assignmentId}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  assignmentId: e.target.value,
-                  problemId: '' 
-                })}
+                value={formData.assignmentId && formData.problemId ? `assignment-${formData.assignmentId}-problem-${formData.problemId}` : 
+                       formData.assignmentId ? `assignment-${formData.assignmentId}` : ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.startsWith('assignment-') && value.includes('-problem-')) {
+                    // 문제 선택
+                    const parts = value.split('-problem-');
+                    const assignmentId = parts[0].replace('assignment-', '');
+                    const problemId = parts[1];
+                    setFormData({ 
+                      ...formData, 
+                      assignmentId: assignmentId,
+                      problemId: problemId
+                    });
+                  } else if (value.startsWith('assignment-')) {
+                    // 과제만 선택
+                    const assignmentId = value.replace('assignment-', '');
+                    setFormData({ 
+                      ...formData, 
+                      assignmentId: assignmentId,
+                      problemId: '' 
+                    });
+                  } else {
+                    // 선택 없음
+                    setFormData({ 
+                      ...formData, 
+                      assignmentId: '',
+                      problemId: '' 
+                    });
+                  }
+                }}
               >
-                <option value="">과제를 선택하세요</option>
-                {assignments.map(assignment => (
-                  <option key={assignment.id} value={assignment.id}>
-                    {assignment.title}
-                  </option>
+                <option value="">과제/문제를 선택하세요</option>
+                {assignmentsWithProblems.map(assignment => (
+                  <React.Fragment key={assignment.id}>
+                    <option 
+                      value={`assignment-${assignment.id}`}
+                      style={{ fontWeight: 'bold', backgroundColor: '#f0f0f0' }}
+                    >
+                      📁 {assignment.title}
+                    </option>
+                    {assignment.problems && assignment.problems.length > 0 && assignment.problems.map(problem => (
+                      <option 
+                        key={problem.id} 
+                        value={`assignment-${assignment.id}-problem-${problem.id}`}
+                        style={{ paddingLeft: '24px' }}
+                      >
+                        &nbsp;&nbsp;└ {problem.title}
+                      </option>
+                    ))}
+                  </React.Fragment>
                 ))}
               </select>
             </div>
-
-            {/* 문제 선택 */}
-            {formData.assignmentId && problems.length > 0 && (
-              <div className="form-group">
-                <label className="form-label">관련 문제 (선택)</label>
-                <select
-                  className="form-select"
-                  value={formData.problemId}
-                  onChange={(e) => setFormData({ ...formData, problemId: e.target.value })}
-                >
-                  <option value="">문제를 선택하세요</option>
-                  {problems.map(problem => (
-                    <option key={problem.id} value={problem.id}>
-                      {problem.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             {/* 내용 */}
             <div className="form-group">
               <label className="form-label">
                 내용 <span className="required">*</span>
               </label>
-              <textarea
-                className="form-textarea"
+              <TipTapEditor
+                content={formData.content}
+                onChange={(html) => setFormData({ ...formData, content: html })}
                 placeholder="질문 내용을 자세히 작성해주세요&#10;&#10;예시:&#10;1. 무엇을 구현하려고 했나요?&#10;2. 어떤 문제가 발생했나요?&#10;3. 어떤 시도를 해보셨나요?"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                rows={15}
               />
             </div>
 

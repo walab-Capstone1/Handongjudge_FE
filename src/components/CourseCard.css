@@ -10,20 +10,23 @@
   overflow: hidden;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, z-index 0.2s ease;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .course-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
+  z-index: 10;
 }
 
 .card-header {
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   position: relative;
-  min-height: 120px;
+  min-height: 80px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -56,9 +59,10 @@
 
 .card-title h3 {
   color: #374151;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: bold;
-  margin: 0 0 0.5rem 0;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .subtitle {
@@ -81,7 +85,7 @@
 }
 
 .card-content {
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   background: white;
 }
 
@@ -95,8 +99,8 @@
 .status-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
 }
 
 .status-tag {
@@ -122,11 +126,41 @@
   color: #388e3c;
 }
 
+.instructor-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .instructor {
   color: #6b7280;
   font-size: 0.9rem;
   margin: 0;
   font-weight: 500;
+  flex: 1;
+}
+
+.enroll-button {
+  background: #667EEA;
+  color: #FFFFFF;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.enroll-button:hover {
+  background: #5568d3;
+}
+
+.enroll-button:active {
+  background: #4a5bc0;
 }
 
 /* 비활성화된 수업 스타일 */

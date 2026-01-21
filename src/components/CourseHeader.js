@@ -1,12 +1,16 @@
 import React from "react";
+import { useRecoilValue } from "recoil";
+import { authState } from "../recoil/atoms";
 import { MdMenu, MdClose } from "react-icons/md";
 import "./CourseHeader.css";
 
 const CourseHeader = ({ 
-  courseName = "[Coding Studio] 1 분반",
+  courseName = "",
   onToggleSidebar,
   isSidebarCollapsed
 }) => {
+  const auth = useRecoilValue(authState);
+  
   return (
     <div className={`course-header-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <div className="course-header-top">
@@ -18,6 +22,11 @@ const CourseHeader = ({
           {isSidebarCollapsed ? <MdMenu /> : <MdClose />}
         </button>
         <span className="course-name">{courseName}</span>
+      </div>
+      <div className="course-header-user">
+        <span className="user-info">
+          {auth.user?.name || "사용자"} {auth.user?.role === "INSTRUCTOR" ? "교수" : "학부생"}
+        </span>
       </div>
     </div>
   );

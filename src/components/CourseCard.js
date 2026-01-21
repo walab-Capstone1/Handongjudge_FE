@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import APIService from "../services/APIService";
 import "./CourseCard.css";
 
-const CourseCard = ({ course, onStatusUpdate }) => {
+const CourseCard = ({ course, onStatusUpdate, showEnrollButton = false, onEnroll }) => {
   const navigate = useNavigate();
   
   const getColorClass = (color) => {
@@ -141,10 +141,41 @@ const CourseCard = ({ course, onStatusUpdate }) => {
           ))}
         </div>
         
-        <p className="instructor">{course.instructor} 교수님</p>
+        <div className="instructor-row">
+          <p className="instructor">{course.instructor} 교수님</p>
+          {showEnrollButton && (
+            <button 
+              className="enroll-button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onEnroll) {
+                  onEnroll();
+                }
+              }}
+            >
+              참가하기
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
+
+  // 공개된 클래스는 카드 클릭 시 참가 모달만 열리도록
+  if (showEnrollButton) {
+    return (
+      <div className="course-card-link" onClick={(e) => {
+        if (!e.target.closest('.enroll-button')) {
+          if (onEnroll) {
+            onEnroll();
+          }
+        }
+      }} style={{ cursor: 'pointer' }}>
+        {cardContent}
+      </div>
+    );
+  }
 
   if (isDisabled) {
     return (

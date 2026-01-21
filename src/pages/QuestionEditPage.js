@@ -147,7 +147,7 @@ const QuestionEditPage = () => {
       />
       <div className="question-create-content">
         <CourseHeader 
-          courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '질문 수정'}
+          courseName={sectionInfo?.courseTitle || '질문 수정'}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
         />

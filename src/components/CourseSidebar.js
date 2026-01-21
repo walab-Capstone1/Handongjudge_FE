@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { MdDashboard, MdAssignment, MdAnnouncement, MdNotifications, MdLogout, MdMenuBook, MdClose, MdForum } from "react-icons/md";
+import { MdDashboard, MdAssignment, MdAnnouncement, MdNotifications, MdLogout, MdMenuBook, MdClose, MdForum, MdQuiz } from "react-icons/md";
 import APIService from "../services/APIService";
 import "./CourseSidebar.css";
 
@@ -23,6 +23,7 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
     { id: "dashboard", label: "대시보드", path: hasSectionId ? `/sections/${sectionId}/dashboard` : '/dashboard', icon: MdDashboard },
     ...(hasSectionId ? [
       { id: "assignment", label: "과제", path: `/sections/${sectionId}/course-assignments`, icon: MdAssignment },
+      { id: "coding-quiz", label: "코딩 테스트", path: `/sections/${sectionId}/coding-quiz`, icon: MdQuiz },
       { id: "notice", label: "공지사항", path: `/sections/${sectionId}/course-notices`, icon: MdAnnouncement },
       { id: "community", label: "커뮤니티", path: `/sections/${sectionId}/community`, icon: MdForum },
       { id: "notification", label: "알림", path: `/sections/${sectionId}/alarm`, icon: MdNotifications },
@@ -108,6 +109,7 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
             const IconComponent = item.icon;
             // 현재 경로를 기반으로 활성 메뉴 판단
             const isActive = location.pathname.includes(item.id === 'assignment' ? 'course-assignments' : 
+                                                        item.id === 'coding-quiz' ? 'coding-quiz' :
                                                         item.id === 'notice' ? 'course-notices' :
                                                         item.id === 'notification' ? 'alarm' :
                                                         item.id);
@@ -202,6 +204,7 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
           </div>
         </div>
       )}
+
     </>
   );
 };
