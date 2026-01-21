@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CourseSidebar from '../components/CourseSidebar';
 import CourseHeader from '../components/CourseHeader';
+import TipTapEditor from '../components/TipTapEditor';
 import APIService from '../services/APIService';
 import { useRecoilState } from 'recoil';
 import { sidebarCollapsedState } from '../recoil/atoms';
@@ -51,7 +52,8 @@ const QuestionCreatePage = () => {
   const fetchInitialData = async () => {
     try {
       const sectionData = await APIService.getSectionInfo(sectionId);
-      setSectionInfo(sectionData);
+      // 응답이 {data: {...}} 형태일 수도 있으므로 처리
+      setSectionInfo(sectionData?.data || sectionData);
 
       const assignmentsData = await APIService.getAssignmentsBySection(sectionId);
       setAssignments(assignmentsData || []);
@@ -176,7 +178,12 @@ const QuestionCreatePage = () => {
       return;
     }
 
-    if (!formData.content.trim()) {
+    // HTML 태그를 제거하고 텍스트만 추출하여 검증
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = formData.content;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    
+    if (!textContent.trim()) {
       alert('내용을 입력해주세요');
       return;
     }
@@ -245,7 +252,7 @@ const QuestionCreatePage = () => {
       />
       <div className="question-create-content">
         <CourseHeader 
-          courseName={sectionInfo ? `[${sectionInfo.courseTitle}] ${sectionInfo.sectionNumber}분반` : '질문 작성'}
+          courseName={sectionInfo?.courseTitle || '질문 작성'}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
         />
@@ -337,12 +344,10 @@ const QuestionCreatePage = () => {
               <label className="form-label">
                 내용 <span className="required">*</span>
               </label>
-              <textarea
-                className="form-textarea"
+              <TipTapEditor
+                content={formData.content}
+                onChange={(html) => setFormData({ ...formData, content: html })}
                 placeholder="질문 내용을 자세히 작성해주세요&#10;&#10;예시:&#10;1. 무엇을 구현하려고 했나요?&#10;2. 어떤 문제가 발생했나요?&#10;3. 어떤 시도를 해보셨나요?"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                rows={15}
               />
             </div>
 

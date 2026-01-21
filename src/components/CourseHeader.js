@@ -3,7 +3,7 @@ import { MdMenu, MdClose } from "react-icons/md";
 import "./CourseHeader.css";
 
 const CourseHeader = ({ 
-  courseName = "[Coding Studio] 1 분반",
+  courseName = "",
   onToggleSidebar,
   isSidebarCollapsed
 }) => {

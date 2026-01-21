@@ -495,6 +495,45 @@ class APIService {
     return await this.request(`/sections/${sectionId}/assignments`);
   }
 
+  // ==================== 코딩 테스트 API ====================
+
+  // 섹션별 코딩 테스트 목록 조회
+  async getQuizzesBySection(sectionId) {
+    return await this.request(`/sections/${sectionId}/quizzes`);
+  }
+
+  // 코딩 테스트 상세 정보 조회
+  async getQuizInfo(sectionId, quizId) {
+    return await this.request(`/sections/${sectionId}/quizzes/${quizId}`);
+  }
+
+  // 코딩 테스트 문제 목록 조회
+  async getQuizProblems(sectionId, quizId) {
+    return await this.request(`/sections/${sectionId}/quizzes/${quizId}/problems`);
+  }
+
+  // 코딩 테스트 생성
+  async createQuiz(sectionId, quizData) {
+    return await this.request(`/sections/${sectionId}/quizzes`, {
+      method: 'POST',
+      body: JSON.stringify(quizData),
+    });
+  }
+
+  // 코딩 테스트 수정
+  async updateQuiz(sectionId, quizId, quizData) {
+    return await this.request(`/sections/${sectionId}/quizzes/${quizId}`, {
+      method: 'PUT',
+      body: JSON.stringify(quizData),
+    });
+  }
+
+  // 코딩 테스트 삭제
+  async deleteQuiz(sectionId, quizId) {
+    return await this.request(`/sections/${sectionId}/quizzes/${quizId}`, {
+      method: 'DELETE',
+    });
+  }
 
   // 과제별 제출 통계 조회 (분반별)
   async getAssignmentSubmissionStats(assignmentId, sectionId) {

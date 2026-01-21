@@ -224,6 +224,69 @@
   border: 1px solid #e1e4e8;
 }
 
+/* Quiz Header Styles */
+.problem-solve-header.quiz-header {
+  position: relative;
+  margin-bottom: 0;
+}
+
+.problem-solve-header.quiz-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.problem-selector-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.problem-selector-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background-color: #21262d;
+  color: #c9d1d9;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.problem-selector-btn:hover {
+  background-color: #30363d;
+  border-color: #58a6ff;
+}
+
+.problem-selector-btn.active {
+  background-color: #58a6ff;
+  color: white;
+  border-color: #58a6ff;
+}
+
+.problem-solve-page.light .problem-selector-btn {
+  background-color: #ffffff;
+  color: #24292e;
+  border-color: #e1e4e8;
+}
+
+.problem-solve-page.light .problem-selector-btn:hover {
+  background-color: #f6f8fa;
+  border-color: #0969da;
+}
+
+.problem-solve-page.light .problem-selector-btn.active {
+  background-color: #0969da;
+  color: white;
+  border-color: #0969da;
+}
+
+
 /* Main Split */
 .main-split {
   flex: 1;
