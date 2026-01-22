@@ -622,6 +622,22 @@
   line-height: 1.5;
 }
 
+/* 강의로 돌아가기 링크 스타일 */
+.tutor-sidebar .sidebar-item.back-link-item .sidebar-label,
+.tutor-sidebar .sidebar-item.back-link-item .sidebar-icon {
+  color: #667eea;
+}
+
+.tutor-sidebar .sidebar-item.back-link-item:hover .sidebar-label,
+.tutor-sidebar .sidebar-item.back-link-item:hover .sidebar-icon {
+  color: #5568d3;
+}
+
+.tutor-sidebar .sidebar-item.back-link-item.active .sidebar-label,
+.tutor-sidebar .sidebar-item.back-link-item.active .sidebar-icon {
+  color: #FFFFFF;
+}
+
 /* 섹션 제목 */
 .tutor-sidebar .sidebar-section {
   margin-bottom: 0.25rem;
