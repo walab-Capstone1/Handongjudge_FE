@@ -159,17 +159,19 @@ body.section-modal-open .user-management .user-management-search-input:focus {
 }
 
 .user-management .user-management-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f8fafc;
 }
 
 .user-management .user-management-table th {
-  padding: 1.25rem 1rem;
+  padding: 1rem 1.5rem;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
+  color: #1e293b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 2px solid #cbd5e1;
+  background: #f1f5f9;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
@@ -185,7 +187,7 @@ body.section-modal-open .user-management .user-management-search-input:focus {
 }
 
 .user-management .user-management-th-sortable:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #e2e8f0;
 }
 
 .user-management .user-management-th-content {
@@ -207,23 +209,24 @@ body.section-modal-open .user-management .user-management-search-input:focus {
 .user-management .user-management-sort-asc,
 .user-management .user-management-sort-desc {
   opacity: 1;
-  color: white;
+  color: #1e293b;
 }
 
 /* 테이블 바디 */
 .user-management .user-management-table td {
-  padding: 1.25rem 1rem;
-  border-bottom: 1px solid #f1f3f4;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
   vertical-align: middle;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .user-management .user-management-table tbody tr {
-  transition: all 0.2s ease;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s ease;
 }
 
 .user-management .user-management-table tbody tr:hover {
-  background-color: #f8f9fa;
+  background: #f8fafc;
 }
 
 /* 이름 셀 */
@@ -269,14 +272,14 @@ body.section-modal-open .user-management .user-management-search-input:focus {
 }
 
 .user-management .user-management-section-badge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.4rem 0.9rem;
-  border-radius: 16px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  background: none;
+  color: #2d3436;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
   display: inline-block;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+  box-shadow: none;
 }
 
 /* 진도율 셀 */
@@ -317,39 +320,43 @@ body.section-modal-open .user-management .user-management-search-input:focus {
 
 /* 작업 셀 */
 .user-management .user-management-actions-cell {
-  text-align: center;
+  white-space: nowrap;
+  text-align: right;
 }
 
-.user-management .user-management-action-buttons {
+.user-management .user-management-actions-inline {
   display: flex;
   gap: 0.5rem;
-  justify-content: center;
   align-items: center;
+  justify-content: flex-end;
 }
 
-.user-management .user-management-btn-detail {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.user-management .user-management-btn-table-action {
+  padding: 0.5rem 1rem;
+  background: #f1f5f9;
+  color: #475569;
   border: none;
-  padding: 0.65rem 1.25rem;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
-.user-management .user-management-btn-detail:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+.user-management .user-management-btn-table-action:hover {
+  background: #e2e8f0;
+  color: #334155;
 }
 
-.user-management .user-management-btn-detail:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+.user-management .user-management-btn-table-action.user-management-btn-delete {
+  color: #ef4444;
+}
+
+.user-management .user-management-btn-table-action.user-management-btn-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 /* 빈 데이터 */
