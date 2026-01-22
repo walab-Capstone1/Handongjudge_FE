@@ -9,8 +9,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.75rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
+  border: none;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
   margin-bottom: 1.5rem;
