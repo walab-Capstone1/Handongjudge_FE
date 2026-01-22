@@ -89,7 +89,7 @@ const SuperAdminProblemManagement = () => {
             </button>
             <button 
               className="admin-btn-primary"
-              onClick={() => navigate('/admin/problems/create')}
+              onClick={() => navigate('/tutor/problems/create')}
             >
               새 문제 만들기
             </button>
@@ -150,7 +150,7 @@ const SuperAdminProblemManagement = () => {
                       <div className="admin-problem-actions-inline">
                         <button 
                           className="admin-btn-table-action admin-btn-edit"
-                          onClick={() => navigate(`/admin/problems/${problem.id}/edit`)}
+                          onClick={() => navigate(`/tutor/problems/${problem.id}/edit`)}
                         >
                           수정
                         </button>

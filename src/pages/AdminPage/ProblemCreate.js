@@ -347,7 +347,7 @@ const ProblemCreate = () => {
       
       if (response?.data || response) {
         alert('문제가 성공적으로 생성되었습니다.');
-        navigate('/admin/problems');
+        navigate('/tutor/problems');
       }
     } catch (err) {
       console.error('문제 생성 실패:', err);

@@ -43,6 +43,8 @@ const AdminDashboard = () => {
   const [copyStep, setCopyStep] = useState(1); // 1: 기본정보, 2: 공지사항, 3: 과제/문제
   const [selectedNoticeDetail, setSelectedNoticeDetail] = useState(null);
   const [selectedProblemDetail, setSelectedProblemDetail] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   useEffect(() => {
     const fetchSections = async () => {
@@ -58,13 +60,27 @@ const AdminDashboard = () => {
       }
     };
 
+    const fetchStats = async () => {
+      try {
+        setLoadingStats(true);
+        const response = await APIService.getAdminStats();
+        setStats(response?.data || null);
+      } catch (error) {
+        console.error('통계 조회 실패:', error);
+        setStats(null);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
     fetchSections();
+    fetchStats();
   }, []);
 
   const handleSectionClick = (section) => {
     // 관리자 페이지에서는 비활성화된 수업도 접근 가능
     // 수업 카드를 클릭하면 해당 수업의 과제 관리 페이지로 이동
-    navigate(`/admin/assignments/section/${section.sectionId}`, { state: { section } });
+    navigate(`/tutor/assignments/section/${section.sectionId}`, { state: { section } });
   };
 
   const handleCopyEnrollmentLink = (enrollmentCode, e) => {
@@ -439,6 +455,39 @@ const AdminDashboard = () => {
             분반을 클릭하면 해당 수업의 관리 페이지로 이동합니다.
           </p>
         </div>
+
+        {/* 통계 섹션 */}
+        {stats && (
+          <div className="dashboard-stats-section">
+            <h2 className="stats-section-title">전체 통계</h2>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-label">전체 수업</div>
+                <div className="stat-value">{stats.totalSections || 0}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">전체 과제</div>
+                <div className="stat-value">{stats.totalAssignments || 0}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">전체 문제</div>
+                <div className="stat-value">{stats.totalProblems || 0}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">전체 수강생</div>
+                <div className="stat-value">{stats.totalStudents || 0}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">최근 제출 (7일)</div>
+                <div className="stat-value">{stats.recentSubmissions || 0}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">최근 과제 (7일)</div>
+                <div className="stat-value">{stats.recentAssignments || 0}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 필터 섹션 */}
         <div className="admin-filter-section">

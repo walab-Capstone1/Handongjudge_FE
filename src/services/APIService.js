@@ -354,6 +354,13 @@ class APIService {
     }
   }
 
+  // 문제의 ZIP 파일 파싱 (수정 페이지용)
+  async parseProblemZip(problemId) {
+    return await this.request(`/problems/${problemId}/parse`, {
+      method: 'GET'
+    });
+  }
+
   // 문제 수정
   async updateProblem(problemId, formData) {
     const url = `${this.baseURL}/problems/${problemId}`;
@@ -397,7 +404,19 @@ class APIService {
     });
   }
 
+  // 문제 삭제
+  async deleteProblem(problemId) {
+    return await this.request(`/problems/${problemId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // 문제 복사
+  // 문제가 사용되는 과제 목록 조회
+  async getProblemAssignments(problemId) {
+    return await this.request(`/problems/${problemId}/assignments`);
+  }
+
   async copyProblem(problemId, newTitle = null) {
     const body = newTitle ? { newTitle } : {};
     return await this.request(`/problems/${problemId}/copy`, {
@@ -410,7 +429,7 @@ class APIService {
   }
 
   // 수업 복사
-  async copySection(sectionId, sectionNumber, year, semester, courseTitle, description, copyNotices, copyAssignments, selectedNoticeIds, selectedAssignmentIds, assignmentProblems) {
+  async copySection(sectionId, sectionNumber, year, semester, courseTitle, description, copyNotices, copyAssignments, selectedNoticeIds, selectedAssignmentIds, assignmentProblems, noticeEdits, assignmentEdits, problemEdits) {
     return await this.request(`/sections/${sectionId}/copy`, {
       method: 'POST',
       headers: {
@@ -426,7 +445,10 @@ class APIService {
         copyAssignments: copyAssignments !== false, // 기본값 true
         selectedNoticeIds: selectedNoticeIds || [],
         selectedAssignmentIds: selectedAssignmentIds || [],
-        assignmentProblems: assignmentProblems || {}
+        assignmentProblems: assignmentProblems || {},
+        noticeEdits: noticeEdits || {},
+        assignmentEdits: assignmentEdits || {},
+        problemEdits: problemEdits || {}
       }),
     });
   }
@@ -548,6 +570,17 @@ class APIService {
     }
   }
 
+  // 마감 직전 과제 조회
+  async getUpcomingAssignments(sectionId, days = 3) {
+    try {
+      const response = await this.request(`/sections/${sectionId}/assignments/upcoming?days=${days}`);
+      return response?.data || response || [];
+    } catch (error) {
+      console.error('마감 직전 과제 조회 실패:', error);
+      return [];
+    }
+  }
+
   // 전체 과제 제출 통계 조회 (교수용) - 백엔드에 해당 엔드포인트가 없어서 주석 처리
   // async getAllAssignmentsSubmissionStats() {
   //   try {
@@ -569,6 +602,19 @@ class APIService {
     } catch (error) {
       console.error('학생 진행 현황 조회 실패:', error);
       return [];
+    }
+  }
+
+  // 튜터가 학생의 accept된 코드 조회
+  async getStudentAcceptedCode(sectionId, assignmentId, userId, problemId) {
+    try {
+      const response = await this.request(
+        `/sections/${sectionId}/assignments/${assignmentId}/students/${userId}/problems/${problemId}/accepted-code`
+      );
+      return response;
+    } catch (error) {
+      console.error('학생 코드 조회 실패:', error);
+      throw error;
     }
   }
 
@@ -700,8 +746,8 @@ class APIService {
   }
 
   // 과제 삭제
-  async deleteAssignment(assignmentId) {
-    return await this.request(`/admin/assignments/${assignmentId}`, {
+  async deleteAssignment(sectionId, assignmentId) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}`, {
       method: 'DELETE',
     });
   }
@@ -748,8 +794,11 @@ class APIService {
 
   // 사용자 상태 변경 (활성/비활성)
   async toggleUserStatus(userId, status) {
-    return await this.request(`/admin/users/${userId}/status`, {
+    return await this.request(`/admin/system-admin/users/${userId}/status`, {
       method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ status }),
     });
   }
@@ -861,6 +910,13 @@ class APIService {
     });
   }
 
+  // 분반(Section) 삭제
+  async deleteSection(sectionId) {
+    return await this.request(`/sections/${sectionId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // 공지사항 활성화/비활성화 토글
   async toggleNoticeActive(noticeId, isActive) {
     return await this.request(`/notices/${noticeId}/active`, {
@@ -881,6 +937,13 @@ class APIService {
   // 강의(Course) 목록 조회
   async getCourses() {
     return await this.request('/courses');
+  }
+
+  // 강의 삭제 (일반 courses 엔드포인트)
+  async deleteCourseByApi(courseId) {
+    return await this.request(`/courses/${courseId}`, {
+      method: 'DELETE',
+    });
   }
 
   // 현재 로그인한 사용자 ID 조회
@@ -1088,6 +1151,56 @@ class APIService {
     return await this.request(`/system-guides/${guideId}/active`, {
       method: 'PATCH',
       body: JSON.stringify({ active: isActive })
+    });
+  }
+
+  // ========== 문제집 관리 API ==========
+
+  // 문제집 목록 조회
+  async getProblemSets() {
+    return await this.request('/problem-sets');
+  }
+
+  // 문제집 상세 조회
+  async getProblemSet(problemSetId) {
+    return await this.request(`/problem-sets/${problemSetId}`);
+  }
+
+  // 문제집 생성
+  async createProblemSet(data) {
+    return await this.request('/problem-sets', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 문제집 수정
+  async updateProblemSet(problemSetId, data) {
+    return await this.request(`/problem-sets/${problemSetId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 문제집 삭제
+  async deleteProblemSet(problemSetId) {
+    return await this.request(`/problem-sets/${problemSetId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // 문제집에 문제 추가
+  async addProblemToSet(problemSetId, problemId, order = null) {
+    return await this.request(`/problem-sets/${problemSetId}/problems`, {
+      method: 'POST',
+      body: JSON.stringify({ problemId, order }),
+    });
+  }
+
+  // 문제집에서 문제 제거
+  async removeProblemFromSet(problemSetId, problemId) {
+    return await this.request(`/problem-sets/${problemSetId}/problems/${problemId}`, {
+      method: 'DELETE',
     });
   }
 

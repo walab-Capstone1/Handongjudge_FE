@@ -186,13 +186,13 @@ const CourseManagement = () => {
                 </button>
                 <button 
                   className="admin-btn-action"
-                  onClick={() => navigate(`/admin/notices/section/${section.sectionId}`)}
+                  onClick={() => navigate(`/tutor/notices/section/${section.sectionId}`)}
                 >
                   공지사항
                 </button>
                 <button 
                   className="admin-btn-action"
-                  onClick={() => navigate(`/admin/users/section/${section.sectionId}`)}
+                  onClick={() => navigate(`/tutor/users/section/${section.sectionId}`)}
                 >
                   학생 관리
                 </button>
@@ -204,7 +204,7 @@ const CourseManagement = () => {
                 </button>
                 <button 
                   className="admin-btn-action admin-primary"
-                  onClick={() => navigate(`/admin/assignments/section/${section.sectionId}`)}
+                  onClick={() => navigate(`/tutor/assignments/section/${section.sectionId}`)}
                 >
                   과제 관리
                 </button>

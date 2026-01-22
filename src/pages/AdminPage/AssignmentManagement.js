@@ -399,12 +399,18 @@ const AssignmentManagement = () => {
   };
 
   const handleDelete = async (assignmentId) => {
-    if (window.confirm('정말로 이 과제를 삭제하시겠습니까?')) {
+    if (window.confirm('정말로 이 과제를 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없으며, 관련된 모든 제출 기록도 함께 삭제됩니다.')) {
       try {
-        console.log('과제 삭제:', assignmentId);
-        alert('과제 삭제 기능은 구현 예정입니다.');
+        if (!sectionId) {
+          alert('수업 정보가 없습니다.');
+          return;
+        }
+        await APIService.deleteAssignment(sectionId, assignmentId);
+        alert('과제가 성공적으로 삭제되었습니다.');
+        fetchAssignments(); // 목록 새로고침
       } catch (error) {
-        alert('과제 삭제에 실패했습니다.');
+        console.error('과제 삭제 실패:', error);
+        alert('과제 삭제에 실패했습니다. ' + (error.message || ''));
       }
     }
   };
@@ -594,16 +600,20 @@ const AssignmentManagement = () => {
 
   const handleSelectProblem = async (problemIds) => {
     try {
+      // 문제를 복사한 후 과제에 추가 (1:1 매핑을 위해)
       for (const problemId of problemIds) {
-      await APIService.addProblemToAssignment(selectedAssignment.id, problemId);
+        // 문제 복사
+        const newProblemId = await APIService.copyProblem(problemId);
+        // 복사된 문제를 과제에 추가
+        await APIService.addProblemToAssignment(selectedAssignment.id, newProblemId);
       }
-      alert(`${problemIds.length}개의 문제가 성공적으로 추가되었습니다.`);
+      alert(`${problemIds.length}개의 문제가 성공적으로 복사되어 추가되었습니다.`);
       setShowProblemModal(false);
       setSelectedProblemIds([]);
       fetchAssignments(); // 목록 새로고침
     } catch (error) {
       console.error('문제 추가 실패:', error);
-      alert('문제 추가에 실패했습니다.');
+      alert('문제 추가에 실패했습니다. ' + (error.message || ''));
     }
   };
 

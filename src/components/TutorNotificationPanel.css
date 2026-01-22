@@ -1,0 +1,421 @@
+/* TutorNotificationPanel.css - 튜터 페이지 전용 알림 패널 스타일 */
+
+/* 오른쪽 알림 아이콘 및 패널 */
+.tutor-alarm-container {
+  position: fixed;
+  z-index: 1000;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: auto;
+}
+
+.tutor-alarm-icon-btn {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 3px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  color: white;
+  font-size: 1.5rem;
+  touch-action: none;
+}
+
+.tutor-alarm-drag-handle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  cursor: grab;
+  font-size: 0.55rem;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  line-height: 1;
+  font-weight: bold;
+  transform: rotate(90deg);
+}
+
+.tutor-alarm-icon-btn:hover .tutor-alarm-drag-handle {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.tutor-alarm-drag-handle:hover {
+  background: rgba(255, 255, 255, 0.45);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.tutor-alarm-drag-handle:active {
+  cursor: grabbing;
+  background: rgba(255, 255, 255, 0.5);
+  transform: rotate(90deg) scale(0.95);
+}
+
+.tutor-alarm-icon-btn.tutor-alarm-dragging .tutor-alarm-drag-handle {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: grabbing;
+}
+
+.tutor-alarm-icon-btn.tutor-alarm-dragging {
+  cursor: grabbing;
+  transform: scale(1.1);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.6);
+  z-index: 1001;
+}
+
+.tutor-alarm-icon-btn:hover:not(.tutor-alarm-dragging) {
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.5);
+}
+
+/* 새 알림이 있을 때 펄스 애니메이션 */
+.tutor-alarm-icon-btn.tutor-alarm-has-unread {
+  animation: tutor-alarm-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tutor-alarm-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 24px rgba(102, 126, 234, 0.8), 0 0 0 8px rgba(102, 126, 234, 0.2);
+  }
+}
+
+.tutor-alarm-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  padding: 0 6px;
+  animation: tutor-alarm-bounce 1s ease-in-out infinite;
+}
+
+@keyframes tutor-alarm-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.tutor-alarm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+  animation: tutor-alarm-fadeIn 0.2s ease;
+}
+
+@keyframes tutor-alarm-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tutor-alarm-panel {
+  position: fixed;
+  width: 420px;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 200px);
+  min-height: 300px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  border: 2px solid #667eea;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: tutor-alarm-slideInUp 0.3s ease;
+}
+
+@media (max-width: 480px) {
+  .tutor-alarm-panel {
+    width: calc(100vw - 1rem);
+    max-width: 420px;
+  }
+}
+
+@keyframes tutor-alarm-slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.tutor-alarm-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-bottom: 2px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex-shrink: 0;
+}
+
+.tutor-alarm-panel-header .tutor-alarm-panel-title {
+  color: white;
+}
+
+.tutor-alarm-panel-header .tutor-alarm-title-icon {
+  color: white;
+}
+
+.tutor-alarm-panel-header .tutor-alarm-close-btn {
+  color: white;
+}
+
+.tutor-alarm-panel-header .tutor-alarm-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.tutor-alarm-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.tutor-alarm-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tutor-alarm-close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.tutor-alarm-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem;
+  min-height: 0;
+}
+
+/* 스크롤바 스타일링 */
+.tutor-alarm-panel-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tutor-alarm-panel-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.tutor-alarm-panel-body::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
+}
+
+.tutor-alarm-panel-body::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
+}
+
+.tutor-alarm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: visible;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tutor-alarm-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.tutor-alarm-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #667eea;
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.tutor-alarm-item:hover {
+  background: #f0f4ff;
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.tutor-alarm-item:hover::before {
+  transform: scaleY(1);
+}
+
+.tutor-alarm-item.tutor-alarm-unread {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  border-left: 4px solid #3b82f6;
+}
+
+.tutor-alarm-item.tutor-alarm-unread::before {
+  background: #3b82f6;
+  transform: scaleY(1);
+}
+
+.tutor-alarm-icon {
+  font-size: 0.9rem;
+  color: #667eea;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.tutor-alarm-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tutor-alarm-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-alarm-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+.tutor-alarm-section {
+  font-weight: 500;
+  color: #667eea;
+}
+
+.tutor-alarm-time {
+  flex-shrink: 0;
+}
+
+.tutor-alarm-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 1rem;
+}
+
+.tutor-alarm-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: tutor-alarm-spin 1s linear infinite;
+}
+
+@keyframes tutor-alarm-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.tutor-alarm-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+

@@ -61,12 +61,21 @@ const UserManagement = () => {
 
   const handleStatusToggle = async (studentId, currentStatus) => {
     const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const confirmMessage = newStatus === 'ACTIVE' 
+      ? '이 학생을 활성화하시겠습니까?'
+      : '이 학생을 비활성화하시겠습니까?\n\n비활성화된 학생은 수업에 접근할 수 없습니다.';
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+    
     try {
-      // TODO: 실제 상태 변경 API 호출
-      console.log('학생 상태 변경:', studentId, newStatus);
-      await fetchStudents();
+      await APIService.toggleUserStatus(studentId, newStatus);
+      alert(`학생 상태가 ${newStatus === 'ACTIVE' ? '활성화' : '비활성화'}되었습니다.`);
+      await fetchStudents(); // 목록 새로고침
     } catch (error) {
       console.error('학생 상태 변경 실패:', error);
+      alert('학생 상태 변경에 실패했습니다. ' + (error.message || ''));
     }
   };
   

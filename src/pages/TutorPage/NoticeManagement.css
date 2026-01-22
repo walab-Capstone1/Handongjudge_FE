@@ -1,0 +1,634 @@
+/* NoticeManagement.css - Tutor 페이지 테마에 맞춘 공지사항 관리 페이지 */
+
+.notice-management {
+  padding: 0;
+}
+
+/* 로딩 스타일 */
+.notice-management .tutor-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  background-color: white;
+}
+
+.notice-management .tutor-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 페이지 헤더 */
+.notice-management .tutor-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.75rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.notice-management .tutor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.notice-management .tutor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.notice-management .tutor-page-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.notice-management .tutor-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* 검색 박스 */
+.notice-management .tutor-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+}
+
+.notice-management .tutor-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-management .tutor-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.notice-management .tutor-search-input:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+  background: white;
+}
+
+/* 모달이 열려있을 때 search input focus 스타일 무시 */
+body.section-modal-open .notice-management .tutor-search-input:focus {
+  outline: none !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* 필터 드롭다운 */
+.notice-management .tutor-filter-dropdown {
+  display: flex;
+  align-items: center;
+}
+
+.notice-management .tutor-filter-select {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  min-width: 150px;
+}
+
+.notice-management .tutor-filter-select:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+  background: white;
+}
+
+.notice-management .tutor-filter-select:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* 버튼 스타일 */
+.notice-management .tutor-btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid white;
+  padding: 0.875rem 1.75rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+}
+
+.notice-management .tutor-btn-primary:hover {
+  background: #f8f9ff;
+  border-color: white;
+  color: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.notice-management .tutor-btn-link-copy {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 0.875rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+}
+
+.notice-management .tutor-btn-link-copy:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.notice-management .tutor-btn-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 0.875rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+}
+
+.notice-management .tutor-btn-secondary:hover {
+  background: #f8f9ff;
+  border-color: #5568d3;
+  color: #5568d3;
+  transform: translateY(-2px);
+}
+
+/* 공지사항 목록 */
+.notice-management .tutor-notices-list {
+  padding: 0 2rem 2rem 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.5rem;
+}
+
+/* 공지사항 카드 */
+.notice-management .notice-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.notice-management .notice-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.notice-management .notice-card.disabled {
+  opacity: 0.6;
+  background: #f9fafb;
+}
+
+/* 제목 행 */
+.notice-management .notice-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.notice-management .tutor-title-and-course {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.notice-management .notice-course {
+  font-size: 0.85rem;
+  color: #667eea;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.notice-management .notice-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* 액션 버튼 */
+.notice-management .notice-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.notice-management .tutor-btn-text-small {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  color: #4b5563;
+}
+
+.notice-management .tutor-btn-text-small:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.notice-management .tutor-btn-text-small.tutor-edit {
+  color: #667eea;
+  border-color: #667eea;
+}
+
+.notice-management .tutor-btn-text-small.tutor-edit:hover {
+  background: #667eea;
+  color: white;
+}
+
+.notice-management .tutor-btn-text-small.tutor-delete {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.notice-management .tutor-btn-text-small.tutor-delete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.notice-management .tutor-btn-icon-small {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.notice-management .tutor-btn-icon-small.tutor-more:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* 더보기 메뉴 */
+.notice-management .tutor-more-menu {
+  position: relative;
+}
+
+.notice-management .tutor-more-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  min-width: 100px;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+}
+
+.notice-management .tutor-more-menu:hover .tutor-more-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.notice-management .tutor-more-dropdown .tutor-btn-text-small {
+  width: 100%;
+  text-align: left;
+  margin: 0;
+  padding: 0.5rem 0.8rem;
+}
+
+/* 통계 정보 */
+.notice-management .notice-compact-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.notice-management .tutor-compact-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.notice-management .tutor-stat-label-compact {
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.notice-management .tutor-stat-value-compact {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 0.85rem;
+}
+
+.notice-management .notice-new-badge {
+  background: #10b981;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+/* 공지사항 내용 */
+.notice-management .notice-content {
+  margin-top: 0;
+}
+
+.notice-management .notice-content p {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 빈 상태 */
+.notice-management .tutor-no-notices {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  grid-column: 1 / -1;
+}
+
+.notice-management .tutor-no-notices-message {
+  text-align: center;
+  color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.notice-management .tutor-no-notices-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.notice-management .tutor-no-notices-message p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.notice-management .tutor-no-notices-message strong {
+  color: #1e293b;
+  font-size: 1.1rem;
+}
+
+/* 모달 스타일 */
+.notice-management .tutor-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.notice-management .tutor-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.notice-management .tutor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notice-management .tutor-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-management .tutor-modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-management .tutor-modal-close:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* 폼 스타일 */
+.notice-management .notice-form {
+  padding: 2rem;
+}
+
+.notice-management .tutor-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.notice-management .tutor-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notice-management .tutor-form-group label {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-management .tutor-form-group input,
+.notice-management .tutor-form-group select,
+.notice-management .tutor-form-group textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  background: white;
+  color: #1e293b;
+}
+
+.notice-management .tutor-form-group input:focus,
+.notice-management .tutor-form-group select:focus,
+.notice-management .tutor-form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.notice-management .tutor-form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.notice-management .tutor-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .notice-management .tutor-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .notice-management .tutor-header-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notice-management .tutor-header-right {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .notice-management .tutor-search-box {
+    max-width: none;
+  }
+
+  .notice-management .tutor-notices-list {
+    grid-template-columns: 1fr;
+    padding: 0 1rem 1rem 1rem;
+  }
+
+  .notice-management .tutor-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .notice-management .tutor-modal-overlay {
+    padding: 1rem;
+  }
+
+  .notice-management .tutor-modal-content {
+    max-height: 95vh;
+  }
+
+  .notice-management .notice-form {
+    padding: 1.5rem;
+  }
+
+  .notice-management .tutor-form-actions {
+    flex-direction: column;
+  }
+}

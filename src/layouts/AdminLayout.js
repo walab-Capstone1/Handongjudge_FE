@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Breadcrumb from "../components/Breadcrumb";
 import APIService from "../services/APIService";
 
 import "./AdminLayout.css";
@@ -68,7 +69,7 @@ const AdminLayout = ({ children, selectedSection = null }) => {
     setExpandedSections({
       [section.sectionId]: !isCurrentlyExpanded
     });
-    navigate(`/admin/assignments/section/${section.sectionId}`);
+    navigate(`/tutor/assignments/section/${section.sectionId}`);
   };
 
   // 수업 펼치기/접기 핸들러 (화살표 클릭 시)
@@ -92,29 +93,30 @@ const AdminLayout = ({ children, selectedSection = null }) => {
 
   // 전역 메뉴 (항상 표시)
   const globalMenuItems = [
-    { path: "/admin", label: "대시보드", subItems: [] },
+    { path: "/tutor", label: "대시보드", subItems: [] },
     { 
-      path: "/admin/problems", 
+      path: "/tutor/problems", 
       label: "문제 관리", 
       subItems: [
-        { path: "/admin/problems", label: "문제 등록 및 관리" },
-        { path: "/admin/problems/sets", label: "문제집 관리" },
+        { path: "/tutor/problems", label: "문제 등록 및 관리" },
+        { path: "/tutor/problems/sets", label: "문제집 관리" },
       ]
     },
+    { path: "/tutor/settings", label: "시스템 설정", subItems: [] },
   ];
 
   // 수업별 메뉴 (수업 선택 시 표시)
   const sectionMenuItems = currentSection ? [
     { 
-      path: `/admin/assignments/section/${currentSection.sectionId}`, 
+      path: `/tutor/assignments/section/${currentSection.sectionId}`, 
       label: "과제 관리",
       subItems: [
-        { path: `/admin/assignments/section/${currentSection.sectionId}`, label: "과제 목록" },
-        { path: `/admin/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황", subItems: [] },
+        { path: `/tutor/assignments/section/${currentSection.sectionId}`, label: "과제 목록" },
+        { path: `/tutor/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황", subItems: [] },
       ]
     },
-    { path: `/admin/notices/section/${currentSection.sectionId}`, label: "공지사항 관리", subItems: [] },
-    { path: `/admin/users/section/${currentSection.sectionId}`, label: "수강생 관리", subItems: [] },
+    { path: `/tutor/notices/section/${currentSection.sectionId}`, label: "공지사항 관리", subItems: [] },
+    { path: `/tutor/users/section/${currentSection.sectionId}`, label: "수강생 관리", subItems: [] },
   ] : [];
 
   return (
@@ -325,11 +327,65 @@ const AdminLayout = ({ children, selectedSection = null }) => {
           </nav>
         </aside>
         <main className="admin-main">
+          <Breadcrumb items={generateBreadcrumbs(location, sections, currentSection)} />
           <div className="admin-content">{children}</div>
         </main>
       </div>
     </div>
   );
+};
+
+// Breadcrumb 생성 함수
+const generateBreadcrumbs = (location, sections, currentSection) => {
+  const pathnames = location.pathname.split('/').filter(x => x);
+  let breadcrumbItems = [{ label: 'Home', path: '/' }];
+
+  let currentPath = '';
+  pathnames.forEach((name, index) => {
+    currentPath += `/${name}`;
+    let label = name;
+    let path = currentPath;
+
+    // 경로별 라벨 설정
+    if (name === 'tutor') {
+      label = '관리 페이지';
+      path = '/tutor';
+    } else if (name === 'problems') {
+      label = '문제 관리';
+    } else if (name === 'sets') {
+      label = '문제집 관리';
+    } else if (name === 'settings') {
+      label = '시스템 설정';
+    } else if (name === 'assignments' && pathnames[index - 1] === 'tutor') {
+      label = '과제 관리';
+    } else if (name === 'notices' && pathnames[index - 1] === 'tutor') {
+      label = '공지사항 관리';
+    } else if (name === 'users' && pathnames[index - 1] === 'tutor') {
+      label = '수강생 관리';
+    } else if (name === 'section' && pathnames[index + 1]) {
+      const id = pathnames[index + 1];
+      const section = sections.find(s => s.sectionId === parseInt(id));
+      if (section) {
+        label = `${section.courseTitle} ${section.sectionNumber}분반`;
+        path = `/tutor/assignments/section/${id}`;
+      } else {
+        label = `Section ${id}`;
+      }
+    } else if (name === 'progress' && pathnames[index - 1] === 'assignments') {
+      label = '풀이 현황';
+    } else if (name === 'create') {
+      label = '생성';
+    } else if (name === 'edit' && pathnames[index - 1]) {
+      label = '수정';
+    }
+    
+    // 'section' 세그먼트 자체는 건너뛰기 (ID가 뒤에 오는 경우)
+    if (name !== 'section' || !pathnames[index + 1] || isNaN(pathnames[index + 1])) {
+      breadcrumbItems.push({ label, path });
+    }
+  });
+
+  return breadcrumbItems;
 };
 
 export default AdminLayout;

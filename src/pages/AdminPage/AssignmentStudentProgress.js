@@ -197,7 +197,7 @@ const AssignmentStudentProgress = () => {
           {/* 헤더 */}
           <div className="admin-page-header">
             <div className="admin-header-left">
-              <button className="admin-btn-back" onClick={() => navigate(`/admin/assignments/section/${sectionId}/progress`)}>
+              <button className="admin-btn-back" onClick={() => navigate(`/tutor/assignments/section/${sectionId}/progress`)}>
                 ← 돌아가기
               </button>
               <div>
@@ -548,7 +548,7 @@ const AssignmentStudentProgress = () => {
                     <tr 
                       key={assignment.id} 
                       className="admin-clickable"
-                      onClick={() => navigate(`/admin/assignments/section/${sectionId}/progress/${assignment.id}`)}
+                      onClick={() => navigate(`/tutor/assignments/section/${sectionId}/progress/${assignment.id}`)}
                     >
                       <td className="admin-assignment-title-cell">
                         <div>

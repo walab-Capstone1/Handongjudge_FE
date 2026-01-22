@@ -34,7 +34,7 @@ const Navbar = () => {
           {/* 마이페이지 비활성화 (기능은 유지) */}
           {/* <Link to="/mypage/info" className="nav-link">마이페이지</Link> */}
           {isProfessor && (
-            <Link to="/admin" className="nav-link admin-link">관리 페이지</Link>
+            <Link to="/tutor" className="nav-link admin-link">관리 페이지</Link>
           )}
           {isSuperAdmin && (
             <Link to="/super-admin" className="nav-link super-admin-link">시스템 관리</Link>

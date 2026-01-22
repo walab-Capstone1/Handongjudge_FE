@@ -61,10 +61,11 @@ const IndexPage = () => {
 
   const handleManagementClick = () => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { redirectTo: "/admin" } });
+      navigate("/login", { state: { redirectTo: "/tutor" } });
       return;
     }
-    navigate("/admin");
+    navigate("/tutor");
+
   };
 
   const handleSystemManagementClick = () => {

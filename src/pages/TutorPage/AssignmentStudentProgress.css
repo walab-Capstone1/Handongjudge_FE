@@ -1,0 +1,1357 @@
+/* 과제별 풀이 현황 페이지 - CSS 스코프 제한 */
+.assignment-progress-container,
+.student-progress-container {
+  padding: 0;
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 페이지 헤더 - 튜터 대시보드 스타일 */
+.assignment-progress-container .tutor-page-header,
+.student-progress-container .tutor-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding: 1.75rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.assignment-progress-container .tutor-header-left,
+.student-progress-container .tutor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.assignment-progress-container .tutor-btn-back,
+.student-progress-container .tutor-btn-back {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.assignment-progress-container .tutor-btn-back:hover,
+.student-progress-container .tutor-btn-back:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-2px);
+}
+
+.assignment-progress-container .tutor-page-title,
+.student-progress-container .tutor-page-title {
+  margin: 0;
+  font-size: 1.875rem;
+  color: white;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-page-subtitle,
+.student-progress-container .tutor-page-subtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 문제별 통계 - 카드 스타일 */
+.assignment-progress-container .tutor-problems-summary,
+.student-progress-container .tutor-problems-summary {
+  margin-bottom: 2rem;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-summary-header,
+.student-progress-container .tutor-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-summary-title,
+.student-progress-container .tutor-summary-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-summary-title::before,
+.student-progress-container .tutor-summary-title::before {
+  content: '';
+  width: 4px;
+  height: 24px;
+  background: #667eea;
+  border-radius: 2px;
+}
+
+.assignment-progress-container .tutor-total-students-label,
+.student-progress-container .tutor-total-students-label {
+  font-size: 0.875rem;
+  color: white;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+}
+
+/* Progress 페이지 전용 문제 목록 - 그리드 레이아웃 */
+.assignment-progress-container .tutor-problems-list,
+.student-progress-container .tutor-problems-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.assignment-progress-container .tutor-problem-stat-card,
+.student-progress-container .tutor-problem-stat-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  min-width: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.assignment-progress-container .tutor-problem-stat-card::before,
+.student-progress-container .tutor-problem-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #667eea;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.assignment-progress-container .tutor-problem-stat-card:hover::before,
+.student-progress-container .tutor-problem-stat-card:hover::before {
+  transform: scaleX(1);
+}
+
+.assignment-progress-container .tutor-problem-stat-card.expanded,
+.student-progress-container .tutor-problem-stat-card.expanded {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  width: 100%;
+  max-width: none;
+  grid-column: 1 / -1;
+}
+
+.assignment-progress-container .tutor-problem-stat-card.expanded::before,
+.student-progress-container .tutor-problem-stat-card.expanded::before {
+  transform: scaleX(1);
+}
+
+
+.assignment-progress-container .tutor-problem-stat-header,
+.student-progress-container .tutor-problem-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.assignment-progress-container .tutor-problem-stat-header.tutor-clickable,
+.student-progress-container .tutor-problem-stat-header.tutor-clickable {
+  cursor: pointer;
+}
+
+.assignment-progress-container .tutor-problem-stat-header.tutor-clickable:hover,
+.student-progress-container .tutor-problem-stat-header.tutor-clickable:hover {
+  background: #f8f9fa;
+}
+
+.assignment-progress-container .tutor-problem-stat-header.tutor-expanded,
+.student-progress-container .tutor-problem-stat-header.tutor-expanded {
+  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+}
+
+.assignment-progress-container .tutor-problem-stat-header .tutor-header-left,
+.student-progress-container .tutor-problem-stat-header .tutor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.assignment-progress-container .tutor-problem-stat-header .tutor-header-right,
+.student-progress-container .tutor-problem-stat-header .tutor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.assignment-progress-container .tutor-problem-number,
+.student-progress-container .tutor-problem-number {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-problem-title,
+.student-progress-container .tutor-problem-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-problem-summary,
+.student-progress-container .tutor-problem-summary {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #f3f4f6;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-toggle-icon,
+.student-progress-container .tutor-toggle-icon {
+  font-size: 0.7rem;
+  color: #667eea;
+  transition: transform 0.3s ease;
+  display: inline-block;
+  font-weight: 700;
+}
+
+.assignment-progress-container .tutor-toggle-icon.tutor-expanded,
+.student-progress-container .tutor-toggle-icon.tutor-expanded {
+  transform: rotate(180deg);
+}
+
+
+.assignment-progress-container .tutor-problem-stat-details,
+.student-progress-container .tutor-problem-stat-details {
+  padding: 0 1rem 1rem 1rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+  }
+}
+
+.assignment-progress-container .tutor-problem-stat-info,
+.student-progress-container .tutor-problem-stat-info {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.assignment-progress-container .tutor-problem-stat-item,
+.student-progress-container .tutor-problem-stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-problem-stat-item .tutor-stat-label,
+.student-progress-container .tutor-problem-stat-item .tutor-stat-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-problem-stat-item .tutor-stat-value,
+.student-progress-container .tutor-problem-stat-item .tutor-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-problem-stat-item.tutor-solved .tutor-stat-value,
+.student-progress-container .tutor-problem-stat-item.tutor-solved .tutor-stat-value {
+  color: #10b981;
+}
+
+.assignment-progress-container .tutor-problem-stat-item.tutor-unsolved .tutor-stat-value,
+.student-progress-container .tutor-problem-stat-item.tutor-unsolved .tutor-stat-value {
+  color: #ef4444;
+}
+
+.assignment-progress-container .tutor-problem-stat-item .tutor-stat-percent,
+.student-progress-container .tutor-problem-stat-item .tutor-stat-percent {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-stat-row,
+.student-progress-container .tutor-stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.assignment-progress-container .tutor-problem-stat-bar,
+.student-progress-container .tutor-problem-stat-bar {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-progress-container .tutor-problem-stat-fill,
+.student-progress-container .tutor-problem-stat-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.assignment-progress-container .tutor-problem-stat-fill.tutor-solved-fill,
+.student-progress-container .tutor-problem-stat-fill.tutor-solved-fill {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+/* 필터 섹션 - 카드 스타일 */
+.assignment-progress-container .tutor-filters-section,
+.student-progress-container .tutor-filters-section {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 1.25rem 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-search-box,
+.student-progress-container .tutor-search-box {
+  position: relative;
+  flex: 1 1 300px;
+  min-width: 250px;
+  max-width: 400px;
+}
+
+.assignment-progress-container .tutor-search-input,
+.student-progress-container .tutor-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-search-input:focus,
+.student-progress-container .tutor-search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* 모달이 열려있을 때 search input focus 스타일 무시 */
+body.section-modal-open .assignment-progress-container .tutor-search-input:focus,
+body.section-modal-open .student-progress-container .tutor-search-input:focus {
+  outline: none !important;
+  border-color: #e1e8ed !important;
+  box-shadow: none !important;
+  background: white !important;
+}
+
+.assignment-progress-container .tutor-status-filters,
+.student-progress-container .tutor-status-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+
+.assignment-progress-container .tutor-filter-btn,
+.student-progress-container .tutor-filter-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #6b7280;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-filter-btn:hover,
+.student-progress-container .tutor-filter-btn:hover {
+  background: #f3f4f6;
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+.assignment-progress-container .tutor-filter-btn.tutor-active,
+.student-progress-container .tutor-filter-btn.tutor-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* 학생 목록 - 카드 스타일 */
+.assignment-progress-container .tutor-students-list,
+.student-progress-container .tutor-students-list {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-table-container,
+.student-progress-container .tutor-table-container {
+  overflow-x: auto;
+}
+
+.assignment-progress-container .tutor-students-table,
+.student-progress-container .tutor-students-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.assignment-progress-container .tutor-students-table thead,
+.student-progress-container .tutor-students-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.assignment-progress-container .tutor-students-table th,
+.student-progress-container .tutor-students-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tutor-students-table th:nth-child(1) {
+  width: 15%;
+}
+
+.tutor-students-table th:nth-child(2) {
+  width: 15%;
+}
+
+.tutor-students-table th:nth-child(3) {
+  width: 12%;
+}
+
+.tutor-students-table th:nth-child(4) {
+  width: 18%;
+}
+
+.tutor-students-table th:nth-child(5) {
+  width: 35%;
+}
+
+.tutor-students-table th:nth-child(6) {
+  width: 15%;
+}
+
+.assignment-progress-container .tutor-students-table tbody tr,
+.student-progress-container .tutor-students-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.assignment-progress-container .tutor-students-table tbody tr:hover,
+.student-progress-container .tutor-students-table tbody tr:hover {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  transform: scale(1.002);
+}
+
+.assignment-progress-container .tutor-students-table tbody tr:last-child,
+.student-progress-container .tutor-students-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.assignment-progress-container .tutor-students-table td,
+.student-progress-container .tutor-students-table td {
+  padding: 1.25rem;
+  font-size: 0.95rem;
+  color: #374151;
+  vertical-align: middle;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .student-id,
+.student-progress-container .student-id {
+  font-family: 'Courier New', monospace;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.assignment-progress-container .student-name,
+.student-progress-container .student-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 상태 배지 - 개선된 스타일 */
+.assignment-progress-container .tutor-status-badge,
+.student-progress-container .tutor-status-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-progress-container .tutor-status-badge.tutor-completed,
+.student-progress-container .tutor-status-badge.tutor-completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.assignment-progress-container .tutor-status-badge.tutor-in-progress,
+.student-progress-container .tutor-status-badge.tutor-in-progress {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+.assignment-progress-container .tutor-status-badge.tutor-not-started,
+.student-progress-container .tutor-status-badge.tutor-not-started {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+/* 진행률 - 개선된 스타일 */
+.assignment-progress-container .tutor-progress-cell,
+.student-progress-container .tutor-progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.assignment-progress-container .tutor-mini-progress-bar,
+.student-progress-container .tutor-mini-progress-bar {
+  flex: 1;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+  min-width: 80px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-progress-container .tutor-mini-progress-fill,
+.student-progress-container .tutor-mini-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  transition: width 0.3s ease;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.assignment-progress-container .tutor-progress-text,
+.student-progress-container .tutor-progress-text {
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: right;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 문제별 상태 - 개선된 스타일 */
+.assignment-progress-container .tutor-problems-status,
+.student-progress-container .tutor-problems-status {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.assignment-progress-container .tutor-btn-detail,
+.student-progress-container .tutor-btn-detail {
+  margin-left: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.assignment-progress-container .tutor-btn-detail:hover,
+.student-progress-container .tutor-btn-detail:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6b3fa0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.assignment-progress-container .tutor-problem-badge,
+.student-progress-container .tutor-problem-badge {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-problem-badge.solved,
+.student-progress-container .tutor-problem-badge.solved {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+  border: none;
+}
+
+.assignment-progress-container .tutor-problem-badge.solved.tutor-badge-clickable,
+.student-progress-container .tutor-problem-badge.solved.tutor-badge-clickable {
+  cursor: pointer;
+}
+
+.assignment-progress-container .tutor-problem-badge.solved:hover,
+.student-progress-container .tutor-problem-badge.solved:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
+
+.assignment-progress-container .tutor-problem-badge.unsolved,
+.student-progress-container .tutor-problem-badge.unsolved {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border: 2px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-problem-badge.unsolved:hover,
+.student-progress-container .tutor-problem-badge.unsolved:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  transform: scale(1.05);
+}
+
+/* 과제 완료 시간 - 개선된 스타일 */
+.assignment-progress-container .assignment-completion-time-cell,
+.student-progress-container .assignment-completion-time-cell {
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.assignment-progress-container .tutor-completion-time-display,
+.student-progress-container .tutor-completion-time-display {
+  font-weight: 600;
+  color: #10b981;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+  padding: 0.35rem 0.75rem;
+  background: #f0fdf4;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.assignment-progress-container .tutor-completion-time-display.tutor-not-completed,
+.student-progress-container .tutor-completion-time-display.tutor-not-completed {
+  color: #9ca3af;
+  font-style: italic;
+  font-weight: 500;
+  background: #f9fafb;
+}
+
+/* 데이터 없음 - 개선된 스타일 */
+.assignment-progress-container .tutor-no-data,
+.student-progress-container .tutor-no-data {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 1.1rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
+  margin: 2rem 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-no-data p,
+.student-progress-container .tutor-no-data p {
+  margin: 0;
+}
+
+/* 로딩 - 개선된 스타일 */
+.assignment-progress-container .tutor-loading-container,
+.student-progress-container .tutor-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.assignment-progress-container .tutor-loading-spinner,
+.student-progress-container .tutor-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 리스트 보기 스타일 - 과제 목록 테이블 */
+.assignment-progress-container .tutor-assignments-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-assignments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.assignment-progress-container .tutor-assignments-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.assignment-progress-container .tutor-assignments-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-progress-container .tutor-assignments-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.assignment-progress-container .tutor-assignments-table tbody tr:hover {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  transform: scale(1.001);
+}
+
+.assignment-progress-container .tutor-assignments-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.assignment-progress-container .tutor-assignments-table td {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.95rem;
+  color: #374151;
+  vertical-align: middle;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-assignment-title-cell {
+  min-width: 300px;
+}
+
+.assignment-progress-container .tutor-assignment-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-assignment-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-assignment-meta-cell {
+  font-size: 0.95rem;
+  color: #1e293b;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-table-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-clickable {
+  cursor: pointer;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .assignment-progress-container .tutor-problems-list,
+  .student-progress-container .tutor-problems-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .assignment-progress-container .tutor-problem-stat-card.expanded,
+  .student-progress-container .tutor-problem-stat-card.expanded {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .assignment-progress-container,
+  .student-progress-container {
+    padding: 1rem;
+  }
+
+  .assignment-progress-container .tutor-page-header,
+  .student-progress-container .tutor-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .assignment-progress-container .tutor-header-left,
+  .student-progress-container .tutor-header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .assignment-progress-container .tutor-summary-header,
+  .student-progress-container .tutor-summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .assignment-progress-container .tutor-problems-list,
+  .student-progress-container .tutor-problems-list {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .assignment-progress-container .tutor-problem-stat-card.expanded,
+  .student-progress-container .tutor-problem-stat-card.expanded {
+    grid-column: span 1;
+  }
+
+  .assignment-progress-container .tutor-problem-stat-header,
+  .student-progress-container .tutor-problem-stat-header {
+    flex-wrap: wrap;
+  }
+
+  .assignment-progress-container .tutor-problem-stat-header .tutor-header-right,
+  .student-progress-container .tutor-problem-stat-header .tutor-header-right {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+
+  .assignment-progress-container .tutor-filters-section,
+  .student-progress-container .tutor-filters-section {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .assignment-progress-container .tutor-search-box,
+  .student-progress-container .tutor-search-box {
+    max-width: none;
+  }
+
+  .assignment-progress-container .tutor-status-filters,
+  .student-progress-container .tutor-status-filters {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    width: 100%;
+  }
+
+  .assignment-progress-container .tutor-students-table,
+  .student-progress-container .tutor-students-table {
+    font-size: 0.85rem;
+  }
+
+  .assignment-progress-container .tutor-students-table th,
+  .assignment-progress-container .tutor-students-table td,
+  .student-progress-container .tutor-students-table th,
+  .student-progress-container .tutor-students-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .assignment-progress-container .tutor-problems-status,
+  .student-progress-container .tutor-problems-status {
+    justify-content: flex-start;
+  }
+
+  .assignment-progress-container .tutor-problem-badge,
+  .student-progress-container .tutor-problem-badge {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+
+  .assignment-progress-container .tutor-btn-detail,
+  .student-progress-container .tutor-btn-detail {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+}
+
+/* 상세보기 모달 - 개선된 스타일 */
+.assignment-progress-container .tutor-modal-overlay,
+.student-progress-container .tutor-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.assignment-progress-container .tutor-detail-modal,
+.student-progress-container .tutor-detail-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.assignment-progress-container .tutor-modal-header,
+.student-progress-container .tutor-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.75rem 2rem;
+  border-bottom: 2px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+}
+
+.assignment-progress-container .tutor-modal-header h2,
+.student-progress-container .tutor-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: white;
+  font-weight: 700;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-progress-container .tutor-modal-close,
+.student-progress-container .tutor-modal-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.assignment-progress-container .tutor-modal-close:hover,
+.student-progress-container .tutor-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.assignment-progress-container .tutor-detail-modal-content,
+.student-progress-container .tutor-detail-modal-content {
+  padding: 2rem;
+}
+
+.assignment-progress-container .student-info,
+.student-progress-container .student-info {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.assignment-progress-container .student-info h3,
+.student-progress-container .student-info h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: #1e293b;
+  font-weight: 700;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-problems-detail-list,
+.student-progress-container .tutor-problems-detail-list {
+  margin-top: 1.5rem;
+}
+
+.assignment-progress-container .tutor-problems-detail-list h4,
+.student-progress-container .tutor-problems-detail-list h4 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.2rem;
+  color: #1e293b;
+  font-weight: 700;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.assignment-progress-container .tutor-problems-detail-list h4::before,
+.student-progress-container .tutor-problems-detail-list h4::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: #667eea;
+  border-radius: 2px;
+}
+
+.assignment-progress-container .tutor-detail-table,
+.student-progress-container .tutor-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-progress-container .tutor-detail-table thead,
+.student-progress-container .tutor-detail-table thead {
+  background: linear-gradient(135deg, #f8f9fa 0%, #f1f5f9 100%);
+}
+
+.assignment-progress-container .tutor-detail-table th,
+.student-progress-container .tutor-detail-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-detail-table td,
+.student-progress-container .tutor-detail-table td {
+  padding: 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+  color: #374151;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-detail-table tbody tr:hover,
+.student-progress-container .tutor-detail-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.assignment-progress-container .tutor-detail-table tbody tr:last-child td,
+.student-progress-container .tutor-detail-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.assignment-progress-container .tutor-status-badge-detail,
+.student-progress-container .tutor-status-badge-detail {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-progress-container .tutor-status-badge-detail.completed,
+.student-progress-container .tutor-status-badge-detail.completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.assignment-progress-container .tutor-status-badge-detail.not-completed,
+.student-progress-container .tutor-status-badge-detail.not-completed {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-submission-time,
+.student-progress-container .tutor-submission-time {
+  font-weight: 600;
+  color: #10b981;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.75rem;
+  background: #f0fdf4;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.assignment-progress-container .tutor-submission-time.tutor-not-completed,
+.student-progress-container .tutor-submission-time.tutor-not-completed {
+  color: #9ca3af;
+  font-style: italic;
+  font-weight: 500;
+  background: #f9fafb;
+}
+
+.assignment-progress-container .tutor-modal-actions,
+.student-progress-container .tutor-modal-actions {
+  padding: 1.5rem 2rem;
+  border-top: 2px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  background: #f9fafb;
+}
+
+.assignment-progress-container .tutor-btn-secondary,
+.student-progress-container .tutor-btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-btn-secondary:hover,
+.student-progress-container .tutor-btn-secondary:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+/* 코드 조회 모달 스타일 */
+.assignment-progress-container .tutor-code-modal,
+.student-progress-container .tutor-code-modal {
+  max-width: 1000px;
+  max-height: 90vh;
+}
+
+.assignment-progress-container .tutor-code-modal-content,
+.student-progress-container .tutor-code-modal-content {
+  padding: 2rem;
+  max-height: calc(90vh - 200px);
+  overflow-y: auto;
+}
+
+.assignment-progress-container .tutor-code-info,
+.student-progress-container .tutor-code-info {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.assignment-progress-container .tutor-code-info-row,
+.student-progress-container .tutor-code-info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-progress-container .tutor-code-info-row:last-child,
+.student-progress-container .tutor-code-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.assignment-progress-container .tutor-code-label,
+.student-progress-container .tutor-code-label {
+  font-weight: 700;
+  color: #374151;
+  min-width: 100px;
+  font-size: 0.95rem;
+}
+
+.assignment-progress-container .tutor-code-value,
+.student-progress-container .tutor-code-value {
+  color: #1e293b;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.assignment-progress-container .tutor-code-value.tutor-result-accepted,
+.student-progress-container .tutor-code-value.tutor-result-accepted {
+  color: #10b981;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  background: #f0fdf4;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.assignment-progress-container .tutor-code-editor-container,
+.student-progress-container .tutor-code-editor-container {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  overflow-x: auto;
+  border: 1px solid #334155;
+}
+
+.assignment-progress-container .tutor-code-display,
+.student-progress-container .tutor-code-display {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: #e2e8f0;
+  font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.assignment-progress-container .tutor-code-display code,
+.student-progress-container .tutor-code-display code {
+  display: block;
+  color: inherit;
+  font-family: inherit;
+  background: transparent;
+  padding: 0;
+}
