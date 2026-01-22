@@ -517,6 +517,48 @@ class APIService {
     return await this.request(`/sections/${sectionId}/assignments`);
   }
 
+  // ==================== 수업별 권한 관련 API ====================
+  
+  // 관리 중인 수업 목록 (ADMIN, TUTOR 역할)
+  async getManagingSections() {
+    return await this.request('/user/sections/managing');
+  }
+
+  // 수강 중인 수업 목록 (STUDENT 역할)
+  async getEnrolledSections() {
+    return await this.request('/user/sections/enrolled');
+  }
+
+  // 특정 수업에서 내 역할 조회
+  async getMyRoleInSection(sectionId) {
+    return await this.request(`/sections/${sectionId}/my-role`);
+  }
+
+  // 모든 수업별 역할 목록
+  async getAllSectionRoles() {
+    return await this.request('/user/sections/roles');
+  }
+
+  // 수업에 튜터 추가
+  async addTutorToSection(sectionId, userId) {
+    return await this.request(`/sections/${sectionId}/tutors`, {
+      method: 'POST',
+      body: JSON.stringify({ userId }),
+    });
+  }
+
+  // 수업에서 튜터 제거
+  async removeTutorFromSection(sectionId, userId) {
+    return await this.request(`/sections/${sectionId}/tutors/${userId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // 수업의 관리자 목록 조회
+  async getSectionAdmins(sectionId) {
+    return await this.request(`/sections/${sectionId}/admins`);
+  }
+
   // ==================== 코딩 테스트 API ====================
 
   // 섹션별 코딩 테스트 목록 조회
