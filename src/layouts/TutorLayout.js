@@ -21,7 +21,8 @@ import {
   FaPlus,
   FaComments,
   FaBell,
-  FaChartBar
+  FaChartBar,
+  FaArrowLeft
 } from "react-icons/fa";
 
 import "./TutorLayout.css";
@@ -78,9 +79,24 @@ const TutorLayout = ({ children, selectedSection = null }) => {
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const response = await APIService.getInstructorDashboard();
+        // 새로운 API: 관리 중인 수업 목록 (ADMIN, TUTOR 역할)
+        const response = await APIService.getManagingSections();
         const sectionsData = response?.data || [];
-        setSections(sectionsData);
+        
+        // SectionInfoDto를 기존 형식으로 변환
+        const transformedSections = sectionsData.map(section => ({
+          sectionId: section.sectionId,
+          courseTitle: section.sectionInfo?.courseTitle || '',
+          sectionNumber: section.sectionInfo?.sectionNumber || '',
+          year: section.sectionInfo?.year || new Date().getFullYear(),
+          semester: section.sectionInfo?.semester || 'SPRING',
+          instructor: section.sectionInfo?.instructorName || '',
+          // 역할 정보는 내부적으로만 저장 (UI에는 표시 안 함)
+          _role: section.role, // 'ADMIN' 또는 'TUTOR'
+          _isAdmin: section.role === 'ADMIN'
+        }));
+        
+        setSections(transformedSections);
         
         // sectionId가 필요한 경로인지 확인
         // /tutor/courses, /tutor/problems, /tutor/settings 등은 sectionId가 필요 없음
@@ -92,7 +108,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
         
         // URL에서 sectionId가 있으면 해당 수업 찾기
         if (sectionIdFromUrl) {
-          const found = sectionsData.find(s => s.sectionId === parseInt(sectionIdFromUrl));
+          const found = transformedSections.find(s => s.sectionId === parseInt(sectionIdFromUrl));
           if (found) {
             setCurrentSection(found);
             localStorage.setItem('tutor_lastSelectedSectionId', found.sectionId.toString());
@@ -102,7 +118,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
           localStorage.setItem('tutor_lastSelectedSectionId', selectedSection.sectionId.toString());
         } else if (lastSelectedSectionId) {
           // localStorage에서 수업 불러오기 (항상 기억)
-          const found = sectionsData.find(s => s.sectionId === parseInt(lastSelectedSectionId));
+          const found = transformedSections.find(s => s.sectionId === parseInt(lastSelectedSectionId));
           if (found) {
             setCurrentSection(found);
             // sectionId가 필요한 경로이고 URL에 없으면 리다이렉트
@@ -205,6 +221,13 @@ const TutorLayout = ({ children, selectedSection = null }) => {
   // 주요 기능 메뉴 (1순위: 대시보드 + 문제관리 통합) - useMemo로 메모이제이션
   const mainMenuItems = useMemo(() => [
     { 
+      path: "/dashboard", 
+      label: "강의로 돌아가기", 
+      icon: FaArrowLeft,
+      subItems: [],
+      isBackLink: true // 스타일링을 위한 플래그
+    },
+    { 
       path: "/tutor", 
       label: "대시보드", 
       icon: FaHome,
@@ -261,53 +284,67 @@ const TutorLayout = ({ children, selectedSection = null }) => {
   ], []);
 
   // 수업별 메뉴 (3순위: 수업 선택 시에만 표시) - useMemo로 메모이제이션
-  const sectionMenuItems = useMemo(() => currentSection ? [
-    { 
-      path: `/tutor/assignments/section/${currentSection.sectionId}`, 
-      label: "과제 관리",
-      icon: FaTasks,
-      subItems: [
-        { path: `/tutor/assignments/section/${currentSection.sectionId}`, label: "과제 목록", icon: FaList },
-        { path: `/tutor/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황", icon: FaChartLine, subItems: [] },
-      ]
-    },
-    { 
-      path: `/tutor/notices/section/${currentSection.sectionId}`, 
-      label: "공지사항 관리", 
-      icon: FaBullhorn,
-      subItems: [] 
-    },
-    { 
-      path: `/sections/${currentSection.sectionId}/community`, 
-      label: "커뮤니티 관리", 
-      icon: FaComments,
-      subItems: [] 
-    },
-    { 
-      path: `/tutor/users/section/${currentSection.sectionId}`, 
-      label: "수강생 관리", 
-      icon: FaUsers,
-      subItems: [] 
-    },
-    { 
-      path: `/tutor/grades/section/${currentSection.sectionId}`, 
-      label: "성적 관리", 
-      icon: FaChartBar,
-      subItems: [] 
-    },
-    { 
-      path: `/tutor/notifications/section/${currentSection.sectionId}`, 
-      label: "수업 알림", 
-      icon: FaBell,
-      subItems: [] 
-    },
-    { 
-      path: `/tutor/stats/section/${currentSection.sectionId}`, 
-      label: "수업 통계", 
-      icon: FaChartBar,
-      subItems: [] 
-    },
-  ] : [], [currentSection]);
+  const sectionMenuItems = useMemo(() => {
+    if (!currentSection) return [];
+    
+    // 현재 수업의 역할 정보 가져오기
+    const sectionData = sections.find(s => s.sectionId === currentSection.sectionId);
+    const isAdmin = sectionData?._isAdmin || false;
+    
+    // 기본 메뉴 (ADMIN, TUTOR 모두 접근 가능)
+    const baseMenus = [
+      { 
+        path: `/tutor/assignments/section/${currentSection.sectionId}`, 
+        label: "과제 관리",
+        icon: FaTasks,
+        subItems: [
+          { path: `/tutor/assignments/section/${currentSection.sectionId}`, label: "과제 목록", icon: FaList },
+          { path: `/tutor/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황", icon: FaChartLine, subItems: [] },
+        ]
+      },
+      { 
+        path: `/tutor/notices/section/${currentSection.sectionId}`, 
+        label: "공지사항 관리", 
+        icon: FaBullhorn,
+        subItems: [] 
+      },
+      { 
+        path: `/sections/${currentSection.sectionId}/community`, 
+        label: "커뮤니티 관리", 
+        icon: FaComments,
+        subItems: [] 
+      },
+      { 
+        path: `/tutor/users/section/${currentSection.sectionId}`, 
+        label: "수강생 관리", 
+        icon: FaUsers,
+        subItems: [] 
+      },
+      { 
+        path: `/tutor/grades/section/${currentSection.sectionId}`, 
+        label: "성적 관리", 
+        icon: FaChartBar,
+        subItems: [] 
+      },
+      { 
+        path: `/tutor/notifications/section/${currentSection.sectionId}`, 
+        label: "수업 알림", 
+        icon: FaBell,
+        subItems: [] 
+      },
+      { 
+        path: `/tutor/stats/section/${currentSection.sectionId}`, 
+        label: "수업 통계", 
+        icon: FaChartBar,
+        subItems: [] 
+      },
+    ];
+    
+    // ADMIN만 접근 가능한 메뉴는 현재 수강생 관리 페이지에서 처리
+    // (튜터 추가/해제 기능이 수강생 관리 페이지에 있으므로 별도 메뉴 불필요)
+    
+    return baseMenus;
+  }, [currentSection, sections]);
 
   return (
     <div className={`tutor-layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -362,7 +399,7 @@ const TutorLayout = ({ children, selectedSection = null }) => {
                     <div key={item.path} className="sidebar-menu-group">
                       <Link
                         to={item.path}
-                        className={`sidebar-item ${isActive ? "active" : ""}`}
+                        className={`sidebar-item ${isActive ? "active" : ""} ${item.isBackLink ? 'back-link-item' : ''}`}
                         onClick={(e) => handleMenuClick(item, isExpanded, e)}
                         title={sidebarCollapsed ? item.label : undefined}
                         data-tooltip={sidebarCollapsed ? item.label : undefined}
