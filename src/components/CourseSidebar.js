@@ -1,23 +1,54 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { MdDashboard, MdAssignment, MdAnnouncement, MdNotifications, MdLogout, MdMenuBook, MdClose, MdForum, MdQuiz } from "react-icons/md";
+import { MdDashboard, MdAssignment, MdAnnouncement, MdNotifications, MdLogout, MdMenuBook, MdClose, MdForum, MdQuiz, MdSettings } from "react-icons/md";
 import APIService from "../services/APIService";
 import "./CourseSidebar.css";
 
 const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, isCollapsed = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [showCourseList, setShowCourseList] = useState(false);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
+  const [hasManagingSections, setHasManagingSections] = useState(false);
+  const [checkingManagingSections, setCheckingManagingSections] = useState(true);
   const courseListRef = useRef(null);
   
   // sectionId가 없을 때 에러 방지
   // sectionId가 null이거나 undefined이거나 NaN이면 과제, 공지사항, 커뮤니티, 알림 메뉴 숨김
   // 처음에는 대시보드만 표시하고, 수업 카드를 클릭하면 나머지 메뉴가 나타남
   const hasSectionId = sectionId !== null && sectionId !== undefined && !isNaN(sectionId) && sectionId > 0;
+  
+  // 관리 중인 수업이 있는지 확인
+  useEffect(() => {
+    const checkManagingSections = async () => {
+      if (!user) {
+        setCheckingManagingSections(false);
+        return;
+      }
+
+      // SUPER_ADMIN은 항상 관리 페이지 접근 가능
+      if (user?.role === 'SUPER_ADMIN') {
+        setHasManagingSections(true);
+        setCheckingManagingSections(false);
+        return;
+      }
+
+      try {
+        const response = await APIService.getManagingSections();
+        setHasManagingSections((response?.data || []).length > 0);
+      } catch (error) {
+        console.error('관리 중인 수업 확인 실패:', error);
+        setHasManagingSections(false);
+      } finally {
+        setCheckingManagingSections(false);
+      }
+    };
+
+    checkManagingSections();
+  }, [user]);
   
   const menuItems = [
     { id: "dashboard", label: "대시보드", path: hasSectionId ? `/sections/${sectionId}/dashboard` : '/dashboard', icon: MdDashboard },
@@ -27,6 +58,10 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
       { id: "notice", label: "공지사항", path: `/sections/${sectionId}/course-notices`, icon: MdAnnouncement },
       { id: "community", label: "커뮤니티", path: `/sections/${sectionId}/community`, icon: MdForum },
       { id: "notification", label: "알림", path: `/sections/${sectionId}/alarm`, icon: MdNotifications },
+    ] : []),
+    // 관리 중인 수업이 있으면 관리 페이지 링크 추가
+    ...(!checkingManagingSections && hasManagingSections ? [
+      { id: "admin", label: "관리 페이지", path: "/tutor", icon: MdSettings }
     ] : []),
   ];
 
@@ -120,7 +155,9 @@ const CourseSidebar = ({ sectionId, activeMenu = "대시보드", onMenuClick, is
                 key={item.id}
                 className={`sidebar-menu-item ${
                   isActive ? "active" : ""
-                } ${isSubMenu ? "sub-menu-item" : ""}`}
+                } ${isSubMenu ? "sub-menu-item" : ""} ${
+                  item.id === 'admin' ? 'admin-menu-item' : ''
+                }`}
                 style={isSubMenu ? {
                   animationDelay: `${(index - 1) * 0.1}s`
                 } : {}}
