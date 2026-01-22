@@ -139,13 +139,15 @@ const TipTapEditor = ({ content, onChange, placeholder }) => {
     editor.chain().focus().updateAttributes('codeBlock', { language: language || null }).run();
     // 언어 변경 후 하이라이팅 다시 적용
     setTimeout(() => {
-      highlightCodeBlocks();
+      if (editor && editor.view && editor.view.dom) {
+        highlightCodeBlocks();
+      }
     }, 100);
   };
 
   // 코드 블록 하이라이팅 적용
   const highlightCodeBlocks = () => {
-    if (!editor) return;
+    if (!editor || !editor.view || !editor.view.dom) return;
     const editorElement = editor.view.dom.closest('.tiptap-editor-wrapper');
     if (!editorElement) return;
 
@@ -183,20 +185,38 @@ const TipTapEditor = ({ content, onChange, placeholder }) => {
     if (!editor) return;
 
     const handleUpdate = () => {
+      // 에디터가 완전히 마운트된 후에만 하이라이팅 시도
       setTimeout(() => {
-        highlightCodeBlocks();
+        if (editor && editor.view && editor.view.dom) {
+          highlightCodeBlocks();
+        }
       }, 10);
     };
 
-    editor.on('update', handleUpdate);
-    editor.on('selectionUpdate', handleUpdate);
+    // 에디터가 마운트될 때까지 대기 (최대 20번 시도, 약 1초)
+    let retryCount = 0;
+    const maxRetries = 20;
+    
+    const checkAndSetup = () => {
+      if (editor && editor.view && editor.view.dom) {
+        editor.on('update', handleUpdate);
+        editor.on('selectionUpdate', handleUpdate);
+        // 초기 하이라이팅
+        handleUpdate();
+      } else if (retryCount < maxRetries) {
+        // 아직 마운트되지 않았다면 다시 시도
+        retryCount++;
+        setTimeout(checkAndSetup, 50);
+      }
+    };
 
-    // 초기 하이라이팅
-    handleUpdate();
+    checkAndSetup();
 
     return () => {
-      editor.off('update', handleUpdate);
-      editor.off('selectionUpdate', handleUpdate);
+      if (editor) {
+        editor.off('update', handleUpdate);
+        editor.off('selectionUpdate', handleUpdate);
+      }
     };
   }, [editor]);
 
