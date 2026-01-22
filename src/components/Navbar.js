@@ -1,14 +1,37 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import APIService from "../services/APIService";
 import "./Navbar.css";
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [hasManagingSections, setHasManagingSections] = useState(false);
+  const [checking, setChecking] = useState(true);
   
-  // role이 ADMIN 또는 SUPER_ADMIN인 사용자에게 관리자 링크 표시
-  const isProfessor = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  // 관리 중인 수업이 있는지 확인
+  useEffect(() => {
+    const checkManagingSections = async () => {
+      if (!isAuthenticated) {
+        setChecking(false);
+        return;
+      }
+      
+      try {
+        const response = await APIService.getManagingSections();
+        setHasManagingSections((response?.data || []).length > 0);
+      } catch (error) {
+        console.error('관리 중인 수업 확인 실패:', error);
+        setHasManagingSections(false);
+      } finally {
+        setChecking(false);
+      }
+    };
+    
+    checkManagingSections();
+  }, [isAuthenticated]);
+  
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
   const handleLogout = async () => {
@@ -33,7 +56,7 @@ const Navbar = () => {
           <Link to="/main" className="nav-link">강의</Link>
           {/* 마이페이지 비활성화 (기능은 유지) */}
           {/* <Link to="/mypage/info" className="nav-link">마이페이지</Link> */}
-          {isProfessor && (
+          {!checking && hasManagingSections && (
             <Link to="/tutor" className="nav-link admin-link">관리 페이지</Link>
           )}
           {isSuperAdmin && (
