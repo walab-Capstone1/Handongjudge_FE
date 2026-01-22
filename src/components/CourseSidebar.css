@@ -130,6 +130,22 @@
   display: none;
 }
 
+/* 관리 페이지 메뉴 스타일 (빨간색) */
+.sidebar-menu-item.admin-menu-item .menu-text,
+.sidebar-menu-item.admin-menu-item .menu-icon {
+  color: #ff4444;
+}
+
+.sidebar-menu-item.admin-menu-item:hover .menu-text,
+.sidebar-menu-item.admin-menu-item:hover .menu-icon {
+  color: #ff6666;
+}
+
+.sidebar-menu-item.admin-menu-item.active .menu-text,
+.sidebar-menu-item.admin-menu-item.active .menu-icon {
+  color: #FFFFFF;
+}
+
 .sidebar-logout {
   display: flex;
   align-items: center;
