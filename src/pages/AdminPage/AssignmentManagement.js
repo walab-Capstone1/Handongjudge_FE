@@ -66,12 +66,28 @@ const AssignmentManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [problemListSearchTerm, setProblemListSearchTerm] = useState('');
   const [openMoreMenu, setOpenMoreMenu] = useState(null);
+  const [currentUserRole, setCurrentUserRole] = useState(null); // 현재 사용자의 역할 (ADMIN인지 확인용)
   const ASSIGNMENTS_PER_PAGE = 10;
 
   useEffect(() => {
     fetchAssignments();
     fetchSections();
+    if (sectionId) {
+      fetchUserRole();
+    }
   }, [sectionId]); // sectionId가 변경될 때마다 다시 조회
+
+  // 현재 사용자의 역할 조회
+  const fetchUserRole = async () => {
+    if (!sectionId) return;
+    try {
+      const roleResponse = await APIService.getMyRoleInSection(sectionId);
+      setCurrentUserRole(roleResponse?.role || null);
+    } catch (error) {
+      console.error('역할 조회 실패:', error);
+      setCurrentUserRole(null);
+    }
+  };
 
   useEffect(() => {
     if (assignments.length > 0) {
@@ -1380,16 +1396,18 @@ const AssignmentManagement = () => {
                         >
                           {assignment.active ? '비활성화' : '활성화'}
                         </button>
-                        <button 
-                          className="admin-btn-text-small admin-delete"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(assignment.id);
-                            setOpenMoreMenu(null);
-                          }}
-                        >
-                          삭제
-                  </button>
+                        {currentUserRole === 'ADMIN' && (
+                          <button 
+                            className="admin-btn-text-small admin-delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(assignment.id);
+                              setOpenMoreMenu(null);
+                            }}
+                          >
+                            삭제
+                          </button>
+                        )}
                 </div>
                     )}
                   </div>
