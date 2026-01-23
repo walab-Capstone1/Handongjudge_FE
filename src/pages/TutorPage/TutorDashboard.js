@@ -13,6 +13,7 @@ const TutorDashboard = () => {
   const navigate = useNavigate();
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedYear, setSelectedYear] = useState('ALL');
   const [selectedSemester, setSelectedSemester] = useState('ALL');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -616,9 +617,18 @@ const TutorDashboard = () => {
 
   // 필터링된 수업 목록
   const filteredSections = sections.filter(section => {
+    // 검색어 필터
+    const matchesSearch = !searchTerm || 
+      section.courseTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (section.instructorName && section.instructorName.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    // 년도 필터
     const matchesYear = selectedYear === 'ALL' || section.year === parseInt(selectedYear);
+    
+    // 학기 필터
     const matchesSemester = selectedSemester === 'ALL' || section.semester === selectedSemester;
-    return matchesYear && matchesSemester;
+    
+    return matchesSearch && matchesYear && matchesSemester;
   });
 
   // 워크로드 관리 데이터 계산
@@ -739,46 +749,50 @@ const TutorDashboard = () => {
     <TutorLayout>
       <div className="tutor-dashboard">
         <div className="tutor-dashboard-header">
-          <h1 className="dashboard-title">전체 수업 운영 현황</h1>
+          <h1 className="dashboard-title">대시보드</h1>
           <p className="dashboard-subtitle">
             모든 수업의 전반적인 상황을 한눈에 파악하고, 우선순위를 결정하세요.
           </p>
         </div>
 
         {/* 필터 섹션 */}
-        <div className="tutor-filter-section">
-          <div className="tutor-filter-left">
-            <div className="tutor-filter-group">
-              <label className="tutor-filter-label">년도</label>
-              <select 
-                className="tutor-filter-select"
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-              >
-                {years.map(year => (
-                  <option key={year} value={year}>
-                    {year === 'ALL' ? '전체' : `${year}년`}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="tutor-filter-group">
-              <label className="tutor-filter-label">학기</label>
-              <select 
-                className="tutor-filter-select"
-                value={selectedSemester}
-                onChange={(e) => setSelectedSemester(e.target.value)}
-              >
-                {semesters.map(semester => (
-                  <option key={semester.value} value={semester.value}>
-                    {semester.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="tutor-filter-stats">
-              <span className="tutor-filter-count">총 {filteredSections.length}개 수업</span>
-            </div>
+        <div className="tutor-dashboard-filters-section">
+          <div className="tutor-dashboard-search-box">
+            <input
+              type="text"
+              placeholder="수업명, 교수명으로 검색..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="tutor-dashboard-search-input"
+            />
+          </div>
+          
+          <div className="tutor-dashboard-filter-group">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="tutor-dashboard-filter-select"
+            >
+              {years.map(year => (
+                <option key={year} value={year}>
+                  {year === 'ALL' ? '전체 년도' : `${year}년`}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="tutor-dashboard-filter-group">
+            <select
+              value={selectedSemester}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              className="tutor-dashboard-filter-select"
+            >
+              {semesters.map(semester => (
+                <option key={semester.value} value={semester.value}>
+                  {semester.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
