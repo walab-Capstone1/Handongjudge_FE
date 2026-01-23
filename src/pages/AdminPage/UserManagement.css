@@ -391,11 +391,15 @@
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  box-sizing: border-box;
+  overflow: auto;
 }
 
 
@@ -415,7 +419,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  border-bottom: 1px solid #e1e8ed;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
   box-sizing: border-box;
 }
 
