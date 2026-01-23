@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
@@ -153,17 +153,21 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
 }
 
 .problem-set-management .problem-set-management-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f8fafc;
+  background-image: none;
 }
 
 .problem-set-management .problem-set-management-table th {
-  padding: 0.875rem 1rem;
+  padding: 1rem 1.5rem;
   text-align: left;
-  font-weight: 600;
-  font-size: 0.8125rem;
-  color: white;
-  border-bottom: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #cbd5e1;
+  background: #f1f5f9;
+  background-image: none;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   white-space: nowrap;
 }
@@ -339,27 +343,32 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
 
 /* 모달 스타일 - CSS 스코프 제한 규칙 적용 */
 .problem-set-management .problem-set-management-create-modal-overlay {
-  position: fixed;
-  top: 65px;
-  left: 280px;
-  right: calc(100vw / 3);
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  z-index: 10000;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10000 !important;
   animation: problem-set-management-create-fadeIn 0.2s ease;
-  padding-top: 2rem;
-  overflow-y: auto;
-  box-sizing: border-box;
-  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 2rem !important;
+  overflow: auto !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
 }
 
 /* 사이드바가 접혔을 때 */
 .tutor-layout.sidebar-collapsed .problem-set-management .problem-set-management-create-modal-overlay {
-  left: 60px;
-  right: calc(100vw / 3);
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
 }
 
 @keyframes problem-set-management-create-fadeIn {
@@ -376,11 +385,12 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   border-radius: 16px;
   width: 90%;
   max-width: 600px;
-  max-height: calc(90vh - 65px);
+  max-height: 90vh;
   overflow: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: problem-set-management-create-slideInUp 0.3s ease;
-  margin-top: 0;
+  margin: auto !important;
+  position: relative !important;
 }
 
 @keyframes problem-set-management-create-slideInUp {
@@ -400,15 +410,16 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   align-items: center;
   padding: 1.75rem 2rem;
   border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f9fafb !important;
+  background-image: none !important;
+  color: #1e293b !important;
 }
 
 .problem-set-management .problem-set-management-create-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: #1e293b !important;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
@@ -531,13 +542,15 @@ body.section-modal-open .problem-set-management .problem-set-management-form-tex
 }
 
 .problem-set-management .problem-set-management-btn-submit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea !important;
+  background-image: none !important;
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .problem-set-management .problem-set-management-btn-submit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%);
+  background: #5568d3 !important;
+  background-image: none !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
