@@ -15,10 +15,18 @@ const ProblemSetManagement = () => {
   const [newSetTitle, setNewSetTitle] = useState('');
   const [newSetDescription, setNewSetDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [showProblemSelectModal, setShowProblemSelectModal] = useState(false);
+  const [allProblems, setAllProblems] = useState([]);
+  const [problemSearchTerm, setProblemSearchTerm] = useState('');
+  const [selectedProblemIds, setSelectedProblemIds] = useState([]);
+  const [currentStep, setCurrentStep] = useState(1); // 1: 기본정보, 2: 문제선택
 
   useEffect(() => {
     fetchProblemSets();
-  }, []);
+    if (showProblemSelectModal) {
+      fetchAllProblems();
+    }
+  }, [showProblemSelectModal]);
 
   const fetchProblemSets = async () => {
     try {
@@ -33,22 +41,59 @@ const ProblemSetManagement = () => {
     }
   };
 
-  const handleCreateSet = async () => {
+  const fetchAllProblems = async () => {
+    try {
+      const response = await APIService.getAllProblems();
+      let problemsData = [];
+      if (Array.isArray(response)) {
+        problemsData = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        problemsData = response.data;
+      } else if (response?.data && !Array.isArray(response.data)) {
+        problemsData = [response.data];
+      } else if (response && typeof response === 'object') {
+        problemsData = Object.values(response);
+      }
+      setAllProblems(problemsData);
+    } catch (error) {
+      console.error('문제 목록 조회 실패:', error);
+      setAllProblems([]);
+    }
+  };
+
+  const handleNextToProblemSelect = () => {
     if (!newSetTitle.trim()) {
       alert('문제집 제목을 입력해주세요.');
       return;
     }
+    setShowCreateModal(false); // 첫 번째 모달 닫기
+    setCurrentStep(2);
+    setShowProblemSelectModal(true); // 두 번째 모달 열기
+    fetchAllProblems();
+  };
+
+  const handleSkipProblemSelect = async () => {
+    await handleCreateSetWithProblems([]);
+  };
+
+  const handleCreateSetWithProblems = async (problemIds = null) => {
+    const finalProblemIds = problemIds !== null ? problemIds : selectedProblemIds;
 
     try {
       setIsCreating(true);
       await APIService.createProblemSet({
         title: newSetTitle.trim(),
         description: newSetDescription.trim() || null,
-        tags: '[]' // 기본값: 빈 태그 배열
+        tags: '[]', // 기본값: 빈 태그 배열
+        problemIds: finalProblemIds
       });
       setShowCreateModal(false);
+      setShowProblemSelectModal(false);
+      setCurrentStep(1);
       setNewSetTitle('');
       setNewSetDescription('');
+      setSelectedProblemIds([]);
+      setProblemSearchTerm('');
       fetchProblemSets();
     } catch (error) {
       console.error('문제집 생성 실패:', error);
@@ -57,6 +102,48 @@ const ProblemSetManagement = () => {
       setIsCreating(false);
     }
   };
+
+  const handleCreateSet = async () => {
+    if (!newSetTitle.trim()) {
+      alert('문제집 제목을 입력해주세요.');
+      return;
+    }
+
+    // 문제 선택 단계로 이동
+    handleNextToProblemSelect();
+  };
+
+  const handleProblemToggle = (problemId) => {
+    setSelectedProblemIds(prev => {
+      if (prev.includes(problemId)) {
+        return prev.filter(id => id !== problemId);
+      } else {
+        return [...prev, problemId];
+      }
+    });
+  };
+
+  const handleSelectAllProblems = () => {
+    const filtered = getFilteredProblems();
+    if (selectedProblemIds.length === filtered.length && filtered.length > 0) {
+      setSelectedProblemIds([]);
+    } else {
+      setSelectedProblemIds(filtered.map(p => p.id));
+    }
+  };
+
+  const getFilteredProblems = () => {
+    let filtered = allProblems;
+    if (problemSearchTerm) {
+      filtered = filtered.filter(p => 
+        p.title?.toLowerCase().includes(problemSearchTerm.toLowerCase()) ||
+        p.id?.toString().includes(problemSearchTerm)
+      );
+    }
+    return filtered;
+  };
+
+  const filteredProblems = getFilteredProblems();
 
   const handleDeleteSet = async (problemSet) => {
     if (!window.confirm(`정말로 "${problemSet.title}" 문제집을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
@@ -109,7 +196,11 @@ const ProblemSetManagement = () => {
           <div className="problem-set-management-title-right">
             <button 
               className="problem-set-management-btn-create"
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setCurrentStep(1);
+                setShowCreateModal(true);
+                setShowProblemSelectModal(false);
+              }}
             >
               + 새 문제집 만들기
             </button>
@@ -189,8 +280,8 @@ const ProblemSetManagement = () => {
           )}
         </div>
 
-        {/* 문제집 생성 모달 */}
-        {showCreateModal && (
+        {/* 문제집 생성 모달 - 기본 정보 */}
+        {showCreateModal && currentStep === 1 && (
           <div 
             className="problem-set-management-create-modal-overlay" 
             onClick={() => {
@@ -261,10 +352,140 @@ const ProblemSetManagement = () => {
                 </button>
                 <button 
                   className="problem-set-management-btn-submit"
-                  onClick={handleCreateSet}
+                  onClick={handleNextToProblemSelect}
                   disabled={isCreating || !newSetTitle.trim()}
                 >
-                  {isCreating ? '생성 중...' : '생성'}
+                  다음
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 문제 선택 모달 */}
+        {showProblemSelectModal && currentStep === 2 && (
+          <div 
+            className="problem-set-management-create-modal-overlay" 
+            onClick={() => {
+              if (!isCreating) {
+                setShowProblemSelectModal(false);
+                setCurrentStep(1);
+                setSelectedProblemIds([]);
+                setProblemSearchTerm('');
+              }
+            }}
+          >
+            <div 
+              className="problem-set-management-create-modal-content" 
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: '95vw', width: '95vw', minWidth: '800px' }}
+            >
+              <div className="problem-set-management-create-modal-header">
+                <h2>문제 선택 - {newSetTitle}</h2>
+                <button 
+                  className="problem-set-management-create-modal-close"
+                  onClick={() => {
+                    if (!isCreating) {
+                      setShowProblemSelectModal(false);
+                      setCurrentStep(1);
+                      setSelectedProblemIds([]);
+                      setProblemSearchTerm('');
+                    }
+                  }}
+                  disabled={isCreating}
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="problem-set-management-create-modal-body">
+                <div style={{ marginBottom: '1rem' }}>
+                  <input
+                    type="text"
+                    placeholder="문제명 또는 ID로 검색..."
+                    value={problemSearchTerm}
+                    onChange={(e) => setProblemSearchTerm(e.target.value)}
+                    className="problem-set-management-search-input"
+                    style={{ width: '100%', maxWidth: '500px' }}
+                  />
+                </div>
+
+                {filteredProblems.length > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedProblemIds.length === filteredProblems.length && filteredProblems.length > 0}
+                        onChange={handleSelectAllProblems}
+                      />
+                      <span>전체 선택</span>
+                    </label>
+                    <span>
+                      {selectedProblemIds.length} / {filteredProblems.length}개 선택됨
+                    </span>
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
+                  {filteredProblems.length > 0 ? (
+                    filteredProblems.map((problem) => (
+                      <div key={problem.id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedProblemIds.includes(problem.id)}
+                          onChange={() => handleProblemToggle(problem.id)}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600 }}>{problem.title}</h4>
+                          <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>ID: #{problem.id}</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                      <p>{problemSearchTerm ? '검색 결과가 없습니다.' : '사용 가능한 문제가 없습니다.'}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="problem-set-management-create-modal-footer">
+                <button 
+                  className="problem-set-management-btn-cancel"
+                  onClick={() => {
+                    setShowProblemSelectModal(false);
+                    setCurrentStep(1);
+                    setShowCreateModal(true);
+                  }}
+                  disabled={isCreating}
+                >
+                  이전
+                </button>
+                <button 
+                  className="problem-set-management-btn-cancel"
+                  onClick={handleSkipProblemSelect}
+                  disabled={isCreating}
+                >
+                  건너뛰기
+                </button>
+                <button 
+                  className="problem-set-management-btn-cancel"
+                  onClick={() => {
+                    setShowProblemSelectModal(false);
+                    setCurrentStep(1);
+                    setSelectedProblemIds([]);
+                    setProblemSearchTerm('');
+                  }}
+                  disabled={isCreating}
+                >
+                  취소
+                </button>
+                <button 
+                  className="problem-set-management-btn-submit"
+                  onClick={() => handleCreateSetWithProblems()}
+                  disabled={isCreating}
+                >
+                  {isCreating ? '생성 중...' : `생성${selectedProblemIds.length > 0 ? ` (${selectedProblemIds.length}개 문제)` : ''}`}
                 </button>
               </div>
             </div>
