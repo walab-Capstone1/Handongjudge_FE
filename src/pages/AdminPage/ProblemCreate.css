@@ -666,3 +666,71 @@
   color: #334155;
 }
 
+/* 문제 수정 페이지 전용 스타일 */
+.problem-create .problem-edit-btn-back,
+button.problem-edit-btn-back {
+  background: #f8fafc !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  color: #475569 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 600 !important;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  min-height: 40px !important;
+  text-decoration: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+.problem-create .problem-edit-btn-back:hover,
+button.problem-edit-btn-back:hover {
+  background: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.problem-create .problem-edit-btn-back:disabled,
+button.problem-edit-btn-back:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background: #f3f4f6 !important;
+}
+
+.problem-create .problem-edit-convert-btn,
+button.problem-edit-convert-btn {
+  background: #3b82f6 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif !important;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3) !important;
+  min-height: 40px !important;
+  text-decoration: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  margin-left: 16px !important;
+  white-space: nowrap !important;
+}
+
+.problem-create .problem-edit-convert-btn:hover,
+button.problem-edit-convert-btn:hover {
+  background: #2563eb !important;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
