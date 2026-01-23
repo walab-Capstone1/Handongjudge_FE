@@ -376,7 +376,6 @@ const ProblemManagement = () => {
             <h1 className="problem-management-title">문제 관리</h1>
             <div className="problem-management-title-stats">
               <span className="problem-management-stat-badge">총 {problems.length}개 문제</span>
-              <span className="problem-management-stat-badge">표시 {filteredProblems.length}개</span>
             </div>
           </div>
           <div className="problem-management-title-right">
@@ -567,20 +566,20 @@ const ProblemManagement = () => {
                     <td className="problem-management-actions-cell">
                       <div className="problem-management-actions-inline">
                         <button 
-                          className="problem-management-btn-action problem-management-btn-edit"
+                          className="tutor-btn-table-action tutor-btn-edit"
                           onClick={() => navigate(`/tutor/problems/${problem.id}/edit`)}
                         >
                           수정
                         </button>
                         <button 
-                          className="problem-management-btn-action problem-management-btn-copy"
+                          className="tutor-btn-table-action tutor-btn-secondary-action"
                           onClick={() => handleCopyClick(problem)}
                         >
                           복사
                         </button>
                         {problem.isUsed && (
                           <button 
-                            className="problem-management-btn-action problem-management-btn-usage"
+                            className="tutor-btn-table-action tutor-btn-secondary-action"
                             onClick={() => handleUsageClick(problem)}
                             title="사용 현황 보기"
                           >
@@ -588,7 +587,7 @@ const ProblemManagement = () => {
                           </button>
                         )}
                         <button 
-                          className="problem-management-btn-action problem-management-btn-delete"
+                          className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-delete"
                           onClick={() => handleDeleteClick(problem)}
                         >
                           삭제
