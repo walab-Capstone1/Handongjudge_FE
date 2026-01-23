@@ -666,3 +666,106 @@
   color: #334155;
 }
 
+/* 문제 수정 페이지 전용 스타일 */
+/* 헤더 레이아웃 */
+.problem-create .tutor-page-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 2rem !important;
+}
+
+.problem-create .problem-edit-btn-back,
+button.problem-edit-btn-back {
+  background: #475569 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  color: white !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 600 !important;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  min-height: 40px !important;
+  text-decoration: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+.problem-create .problem-edit-btn-back:hover,
+button.problem-edit-btn-back:hover {
+  background: #334155 !important;
+  border-color: #1e293b !important;
+  color: white !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.problem-create .problem-edit-btn-back:disabled,
+button.problem-edit-btn-back:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background: #f3f4f6 !important;
+}
+
+.problem-create .problem-edit-convert-btn,
+button.problem-edit-convert-btn {
+  background: #667eea !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif !important;
+  min-height: 40px !important;
+  text-decoration: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  margin-left: 16px !important;
+  white-space: nowrap !important;
+}
+
+.problem-create .problem-edit-convert-btn:hover,
+button.problem-edit-convert-btn:hover {
+  background: #5568d3 !important;
+}
+
+/* 문제 수정 페이지의 수정 완료 버튼 단색 스타일 */
+.problem-create .problem-create-actions .tutor-btn-primary,
+.problem-create .problem-create-actions button.tutor-btn-primary {
+  background: #667eea !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0.875rem 1.75rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif !important;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3) !important;
+}
+
+.problem-create .problem-create-actions .tutor-btn-primary:hover:not(:disabled),
+.problem-create .problem-create-actions button.tutor-btn-primary:hover:not(:disabled) {
+  background: #5568d3 !important;
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.problem-create .problem-create-actions .tutor-btn-primary:disabled,
+.problem-create .problem-create-actions button.tutor-btn-primary:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
