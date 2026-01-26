@@ -30,7 +30,7 @@
 .section-title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: white;
+  color: white !important;
   margin: 0;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
