@@ -730,7 +730,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 2rem 2rem 1rem 2rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
+  background-image: none !important;
 }
 
 .admin-modal-title {
