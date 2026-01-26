@@ -21,6 +21,8 @@ import AssignmentStudentProgress from "./pages/TutorPage/AssignmentStudentProgre
 import UserManagement from "./pages/TutorPage/UserManagement";
 import GradeManagement from "./pages/TutorPage/GradeManagement";
 import NoticeManagement from "./pages/TutorPage/NoticeManagement";
+import NoticeCreatePage from "./pages/TutorPage/NoticeCreatePage";
+import NoticeEditPage from "./pages/TutorPage/NoticeEditPage";
 import ProblemManagement from "./pages/TutorPage/ProblemManagement";
 import ProblemSetManagement from "./pages/TutorPage/ProblemSetManagement";
 import ProblemSetEdit from "./pages/TutorPage/ProblemSetEdit";
@@ -95,6 +97,10 @@ function App() {
             <Route path="/tutor/assignments/section/:sectionId/progress/:assignmentId" element={<AdminRoute><AssignmentStudentProgress /></AdminRoute>} />
             <Route path="/tutor/notices" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
             <Route path="/tutor/notices/section/:sectionId" element={<AdminRoute><NoticeManagement /></AdminRoute>} />
+            <Route path="/tutor/notices/create" element={<AdminRoute><NoticeCreatePage /></AdminRoute>} />
+            <Route path="/tutor/notices/section/:sectionId/create" element={<AdminRoute><NoticeCreatePage /></AdminRoute>} />
+            <Route path="/tutor/notices/:noticeId/edit" element={<AdminRoute><NoticeEditPage /></AdminRoute>} />
+            <Route path="/tutor/notices/section/:sectionId/:noticeId/edit" element={<AdminRoute><NoticeEditPage /></AdminRoute>} />
             <Route path="/tutor/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
             <Route path="/tutor/users/section/:sectionId" element={<AdminRoute><UserManagement /></AdminRoute>} />
             <Route path="/tutor/grades" element={<AdminRoute><GradeManagement /></AdminRoute>} />
