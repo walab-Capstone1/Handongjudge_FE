@@ -81,13 +81,29 @@ const ProblemSetManagement = () => {
     
     try {
       setIsCreating(true);
-      // TODO: 백엔드 API 연동
-      // await APIService.createProblemSet({
-      //   title: newSetTitle,
-      //   description: newSetDescription,
-      //   problemIds: finalProblemIds
-      // });
-      alert(`문제집 생성 기능은 백엔드 API 연동 후 구현됩니다.${finalProblemIds.length > 0 ? ` (${finalProblemIds.length}개 문제 포함)` : ''}`);
+      
+      // 1. 문제집 생성 (problemIds 없이)
+      const response = await APIService.createProblemSet({
+        title: newSetTitle.trim(),
+        description: newSetDescription.trim() || null,
+        tags: '[]' // 기본값: 빈 태그 배열
+      });
+      
+      // 2. 생성된 문제집 ID 가져오기
+      const problemSetId = response?.data?.id || response?.id || response;
+      
+      // 3. 선택한 문제들을 개별적으로 추가
+      if (finalProblemIds && finalProblemIds.length > 0) {
+        for (let i = 0; i < finalProblemIds.length; i++) {
+          try {
+            await APIService.addProblemToSet(problemSetId, finalProblemIds[i], i);
+          } catch (error) {
+            console.error(`문제 ${finalProblemIds[i]} 추가 실패:`, error);
+            // 개별 문제 추가 실패는 경고만 하고 계속 진행
+          }
+        }
+      }
+      
       setShowCreateModal(false);
       setShowProblemSelectModal(false);
       setCurrentStep(1);
@@ -98,7 +114,7 @@ const ProblemSetManagement = () => {
       fetchProblemSets();
     } catch (error) {
       console.error('문제집 생성 실패:', error);
-      alert('문제집 생성에 실패했습니다.');
+      alert('문제집 생성에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
     } finally {
       setIsCreating(false);
     }
