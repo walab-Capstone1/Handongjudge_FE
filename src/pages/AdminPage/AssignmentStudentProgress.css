@@ -753,13 +753,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
+  background-image: none !important;
 }
 
 .admin-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: #1a202c;
+  color: #1e293b !important;
   font-weight: 700;
 }
 
