@@ -215,190 +215,349 @@ body.section-modal-open .notice-management .tutor-search-input:focus {
   transform: translateY(-2px);
 }
 
-/* 공지사항 목록 */
-.notice-management .tutor-notices-list {
-  padding: 0 2rem 2rem 2rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 1.5rem;
-}
-
-/* 공지사항 카드 */
-.notice-management .notice-card {
+/* 공지사항 테이블 스타일 - 과제 관리 테이블과 동일 */
+.notice-management .tutor-notices-table-container {
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.notice-management .notice-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-  transform: translateY(-2px);
-}
-
-.notice-management .notice-card.disabled {
-  opacity: 0.6;
-  background: #f9fafb;
-}
-
-/* 제목 행 */
-.notice-management .notice-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  width: 100%;
-  margin-bottom: 1rem;
-}
-
-.notice-management .tutor-title-and-course {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.notice-management .notice-course {
-  font-size: 0.85rem;
-  color: #667eea;
-  margin: 0 0 0.5rem 0;
-  font-weight: 600;
-}
-
-.notice-management .notice-title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
-  line-height: 1.3;
-}
-
-/* 액션 버튼 */
-.notice-management .notice-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-top: 0.25rem;
-  flex-shrink: 0;
-}
-
-.notice-management .tutor-btn-text-small {
-  padding: 0.4rem 0.8rem;
-  border: 1px solid #e5e7eb;
-  background: white;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  color: #4b5563;
-}
-
-.notice-management .tutor-btn-text-small:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-}
-
-.notice-management .tutor-btn-text-small.tutor-edit {
-  color: #667eea;
-  border-color: #667eea;
-}
-
-.notice-management .tutor-btn-text-small.tutor-edit:hover {
-  background: #667eea;
-  color: white;
-}
-
-.notice-management .tutor-btn-text-small.tutor-delete {
-  color: #ef4444;
-  border-color: #ef4444;
-}
-
-.notice-management .tutor-btn-text-small.tutor-delete:hover {
-  background: #ef4444;
-  color: white;
-}
-
-.notice-management .tutor-btn-icon-small {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.5rem;
   border-radius: 8px;
-  transition: all 0.2s ease;
-  color: #6b7280;
+  overflow: visible;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  position: relative;
+  margin: 0 2rem 2rem 2rem;
 }
 
-.notice-management .tutor-btn-icon-small.tutor-more:hover {
-  background: #f3f4f6;
-  color: #374151;
+.notice-management .tutor-notices-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
-/* 더보기 메뉴 */
-.notice-management .tutor-more-menu {
+.notice-management .tutor-notices-table thead {
+  background: #f8fafc;
+}
+
+.notice-management .tutor-notices-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notice-management .tutor-notices-table th.tutor-notice-title-cell {
+  width: 40%;
+  text-align: left;
+  padding-left: calc(1rem - 3px);
+  border-left: 3px solid transparent;
+}
+
+.notice-management .tutor-notices-table th.tutor-notice-section-cell {
+  width: 20%;
+  text-align: left;
+}
+
+.notice-management .tutor-notices-table th.tutor-notice-date-cell {
+  width: 20%;
+  text-align: right;
+}
+
+.notice-management .tutor-notices-table th.tutor-notice-actions-cell {
+  width: 20%;
+  text-align: right;
+  padding-right: 1rem;
+}
+
+.notice-management .tutor-notices-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s ease;
+  position: relative;
+  overflow: visible;
+}
+
+.notice-management .tutor-notices-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.notice-management .tutor-notices-table tbody tr.tutor-disabled {
+  background: #f9fafb;
+  opacity: 0.65;
   position: relative;
 }
 
-.notice-management .tutor-more-dropdown {
+.notice-management .tutor-notices-table tbody tr.tutor-disabled td:first-child {
+  border-left: 3px solid #d1d5db;
+  padding-left: calc(1rem - 3px);
+}
+
+.notice-management .tutor-notices-table tbody tr:not(.tutor-disabled) td:first-child {
+  border-left: 3px solid transparent;
+  padding-left: calc(1rem - 3px);
+  transition: border-color 0.2s ease;
+}
+
+.notice-management .tutor-notices-table tbody tr:not(.tutor-disabled):hover td:first-child {
+  border-left-color: #667eea;
+}
+
+.notice-management .tutor-notices-table td {
+  padding: 0.875rem 1rem;
+  vertical-align: middle;
+  overflow: visible;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.notice-management .tutor-notices-table td.tutor-notice-title-cell {
+  width: 40%;
+  max-width: 0;
+  text-align: left;
+  min-width: 0;
+  position: relative;
+}
+
+.notice-management .tutor-notices-table td.tutor-notice-section-cell {
+  width: 20%;
+  max-width: 0;
+  text-align: left;
+  font-size: 0.875rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.notice-management .tutor-notices-table td.tutor-notice-date-cell {
+  width: 20%;
+  max-width: 0;
+  text-align: right;
+  font-size: 0.875rem;
+  color: #475569;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.notice-management .tutor-notices-table td.tutor-notice-actions-cell {
+  width: 20%;
+  max-width: 0;
+  text-align: right;
+  padding-right: 1rem;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: visible;
+  position: relative;
+}
+
+.notice-management .tutor-notice-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notice-management .tutor-notice-description {
+  font-size: 0.8125rem;
+  color: #64748b;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notice-management .tutor-notice-actions-inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+/* 테이블 버튼 스타일 - 과제 관리와 동일 */
+.notice-management .tutor-btn-table-action {
+  padding: 0.5rem 0.625rem;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.notice-management .tutor-btn-table-action:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.notice-management .tutor-btn-table-action.tutor-btn-edit {
+  background: white;
+  color: #667eea;
+  border: 1px solid #667eea;
+  padding: 0.5rem 0.875rem;
+}
+
+.notice-management .tutor-btn-table-action.tutor-btn-edit:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.notice-management .tutor-btn-table-action.tutor-btn-delete {
+  color: #ef4444;
+}
+
+.notice-management .tutor-btn-table-action.tutor-btn-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.notice-management .tutor-notice-primary-actions {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.notice-management .tutor-notice-secondary-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notice-management .tutor-secondary-actions-layer {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+  padding: 0.25rem;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  position: relative;
+}
+
+.notice-management .tutor-secondary-actions-layer::before {
+  content: '';
+  position: absolute;
+  left: -0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 70%;
+  background: #d1d5db;
+}
+
+.notice-management .tutor-btn-secondary-action {
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.notice-management .tutor-btn-secondary-action:hover {
+  background: #e5e7eb !important;
+  color: #374151 !important;
+  border-color: #d1d5db !important;
+}
+
+.notice-management .tutor-btn-secondary-action.tutor-btn-delete,
+.notice-management .tutor-more-menu button.tutor-btn-secondary-action {
+  color: #ef4444 !important;
+  border-color: #fee2e2 !important;
+}
+
+.notice-management .tutor-btn-secondary-action.tutor-btn-delete:hover,
+.notice-management .tutor-more-menu button.tutor-btn-secondary-action:hover {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border-color: #ef4444 !important;
+}
+
+.notice-management .tutor-table-empty {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 더보기 메뉴 - 과제 관리와 동일 */
+.notice-management .tutor-notice-secondary-actions .tutor-more-menu {
+  position: relative;
+  display: inline-block;
+  z-index: 100;
+}
+
+.notice-management .tutor-notice-secondary-actions .tutor-more-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
+  margin-top: 0.375rem;
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 0.5rem;
-  min-width: 100px;
-  z-index: 10;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10000 !important;
+  min-width: auto;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0.125rem;
 }
 
-.notice-management .tutor-more-menu:hover .tutor-more-dropdown {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.notice-management .tutor-more-dropdown .tutor-btn-text-small {
-  width: 100%;
+.notice-management .tutor-notice-secondary-actions .tutor-more-dropdown .tutor-btn-text-small {
+  padding: 0.375rem 0.625rem;
+  background: white;
+  border: none;
   text-align: left;
-  margin: 0;
-  padding: 0.5rem 0.8rem;
-}
-
-/* 통계 정보 */
-.notice-management .notice-compact-stats {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.notice-management .tutor-compact-stat {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.notice-management .tutor-stat-label-compact {
-  font-weight: 600;
-  color: #6b7280;
-  font-size: 0.85rem;
-}
-
-.notice-management .tutor-stat-value-compact {
+  font-size: 0.8125rem;
   font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  width: auto;
+  border-radius: 4px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-management .tutor-notice-secondary-actions .tutor-more-dropdown .tutor-btn-text-small:hover {
+  background: #f3f4f6;
+}
+
+.notice-management .tutor-notice-secondary-actions .tutor-more-dropdown .tutor-btn-text-small.tutor-delete {
+  color: #ef4444;
+}
+
+.notice-management .tutor-notice-secondary-actions .tutor-more-dropdown .tutor-btn-text-small.tutor-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.notice-management .tutor-meta-label {
+  font-size: 0.6875rem;
+  color: #94a3b8;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-management .tutor-meta-value {
+  font-size: 0.875rem;
   color: #1e293b;
-  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .notice-management .notice-new-badge {
@@ -411,55 +570,6 @@ body.section-modal-open .notice-management .tutor-search-input:focus {
   text-transform: uppercase;
 }
 
-/* 공지사항 내용 */
-.notice-management .notice-content {
-  margin-top: 0;
-}
-
-.notice-management .notice-content p {
-  color: #64748b;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 빈 상태 */
-.notice-management .tutor-no-notices {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 4rem 2rem;
-  grid-column: 1 / -1;
-}
-
-.notice-management .tutor-no-notices-message {
-  text-align: center;
-  color: #6b7280;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.notice-management .tutor-no-notices-icon {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-}
-
-.notice-management .tutor-no-notices-message p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.notice-management .tutor-no-notices-message strong {
-  color: #1e293b;
-  font-size: 1.1rem;
-}
 
 /* 모달 스타일 */
 .notice-management .tutor-modal-overlay {
@@ -607,9 +717,24 @@ body.section-modal-open .notice-management .tutor-search-input:focus {
     max-width: none;
   }
 
-  .notice-management .tutor-notices-list {
-    grid-template-columns: 1fr;
-    padding: 0 1rem 1rem 1rem;
+  .notice-management .tutor-notices-table-container {
+    margin: 0 1rem 1rem 1rem;
+    overflow-x: auto;
+  }
+
+  .notice-management .tutor-notices-table {
+    min-width: 800px;
+    table-layout: auto;
+  }
+
+  .notice-management .tutor-notice-actions-inline {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .notice-management .tutor-btn-table-action {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.6875rem;
   }
 
   .notice-management .tutor-form-row {
