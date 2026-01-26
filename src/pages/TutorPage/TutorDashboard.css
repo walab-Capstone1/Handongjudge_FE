@@ -1658,7 +1658,7 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #000000;
 }
 
 .tutor-modal-close {
@@ -2606,6 +2606,12 @@ input[type="checkbox"]:checked {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
+/* 대시보드의 전체 수업 운영 현황 제목 - 검은색으로 강제 적용 */
+.tutor-dashboard .dashboard-sections-panel > .section-title,
+.tutor-dashboard .dashboard-sections-panel > h2.section-title {
+  color: #000000 !important;
+}
+
 .section-title-icon {
   color: #667eea;
   font-size: 1rem;
@@ -2620,9 +2626,6 @@ input[type="checkbox"]:checked {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.dashboard-sections-panel > .section-title {
-  margin-bottom: 1.25rem;
-}
 
 .dashboard-sections-panel .health-cards-grid {
   overflow-y: auto;
