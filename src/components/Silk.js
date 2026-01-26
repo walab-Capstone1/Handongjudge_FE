@@ -115,8 +115,8 @@ const Silk = ({ speed = 5, scale = 1, color = '#7B7481', noiseIntensity = 1.5, r
     const handleResize = () => {
       if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
-        // Canvas는 자동으로 리사이즈되지만, 명시적으로 트리거
-        window.dispatchEvent(new Event('resize'));
+        // Canvas는 자동으로 리사이즈되므로 추가 이벤트 트리거 불필요
+        // window.dispatchEvent 제거하여 무한 루프 방지
       }
     };
 
