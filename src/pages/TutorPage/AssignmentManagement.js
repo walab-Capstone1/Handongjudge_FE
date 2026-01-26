@@ -183,10 +183,12 @@ const AssignmentManagement = () => {
     setSelectedAssignment(assignment);
     
     // 기존 데이터로 폼 초기화
+    // sectionId는 자동으로 설정 (현재 URL의 sectionId 또는 assignment.sectionId 사용)
+    const currentSectionId = sectionId || assignment.sectionId || '';
     setFormData({
       title: assignment.title || '',
       description: assignment.description || '',
-      sectionId: assignment.sectionId || '',
+      sectionId: currentSectionId, // 자동으로 설정
       startDate: assignment.startDate ? new Date(assignment.startDate).toISOString().slice(0, 16) : '',
       endDate: assignment.endDate ? new Date(assignment.endDate).toISOString().slice(0, 16) : '',
       assignmentNumber: assignment.assignmentNumber || ''
@@ -965,8 +967,12 @@ const AssignmentManagement = () => {
           onCreateNew={handleCreateNewProblem}
           onProblemDetail={async (problemId) => {
             try {
-              const problemInfo = await APIService.getProblemInfo(problemId);
-              setSelectedProblemDetail(problemInfo.data || problemInfo);
+              const problemDetail = await APIService.getProblemInfo(problemId);
+              setSelectedProblemForDetail({
+                ...problemDetail,
+                id: problemId
+              });
+              setShowProblemDetailModal(true);
             } catch (error) {
               console.error('문제 정보 조회 실패:', error);
               alert('문제 정보를 불러오는데 실패했습니다.');
@@ -1468,7 +1474,24 @@ const AssignmentManagement = () => {
               alert('문제 상세 정보를 불러오는데 실패했습니다.');
             }
           }}
+          onProblemViewDetail={async (problemId) => {
+            try {
+              const problemDetail = await APIService.getProblemInfo(problemId);
+              setSelectedProblemForDetail({
+                ...problemDetail,
+                id: problemId
+              });
+              setShowProblemDetailModal(true);
+            } catch (error) {
+              console.error('문제 정보 조회 실패:', error);
+              alert('문제 정보를 불러오는데 실패했습니다.');
+            }
+          }}
           onSearchChange={(value) => setProblemListSearchTerm(value)}
+          onProblemUpdated={() => {
+            refetchAssignments();
+            refetchSubmissionStats();
+          }}
         />
 
         {/* 문제 상세 및 수정 모달 */}

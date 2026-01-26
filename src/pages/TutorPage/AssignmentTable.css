@@ -5,6 +5,7 @@
   overflow: visible;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
+  position: relative;
 }
 
 .assignment-management .tutor-assignments-table {
@@ -65,6 +66,7 @@
   border-bottom: 1px solid #f1f5f9;
   transition: background 0.2s ease;
   position: relative;
+  overflow: visible;
 }
 
 .assignment-management .tutor-assignments-table tbody tr:hover {
@@ -90,7 +92,7 @@
 }
 
 .assignment-management .tutor-assignments-table tbody tr:not(.tutor-disabled):hover td:first-child {
-  border-left-color: #10b981;
+  border-left-color: #667eea;
 }
 
 .assignment-management .tutor-assignments-table tbody tr.tutor-clickable {
@@ -104,8 +106,9 @@
 .assignment-management .tutor-assignments-table td {
   padding: 0.875rem 1rem;
   vertical-align: middle;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
+  position: relative;
 }
 
 /* 셀 컬럼별 클래스명 지정 - 헤더와 동일한 클래스명 사용 */
@@ -175,6 +178,7 @@
   text-align: right;
   max-width: 100%;
   overflow: visible;
+  position: relative;
 }
 
 .assignment-management .tutor-assignment-actions-inline {
@@ -184,6 +188,59 @@
   justify-content: flex-end;
   flex-wrap: nowrap;
   min-width: 0;
+}
+
+/* 더보기 메뉴 스타일 */
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-menu {
+  position: relative;
+  display: inline-block;
+  z-index: 100;
+}
+
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.375rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10000 !important;
+  min-width: auto;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0.125rem;
+}
+
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown .tutor-btn-text-small {
+  padding: 0.375rem 0.625rem;
+  background: white;
+  border: none;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  width: auto;
+  border-radius: 4px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown .tutor-btn-text-small:hover {
+  background: #f3f4f6;
+}
+
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown .tutor-btn-text-small.tutor-delete {
+  color: #ef4444;
+}
+
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown .tutor-btn-text-small.tutor-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .assignment-management .tutor-assignment-primary-actions {
@@ -232,12 +289,14 @@
   border-color: #d1d5db !important;
 }
 
-.assignment-management .tutor-btn-secondary-action.tutor-btn-delete {
+.assignment-management .tutor-btn-secondary-action.tutor-btn-delete,
+.assignment-management .tutor-more-menu button.tutor-btn-secondary-action {
   color: #ef4444 !important;
   border-color: #fee2e2 !important;
 }
 
-.assignment-management .tutor-btn-secondary-action.tutor-btn-delete:hover {
+.assignment-management .tutor-btn-secondary-action.tutor-btn-delete:hover,
+.assignment-management .tutor-more-menu button.tutor-btn-secondary-action:hover {
   background: #fee2e2 !important;
   color: #dc2626 !important;
   border-color: #ef4444 !important;
