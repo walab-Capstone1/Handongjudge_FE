@@ -104,16 +104,32 @@ const AssignmentTableView = ({
                         >
                           {assignment.active ? '비활성화' : '활성화'}
                         </button>
-                        <button 
-                          className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-delete"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(assignment.id);
-                          }}
-                          title="삭제"
-                        >
-                          삭제
-                        </button>
+                        <div className="tutor-more-menu">
+                          <button 
+                            className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleMoreMenu(openMoreMenu === assignment.id ? null : assignment.id);
+                            }}
+                            title="더보기"
+                          >
+                            ⋯
+                          </button>
+                          {openMoreMenu === assignment.id && (
+                            <div className="tutor-more-dropdown">
+                              <button 
+                                className="tutor-btn-text-small tutor-delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDelete(assignment.id);
+                                  onToggleMoreMenu(null);
+                                }}
+                              >
+                                삭제
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
