@@ -20,6 +20,8 @@ const ProblemSetManagement = () => {
   const [problemSearchTerm, setProblemSearchTerm] = useState('');
   const [selectedProblemIds, setSelectedProblemIds] = useState([]);
   const [currentStep, setCurrentStep] = useState(1); // 1: 기본정보, 2: 문제선택
+  const [currentPage, setCurrentPage] = useState(1);
+  const PROBLEMS_PER_PAGE = 10;
 
   useEffect(() => {
     fetchProblemSets();
@@ -81,12 +83,29 @@ const ProblemSetManagement = () => {
 
     try {
       setIsCreating(true);
-      await APIService.createProblemSet({
+      
+      // 1. 문제집 생성 (problemIds 없이)
+      const response = await APIService.createProblemSet({
         title: newSetTitle.trim(),
         description: newSetDescription.trim() || null,
-        tags: '[]', // 기본값: 빈 태그 배열
-        problemIds: finalProblemIds
+        tags: '[]' // 기본값: 빈 태그 배열
       });
+      
+      // 2. 생성된 문제집 ID 가져오기
+      const problemSetId = response?.data?.id || response?.id || response;
+      
+      // 3. 선택한 문제들을 개별적으로 추가
+      if (finalProblemIds && finalProblemIds.length > 0) {
+        for (let i = 0; i < finalProblemIds.length; i++) {
+          try {
+            await APIService.addProblemToSet(problemSetId, finalProblemIds[i], i);
+          } catch (error) {
+            console.error(`문제 ${finalProblemIds[i]} 추가 실패:`, error);
+            // 개별 문제 추가 실패는 경고만 하고 계속 진행
+          }
+        }
+      }
+      
       setShowCreateModal(false);
       setShowProblemSelectModal(false);
       setCurrentStep(1);
@@ -94,6 +113,7 @@ const ProblemSetManagement = () => {
       setNewSetDescription('');
       setSelectedProblemIds([]);
       setProblemSearchTerm('');
+      setCurrentPage(1);
       fetchProblemSets();
     } catch (error) {
       console.error('문제집 생성 실패:', error);
@@ -125,10 +145,20 @@ const ProblemSetManagement = () => {
 
   const handleSelectAllProblems = () => {
     const filtered = getFilteredProblems();
-    if (selectedProblemIds.length === filtered.length && filtered.length > 0) {
-      setSelectedProblemIds([]);
+    const allSelected = filtered.length > 0 && 
+      filtered.every(p => selectedProblemIds.includes(p.id));
+    
+    if (allSelected) {
+      // 모든 문제 선택 해제
+      const filteredIds = filtered.map(p => p.id);
+      setSelectedProblemIds(prev => prev.filter(id => !filteredIds.includes(id)));
     } else {
-      setSelectedProblemIds(filtered.map(p => p.id));
+      // 모든 문제 선택
+      setSelectedProblemIds(prev => {
+        const newIds = filtered.map(p => p.id);
+        const combined = [...new Set([...prev, ...newIds])];
+        return combined;
+      });
     }
   };
 
@@ -141,6 +171,34 @@ const ProblemSetManagement = () => {
       );
     }
     return filtered;
+  };
+
+  const getPaginatedProblems = () => {
+    const filtered = getFilteredProblems();
+    const startIndex = (currentPage - 1) * PROBLEMS_PER_PAGE;
+    return filtered.slice(startIndex, startIndex + PROBLEMS_PER_PAGE);
+  };
+
+  const getTotalPages = () => {
+    return Math.ceil(getFilteredProblems().length / PROBLEMS_PER_PAGE);
+  };
+
+  const getDifficultyLabel = (difficulty) => {
+    const labels = {
+      '1': '쉬움',
+      '2': '보통',
+      '3': '어려움'
+    };
+    return labels[difficulty] || difficulty;
+  };
+
+  const getDifficultyColor = (difficulty) => {
+    const colors = {
+      '1': '#10b981',
+      '2': '#f59e0b',
+      '3': '#ef4444'
+    };
+    return colors[difficulty] || '#6b7280';
   };
 
   const filteredProblems = getFilteredProblems();
@@ -190,7 +248,6 @@ const ProblemSetManagement = () => {
             <h1 className="problem-set-management-title">문제집 관리</h1>
             <div className="problem-set-management-title-stats">
               <span className="problem-set-management-stat-badge">총 {problemSets.length}개 문제집</span>
-              <span className="problem-set-management-stat-badge">표시 {filteredSets.length}개</span>
             </div>
           </div>
           <div className="problem-set-management-title-right">
@@ -372,13 +429,13 @@ const ProblemSetManagement = () => {
                 setCurrentStep(1);
                 setSelectedProblemIds([]);
                 setProblemSearchTerm('');
+                setCurrentPage(1);
               }
             }}
           >
             <div 
-              className="problem-set-management-create-modal-content" 
+              className="problem-set-management-create-modal-content problem-set-management-create-modal-content-problem-select" 
               onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: '95vw', width: '95vw', minWidth: '800px' }}
             >
               <div className="problem-set-management-create-modal-header">
                 <h2>문제 선택 - {newSetTitle}</h2>
@@ -390,6 +447,7 @@ const ProblemSetManagement = () => {
                       setCurrentStep(1);
                       setSelectedProblemIds([]);
                       setProblemSearchTerm('');
+                      setCurrentPage(1);
                     }
                   }}
                   disabled={isCreating}
@@ -399,54 +457,111 @@ const ProblemSetManagement = () => {
               </div>
               
               <div className="problem-set-management-create-modal-body">
-                <div style={{ marginBottom: '1rem' }}>
-                  <input
-                    type="text"
-                    placeholder="문제명 또는 ID로 검색..."
-                    value={problemSearchTerm}
-                    onChange={(e) => setProblemSearchTerm(e.target.value)}
-                    className="problem-set-management-search-input"
-                    style={{ width: '100%', maxWidth: '500px' }}
-                  />
+                <div className="problem-set-management-create-modal-filter-section">
+                  <div className="problem-set-management-create-modal-search">
+                    <input
+                      type="text"
+                      placeholder="문제명 또는 ID로 검색..."
+                      value={problemSearchTerm}
+                      onChange={(e) => {
+                        setProblemSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="problem-set-management-create-modal-search-input"
+                    />
+                  </div>
                 </div>
 
-                {filteredProblems.length > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedProblemIds.length === filteredProblems.length && filteredProblems.length > 0}
-                        onChange={handleSelectAllProblems}
-                      />
-                      <span>전체 선택</span>
-                    </label>
-                    <span>
-                      {selectedProblemIds.length} / {filteredProblems.length}개 선택됨
-                    </span>
+                {getFilteredProblems().length > 0 ? (
+                  <>
+                    <div className="problem-set-management-create-modal-actions">
+                      <button
+                        className="problem-set-management-create-modal-select-all"
+                        onClick={handleSelectAllProblems}
+                      >
+                        {getFilteredProblems().length > 0 &&
+                         getFilteredProblems().every(p => selectedProblemIds.includes(p.id))
+                          ? '전체 해제' : '전체 선택'}
+                      </button>
+                      <span className="problem-set-management-create-modal-selected-count">
+                        {selectedProblemIds.length}개 선택됨
+                      </span>
+                      <span className="problem-set-management-create-modal-filter-count">
+                        총 {getFilteredProblems().length}개 문제
+                      </span>
+                    </div>
+
+                    <div className="problem-set-management-create-modal-problems-list">
+                      {getPaginatedProblems().map((problem) => {
+                        const isSelected = selectedProblemIds.includes(problem.id);
+                        
+                        return (
+                          <div 
+                            key={problem.id}
+                            className={`problem-set-management-create-modal-problem-item ${
+                              isSelected ? 'selected' : ''
+                            }`}
+                            onClick={() => handleProblemToggle(problem.id)}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleProblemToggle(problem.id)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div className="problem-set-management-create-modal-problem-info">
+                              <div className="problem-set-management-create-modal-problem-title-wrapper">
+                                <span className="problem-set-management-create-modal-problem-id-badge">
+                                  #{problem.id}
+                                </span>
+                                <span className="problem-set-management-create-modal-problem-title">
+                                  {problem.title}
+                                </span>
+                              </div>
+                              <div className="problem-set-management-create-modal-problem-meta">
+                                <span 
+                                  className="problem-set-management-create-modal-problem-difficulty"
+                                  style={{ 
+                                    backgroundColor: getDifficultyColor(problem.difficulty) + '20',
+                                    color: getDifficultyColor(problem.difficulty)
+                                  }}
+                                >
+                                  {getDifficultyLabel(problem.difficulty)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {getTotalPages() > 1 && (
+                      <div className="problem-set-management-create-modal-pagination">
+                        <button
+                          className="problem-set-management-create-modal-pagination-btn"
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          disabled={currentPage === 1}
+                        >
+                          이전
+                        </button>
+                        <span className="problem-set-management-create-modal-pagination-info">
+                          {currentPage} / {getTotalPages()}
+                        </span>
+                        <button
+                          className="problem-set-management-create-modal-pagination-btn"
+                          onClick={() => setCurrentPage(prev => Math.min(getTotalPages(), prev + 1))}
+                          disabled={currentPage === getTotalPages()}
+                        >
+                          다음
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="problem-set-management-create-modal-empty">
+                    {problemSearchTerm ? '검색 결과가 없습니다.' : '사용 가능한 문제가 없습니다.'}
                   </div>
                 )}
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
-                  {filteredProblems.length > 0 ? (
-                    filteredProblems.map((problem) => (
-                      <div key={problem.id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <input
-                          type="checkbox"
-                          checked={selectedProblemIds.includes(problem.id)}
-                          onChange={() => handleProblemToggle(problem.id)}
-                        />
-                        <div style={{ flex: 1 }}>
-                          <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600 }}>{problem.title}</h4>
-                          <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>ID: #{problem.id}</span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
-                      <p>{problemSearchTerm ? '검색 결과가 없습니다.' : '사용 가능한 문제가 없습니다.'}</p>
-                    </div>
-                  )}
-                </div>
               </div>
 
               <div className="problem-set-management-create-modal-footer">
@@ -475,6 +590,7 @@ const ProblemSetManagement = () => {
                     setCurrentStep(1);
                     setSelectedProblemIds([]);
                     setProblemSearchTerm('');
+                    setCurrentPage(1);
                   }}
                   disabled={isCreating}
                 >

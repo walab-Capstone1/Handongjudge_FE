@@ -386,11 +386,20 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
-  overflow: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: problem-set-management-create-slideInUp 0.3s ease;
   margin: auto !important;
   position: relative !important;
+}
+
+/* 문제 선택 모달의 경우 더 넓게 */
+.problem-set-management .problem-set-management-create-modal-content-problem-select {
+  max-width: 45vw !important;
+  width: 45vw !important;
+  min-width: 800px !important;
 }
 
 @keyframes problem-set-management-create-slideInUp {
@@ -424,10 +433,10 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
 }
 
 .problem-set-management .problem-set-management-create-modal-close {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
   font-size: 1.75rem;
-  color: white;
+  color: #6b7280;
   cursor: pointer;
   padding: 0;
   width: 2.25rem;
@@ -440,12 +449,15 @@ body.section-modal-open .problem-set-management .problem-set-management-search-i
 }
 
 .problem-set-management .problem-set-management-create-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #e5e7eb;
+  color: #374151;
   transform: rotate(90deg);
 }
 
 .problem-set-management .problem-set-management-create-modal-body {
   padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .problem-set-management .problem-set-management-create-modal-footer {
@@ -559,6 +571,212 @@ body.section-modal-open .problem-set-management .problem-set-management-form-tex
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* 문제 선택 모달 스타일 - ProblemSetEdit와 동일한 디자인 */
+.problem-set-management .problem-set-management-create-modal-filter-section {
+  margin-bottom: 1.5rem;
+}
+
+.problem-set-management .problem-set-management-create-modal-search {
+  margin-bottom: 1rem;
+}
+
+.problem-set-management .problem-set-management-create-modal-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: white;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.problem-set-management .problem-set-management-create-modal-search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
+}
+
+.problem-set-management .problem-set-management-create-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.problem-set-management .problem-set-management-create-modal-select-all {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.problem-set-management .problem-set-management-create-modal-select-all:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.problem-set-management .problem-set-management-create-modal-selected-count {
+  font-size: 0.875rem;
+  color: #667eea;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.problem-set-management .problem-set-management-create-modal-filter-count {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-weight: 500;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  margin-left: auto;
+}
+
+.problem-set-management .problem-set-management-create-modal-problems-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-item:hover {
+  background: #f8fafc;
+  border-color: #667eea;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-item.selected {
+  background: #f0f4ff;
+  border-color: #667eea;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-item input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  accent-color: #667eea;
+  flex-shrink: 0;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-id-badge {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  flex-shrink: 0;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-title {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  flex: 1;
+  min-width: 0;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.problem-set-management .problem-set-management-create-modal-problem-difficulty {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.problem-set-management .problem-set-management-create-modal-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.problem-set-management .problem-set-management-create-modal-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.problem-set-management .problem-set-management-create-modal-pagination-btn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.problem-set-management .problem-set-management-create-modal-pagination-btn:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.problem-set-management .problem-set-management-create-modal-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.problem-set-management .problem-set-management-create-modal-pagination-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 /* 반응형 디자인 */

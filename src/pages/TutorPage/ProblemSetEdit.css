@@ -365,23 +365,24 @@
   align-items: center;
   padding: 1.75rem 2rem;
   border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f9fafb !important;
+  background-image: none !important;
+  color: #1e293b !important;
 }
 
 .problem-set-edit .problem-set-edit-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: #1e293b !important;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .problem-set-edit .problem-set-edit-modal-close {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
   font-size: 1.75rem;
-  color: white;
+  color: #6b7280;
   cursor: pointer;
   padding: 0;
   width: 2.25rem;
@@ -394,7 +395,8 @@
 }
 
 .problem-set-edit .problem-set-edit-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #e5e7eb;
+  color: #374151;
   transform: rotate(90deg);
 }
 
@@ -456,14 +458,16 @@
 }
 
 .problem-set-edit .problem-set-edit-modal-filter-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea !important;
+  background-image: none !important;
   border-color: #667eea;
   color: white;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .problem-set-edit .problem-set-edit-modal-filter-btn.active:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%);
+  background: #5568d3 !important;
+  background-image: none !important;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
@@ -717,13 +721,15 @@ body.section-modal-open .problem-set-edit .problem-set-edit-modal-search-input:f
 }
 
 .problem-set-edit .problem-set-edit-modal-btn-submit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea !important;
+  background-image: none !important;
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .problem-set-edit .problem-set-edit-modal-btn-submit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%);
+  background: #5568d3 !important;
+  background-image: none !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
