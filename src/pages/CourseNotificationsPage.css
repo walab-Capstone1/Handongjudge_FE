@@ -131,7 +131,6 @@
 .notification-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 18px 24px;
   border-radius: 8px;
   cursor: pointer;
@@ -172,17 +171,26 @@
   align-items: center;
   gap: 12px;
   flex: 1;
+  flex-wrap: nowrap;
+  width: 100%;
+  min-width: 0;
 }
 
 .notification-tag {
-  order: -1;
-  margin-right: 8px;
+  flex-shrink: 0;
+  margin-right: 0;
+  order: 1;
 }
 
 .notification-title {
   font-size: 14px;
   font-weight: 500;
   flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  order: 2;
 }
 
 .notification-card.unread.assignment .notification-title {
@@ -206,6 +214,9 @@
   font-size: 13px;
   font-weight: 400;
   margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+  order: 3;
 }
 
 .notification-card.unread.assignment .notification-date {
@@ -228,8 +239,6 @@
   flex-shrink: 0;
   border: 1px solid #667EEA;
   white-space: nowrap;
-  order: -1;
-  margin-right: 8px;
 }
 
 .notification-card.unread .notification-tag {

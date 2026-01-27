@@ -508,6 +508,8 @@ const CourseDashboardPage = () => {
     return colors[id % colors.length];
   };
 
+  const transformedSections = enrolledSections.map(section => transformSectionData(section, sectionNewItems));
+
   if (loading) {
     return (
       <div className="course-dashboard-container">
@@ -543,7 +545,6 @@ const CourseDashboardPage = () => {
     );
   }
 
-  const transformedSections = enrolledSections.map(section => transformSectionData(section, sectionNewItems));
 
   return (
     <div className={`course-dashboard-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -559,6 +560,7 @@ const CourseDashboardPage = () => {
           courseName={sectionId ? (sectionInfo?.courseTitle ? (sectionInfo.sectionNumber ? `${sectionInfo.courseTitle} ${sectionInfo.sectionNumber}분반` : `${sectionInfo.courseTitle}`) : "수업 대시보드") : "전체 수업 대시보드"}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
+          sectionId={sectionId}
         />
 
         <div className="dashboard-body">
@@ -572,14 +574,14 @@ const CourseDashboardPage = () => {
               className="profile-avatar"
             />
             <span className="profile-greeting">
-              {auth.user?.name || "사용자"} {auth.user?.role === "INSTRUCTOR" ? "교수" : "학부생"}님, 반가워요!
+              {auth.user?.name || "사용자"}님, 반가워요!
             </span>
           </div>
 
             {/* 참여한 수업 목록 */}
             <div className="courses-section">
             <div className="section-header">
-                <span className="section-title">참여한 수업 목록</span>
+                <span className="dashboard-section-title">참여한 수업 목록</span>
                 <button 
                   className="join-class-btn"
                   onClick={() => setShowEnrollModal(true)}
@@ -609,7 +611,13 @@ const CourseDashboardPage = () => {
             {/* 관리 중인 수업 목록 */}
             <div className="courses-section">
               <div className="section-header">
-                <span className="section-title">관리 중인 수업 목록</span>
+                <span className="dashboard-section-title">관리 중인 수업 목록</span>
+                <button 
+                  className="create-course-btn"
+                  onClick={() => navigate('/tutor/courses')}
+                >
+                  + 수업 만들기
+                </button>
               </div>
               <div className="courses-scroll-container">
                 <div className="courses-grid">
@@ -637,7 +645,7 @@ const CourseDashboardPage = () => {
             {/* 공개된 클래스 */}
             <div className="courses-section">
               <div className="section-header">
-                <span className="section-title">공개된 클래스</span>
+                <span className="dashboard-section-title">공개된 클래스</span>
               </div>
               <div className="courses-scroll-container">
                 <div className="courses-grid">
@@ -670,7 +678,7 @@ const CourseDashboardPage = () => {
           <div className="right-column">
             {/* 알림 섹션 */}
             <div className="notifications-subsection">
-              <span className="section-title">알림</span>
+              <span className="dashboard-section-title">알림</span>
               <div className="notifications-box">
                 {allNotifications.length > 0 ? (
                   allNotifications.map((notification) => (
@@ -699,7 +707,7 @@ const CourseDashboardPage = () => {
 
             {/* 과제 섹션 */}
             <div className="assignments-subsection">
-              <span className="section-title">과제</span>
+              <span className="dashboard-section-title">과제</span>
               <div className="assignments-summary-box">
                 {allAssignments.length > 0 ? (
                   allAssignments.map((assignment) => {
@@ -732,7 +740,7 @@ const CourseDashboardPage = () => {
 
             {/* 공지사항 섹션 */}
             <div className="notices-subsection">
-              <span className="section-title">공지사항</span>
+              <span className="dashboard-section-title">공지사항</span>
               <div className="notices-box">
                 {allNotices.length > 0 ? (
                   allNotices.map((notice) => (
