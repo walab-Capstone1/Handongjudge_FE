@@ -639,7 +639,7 @@ body.section-modal-open .course-management .course-management-search-input:focus
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: rgb(0, 0, 0);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
@@ -779,9 +779,9 @@ body.section-modal-open .course-management .course-management-search-input:focus
 
 /* 복사 모달 - 큰 크기 */
 .course-management .tutor-modal-content-large {
-  max-width: 800px;
+  max-width: 600px;
   max-height: calc(85vh - 65px); /* 헤더 높이를 고려한 최대 높이 */
-  width: 90%;
+  width: 85%;
 }
 
 .course-management .tutor-modal-body-large {

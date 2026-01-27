@@ -1,5 +1,6 @@
 /* TutorDashboard.css */
 @import '../../styles/variables.css';
+@import './CourseManagement.css';
 
 .tutor-dashboard {
   padding: 0;

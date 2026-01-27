@@ -14,8 +14,10 @@ const TutorDashboard = () => {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedYear, setSelectedYear] = useState('ALL');
-  const [selectedSemester, setSelectedSemester] = useState('ALL');
+  const [filterYear, setFilterYear] = useState('ALL');
+  const [filterSemester, setFilterSemester] = useState('ALL');
+  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -258,8 +260,24 @@ const TutorDashboard = () => {
     }
   };
 
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openDropdownId && !event.target.closest('.tutor-course-card-dropdown-container')) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    if (openDropdownId) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [openDropdownId]);
+
   const handleToggleActive = async (sectionId, currentActive, e) => {
-    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    if (e) e.stopPropagation(); // 카드 클릭 이벤트 방지
     try {
       const newActiveStatus = !currentActive;
       console.log('활성화 상태 변경 시도:', { sectionId, currentActive, newActiveStatus });
@@ -281,6 +299,24 @@ const TutorDashboard = () => {
       alert(`수업 상태 변경에 실패했습니다.\n${error.message || '네트워크 오류가 발생했습니다.'}`);
     }
   };
+
+  const handleDeleteSection = async (sectionId, sectionTitle) => {
+    if (!window.confirm(`정말로 분반 "${sectionTitle}"을(를) 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      await APIService.deleteSection(sectionId);
+      alert('분반이 삭제되었습니다.');
+      const dashboardResponse = await APIService.getInstructorDashboard();
+      const dashboardData = dashboardResponse?.data || [];
+      setSections(dashboardData);
+    } catch (error) {
+      console.error('분반 삭제 실패:', error);
+      alert(error.message || '분반 삭제에 실패했습니다.');
+    }
+  };
+
 
   const handleCreateSection = async () => {
     try {
@@ -571,6 +607,15 @@ const TutorDashboard = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
+
   // D-day 계산 함수
   const calculateDDay = (endDate) => {
     if (!endDate) return null;
@@ -596,24 +641,6 @@ const TutorDashboard = () => {
     }
   };
 
-  // 년도 필터링
-  const years = ['ALL', ...new Set(sections.map(s => s.year).filter(Boolean))].sort((a, b) => {
-    if (a === 'ALL') return -1;
-    if (b === 'ALL') return 1;
-    return b - a;
-  });
-
-  // 학기 필터링 (1학기, 여름학기, 2학기, 겨울학기, 캠프, 특강, 비정규 세션)
-  const semesters = [
-    { value: 'ALL', label: '전체' },
-    { value: 'SPRING', label: '1학기' },
-    { value: 'SUMMER', label: '여름학기' },
-    { value: 'FALL', label: '2학기' },
-    { value: 'WINTER', label: '겨울학기' },
-    { value: 'CAMP', label: '캠프' },
-    { value: 'SPECIAL', label: '특강' },
-    { value: 'IRREGULAR', label: '비정규 세션' }
-  ];
 
   // 필터링된 수업 목록
   const filteredSections = sections.filter(section => {
@@ -623,13 +650,21 @@ const TutorDashboard = () => {
       (section.instructorName && section.instructorName.toLowerCase().includes(searchTerm.toLowerCase()));
     
     // 년도 필터
-    const matchesYear = selectedYear === 'ALL' || section.year === parseInt(selectedYear);
+    const matchesYear = filterYear === 'ALL' || section.year === parseInt(filterYear);
     
     // 학기 필터
-    const matchesSemester = selectedSemester === 'ALL' || section.semester === selectedSemester;
+    const matchesSemester = filterSemester === 'ALL' || section.semester === filterSemester;
     
-    return matchesSearch && matchesYear && matchesSemester;
+    // 상태 필터
+    const matchesStatus = filterStatus === 'ALL' || 
+      (filterStatus === 'ACTIVE' && section.active !== false) ||
+      (filterStatus === 'INACTIVE' && section.active === false);
+    
+    return matchesSearch && matchesYear && matchesSemester && matchesStatus;
   });
+
+  // 사용 가능한 년도 목록
+  const availableYears = [...new Set(sections.map(s => s.year).filter(Boolean))].sort((a, b) => b - a);
 
   // 워크로드 관리 데이터 계산
   const workloadData = useMemo(() => {
@@ -747,142 +782,194 @@ const TutorDashboard = () => {
 
   return (
     <TutorLayout>
-      <div className="tutor-dashboard">
-        <div className="tutor-dashboard-header">
-          <h1 className="dashboard-title">대시보드</h1>
-          <p className="dashboard-subtitle">
-            모든 수업의 전반적인 상황을 한눈에 파악하고, 우선순위를 결정하세요.
-          </p>
+      <div className="course-management">
+        {/* 타이틀 헤더 섹션 */}
+        <div className="course-management-title-header">
+          <div className="course-management-title-left">
+            <h1 className="course-management-title">수업 관리</h1>
+            <div className="course-management-title-stats">
+              <span className="course-management-stat-badge">총 {sections.length}개 분반</span>
+            </div>
+          </div>
+          <div className="course-management-title-right">
+            <button 
+              className="course-management-btn-create"
+              onClick={() => setShowCreateModal(true)}
+            >
+              + 새 수업 만들기
+            </button>
+          </div>
         </div>
-
+        
         {/* 필터 섹션 */}
-        <div className="tutor-dashboard-filters-section">
-          <div className="tutor-dashboard-search-box">
+        <div className="course-management-filters-section">
+          <div className="course-management-search-box">
             <input
               type="text"
               placeholder="수업명, 교수명으로 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="tutor-dashboard-search-input"
+              className="course-management-search-input"
             />
           </div>
           
-          <div className="tutor-dashboard-filter-group">
+          <div className="course-management-filter-group">
             <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="tutor-dashboard-filter-select"
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="course-management-filter-select"
             >
-              {years.map(year => (
-                <option key={year} value={year}>
-                  {year === 'ALL' ? '전체 년도' : `${year}년`}
-                </option>
+              <option value="ALL">전체 년도</option>
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}년</option>
               ))}
             </select>
           </div>
           
-          <div className="tutor-dashboard-filter-group">
+          <div className="course-management-filter-group">
             <select
-              value={selectedSemester}
-              onChange={(e) => setSelectedSemester(e.target.value)}
-              className="tutor-dashboard-filter-select"
+              value={filterSemester}
+              onChange={(e) => setFilterSemester(e.target.value)}
+              className="course-management-filter-select"
             >
-              {semesters.map(semester => (
-                <option key={semester.value} value={semester.value}>
-                  {semester.label}
-                </option>
-              ))}
+              <option value="ALL">전체 학기</option>
+              <option value="SPRING">1학기</option>
+              <option value="SUMMER">여름학기</option>
+              <option value="FALL">2학기</option>
+              <option value="WINTER">겨울학기</option>
+              <option value="CAMP">캠프</option>
+              <option value="SPECIAL">특강</option>
+              <option value="IRREGULAR">비정규 세션</option>
+            </select>
+          </div>
+          
+          <div className="course-management-filter-group">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="course-management-filter-select"
+            >
+              <option value="ALL">전체 상태</option>
+              <option value="ACTIVE">활성</option>
+              <option value="INACTIVE">비활성</option>
             </select>
           </div>
         </div>
 
-        {/* 랜드스케이프 배치: 수업 카드 */}
-        <div className="dashboard-landscape-layout">
-          {/* 왼쪽: 전체 수업 카드 */}
-          <div className="dashboard-sections-panel">
-            <h2 className="section-title">
-              <FaChartLine className="section-title-icon" />
-              전체 수업 운영 현황
-            </h2>
-          {loadingSectionStats ? (
-            <div className="dashboard-loading">
-              <div className="tutor-loading-spinner"></div>
-              <p>수업 통계를 계산하는 중...</p>
-            </div>
-          ) : (
-            <div className="health-cards-grid">
-              {filteredSections.map((section) => {
-                const stat = sectionStats[section.sectionId] || {};
-                const healthStatus = getHealthStatus(stat);
-                const isActive = section.active !== false;
-                
-                return (
-                  <div
-                    key={section.sectionId}
-                    className={`health-card ${!isActive ? 'inactive' : ''}`}
-                    onClick={() => isActive && handleSectionClick(section)}
+        {/* 수업 카드 그리드 - CourseManagement와 동일한 디자인 */}
+        <div className="tutor-sections-grid">
+          {filteredSections.map((section) => (
+            <div key={section.sectionId} className="tutor-course-section-card">
+              {/* 헤더: 제목과 상태 배지 */}
+              <div className="tutor-course-card-header">
+                <h3 className="tutor-course-card-title">{section.courseTitle}</h3>
+                <span className={`tutor-course-card-status-badge ${section.active !== false ? 'active' : 'inactive'}`}>
+                  {section.active !== false ? '활성' : '비활성'}
+                </span>
+              </div>
+
+              {/* 컴팩트한 통계 정보 및 메타 정보 */}
+              <div className="tutor-course-card-stats-compact">
+                <div className="tutor-course-card-stat-item">
+                  <span className="tutor-course-card-stat-label">학생</span>
+                  <span className="tutor-course-card-stat-value">{section.studentCount || 0}명</span>
+                </div>
+                <div className="tutor-course-card-stat-item">
+                  <span className="tutor-course-card-stat-label">공지</span>
+                  <span className="tutor-course-card-stat-value">{section.noticeCount || 0}개</span>
+                </div>
+                <div className="tutor-course-card-stat-item">
+                  <span className="tutor-course-card-stat-label">학기</span>
+                  <span className="tutor-course-card-stat-value">{section.year || new Date().getFullYear()}년 {getSemesterLabel(section.semester)}</span>
+                </div>
+                {section.createdAt && (
+                  <div className="tutor-course-card-stat-item">
+                    <span className="tutor-course-card-stat-label">생성일</span>
+                    <span className="tutor-course-card-stat-value">{formatDate(section.createdAt)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* 컴팩트한 액션 버튼 영역 */}
+              <div className="tutor-course-card-actions-compact">
+                <button 
+                  className={`tutor-course-card-btn-toggle-status ${section.active !== false ? 'active' : 'inactive'}`}
+                  onClick={(e) => handleToggleActive(section.sectionId, section.active !== false, e)}
+                  title={section.active !== false ? '비활성화하기' : '활성화하기'}
+                >
+                  {section.active !== false ? '활성' : '비활성'}
+                </button>
+                <div className="tutor-course-card-action-buttons-compact">
+                  <button 
+                    className="tutor-course-card-action-btn-compact"
+                    onClick={() => navigate(`/tutor/notices/section/${section.sectionId}`)}
+                    title="공지사항"
                   >
-                    <div className="health-card-header">
-                      <div className="health-status-indicator">
-                        <div className="health-status-dot"></div>
-                      </div>
-                      <div className="health-card-title-area">
-                        <h3 className="health-card-title">{section.courseTitle}</h3>
-                        <span className="health-card-badge">
-                          {section.year || '2024'}년 {getSemesterLabel(section.semester)}
-                          {section.sectionNumber && ` ${section.sectionNumber}분반`}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="health-card-body">
-                      {stat.upcomingDeadlines && stat.upcomingDeadlines.length > 0 ? (
-                        <div className="upcoming-assignments-list">
-                          {stat.upcomingDeadlines.slice(0, 3).map((deadline, index) => {
-                            const dDay = calculateDDay(deadline.endDate);
-                            return (
-                              <div
-                                key={deadline.assignmentId || index}
-                                className="upcoming-assignment-item"
-                                onClick={(e) => isActive && handleAssignmentProgressClick(e, section.sectionId, deadline.assignmentId)}
-                              >
-                                <div className="upcoming-assignment-header">
-                                  <span className="upcoming-assignment-title">{deadline.title}</span>
-                                  <span className={`upcoming-assignment-dday ${dDay === 'D-day' || dDay === '마감' ? 'urgent' : ''}`}>
-                                    {dDay}
-                                  </span>
-                                </div>
-                                <div className="upcoming-assignment-meta">
-                                  <span className="upcoming-assignment-rate">제출률: {deadline.submissionRate?.toFixed(1) || 0}%</span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="no-upcoming-assignments">
-                          <p>마감 직전 과제가 없습니다.</p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {isActive && (
-                      <div className="health-card-footer">
-                        <span className="health-card-hint">클릭하여 상세 보기</span>
+                    공지
+                  </button>
+                  <button 
+                    className="tutor-course-card-action-btn-compact"
+                    onClick={() => navigate(`/tutor/users/section/${section.sectionId}`)}
+                    title="학생 관리"
+                  >
+                    학생
+                  </button>
+                  <button 
+                    className="tutor-course-card-action-btn-compact"
+                    onClick={() => navigate(`/tutor/grades/section/${section.sectionId}`)}
+                    title="성적 관리"
+                  >
+                    성적
+                  </button>
+                  <button 
+                    className="tutor-course-card-action-btn-compact primary"
+                    onClick={() => navigate(`/tutor/assignments/section/${section.sectionId}`)}
+                    title="과제 관리"
+                  >
+                    과제
+                  </button>
+                  <div className="tutor-course-card-dropdown-container">
+                    <button 
+                      className="tutor-course-card-action-btn-compact dropdown-toggle"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenDropdownId(openDropdownId === section.sectionId ? null : section.sectionId);
+                      }}
+                      title="더보기"
+                    >
+                      ⋯
+                    </button>
+                    {openDropdownId === section.sectionId && (
+                      <div className="tutor-course-card-dropdown-menu">
+                        <button 
+                          className="tutor-course-card-dropdown-item delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenDropdownId(null);
+                            handleDeleteSection(section.sectionId, section.courseTitle);
+                          }}
+                        >
+                          삭제
+                        </button>
                       </div>
                     )}
                   </div>
-                );
-              })}
-              {filteredSections.length === 0 && (
-                <div className="dashboard-empty-state">
-                  <p>조건에 맞는 수업이 없습니다.</p>
                 </div>
-              )}
+              </div>
             </div>
-          )}
-          </div>
+          ))}
         </div>
+
+        {filteredSections.length === 0 && (
+          <div className="tutor-no-sections">
+            <p>
+              {searchTerm || filterYear !== 'ALL' || filterSemester !== 'ALL' || filterStatus !== 'ALL'
+                ? '검색 조건에 맞는 수업이 없습니다.' 
+                : '담당하고 있는 수업이 없습니다.'
+              }
+            </p>
+          </div>
+        )}
 
 
         {/* 워크로드 관리 섹션 (제거 예정 - 주석 처리) */}
