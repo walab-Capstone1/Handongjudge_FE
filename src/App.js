@@ -30,6 +30,7 @@ import ProblemCreate from "./pages/TutorPage/ProblemCreate";
 import ProblemEdit from "./pages/TutorPage/ProblemEdit";
 import ProblemView from "./pages/TutorPage/ProblemView";
 import SettingsPage from "./pages/TutorPage/SettingsPage";
+import CodingTestManagement from "./pages/TutorPage/CodingTestManagement";
 import AdminRoute from "./components/AdminRoute";
 import EnrollPage from "./pages/EnrollPage";
 import IndexPage from "./pages/IndexPage";
@@ -105,6 +106,8 @@ function App() {
             <Route path="/tutor/users/section/:sectionId" element={<AdminRoute><UserManagement /></AdminRoute>} />
             <Route path="/tutor/grades" element={<AdminRoute><GradeManagement /></AdminRoute>} />
             <Route path="/tutor/grades/section/:sectionId" element={<AdminRoute><GradeManagement /></AdminRoute>} />
+            <Route path="/tutor/coding-tests/section/:sectionId" element={<AdminRoute><CodingTestManagement /></AdminRoute>} />
+            <Route path="/tutor/coding-tests/section/:sectionId/:quizId" element={<AdminRoute><CodingTestManagement /></AdminRoute>} />
             <Route path="/tutor/problems" element={<AdminRoute><ProblemManagement /></AdminRoute>} />
             <Route path="/tutor/problems/create" element={<AdminRoute><ProblemCreate /></AdminRoute>} />
             <Route path="/tutor/problems/:problemId/edit" element={<AdminRoute><ProblemEdit /></AdminRoute>} />
