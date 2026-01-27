@@ -22,7 +22,8 @@ import {
   FaComments,
   FaBell,
   FaChartBar,
-  FaArrowLeft
+  FaArrowLeft,
+  FaCode
 } from "react-icons/fa";
 
 import "./TutorLayout.css";
@@ -301,6 +302,12 @@ const TutorLayout = ({ children, selectedSection = null }) => {
           { path: `/tutor/assignments/section/${currentSection.sectionId}`, label: "과제 목록", icon: FaList },
           { path: `/tutor/assignments/section/${currentSection.sectionId}/progress`, label: "과제별 풀이 현황", icon: FaChartLine, subItems: [] },
         ]
+      },
+      { 
+        path: `/tutor/coding-tests/section/${currentSection.sectionId}`, 
+        label: "코딩 테스트 관리", 
+        icon: FaCode,
+        subItems: [] 
       },
       { 
         path: `/tutor/notices/section/${currentSection.sectionId}`, 
