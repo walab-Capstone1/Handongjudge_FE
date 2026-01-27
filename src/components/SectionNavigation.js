@@ -7,6 +7,7 @@ const SectionNavigation = ({
   sectionId, 
   sectionName, 
   enrollmentCode = null,
+  title = "수강생 관리",
   showSearch = false, 
   searchTerm = '', 
   onSearchChange = () => {},
@@ -65,7 +66,7 @@ const SectionNavigation = ({
     <div className="section-navigation">
       <div className="section-nav-header">
         <div className="section-header-left">
-          <h2 className="section-title">수강생 관리</h2>
+          <h2 className="section-title">{title}</h2>
           {courseTitle && (
             <span className="section-course-name">{courseTitle}</span>
           )}

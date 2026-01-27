@@ -1,0 +1,1187 @@
+.coding-test-management {
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.coding-test-content {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.coding-test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.coding-test-header-left h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.quiz-count {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-left: 1rem;
+}
+
+.coding-test-header-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.status-filter {
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.875rem;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.status-filter:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.btn-create-quiz {
+  padding: 0.625rem 1.25rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-create-quiz:hover {
+  background: #5568d3;
+}
+
+.loading-container,
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #64748b;
+}
+
+.quiz-table-container {
+  overflow-x: auto;
+}
+
+.coding-test-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.coding-test-table thead {
+  background: #f1f5f9;
+}
+
+.coding-test-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.coding-test-table td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.coding-test-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.quiz-row-clickable {
+  cursor: pointer;
+}
+
+.quiz-title {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.quiz-description {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.waiting {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.ended {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.quiz-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.btn-edit:hover {
+  background: #c7d2fe;
+}
+
+.btn-delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-delete:hover {
+  background: #fecaca;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content.problem-select-modal {
+  max-width: 700px;
+  max-height: 80vh;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.modal-close:hover {
+  background: #f1f5f9;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 0.875rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.625rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.problem-select-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn-select-problems {
+  padding: 0.625rem 1rem;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-select-problems:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.selected-count {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-cancel,
+.btn-submit {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.btn-submit {
+  background: #667eea;
+  color: white;
+}
+
+.btn-submit:hover {
+  background: #5568d3;
+}
+
+/* 문제 선택 모달 스타일 - 문제집 관리와 동일한 디자인 */
+.coding-test-problem-select-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: coding-test-problem-select-fadeIn 0.2s ease;
+}
+
+@keyframes coding-test-problem-select-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.coding-test-problem-select-modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  max-width: 45vw;
+  width: 45vw;
+  min-width: 800px;
+  animation: coding-test-problem-select-slideInUp 0.3s ease;
+}
+
+@keyframes coding-test-problem-select-slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.coding-test-problem-select-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.75rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #1e293b;
+}
+
+.coding-test-problem-select-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-close {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  font-size: 1.75rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.coding-test-problem-select-modal-close:hover {
+  background: #e5e7eb;
+  color: #374151;
+  transform: rotate(90deg);
+}
+
+.coding-test-problem-select-modal-body {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.coding-test-problem-select-modal-filter-section {
+  margin-bottom: 1.5rem;
+}
+
+.coding-test-problem-select-modal-search {
+  margin-bottom: 1rem;
+}
+
+.coding-test-problem-select-modal-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: white;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
+}
+
+.coding-test-problem-select-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.coding-test-problem-select-modal-select-all {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-select-all:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.coding-test-problem-select-modal-selected-count {
+  font-size: 0.875rem;
+  color: #667eea;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-filter-count {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-weight: 500;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  margin-left: auto;
+}
+
+.coding-test-problem-select-modal-problems-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.coding-test-problem-select-modal-problem-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.coding-test-problem-select-modal-problem-item:hover {
+  background: #f8fafc;
+  border-color: #667eea;
+}
+
+.coding-test-problem-select-modal-problem-item.selected {
+  background: #f0f4ff;
+  border-color: #667eea;
+}
+
+.coding-test-problem-select-modal-problem-item.already-added {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+
+.coding-test-problem-select-modal-problem-item input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  accent-color: #667eea;
+  flex-shrink: 0;
+}
+
+.coding-test-problem-select-modal-problem-item.already-added input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
+.coding-test-problem-select-modal-problem-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.coding-test-problem-select-modal-problem-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.coding-test-problem-select-modal-problem-id-badge {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  flex-shrink: 0;
+}
+
+.coding-test-problem-select-modal-problem-title {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  flex: 1;
+  min-width: 0;
+}
+
+.coding-test-problem-select-modal-already-added-badge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  flex-shrink: 0;
+}
+
+.coding-test-problem-select-modal-problem-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.coding-test-problem-select-modal-problem-difficulty {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.coding-test-problem-select-modal-pagination-btn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-pagination-btn:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.coding-test-problem-select-modal-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.coding-test-problem-select-modal-pagination-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.coding-test-problem-select-modal-btn-cancel,
+.coding-test-problem-select-modal-btn-submit {
+  padding: 0.875rem 1.75rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.coding-test-problem-select-modal-btn-cancel {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.coding-test-problem-select-modal-btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.coding-test-problem-select-modal-btn-submit {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.coding-test-problem-select-modal-btn-submit:hover:not(:disabled) {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.coding-test-problem-select-modal-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 상세 보기 모드 스타일 */
+.coding-test-detail-wrapper {
+  padding: 0;
+}
+
+.coding-test-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e1e8ed;
+}
+
+.coding-test-back-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.coding-test-back-btn:hover {
+  background: #e5e7eb;
+  transform: translateX(-2px);
+}
+
+.coding-test-detail-title {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.coding-test-detail-content {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* 왼쪽 탭 사이드바 */
+.coding-test-sidebar {
+  flex: 0 0 200px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 1rem 0;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+}
+
+.coding-test-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.coding-test-tab {
+  padding: 1rem 1.5rem;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.coding-test-tab:hover {
+  background: #f8f9fa;
+  color: #1a202c;
+}
+
+.coding-test-tab.active {
+  background: #f0f4ff;
+  color: #000000;
+  border-left-color: #667eea;
+  font-weight: 600;
+}
+
+/* 오른쪽 메인 콘텐츠 */
+.coding-test-main-content {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  min-height: 600px;
+}
+
+/* 메인 탭 스타일 */
+.coding-test-main-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.quiz-info-section {
+  padding-bottom: 2rem;
+  border-bottom: 2px solid #e1e8ed;
+}
+
+.quiz-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.quiz-info-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.quiz-control-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.quiz-control-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  color: #667eea;
+}
+
+.quiz-control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quiz-btn-start:hover:not(:disabled) {
+  background: #f0f4ff;
+  border-color: #5568d3;
+  color: #5568d3;
+}
+
+.quiz-btn-stop {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.quiz-btn-stop:hover:not(:disabled) {
+  background: #fffbeb;
+  border-color: #d97706;
+  color: #d97706;
+}
+
+.quiz-btn-end {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.quiz-btn-end:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.quiz-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-item label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #1a202c;
+  font-weight: 500;
+}
+
+/* 문제 탭 스타일 */
+.coding-test-problems-tab {
+  width: 100%;
+}
+
+.problems-tab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e1e8ed;
+}
+
+.problems-tab-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.problems-add-btn {
+  padding: 0.625rem 1.25rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.problems-add-btn:hover {
+  background: #5568d3;
+}
+
+.problem-remove-btn {
+  padding: 0.375rem 0.75rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.problem-remove-btn:hover {
+  background: #fecaca;
+}
+
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.problems-count {
+  font-size: 1rem;
+  color: #667eea;
+  font-weight: 600;
+  background: #f0f4ff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.problems-list-container {
+  width: 100%;
+}
+
+.problems-table-container {
+  overflow-x: auto;
+}
+
+.problems-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.problems-table thead {
+  background: #f8fafc;
+}
+
+.problems-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #cbd5e1;
+  background: #f1f5f9;
+  white-space: nowrap;
+}
+
+.problems-table td {
+  padding: 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+  color: #1a202c;
+  vertical-align: middle;
+}
+
+.problems-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.problem-number {
+  font-weight: 700;
+  color: #667eea;
+  text-align: center;
+  width: 80px;
+}
+
+.problem-title-cell {
+  max-width: 400px;
+}
+
+.problem-title-main {
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 0.25rem;
+}
+
+.problem-description-preview {
+  font-size: 0.875rem;
+  color: #1a202c;
+  line-height: 1.5;
+  margin-top: 0.25rem;
+}
+
+.problem-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* 제출 탭 스타일 */
+.coding-test-submissions-tab {
+  width: 100%;
+}
+
+/* 코딩테스트 전용 테이블 헤더 스타일 오버라이드 */
+.coding-test-submissions-tab .admin-students-table thead {
+  background: #f8fafc;
+}
+
+.coding-test-submissions-tab .admin-students-table th {
+  background: #f1f5f9;
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+/* 문제 배지 클릭 가능 스타일 */
+.coding-test-submissions-tab .admin-problem-badge.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.coding-test-submissions-tab .admin-problem-badge.clickable:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .coding-test-detail-content {
+    flex-direction: column;
+  }
+
+  .coding-test-sidebar {
+    flex: 0 0 auto;
+    position: static;
+  }
+
+  .coding-test-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .coding-test-tab {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+
+  .coding-test-tab.active {
+    border-left: none;
+    border-bottom-color: #667eea;
+  }
+
+  .quiz-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-info-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .quiz-control-buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .coding-test-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .coding-test-table {
+    font-size: 0.875rem;
+  }
+
+  .coding-test-table th,
+  .coding-test-table td {
+    padding: 0.75rem;
+  }
+
+  .problem-search-section {
+    flex-direction: column;
+  }
+
+  .coding-test-detail-wrapper {
+    padding: 1rem;
+  }
+
+  .coding-test-main-content {
+    padding: 1.5rem;
+  }
+
+  .quiz-control-buttons {
+    flex-direction: column;
+  }
+
+  .quiz-control-btn {
+    width: 100%;
+  }
+}
+

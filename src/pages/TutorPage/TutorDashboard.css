@@ -1,5 +1,6 @@
 /* TutorDashboard.css */
 @import '../../styles/variables.css';
+@import './CourseManagement.css';
 
 .tutor-dashboard {
   padding: 0;
@@ -392,7 +393,7 @@
   flex-direction: column;
   align-items: flex-start;
   padding: 1.75rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
@@ -478,7 +479,96 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   color: var(--color-primary);
 }
 
-/* 필터 섹션 */
+/* 필터 섹션 - CourseManagement 스타일과 일치 */
+.tutor-dashboard-filters-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.tutor-dashboard-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+}
+
+.tutor-dashboard-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: white;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-dashboard-search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
+}
+
+.tutor-dashboard-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tutor-dashboard-filter-select {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  min-width: 140px;
+}
+
+.tutor-dashboard-filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.tutor-dashboard-filter-select:hover {
+  border-color: #9ca3af;
+}
+
+@media (max-width: 1024px) {
+  .tutor-dashboard-filters-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .tutor-dashboard-search-box {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .tutor-dashboard-filters-section {
+    padding: 1rem 1.25rem;
+  }
+  
+  .tutor-dashboard-filter-select {
+    width: 100%;
+  }
+}
+
+/* 필터 섹션 (기존 스타일 유지 - 다른 곳에서 사용할 수 있음) */
 .tutor-filter-section {
   display: flex;
   justify-content: space-between;
@@ -1569,7 +1659,7 @@ body.section-modal-open .tutor-dashboard .tutor-search-input:focus {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #000000;
 }
 
 .tutor-modal-close {
@@ -2517,6 +2607,12 @@ input[type="checkbox"]:checked {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
+/* 대시보드의 전체 수업 운영 현황 제목 - 검은색으로 강제 적용 */
+.tutor-dashboard .dashboard-sections-panel > .section-title,
+.tutor-dashboard .dashboard-sections-panel > h2.section-title {
+  color: #000000 !important;
+}
+
 .section-title-icon {
   color: #667eea;
   font-size: 1rem;
@@ -2531,9 +2627,6 @@ input[type="checkbox"]:checked {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.dashboard-sections-panel > .section-title {
-  margin-bottom: 1.25rem;
-}
 
 .dashboard-sections-panel .health-cards-grid {
   overflow-y: auto;
@@ -2562,7 +2655,7 @@ input[type="checkbox"]:checked {
 
 .health-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.75rem;
   align-content: start;
 }

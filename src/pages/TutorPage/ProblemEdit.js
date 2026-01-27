@@ -587,10 +587,11 @@ const ProblemEdit = () => {
         <div className="tutor-page-header">
           <h1 className="tutor-page-title">문제 수정</h1>
           <button 
-            className="tutor-btn-secondary"
+            className="problem-edit-btn-back"
             onClick={() => navigate('/tutor/problems')}
+            title="뒤로가기"
           >
-            취소
+            ← 뒤로가기
           </button>
         </div>
 
@@ -628,8 +629,7 @@ const ProblemEdit = () => {
                   setEnableFullEdit(true);
                 }
               }}
-              className="tutor-btn-primary"
-              style={{ marginLeft: '16px', whiteSpace: 'nowrap' }}
+              className="problem-edit-convert-btn"
             >
               문제 변환
             </button>
@@ -1134,11 +1134,12 @@ const ProblemEdit = () => {
             <div className="problem-create-actions">
               <button
                 type="button"
-                className="tutor-btn-secondary"
+                className="problem-edit-btn-back"
                 onClick={() => navigate('/tutor/problems')}
                 disabled={submitting}
+                title="뒤로가기"
               >
-                취소
+                ← 뒤로가기
               </button>
               <button
                 type="submit"

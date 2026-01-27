@@ -258,16 +258,16 @@ const CourseNotificationsPage = () => {
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="notification-content">
+                    <span className={`notification-tag ${notification.type}`}>
+                      {notification.type === 'notice' ? '공지' : 
+                       notification.type === 'assignment' ? '과제' : 
+                       notification.type === 'community' ? '커뮤니티' : '알림'}
+                    </span>
                     <span className="notification-title">
                       {notification.title}
                     </span>
                     <span className="notification-date">
                       [{notification.date}]
-                    </span>
-                    <span className={`notification-tag ${notification.type}`}>
-                      {notification.type === 'notice' ? '공지' : 
-                       notification.type === 'assignment' ? '과제' : 
-                       notification.type === 'community' ? '커뮤니티' : '알림'}
                     </span>
                   </div>
                 </div>

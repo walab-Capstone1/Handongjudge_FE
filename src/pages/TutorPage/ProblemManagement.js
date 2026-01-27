@@ -38,6 +38,7 @@ const ProblemManagement = () => {
   const [problemUsageMap, setProblemUsageMap] = useState({}); // 문제별 사용 현황 맵 { problemId: [{ sectionId, assignmentId, ... }] }
   const [loadingUsageData, setLoadingUsageData] = useState(false);
   const [availableTags, setAvailableTags] = useState([]); // 사용 가능한 태그 목록
+  const [openMoreMenu, setOpenMoreMenu] = useState(null); // 더보기 메뉴 열림 상태
 
   useEffect(() => {
     fetchProblems();
@@ -376,7 +377,6 @@ const ProblemManagement = () => {
             <h1 className="problem-management-title">문제 관리</h1>
             <div className="problem-management-title-stats">
               <span className="problem-management-stat-badge">총 {problems.length}개 문제</span>
-              <span className="problem-management-stat-badge">표시 {filteredProblems.length}개</span>
             </div>
           </div>
           <div className="problem-management-title-right">
@@ -566,33 +566,59 @@ const ProblemManagement = () => {
                     </td>
                     <td className="problem-management-actions-cell">
                       <div className="problem-management-actions-inline">
-                        <button 
-                          className="problem-management-btn-action problem-management-btn-edit"
-                          onClick={() => navigate(`/tutor/problems/${problem.id}/edit`)}
-                        >
-                          수정
-                        </button>
-                        <button 
-                          className="problem-management-btn-action problem-management-btn-copy"
-                          onClick={() => handleCopyClick(problem)}
-                        >
-                          복사
-                        </button>
-                        {problem.isUsed && (
+                        <div className="tutor-assignment-primary-actions">
                           <button 
-                            className="problem-management-btn-action problem-management-btn-usage"
-                            onClick={() => handleUsageClick(problem)}
-                            title="사용 현황 보기"
+                            className="tutor-btn-table-action tutor-btn-edit"
+                            onClick={() => navigate(`/tutor/problems/${problem.id}/edit`)}
                           >
-                            사용 현황
+                            수정
                           </button>
-                        )}
-                        <button 
-                          className="problem-management-btn-action problem-management-btn-delete"
-                          onClick={() => handleDeleteClick(problem)}
-                        >
-                          삭제
-                        </button>
+                          <button 
+                            className="tutor-btn-table-action tutor-btn-secondary-action"
+                            onClick={() => handleCopyClick(problem)}
+                          >
+                            복사
+                          </button>
+                          {problem.isUsed && (
+                            <button 
+                              className="tutor-btn-table-action tutor-btn-secondary-action"
+                              onClick={() => handleUsageClick(problem)}
+                              title="사용 현황 보기"
+                            >
+                              사용 현황
+                            </button>
+                          )}
+                        </div>
+                        <div className="tutor-assignment-secondary-actions">
+                          <div className="tutor-secondary-actions-layer">
+                            <div className="tutor-more-menu">
+                              <button 
+                                className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMoreMenu(openMoreMenu === problem.id ? null : problem.id);
+                                }}
+                                title="더보기"
+                              >
+                                ⋯
+                              </button>
+                              {openMoreMenu === problem.id && (
+                                <div className="tutor-more-dropdown">
+                                  <button 
+                                    className="tutor-btn-text-small tutor-delete"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteClick(problem);
+                                      setOpenMoreMenu(null);
+                                    }}
+                                  >
+                                    삭제
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </td>
                   </tr>

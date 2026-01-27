@@ -32,87 +32,8 @@ const CourseDashboardPage = () => {
   const [enrollLoading, setEnrollLoading] = useState(false);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   
-  // 더미 데이터: 관리 중인 수업 목록
-  const [managingSections] = useState([
-    {
-      id: 999,
-      title: "데이터베이스 시스템",
-      subtitle: "강의 ID: DB001",
-      batch: "",
-      courseName: "[데이터베이스 시스템]",
-      status: [],
-      instructor: "김교수",
-      color: "blue",
-      sectionId: 999,
-      courseId: "DB001",
-      active: true
-    },
-    {
-      id: 998,
-      title: "알고리즘",
-      subtitle: "강의 ID: ALG001",
-      batch: "",
-      courseName: "[알고리즘]",
-      status: [],
-      instructor: "이교수",
-      color: "green",
-      sectionId: 998,
-      courseId: "ALG001",
-      active: true
-    },
-    {
-      id: 997,
-      title: "운영체제",
-      subtitle: "강의 ID: OS001",
-      batch: "",
-      courseName: "[운영체제]",
-      status: [],
-      instructor: "박교수",
-      color: "purple",
-      sectionId: 997,
-      courseId: "OS001",
-      active: true
-    },
-    {
-      id: 996,
-      title: "컴퓨터 구조",
-      subtitle: "강의 ID: CA001",
-      batch: "",
-      courseName: "[컴퓨터 구조]",
-      status: [],
-      instructor: "최교수",
-      color: "orange",
-      sectionId: 996,
-      courseId: "CA001",
-      active: true
-    },
-    {
-      id: 995,
-      title: "소프트웨어 공학",
-      subtitle: "강의 ID: SE001",
-      batch: "",
-      courseName: "[소프트웨어 공학]",
-      status: [],
-      instructor: "정교수",
-      color: "red",
-      sectionId: 995,
-      courseId: "SE001",
-      active: true
-    },
-    {
-      id: 994,
-      title: "네트워크 프로그래밍",
-      subtitle: "강의 ID: NP001",
-      batch: "",
-      courseName: "[네트워크 프로그래밍]",
-      status: [],
-      instructor: "강교수",
-      color: "blue",
-      sectionId: 994,
-      courseId: "NP001",
-      active: true
-    }
-  ]);
+  // 관리 중인 수업 목록 (실제 API 호출)
+  const [managingSections, setManagingSections] = useState([]);
   
   // 더미 데이터: 공개된 클래스
   const [publicSections] = useState([
@@ -163,9 +84,41 @@ const CourseDashboardPage = () => {
   useEffect(() => {
     if (auth.user) {
       fetchDashboardData();
+      fetchManagingSections();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.user, sectionId]);
+
+  // 관리 중인 수업 목록 가져오기
+  const fetchManagingSections = async () => {
+    if (!auth?.user) return;
+    
+    try {
+      const response = await APIService.getManagingSections();
+      const sectionsData = response?.data || [];
+      
+      // SectionInfoDto를 CourseCard 형식으로 변환
+      const transformed = sectionsData.map(section => ({
+        id: section.sectionId,
+        sectionId: section.sectionId,
+        title: section.sectionInfo?.courseTitle || '',
+        subtitle: `${section.sectionInfo?.sectionNumber || ''}분반`,
+        courseName: `[${section.sectionInfo?.courseTitle || ''}]`,
+        instructor: section.sectionInfo?.instructorName || '',
+        color: getRandomColor(section.sectionId),
+        active: section.sectionInfo?.active !== false,
+        status: [], // CourseCard에서 필요한 status 필드 (빈 배열)
+        // 역할 정보는 내부적으로만 저장
+        _role: section.role,
+        _isAdmin: section.role === 'ADMIN'
+      }));
+      
+      setManagingSections(transformed);
+    } catch (error) {
+      console.error('관리 중인 수업 조회 실패:', error);
+      setManagingSections([]);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -555,6 +508,8 @@ const CourseDashboardPage = () => {
     return colors[id % colors.length];
   };
 
+  const transformedSections = enrolledSections.map(section => transformSectionData(section, sectionNewItems));
+
   if (loading) {
     return (
       <div className="course-dashboard-container">
@@ -590,7 +545,6 @@ const CourseDashboardPage = () => {
     );
   }
 
-  const transformedSections = enrolledSections.map(section => transformSectionData(section, sectionNewItems));
 
   return (
     <div className={`course-dashboard-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -606,6 +560,7 @@ const CourseDashboardPage = () => {
           courseName={sectionId ? (sectionInfo?.courseTitle ? (sectionInfo.sectionNumber ? `${sectionInfo.courseTitle} ${sectionInfo.sectionNumber}분반` : `${sectionInfo.courseTitle}`) : "수업 대시보드") : "전체 수업 대시보드"}
           onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
+          sectionId={sectionId}
         />
 
         <div className="dashboard-body">
@@ -619,14 +574,14 @@ const CourseDashboardPage = () => {
               className="profile-avatar"
             />
             <span className="profile-greeting">
-              {auth.user?.name || "사용자"} {auth.user?.role === "INSTRUCTOR" ? "교수" : "학부생"}님, 반가워요!
+              {auth.user?.name || "사용자"}님, 반가워요!
             </span>
           </div>
 
             {/* 참여한 수업 목록 */}
             <div className="courses-section">
             <div className="section-header">
-                <span className="section-title">참여한 수업 목록</span>
+                <span className="dashboard-section-title">참여한 수업 목록</span>
                 <button 
                   className="join-class-btn"
                   onClick={() => setShowEnrollModal(true)}
@@ -656,7 +611,13 @@ const CourseDashboardPage = () => {
             {/* 관리 중인 수업 목록 */}
             <div className="courses-section">
               <div className="section-header">
-                <span className="section-title">관리 중인 수업 목록</span>
+                <span className="dashboard-section-title">관리 중인 수업 목록</span>
+                <button 
+                  className="create-course-btn"
+                  onClick={() => navigate('/tutor/courses')}
+                >
+                  + 수업 만들기
+                </button>
               </div>
               <div className="courses-scroll-container">
                 <div className="courses-grid">
@@ -666,6 +627,10 @@ const CourseDashboardPage = () => {
                         key={course.id} 
                         course={course}
                         onStatusUpdate={fetchDashboardData}
+                        onClick={() => {
+                          // 관리 페이지로 이동
+                          navigate(`/tutor/assignments/section/${course.sectionId}`);
+                        }}
                       />
                     ))
                   ) : (
@@ -680,7 +645,7 @@ const CourseDashboardPage = () => {
             {/* 공개된 클래스 */}
             <div className="courses-section">
               <div className="section-header">
-                <span className="section-title">공개된 클래스</span>
+                <span className="dashboard-section-title">공개된 클래스</span>
               </div>
               <div className="courses-scroll-container">
                 <div className="courses-grid">
@@ -713,7 +678,7 @@ const CourseDashboardPage = () => {
           <div className="right-column">
             {/* 알림 섹션 */}
             <div className="notifications-subsection">
-              <span className="section-title">알림</span>
+              <span className="dashboard-section-title">알림</span>
               <div className="notifications-box">
                 {allNotifications.length > 0 ? (
                   allNotifications.map((notification) => (
@@ -742,7 +707,7 @@ const CourseDashboardPage = () => {
 
             {/* 과제 섹션 */}
             <div className="assignments-subsection">
-              <span className="section-title">과제</span>
+              <span className="dashboard-section-title">과제</span>
               <div className="assignments-summary-box">
                 {allAssignments.length > 0 ? (
                   allAssignments.map((assignment) => {
@@ -775,7 +740,7 @@ const CourseDashboardPage = () => {
 
             {/* 공지사항 섹션 */}
             <div className="notices-subsection">
-              <span className="section-title">공지사항</span>
+              <span className="dashboard-section-title">공지사항</span>
               <div className="notices-box">
                 {allNotices.length > 0 ? (
                   allNotices.map((notice) => (

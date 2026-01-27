@@ -122,7 +122,7 @@ const CourseCard = ({ course, onStatusUpdate, showEnrollButton = false, onEnroll
       
       <div className="card-content">
         <div className="status-tags">
-          {course.status.map((status, index) => (
+          {(course.status || []).map((status, index) => (
             <span 
               key={index} 
               className={`status-tag ${getStatusColor(status.color)}`}

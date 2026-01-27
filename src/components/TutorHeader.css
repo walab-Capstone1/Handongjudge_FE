@@ -67,6 +67,11 @@
   padding: 0.5rem 0;
 }
 
+.tutor-header-user-role {
+  color: #667eea;
+  font-weight: 600;
+}
+
 .tutor-header-logout-button {
   background: #f3f4f6;
   color: #6b7280;

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import CodeBlock from '@tiptap/extension-code-block';
@@ -83,6 +83,18 @@ const TipTapEditor = ({ content, onChange, placeholder }) => {
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
+    onCreate: ({ editor }) => {
+      // 에디터가 생성된 후 하이라이팅 적용
+      setTimeout(() => {
+        try {
+          if (editor && editor.view && editor.view.dom) {
+            highlightCodeBlocks();
+          }
+        } catch (error) {
+          console.warn('에디터 초기화 중 하이라이팅 실패:', error);
+        }
+      }, 100);
+    },
     editorProps: {
       attributes: {
         class: 'tiptap-editor',
@@ -136,69 +148,157 @@ const TipTapEditor = ({ content, onChange, placeholder }) => {
 
   const handleCodeBlockLanguageChange = (language) => {
     if (!editor) return;
-    editor.chain().focus().updateAttributes('codeBlock', { language: language || null }).run();
-    // 언어 변경 후 하이라이팅 다시 적용
-    setTimeout(() => {
-      highlightCodeBlocks();
-    }, 100);
+    try {
+      editor.chain().focus().updateAttributes('codeBlock', { language: language || null }).run();
+      // 언어 변경 후 하이라이팅 다시 적용
+      setTimeout(() => {
+        try {
+          if (editor && editor.view) {
+            const dom = editor.view.dom;
+            if (dom) {
+              highlightCodeBlocks();
+            }
+          }
+        } catch (error) {
+          console.warn('언어 변경 후 하이라이팅 실패:', error);
+        }
+      }, 100);
+    } catch (error) {
+      console.warn('코드 블록 언어 변경 실패:', error);
+    }
   };
 
   // 코드 블록 하이라이팅 적용
-  const highlightCodeBlocks = () => {
-    if (!editor) return;
-    const editorElement = editor.view.dom.closest('.tiptap-editor-wrapper');
-    if (!editorElement) return;
-
-    const codeBlocks = editorElement.querySelectorAll('pre code');
-    codeBlocks.forEach((block) => {
-      const preElement = block.closest('pre');
-      const language = preElement?.getAttribute('data-language') || '';
+  const highlightCodeBlocks = useCallback(() => {
+    try {
+      if (!editor) return;
       
-      // 이미 하이라이팅된 경우 제거 (중복 방지)
-      block.className = block.className.replace(/hljs-[^\s]+/g, '').trim();
+      // 에디터 뷰가 준비되었는지 안전하게 확인
+      if (!editor.view) return;
       
-      if (language && hljs.getLanguage(language)) {
-        try {
-          const highlighted = hljs.highlight(block.textContent || '', { language });
-          block.innerHTML = highlighted.value;
-          block.className = `hljs ${language} ${block.className}`.trim();
-        } catch (err) {
-          console.error('하이라이팅 실패:', err);
-        }
-      } else if (language) {
-        // 언어를 알 수 없는 경우 자동 감지
-        try {
-          const highlighted = hljs.highlightAuto(block.textContent || '');
-          block.innerHTML = highlighted.value;
-          block.className = `hljs ${block.className}`.trim();
-        } catch (err) {
-          console.error('하이라이팅 실패:', err);
-        }
+      // DOM에 안전하게 접근
+      let editorDom;
+      try {
+        editorDom = editor.view.dom;
+      } catch (error) {
+        // view.dom에 접근할 수 없는 경우 (아직 마운트되지 않음)
+        return;
       }
-    });
-  };
+      
+      if (!editorDom) return;
+      
+      const editorElement = editorDom.closest('.tiptap-editor-wrapper');
+      if (!editorElement) return;
+
+      const codeBlocks = editorElement.querySelectorAll('pre code');
+      codeBlocks.forEach((block) => {
+        const preElement = block.closest('pre');
+        const language = preElement?.getAttribute('data-language') || '';
+        
+        // 이미 하이라이팅된 경우 제거 (중복 방지)
+        block.className = block.className.replace(/hljs-[^\s]+/g, '').trim();
+        
+        if (language && hljs.getLanguage(language)) {
+          try {
+            const highlighted = hljs.highlight(block.textContent || '', { language });
+            block.innerHTML = highlighted.value;
+            block.className = `hljs ${language} ${block.className}`.trim();
+          } catch (err) {
+            console.error('하이라이팅 실패:', err);
+          }
+        } else if (language) {
+          // 언어를 알 수 없는 경우 자동 감지
+          try {
+            const highlighted = hljs.highlightAuto(block.textContent || '');
+            block.innerHTML = highlighted.value;
+            block.className = `hljs ${block.className}`.trim();
+          } catch (err) {
+            console.error('하이라이팅 실패:', err);
+          }
+        }
+      });
+    } catch (error) {
+      // 에러가 발생해도 앱이 크래시되지 않도록 함
+      console.warn('코드 블록 하이라이팅 중 오류:', error);
+    }
+  }, [editor]);
 
   // 에디터 콘텐츠 변경 시 하이라이팅 적용
   useEffect(() => {
     if (!editor) return;
 
     const handleUpdate = () => {
+      // 에디터가 완전히 마운트된 후에만 하이라이팅 시도
       setTimeout(() => {
-        highlightCodeBlocks();
+        try {
+          // 안전하게 에디터 상태 확인
+          if (editor && editor.view) {
+            try {
+              // view.dom에 접근 시도
+              const dom = editor.view.dom;
+              if (dom) {
+                highlightCodeBlocks();
+              }
+            } catch (error) {
+              // view.dom에 접근할 수 없는 경우 (아직 마운트되지 않음)
+              // 조용히 무시하고 다음 업데이트에서 다시 시도
+            }
+          }
+        } catch (error) {
+          console.warn('하이라이팅 업데이트 중 오류:', error);
+        }
       }, 10);
     };
 
-    editor.on('update', handleUpdate);
-    editor.on('selectionUpdate', handleUpdate);
+    // 에디터가 마운트될 때까지 대기
+    let retryCount = 0;
+    const maxRetries = 20;
+    
+    const checkAndSetup = () => {
+      try {
+        // 안전하게 에디터 상태 확인
+        if (editor && editor.view) {
+          try {
+            // view.dom에 접근 시도
+            const dom = editor.view.dom;
+            if (dom) {
+              // 에디터가 준비되었으므로 이벤트 리스너 등록
+              editor.on('update', handleUpdate);
+              editor.on('selectionUpdate', handleUpdate);
+              // 초기 하이라이팅
+              handleUpdate();
+              return; // 성공적으로 설정되었으므로 종료
+            }
+          } catch (error) {
+            // view.dom에 접근할 수 없는 경우 (아직 마운트되지 않음)
+          }
+        }
+        
+        // 아직 마운트되지 않았다면 다시 시도
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(checkAndSetup, 50);
+        }
+      } catch (error) {
+        console.warn('에디터 설정 중 오류:', error);
+      }
+    };
 
-    // 초기 하이라이팅
-    handleUpdate();
+    // 약간의 지연 후 설정 시작 (에디터가 완전히 초기화될 시간 제공)
+    const timeoutId = setTimeout(checkAndSetup, 100);
 
     return () => {
-      editor.off('update', handleUpdate);
-      editor.off('selectionUpdate', handleUpdate);
+      clearTimeout(timeoutId);
+      if (editor) {
+        try {
+          editor.off('update', handleUpdate);
+          editor.off('selectionUpdate', handleUpdate);
+        } catch (error) {
+          // 정리 중 오류는 무시
+        }
+      }
     };
-  }, [editor]);
+  }, [editor, highlightCodeBlocks]);
 
   if (!editor) {
     return null;

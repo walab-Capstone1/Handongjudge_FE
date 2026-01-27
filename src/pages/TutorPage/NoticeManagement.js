@@ -13,13 +13,7 @@ const NoticeManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
-  const [showModal, setShowModal] = useState(false);
-  const [editingNotice, setEditingNotice] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    sectionId: ''
-  });
+  const [openMoreMenu, setOpenMoreMenu] = useState(null);
 
   useEffect(() => {
     fetchNotices();
@@ -75,19 +69,22 @@ const NoticeManagement = () => {
   };
 
   const handleCreateNotice = () => {
-    setEditingNotice(null);
-    resetForm();
-    setShowModal(true);
+    // 페이지로 이동
+    if (sectionId) {
+      navigate(`/tutor/notices/section/${sectionId}/create`);
+    } else {
+      navigate('/tutor/notices/create');
+    }
   };
 
   const handleEditNotice = (notice) => {
-    setEditingNotice(notice);
-    setFormData({
-      title: notice.title,
-      content: notice.content,
-      sectionId: notice.sectionId
-    });
-    setShowModal(true);
+    // 페이지로 이동
+    const noticeSectionId = sectionId || notice.sectionId;
+    if (noticeSectionId) {
+      navigate(`/tutor/notices/section/${noticeSectionId}/${notice.id}/edit`);
+    } else {
+      navigate(`/tutor/notices/${notice.id}/edit`);
+    }
   };
 
   const handleDeleteNotice = async (noticeId) => {
@@ -114,54 +111,6 @@ const NoticeManagement = () => {
     }
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingNotice(null);
-    resetForm();
-  };
-
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      content: '',
-      sectionId: ''
-    });
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!formData.sectionId) {
-      alert('분반을 선택해주세요.');
-      return;
-    }
-
-    try {
-      if (editingNotice) {
-        // 수정
-        await APIService.updateNotice(editingNotice.id, formData);
-        alert('공지사항이 수정되었습니다.');
-      } else {
-        // 생성
-        await APIService.createNotice(formData);
-        alert('공지사항이 생성되었습니다.');
-      }
-      
-      handleCloseModal();
-      fetchNotices(); // 목록 새로고침
-    } catch (error) {
-      console.error('공지사항 저장 실패:', error);
-      alert('공지사항 저장에 실패했습니다.');
-    }
-  };
 
 
 
@@ -173,8 +122,34 @@ const NoticeManagement = () => {
     return matchesSearch && matchesSection;
   });
 
+  // sectionName에서 "분반" 텍스트 및 sectionNumber 제거 헬퍼 함수
+  const getSectionNameWithoutSection = (sectionName) => {
+    if (!sectionName) return '미지정';
+    // "분반" 텍스트와 관련된 모든 패턴 제거
+    // 예: " - 1분반", " (1분반)", " 1분반", "분반 1", "1분반", "null분반" 등
+    let cleaned = sectionName
+      .replace(/\s*[-–]\s*\d+분반/gi, '')           // " - 1분반"
+      .replace(/\s*\(\d+분반\)/gi, '')             // " (1분반)"
+      .replace(/\s+\d+분반/gi, '')                  // " 1분반"
+      .replace(/\s*분반\s*\d+/gi, '')               // "분반 1"
+      .replace(/\d+분반/gi, '')                     // "1분반"
+      .replace(/\s*[-–]\s*분반\s*\d+/gi, '')       // " - 분반 1"
+      .replace(/\s*\(\s*분반\s*\d+\s*\)/gi, '')    // " ( 분반 1 )"
+      .replace(/\s*[-–]\s*null\s*분반/gi, '')      // " - null 분반"
+      .replace(/\s*\(\s*null\s*분반\s*\)/gi, '')  // " ( null 분반 )"
+      .replace(/\s+null\s*분반/gi, '')             // " null 분반"
+      .replace(/null\s*분반/gi, '')                 // "null 분반"
+      .replace(/\s*[-–]\s*null분반/gi, '')         // " - null분반"
+      .replace(/\s*\(\s*null분반\s*\)/gi, '')      // " ( null분반 )"
+      .replace(/\s+null분반/gi, '')                 // " null분반"
+      .replace(/null분반/gi, '')                    // "null분반"
+      .replace(/\s+/g, ' ')                         // 연속된 공백을 하나로
+      .trim();
+    return cleaned || '미지정';
+  };
+
   const uniqueSections = Array.from(
-    new Map(notices.map(notice => [notice.sectionId, { id: notice.sectionId, name: notice.sectionName }])).values()
+    new Map(notices.map(notice => [notice.sectionId, { id: notice.sectionId, name: getSectionNameWithoutSection(notice.sectionName) }])).values()
   );
 
   if (loading) {
@@ -210,7 +185,7 @@ const NoticeManagement = () => {
           <div className="tutor-page-header">
             <div className="tutor-header-left">
               <h1 className="tutor-page-title">
-                {currentSection.courseTitle} - {currentSection.sectionNumber}분반
+                {currentSection.courseTitle}
               </h1>
             </div>
             <div className="tutor-header-right">
@@ -275,160 +250,105 @@ const NoticeManagement = () => {
           </div>
         )}
 
-        <div className="tutor-notices-list">
-          {filteredNotices.map((notice) => (
-            <div key={notice.id} className={`notice-card ${notice.active === false ? 'disabled' : ''}`}>
-              <div className="notice-title-row">
-                <div className="tutor-title-and-course">
-                  <p className="notice-course">{notice.sectionName}</p>
-                  <h3 className="notice-title">{notice.title}</h3>
-                </div>
-                <div className="notice-actions">
-                  <button 
-                    className="tutor-btn-text-small tutor-edit"
-                    onClick={() => handleEditNotice(notice)}
-                  >
-                    수정
-                  </button>
-                  <div className="tutor-more-menu">
-                    <button 
-                      className="tutor-btn-icon-small tutor-more"
-                      title="더보기"
-                    >
-                      ⋯
-                    </button>
-                    <div className="tutor-more-dropdown">
-                      <button 
-                        className="tutor-btn-text-small"
-                        onClick={() => handleToggleActive(notice.id, notice.active)}
-                      >
-                        {notice.active ? '비활성화' : '활성화'}
-                      </button>
-                      <button 
-                        className="tutor-btn-text-small tutor-delete"
-                        onClick={() => handleDeleteNotice(notice.id)}
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="notice-compact-stats">
-                <span className="tutor-compact-stat">
-                  <span className="tutor-stat-label-compact">작성일:</span>
-                  <span className="tutor-stat-value-compact">
-                    {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
-                  </span>
-                </span>
-                {notice.isNew && (
-                  <span className="notice-new-badge">NEW</span>
-                )}
-              </div>
-
-              <div className="notice-content">
-                <p>{notice.content}</p>
-              </div>
-            </div>
-          ))}
-
-          {filteredNotices.length === 0 && (
-            <div className="tutor-no-notices">
-              <div className="tutor-no-notices-message">
-                <span className="tutor-no-notices-icon">📢</span>
-                <div>
-                  {notices.length === 0 ? (
-                    <>
-                      <p><strong>작성된 공지사항이 없습니다</strong></p>
-                      <p>새 공지사항을 작성해보세요.</p>
-                    </>
-                  ) : (
-                    <>
-                      <p><strong>검색 조건에 맞는 공지사항이 없습니다</strong></p>
-                      <p>다른 검색어나 필터 조건을 사용해보세요.</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+        <div className="tutor-notices-table-container">
+          <table className="tutor-notices-table">
+            <thead>
+              <tr>
+                <th className="tutor-notice-title-cell">제목</th>
+                <th className="tutor-notice-section-cell">수업</th>
+                <th className="tutor-notice-date-cell">작성일</th>
+                <th className="tutor-notice-actions-cell">관리</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredNotices.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="tutor-table-empty">
+                    {notices.length === 0 ? '작성된 공지사항이 없습니다.' : '검색 조건에 맞는 공지사항이 없습니다.'}
+                  </td>
+                </tr>
+              ) : (
+                filteredNotices.map((notice) => (
+                  <tr key={notice.id} className={notice.active === false ? 'tutor-disabled' : ''}>
+                    <td className="tutor-notice-title-cell">
+                      <div>
+                        <div className="tutor-notice-title">
+                          {notice.title}
+                          {notice.isNew && (
+                            <span className="notice-new-badge">NEW</span>
+                          )}
+                        </div>
+                        {notice.content && (
+                          <div className="tutor-notice-description">{notice.content}</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="tutor-notice-section-cell">
+                      {getSectionNameWithoutSection(notice.sectionName)}
+                    </td>
+                    <td className="tutor-notice-date-cell">
+                      {new Date(notice.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </td>
+                    <td className="tutor-notice-actions-cell">
+                      <div className="tutor-notice-actions-inline">
+                        <div className="tutor-notice-primary-actions">
+                          <button 
+                            className="tutor-btn-table-action tutor-btn-edit"
+                            onClick={() => handleEditNotice(notice)}
+                            title="수정"
+                          >
+                            수정
+                          </button>
+                        </div>
+                        <div className="tutor-notice-secondary-actions">
+                          <div className="tutor-secondary-actions-layer">
+                            <button 
+                              className="tutor-btn-table-action tutor-btn-secondary-action"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleActive(notice.id, notice.active);
+                              }}
+                              title={notice.active ? '비활성화' : '활성화'}
+                            >
+                              {notice.active ? '비활성화' : '활성화'}
+                            </button>
+                            <div className="tutor-more-menu">
+                              <button 
+                                className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMoreMenu(openMoreMenu === notice.id ? null : notice.id);
+                                }}
+                                title="더보기"
+                              >
+                                ⋯
+                              </button>
+                              {openMoreMenu === notice.id && (
+                                <div className="tutor-more-dropdown">
+                                  <button 
+                                    className="tutor-btn-text-small tutor-delete"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteNotice(notice.id);
+                                      setOpenMoreMenu(null);
+                                    }}
+                                  >
+                                    삭제
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* 공지사항 생성/수정 모달 */}
-        {showModal && (
-          <div className="tutor-modal-overlay">
-            <div className="tutor-modal-content">
-              <div className="tutor-modal-header">
-                <h2>{editingNotice ? '공지사항 수정' : '새 공지사항 작성'}</h2>
-                <button
-                  className="tutor-modal-close"
-                  onClick={handleCloseModal}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="notice-form">
-                <div className="tutor-form-row">
-                  <div className="tutor-form-group">
-                    <label htmlFor="title">공지사항 제목 *</label>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      placeholder="공지사항 제목을 입력하세요"
-                      required
-                    />
-                  </div>
-                  <div className="tutor-form-group">
-                    <label htmlFor="sectionId">분반 선택 *</label>
-                    <select
-                      id="sectionId"
-                      name="sectionId"
-                      value={formData.sectionId}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="">분반을 선택하세요</option>
-                      {sections.map((section) => (
-                        <option key={section.sectionId} value={section.sectionId}>
-                          {section.courseTitle} ({section.sectionNumber}분반)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-
-
-                <div className="tutor-form-group">
-                  <label htmlFor="content">공지사항 내용 *</label>
-                  <textarea
-                    id="content"
-                    name="content"
-                    value={formData.content}
-                    onChange={handleInputChange}
-                    placeholder="공지사항 내용을 입력하세요"
-                    rows="8"
-                    required
-                  />
-                </div>
-
-                <div className="tutor-form-actions">
-                  <button type="button" className="tutor-btn-secondary" onClick={handleCloseModal}>
-                    취소
-                  </button>
-                  <button type="submit" className="tutor-btn-primary">
-                    {editingNotice ? '수정' : '작성'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </TutorLayout>
   );

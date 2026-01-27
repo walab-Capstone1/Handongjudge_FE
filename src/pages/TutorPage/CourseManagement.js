@@ -47,11 +47,28 @@ const CourseManagement = () => {
   const [editingAssignmentId, setEditingAssignmentId] = useState(null);
   const [editingProblemId, setEditingProblemId] = useState(null);
   const [viewingNoticeId, setViewingNoticeId] = useState(null); // 조회 중인 공지사항 ID
+  const [openDropdownId, setOpenDropdownId] = useState(null); // 열려있는 드롭다운 ID
 
   useEffect(() => {
     fetchSections();
     fetchAvailableCourses();
   }, []);
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openDropdownId && !event.target.closest('.tutor-course-card-dropdown-container')) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    if (openDropdownId) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [openDropdownId]);
 
   const fetchAvailableCourses = async () => {
     try {
@@ -624,13 +641,32 @@ const CourseManagement = () => {
                   >
                     과제
                   </button>
-                  <button 
-                    className="tutor-course-card-action-btn-compact delete"
-                    onClick={() => handleDeleteSection(section.sectionId, section.courseTitle)}
-                    title="분반 삭제"
-                  >
-                    삭제
-                  </button>
+                  <div className="tutor-course-card-dropdown-container">
+                    <button 
+                      className="tutor-course-card-action-btn-compact dropdown-toggle"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenDropdownId(openDropdownId === section.sectionId ? null : section.sectionId);
+                      }}
+                      title="더보기"
+                    >
+                      ⋯
+                    </button>
+                    {openDropdownId === section.sectionId && (
+                      <div className="tutor-course-card-dropdown-menu">
+                        <button 
+                          className="tutor-course-card-dropdown-item delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenDropdownId(null);
+                            handleDeleteSection(section.sectionId, section.courseTitle);
+                          }}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

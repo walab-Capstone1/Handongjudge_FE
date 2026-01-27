@@ -160,7 +160,7 @@ const CodingQuizPage = () => {
               {/* 진행 중인 퀴즈 */}
           {activeQuizzes.length > 0 && (
             <div className="quiz-section">
-              <h2 className="section-title">진행 중인 퀴즈</h2>
+              <h2 className="coding-quiz-section-title">진행 중인 퀴즈</h2>
               <div className="quiz-list">
                 {activeQuizzes.map(quiz => (
                   <div 
@@ -195,7 +195,7 @@ const CodingQuizPage = () => {
           {/* 대기 중인 퀴즈 */}
           {waitingQuizzes.length > 0 && (
             <div className="quiz-section">
-              <h2 className="section-title">예정된 퀴즈</h2>
+              <h2 className="coding-quiz-section-title">예정된 퀴즈</h2>
               <div className="quiz-list">
                 {waitingQuizzes.map(quiz => (
                   <div 
@@ -229,7 +229,7 @@ const CodingQuizPage = () => {
           {/* 종료된 퀴즈 */}
           {endedQuizzes.length > 0 && (
             <div className="quiz-section">
-              <h2 className="section-title">종료된 퀴즈</h2>
+              <h2 className="coding-quiz-section-title">종료된 퀴즈</h2>
               <div className="quiz-list">
                 {endedQuizzes.map(quiz => (
                   <div 

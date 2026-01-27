@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.75rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
@@ -186,21 +186,22 @@ body.section-modal-open .course-management .course-management-search-input:focus
 
 /* 수업 그리드 - TutorDashboard 스타일과 일치 */
 .course-management .tutor-sections-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 0.75rem !important;
   margin-bottom: 2rem;
+  align-content: start;
 }
 
 @media (max-width: 1024px) {
   .course-management .tutor-sections-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
 @media (max-width: 768px) {
   .course-management .tutor-sections-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -431,6 +432,62 @@ body.section-modal-open .course-management .course-management-search-input:focus
   border-color: #dc2626;
 }
 
+/* 드롭다운 컨테이너 */
+.course-management .tutor-course-card-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.course-management .tutor-course-card-action-btn-compact.dropdown-toggle {
+  min-width: 36px;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0.375rem 0.5rem;
+}
+
+.course-management .tutor-course-card-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 100px;
+  overflow: hidden;
+}
+
+.course-management .tutor-course-card-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  text-align: left;
+  background: white;
+  border: none;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.course-management .tutor-course-card-dropdown-item:hover {
+  background: #f9fafb;
+  color: #1e293b;
+}
+
+.course-management .tutor-course-card-dropdown-item.delete {
+  color: #dc2626;
+}
+
+.course-management .tutor-course-card-dropdown-item.delete:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .course-management .tutor-no-sections {
   grid-column: 1 / -1;
   text-align: center;
@@ -582,7 +639,7 @@ body.section-modal-open .course-management .course-management-search-input:focus
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: rgb(0, 0, 0);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
@@ -722,9 +779,9 @@ body.section-modal-open .course-management .course-management-search-input:focus
 
 /* 복사 모달 - 큰 크기 */
 .course-management .tutor-modal-content-large {
-  max-width: 800px;
+  max-width: 600px;
   max-height: calc(85vh - 65px); /* 헤더 높이를 고려한 최대 높이 */
-  width: 90%;
+  width: 85%;
 }
 
 .course-management .tutor-modal-body-large {

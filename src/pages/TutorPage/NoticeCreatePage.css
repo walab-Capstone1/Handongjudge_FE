@@ -1,0 +1,150 @@
+/* 공지사항 작성 페이지 스타일 */
+.notice-create-page {
+  padding: 0;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.notice-create-header {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.notice-create-back-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-create-back-btn:hover {
+  background: #e5e7eb;
+  color: #1e293b;
+}
+
+.notice-create-header-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-create-section-info {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.25rem 0 0 0;
+}
+
+.notice-create-body {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.notice-create-form {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.notice-create-form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.notice-create-label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-create-label .required {
+  color: #ef4444;
+}
+
+.notice-create-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-create-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.notice-create-char-count {
+  position: absolute;
+  right: 0.75rem;
+  top: 2.5rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-create-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.notice-create-btn-cancel,
+.notice-create-btn-submit {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  border: none;
+}
+
+.notice-create-btn-cancel {
+  background: #f3f4f6;
+  color: #475569;
+}
+
+.notice-create-btn-cancel:hover {
+  background: #e5e7eb;
+  color: #1e293b;
+}
+
+.notice-create-btn-submit {
+  background: #667eea;
+  color: white;
+}
+
+.notice-create-btn-submit:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.notice-create-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

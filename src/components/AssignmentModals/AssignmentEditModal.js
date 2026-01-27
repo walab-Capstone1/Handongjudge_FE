@@ -63,23 +63,6 @@ const AssignmentEditModal = ({
             </div>
           </div>
 
-          <div className="tutor-form-group">
-            <label htmlFor="edit-sectionId">분반 선택 *</label>
-            <select
-              id="edit-sectionId"
-              name="sectionId"
-              value={formData.sectionId}
-              onChange={onInputChange}
-              required
-            >
-              <option value="">분반을 선택하세요</option>
-              {sections.map((section) => (
-                <option key={section.sectionId} value={section.sectionId}>
-                  {section.courseTitle} (분반 {section.sectionNumber || section.sectionId})
-                </option>
-              ))}
-            </select>
-          </div>
 
           <div className="tutor-form-group">
             <label htmlFor="edit-description">과제 설명</label>

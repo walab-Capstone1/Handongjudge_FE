@@ -72,6 +72,46 @@
   box-sizing: border-box;
 }
 
+/* 문제 추가 모달의 overlay는 낮은 z-index */
+.tutor-modal-overlay.tutor-modal-overlay-problem-select {
+  z-index: 10000 !important;
+  position: fixed !important;
+  top: 65px !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 2rem !important;
+  box-sizing: border-box !important;
+  overflow: auto !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 문제 상세 모달은 다른 모달보다 위에 표시 */
+.tutor-modal-overlay.tutor-modal-overlay-detail {
+  z-index: 50000 !important;
+  position: fixed !important;
+  top: 65px !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 2rem !important;
+  box-sizing: border-box !important;
+  overflow: auto !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 /* 기존 tutor-modal-overlay (하위 호환성 유지) */
 .assignment-management .tutor-modal-overlay {
   position: fixed;
@@ -175,9 +215,39 @@
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideInUp 0.3s ease;
-  margin-top: 0;
+  margin: auto;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+/* 문제 상세 모달용 큰 크기 */
+.tutor-modal-content.tutor-large-modal {
+  max-width: 80vw;
+  width: 80vw;
+  min-width: 600px;
+  max-height: calc(90vh - 65px);
+}
+
+/* tutor-modal-body - 스크롤 가능하도록 설정 */
+.tutor-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* tutor-modal-actions - 모달 하단 액션 버튼 */
+.tutor-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  margin-top: auto;
+  border-top: 1px solid #e5e7eb;
 }
 
 /* tutor-modal-content 내부 폼 스타일 */
@@ -408,23 +478,24 @@
   align-items: center;
   padding: 1.75rem 2rem;
   border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f9fafb !important;
+  background-image: none !important;
+  color: #1e293b;
 }
 
 .assignment-management-problem-list-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: #1e293b;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .assignment-management-problem-list-modal-close {
-  background: rgba(255, 255, 255, 0.2);
+  background: #e5e7eb;
   border: none;
   font-size: 1.75rem;
-  color: white;
+  color: #6b7280;
   cursor: pointer;
   padding: 0;
   width: 2.25rem;
@@ -437,7 +508,8 @@
 }
 
 .assignment-management-problem-list-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #d1d5db;
+  color: #374151;
   transform: rotate(90deg);
 }
 
@@ -462,18 +534,19 @@
 }
 
 .assignment-management-problem-list-modal-body .tutor-problems-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f8fafc !important;
+  background-image: none !important;
 }
 
 .assignment-management-problem-list-modal-body .tutor-problems-table th {
   padding: 1rem 1.25rem;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
-  color: white;
+  color: #1e293b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: none;
+  border-bottom: 2px solid #cbd5e1;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
@@ -1281,6 +1354,38 @@
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
+/* 모달 내부 문제 편집 폼의 수정 완료 버튼 - 단일 색 */
+.assignment-management-problem-list-modal-body .problem-create-actions .tutor-btn-primary,
+.assignment-management-problem-list-modal-body .problem-create-actions button.tutor-btn-primary {
+  background: #667eea !important;
+  background-image: none !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0.875rem 1.75rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif !important;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3) !important;
+}
+
+.assignment-management-problem-list-modal-body .problem-create-actions .tutor-btn-primary:hover:not(:disabled),
+.assignment-management-problem-list-modal-body .problem-create-actions button.tutor-btn-primary:hover:not(:disabled) {
+  background: #5568d3 !important;
+  background-image: none !important;
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.assignment-management-problem-list-modal-body .problem-create-actions .tutor-btn-primary:disabled,
+.assignment-management-problem-list-modal-body .problem-create-actions button.tutor-btn-primary:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
 /* tutor-modal-header - Portal로 body에 렌더링되므로 전역 스타일 */
 .tutor-modal-header {
   display: flex;
@@ -1288,8 +1393,9 @@
   align-items: center;
   padding: 1.75rem 2rem;
   border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f9fafb !important;
+  background-image: none !important;
+  color: #1e293b;
   flex-shrink: 0;
 }
 
@@ -1297,15 +1403,15 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: #1e293b;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .tutor-modal-close {
-  background: rgba(255, 255, 255, 0.2);
+  background: #e5e7eb;
   border: none;
   font-size: 1.75rem;
-  color: white;
+  color: #6b7280;
   cursor: pointer;
   padding: 0;
   width: 2.25rem;
@@ -1318,7 +1424,8 @@
 }
 
 .tutor-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #d1d5db;
+  color: #374151;
   transform: rotate(90deg);
 }
 
@@ -1366,7 +1473,7 @@
 /* tutor-modal-footer - Portal로 body에 렌더링되므로 전역 스타일 */
 .tutor-modal-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: 1rem;
   padding: 1.5rem 2rem;
@@ -1433,7 +1540,8 @@
 
 .tutor-footer-actions .tutor-btn-primary {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea !important;
+  background-image: none !important;
   color: white;
   border: none;
   border-radius: 8px;
@@ -1447,7 +1555,8 @@
 }
 
 .tutor-footer-actions .tutor-btn-primary:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%);
+  background: #5568d3 !important;
+  background-image: none !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
@@ -1603,6 +1712,153 @@
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
+/* 모드 선택 탭 */
+.tutor-problem-mode-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.tutor-mode-tab {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-mode-tab:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.tutor-mode-tab.active {
+  background: #667eea;
+  color: white;
+  background-image: none !important;
+}
+
+/* 문제집 선택 */
+.tutor-problem-set-selection h3,
+.tutor-section-selection h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-problem-sets-list,
+.tutor-sections-list,
+.tutor-assignments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.tutor-problem-set-item,
+.tutor-section-item,
+.tutor-assignment-item {
+  padding: 1rem 1.25rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tutor-problem-set-item:hover,
+.tutor-section-item:hover,
+.tutor-assignment-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  transform: translateY(-1px);
+}
+
+.tutor-problem-set-item h4,
+.tutor-section-item h4,
+.tutor-assignment-item h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-problem-set-item p,
+.tutor-assignment-item p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-problem-count {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: #f3f4f6;
+  color: #667eea;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 뒤로가기 버튼 */
+.tutor-section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tutor-section-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-btn-back {
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-btn-back:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+/* 로딩 상태 */
+.tutor-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
 /* 기존 tutor-modal-header (하위 호환성 유지) */
 .assignment-management .tutor-modal-header {
   display: flex;
@@ -1610,8 +1866,9 @@
   align-items: center;
   padding: 1.75rem 2rem;
   border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f9fafb !important;
+  background-image: none !important;
+  color: #1e293b;
 }
 
 .assignment-management .tutor-modal-header h2,
@@ -1619,7 +1876,7 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: #1e293b !important;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
@@ -1777,5 +2034,107 @@ body.section-modal-open .assignment-management .tutor-form-select:focus {
   .assignment-management .tutor-form-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* 문제 상세 모달 콘텐츠 스타일 - ProblemManagement와 동일 */
+.tutor-problem-detail-content {
+  padding: 1.5rem;
+  line-height: 1.7;
+  color: #334155;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-detail-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+  color: #64748b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-detail-meta span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.tutor-detail-body {
+  line-height: 1.7;
+  color: #334155;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-problem-description h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid #667eea;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-problem-description h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-problem-description h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-problem-description p {
+  margin: 0.75rem 0;
+  color: #475569;
+  line-height: 1.7;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.tutor-problem-description code {
+  background: #f1f5f9;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+  color: #dc2626;
+  border: 1px solid #e2e8f0;
+}
+
+.tutor-problem-description pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid #334155;
+}
+
+.tutor-problem-description pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+  white-space: pre;
+  display: block;
+  border: none;
 }
 

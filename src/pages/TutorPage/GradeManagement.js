@@ -62,6 +62,7 @@ const GradeManagement = () => {
     }
   };
 
+
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -94,6 +95,11 @@ const GradeManagement = () => {
           sectionId={sectionId}
           sectionName={`${currentSection.courseTitle} - ${currentSection.sectionNumber}분반`}
           enrollmentCode={currentSection.enrollmentCode}
+          title="성적 관리"
+          showSearch={true}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="이름, 이메일로 검색..."
         />
       )}
       
@@ -156,9 +162,6 @@ const GradeManagement = () => {
                   return (
                     <tr key={student.userId}>
                       <td className="grade-student-name">
-                        <div className="grade-student-avatar">
-                          {student.name.charAt(0)}
-                        </div>
                         {student.name}
                       </td>
                       <td>{student.email}</td>

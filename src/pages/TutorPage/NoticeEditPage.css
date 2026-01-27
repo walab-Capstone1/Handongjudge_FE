@@ -1,0 +1,160 @@
+/* 공지사항 수정 페이지 스타일 */
+.notice-edit-page {
+  padding: 0;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.notice-edit-header {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.notice-edit-back-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-edit-back-btn:hover {
+  background: #e5e7eb;
+  color: #1e293b;
+}
+
+.notice-edit-header-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-edit-section-info {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.25rem 0 0 0;
+}
+
+.notice-edit-body {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.notice-edit-form {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.notice-edit-form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.notice-edit-label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-edit-label .required {
+  color: #ef4444;
+}
+
+.notice-edit-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-edit-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.notice-edit-char-count {
+  position: absolute;
+  right: 0.75rem;
+  top: 2.5rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.notice-edit-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.notice-edit-btn-cancel,
+.notice-edit-btn-submit {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  border: none;
+}
+
+.notice-edit-btn-cancel {
+  background: #f3f4f6;
+  color: #475569;
+}
+
+.notice-edit-btn-cancel:hover {
+  background: #e5e7eb;
+  color: #1e293b;
+}
+
+.notice-edit-btn-submit {
+  background: #667eea;
+  color: white;
+}
+
+.notice-edit-btn-submit:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.notice-edit-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notice-edit-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1rem;
+  color: #64748b;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+

@@ -15,7 +15,7 @@ export const useAssignmentProblems = () => {
 
   const fetchAvailableProblems = useCallback(async () => {
     try {
-      const response = await APIService.getProblems();
+      const response = await APIService.getAllProblems();
       const problems = response.data || response || [];
       setAvailableProblems(Array.isArray(problems) ? problems : []);
     } catch (error) {
@@ -34,7 +34,7 @@ export const useAssignmentProblems = () => {
         problems = response.data || response || [];
       } else {
         // 모든 문제 조회
-        const response = await APIService.getProblems();
+        const response = await APIService.getAllProblems();
         problems = response.data || response || [];
       }
       

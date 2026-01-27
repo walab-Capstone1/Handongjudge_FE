@@ -17,6 +17,9 @@ const UserManagement = () => {
   // 모달 관련 상태 제거됨
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSection, setFilterSection] = useState('ALL');
+  const [filterRole, setFilterRole] = useState('ALL'); // 'ALL', 'STUDENT', 'TUTOR', 'ADMIN'
+  const [userRoles, setUserRoles] = useState({}); // { userId: 'STUDENT' | 'TUTOR' | 'ADMIN' }
+  const [currentUserRole, setCurrentUserRole] = useState(null); // 현재 사용자의 역할 (ADMIN인지 확인용)
   
   // 정렬 관련 상태
   const [sortField, setSortField] = useState('name'); // 'name', 'email', 'progress', 'joinedAt'
@@ -35,7 +38,7 @@ const UserManagement = () => {
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [sectionId]);
 
   const fetchStudents = async () => {
     try {
@@ -64,6 +67,17 @@ const UserManagement = () => {
           const studentsResponse = await APIService.getSectionStudents(parsedSectionId);
           const studentsData = studentsResponse?.data || studentsResponse || [];
           setStudents(studentsData);
+          
+          // 현재 사용자의 역할 확인
+          try {
+            const roleResponse = await APIService.getMyRoleInSection(parsedSectionId);
+            setCurrentUserRole(roleResponse?.role || null);
+          } catch (error) {
+            console.error('역할 조회 실패:', error);
+          }
+          
+          // 모든 사용자의 역할 정보 가져오기
+          await fetchUserRoles(parsedSectionId, studentsData);
         } catch (error) {
           console.error('분반 학생 목록 조회 실패:', error);
           setStudents([]);
@@ -82,6 +96,73 @@ const UserManagement = () => {
       setStudents([]);
       setSections([]);
       setLoading(false);
+    }
+  };
+
+  // 사용자들의 역할 정보 가져오기
+  const fetchUserRoles = async (sectionId, studentsData) => {
+    if (!sectionId) return;
+    
+    try {
+      // 모든 수업별 역할 목록 가져오기
+      const rolesResponse = await APIService.getAllSectionRoles();
+      const allRoles = rolesResponse?.data || [];
+      
+      // 현재 수업의 역할만 필터링
+      const sectionRoles = allRoles.filter(role => role.sectionId === parseInt(sectionId));
+      
+      // 역할 정보를 맵으로 변환 { userId: 'STUDENT' | 'TUTOR' | 'ADMIN' }
+      const rolesMap = {};
+      sectionRoles.forEach(role => {
+        rolesMap[role.userId] = role.role;
+      });
+      
+      setUserRoles(rolesMap);
+    } catch (error) {
+      console.error('역할 정보 조회 실패:', error);
+      setUserRoles({});
+    }
+  };
+
+  // 튜터 추가 핸들러
+  const handleAddTutor = async (userId) => {
+    if (!sectionId) {
+      alert('수업을 선택해주세요.');
+      return;
+    }
+    
+    if (!window.confirm('이 사용자를 튜터로 추가하시겠습니까?')) {
+      return;
+    }
+    
+    try {
+      await APIService.addTutorToSection(sectionId, userId);
+      alert('튜터가 추가되었습니다.');
+      await fetchStudents(); // 목록 새로고침
+    } catch (error) {
+      console.error('튜터 추가 실패:', error);
+      alert('튜터 추가에 실패했습니다: ' + (error.message || ''));
+    }
+  };
+
+  // 튜터 제거 핸들러
+  const handleRemoveTutor = async (userId) => {
+    if (!sectionId) {
+      alert('수업을 선택해주세요.');
+      return;
+    }
+    
+    if (!window.confirm('이 사용자의 튜터 권한을 제거하시겠습니까?')) {
+      return;
+    }
+    
+    try {
+      await APIService.removeTutorFromSection(sectionId, userId);
+      alert('튜터가 제거되었습니다.');
+      await fetchStudents(); // 목록 새로고침
+    } catch (error) {
+      console.error('튜터 제거 실패:', error);
+      alert('튜터 제거에 실패했습니다: ' + (error.message || ''));
     }
   };
 
@@ -174,8 +255,22 @@ const UserManagement = () => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (student.teamId && student.teamId.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesSection = filterSection === 'ALL' || student.sectionName.includes(filterSection);
-    return matchesSearch && matchesSection;
+    const matchesSection = filterSection === 'ALL' || student.sectionName?.includes(filterSection);
+    
+    // 역할 필터링 (sectionId가 있을 때만)
+    let matchesRole = true;
+    if (sectionId && filterRole !== 'ALL') {
+      const userRole = userRoles[student.userId];
+      if (filterRole === 'STUDENT') {
+        matchesRole = userRole === 'STUDENT' || !userRole; // 역할이 없으면 기본적으로 STUDENT
+      } else if (filterRole === 'TUTOR') {
+        matchesRole = userRole === 'TUTOR';
+      } else if (filterRole === 'ADMIN') {
+        matchesRole = userRole === 'ADMIN';
+      }
+    }
+    
+    return matchesSearch && matchesSection && matchesRole;
   });
 
   // 정렬 함수
@@ -337,6 +432,16 @@ const UserManagement = () => {
                 className="user-management-search-input"
               />
             </div>
+            <select
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+              className="user-management-section-filter"
+            >
+              <option value="ALL">전체</option>
+              <option value="STUDENT">수강생</option>
+              <option value="TUTOR">튜터</option>
+              <option value="ADMIN">관리자</option>
+            </select>
           </div>
         </div>
       )}
@@ -364,8 +469,9 @@ const UserManagement = () => {
                     {getSortIcon('email')}
                   </div>
                 </th>
-                <th>과목</th>
-                <th>분반</th>
+                {!sectionId && <th>과목</th>}
+                {!sectionId && <th>분반</th>}
+                {sectionId && <th>역할</th>}
                 <th 
                   className="user-management-th-sortable"
                   onClick={() => handleSort('progress')}
@@ -375,56 +481,102 @@ const UserManagement = () => {
                     {getSortIcon('progress')}
                   </div>
                 </th>
-                <th>작업</th>
+                <th style={{ textAlign: 'right' }}>작업</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedStudents.map((student) => (
-                <tr key={student.userId}>
-                  <td className="user-management-name-cell">
-                    <div className="user-management-name-content">
-                      <div className="user-management-avatar">
-                        {student.name.charAt(0)}
-                      </div>
+              {paginatedStudents.map((student) => {
+                const userRole = sectionId ? (userRoles[student.userId] || 'STUDENT') : null;
+                const isAdmin = currentUserRole === 'ADMIN';
+                const isTutor = userRole === 'TUTOR';
+                const isStudent = userRole === 'STUDENT' || !userRole;
+                
+                return (
+                  <tr key={student.userId}>
+                    <td className="user-management-name-cell">
                       {student.name}
-                    </div>
-                  </td>
-                  <td className="user-management-email-cell">{student.email}</td>
-                  <td className="user-management-course-cell">{student.courseTitle}</td>
-                  <td className="user-management-section-cell">
-                    <span className="user-management-section-badge">
-                      {student.sectionNumber}분반
-                    </span>
-                  </td>
-                  <td className="user-management-progress-cell">
-                    <div className="user-management-progress-info">
-                      <div className="user-management-progress-bar-container">
-                        <div 
-                          className="user-management-progress-bar-fill" 
-                          style={{ width: `${student.assignmentCompletionRate || 0}%` }}
-                        ></div>
+                    </td>
+                    <td className="user-management-email-cell">{student.email}</td>
+                    {!sectionId && <td className="user-management-course-cell">{student.courseTitle}</td>}
+                    {!sectionId && (
+                      <td className="user-management-section-cell">
+                        <span className="user-management-section-badge">
+                          {student.sectionNumber}분반
+                        </span>
+                      </td>
+                    )}
+                    {sectionId && (
+                      <td>
+                        <span 
+                          className="user-management-section-badge"
+                          style={{
+                            backgroundColor: userRole === 'ADMIN' ? '#e17055' : 
+                                           userRole === 'TUTOR' ? '#667eea' : 'transparent',
+                            color: userRole === 'ADMIN' ? 'white' : 
+                                  userRole === 'TUTOR' ? 'white' : '#2d3436',
+                            padding: userRole ? '0.3rem 0.8rem' : '0',
+                            borderRadius: userRole ? '16px' : '0',
+                            fontSize: '0.8rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          {userRole === 'ADMIN' ? '관리자' : 
+                           userRole === 'TUTOR' ? '튜터' : '수강생'}
+                        </span>
+                      </td>
+                    )}
+                    <td className="user-management-progress-cell">
+                      <div className="user-management-progress-info">
+                        <div className="user-management-progress-bar-container">
+                          <div 
+                            className="user-management-progress-bar-fill" 
+                            style={{ width: `${student.assignmentCompletionRate || 0}%` }}
+                          ></div>
+                        </div>
+                        <span className="user-management-progress-text">
+                          {student.assignmentCompletionRate ? `${student.assignmentCompletionRate.toFixed(1)}%` : '0%'}
+                        </span>
                       </div>
-                      <span className="user-management-progress-text">
-                        {student.assignmentCompletionRate ? `${student.assignmentCompletionRate.toFixed(1)}%` : '0%'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="user-management-actions-cell">
-                    <div className="user-management-action-buttons">
-                      <button 
-                        className="user-management-btn-detail"
-                        onClick={() => handleStudentDetailView(student)}
-                        title="상세 보기"
-                      >
-                        상세 보기
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="user-management-actions-cell">
+                      <div className="user-management-actions-inline">
+                        <button 
+                          className="user-management-btn-table-action"
+                          onClick={() => handleStudentDetailView(student)}
+                          title="상세 보기"
+                        >
+                          상세 보기
+                        </button>
+                        {sectionId && isAdmin && (
+                          <>
+                            {isStudent && (
+                              <button 
+                                className="user-management-btn-table-action"
+                                onClick={() => handleAddTutor(student.userId)}
+                                title="튜터로 추가"
+                              >
+                                튜터 추가
+                              </button>
+                            )}
+                            {isTutor && (
+                              <button 
+                                className="user-management-btn-table-action user-management-btn-delete"
+                                onClick={() => handleRemoveTutor(student.userId)}
+                                title="튜터 권한 제거"
+                              >
+                                튜터 제거
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
               {paginatedStudents.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="user-management-no-data">
+                  <td colSpan={sectionId ? 5 : 6} className="user-management-no-data">
                     <div className="user-management-no-data-message">
                       <span className="user-management-no-data-icon"></span>
                       <div>

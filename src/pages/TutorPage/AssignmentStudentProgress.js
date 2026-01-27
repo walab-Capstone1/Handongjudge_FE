@@ -444,7 +444,14 @@ const AssignmentStudentProgress = () => {
           <div className="tutor-modal-overlay" onClick={() => setShowCodeModal(false)}>
             <div className="tutor-modal-content tutor-code-modal" onClick={(e) => e.stopPropagation()}>
               <div className="tutor-modal-header">
-                <h2>학생 코드 조회</h2>
+                <div>
+                  <h2>제출 코드 조회</h2>
+                  {selectedCodeData.problem && (
+                    <p className="tutor-modal-subtitle">
+                      {removeCopyLabel(selectedCodeData.problem.title)}
+                    </p>
+                  )}
+                </div>
                 <button 
                   className="tutor-modal-close"
                   onClick={() => setShowCodeModal(false)}

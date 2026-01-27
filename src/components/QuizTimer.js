@@ -69,3 +69,5 @@ const QuizTimer = ({ endTime, onTimeUp }) => {
 
 export default QuizTimer;
 
+
+

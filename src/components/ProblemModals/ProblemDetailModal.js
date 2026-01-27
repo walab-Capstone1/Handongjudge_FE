@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import '../../components/AssignmentModals/AssignmentModals.css';
 
@@ -18,8 +19,11 @@ const ProblemDetailModal = ({ isOpen, problemDetail, onClose }) => {
     description.includes('**') ||
     !description.includes('<');
 
-  return (
-    <div className="tutor-modal-overlay" onClick={onClose}>
+  return createPortal(
+    <div 
+      className="tutor-modal-overlay tutor-modal-overlay-detail" 
+      onClick={onClose}
+    >
       <div className="tutor-modal-content tutor-large-modal" onClick={(e) => e.stopPropagation()}>
         <div className="tutor-modal-header">
           <h2>문제 상세 - {problemDetail.title}</h2>
@@ -61,18 +65,11 @@ const ProblemDetailModal = ({ isOpen, problemDetail, onClose }) => {
             >
               닫기
             </button>
-            <button 
-              className="tutor-btn-primary"
-              onClick={() => {
-                alert('문제 수정 기능은 추후 구현 예정입니다.');
-              }}
-            >
-              수정
-            </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
