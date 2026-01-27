@@ -43,6 +43,15 @@
   margin-bottom: 40px;
 }
 
+/* 코딩 테스트 페이지 전용 섹션 제목 - 독립적으로 관리 */
+.coding-quiz-section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000 !important;
+  margin: 0 0 16px 0;
+}
+
+/* 기존 section-title은 유지 (하위 호환성) */
 .section-title {
   font-size: 20px;
   font-weight: 600;
