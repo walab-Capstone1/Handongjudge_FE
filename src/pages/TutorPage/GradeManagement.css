@@ -239,6 +239,30 @@ body.section-modal-open .grade-management .tutor-search-input:focus {
   border-right: none;
 }
 
+.grade-management .grade-course-quiz-header {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.grade-management .grade-item-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.grade-management .grade-item-type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #0ea5e9;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .grade-management .grade-course-assignment-total-header {
   text-align: center;
   min-width: 100px;
@@ -672,6 +696,14 @@ body.section-modal-open .grade-management .grade-score-input:focus {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
+.grade-management .grade-points-unit {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 600;
+  min-width: 30px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
 .grade-management .grade-bulk-input:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -682,6 +714,69 @@ body.section-modal-open .grade-management .grade-bulk-input:focus {
   outline: none !important;
   border-color: #667eea !important;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* 과제별 그룹 (수업 전체 보기용) */
+.grade-management .grade-assignment-group {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.grade-management .grade-assignment-group:last-child {
+  margin-bottom: 0;
+}
+
+.grade-management .grade-assignment-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.grade-management .grade-assignment-group-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.grade-management .grade-assignment-group-total {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #667eea;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+/* 과제 총점 요약 */
+.grade-management .grade-total-points-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.grade-management .grade-total-points-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.grade-management .grade-total-points-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 .grade-management .grade-modal-actions {
