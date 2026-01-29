@@ -417,6 +417,11 @@ class APIService {
     return await this.request(`/problems/${problemId}/assignments`);
   }
 
+  // 문제 사용 현황 조회 (과제, 문제집, 퀴즈 포함)
+  async getProblemUsage(problemId) {
+    return await this.request(`/problems/${problemId}/usage`);
+  }
+
   async copyProblem(problemId, newTitle = null) {
     const body = newTitle ? { newTitle } : {};
     return await this.request(`/problems/${problemId}/copy`, {
@@ -1243,6 +1248,29 @@ class APIService {
   async removeProblemFromSet(problemSetId, problemId) {
     return await this.request(`/problem-sets/${problemSetId}/problems/${problemId}`, {
       method: 'DELETE',
+    });
+  }
+
+  // ==================== 성적 관리 API ====================
+  
+  // 과제별 모든 학생 성적 조회
+  async getAssignmentGrades(sectionId, assignmentId) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/grades`);
+  }
+
+  // 학생별 문제 성적 입력/수정
+  async saveGrade(sectionId, assignmentId, gradeData) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/grades`, {
+      method: 'POST',
+      body: JSON.stringify(gradeData),
+    });
+  }
+
+  // 일괄 성적 입력
+  async saveBulkGrades(sectionId, assignmentId, bulkGradeData) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/grades/bulk`, {
+      method: 'POST',
+      body: JSON.stringify(bulkGradeData),
     });
   }
 

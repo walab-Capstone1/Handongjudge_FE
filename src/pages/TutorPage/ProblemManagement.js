@@ -25,7 +25,7 @@ const ProblemManagement = () => {
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('success');
   const [showUsageModal, setShowUsageModal] = useState(false);
-  const [problemUsage, setProblemUsage] = useState([]);
+  const [problemUsage, setProblemUsage] = useState({ assignments: [], problemSets: [], quizzes: [] });
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [problemForUsage, setProblemForUsage] = useState(null);
   const [filterUsageStatus, setFilterUsageStatus] = useState('ALL'); // 'ALL', 'USED', 'UNUSED'
@@ -328,15 +328,15 @@ const ProblemManagement = () => {
     setProblemUsage([]);
     
     try {
-      const response = await APIService.getProblemAssignments(problem.id);
-      const assignments = Array.isArray(response) ? response : (response?.data || []);
-      setProblemUsage(assignments);
+      const response = await APIService.getProblemUsage(problem.id);
+      const usage = response?.data || response || {};
+      setProblemUsage(usage);
     } catch (error) {
       console.error('문제 사용 현황 조회 실패:', error);
       setAlertMessage('문제 사용 현황 조회에 실패했습니다. ' + (error.message || ''));
       setAlertType('error');
       setTimeout(() => setAlertMessage(null), 5000);
-      setProblemUsage([]);
+      setProblemUsage({});
     } finally {
       setLoadingUsage(false);
     }
@@ -896,73 +896,193 @@ const ProblemManagement = () => {
                   <div style={{ textAlign: 'center', padding: '40px' }}>
                     <LoadingSpinner message="사용 현황을 불러오는 중..." />
                   </div>
-                ) : problemUsage.length === 0 ? (
+                ) : (!problemUsage.assignments || problemUsage.assignments.length === 0) && 
+                    (!problemUsage.problemSets || problemUsage.problemSets.length === 0) && 
+                    (!problemUsage.quizzes || problemUsage.quizzes.length === 0) ? (
                   <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-                    <p>이 문제는 현재 어떤 과제에서도 사용되지 않습니다.</p>
+                    <p>이 문제는 현재 어떤 곳에서도 사용되지 않습니다.</p>
                   </div>
                 ) : (
                   <div>
-                    <p style={{ marginBottom: '16px', color: '#666' }}>
-                      총 {problemUsage.length}개의 과제에서 사용 중입니다.
-                    </p>
-                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr style={{ borderBottom: '2px solid #e1e8ed', backgroundColor: '#f8f9fa' }}>
-                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>수업</th>
-                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>과제</th>
-                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>시작일</th>
-                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>종료일</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {problemUsage.map((usage, index) => (
-                            <tr 
-                              key={usage.assignmentId} 
-                              style={{ 
-                                borderBottom: '1px solid #e1e8ed',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s ease'
-                              }}
-                              onClick={() => {
-                                if (usage.sectionId && usage.assignmentId && problemForUsage?.id) {
-                                  navigate(`/sections/${usage.sectionId}/assignments/${usage.assignmentId}/detail/problems/${problemForUsage.id}`);
-                                }
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#f0f7ff';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                              }}
-                            >
-                              <td style={{ padding: '12px' }}>
-                                <div>
-                                  <div style={{ fontWeight: '500' }}>{usage.courseTitle}</div>
-                                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                                    {usage.year}년 {usage.semester} {usage.sectionNumber ? `- ${usage.sectionNumber}분반` : ''}
-                                  </div>
-                                </div>
-                              </td>
-                              <td style={{ padding: '12px' }}>
-                                {usage.assignmentNumber && (
-                                  <span style={{ color: '#666', marginRight: '8px' }}>
-                                    {usage.assignmentNumber}
-                                  </span>
-                                )}
-                                {usage.assignmentTitle}
-                              </td>
-                              <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
-                                {formatDateTime(usage.assignmentStartDate)}
-                              </td>
-                              <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
-                                {formatDateTime(usage.assignmentEndDate)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    {/* 과제 사용 현황 */}
+                    {problemUsage.assignments && problemUsage.assignments.length > 0 && (
+                      <div style={{ marginBottom: '30px' }}>
+                        <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#333' }}>
+                          과제 ({problemUsage.assignments.length}개)
+                        </h3>
+                        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                              <tr style={{ borderBottom: '2px solid #e1e8ed', backgroundColor: '#f8f9fa' }}>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>수업</th>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>과제</th>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>시작일</th>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>종료일</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {problemUsage.assignments.map((usage, index) => (
+                                <tr 
+                                  key={`assignment-${usage.assignmentId}`} 
+                                  style={{ 
+                                    borderBottom: '1px solid #e1e8ed',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s ease'
+                                  }}
+                                  onClick={() => {
+                                    if (usage.sectionId && usage.assignmentId && problemForUsage?.id) {
+                                      navigate(`/sections/${usage.sectionId}/assignments/${usage.assignmentId}/detail/problems/${problemForUsage.id}`);
+                                    }
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#f0f7ff';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                  }}
+                                >
+                                  <td style={{ padding: '12px' }}>
+                                    <div>
+                                      <div style={{ fontWeight: '500' }}>{usage.courseTitle}</div>
+                                      <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                        {usage.year}년 {usage.semester === 'SPRING' ? '1학기' : usage.semester === 'SUMMER' ? '여름학기' : usage.semester === 'FALL' ? '2학기' : '겨울학기'} {usage.sectionNumber ? `- ${usage.sectionNumber}분반` : ''}
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td style={{ padding: '12px' }}>
+                                    {usage.assignmentNumber && (
+                                      <span style={{ color: '#666', marginRight: '8px' }}>
+                                        {usage.assignmentNumber}
+                                      </span>
+                                    )}
+                                    {usage.assignmentTitle}
+                                  </td>
+                                  <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
+                                    {formatDateTime(usage.assignmentStartDate)}
+                                  </td>
+                                  <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
+                                    {formatDateTime(usage.assignmentEndDate)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 문제집 사용 현황 */}
+                    {problemUsage.problemSets && problemUsage.problemSets.length > 0 && (
+                      <div style={{ marginBottom: '30px' }}>
+                        <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#333' }}>
+                          문제집 ({problemUsage.problemSets.length}개)
+                        </h3>
+                        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                              <tr style={{ borderBottom: '2px solid #e1e8ed', backgroundColor: '#f8f9fa' }}>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>문제집 제목</th>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>설명</th>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>생성일</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {problemUsage.problemSets.map((ps, index) => (
+                                <tr 
+                                  key={`problemset-${ps.problemSetId}`} 
+                                  style={{ 
+                                    borderBottom: '1px solid #e1e8ed',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s ease'
+                                  }}
+                                  onClick={() => {
+                                    navigate(`/tutor/problems/sets/${ps.problemSetId}/edit`);
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#f0f7ff';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                  }}
+                                >
+                                  <td style={{ padding: '12px', fontWeight: '500' }}>
+                                    {ps.problemSetTitle}
+                                  </td>
+                                  <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
+                                    {ps.description || '-'}
+                                  </td>
+                                  <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
+                                    {formatDateTime(ps.createdAt)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 퀴즈 사용 현황 */}
+                    {problemUsage.quizzes && problemUsage.quizzes.length > 0 && (
+                      <div style={{ marginBottom: '30px' }}>
+                        <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#333' }}>
+                          퀴즈 ({problemUsage.quizzes.length}개)
+                        </h3>
+                        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                              <tr style={{ borderBottom: '2px solid #e1e8ed', backgroundColor: '#f8f9fa' }}>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>수업</th>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>퀴즈</th>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>시작일</th>
+                                <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>종료일</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {problemUsage.quizzes.map((quiz, index) => (
+                                <tr 
+                                  key={`quiz-${quiz.quizId}`} 
+                                  style={{ 
+                                    borderBottom: '1px solid #e1e8ed',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s ease'
+                                  }}
+                                  onClick={() => {
+                                    if (quiz.sectionId && quiz.quizId) {
+                                      navigate(`/tutor/coding-tests/section/${quiz.sectionId}/${quiz.quizId}`);
+                                    }
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#f0f7ff';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                  }}
+                                >
+                                  <td style={{ padding: '12px' }}>
+                                    <div>
+                                      <div style={{ fontWeight: '500' }}>{quiz.courseTitle}</div>
+                                      <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                        {quiz.year}년 {quiz.semester === 'SPRING' ? '1학기' : quiz.semester === 'SUMMER' ? '여름학기' : quiz.semester === 'FALL' ? '2학기' : '겨울학기'} {quiz.sectionNumber ? `- ${quiz.sectionNumber}분반` : ''}
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td style={{ padding: '12px', fontWeight: '500' }}>
+                                    {quiz.quizTitle}
+                                  </td>
+                                  <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
+                                    {formatDateTime(quiz.startTime)}
+                                  </td>
+                                  <td style={{ padding: '12px', color: '#666', fontSize: '14px' }}>
+                                    {formatDateTime(quiz.endTime)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
