@@ -130,6 +130,8 @@ const ProblemEdit = () => {
   const [currentTag, setCurrentTag] = useState('');
   const [originalTimeLimit, setOriginalTimeLimit] = useState('');
   const [originalMemoryLimit, setOriginalMemoryLimit] = useState('');
+  const [parsedTestCases, setParsedTestCases] = useState([]); // ZIP에서 파싱한 테스트케이스
+  const [showParsedTestCases, setShowParsedTestCases] = useState(false); // 파싱된 테스트케이스 표시 여부
 
   useEffect(() => {
     fetchProblem();
@@ -244,6 +246,9 @@ const ProblemEdit = () => {
         const testCases = parsedData.testCases || parsedData.testcases || [];
         console.log('파싱된 테스트케이스:', testCases);
         
+        // 파싱된 테스트케이스를 state에 저장
+        setParsedTestCases(testCases);
+        
         if (testCases.length > 0) {
           const sampleTestCases = testCases.filter(tc => tc.type === 'sample');
           console.log('샘플 테스트케이스:', sampleTestCases);
@@ -255,6 +260,9 @@ const ProblemEdit = () => {
             }));
           }
         }
+      } else {
+        // parsedData가 없으면 빈 배열로 설정
+        setParsedTestCases([]);
       }
       
       setFormData({
@@ -358,12 +366,108 @@ const ProblemEdit = () => {
     }
   };
 
-  const handleTestcaseAdd = (e) => {
+  const handleTestcaseAdd = async (e) => {
     const files = Array.from(e.target.files);
+    const newTestCases = [];
+    
+    // RTF 형식에서 순수 텍스트 추출하는 함수
+    const extractTextFromRTF = (rtfContent) => {
+      // RTF 형식인지 확인
+      if (rtfContent.trim().startsWith('{\\rtf')) {
+        // RTF에서 텍스트만 추출 (간단한 방법)
+        let text = rtfContent
+          .replace(/\\[a-z]+\d*\s?/gi, '') // RTF 명령어 제거
+          .replace(/\{[^}]*\}/g, '') // 중괄호 블록 제거
+          .replace(/\\[{}]/g, '') // 이스케이프 문자 제거
+          .trim();
+        
+        // 줄바꿈 정리
+        text = text.replace(/\s+/g, ' ').trim();
+        return text;
+      }
+      return rtfContent;
+    };
+    
+    // 먼저 모든 파일을 읽어서 쌍을 찾기
+    const fileMap = new Map(); // baseName -> { inputFile: File, outputFile: File }
+    
+    for (const file of files) {
+      try {
+        const fileName = file.name;
+        const baseName = fileName.replace(/\.(in|ans|out)$/i, '');
+        
+        const isInput = fileName.toLowerCase().endsWith('.in');
+        const isOutput = fileName.toLowerCase().endsWith('.ans') || fileName.toLowerCase().endsWith('.out');
+        
+        if (!isInput && !isOutput) {
+          continue; // .in, .ans, .out 파일이 아니면 건너뛰기
+        }
+        
+        if (!fileMap.has(baseName)) {
+          fileMap.set(baseName, { inputFile: null, outputFile: null });
+        }
+        
+        const pair = fileMap.get(baseName);
+        if (isInput) {
+          pair.inputFile = file;
+        } else if (isOutput) {
+          pair.outputFile = file;
+        }
+      } catch (err) {
+        console.error('파일 처리 실패:', err);
+      }
+    }
+    
+    // 파일 쌍을 처리
+    for (const [baseName, pair] of fileMap.entries()) {
+      try {
+        let inputContent = '';
+        let outputContent = '';
+        
+        // 입력 파일 읽기
+        if (pair.inputFile) {
+          const rawInput = await pair.inputFile.text();
+          inputContent = extractTextFromRTF(rawInput);
+        }
+        
+        // 출력 파일 읽기
+        if (pair.outputFile) {
+          const rawOutput = await pair.outputFile.text();
+          outputContent = extractTextFromRTF(rawOutput);
+        }
+        
+        // 입력 또는 출력 중 하나라도 있으면 추가
+        if (inputContent || outputContent) {
+          newTestCases.push({
+            file: pair.inputFile || pair.outputFile,
+            name: baseName,
+            input: inputContent,
+            output: outputContent,
+            type: 'secret',
+            isNew: true
+          });
+        }
+      } catch (err) {
+        console.error('파일 읽기 실패:', err);
+        // 파일 읽기 실패해도 추가
+        newTestCases.push({
+          file: pair.inputFile || pair.outputFile,
+          name: baseName,
+          input: '',
+          output: '',
+          type: 'secret',
+          isNew: true
+        });
+      }
+    }
+    
     setFormData(prev => ({
       ...prev,
-      testcases: [...prev.testcases, ...files]
+      testcases: [...prev.testcases, ...newTestCases]
     }));
+    
+    // input 초기화
+    e.target.value = '';
   };
 
   const handleTestcaseRemove = (index) => {
@@ -371,6 +475,30 @@ const ProblemEdit = () => {
       ...prev,
       testcases: prev.testcases.filter((_, i) => i !== index)
     }));
+  };
+
+  const handleTestcaseChange = (index, field, value) => {
+    setFormData(prev => {
+      const newTestcases = [...prev.testcases];
+      if (newTestcases[index]) {
+        newTestcases[index] = { ...newTestcases[index], [field]: value };
+      }
+      return { ...prev, testcases: newTestcases };
+    });
+  };
+
+  const handleParsedTestcaseRemove = (index) => {
+    setParsedTestCases(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleParsedTestcaseChange = (index, field, value) => {
+    setParsedTestCases(prev => {
+      const newTestcases = [...prev];
+      if (newTestcases[index]) {
+        newTestcases[index] = { ...newTestcases[index], [field]: value };
+      }
+      return newTestcases;
+    });
   };
 
   const applyFormat = (command, value = null) => {
@@ -415,9 +543,37 @@ const ProblemEdit = () => {
         submitFormData.append('zipFile', zipFile);
       }
 
-      // 테스트케이스 파일들
-      formData.testcases.forEach((file, index) => {
-        submitFormData.append(`testcase_${index}`, file);
+      // 테스트케이스 파일들 - 객체를 파일로 변환
+      let testcaseIndex = 0;
+      formData.testcases.forEach((testcase) => {
+        if (testcase.input) {
+          const inputBlob = new Blob([testcase.input], { type: 'text/plain' });
+          const inputFile = new File([inputBlob], `${testcase.name || testcaseIndex}.in`, { type: 'text/plain' });
+          submitFormData.append(`testcase_${testcaseIndex}`, inputFile);
+          testcaseIndex++;
+        }
+        if (testcase.output) {
+          const outputBlob = new Blob([testcase.output], { type: 'text/plain' });
+          const outputFile = new File([outputBlob], `${testcase.name || (testcaseIndex - 1)}.ans`, { type: 'text/plain' });
+          submitFormData.append(`testcase_${testcaseIndex}`, outputFile);
+          testcaseIndex++;
+        }
+      });
+      
+      // 기존 테스트케이스도 파일로 변환
+      parsedTestCases.forEach((testcase) => {
+        if (testcase.input) {
+          const inputBlob = new Blob([testcase.input], { type: 'text/plain' });
+          const inputFile = new File([inputBlob], `${testcase.name || testcaseIndex}.in`, { type: 'text/plain' });
+          submitFormData.append(`testcase_${testcaseIndex}`, inputFile);
+          testcaseIndex++;
+        }
+        if (testcase.output) {
+          const outputBlob = new Blob([testcase.output], { type: 'text/plain' });
+          const outputFile = new File([outputBlob], `${testcase.name || (testcaseIndex - 1)}.ans`, { type: 'text/plain' });
+          submitFormData.append(`testcase_${testcaseIndex}`, outputFile);
+          testcaseIndex++;
+        }
       });
 
       await APIService.updateProblem(problemId, submitFormData);
@@ -830,30 +986,121 @@ const ProblemEdit = () => {
                     type="file"
                     id="testcaseInput"
                     multiple
+                    accept=".in,.ans"
                     onChange={handleTestcaseAdd}
                     className="problem-create-file-input"
                   />
                   <label htmlFor="testcaseInput" className="problem-create-file-label-inline">
-                    파일 선택
+                    추가
                   </label>
-                  <span className="problem-create-help-text">
-                    테스트케이스 입력(.in) 및 출력(.ans) 파일
+                  <span className="problem-create-help-text" style={{ display: 'block', marginTop: '4px', fontSize: '12px', color: '#666' }}>
+                    테스트케이스 입력(.in) 및 출력(.ans) 파일 (예: 01.in, 01.ans)
                   </span>
                 </div>
-                <div className="problem-create-testcase-list">
-                  {formData.testcases.map((file, idx) => (
-                    <div key={idx} className="problem-create-testcase-item">
-                      <span>{file.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleTestcaseRemove(idx)}
-                        className="problem-create-testcase-remove"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                {formData.testcases.length > 0 && (
+                  <div className="problem-create-testcase-list">
+                    {formData.testcases.map((testcase, idx) => (
+                      <div key={idx} className="problem-create-testcase-item-compact">
+                        <div className="problem-create-testcase-header-compact">
+                          <div className="problem-create-testcase-header-left">
+                            <span className="problem-create-testcase-name">{testcase.name || `테스트케이스 ${idx + 1}`}</span>
+                            <select
+                              value={testcase.type || 'secret'}
+                              onChange={(e) => handleTestcaseChange(idx, 'type', e.target.value)}
+                              className="problem-create-testcase-type-select"
+                            >
+                              <option value="sample">샘플</option>
+                              <option value="secret">비밀</option>
+                            </select>
+                            <span className="problem-create-testcase-type-badge">
+                              {testcase.type === 'sample' ? '샘플' : '비밀'}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleTestcaseRemove(idx)}
+                            className="problem-create-testcase-remove-btn"
+                          >
+                            삭제
+                          </button>
+                        </div>
+                        <div className="problem-create-testcase-body-compact">
+                          {testcase.input && (
+                            <div className="problem-create-testcase-content-item">
+                              <div className="problem-create-testcase-content-label">입력</div>
+                              <pre className="problem-create-testcase-content-text">{testcase.input}</pre>
+                            </div>
+                          )}
+                          {testcase.output && (
+                            <div className="problem-create-testcase-content-item">
+                              <div className="problem-create-testcase-content-label">출력</div>
+                              <pre className="problem-create-testcase-content-text">{testcase.output}</pre>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* ZIP에서 파싱된 테스트케이스 표시 */}
+                {parsedTestCases.length > 0 && (
+                  <div className="problem-create-parsed-testcases-section" style={{ marginTop: '16px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowParsedTestCases(!showParsedTestCases)}
+                      className="problem-create-parsed-testcases-toggle"
+                    >
+                      <span>{showParsedTestCases ? '▼' : '▶'}</span>
+                      <span>기존 테스트케이스 ({parsedTestCases.length}개)</span>
+                    </button>
+                    {showParsedTestCases && (
+                      <div className="problem-create-parsed-testcases">
+                        {parsedTestCases.map((testCase, idx) => (
+                          <div key={idx} className="problem-create-testcase-item-compact">
+                            <div className="problem-create-testcase-header-compact">
+                              <div className="problem-create-testcase-header-left">
+                                <span className="problem-create-testcase-name">{testCase.name || `테스트케이스 ${idx + 1}`}</span>
+                                <select
+                                  value={testCase.type || 'secret'}
+                                  onChange={(e) => handleParsedTestcaseChange(idx, 'type', e.target.value)}
+                                  className="problem-create-testcase-type-select"
+                                >
+                                  <option value="sample">샘플</option>
+                                  <option value="secret">비밀</option>
+                                </select>
+                                <span className="problem-create-testcase-type-badge">
+                                  {testCase.type === 'sample' ? '샘플' : '비밀'}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleParsedTestcaseRemove(idx)}
+                                className="problem-create-testcase-remove-btn"
+                              >
+                                삭제
+                              </button>
+                            </div>
+                            <div className="problem-create-testcase-body-compact">
+                              {testCase.input && (
+                                <div className="problem-create-testcase-content-item">
+                                  <div className="problem-create-testcase-content-label">입력</div>
+                                  <pre className="problem-create-testcase-content-text">{testCase.input}</pre>
+                                </div>
+                              )}
+                              {testCase.output && (
+                                <div className="problem-create-testcase-content-item">
+                                  <div className="problem-create-testcase-content-label">출력</div>
+                                  <pre className="problem-create-testcase-content-text">{testCase.output}</pre>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

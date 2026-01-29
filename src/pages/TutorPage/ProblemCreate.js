@@ -333,14 +333,38 @@ const ProblemCreate = () => {
       submitFormData.append('memoryLimit', formData.memoryLimit || '0');
       submitFormData.append('sampleInputs', JSON.stringify(formData.sampleInputs));
       
-      // ZIP 파일 (선택적)
-      if (zipFile) {
-        submitFormData.append('zipFile', zipFile);
-      }
+      // ZIP 파일은 전송하지 않음 - 파싱된 필드만 전송
+      // ZIP 파일은 프론트엔드에서 파싱용으로만 사용하고,
+      // 실제 API는 항상 필드 기반으로 ZIP을 생성합니다.
 
-      // 테스트케이스 파일들
-      formData.testcases.forEach((file, index) => {
-        submitFormData.append(`testcase_${index}`, file);
+      // 테스트케이스 파일들 - 파싱된 테스트케이스 + 새로 추가한 테스트케이스 모두 포함
+      let testcaseIndex = 0;
+      
+      // 1. ZIP에서 파싱된 테스트케이스 전송
+      parsedTestCases.forEach((testcase) => {
+        const baseName = testcase.name || `testcase_${testcaseIndex}`;
+        
+        // input 파일
+        if (testcase.input) {
+          const inputBlob = new Blob([testcase.input], { type: 'text/plain' });
+          const inputFile = new File([inputBlob], `${baseName}.in`, { type: 'text/plain' });
+          submitFormData.append(`testcase_${testcaseIndex}`, inputFile);
+          testcaseIndex++;
+        }
+        
+        // output 파일
+        if (testcase.output) {
+          const outputBlob = new Blob([testcase.output], { type: 'text/plain' });
+          const outputFile = new File([outputBlob], `${baseName}.ans`, { type: 'text/plain' });
+          submitFormData.append(`testcase_${testcaseIndex}`, outputFile);
+          testcaseIndex++;
+        }
+      });
+      
+      // 2. 새로 추가한 테스트케이스 파일 전송 (File 객체)
+      formData.testcases.forEach((file) => {
+        submitFormData.append(`testcase_${testcaseIndex}`, file);
+        testcaseIndex++;
       });
 
       const response = await APIService.createProblem(submitFormData);

@@ -354,12 +354,19 @@ const CodingTestManagement = () => {
     }
 
     try {
+      // 문제 복사본 생성 (퀴즈는 모두 고유 복사본으로 관리)
+      const copiedProblemIds = [];
+      for (const problemId of selectedProblemIds) {
+        const newProblemId = await APIService.copyProblem(problemId);
+        copiedProblemIds.push(newProblemId);
+      }
+
       const quizData = {
         title: formData.title,
         description: formData.description,
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
-        problemIds: selectedProblemIds
+        problemIds: copiedProblemIds
       };
       
       await APIService.createQuiz(sectionId, quizData);
@@ -387,12 +394,19 @@ const CodingTestManagement = () => {
     }
 
     try {
+      // 문제 복사본 생성 (퀴즈는 모두 고유 복사본으로 관리)
+      const copiedProblemIds = [];
+      for (const problemId of selectedProblemIds) {
+        const newProblemId = await APIService.copyProblem(problemId);
+        copiedProblemIds.push(newProblemId);
+      }
+
       const quizData = {
         title: formData.title,
         description: formData.description,
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
-        problemIds: selectedProblemIds
+        problemIds: copiedProblemIds
       };
       
       await APIService.updateQuiz(sectionId, selectedQuiz.id, quizData);
@@ -437,10 +451,24 @@ const CodingTestManagement = () => {
 
   const handleAddProblemToQuiz = async (problemId) => {
     try {
-      // TODO: 코딩테스트에 문제 추가 API 호출
-      // await APIService.addProblemToQuiz(quizId, problemId);
-      alert('문제 추가 기능은 백엔드 API 구현이 필요합니다.');
-      // fetchQuizProblems(); // 문제 목록 새로고침
+      // 문제 복사본 생성 후 퀴즈에 추가 (퀴즈는 모두 고유 복사본으로 관리)
+      const newProblemId = await APIService.copyProblem(problemId);
+      
+      // 퀴즈 수정 API를 통해 문제 추가 (기존 문제 + 새 문제)
+      const currentProblemIds = problems.map(p => p.id);
+      const updatedProblemIds = [...currentProblemIds, newProblemId];
+      
+      const quizData = {
+        title: selectedQuizDetail.title,
+        description: selectedQuizDetail.description || '',
+        startTime: selectedQuizDetail.startTime.toISOString(),
+        endTime: selectedQuizDetail.endTime.toISOString(),
+        problemIds: updatedProblemIds
+      };
+      
+      await APIService.updateQuiz(sectionId, quizId, quizData);
+      fetchQuizProblems(); // 문제 목록 새로고침
+      alert('문제가 추가되었습니다.');
     } catch (error) {
       console.error('문제 추가 실패:', error);
       alert('문제 추가에 실패했습니다.');
@@ -1015,14 +1043,36 @@ const CodingTestManagement = () => {
                         alert('추가할 문제를 선택해주세요.');
                         return;
                       }
-                      // TODO: 선택한 문제들을 코딩테스트에 추가
-                      for (const problemId of newProblemIds) {
-                        await handleAddProblemToQuiz(problemId);
+                      try {
+                        // 문제 복사본 생성 후 퀴즈에 추가 (퀴즈는 모두 고유 복사본으로 관리)
+                        const copiedProblemIds = [];
+                        for (const problemId of newProblemIds) {
+                          const newProblemId = await APIService.copyProblem(problemId);
+                          copiedProblemIds.push(newProblemId);
+                        }
+                        
+                        // 퀴즈 수정 API를 통해 문제 추가 (기존 문제 + 새 문제)
+                        const currentProblemIds = problems.map(p => p.id);
+                        const updatedProblemIds = [...currentProblemIds, ...copiedProblemIds];
+                        
+                        const quizData = {
+                          title: selectedQuizDetail.title,
+                          description: selectedQuizDetail.description || '',
+                          startTime: selectedQuizDetail.startTime.toISOString(),
+                          endTime: selectedQuizDetail.endTime.toISOString(),
+                          problemIds: updatedProblemIds
+                        };
+                        
+                        await APIService.updateQuiz(sectionId, quizId, quizData);
+                        setShowAddProblemModal(false);
+                        setProblemSearchTerm('');
+                        setCurrentProblemPage(1);
+                        fetchQuizProblems();
+                        alert(`${newProblemIds.length}개의 문제가 추가되었습니다.`);
+                      } catch (error) {
+                        console.error('문제 추가 실패:', error);
+                        alert('문제 추가에 실패했습니다.');
                       }
-                      setShowAddProblemModal(false);
-                      setProblemSearchTerm('');
-                      setCurrentProblemPage(1);
-                      fetchQuizProblems();
                     }}
                   >
                     추가 ({selectedProblemIds.filter(id => !problems.some(p => p.id === id)).length}개)
