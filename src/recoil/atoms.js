@@ -7,7 +7,7 @@ export const authState = atom({
     isAuthenticated: false,
     user: null,
     accessToken: null,
-    loading: false,
+    loading: true,
     error: null,
   },
 });
