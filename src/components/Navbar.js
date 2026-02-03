@@ -2,7 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import APIService from "../services/APIService";
-import "./Navbar.css";
+import {
+  Navbar as NavbarContainer,
+  NavbarContainer as NavbarWrapper,
+  NavLeft,
+  LogoLink,
+  LogoImage,
+  NavLink,
+  AdminLink,
+  NavRight,
+  UserInfo,
+  LogoutButton
+} from "./styleddiv";
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -46,36 +57,36 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        <div className="nav-left">
-          <Link to="/main" className="logo-link">
-            <img src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="CodeSturdy" className="logo-image" />
+    <NavbarContainer>
+      <NavbarWrapper>
+        <NavLeft>
+          <LogoLink to="/main">
+            <LogoImage src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="CodeSturdy" />
             <span>CodeSturdy</span>
-          </Link>
-          <Link to="/main" className="nav-link">강의</Link>
+          </LogoLink>
+          <NavLink to="/main">강의</NavLink>
           {/* 마이페이지 비활성화 (기능은 유지) */}
-          {/* <Link to="/mypage/info" className="nav-link">마이페이지</Link> */}
+          {/* <NavLink to="/mypage/info">마이페이지</NavLink> */}
           {!checking && hasManagingSections && (
-            <Link to="/tutor" className="nav-link admin-link">관리 페이지</Link>
+            <AdminLink to="/tutor">관리 페이지</AdminLink>
           )}
           {isSuperAdmin && (
-            <Link to="/super-admin" className="nav-link super-admin-link">시스템 관리</Link>
+            <NavLink to="/super-admin" className="super-admin-link">시스템 관리</NavLink>
           )}
-        </div>
+        </NavLeft>
 
-        <div className="nav-right">
+        <NavRight>
           {isAuthenticated && (
             <>
-              <span className="user-info">{user?.name || user?.email}</span>
-              <button onClick={handleLogout} className="logout-button">
+              <UserInfo>{user?.name || user?.email}</UserInfo>
+              <LogoutButton onClick={handleLogout}>
                 로그아웃
-              </button>
+              </LogoutButton>
             </>
           )}
-        </div>
-      </div>
-    </nav>
+        </NavRight>
+      </NavbarWrapper>
+    </NavbarContainer>
   );
 };
 

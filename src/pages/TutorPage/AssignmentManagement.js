@@ -20,11 +20,6 @@ import StandaloneProblemCreateModal from "../../components/ProblemModals/Standal
 import BulkProblemCreateModal from "../../components/ProblemModals/BulkProblemCreateModal";
 import ProblemListModal from "../../components/ProblemModals/ProblemListModal";
 import ProblemDetailModal from "../../components/ProblemModals/ProblemDetailModal";
-import "./AssignmentManagement.css";
-import "./AssignmentManagementList.css";
-import "./AssignmentTable.css";
-import "./Pagination.css";
-import "../../components/AssignmentModals/AssignmentModals.css";
 
 const AssignmentManagement = () => {
   const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기
@@ -788,6 +783,313 @@ const AssignmentManagement = () => {
 
   return (
     <TutorLayout selectedSection={currentSection}>
+      <style dangerouslySetInnerHTML={{__html: `
+/* AssignmentManagement.css - Tutor 스타일과 일치하는 과제 관리 페이지 */
+.assignment-management { padding: 0; }
+.assignment-management .tutor-loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; gap: 1rem; background-color: white; }
+.assignment-management .tutor-loading-spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.assignment-management .tutor-page-header { display: flex; align-items: center; justify-content: space-between; padding: 1.75rem 2rem; background: #667eea; color: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2); margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1.25rem; }
+.assignment-management .tutor-header-left { display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 0; }
+.assignment-management .tutor-header-right { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.assignment-management .tutor-page-title { font-size: 1.875rem; font-weight: 700; color: white; margin: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+.assignment-management .tutor-header-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.assignment-management .tutor-filters-section { display: flex; align-items: center; gap: 1rem; padding: 1.5rem 2rem; background: white; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); margin-bottom: 2rem; flex-wrap: wrap; }
+.assignment-management .tutor-search-box { position: relative; flex: 1; min-width: 250px; max-width: 400px; }
+.assignment-management .tutor-search-input { width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; transition: all 0.2s ease; background: white; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-search-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); background: white; }
+body.section-modal-open .assignment-management .tutor-search-input:focus { outline: none !important; border-color: #e1e8ed !important; box-shadow: none !important; background: white !important; }
+.assignment-management .section-filter { padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; background: white; color: #1e293b; cursor: pointer; transition: all 0.2s ease; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; min-width: 140px; }
+.assignment-management .section-filter:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+.assignment-management .section-filter:hover { border-color: #9ca3af; }
+.assignment-management .tutor-btn-primary { display: flex; align-items: center; gap: 0.5rem; background: white; color: #667eea; border: 2px solid #667eea; padding: 0.875rem 1.75rem; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; font-size: 0.95rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; white-space: nowrap; }
+.assignment-management .tutor-btn-primary:hover { background: #667eea; color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
+.assignment-management .tutor-btn-secondary { background: white; color: #667eea; border: 2px solid #667eea; padding: 0.875rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.95rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; white-space: nowrap; }
+.assignment-management .tutor-btn-secondary:hover { background: #f8f9ff; border-color: #5568d3; color: #5568d3; transform: translateY(-2px); }
+.assignment-management .tutor-btn-secondary.tutor-btn-primary-color { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
+.assignment-management .tutor-btn-secondary.tutor-btn-primary-color:hover { background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); }
+.assignment-management .tutor-assignments-table-container { background: white; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow: hidden; }
+.assignment-management .tutor-assignments-table { width: 100%; border-collapse: collapse; }
+.assignment-management .tutor-assignments-table thead { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.assignment-management .tutor-assignments-table th { padding: 1rem 1.5rem; text-align: left; font-weight: 600; font-size: 0.95rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignments-table tbody tr { border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s ease; }
+.assignment-management .tutor-assignments-table tbody tr:hover { background-color: #f8f9ff; }
+.assignment-management .tutor-assignments-table tbody tr.tutor-disabled { opacity: 0.65; background-color: #f9fafb; }
+.assignment-management .tutor-assignments-table td { padding: 1.25rem 1.5rem; font-size: 0.9rem; color: #374151; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignment-title-cell { min-width: 200px; }
+.assignment-management .tutor-assignment-title { font-weight: 600; color: #1e293b; font-size: 1rem; margin-bottom: 0.25rem; }
+.assignment-management .tutor-assignment-description { color: #64748b; font-size: 0.85rem; margin-top: 0.25rem; line-height: 1.4; }
+.assignment-management .tutor-assignment-meta-cell { color: #64748b; font-size: 0.9rem; }
+.assignment-management .tutor-assignment-actions-cell { width: 1%; white-space: nowrap; }
+.assignment-management .tutor-assignment-actions-inline { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.assignment-management .tutor-btn-table-action { padding: 0.5rem 1rem; border: 1px solid #e5e7eb; background: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; color: #667eea; }
+.assignment-management .tutor-btn-table-action:hover { background: #667eea; color: white; border-color: #667eea; transform: translateY(-1px); }
+.assignment-management .tutor-btn-table-action.tutor-btn-edit { color: #667eea; border-color: #667eea; }
+.assignment-management .tutor-btn-table-action.tutor-btn-edit:hover { background: #667eea; color: white; }
+.assignment-management .tutor-btn-table-action.tutor-btn-more { background: #f3f4f6; border-color: #e5e7eb; color: #64748b; padding: 0.5rem 0.75rem; font-size: 1.2rem; line-height: 1; }
+.assignment-management .tutor-btn-table-action.tutor-btn-more:hover { background: #e5e7eb; color: #374151; }
+.assignment-management .tutor-more-menu { position: relative; }
+.assignment-management .tutor-more-dropdown { position: absolute; top: 100%; right: 0; margin-top: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 100; min-width: 120px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.assignment-management .tutor-btn-text-small { padding: 0.5rem 0.75rem; border: none; background: transparent; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: left; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; color: #374151; }
+.assignment-management .tutor-btn-text-small:hover { background: #f3f4f6; }
+.assignment-management .tutor-btn-text-small.tutor-delete { color: #ef4444; }
+.assignment-management .tutor-btn-text-small.tutor-delete:hover { background: #fee2e2; color: #dc2626; }
+.assignment-management .tutor-table-empty { text-align: center; padding: 3rem; color: #64748b; font-size: 1rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignments-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.assignment-management .tutor-assignment-list-item { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; transition: all 0.3s ease; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
+.assignment-management .tutor-assignment-list-item:hover { box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15); border-color: #667eea; transform: translateY(-2px); }
+.assignment-management .tutor-assignment-list-item.tutor-disabled { opacity: 0.65; background: #f9fafb; }
+.assignment-management .tutor-assignment-list-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; }
+.assignment-management .tutor-assignment-list-info { flex: 1; min-width: 0; }
+.assignment-management .tutor-assignment-list-title-section { margin-bottom: 1rem; }
+.assignment-management .tutor-assignment-list-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0 0 0.5rem 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignment-list-description { color: #64748b; font-size: 0.95rem; line-height: 1.6; margin: 0; }
+.assignment-management .tutor-assignment-list-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.assignment-management .tutor-assignment-meta-item { display: flex; flex-direction: column; gap: 0.25rem; }
+.assignment-management .tutor-meta-label { font-size: 0.8rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.assignment-management .tutor-meta-value { font-size: 1rem; font-weight: 600; color: #1e293b; }
+.assignment-management .tutor-assignment-list-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-start; }
+.assignment-management .tutor-btn-list-action { padding: 0.75rem 1.25rem; border: 1px solid #e5e7eb; background: white; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; color: #667eea; }
+.assignment-management .tutor-btn-list-action:hover { background: #667eea; color: white; border-color: #667eea; transform: translateY(-1px); }
+.assignment-management .tutor-pagination { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; background: white; border-radius: 12px; border: 1px solid #e5e7eb; margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.assignment-management .tutor-pagination-info { font-size: 0.9rem; color: #64748b; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-pagination-controls { display: flex; align-items: center; gap: 0.5rem; }
+.assignment-management .tutor-btn-pagination { padding: 0.5rem 1rem; border: 1px solid #e5e7eb; background: white; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; color: #374151; }
+.assignment-management .tutor-btn-pagination:hover:not(:disabled) { background: #667eea; color: white; border-color: #667eea; }
+.assignment-management .tutor-btn-pagination:disabled { opacity: 0.5; cursor: not-allowed; }
+.assignment-management .tutor-pagination-pages { display: flex; gap: 0.25rem; }
+.assignment-management .tutor-btn-pagination-page { padding: 0.5rem 0.75rem; border: 1px solid #e5e7eb; background: white; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; color: #374151; min-width: 40px; }
+.assignment-management .tutor-btn-pagination-page:hover { background: #f3f4f6; border-color: #cbd5e1; }
+.assignment-management .tutor-btn-pagination-page.active { background: #667eea; color: white; border-color: #667eea; }
+.assignment-management .assignment-management-copy-problem-modal-overlay { position: fixed; top: 65px; left: 280px; right: calc(100vw / 3); bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-start; justify-content: center; z-index: 10000; animation: assignment-management-copy-problem-fadeIn 0.2s ease; padding-top: 2rem; overflow-y: auto; box-sizing: border-box; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.tutor-layout.sidebar-collapsed .assignment-management .assignment-management-copy-problem-modal-overlay { left: 60px; right: calc(100vw / 3); }
+@keyframes assignment-management-copy-problem-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.assignment-management .tutor-modal-overlay { position: fixed; top: 65px; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-start; justify-content: center; z-index: 10000; animation: fadeIn 0.2s ease; padding-top: 2rem; overflow-y: auto; box-sizing: border-box; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.assignment-management .tutor-modal-content { background: white; border-radius: 16px; width: 90%; max-width: 600px; max-height: calc(90vh - 65px); overflow: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); animation: slideInUp 0.3s ease; margin-top: 0; }
+@keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.assignment-management .tutor-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.75rem 2rem; border-bottom: 1px solid #e5e7eb; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.assignment-management .tutor-modal-header h2, .assignment-management .tutor-modal-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: white; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-modal-close { background: rgba(255, 255, 255, 0.2); border: none; font-size: 1.75rem; color: white; cursor: pointer; padding: 0; width: 2.25rem; height: 2.25rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s ease; }
+.assignment-management .tutor-modal-close:hover { background: rgba(255, 255, 255, 0.3); transform: rotate(90deg); }
+.assignment-management .assignment-form, .assignment-management .tutor-modal-body { padding: 2rem; }
+.assignment-management .tutor-form-group { margin-bottom: 1.5rem; }
+.assignment-management .tutor-form-group label, .assignment-management .tutor-form-label { display: block; margin-bottom: 0.625rem; font-weight: 600; color: #374151; font-size: 0.95rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-form-input, .assignment-management .tutor-form-textarea, .assignment-management .tutor-form-select { width: 100%; padding: 0.875rem 1rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; transition: all 0.2s ease; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; box-sizing: border-box; }
+.assignment-management .tutor-form-input:focus, .assignment-management .tutor-form-textarea:focus, .assignment-management .tutor-form-select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+body.section-modal-open .assignment-management .tutor-form-input:focus, body.section-modal-open .assignment-management .tutor-form-textarea:focus, body.section-modal-open .assignment-management .tutor-form-select:focus { outline: none !important; border-color: #e1e8ed !important; box-shadow: none !important; background: white !important; }
+.assignment-management .tutor-form-textarea { resize: vertical; min-height: 100px; }
+.assignment-management .tutor-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.assignment-management .tutor-form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb; }
+.assignment-management .tutor-btn-cancel { background: #f3f4f6; color: #6b7280; border: none; padding: 0.875rem 1.75rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-cancel:hover { background: #e5e7eb; }
+.assignment-management .tutor-btn-submit { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.875rem 1.75rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-submit:hover:not(:disabled) { background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); }
+.assignment-management .tutor-btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.assignment-management .tutor-problem-search-section { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: stretch; flex-wrap: nowrap; }
+.assignment-management .tutor-problem-search-section .tutor-search-box { flex: 1; min-width: 0; display: flex; align-items: center; }
+.assignment-management .tutor-problem-search-section .tutor-search-input { width: 100%; padding: 0.6rem 1rem; border: 2px solid #e9ecef; border-radius: 8px; font-size: 0.9rem; background: white; transition: all 0.3s ease; }
+.assignment-management .tutor-problem-search-section .tutor-search-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+body.section-modal-open .assignment-management .tutor-problem-search-section .tutor-search-input:focus { outline: none !important; border-color: #e1e8ed !important; box-shadow: none !important; background: white !important; }
+.assignment-management .tutor-problem-search-box { flex: 1; max-width: calc(100% - 200px); min-width: 200px; }
+.assignment-management .tutor-problem-search-box .tutor-search-input { width: 99%; padding: 0.6rem 0.9rem; border: 2px solid #e9ecef; border-radius: 8px; font-size: 0.9rem; background: white; transition: all 0.3s ease; }
+.assignment-management .tutor-problem-search-box .tutor-search-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+body.section-modal-open .assignment-management .tutor-problem-search-box .tutor-search-input:focus { outline: none !important; border-color: #e1e8ed !important; box-shadow: none !important; background: white !important; }
+.assignment-management .tutor-btn-create-new { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; flex-shrink: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-create-new:hover { background: linear-gradient(135deg, #5a6fd8, #6a4190); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
+.assignment-management .tutor-available-problems { display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; max-height: calc(70vh - 150px); padding-right: 0.5rem; }
+.assignment-management .tutor-available-problem-item { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 1rem 1.25rem; background: #f8f9fa; border-radius: 10px; border: 2px solid #e9ecef; transition: all 0.3s ease; gap: 1rem; }
+.assignment-management .tutor-available-problem-item:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1); background: white; }
+.assignment-management .tutor-available-problem-item .tutor-problem-info { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; overflow: hidden; }
+.assignment-management .tutor-available-problem-item .tutor-problem-title { font-size: 1rem; font-weight: 600; color: #2d3436; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-available-problem-item .tutor-problem-created { font-size: 0.8rem; color: #95a5a6; margin: 0; }
+.assignment-management .tutor-btn-select-problem { background: #667eea; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; flex-shrink: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-select-problem:hover { background: #5568d3; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
+.assignment-management .tutor-no-available-problems { text-align: center; padding: 3rem; color: #636e72; display: flex; flex-direction: column; gap: 1rem; align-items: center; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-available-problems-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; flex: 1; overflow-y: auto; }
+.assignment-management .tutor-problem-card { background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; padding-top: 0.5rem; transition: all 0.2s ease; display: flex; flex-direction: column; gap: 0.5rem; position: relative; }
+.assignment-management .tutor-problem-card:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15); }
+.assignment-management .tutor-problem-card-header { position: absolute; top: 0.5rem; right: 1rem; display: flex; justify-content: flex-end; margin: 0; padding: 0; z-index: 1; }
+.assignment-management .tutor-problem-checkbox { width: 1.3rem; height: 1.3rem; cursor: pointer; accent-color: #667eea; }
+.assignment-management .tutor-problem-card-body { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0; padding-top: 0; }
+.assignment-management .tutor-problem-card-title { font-weight: 600; color: #1e293b; font-size: 0.95rem; line-height: 1.4; margin: 0; padding: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-problem-card-date { font-size: 0.8rem; color: #64748b; }
+.assignment-management .tutor-problem-card-meta-row { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
+.assignment-management .tutor-btn-view-detail-card { padding: 0.4rem 0.8rem; background: #f3f4f6; color: #667eea; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-view-detail-card:hover { background: #667eea; color: white; border-color: #667eea; transform: translateY(-1px); }
+.assignment-management .tutor-modal-content-large, .assignment-management .tutor-problem-modal-large { max-width: 95vw !important; width: 95vw !important; min-width: 800px; max-height: 90vh; display: flex; flex-direction: column; }
+.assignment-management .tutor-problem-modal-body { padding: 1.5rem; padding-bottom: 1.5rem; flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 1rem; min-height: 0; background: white; }
+.assignment-management .tutor-problem-modal-body .tutor-problem-search-section { flex-shrink: 0; margin-bottom: 0; display: flex; flex-direction: column; gap: 0; max-width: 500px; }
+.assignment-management .tutor-problem-modal-body .tutor-problem-search-section .tutor-search-input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e9ecef; border-radius: 8px; font-size: 0.95rem; background: white; transition: all 0.3s ease; }
+.assignment-management .tutor-problem-modal-body .tutor-problem-search-section .tutor-search-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+body.section-modal-open .assignment-management .tutor-problem-modal-body .tutor-problem-search-section .tutor-search-input:focus { outline: none !important; border-color: #e1e8ed !important; box-shadow: none !important; background: white !important; }
+.assignment-management .tutor-view-mode-tabs { display: flex; gap: 0.25rem; background: #f1f5f9; padding: 0.15rem; border-radius: 8px; flex-shrink: 0; height: fit-content; align-items: center; }
+.assignment-management .tutor-tab-button { flex: 1; padding: 0.4rem 0.8rem; background: transparent; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; line-height: 1.2; margin-bottom: 0px; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-tab-button:hover { background: #e2e8f0; color: #475569; }
+.assignment-management .tutor-tab-button.tutor-active { background: white; color: #667eea; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+.assignment-management .tutor-problem-list-view, .assignment-management .tutor-problem-hierarchy-view { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; min-height: 0; margin-top: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; }
+.assignment-management .assignment-list-large { display: flex; flex-direction: column; gap: 1rem; }
+.assignment-management .assignment-item-large { background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; transition: all 0.2s ease; }
+.assignment-management .assignment-item-large:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+.assignment-management .assignment-item-header-large { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f9fafb; }
+.assignment-management .assignment-item-header-large .tutor-checkbox-label { display: flex; align-items: center; gap: 0.75rem; flex: 1; cursor: pointer; }
+.assignment-management .assignment-item-header-large .tutor-checkbox-label input[type="checkbox"] { width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: #667eea; }
+.assignment-management .assignment-info-large { display: flex; flex-direction: column; gap: 0.25rem; }
+.assignment-management .assignment-title-large { font-weight: 600; color: #1e293b; font-size: 1rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .assignment-meta { font-size: 0.85rem; color: #64748b; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-expand-assignment-large { padding: 0.5rem 1rem; background: transparent; color: #667eea; border: 1px solid #667eea; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-expand-assignment-large:hover { background: #667eea; color: white; }
+.assignment-management .tutor-problem-selection-box-large { padding: 1rem; background: white; border-top: 1px solid #e5e7eb; }
+.assignment-management .tutor-problem-selection-header-large { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: #f8fafc; border-radius: 6px; margin-bottom: 0.75rem; }
+.assignment-management .tutor-problem-selection-header-large .tutor-checkbox-label { display: flex; align-items: center; gap: 0.75rem; font-weight: 600; color: #374151; cursor: pointer; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-problem-selection-header-large .tutor-checkbox-label input[type="checkbox"] { width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: #667eea; }
+.assignment-management .tutor-problem-selection-header-large .tutor-item-count { font-weight: 600; color: #667eea; font-size: 0.85rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-problem-list-large { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; padding-bottom: 1rem; }
+.assignment-management .tutor-problem-item-large { background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; padding-top: 0.5rem; transition: all 0.2s ease; display: flex; flex-direction: column; gap: 0.5rem; position: relative; overflow: hidden; }
+.assignment-management .tutor-problem-item-large:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15); }
+.assignment-management .tutor-problem-item-large-header { position: absolute; top: 0.5rem; right: 1rem; display: flex; justify-content: flex-end; z-index: 1; }
+.assignment-management .tutor-problem-item-large-header .tutor-problem-checkbox { width: 1.3rem; height: 1.3rem; cursor: pointer; accent-color: #667eea; }
+.assignment-management .tutor-problem-item-large-body { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0; padding-top: 0; padding-right: 3rem; padding-left: 0; min-width: 0; width: 100%; box-sizing: border-box; }
+.assignment-management .tutor-problem-title-row { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; width: 100%; min-width: 0; box-sizing: border-box; }
+.assignment-management .tutor-problem-title-large { font-weight: 600; color: #1e293b; font-size: 0.95rem; line-height: 1.4; margin: 0; padding: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-problem-number-large { font-weight: 600; color: #667eea; font-size: 0.95rem; margin-right: 0.5rem; }
+.assignment-management .tutor-problem-item-large-actions { display: flex; justify-content: center; margin-top: 0.25rem; }
+.assignment-management .tutor-btn-view-problem { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+.assignment-management .tutor-file-input { width: 100%; padding: 0.8rem; border: 2px dashed #e9ecef; border-radius: 8px; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease; }
+.assignment-management .tutor-file-input:hover { border-color: #667eea; background: #f0f4ff; }
+.assignment-management .tutor-file-help { display: block; color: #636e72; font-size: 0.8rem; margin-top: 0.5rem; line-height: 1.4; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-file-selected { color: #28a745; font-weight: 600; display: inline-block; margin-left: 8px; }
+.assignment-management .tutor-optional { color: #999; font-weight: normal; font-size: 0.9rem; }
+.assignment-management .tutor-info-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+.assignment-management .tutor-info-box p { margin: 0.25rem 0; font-size: 0.9rem; color: #495057; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-info-box p:first-child { margin-bottom: 0.5rem; }
+.assignment-management .tutor-large-modal { max-width: 900px; width: 90vw; max-height: 90vh; overflow-y: auto; }
+.assignment-management .tutor-bulk-problems-container { max-height: 400px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+.assignment-management .tutor-bulk-problem-row { border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: #f8f9fa; }
+.assignment-management .tutor-bulk-problem-row:last-child { margin-bottom: 0; }
+.assignment-management .tutor-problem-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #dee2e6; }
+.assignment-management .tutor-problem-row-header h4 { margin: 0; color: #495057; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-remove-row { background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.assignment-management .tutor-btn-remove-row:hover { background: #c82333; }
+.assignment-management .tutor-problem-row-content .tutor-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+.assignment-management .tutor-bulk-actions { text-align: center; margin: 1rem 0; }
+.assignment-management .tutor-btn-add-row { background: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: background-color 0.2s ease; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-add-row:hover { background: #218838; }
+.assignment-management .tutor-no-assignments { text-align: center; padding: 4rem 2rem; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+.assignment-management .tutor-no-assignments-message { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; color: #636e72; }
+.assignment-management .tutor-no-assignments-message p { margin: 0; font-size: 1.2rem; font-weight: 500; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-no-assignments-icon { font-size: 4rem; opacity: 0.5; }
+.assignment-management .tutor-loading-items, .assignment-management .tutor-no-items { text-align: center; padding: 2rem 1rem; color: #64748b; font-size: 1rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+@media (max-width: 1024px) { .assignment-management .tutor-page-header { flex-direction: column; align-items: stretch; padding: 1.5rem; } .assignment-management .tutor-header-left { flex-direction: column; align-items: flex-start; gap: 1rem; } .assignment-management .tutor-header-right { width: 100%; } .assignment-management .tutor-filters-section { flex-direction: column; align-items: stretch; padding: 1.25rem; gap: 0.75rem; } .assignment-management .tutor-search-box { max-width: 100%; min-width: auto; } .assignment-management .section-filter { width: 100%; min-width: auto; } .assignment-management .tutor-pagination { flex-direction: column; align-items: stretch; } .assignment-management .tutor-problem-modal-large { min-width: auto; width: 95vw !important; } }
+@media (max-width: 768px) { .assignment-management .tutor-page-header { padding: 1.25rem; } .assignment-management .tutor-page-title { font-size: 1.5rem; } .assignment-management .tutor-header-actions { width: 100%; flex-direction: column; } .assignment-management .tutor-btn-primary, .assignment-management .tutor-btn-secondary { width: 100%; justify-content: center; } .assignment-management .tutor-assignments-table { font-size: 0.85rem; } .assignment-management .tutor-assignments-table th, .assignment-management .tutor-assignments-table td { padding: 0.75rem 1rem; } .assignment-management .tutor-form-row { grid-template-columns: 1fr; } .assignment-management .tutor-problem-row-content .tutor-form-row { grid-template-columns: 1fr; } .assignment-management .tutor-modal-content { width: 95%; margin: 1rem; } .assignment-management .tutor-modal-header, .assignment-management .assignment-form, .assignment-management .tutor-modal-body { padding: 1.5rem; } .assignment-management .tutor-form-actions { flex-direction: column; } .assignment-management .tutor-available-problems-grid, .assignment-management .tutor-problem-list-large { grid-template-columns: 1fr; } }
+/* AssignmentManagementList.css */
+.assignment-management .tutor-assignments-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.assignment-management .tutor-assignment-list-item { background: white; border-radius: 8px; padding: 1rem 1.25rem; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; position: relative; }
+.assignment-management .tutor-assignment-list-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #10b981; border-radius: 8px 0 0 8px; opacity: 0; transition: opacity 0.2s ease; }
+.assignment-management .tutor-assignment-list-item:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border-color: #cbd5e1; }
+.assignment-management .tutor-assignment-list-item:hover::before { opacity: 1; }
+.assignment-management .tutor-assignment-list-item.tutor-disabled { background: #f9fafb; opacity: 0.65; border-left: 3px solid #d1d5db; }
+.assignment-management .tutor-assignment-list-item.tutor-disabled::before { display: none; }
+.assignment-management .tutor-assignment-list-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.25rem; }
+.assignment-management .tutor-assignment-list-info { flex: 1; min-width: 0; }
+.assignment-management .tutor-assignment-list-title-section { margin-bottom: 0.75rem; }
+.assignment-management .tutor-assignment-list-title { font-size: 1rem; font-weight: 600; color: #1e293b; margin: 0 0 0.375rem 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignment-list-description { font-size: 0.875rem; color: #64748b; margin: 0; line-height: 1.5; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignment-list-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.assignment-management .tutor-assignment-meta-item { display: flex; flex-direction: column; gap: 0.25rem; }
+.assignment-management .tutor-meta-label { font-size: 0.6875rem; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-meta-value { font-size: 0.875rem; color: #1e293b; font-weight: 600; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignment-list-actions { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
+.assignment-management .tutor-btn-list-action { padding: 0.5rem 0.875rem; background: #f3f4f6; color: #6b7280; border: none; border-radius: 6px; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-btn-list-action:hover { background: #e5e7eb; color: #374151; }
+.assignment-management .tutor-btn-list-action.tutor-btn-more { padding: 0.5rem 0.625rem; font-size: 1.125rem; line-height: 1; min-width: 32px; }
+.assignment-management .tutor-assignment-list-item.tutor-expanded { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border-color: #cbd5e1; }
+.assignment-management .assignment-expanded-content { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; }
+.assignment-management .tutor-clickable { cursor: pointer; }
+.assignment-management .tutor-clickable:hover { background: #f8fafc; }
+.assignment-management .tutor-arrow-icon { font-size: 1.125rem; color: #94a3b8; font-weight: 600; }
+.assignment-management .tutor-assignment-list-item .tutor-more-menu { position: relative; display: inline-block; }
+.assignment-management .tutor-assignment-list-item .tutor-more-dropdown { position: absolute; top: 100%; right: 0; margin-top: 0.375rem; background: white; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); z-index: 1000; min-width: 110px; display: flex; flex-direction: column; overflow: hidden; padding: 0.25rem; }
+.assignment-management .tutor-assignment-list-item .tutor-more-dropdown .tutor-btn-text-small { padding: 0.625rem 0.875rem; background: white; border: none; text-align: left; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: background 0.2s ease; white-space: nowrap; width: 100%; border-radius: 4px; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignment-list-item .tutor-more-dropdown .tutor-btn-text-small:hover { background: #f3f4f6; }
+.assignment-management .tutor-assignment-list-item .tutor-more-dropdown .tutor-btn-text-small.tutor-delete { color: #ef4444; }
+.assignment-management .tutor-assignment-list-item .tutor-more-dropdown .tutor-btn-text-small.tutor-delete:hover { background: #fee2e2; color: #dc2626; }
+/* AssignmentTable.css */
+.assignment-management .tutor-assignments-table-container { background: white; border-radius: 8px; overflow: visible; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb; position: relative; }
+.assignment-management .tutor-assignments-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.assignment-management .tutor-assignments-table thead { background: #f8fafc; }
+.assignment-management .tutor-assignments-table th { padding: 0.75rem 1rem; text-align: left; font-weight: 600; font-size: 0.8125rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; overflow: hidden; text-overflow: ellipsis; }
+.assignment-management .tutor-assignments-table th.tutor-assignment-title-cell { width: 32%; text-align: left; padding-left: calc(1rem - 3px); border-left: 3px solid transparent; }
+.assignment-management .tutor-assignments-table th.tutor-assignment-due-date-cell { width: 14%; text-align: right; }
+.assignment-management .tutor-assignments-table th.tutor-assignment-problem-count-cell { width: 10%; text-align: right; }
+.assignment-management .tutor-assignments-table th.tutor-assignment-submission-cell { width: 14%; text-align: right; }
+.assignment-management .tutor-assignments-table th.tutor-assignment-actions-cell { width: 30%; text-align: right; padding-right: 1rem; }
+.assignment-management .tutor-assignments-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.2s ease; position: relative; overflow: visible; }
+.assignment-management .tutor-assignments-table tbody tr:hover { background: #f8fafc; }
+.assignment-management .tutor-assignments-table tbody tr.tutor-disabled { background: #f9fafb; opacity: 0.65; position: relative; }
+.assignment-management .tutor-assignments-table tbody tr.tutor-disabled td:first-child { border-left: 3px solid #d1d5db; padding-left: calc(1rem - 3px); }
+.assignment-management .tutor-assignments-table tbody tr:not(.tutor-disabled) td:first-child { border-left: 3px solid transparent; padding-left: calc(1rem - 3px); transition: border-color 0.2s ease; }
+.assignment-management .tutor-assignments-table tbody tr:not(.tutor-disabled):hover td:first-child { border-left-color: #667eea; }
+.assignment-management .tutor-assignments-table tbody tr.tutor-clickable { cursor: pointer; }
+.assignment-management .tutor-assignments-table tbody tr.tutor-clickable:hover { background: #f1f5f9; }
+.assignment-management .tutor-assignments-table td { padding: 0.875rem 1rem; vertical-align: middle; overflow: visible; text-overflow: ellipsis; position: relative; }
+.assignment-management .tutor-assignments-table td.tutor-assignment-title-cell { width: 32%; max-width: 0; text-align: left; min-width: 0; position: relative; }
+.assignment-management .tutor-assignments-table td.tutor-assignment-due-date-cell { width: 14%; max-width: 0; text-align: right; }
+.assignment-management .tutor-assignments-table td.tutor-assignment-problem-count-cell { width: 10%; max-width: 0; text-align: right; }
+.assignment-management .tutor-assignments-table td.tutor-assignment-submission-cell { width: 14%; max-width: 0; text-align: right; }
+.assignment-management .tutor-assignments-table td.tutor-assignment-actions-cell { width: 30%; max-width: 0; text-align: right; padding-right: 1rem; }
+.assignment-management .tutor-assignment-title { font-size: 0.9375rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem; }
+.assignment-management .tutor-assignment-description { font-size: 0.8125rem; color: #64748b; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.assignment-management .tutor-assignment-due-date-cell, .assignment-management .tutor-assignment-problem-count-cell, .assignment-management .tutor-assignment-submission-cell { font-size: 0.875rem; color: #475569; font-weight: 500; white-space: nowrap; text-align: right; }
+.assignment-management .tutor-assignment-actions-cell { white-space: nowrap; text-align: right; max-width: 100%; overflow: visible; position: relative; }
+.assignment-management .tutor-assignment-actions-inline { display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; flex-wrap: nowrap; min-width: 0; }
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-menu { position: relative; display: inline-block; z-index: 100; }
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown { position: absolute; top: 100%; right: 0; margin-top: 0.375rem; background: white; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); z-index: 10000 !important; min-width: auto; width: auto; display: flex; flex-direction: column; overflow: hidden; padding: 0.125rem; }
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown .tutor-btn-text-small { padding: 0.375rem 0.625rem; background: white; border: none; text-align: left; font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: background 0.2s ease; white-space: nowrap; width: auto; border-radius: 4px; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown .tutor-btn-text-small:hover { background: #f3f4f6; }
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown .tutor-btn-text-small.tutor-delete { color: #ef4444; }
+.assignment-management .tutor-assignment-secondary-actions .tutor-more-dropdown .tutor-btn-text-small.tutor-delete:hover { background: #fee2e2; color: #dc2626; }
+.assignment-management .tutor-assignment-primary-actions { display: flex; gap: 0.375rem; align-items: center; }
+.assignment-management .tutor-assignment-secondary-actions { position: relative; display: flex; align-items: center; }
+.assignment-management .tutor-secondary-actions-layer { display: flex; gap: 0.375rem; align-items: center; padding: 0.25rem; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; position: relative; }
+.assignment-management .tutor-secondary-actions-layer::before { content: ''; position: absolute; left: -0.5rem; top: 50%; transform: translateY(-50%); width: 1px; height: 70%; background: #d1d5db; }
+.assignment-management .tutor-btn-secondary-action { background: #f3f4f6 !important; color: #6b7280 !important; border: 1px solid #e5e7eb !important; }
+.assignment-management .tutor-btn-secondary-action:hover { background: #e5e7eb !important; color: #374151 !important; border-color: #d1d5db !important; }
+.assignment-management .tutor-btn-secondary-action.tutor-btn-delete, .assignment-management .tutor-more-menu button.tutor-btn-secondary-action { color: #ef4444 !important; border-color: #fee2e2 !important; }
+.assignment-management .tutor-btn-secondary-action.tutor-btn-delete:hover, .assignment-management .tutor-more-menu button.tutor-btn-secondary-action:hover { background: #fee2e2 !important; color: #dc2626 !important; border-color: #ef4444 !important; }
+.assignment-management .tutor-btn-table-action { padding: 0.5rem 0.625rem; background: #f3f4f6; color: #6b7280; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; flex-shrink: 0; min-width: fit-content; }
+.assignment-management .tutor-btn-table-action:hover { background: #e5e7eb; color: #374151; }
+.assignment-management .tutor-btn-table-action.tutor-btn-edit { background: white; color: #667eea; border: 1px solid #667eea; padding: 0.5rem 0.875rem; }
+.assignment-management .tutor-btn-table-action.tutor-btn-edit:hover { background: #667eea; color: white; border-color: #667eea; }
+.assignment-management .tutor-btn-table-action.tutor-btn-delete { color: #ef4444; }
+.assignment-management .tutor-btn-table-action.tutor-btn-delete:hover { background: #fee2e2; color: #dc2626; }
+.assignment-management .tutor-table-empty { text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8; font-size: 0.875rem; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+.tutor-problems-table-container { margin-top: 1rem; }
+.tutor-problems-table { width: 100%; border-collapse: collapse; }
+.tutor-problems-table thead { background: #f8fafc; }
+.tutor-problems-table th { padding: 0.875rem 1rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; }
+.tutor-problems-table tbody tr { border-bottom: 1px solid #e2e8f0; transition: background 0.2s ease; }
+.tutor-problems-table tbody tr:hover { background: #f8fafc; }
+.tutor-problems-table td { padding: 1rem; vertical-align: middle; font-size: 0.95rem; color: #1e293b; }
+.tutor-problem-title-cell { min-width: 200px; }
+.tutor-btn-link { background: none; border: none; color: #667eea; font-size: 0.95rem; font-weight: 500; cursor: pointer; padding: 0; text-align: left; transition: color 0.2s ease; }
+.tutor-btn-link:hover { color: #5568d3; text-decoration: underline; }
+@media (max-width: 1200px) { .assignment-management .tutor-assignments-table { font-size: 0.875rem; } .assignment-management .tutor-assignments-table th.tutor-assignment-title-cell, .assignment-management .tutor-assignments-table td.tutor-assignment-title-cell { width: 28%; } .assignment-management .tutor-assignments-table th.tutor-assignment-due-date-cell, .assignment-management .tutor-assignments-table td.tutor-assignment-due-date-cell, .assignment-management .tutor-assignments-table th.tutor-assignment-problem-count-cell, .assignment-management .tutor-assignments-table td.tutor-assignment-problem-count-cell, .assignment-management .tutor-assignments-table th.tutor-assignment-submission-cell, .assignment-management .tutor-assignments-table td.tutor-assignment-submission-cell { width: 12%; } .assignment-management .tutor-assignments-table th.tutor-assignment-actions-cell, .assignment-management .tutor-assignments-table td.tutor-assignment-actions-cell { width: 32%; } .assignment-management .tutor-btn-table-action { padding: 0.5rem 0.5rem; font-size: 0.6875rem; } }
+@media (max-width: 768px) { .assignment-management .tutor-assignments-table-container { overflow-x: auto; } .assignment-management .tutor-assignments-table { min-width: 800px; table-layout: auto; } .assignment-management .tutor-assignment-actions-inline { flex-wrap: wrap; gap: 0.25rem; } .assignment-management .tutor-btn-table-action { padding: 0.375rem 0.5rem; font-size: 0.6875rem; } }
+/* Pagination.css */
+.tutor-pagination { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #f8fafc; }
+.tutor-pagination-info { font-size: 0.875rem; color: #64748b; font-weight: 500; }
+.tutor-pagination-controls { display: flex; align-items: center; gap: 0.5rem; }
+.tutor-btn-pagination { padding: 0.5rem 1rem; background: white; color: #475569; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+.tutor-btn-pagination:hover:not(:disabled) { background: #f1f5f9; border-color: #cbd5e1; color: #334155; }
+.tutor-btn-pagination:disabled { opacity: 0.5; cursor: not-allowed; }
+.tutor-pagination-pages { display: flex; gap: 0.25rem; }
+.tutor-btn-pagination-page { padding: 0.5rem 0.75rem; background: white; color: #475569; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; min-width: 2.5rem; }
+.tutor-btn-pagination-page:hover { background: #f1f5f9; border-color: #cbd5e1; color: #334155; }
+.tutor-btn-pagination-page.active { background: #667eea; color: white; border-color: #667eea; }
+.tutor-btn-pagination-page.active:hover { background: #5568d3; border-color: #5568d3; }
+/* AssignmentModals.css - 나머지 스타일은 매우 길어서 별도 파일로 유지하거나 필요시 추가 */
+`}} />
       <div className="assignment-management">
       {/* 분반별 페이지인 경우 통합 네비게이션 표시 */}
       {sectionId && currentSection && (

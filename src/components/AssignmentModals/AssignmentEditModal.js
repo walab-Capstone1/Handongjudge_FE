@@ -1,5 +1,20 @@
 import React from 'react';
-import './AssignmentModals.css';
+import {
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalCloseButton,
+  Form,
+  FormRow,
+  FormGroup,
+  Label,
+  Input,
+  Textarea,
+  FormActions,
+  ButtonSecondary,
+  ButtonPrimary
+} from './styleddiv';
 
 /**
  * 과제 수정 모달 컴포넌트
@@ -23,23 +38,20 @@ const AssignmentEditModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="tutor-modal-overlay">
-      <div className="tutor-modal-content">
-        <div className="tutor-modal-header">
-          <h2>과제 수정</h2>
-          <button 
-            className="tutor-modal-close"
-            onClick={onClose}
-          >
+    <ModalOverlay>
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle>과제 수정</ModalTitle>
+          <ModalCloseButton onClick={onClose}>
             ✕
-          </button>
-        </div>
+          </ModalCloseButton>
+        </ModalHeader>
         
-        <form onSubmit={onSubmit} className="assignment-form">
-          <div className="tutor-form-row">
-            <div className="tutor-form-group">
-              <label htmlFor="edit-title">과제명 *</label>
-              <input
+        <Form onSubmit={onSubmit}>
+          <FormRow>
+            <FormGroup>
+              <Label htmlFor="edit-title">과제명 *</Label>
+              <Input
                 type="text"
                 id="edit-title"
                 name="title"
@@ -48,11 +60,11 @@ const AssignmentEditModal = ({
                 placeholder="과제명을 입력하세요"
                 required
               />
-            </div>
+            </FormGroup>
             
-            <div className="tutor-form-group">
-              <label htmlFor="edit-assignmentNumber">과제 번호</label>
-              <input
+            <FormGroup>
+              <Label htmlFor="edit-assignmentNumber">과제 번호</Label>
+              <Input
                 type="text"
                 id="edit-assignmentNumber"
                 name="assignmentNumber"
@@ -60,13 +72,12 @@ const AssignmentEditModal = ({
                 onChange={onInputChange}
                 placeholder="예: HW1, Assignment1"
               />
-            </div>
-          </div>
+            </FormGroup>
+          </FormRow>
 
-
-          <div className="tutor-form-group">
-            <label htmlFor="edit-description">과제 설명</label>
-            <textarea
+          <FormGroup>
+            <Label htmlFor="edit-description">과제 설명</Label>
+            <Textarea
               id="edit-description"
               name="description"
               value={formData.description}
@@ -74,50 +85,43 @@ const AssignmentEditModal = ({
               placeholder="과제에 대한 상세 설명을 입력하세요"
               rows="4"
             />
-          </div>
+          </FormGroup>
 
-          <div className="tutor-form-row">
-            <div className="tutor-form-group">
-              <label htmlFor="edit-startDate">시작일</label>
-              <input
+          <FormRow>
+            <FormGroup>
+              <Label htmlFor="edit-startDate">시작일</Label>
+              <Input
                 type="datetime-local"
                 id="edit-startDate"
                 name="startDate"
                 value={formData.startDate}
                 onChange={onInputChange}
               />
-            </div>
+            </FormGroup>
             
-            <div className="tutor-form-group">
-              <label htmlFor="edit-endDate">마감일</label>
-              <input
+            <FormGroup>
+              <Label htmlFor="edit-endDate">마감일</Label>
+              <Input
                 type="datetime-local"
                 id="edit-endDate"
                 name="endDate"
                 value={formData.endDate}
                 onChange={onInputChange}
               />
-            </div>
-          </div>
+            </FormGroup>
+          </FormRow>
 
-          <div className="tutor-form-actions">
-            <button 
-              type="button" 
-              className="tutor-btn-secondary"
-              onClick={onClose}
-            >
+          <FormActions>
+            <ButtonSecondary type="button" onClick={onClose}>
               취소
-            </button>
-            <button 
-              type="submit" 
-              className="tutor-btn-primary"
-            >
+            </ButtonSecondary>
+            <ButtonPrimary type="submit">
               과제 수정
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            </ButtonPrimary>
+          </FormActions>
+        </Form>
+      </ModalContent>
+    </ModalOverlay>
   );
 };
 

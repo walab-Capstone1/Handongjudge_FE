@@ -779,14 +779,21 @@ body.section-modal-open .course-management .course-management-search-input:focus
 
 /* 복사 모달 - 큰 크기 */
 .course-management .tutor-modal-content-large {
-  max-width: 600px;
-  max-height: calc(85vh - 65px); /* 헤더 높이를 고려한 최대 높이 */
-  width: 85%;
+  width: 63vw !important;
+  max-width: 63vw !important;
+  min-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .course-management .tutor-modal-body-large {
-  max-height: calc(85vh - 265px); /* 헤더(65px) + 모달 헤더/푸터(200px) 고려 */
+  flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2rem;
+  min-height: 0;
 }
 
 /* 조회 모달 */

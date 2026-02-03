@@ -417,6 +417,11 @@ class APIService {
     return await this.request(`/problems/${problemId}/assignments`);
   }
 
+  // 문제 사용 현황 조회 (과제, 문제집, 퀴즈 포함)
+  async getProblemUsage(problemId) {
+    return await this.request(`/problems/${problemId}/usage`);
+  }
+
   async copyProblem(problemId, newTitle = null) {
     const body = newTitle ? { newTitle } : {};
     return await this.request(`/problems/${problemId}/copy`, {
@@ -574,6 +579,11 @@ class APIService {
   // 코딩 테스트 문제 목록 조회
   async getQuizProblems(sectionId, quizId) {
     return await this.request(`/sections/${sectionId}/quizzes/${quizId}/problems`);
+  }
+
+  // 퀴즈 성적 조회
+  async getQuizGrades(sectionId, quizId) {
+    return await this.request(`/sections/${sectionId}/quizzes/${quizId}/grades`);
   }
 
   // 코딩 테스트 생성
@@ -1027,6 +1037,23 @@ class APIService {
     });
   }
 
+  // 읽지 않은 알림 목록 조회
+  async getUnreadNotifications() {
+    return await this.request('/community/notifications/unread');
+  }
+
+  // 읽지 않은 알림 수 조회
+  async getUnreadNotificationCount() {
+    return await this.request('/community/notifications/unread/count');
+  }
+
+  // 모든 알림 읽음 처리
+  async markAllNotificationsAsRead() {
+    return await this.request('/community/notifications/read-all', {
+      method: 'PUT'
+    });
+  }
+
   // ==================== 커뮤니티 질문 API ====================
   
   // 질문 상세 조회
@@ -1243,6 +1270,46 @@ class APIService {
   async removeProblemFromSet(problemSetId, problemId) {
     return await this.request(`/problem-sets/${problemSetId}/problems/${problemId}`, {
       method: 'DELETE',
+    });
+  }
+
+  // ==================== 성적 관리 API ====================
+  
+  // 과제별 모든 학생 성적 조회
+  async getAssignmentGrades(sectionId, assignmentId) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/grades`);
+  }
+
+  // 학생별 문제 성적 입력/수정
+  async saveGrade(sectionId, assignmentId, gradeData) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/grades`, {
+      method: 'POST',
+      body: JSON.stringify(gradeData),
+    });
+  }
+
+  // 일괄 성적 입력
+  async saveBulkGrades(sectionId, assignmentId, bulkGradeData) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/grades/bulk`, {
+      method: 'POST',
+      body: JSON.stringify(bulkGradeData),
+    });
+  }
+
+  // 문제 배점 설정 (개별)
+  async setProblemPoints(sectionId, assignmentId, problemId, points) {
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/grades/problems/${problemId}/points`, {
+      method: 'PUT',
+      body: JSON.stringify({ points }),
+    });
+  }
+
+  // 문제 배점 일괄 설정
+  async setBulkProblemPoints(sectionId, assignmentId, problemPoints) {
+    // problemPoints는 { problemId: points } 형태의 객체
+    return await this.request(`/sections/${sectionId}/assignments/${assignmentId}/grades/points/bulk`, {
+      method: 'PUT',
+      body: JSON.stringify(problemPoints),
     });
   }
 

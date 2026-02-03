@@ -4,8 +4,7 @@ import TutorLayout from "../../layouts/TutorLayout";
 import APIService from "../../services/APIService";
 import { removeCopyLabel } from "../../utils/problemUtils";
 import "./AssignmentStudentProgress.css";
-import "../TutorPage/AssignmentManagementList.css";
-import "../TutorPage/AssignmentTable.css";
+
 
 const AssignmentStudentProgress = () => {
   const { sectionId, assignmentId } = useParams();
