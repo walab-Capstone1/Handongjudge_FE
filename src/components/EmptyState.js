@@ -1,5 +1,11 @@
 import React from 'react';
-import './EmptyState.css';
+import {
+  EmptyState as EmptyStateContainer,
+  EmptyStateIcon,
+  EmptyStateTitle,
+  EmptyStateMessage,
+  EmptyStateAction
+} from './styleddiv';
 
 const EmptyState = ({ 
   icon, 
@@ -9,16 +15,18 @@ const EmptyState = ({
   onAction 
 }) => {
   return (
-    <div className="empty-state">
-      {icon && <div className="empty-state__icon">{icon}</div>}
-      <h3 className="empty-state__title">{title}</h3>
-      {message && <p className="empty-state__message">{message}</p>}
+    <EmptyStateContainer>
+      {icon && <EmptyStateIcon>{icon}</EmptyStateIcon>}
+      <EmptyStateTitle>{title}</EmptyStateTitle>
+      {message && <EmptyStateMessage>{message}</EmptyStateMessage>}
       {actionLabel && onAction && (
-        <button className="empty-state__action btn btn-primary" onClick={onAction}>
-          {actionLabel}
-        </button>
+        <EmptyStateAction>
+          <button className="btn btn-primary" onClick={onAction}>
+            {actionLabel}
+          </button>
+        </EmptyStateAction>
       )}
-    </div>
+    </EmptyStateContainer>
   );
 };
 

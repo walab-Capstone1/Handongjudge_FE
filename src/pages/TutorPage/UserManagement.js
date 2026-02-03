@@ -5,7 +5,7 @@ import SectionNavigation from "../../components/SectionNavigation";
 import APIService from "../../services/APIService";
 import AssignmentPagination from "../../components/Pagination/AssignmentPagination";
 import "./UserManagement.css";
-import "./Pagination.css";
+
 
 const UserManagement = () => {
   const { sectionId } = useParams(); // URL에서 분반 고유 ID 가져오기

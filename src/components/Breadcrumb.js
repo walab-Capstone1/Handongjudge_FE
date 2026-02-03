@@ -1,37 +1,43 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import './Breadcrumb.css';
+import {
+  Breadcrumb as BreadcrumbContainer,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbCurrent,
+  BreadcrumbSeparator
+} from './styleddiv';
 
 const Breadcrumb = ({ items }) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <nav className="breadcrumb" aria-label="Breadcrumb">
-      <ol className="breadcrumb__list">
+    <BreadcrumbContainer aria-label="Breadcrumb">
+      <BreadcrumbList>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           
           return (
-            <li key={index} className="breadcrumb__item">
+            <BreadcrumbItem key={index}>
               {isLast ? (
-                <span className="breadcrumb__current" aria-current="page">
+                <BreadcrumbCurrent aria-current="page">
                   {item.label}
-                </span>
+                </BreadcrumbCurrent>
               ) : (
                 <>
-                  <Link to={item.path} className="breadcrumb__link">
+                  <BreadcrumbLink to={item.path}>
                     {item.label}
-                  </Link>
-                  <span className="breadcrumb__separator" aria-hidden="true">
+                  </BreadcrumbLink>
+                  <BreadcrumbSeparator aria-hidden="true">
                     /
-                  </span>
+                  </BreadcrumbSeparator>
                 </>
               )}
-            </li>
+            </BreadcrumbItem>
           );
         })}
-      </ol>
-    </nav>
+      </BreadcrumbList>
+    </BreadcrumbContainer>
   );
 };
 

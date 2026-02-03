@@ -1,5 +1,12 @@
 import React from 'react';
-import './Alert.css';
+import {
+  AlertSuccess,
+  AlertError,
+  AlertWarning,
+  AlertInfo,
+  AlertContent,
+  AlertClose
+} from './styleddiv';
 
 const Alert = ({ 
   type = 'info', 
@@ -7,23 +14,27 @@ const Alert = ({
   onClose,
   children 
 }) => {
-  const alertClass = `alert alert--${type}`;
+  const AlertComponent = {
+    success: AlertSuccess,
+    error: AlertError,
+    warning: AlertWarning,
+    info: AlertInfo
+  }[type] || AlertInfo;
   
   return (
-    <div className={alertClass}>
-      <div className="alert__content">
+    <AlertComponent>
+      <AlertContent>
         {children || message}
-      </div>
+      </AlertContent>
       {onClose && (
-        <button 
-          className="alert__close"
+        <AlertClose
           onClick={onClose}
           aria-label="닫기"
         >
           ×
-        </button>
+        </AlertClose>
       )}
-    </div>
+    </AlertComponent>
   );
 };
 
