@@ -1,0 +1,281 @@
+import styled from "styled-components";
+
+export const DescriptionArea = styled.div`
+  padding: 0 0 24px 0;
+  overflow: auto;
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  border-right: 1px solid #30363d;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+  flex: 1;
+  min-height: 0;
+
+  .problem-solve-page.light & {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-right: 1px solid #e1e4e8;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+
+  > div {
+    padding: 0 24px;
+  }
+`;
+
+export const DescriptionHeader = styled.div`
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 16px;
+  color: #58a6ff;
+  background: linear-gradient(90deg, rgba(88, 166, 255, 0.1) 0%, rgba(88, 166, 255, 0.05) 100%);
+  border-bottom: 1px solid #30363d;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-height: 48px;
+  box-sizing: border-box;
+
+  .problem-solve-page.light & {
+    color: #0969da;
+    background: linear-gradient(90deg, rgba(9, 105, 218, 0.1) 0%, rgba(9, 105, 218, 0.05) 100%);
+    border-bottom: 1px solid #e1e4e8;
+  }
+`;
+
+export const ProblemLimitsHeader = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+export const LimitBadge = styled.span<{ $type: "time" | "memory" }>`
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+
+  ${(props) =>
+		props.$type === "time"
+			? `
+    background: rgba(255, 255, 255, 0.15);
+    color: #58a6ff;
+    border: 1px solid rgba(88, 166, 255, 0.3);
+  `
+			: `
+    background: rgba(255, 255, 255, 0.15);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+  `}
+
+  .problem-solve-page.light & {
+    ${(props) =>
+			props.$type === "time"
+				? `
+      background: rgba(9, 105, 218, 0.15);
+      color: #0969da;
+      border: 1px solid rgba(9, 105, 218, 0.3);
+    `
+				: `
+      background: rgba(220, 53, 132, 0.15);
+      color: #d63384;
+      border: 1px solid rgba(220, 53, 132, 0.3);
+    `}
+  }
+`;
+
+export const DescriptionContent = styled.div`
+  padding: 16px 0;
+  line-height: 1.6;
+  color: #eff5f2;
+
+  .problem-solve-page.light & {
+    color: #000000;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 16px 0 8px 0;
+    color: #eff5f2 !important;
+    font-weight: bold;
+
+    .problem-solve-page.light & {
+      color: #000000 !important;
+    }
+  }
+
+  p {
+    margin: 8px 0;
+  }
+
+  ul,
+  ol {
+    margin: 8px 0;
+    padding-left: 24px;
+  }
+
+  li {
+    margin: 4px 0;
+  }
+
+  code {
+    background-color: #30363d;
+    color: #e1e4e8;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+    font-size: 0.9em;
+
+    .problem-solve-page.light & {
+      background-color: #f6f8fa;
+      color: #24292e;
+    }
+  }
+
+  pre {
+    background-color: #0d1117;
+    color: #e1e4e8;
+    padding: 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 12px 0;
+    border: 1px solid #30363d;
+
+    .problem-solve-page.light & {
+      background-color: #f6f8fa;
+      color: #24292e;
+      border: 1px solid #e1e4e8;
+    }
+
+    code {
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
+    }
+  }
+
+  blockquote {
+    border-left: 4px solid #58a6ff;
+    margin: 12px 0;
+    padding: 8px 16px;
+    background-color: rgba(88, 166, 255, 0.1);
+    border-radius: 0 4px 4px 0;
+
+    .problem-solve-page.light & {
+      border-left-color: #0969da;
+      background-color: rgba(9, 105, 218, 0.1);
+    }
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+  }
+
+  th,
+  td {
+    border: 1px solid #30363d;
+    padding: 8px 12px;
+    text-align: left;
+
+    .problem-solve-page.light & {
+      border: 1px solid #e1e4e8;
+    }
+  }
+
+  th {
+    background-color: #21262d;
+    font-weight: bold;
+
+    .problem-solve-page.light & {
+      background-color: #f6f8fa;
+    }
+  }
+
+  a {
+    color: #58a6ff;
+    text-decoration: none;
+
+    .problem-solve-page.light & {
+      color: #0969da;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .inline-code {
+    background-color: #30363d;
+    color: #e1e4e8;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+    font-size: 0.9em;
+
+    .problem-solve-page.light & {
+      background-color: #f6f8fa;
+      color: #24292e;
+    }
+  }
+
+  .code-block {
+    background-color: #0d1117;
+    color: #e1e4e8;
+    padding: 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 12px 0;
+    border: 1px solid #30363d;
+
+    .problem-solve-page.light & {
+      background-color: #f6f8fa;
+      color: #24292e;
+      border: 1px solid #e1e4e8;
+    }
+
+    code {
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: inherit;
+    }
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+
+  strong {
+    font-weight: bold;
+    color: #eff5f2;
+
+    .problem-solve-page.light & {
+      color: #000000;
+    }
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  hr {
+    border: none;
+    border-top: 2px solid #30363d;
+    margin: 24px 0;
+
+    .problem-solve-page.light & {
+      border-top-color: #e1e4e8;
+    }
+  }
+`;
