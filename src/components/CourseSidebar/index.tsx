@@ -204,10 +204,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 				className={isCollapsed ? "collapsed" : ""}
 			>
 				<S.SidebarHeader onClick={() => !isCollapsed && navigate("/index")}>
-					<S.SidebarLogo
-						src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/blBC3g5kkQ/0xrnt7m1_expires_30_days.png"
-						alt="CodeSturdy Logo"
-					/>
+					<S.SidebarLogo src="/logo.svg" alt="CodeSturdy Logo" />
 					{!isCollapsed && <S.SidebarTitle>CodeSturdy</S.SidebarTitle>}
 				</S.SidebarHeader>
 

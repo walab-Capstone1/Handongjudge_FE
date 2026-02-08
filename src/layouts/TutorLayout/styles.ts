@@ -162,9 +162,10 @@ export const SidebarSection = styled.div<{ $collapsed?: boolean }>`
   margin-bottom: ${(props) => (props.$collapsed ? "0.25rem" : "0.25rem")};
   transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
-  padding: ${(props) => (props.$collapsed ? "0" : "inherit")};
+  padding: ${(props) => (props.$collapsed ? "0" : "0.25rem 0")};
   margin-left: ${(props) => (props.$collapsed ? "0" : "inherit")};
   margin-right: ${(props) => (props.$collapsed ? "0" : "inherit")};
+  min-width: 0;
 `;
 
 export const SidebarSectionTitle = styled.div<{ $collapsed: boolean }>`
@@ -200,10 +201,11 @@ export const SidebarMenuGroup = styled.div<{ $collapsed?: boolean }>`
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: ${(props) => (props.$collapsed ? "100%" : "auto")};
-  max-width: ${(props) => (props.$collapsed ? "60px" : "none")};
+  width: 100%;
+  max-width: ${(props) => (props.$collapsed ? "60px" : "100%")};
   margin: ${(props) => (props.$collapsed ? "0" : "inherit")};
   padding: ${(props) => (props.$collapsed ? "0" : "inherit")};
+  min-width: 0;
 `;
 
 export const SidebarItem = styled.div<{
@@ -299,8 +301,9 @@ export const SidebarLabel = styled.span<{ $collapsed: boolean }>`
   font-size: 0.95rem;
   white-space: nowrap;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  flex: 1;
+  flex: ${(props) => (props.$collapsed ? "0 0 0" : "1")};
   line-height: 1.5;
+  min-width: 0;
   opacity: ${(props) => (props.$collapsed ? 0 : 1)};
   width: ${(props) => (props.$collapsed ? 0 : "auto")};
   height: ${(props) => (props.$collapsed ? 0 : "auto")};
@@ -450,7 +453,7 @@ export const SidebarSubItemCollapsed = styled.div<{ $active: boolean }>`
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     pointer-events: none;
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    animation: ${tooltipFadeIn} 0.2s ease;
+    ${css`animation: ${tooltipFadeIn} 0.2s ease;`}
   }
 
   .sidebar-icon {
@@ -687,7 +690,7 @@ export const SectionModalOverlay = styled.div`
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  animation: ${fadeIn} 0.2s ease;
+  ${css`animation: ${fadeIn} 0.2s ease;`}
 `;
 
 export const SectionModalContent = styled.div`
@@ -699,7 +702,7 @@ export const SectionModalContent = styled.div`
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: ${slideUp} 0.3s ease;
+  ${css`animation: ${slideUp} 0.3s ease;`}
 
   @media (max-width: 768px) {
     width: 95%;

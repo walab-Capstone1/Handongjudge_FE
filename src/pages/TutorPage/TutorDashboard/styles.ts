@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 const pulse = keyframes`
   0%, 100% {
@@ -1268,9 +1268,9 @@ export const NotificationIconBtn = styled.button<{ $hasUnread?: boolean }>`
 
   ${(props) =>
 		props.$hasUnread &&
-		`
-    animation: ${pulse} 2s ease-in-out infinite;
-  `}
+		css`
+			animation: ${pulse} 2s ease-in-out infinite;
+		`}
 `;
 
 export const NotificationBadge = styled.span`

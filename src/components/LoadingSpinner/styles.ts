@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 const spin = keyframes`
   0% { transform: rotate(0deg); }
@@ -56,7 +56,7 @@ export const Spinner = styled.div<{ $size: "sm" | "md" | "lg" }>`
         return "40px";
     }
   }};
-  animation: ${spin} 1s linear infinite;
+  ${css`animation: ${spin} 1s linear infinite;`}
 `;
 
 export const Message = styled.p`

@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 const pulse = keyframes`
   0%, 100% {
@@ -70,7 +70,7 @@ export const IconButton = styled.button<{
   font-size: 1.5rem;
   touch-action: none;
 
-  ${(props) => props.$hasUnread && `animation: ${pulse} 2s ease-in-out infinite;`}
+  ${(props) => props.$hasUnread && css`animation: ${pulse} 2s ease-in-out infinite;`}
 
   ${(props) =>
 		props.$dragging &&

@@ -4,9 +4,11 @@ export const CardLink = styled.div`
   text-decoration: none;
   color: inherit;
   display: block;
+  min-width: 280px;
 `;
 
 export const Card = styled.div<{ $disabled?: boolean }>`
+  min-width: 280px;
   background: white;
   border-radius: 12px;
   overflow: hidden;

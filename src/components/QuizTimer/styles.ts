@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 const pulse = keyframes`
   0%, 100% {
@@ -35,9 +35,9 @@ export const Container = styled.div<{ $warning?: boolean; $expired?: boolean }>`
 
   ${(props) =>
 		props.$warning &&
-		`
-    animation: ${pulse} 1.5s ease-in-out infinite;
-  `}
+		css`
+			animation: ${pulse} 1.5s ease-in-out infinite;
+		`}
 `;
 
 export const Label = styled.span`

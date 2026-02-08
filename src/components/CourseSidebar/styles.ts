@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 
 const slideDownFadeIn = keyframes`
   from {
@@ -87,11 +87,11 @@ export const MenuItem = styled.div<{
 
   ${(props) =>
 		props.$isSubMenu &&
-		`
-    opacity: 0;
-    transform: translateY(-10px);
-    animation: ${slideDownFadeIn} 0.4s ease-out forwards;
-  `}
+		css`
+			opacity: 0;
+			transform: translateY(-10px);
+			animation: ${slideDownFadeIn} 0.4s ease-out forwards;
+		`}
 
   &:hover {
     background-color: rgba(102, 126, 234, 0.2);
