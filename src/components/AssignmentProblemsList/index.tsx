@@ -57,18 +57,9 @@ const AssignmentProblemsList: React.FC<AssignmentProblemsListProps> = ({
 						key={problem.id || index}
 						$completed={problem.completed}
 						onClick={() => handleProblemClick(problem.id)}
-						style={{ color: problem.completed ? "#868fb7" : "#000000" }}
 					>
-						<S.Bullet
-							style={{ color: problem.completed ? "#868fb7" : "#000000" }}
-						>
-							•
-						</S.Bullet>
-						<S.ProblemTitle
-							style={{ color: problem.completed ? "#868fb7" : "#000000" }}
-						>
-							{problem.title}
-						</S.ProblemTitle>
+						<S.Bullet>•</S.Bullet>
+						<S.ProblemTitle>{problem.title}</S.ProblemTitle>
 					</S.ProblemRow>
 				))}
 			</S.Items>

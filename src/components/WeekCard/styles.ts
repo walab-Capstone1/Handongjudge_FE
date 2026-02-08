@@ -1,4 +1,11 @@
 import styled from "styled-components";
+import { Link } from "react-router-dom";
+
+export const CardLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+  display: block;
+`;
 
 export const Card = styled.div`
   background: white;
@@ -45,40 +52,49 @@ export const Description = styled.p`
   color: #636e72;
   font-size: 0.9rem;
   line-height: 1.5;
-  margin-bottom: 1.5rem;
+  margin: 0 0 1.5rem 0;
 `;
 
 export const Metrics = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 `;
 
 export const Metric = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f3f4;
+
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 
 export const MetricLabel = styled.span`
-  font-size: 0.75rem;
-  color: #95a5a6;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  color: #636e72;
+  font-weight: 500;
 `;
 
 export const MetricValue = styled.span<{ $type?: string }>`
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.85rem;
   color: #2d3436;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 
   ${(props) =>
 		props.$type === "deadline" &&
 		`
     color: #e74c3c;
-    background: #fee;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    display: inline-block;
+    font-weight: bold;
+    &::before {
+      content: "⏰ ";
+      margin-right: 0.25rem;
+    }
   `}
 `;

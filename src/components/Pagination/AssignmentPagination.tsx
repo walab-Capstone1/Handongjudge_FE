@@ -1,15 +1,6 @@
 import type React from "react";
 import * as S from "./styles";
-
-interface AssignmentPaginationProps {
-	totalItems: number;
-	currentPage: number;
-	itemsPerPage: number;
-	onPageChange: (page: number) => void;
-	onItemsPerPageChange: (itemsPerPage: number) => void;
-	/** 원본 디자인: true면 "페이지당 항목 수" 선택 숨김 */
-	showItemsPerPage?: boolean;
-}
+import type { AssignmentPaginationProps } from "./types";
 
 const AssignmentPagination: React.FC<AssignmentPaginationProps> = ({
 	totalItems,
@@ -19,7 +10,9 @@ const AssignmentPagination: React.FC<AssignmentPaginationProps> = ({
 	onItemsPerPageChange,
 	showItemsPerPage = true,
 }) => {
-	const safeTotal = Number.isFinite(Number(totalItems)) ? Number(totalItems) : 0;
+	const safeTotal = Number.isFinite(Number(totalItems))
+		? Number(totalItems)
+		: 0;
 	const safePage = Math.max(
 		1,
 		Number.isFinite(Number(currentPage)) ? Number(currentPage) : 1,

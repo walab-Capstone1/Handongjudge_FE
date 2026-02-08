@@ -1,23 +1,25 @@
-import React from "react";
-import styled from "styled-components";
+import type React from "react";
+import * as S from "./styles";
+import type { ErrorMessageProps } from "./types";
 
-const Container = styled.div`
-  padding: 1rem;
-  background: #fee2e2;
-  border: 1px solid #ef4444;
-  border-radius: 8px;
-  color: #991b1b;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-`;
-
-interface ErrorMessageProps {
-  message: string;
-  children?: React.ReactNode;
-}
-
-const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, children }) => {
-  return <Container>{children || message}</Container>;
+const ErrorMessage: React.FC<ErrorMessageProps> = ({
+	error,
+	message,
+	onRetry,
+	children,
+}) => {
+	const text = children ?? error ?? message;
+	return (
+		<S.Container>
+			<S.Title>오류가 발생했습니다</S.Title>
+			{text && <S.Text>{text}</S.Text>}
+			{onRetry && (
+				<S.RetryButton type="button" onClick={onRetry}>
+					다시 시도
+				</S.RetryButton>
+			)}
+		</S.Container>
+	);
 };
 
 export default ErrorMessage;
