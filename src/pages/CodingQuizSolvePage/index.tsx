@@ -6,10 +6,10 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import Split from "react-split";
 import apiService from "../../services/APIService";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import ProblemDescription from "../../components/ProblemDescription";
-import CodeEditor from "../../components/CodeEditor";
-import ExecutionResult from "../../components/ExecutionResult";
-import DraggablePanel from "../../components/DraggablePanel";
+import ProblemDescription from "./ProblemDescription";
+import CodeEditor from "./CodeEditor";
+import ExecutionResult from "./ExecutionResult";
+import DraggablePanel from "./DraggablePanel";
 import QuizTimer from "../../components/QuizTimer";
 import indexedDBManager from "../../utils/IndexedDBManager";
 // CSS는 ProblemSolvePage 컴포넌트들이 각자 스타일을 가지고 있음

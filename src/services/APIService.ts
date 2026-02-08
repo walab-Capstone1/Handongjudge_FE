@@ -86,14 +86,14 @@ class APIService {
 		}
 	}
 
-  async loginWithKakao(code: string): Promise<any> {
-    return this.request("/auth/kakao/callback", {
-      method: "POST",
-      body: JSON.stringify({ code }),
-    });
-  }
+	async loginWithKakao(code: string): Promise<any> {
+		return this.request("/auth/kakao/callback", {
+			method: "POST",
+			body: JSON.stringify({ code }),
+		});
+	}
 
-  async login(email: string, password: string): Promise<any> {
+	async login(email: string, password: string): Promise<any> {
 		const response = await this.request("/auth/login", {
 			method: "POST",
 			body: JSON.stringify({ email, password }),
@@ -945,6 +945,19 @@ class APIService {
 
 	async getSubmissionCode(submissionId: number | string): Promise<any> {
 		return await this.request(`/mypage/submission/${submissionId}/code`);
+	}
+
+	/**
+	 * 특정 사용자의 문제별 제출 이력 조회 (튜터/관리자용)
+	 */
+	async getSubmissionHistory(
+		problemId: number,
+		sectionId: number,
+		userId: number,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/problems/${problemId}/users/${userId}/submissions`,
+		);
 	}
 
 	async enrollByCode(enrollmentCode: string): Promise<any> {

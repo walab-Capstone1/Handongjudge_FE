@@ -2,7 +2,7 @@ import type React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaGraduationCap, FaPencilAlt, FaCog, FaPlus } from "react-icons/fa";
-import Silk from "../../components/Silk";
+import Silk from "./Silk";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import { useAuth } from "../../hooks/useAuth";

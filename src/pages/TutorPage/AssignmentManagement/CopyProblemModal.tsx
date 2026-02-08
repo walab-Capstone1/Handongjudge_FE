@@ -3,7 +3,7 @@ import APIService from "../../../services/APIService";
 import { removeCopyLabel } from "../../../utils/problemUtils";
 import { getSemesterLabel } from "../../../utils/assignmentUtils";
 import * as S from "./styles";
-import "../../../components/AssignmentModals/AssignmentModals.css";
+import "./AssignmentModals/AssignmentModals.css";
 
 interface SectionOption {
 	sectionId: number;
@@ -93,7 +93,9 @@ const CopyProblemModal: React.FC<CopyProblemModalProps> = ({
 
 	return (
 		<S.CopyModalOverlay onClick={onClose}>
-			<S.CopyModalContent onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+			<S.CopyModalContent
+				onClick={(e: React.MouseEvent) => e.stopPropagation()}
+			>
 				<S.CopyModalHeader>
 					<S.CopyModalHeaderLeft>
 						<S.CopyModalBtnBack type="button" onClick={onBack} title="뒤로가기">
@@ -103,7 +105,11 @@ const CopyProblemModal: React.FC<CopyProblemModalProps> = ({
 							기존 문제 가져오기 - {selectedAssignmentTitle ?? ""}
 						</S.CopyModalTitle>
 					</S.CopyModalHeaderLeft>
-					<S.CopyModalBtnClose type="button" onClick={onClose} aria-label="닫기">
+					<S.CopyModalBtnClose
+						type="button"
+						onClick={onClose}
+						aria-label="닫기"
+					>
 						×
 					</S.CopyModalBtnClose>
 				</S.CopyModalHeader>
@@ -164,7 +170,8 @@ const CopyProblemModal: React.FC<CopyProblemModalProps> = ({
 
 					{loadingAssignmentsForProblem ? (
 						<S.LoadingItems>과제를 불러오는 중...</S.LoadingItems>
-					) : selectedSectionForProblem && assignmentsForProblem.length === 0 ? (
+					) : selectedSectionForProblem &&
+						assignmentsForProblem.length === 0 ? (
 						<S.NoItems>선택한 수업에 과제가 없습니다.</S.NoItems>
 					) : selectedSectionForProblem ? (
 						<>
@@ -179,23 +186,23 @@ const CopyProblemModal: React.FC<CopyProblemModalProps> = ({
 													if (allSelectedList) {
 														onSelectAllInList([]);
 													} else {
-														onSelectAllInList(filteredList.map((p: any) => p.id));
+														onSelectAllInList(
+															filteredList.map((p: any) => p.id),
+														);
 													}
 												}}
 											/>
 											<span>전체 선택</span>
 										</label>
 										<span className="tutor-item-count">
-											{selectedProblemIds.length} / {filteredList.length}개 선택됨
+											{selectedProblemIds.length} / {filteredList.length}개
+											선택됨
 										</span>
 									</div>
 									<div className="tutor-available-problems-grid">
 										{filteredList.length > 0 ? (
 											filteredList.map((problem: any) => (
-												<div
-													key={problem.id}
-													className="tutor-problem-card"
-												>
+												<div key={problem.id} className="tutor-problem-card">
 													<div className="tutor-problem-card-header">
 														<input
 															type="checkbox"
@@ -224,10 +231,14 @@ const CopyProblemModal: React.FC<CopyProblemModalProps> = ({
 																	e.stopPropagation();
 																	try {
 																		const info =
-																			await APIService.getProblemInfo(problem.id);
+																			await APIService.getProblemInfo(
+																				problem.id,
+																			);
 																		onOpenProblemDetail(info?.data || info);
 																	} catch {
-																		alert("문제 정보를 불러오는데 실패했습니다.");
+																		alert(
+																			"문제 정보를 불러오는데 실패했습니다.",
+																		);
 																	}
 																}}
 															>
@@ -262,9 +273,7 @@ const CopyProblemModal: React.FC<CopyProblemModalProps> = ({
 												list = list.filter((p: any) =>
 													p.title
 														?.toLowerCase()
-														.includes(
-															copyProblemSearchTerm.toLowerCase(),
-														),
+														.includes(copyProblemSearchTerm.toLowerCase()),
 												);
 											}
 											const allSelected =
@@ -285,7 +294,9 @@ const CopyProblemModal: React.FC<CopyProblemModalProps> = ({
 																type="checkbox"
 																checked={allSelected}
 																onChange={() =>
-																	onSelectAllProblemsForAssignment(assignment.id)
+																	onSelectAllProblemsForAssignment(
+																		assignment.id,
+																	)
 																}
 																disabled={list.length === 0}
 															/>

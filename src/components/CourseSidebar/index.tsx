@@ -55,9 +55,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 	const courseListRef = useRef<HTMLDivElement>(null);
 
 	const hasSectionId =
-		sectionId !== null &&
-		sectionId !== undefined &&
-		Number(sectionId) > 0;
+		sectionId !== null && sectionId !== undefined && Number(sectionId) > 0;
 
 	useEffect(() => {
 		const checkManagingSections = async () => {
@@ -201,7 +199,10 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 
 	return (
 		<>
-			<S.Sidebar $collapsed={isCollapsed}>
+			<S.Sidebar
+				$collapsed={isCollapsed}
+				className={isCollapsed ? "collapsed" : ""}
+			>
 				<S.SidebarHeader onClick={() => !isCollapsed && navigate("/index")}>
 					<S.SidebarLogo
 						src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/blBC3g5kkQ/0xrnt7m1_expires_30_days.png"
@@ -228,6 +229,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 						return (
 							<S.MenuItem
 								key={item.id}
+								className={item.id === "admin" ? "admin-menu-item" : ""}
 								$active={isActive}
 								$isSubMenu={isSubMenu}
 								$isAdmin={item.id === "admin"}

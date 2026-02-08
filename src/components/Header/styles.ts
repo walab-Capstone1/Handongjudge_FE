@@ -1,20 +1,20 @@
 import styled from "styled-components";
 
 export const HeaderContainer = styled.header`
+  width: 100%;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  border-bottom: 1px solid #e5e7eb;
 `;
 
 export const HeaderWrapper = styled.div`
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 20px 80px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 export const Logo = styled.div`
@@ -23,6 +23,7 @@ export const Logo = styled.div`
   gap: 12px;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  margin-left: -20px;
 
   &:hover {
     opacity: 0.8;
@@ -39,32 +40,33 @@ export const LogoIcon = styled.div`
   img {
     width: 100%;
     height: 100%;
+    object-fit: contain;
   }
 `;
 
-export const LogoText = styled.span`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #667eea;
+export const LogoText = styled.h1`
+  font-size: 24px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0;
+  padding-left: 0;
+  text-indent: 0;
 `;
 
 export const HeaderLinks = styled.div`
   display: flex;
+  gap: 24px;
   align-items: center;
-  gap: 2rem;
+  margin-right: -50px;
 `;
 
-export const HeaderLink = styled.button`
-  background: none;
-  border: none;
-  color: #374151;
-  font-size: 1rem;
-  font-weight: 500;
+export const HeaderLink = styled.span`
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 14px;
   cursor: pointer;
-  transition: color 0.2s ease;
-  padding: 0.5rem 1rem;
 
   &:hover {
-    color: #667eea;
+    color: #1f2937;
   }
 `;

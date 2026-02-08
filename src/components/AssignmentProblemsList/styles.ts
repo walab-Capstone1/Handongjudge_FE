@@ -33,6 +33,7 @@ export const ProblemRow = styled.div<{ $completed?: boolean }>`
   margin: -4px -8px;
   border-radius: 6px;
   transition: background-color 0.2s ease;
+  color: ${(p) => (p.$completed ? "#868fb7" : "#000000")};
 
   &:hover {
     background-color: rgba(102, 126, 234, 0.1);

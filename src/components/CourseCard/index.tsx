@@ -156,6 +156,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 					<S.Instructor>{course.instructor} 교수님</S.Instructor>
 					{showEnrollButton && (
 						<S.EnrollButton
+							className="enroll-button"
 							onClick={(e) => {
 								e.preventDefault();
 								e.stopPropagation();
@@ -175,6 +176,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 	if (showEnrollButton) {
 		return (
 			<S.CardLink
+				className="course-card-link"
 				onClick={(e) => {
 					if (!(e.target as HTMLElement).closest(".enroll-button")) {
 						if (onEnroll) {

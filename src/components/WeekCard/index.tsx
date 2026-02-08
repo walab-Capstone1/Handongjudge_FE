@@ -1,18 +1,6 @@
 import type React from "react";
-import { Link } from "react-router-dom";
 import * as S from "./styles";
-
-interface Week {
-	title: string;
-	description: string;
-	frequency: string;
-	avgScore: string;
-	problemSet: string;
-}
-
-interface WeekCardProps {
-	week: Week;
-}
+import type { WeekCardProps } from "./types";
 
 const WeekCard: React.FC<WeekCardProps> = ({ week }) => {
 	const getLevelIcon = (level: string): string => {
@@ -42,10 +30,7 @@ const WeekCard: React.FC<WeekCardProps> = ({ week }) => {
 	};
 
 	return (
-		<Link
-			to={`/assignments/${week.title.replace(" ", "")}/detail`}
-			style={{ textDecoration: "none" }}
-		>
+		<S.CardLink to={`/assignments/${week.title.replace(" ", "")}/detail`}>
 			<S.Card>
 				<S.Header>
 					<S.Title>{week.title}</S.Title>
@@ -75,7 +60,7 @@ const WeekCard: React.FC<WeekCardProps> = ({ week }) => {
 					</S.Metric>
 				</S.Metrics>
 			</S.Card>
-		</Link>
+		</S.CardLink>
 	);
 };
 

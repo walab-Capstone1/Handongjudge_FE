@@ -40,7 +40,7 @@ export const SidebarHeader = styled.div`
   cursor: pointer;
   transition: background-color 0.2s ease;
 
-  ${Sidebar}.collapsed & {
+  ${Sidebar}[class*="collapsed"] & {
     justify-content: center;
     padding: 20px 0;
   }
@@ -130,7 +130,7 @@ export const MenuText = styled.span`
   overflow: hidden;
   transition: opacity 0.2s ease;
 
-  ${Sidebar}.collapsed & {
+  ${Sidebar}[class*="collapsed"] & {
     display: none;
   }
 
