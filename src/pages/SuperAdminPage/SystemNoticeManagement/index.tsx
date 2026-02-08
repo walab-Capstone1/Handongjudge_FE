@@ -4,7 +4,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import APIService from "../../../services/APIService";
 import Header from "../../../components/Header";
 import LoadingSpinner from "../../../components/LoadingSpinner";
-import * as S from "../../TutorPage/Tutordashboard/styles";
+import * as S from "../../TutorPage/TutorDashboard/styles";
 import type { SystemNotice, CreateSystemNoticeData } from "./types";
 
 const SystemNoticeManagement: React.FC = () => {

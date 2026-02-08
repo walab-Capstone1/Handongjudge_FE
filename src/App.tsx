@@ -28,7 +28,7 @@ import CodingQuizSolvePage from "./pages/CodingQuizSolvePage";
 
 import ProblemSolvePage from "./pages/AssignmentPage/ProblemSolvePage";
 
-import CourseManagement from "./pages/TutorPage/Tutordashboard";
+import CourseManagement from "./pages/TutorPage/TutorDashboard";
 import AssignmentManagement from "./pages/TutorPage/AssignmentManagement";
 import AssignmentCreatePage from "./pages/TutorPage/AssignmentCreatePage";
 import AssignmentEditPage from "./pages/TutorPage/AssignmentEditPage";
