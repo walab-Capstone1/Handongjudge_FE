@@ -1,7 +1,7 @@
 import type React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import TutorLayout from "../../../layouts/TutorLayout";
 import APIService from "../../../services/APIService";
 import LoadingSpinner from "../../../components/LoadingSpinner";
@@ -56,6 +56,8 @@ interface BulkProblemItem {
 
 const AssignmentManagement: React.FC = () => {
 	const { sectionId } = useParams<{ sectionId: string }>();
+	const navigate = useNavigate();
+	const location = useLocation();
 
 	const {
 		assignments,
@@ -164,6 +166,28 @@ const AssignmentManagement: React.FC = () => {
 	useEffect(() => {
 		setCurrentPage(1);
 	}, [searchTerm, filterSection]);
+
+	// 문제 수정 페이지에서 뒤로가기 시 문제 목록 모달을 다시 열기
+	const openProblemListForAssignmentId = (
+		location.state as { openProblemListForAssignmentId?: number } | null
+	)?.openProblemListForAssignmentId;
+	useEffect(() => {
+		if (openProblemListForAssignmentId == null || !assignments.length) return;
+		const assignment = assignments.find(
+			(a) => a.id === openProblemListForAssignmentId,
+		);
+		if (assignment) {
+			setSelectedAssignmentForProblemList(assignment as Assignment);
+			setShowProblemListModal(true);
+			setProblemListSearchTerm("");
+			navigate(location.pathname, { replace: true, state: {} });
+		}
+	}, [
+		openProblemListForAssignmentId,
+		assignments,
+		navigate,
+		location.pathname,
+	]);
 
 	const resetForm = useCallback(() => {
 		setFormData({
@@ -978,6 +1002,18 @@ const AssignmentManagement: React.FC = () => {
 				selectedAssignment={selectedAssignmentForProblemList}
 				submissionStats={submissionStats}
 				searchTerm={problemListSearchTerm}
+				onEditProblemNavigate={
+					sectionId && selectedAssignmentForProblemList
+						? (problemId) =>
+								navigate(`/tutor/problems/${problemId}/edit`, {
+									state: {
+										fromAssignmentProblemList: true,
+										sectionId,
+										assignmentId: selectedAssignmentForProblemList.id,
+									},
+								})
+						: undefined
+				}
 				onClose={() => {
 					setShowProblemListModal(false);
 					setSelectedAssignmentForProblemList(null);

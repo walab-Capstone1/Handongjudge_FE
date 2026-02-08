@@ -29,16 +29,18 @@ export const UserSection = styled.div`
 `;
 
 export const ToggleButton = styled.button`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  gap: 4px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px;
   border: none;
   background: transparent;
   cursor: pointer;
   color: #667eea;
-  font-size: 24px;
+  font-size: 1rem;
   transition: all 0.2s ease;
   border-radius: 4px;
 

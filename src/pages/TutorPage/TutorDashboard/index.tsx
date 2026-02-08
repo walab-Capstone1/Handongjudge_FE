@@ -1,34 +1,73 @@
 import type React from "react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TutorLayout from "../../../layouts/TutorLayout";
-import { useAuth } from "../../../hooks/useAuth";
 import APIService from "../../../services/APIService";
-import { removeCopyLabel } from "../../../utils/problemUtils";
-import ReactMarkdown from "react-markdown";
-import {
-	FaExclamationTriangle,
-	FaCheckCircle,
-	FaClock,
-	FaUsers,
-	FaChartLine,
-	FaArrowUp,
-	FaArrowDown,
-	FaMinus,
-} from "react-icons/fa";
 import * as S from "./styles";
-import type {
-	Section,
-	SectionStat,
-	FormData,
-	CopyFormData,
-	Notice,
-	Assignment,
-	Problem,
-} from "./types";
 
-const TutorDashboard: React.FC = () => {
-	const { user } = useAuth();
+interface Section {
+	sectionId: number;
+	courseTitle: string;
+	year: number;
+	semester: string;
+	studentCount: number;
+	noticeCount: number;
+	active: boolean;
+	createdAt: string;
+	instructorName?: string;
+}
+
+interface FormData {
+	courseId: string;
+	courseTitle: string;
+	description: string;
+	year: number | string;
+	semester: string;
+}
+
+interface CopyFormData {
+	sourceSectionId: string;
+	courseTitle: string;
+	description: string;
+	year: number | string;
+	semester: string;
+	copyNotices: boolean;
+	copyAssignments: boolean;
+	selectedNoticeIds: number[];
+	selectedAssignmentIds: number[];
+	assignmentProblems: Record<number, number[]>;
+	noticeEdits: Record<number, { title?: string; content?: string }>;
+	assignmentEdits: Record<number, { title?: string; description?: string }>;
+	problemEdits: Record<number, { title?: string }>;
+}
+
+interface Notice {
+	id: number;
+	title: string;
+	content: string;
+	createdAt: string;
+}
+
+interface Problem {
+	id: number;
+	title: string;
+}
+
+interface Assignment {
+	id: number;
+	title: string;
+	description: string;
+	startDate: string;
+	endDate: string;
+	problems: Problem[];
+}
+
+interface Course {
+	id: number;
+	title: string;
+}
+
+const CourseManagement: React.FC = () => {
 	const navigate = useNavigate();
 	const [sections, setSections] = useState<Section[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -36,16 +75,16 @@ const TutorDashboard: React.FC = () => {
 	const [filterYear, setFilterYear] = useState("ALL");
 	const [filterSemester, setFilterSemester] = useState("ALL");
 	const [filterStatus, setFilterStatus] = useState("ALL");
-	const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
 	const [showCreateModal, setShowCreateModal] = useState(false);
-	const [showCopyModal, setShowCopyModal] = useState(false);
 	const [formData, setFormData] = useState<FormData>({
+		courseId: "",
 		courseTitle: "",
 		description: "",
-		sectionNumber: "",
 		year: new Date().getFullYear(),
 		semester: "SPRING",
 	});
+	const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
+	const [showCopyModal, setShowCopyModal] = useState(false);
 	const [copyFormData, setCopyFormData] = useState<CopyFormData>({
 		sourceSectionId: "",
 		courseTitle: "",
@@ -57,6 +96,9 @@ const TutorDashboard: React.FC = () => {
 		selectedNoticeIds: [],
 		selectedAssignmentIds: [],
 		assignmentProblems: {},
+		noticeEdits: {},
+		assignmentEdits: {},
+		problemEdits: {},
 	});
 	const [sourceNotices, setSourceNotices] = useState<Notice[]>([]);
 	const [sourceAssignments, setSourceAssignments] = useState<Assignment[]>([]);
@@ -66,243 +108,24 @@ const TutorDashboard: React.FC = () => {
 		Record<number, boolean>
 	>({});
 	const [copyStep, setCopyStep] = useState(1);
-	const [selectedNoticeDetail, setSelectedNoticeDetail] =
-		useState<Notice | null>(null);
-	const [selectedProblemDetail, setSelectedProblemDetail] =
-		useState<Problem | null>(null);
-	const [stats, setStats] = useState<any>(null);
-	const [loadingStats, setLoadingStats] = useState(false);
-	const [sectionStats, setSectionStats] = useState<Record<number, SectionStat>>(
-		{},
+	const [editingNoticeId, setEditingNoticeId] = useState<number | null>(null);
+	const [editingAssignmentId, setEditingAssignmentId] = useState<number | null>(
+		null,
 	);
-	const [loadingSectionStats, setLoadingSectionStats] = useState(false);
-
-	const calculateSectionStats = async (
-		sectionId: number,
-	): Promise<SectionStat> => {
-		try {
-			const assignmentsResponse =
-				await APIService.getAssignmentsBySection(sectionId);
-			const assignments =
-				assignmentsResponse?.data || assignmentsResponse || [];
-
-			if (assignments.length === 0) {
-				return {
-					averageSubmissionRate: 0,
-					atRiskStudents: 0,
-					issues: 0,
-					upcomingDeadlines: [],
-					pendingGrading: 0,
-					totalAssignments: 0,
-					activeAssignments: 0,
-				};
-			}
-
-			const upcomingAssignments = await APIService.getUpcomingAssignments(
-				sectionId,
-				3,
-			);
-			const upcomingDeadlines = upcomingAssignments.map((assignment: any) => ({
-				assignmentId: assignment.assignmentId,
-				title: assignment.title,
-				endDate: assignment.endDate,
-				submissionRate: assignment.submissionRate || 0,
-			}));
-
-			if (upcomingDeadlines.length === 0) {
-				const now = new Date();
-				const activeAssignments = assignments.filter(
-					(a: any) => a.active && a.endDate,
-				);
-
-				const futureAssignments = activeAssignments
-					.filter((a: any) => {
-						const endDate = new Date(a.endDate);
-						return endDate > now;
-					})
-					.sort(
-						(a: any, b: any) =>
-							new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
-					);
-
-				for (const assignment of futureAssignments.slice(0, 3)) {
-					try {
-						const statsResponse = await APIService.getAssignmentSubmissionStats(
-							assignment.id,
-							sectionId,
-						);
-						if (statsResponse) {
-							upcomingDeadlines.push({
-								assignmentId: assignment.id,
-								title: assignment.title,
-								endDate: assignment.endDate,
-								submissionRate: statsResponse.submissionRate || 0,
-							});
-						}
-					} catch (error) {
-						console.error(`과제 ${assignment.id} 통계 조회 실패:`, error);
-						upcomingDeadlines.push({
-							assignmentId: assignment.id,
-							title: assignment.title,
-							endDate: assignment.endDate,
-							submissionRate: 0,
-						});
-					}
-				}
-			}
-
-			let totalSubmissionRate = 0;
-			let validAssignments = 0;
-			let pendingGrading = 0;
-			const now = new Date();
-
-			for (const assignment of assignments) {
-				if (!assignment.active) continue;
-
-				try {
-					const statsResponse = await APIService.getAssignmentSubmissionStats(
-						assignment.id,
-						sectionId,
-					);
-					if (statsResponse) {
-						const submissionRate = statsResponse.submissionRate || 0;
-						totalSubmissionRate += submissionRate;
-						validAssignments++;
-
-						if (submissionRate < 50 && assignment.endDate) {
-							const endDate = new Date(assignment.endDate);
-							if (endDate < now) {
-								pendingGrading++;
-							}
-						}
-					}
-				} catch (error) {
-					console.error(`과제 ${assignment.id} 통계 조회 실패:`, error);
-				}
-			}
-
-			const averageSubmissionRate =
-				validAssignments > 0 ? totalSubmissionRate / validAssignments : 0;
-			const atRiskStudents = Math.ceil(
-				((100 - averageSubmissionRate) / 100) *
-					(sections.find((s) => s.sectionId === sectionId)?.studentCount || 0),
-			);
-			const issues = upcomingDeadlines.length + pendingGrading;
-
-			return {
-				averageSubmissionRate: Math.round(averageSubmissionRate * 10) / 10,
-				atRiskStudents,
-				issues,
-				upcomingDeadlines,
-				pendingGrading,
-				totalAssignments: assignments.length,
-				activeAssignments: assignments.filter((a: any) => a.active).length,
-			};
-		} catch (error) {
-			console.error(`수업 ${sectionId} 통계 계산 실패:`, error);
-			return {
-				averageSubmissionRate: 0,
-				atRiskStudents: 0,
-				issues: 0,
-				upcomingDeadlines: [],
-				pendingGrading: 0,
-				totalAssignments: 0,
-				activeAssignments: 0,
-			};
-		}
-	};
-
-	const getHealthStatus = (sectionStat: SectionStat | undefined) => {
-		if (!sectionStat)
-			return { status: "unknown", label: "알 수 없음", color: "#9ca3af" };
-
-		const { averageSubmissionRate, atRiskStudents } = sectionStat;
-
-		if (averageSubmissionRate >= 80 && atRiskStudents <= 3) {
-			return { status: "healthy", label: "건강함", color: "#10b981" };
-		}
-		if (averageSubmissionRate < 60 || atRiskStudents > 10) {
-			return { status: "danger", label: "위험", color: "#ef4444" };
-		}
-		return { status: "warning", label: "주의", color: "#f59e0b" };
-	};
+	const [editingProblemId, setEditingProblemId] = useState<number | null>(null);
+	const [viewingNoticeId, setViewingNoticeId] = useState<number | null>(null);
+	const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
 
 	useEffect(() => {
-		const fetchSections = async () => {
-			try {
-				setLoading(true);
-				const dashboardResponse = await APIService.getInstructorDashboard();
-				const dashboardData = dashboardResponse?.data || [];
-				setSections(dashboardData);
-				setLoading(false);
-
-				setLoadingSectionStats(true);
-				const statsMap: Record<number, SectionStat> = {};
-				for (const section of dashboardData) {
-					if (section.active !== false) {
-						statsMap[section.sectionId] = await calculateSectionStats(
-							section.sectionId,
-						);
-					}
-				}
-				setSectionStats(statsMap);
-				setLoadingSectionStats(false);
-			} catch (error) {
-				setSections([]);
-				setLoading(false);
-				setLoadingSectionStats(false);
-			}
-		};
-
-		const fetchStats = async () => {
-			try {
-				setLoadingStats(true);
-				const response = await APIService.getAdminStats();
-				setStats(response?.data || null);
-			} catch (error) {
-				console.error("통계 조회 실패:", error);
-				setStats(null);
-			} finally {
-				setLoadingStats(false);
-			}
-		};
-
 		fetchSections();
-		fetchStats();
+		fetchAvailableCourses();
 	}, []);
-
-	const handleSectionClick = (section: Section) => {
-		navigate(`/tutor/section/${section.sectionId}/assignments`, {
-			state: { section },
-		});
-	};
-
-	const handleCopyEnrollmentLink = (
-		enrollmentCode: string | undefined,
-		e: React.MouseEvent,
-	) => {
-		e.stopPropagation();
-		if (enrollmentCode) {
-			const enrollmentLink = `${window.location.origin}/enroll/${enrollmentCode}`;
-			navigator.clipboard
-				.writeText(enrollmentLink)
-				.then(() => {
-					alert("수업 참가 링크가 복사되었습니다!");
-				})
-				.catch((err) => {
-					console.error("복사 실패:", err);
-					alert("링크 복사에 실패했습니다.");
-				});
-		}
-	};
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (
 				openDropdownId &&
-				!(event.target as HTMLElement).closest(
-					".tutor-course-card-dropdown-container",
-				)
+				!(event.target as Element).closest(".dropdown-container")
 			) {
 				setOpenDropdownId(null);
 			}
@@ -316,12 +139,73 @@ const TutorDashboard: React.FC = () => {
 		}
 	}, [openDropdownId]);
 
+	const fetchAvailableCourses = async () => {
+		try {
+			const courses = await APIService.getCourses();
+			setAvailableCourses(courses || []);
+		} catch (error) {
+			console.error("강의 목록 조회 실패:", error);
+			setAvailableCourses([]);
+		}
+	};
+
+	const handleCreateSection = async () => {
+		try {
+			let courseId: number;
+			if (formData.courseId) {
+				courseId = Number.parseInt(formData.courseId);
+			} else if (formData.courseTitle) {
+				const courseResponse = await APIService.createCourse({
+					title: formData.courseTitle,
+					description: formData.description || "",
+				});
+				courseId = courseResponse.id;
+			} else {
+				alert("강의를 선택하거나 새 강의 제목을 입력해주세요.");
+				return;
+			}
+
+			await APIService.createSection({
+				courseId: courseId,
+				instructorId: await APIService.getCurrentUserId(),
+				sectionNumber: null,
+				year: Number.parseInt(String(formData.year)),
+				semester: formData.semester,
+			});
+
+			alert("수업이 성공적으로 생성되었습니다!");
+			setShowCreateModal(false);
+			setFormData({
+				courseId: "",
+				courseTitle: "",
+				description: "",
+				year: new Date().getFullYear(),
+				semester: "SPRING",
+			});
+			fetchSections();
+		} catch (error: any) {
+			console.error("수업 생성 실패:", error);
+			alert(error.message || "수업 생성에 실패했습니다.");
+		}
+	};
+
+	const fetchSections = async () => {
+		try {
+			setLoading(true);
+			const dashboardResponse = await APIService.getInstructorDashboard();
+			const sectionsData = dashboardResponse?.data || [];
+			setSections(sectionsData);
+			setLoading(false);
+		} catch (error) {
+			setSections([]);
+			setLoading(false);
+		}
+	};
+
 	const handleToggleActive = async (
 		sectionId: number,
 		currentActive: boolean,
-		e?: React.MouseEvent,
 	) => {
-		if (e) e.stopPropagation();
 		try {
 			const newActiveStatus = !currentActive;
 			await APIService.toggleSectionActive(sectionId, newActiveStatus);
@@ -330,15 +214,10 @@ const TutorDashboard: React.FC = () => {
 					? "수업이 활성화되었습니다."
 					: "수업이 비활성화되었습니다.",
 			);
-
-			const dashboardResponse = await APIService.getInstructorDashboard();
-			const dashboardData = dashboardResponse?.data || [];
-			setSections(dashboardData);
+			fetchSections();
 		} catch (error: any) {
 			console.error("수업 상태 변경 실패:", error);
-			alert(
-				`수업 상태 변경에 실패했습니다.\n${error.message || "네트워크 오류가 발생했습니다."}`,
-			);
+			alert(error.message || "수업 상태 변경에 실패했습니다.");
 		}
 	};
 
@@ -355,49 +234,41 @@ const TutorDashboard: React.FC = () => {
 		try {
 			await APIService.deleteSection(sectionId);
 			alert("분반이 삭제되었습니다.");
-			const dashboardResponse = await APIService.getInstructorDashboard();
-			const dashboardData = dashboardResponse?.data || [];
-			setSections(dashboardData);
+			fetchSections();
 		} catch (error: any) {
 			console.error("분반 삭제 실패:", error);
 			alert(error.message || "분반 삭제에 실패했습니다.");
 		}
 	};
 
-	const handleCreateSection = async () => {
-		try {
-			const instructorId = await APIService.getCurrentUserId();
-
-			const courseResponse = await APIService.createCourse({
-				title: formData.courseTitle,
-				description: formData.description || "",
-			});
-
-			const sectionResponse = await APIService.createSection({
-				courseId: courseResponse.id,
-				instructorId: instructorId,
-				sectionNumber: null,
-				year: Number.parseInt(String(formData.year)),
-				semester: formData.semester,
-			});
-
-			alert("수업이 성공적으로 생성되었습니다!");
-			setShowCreateModal(false);
-			setFormData({
-				courseTitle: "",
-				description: "",
-				sectionNumber: "",
-				year: new Date().getFullYear(),
-				semester: "SPRING",
-			});
-
-			const dashboardResponse = await APIService.getInstructorDashboard();
-			const dashboardData = dashboardResponse?.data || [];
-			setSections(dashboardData);
-		} catch (error: any) {
-			console.error("수업 생성 실패:", error);
-			alert(error.message || "수업 생성에 실패했습니다.");
+	const getSemesterLabel = (semester: string) => {
+		switch (semester) {
+			case "SPRING":
+				return "1학기";
+			case "SUMMER":
+				return "여름학기";
+			case "FALL":
+				return "2학기";
+			case "WINTER":
+				return "겨울학기";
+			case "CAMP":
+				return "캠프";
+			case "SPECIAL":
+				return "특강";
+			case "IRREGULAR":
+				return "비정규 세션";
+			default:
+				return semester || "";
 		}
+	};
+
+	const formatDate = (dateString: string) => {
+		if (!dateString) return "";
+		const date = new Date(dateString);
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, "0");
+		const day = String(date.getDate()).padStart(2, "0");
+		return `${year}.${month}.${day}`;
 	};
 
 	const handleSourceSectionChange = async (sectionId: string) => {
@@ -407,19 +278,24 @@ const TutorDashboard: React.FC = () => {
 			selectedNoticeIds: [],
 			selectedAssignmentIds: [],
 			assignmentProblems: {},
+			noticeEdits: {},
+			assignmentEdits: {},
+			problemEdits: {},
 		});
 		setExpandedAssignments({});
 
 		if (sectionId) {
 			try {
 				setLoadingNotices(true);
-				const notices = await APIService.getSectionNotices(Number(sectionId));
+				const notices = await APIService.getSectionNotices(
+					Number.parseInt(sectionId),
+				);
 				const noticesData = notices?.data || notices || [];
 				setSourceNotices(noticesData);
 
 				setLoadingAssignments(true);
 				const assignments = await APIService.getAssignmentsBySection(
-					Number(sectionId),
+					Number.parseInt(sectionId),
 				);
 				const assignmentsData = assignments?.data || assignments || [];
 
@@ -427,14 +303,14 @@ const TutorDashboard: React.FC = () => {
 					assignmentsData.map(async (assignment: any) => {
 						try {
 							const problems = await APIService.getAssignmentProblems(
-								Number(sectionId),
+								Number.parseInt(sectionId),
 								assignment.id,
 							);
 							return {
 								...assignment,
 								problems: problems || [],
 							};
-						} catch (error) {
+		} catch (error) {
 							console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
 							return { ...assignment, problems: [] };
 						}
@@ -443,25 +319,18 @@ const TutorDashboard: React.FC = () => {
 
 				setSourceAssignments(assignmentsWithProblems);
 
-				const initialAssignmentProblems: Record<number, number[]> = {};
-				assignmentsWithProblems.forEach((assignment: any) => {
-					initialAssignmentProblems[assignment.id] = assignment.problems.map(
-						(p: any) => p.id,
-					);
-				});
-
 				setCopyFormData((prev) => ({
 					...prev,
 					sourceSectionId: sectionId,
-					selectedNoticeIds: noticesData.map((n: any) => n.id),
-					selectedAssignmentIds: assignmentsWithProblems.map((a: any) => a.id),
-					assignmentProblems: initialAssignmentProblems,
+					selectedNoticeIds: [],
+					selectedAssignmentIds: [],
+					assignmentProblems: {},
 				}));
 			} catch (error) {
 				console.error("데이터 조회 실패:", error);
 				setSourceNotices([]);
 				setSourceAssignments([]);
-			} finally {
+		} finally {
 				setLoadingNotices(false);
 				setLoadingAssignments(false);
 			}
@@ -494,6 +363,19 @@ const TutorDashboard: React.FC = () => {
 		}
 	};
 
+	const handleNoticeEdit = (noticeId: number, field: string, value: string) => {
+		setCopyFormData((prev) => {
+			const edits = prev.noticeEdits[noticeId] || {};
+			return {
+				...prev,
+				noticeEdits: {
+					...prev.noticeEdits,
+					[noticeId]: { ...edits, [field]: value },
+				},
+			};
+		});
+	};
+
 	const handleAssignmentToggle = (assignmentId: number) => {
 		setCopyFormData((prev) => {
 			const isSelected = prev.selectedAssignmentIds.includes(assignmentId);
@@ -507,17 +389,16 @@ const TutorDashboard: React.FC = () => {
 					),
 					assignmentProblems: newAssignmentProblems,
 				};
-			} else {
-				const assignment = sourceAssignments.find((a) => a.id === assignmentId);
-				return {
-					...prev,
-					selectedAssignmentIds: [...prev.selectedAssignmentIds, assignmentId],
-					assignmentProblems: {
-						...prev.assignmentProblems,
-						[assignmentId]: assignment?.problems.map((p) => p.id) || [],
-					},
-				};
 			}
+			const assignment = sourceAssignments.find((a) => a.id === assignmentId);
+			return {
+				...prev,
+				selectedAssignmentIds: [...prev.selectedAssignmentIds, assignmentId],
+				assignmentProblems: {
+					...prev.assignmentProblems,
+					[assignmentId]: assignment?.problems.map((p) => p.id) || [],
+				},
+			};
 		});
 	};
 
@@ -543,6 +424,23 @@ const TutorDashboard: React.FC = () => {
 				assignmentProblems: allAssignmentProblems,
 			}));
 		}
+	};
+
+	const handleAssignmentEdit = (
+		assignmentId: number,
+		field: string,
+		value: string,
+	) => {
+		setCopyFormData((prev) => {
+			const edits = prev.assignmentEdits[assignmentId] || {};
+			return {
+				...prev,
+				assignmentEdits: {
+					...prev.assignmentEdits,
+					[assignmentId]: { ...edits, [field]: value },
+				},
+			};
+		});
 	};
 
 	const toggleAssignmentExpand = (assignmentId: number) => {
@@ -586,6 +484,16 @@ const TutorDashboard: React.FC = () => {
 		}));
 	};
 
+	const handleProblemEdit = (problemId: number, title: string) => {
+		setCopyFormData((prev) => ({
+			...prev,
+			problemEdits: {
+				...prev.problemEdits,
+				[problemId]: { title },
+			},
+		}));
+	};
+
 	const handleCopySection = async () => {
 		try {
 			if (!copyFormData.sourceSectionId) {
@@ -610,12 +518,12 @@ const TutorDashboard: React.FC = () => {
 				copyFormData.copyNotices ? copyFormData.selectedNoticeIds : [],
 				copyFormData.copyAssignments ? copyFormData.selectedAssignmentIds : [],
 				copyFormData.copyAssignments ? copyFormData.assignmentProblems : {},
-				{}, // noticeEdits
-				{}, // assignmentEdits
-				{}, // problemEdits
+				copyFormData.noticeEdits,
+				copyFormData.assignmentEdits,
+				copyFormData.problemEdits,
 			);
 
-			if ((response as any).success) {
+			if (response.success) {
 				alert("수업이 성공적으로 복사되었습니다!");
 				setShowCopyModal(false);
 				setCopyStep(1);
@@ -630,16 +538,19 @@ const TutorDashboard: React.FC = () => {
 					selectedNoticeIds: [],
 					selectedAssignmentIds: [],
 					assignmentProblems: {},
+					noticeEdits: {},
+					assignmentEdits: {},
+					problemEdits: {},
 				});
 				setSourceNotices([]);
 				setSourceAssignments([]);
 				setExpandedAssignments({});
-
-				const dashboardResponse = await APIService.getInstructorDashboard();
-				const dashboardData = dashboardResponse?.data || [];
-				setSections(dashboardData);
+				setEditingNoticeId(null);
+				setEditingAssignmentId(null);
+				setEditingProblemId(null);
+				fetchSections();
 			} else {
-				alert((response as any).message || "수업 복사에 실패했습니다.");
+				alert(response.message || "수업 복사에 실패했습니다.");
 			}
 		} catch (error: any) {
 			console.error("수업 복사 실패:", error);
@@ -647,54 +558,14 @@ const TutorDashboard: React.FC = () => {
 		}
 	};
 
-	const getSemesterLabel = (semester: string) => {
-		switch (semester) {
-			case "SPRING":
-				return "1학기";
-			case "SUMMER":
-				return "여름학기";
-			case "FALL":
-				return "2학기";
-			case "WINTER":
-				return "겨울학기";
-			case "CAMP":
-				return "캠프";
-			case "SPECIAL":
-				return "특강";
-			case "IRREGULAR":
-				return "비정규 세션";
-			default:
-				return semester || "1학기";
-		}
-	};
-
-	const formatDate = (dateString: string) => {
-		if (!dateString) return "";
-		const date = new Date(dateString);
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, "0");
-		const day = String(date.getDate()).padStart(2, "0");
-		return `${year}.${month}.${day}`;
-	};
-
-	const calculateDDay = (endDate: string) => {
-		if (!endDate) return null;
-		const end = new Date(endDate);
-		const now = new Date();
-		now.setHours(0, 0, 0, 0);
-		end.setHours(0, 0, 0, 0);
-		const diffTime = end.getTime() - now.getTime();
-		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-		if (diffDays < 0) return "마감";
-		if (diffDays === 0) return "D-day";
-		return `D-${diffDays}`;
-	};
+	const availableYears = [
+		...new Set(sections.map((s) => s.year).filter(Boolean)),
+	].sort((a, b) => b - a);
 
 	const filteredSections = sections.filter((section) => {
 		const matchesSearch =
 			!searchTerm ||
-			section.courseTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			section.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			(section.instructorName &&
 				section.instructorName
 					.toLowerCase()
@@ -702,8 +573,10 @@ const TutorDashboard: React.FC = () => {
 
 		const matchesYear =
 			filterYear === "ALL" || section.year === Number.parseInt(filterYear);
+
 		const matchesSemester =
 			filterSemester === "ALL" || section.semester === filterSemester;
+
 		const matchesStatus =
 			filterStatus === "ALL" ||
 			(filterStatus === "ACTIVE" && section.active !== false) ||
@@ -712,17 +585,15 @@ const TutorDashboard: React.FC = () => {
 		return matchesSearch && matchesYear && matchesSemester && matchesStatus;
 	});
 
-	const availableYears = [
-		...new Set(sections.map((s) => s.year).filter(Boolean)),
-	].sort((a, b) => b - a);
-
 	if (loading) {
 		return (
 			<TutorLayout>
-				<S.LoadingContainer>
-					<S.LoadingSpinner />
-					<S.LoadingText>분반 정보를 불러오는 중...</S.LoadingText>
-				</S.LoadingContainer>
+				<S.Container>
+					<S.LoadingContainer>
+						<S.LoadingSpinner />
+						<S.LoadingText>수업 정보를 불러오는 중...</S.LoadingText>
+					</S.LoadingContainer>
+				</S.Container>
 			</TutorLayout>
 		);
 	}
@@ -735,9 +606,13 @@ const TutorDashboard: React.FC = () => {
 						<S.Title>수업 관리</S.Title>
 						<S.TitleStats>
 							<S.StatBadge>총 {sections.length}개 분반</S.StatBadge>
+							<S.StatBadge>표시 {filteredSections.length}개</S.StatBadge>
 						</S.TitleStats>
 					</S.TitleLeft>
 					<S.TitleRight>
+						<S.CopyButton onClick={() => setShowCopyModal(true)}>
+							기존 수업 복사
+						</S.CopyButton>
 						<S.CreateButton onClick={() => setShowCreateModal(true)}>
 							+ 새 수업 만들기
 						</S.CreateButton>
@@ -807,39 +682,25 @@ const TutorDashboard: React.FC = () => {
 							</S.CardHeader>
 
 							<S.StatsCompact>
-								<S.StatItem className="tutor-course-card-stat-item">
-									<S.StatLabel className="tutor-course-card-stat-label">
-										학생
-									</S.StatLabel>
-									<S.StatValue className="tutor-course-card-stat-value">
-										{section.studentCount || 0}명
-									</S.StatValue>
+								<S.StatItem>
+									<S.StatLabel>학생</S.StatLabel>
+									<S.StatValue>{section.studentCount || 0}명</S.StatValue>
 								</S.StatItem>
-								<S.StatItem className="tutor-course-card-stat-item">
-									<S.StatLabel className="tutor-course-card-stat-label">
-										공지
-									</S.StatLabel>
-									<S.StatValue className="tutor-course-card-stat-value">
-										{section.noticeCount || 0}개
-									</S.StatValue>
+								<S.StatItem>
+									<S.StatLabel>공지</S.StatLabel>
+									<S.StatValue>{section.noticeCount || 0}개</S.StatValue>
 								</S.StatItem>
-								<S.StatItem className="tutor-course-card-stat-item">
-									<S.StatLabel className="tutor-course-card-stat-label">
-										학기
-									</S.StatLabel>
-									<S.StatValue className="tutor-course-card-stat-value">
+								<S.StatItem>
+									<S.StatLabel>학기</S.StatLabel>
+									<S.StatValue>
 										{section.year || new Date().getFullYear()}년{" "}
 										{getSemesterLabel(section.semester)}
 									</S.StatValue>
 								</S.StatItem>
 								{section.createdAt && (
-									<S.StatItem className="tutor-course-card-stat-item">
-										<S.StatLabel className="tutor-course-card-stat-label">
-											생성일
-										</S.StatLabel>
-										<S.StatValue className="tutor-course-card-stat-value">
-											{formatDate(section.createdAt)}
-										</S.StatValue>
+									<S.StatItem>
+										<S.StatLabel>생성일</S.StatLabel>
+										<S.StatValue>{formatDate(section.createdAt)}</S.StatValue>
 									</S.StatItem>
 								)}
 							</S.StatsCompact>
@@ -847,11 +708,10 @@ const TutorDashboard: React.FC = () => {
 							<S.ActionsCompact>
 								<S.ToggleButton
 									$active={section.active !== false}
-									onClick={(e) =>
+									onClick={() =>
 										handleToggleActive(
 											section.sectionId,
 											section.active !== false,
-											e,
 										)
 									}
 									title={
@@ -861,17 +721,17 @@ const TutorDashboard: React.FC = () => {
 									{section.active !== false ? "활성" : "비활성"}
 								</S.ToggleButton>
 								<S.ActionButtonsCompact>
-									<S.ActionButton
-										onClick={() =>
-											navigate(`/tutor/section/${section.sectionId}/notices`)
-										}
+												<S.ActionButton
+													onClick={() =>
+											navigate(`/tutor/notices/section/${section.sectionId}`)
+													}
 										title="공지사항"
-									>
+												>
 										공지
-									</S.ActionButton>
+												</S.ActionButton>
 									<S.ActionButton
 										onClick={() =>
-											navigate(`/tutor/section/${section.sectionId}/users`)
+											navigate(`/tutor/users/section/${section.sectionId}`)
 										}
 										title="학생 관리"
 									>
@@ -879,7 +739,7 @@ const TutorDashboard: React.FC = () => {
 									</S.ActionButton>
 									<S.ActionButton
 										onClick={() =>
-											navigate(`/tutor/section/${section.sectionId}/grades`)
+											navigate(`/tutor/grades/section/${section.sectionId}`)
 										}
 										title="성적 관리"
 									>
@@ -889,14 +749,14 @@ const TutorDashboard: React.FC = () => {
 										$primary
 										onClick={() =>
 											navigate(
-												`/tutor/section/${section.sectionId}/assignments`,
+												`/tutor/assignments/section/${section.sectionId}`,
 											)
 										}
 										title="과제 관리"
 									>
 										과제
 									</S.ActionButton>
-									<S.DropdownContainer>
+									<S.DropdownContainer className="dropdown-container">
 										<S.DropdownToggle
 											onClick={(e) => {
 												e.stopPropagation();
@@ -930,8 +790,8 @@ const TutorDashboard: React.FC = () => {
 									</S.DropdownContainer>
 								</S.ActionButtonsCompact>
 							</S.ActionsCompact>
-						</S.CourseCard>
-					))}
+							</S.CourseCard>
+						))}
 				</S.SectionsGrid>
 
 				{filteredSections.length === 0 && (
@@ -960,28 +820,58 @@ const TutorDashboard: React.FC = () => {
 
 							<S.ModalBody>
 								<S.FormGroup>
-									<label>강의 제목</label>
-									<S.FormInput
-										type="text"
-										value={formData.courseTitle}
+									<label>강의 선택 또는 새 강의 제목 입력</label>
+									<S.FormSelect
+										value={formData.courseId}
 										onChange={(e) =>
-											setFormData({ ...formData, courseTitle: e.target.value })
+											setFormData({
+												...formData,
+												courseId: e.target.value,
+												courseTitle: "",
+											})
 										}
-										placeholder="예: 자바프로그래밍"
-									/>
+									>
+										<option value="">새 강의 만들기</option>
+										{availableCourses.map((course) => (
+											<option key={course.id} value={course.id}>
+												{course.title}
+											</option>
+										))}
+									</S.FormSelect>
 								</S.FormGroup>
 
-								<S.FormGroup>
-									<label>수업 설명</label>
-									<S.FormTextarea
-										value={formData.description}
-										onChange={(e) =>
-											setFormData({ ...formData, description: e.target.value })
-										}
-										placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
-										rows={3}
-									/>
-								</S.FormGroup>
+								{!formData.courseId && (
+									<>
+										<S.FormGroup>
+											<label>새 강의 제목</label>
+											<S.FormInput
+												type="text"
+												value={formData.courseTitle}
+												onChange={(e) =>
+													setFormData({
+														...formData,
+														courseTitle: e.target.value,
+													})
+												}
+												placeholder="예: 자바프로그래밍"
+											/>
+										</S.FormGroup>
+										<S.FormGroup>
+											<label>수업 설명</label>
+											<S.FormTextarea
+												value={formData.description}
+												onChange={(e) =>
+													setFormData({
+														...formData,
+														description: e.target.value,
+													})
+												}
+												placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
+												rows={3}
+											/>
+										</S.FormGroup>
+									</>
+								)}
 
 								<S.FormRow>
 									<S.FormGroup>
@@ -990,10 +880,7 @@ const TutorDashboard: React.FC = () => {
 											type="number"
 											value={formData.year}
 											onChange={(e) =>
-												setFormData({
-													...formData,
-													year: e.target.value as any,
-												})
+												setFormData({ ...formData, year: e.target.value })
 											}
 											placeholder="2025"
 											min="2020"
@@ -1006,10 +893,7 @@ const TutorDashboard: React.FC = () => {
 										<S.FormSelect
 											value={formData.semester}
 											onChange={(e) =>
-												setFormData({
-													...formData,
-													semester: e.target.value as any,
-												})
+												setFormData({ ...formData, semester: e.target.value })
 											}
 										>
 											<option value="SPRING">1학기</option>
@@ -1030,7 +914,7 @@ const TutorDashboard: React.FC = () => {
 								</S.BtnCancel>
 								<S.BtnSubmit
 									onClick={handleCreateSection}
-									disabled={!formData.courseTitle}
+									disabled={!formData.courseId && !formData.courseTitle}
 								>
 									생성하기
 								</S.BtnSubmit>
@@ -1039,35 +923,37 @@ const TutorDashboard: React.FC = () => {
 					</S.ModalOverlay>
 				)}
 
-				{/* 수업 가져오기 모달 */}
+				{/* 수업 복사 모달 */}
 				{showCopyModal && (
 					<S.ModalOverlay
 						onClick={() => {
 							setShowCopyModal(false);
 							setCopyStep(1);
-							setSelectedNoticeDetail(null);
-							setSelectedProblemDetail(null);
+							setEditingNoticeId(null);
+							setEditingAssignmentId(null);
+							setEditingProblemId(null);
 						}}
 					>
 						<S.ModalContent
-							$large={copyStep !== 1}
+							$large={copyStep > 1}
 							onClick={(e) => e.stopPropagation()}
 						>
 							<S.ModalHeader>
-								<h2>수업 가져오기</h2>
+								<h2>기존 수업 복사</h2>
 								<S.ModalClose
 									onClick={() => {
 										setShowCopyModal(false);
 										setCopyStep(1);
-										setSelectedNoticeDetail(null);
-										setSelectedProblemDetail(null);
+										setEditingNoticeId(null);
+										setEditingAssignmentId(null);
+										setEditingProblemId(null);
 									}}
 								>
 									×
 								</S.ModalClose>
 							</S.ModalHeader>
 
-							<S.ModalBody $large={copyStep !== 1}>
+							<S.ModalBody $large={copyStep > 1}>
 								{/* 1단계: 기본 정보 */}
 								{copyStep === 1 && (
 									<S.StepContent>
@@ -1133,7 +1019,7 @@ const TutorDashboard: React.FC = () => {
 													onChange={(e) =>
 														setCopyFormData({
 															...copyFormData,
-															year: e.target.value as any,
+															year: e.target.value,
 														})
 													}
 													placeholder="2025"
@@ -1149,7 +1035,7 @@ const TutorDashboard: React.FC = () => {
 													onChange={(e) =>
 														setCopyFormData({
 															...copyFormData,
-															semester: e.target.value as any,
+															semester: e.target.value,
 														})
 													}
 												>
@@ -1163,16 +1049,60 @@ const TutorDashboard: React.FC = () => {
 												</S.FormSelect>
 											</S.FormGroup>
 										</S.FormRow>
+
+										<S.FormGroup>
+											<S.CheckboxLabel $large>
+												<input
+													type="checkbox"
+													checked={copyFormData.copyNotices}
+													onChange={(e) =>
+														setCopyFormData({
+															...copyFormData,
+															copyNotices: e.target.checked,
+														})
+													}
+												/>
+												<S.CheckboxContent>
+													<S.CheckboxTitle>공지사항 복사</S.CheckboxTitle>
+													<S.CheckboxDescription>
+														복사할 공지사항을 선택할 수 있습니다
+													</S.CheckboxDescription>
+												</S.CheckboxContent>
+											</S.CheckboxLabel>
+										</S.FormGroup>
+
+										<S.FormGroup>
+											<S.CheckboxLabel $large>
+												<input
+													type="checkbox"
+													checked={copyFormData.copyAssignments}
+													onChange={(e) =>
+														setCopyFormData({
+															...copyFormData,
+															copyAssignments: e.target.checked,
+														})
+													}
+												/>
+												<S.CheckboxContent>
+													<S.CheckboxTitle>과제 및 문제 복사</S.CheckboxTitle>
+													<S.CheckboxDescription>
+														복사할 과제와 문제를 선택할 수 있습니다
+													</S.CheckboxDescription>
+												</S.CheckboxContent>
+											</S.CheckboxLabel>
+										</S.FormGroup>
 									</S.StepContent>
 								)}
 
-								{/* 2단계: 공지사항 선택 */}
+								{/* 2단계: 공지사항 선택 및 수정 */}
 								{copyStep === 2 && (
 									<S.StepContent>
-										<S.StepTitle>2단계: 공지사항 선택</S.StepTitle>
+										<S.StepTitle>2단계: 공지사항 선택 및 수정</S.StepTitle>
 										<S.StepDescription>
-											가져올 공지사항을 선택하세요. 건너뛰면 공지사항을 가져오지
-											않습니다.
+											가져올 공지사항을 선택하고 제목/내용을 수정할 수 있습니다.
+											<S.StepHighlight>
+												선택하지 않은 공지사항은 복사되지 않습니다.
+											</S.StepHighlight>
 										</S.StepDescription>
 
 										{loadingNotices ? (
@@ -1200,51 +1130,118 @@ const TutorDashboard: React.FC = () => {
 													</S.ItemCount>
 												</S.SelectionHeader>
 
-												<S.ItemListLarge>
-													{sourceNotices.map((notice) => (
-														<S.ListItemLarge key={notice.id}>
-															<S.CheckboxLabel>
-																<input
-																	type="checkbox"
-																	checked={copyFormData.selectedNoticeIds.includes(
-																		notice.id,
-																	)}
-																	onChange={() => handleNoticeToggle(notice.id)}
-																/>
-																<S.ItemInfo>
-																	<S.ItemTitleLarge>
-																		{notice.title}
-																	</S.ItemTitleLarge>
-																	<S.ItemMeta>
-																		{new Date(
-																			notice.createdAt,
-																		).toLocaleDateString("ko-KR")}
-																	</S.ItemMeta>
-																</S.ItemInfo>
-															</S.CheckboxLabel>
-															<S.BtnViewDetail
-																onClick={(e) => {
-																	e.stopPropagation();
-																	setSelectedNoticeDetail(notice);
-																}}
+												<S.ItemListLarge $compact>
+													{sourceNotices.map((notice) => {
+														const isSelected =
+															copyFormData.selectedNoticeIds.includes(
+																notice.id,
+															);
+														const isEditing = editingNoticeId === notice.id;
+														const editData =
+															copyFormData.noticeEdits[notice.id] || {};
+														const displayTitle = editData.title || notice.title;
+
+														return (
+															<S.ListItemLarge
+																key={notice.id}
+																$selected={isSelected}
 															>
-																상세보기
-															</S.BtnViewDetail>
-														</S.ListItemLarge>
-													))}
+																{isEditing ? (
+																	<S.EditForm $inline>
+																		<S.EditInput
+																			type="text"
+																			value={editData.title || notice.title}
+																			onChange={(e) =>
+																				handleNoticeEdit(
+																					notice.id,
+																					"title",
+																					e.target.value,
+																				)
+																			}
+																			placeholder="제목"
+																		/>
+																		<S.EditTextarea
+																			value={editData.content || notice.content}
+																			onChange={(e) =>
+																				handleNoticeEdit(
+																					notice.id,
+																					"content",
+																					e.target.value,
+																				)
+																			}
+																			placeholder="내용"
+																			rows={4}
+																		/>
+																		<S.EditFormActions>
+																			<S.BtnSaveEdit
+																				onClick={(e) => {
+																					e.stopPropagation();
+																					setEditingNoticeId(null);
+																				}}
+																			>
+																				저장
+																			</S.BtnSaveEdit>
+																			<S.BtnCancel
+																				onClick={(e) => {
+																					e.stopPropagation();
+																					setEditingNoticeId(null);
+																				}}
+																			>
+																				취소
+																			</S.BtnCancel>
+																		</S.EditFormActions>
+																	</S.EditForm>
+																) : (
+																	<>
+																		<S.CheckboxLabel $item>
+																			<input
+																				type="checkbox"
+																				checked={isSelected}
+																				onChange={() =>
+																					handleNoticeToggle(notice.id)
+																				}
+																			/>
+																			<S.ItemInfo>
+																				<S.ItemTitleLarge>
+																					{displayTitle}
+																				</S.ItemTitleLarge>
+																				<S.ItemMeta>
+																					{new Date(
+																						notice.createdAt,
+																					).toLocaleDateString("ko-KR")}
+																				</S.ItemMeta>
+																			</S.ItemInfo>
+																		</S.CheckboxLabel>
+																		<S.BtnView
+																			onClick={(e) => {
+																				e.stopPropagation();
+																				setViewingNoticeId(notice.id);
+																			}}
+																			title="공지사항 내용 보기"
+																		>
+																			조회
+																		</S.BtnView>
+																	</>
+																)}
+															</S.ListItemLarge>
+														);
+													})}
 												</S.ItemListLarge>
 											</S.SelectionBoxLarge>
 										)}
 									</S.StepContent>
 								)}
 
-								{/* 3단계: 과제 및 문제 선택 */}
+								{/* 3단계: 과제 및 문제 선택 및 수정 */}
 								{copyStep === 3 && (
 									<S.StepContent>
-										<S.StepTitle>3단계: 과제 및 문제 선택</S.StepTitle>
+										<S.StepTitle>3단계: 과제 및 문제 선택 및 수정</S.StepTitle>
 										<S.StepDescription>
-											가져올 과제와 문제를 선택하세요. 과제를 클릭하면 해당
-											과제의 문제 목록을 볼 수 있습니다.
+											가져올 과제와 문제를 선택하고 제목/내용을 수정할 수
+											있습니다.
+											<S.StepHighlight>
+												선택하지 않은 과제나 문제는 복사되지 않습니다.
+											</S.StepHighlight>
 										</S.StepDescription>
 
 										{loadingAssignments ? (
@@ -1283,13 +1280,19 @@ const TutorDashboard: React.FC = () => {
 															[];
 														const isExpanded =
 															expandedAssignments[assignment.id];
+														const isEditingAssignment =
+															editingAssignmentId === assignment.id;
+														const assignmentEditData =
+															copyFormData.assignmentEdits[assignment.id] || {};
+														const displayAssignmentTitle =
+															assignmentEditData.title || assignment.title;
 
 														return (
 															<S.AssignmentItemLarge
 																key={assignment.id}
-																$expanded={isExpanded}
+																$selected={isAssignmentSelected}
 															>
-																<S.AssignmentHeaderLarge>
+																<S.AssignmentHeader>
 																	<S.CheckboxLabel>
 																		<input
 																			type="checkbox"
@@ -1298,37 +1301,86 @@ const TutorDashboard: React.FC = () => {
 																				handleAssignmentToggle(assignment.id)
 																			}
 																		/>
-																		<S.AssignmentInfoLarge>
-																			<S.AssignmentTitleLarge>
-																				{assignment.title}
-																			</S.AssignmentTitleLarge>
-																			<S.AssignmentMeta>
-																				{assignment.problems?.length || 0}개
-																				문제
-																				{assignment.endDate &&
-																					` · 마감: ${new Date(assignment.endDate).toLocaleDateString("ko-KR")}`}
-																			</S.AssignmentMeta>
-																		</S.AssignmentInfoLarge>
+																		<S.AssignmentInfo>
+																			{isEditingAssignment ? (
+																				<S.EditForm>
+																					<S.EditInput
+																						type="text"
+																						value={
+																							assignmentEditData.title ||
+																							assignment.title
+																						}
+																						onChange={(e) =>
+																							handleAssignmentEdit(
+																								assignment.id,
+																								"title",
+																								e.target.value,
+																							)
+																						}
+																						placeholder="과제 제목"
+																					/>
+																					<S.EditTextarea
+																						value={
+																							assignmentEditData.description ||
+																							assignment.description
+																						}
+																						onChange={(e) =>
+																							handleAssignmentEdit(
+																								assignment.id,
+																								"description",
+																								e.target.value,
+																							)
+																						}
+																						placeholder="과제 설명"
+																						rows={3}
+																					/>
+																					<S.BtnSaveEdit
+																						onClick={(e) => {
+																							e.stopPropagation();
+																							setEditingAssignmentId(null);
+																						}}
+																					>
+																						저장
+																					</S.BtnSaveEdit>
+																				</S.EditForm>
+																			) : (
+																				<>
+																					<S.AssignmentTitle>
+																						{displayAssignmentTitle}
+																					</S.AssignmentTitle>
+																					<S.AssignmentMeta>
+																						{new Date(
+																							assignment.startDate,
+																						).toLocaleDateString("ko-KR")}{" "}
+																						~{" "}
+																						{new Date(
+																							assignment.endDate,
+																						).toLocaleDateString("ko-KR")}
+																					</S.AssignmentMeta>
+																				</>
+																			)}
+																		</S.AssignmentInfo>
 																	</S.CheckboxLabel>
-																	{assignment.problems &&
-																		assignment.problems.length > 0 && (
-																			<S.BtnExpandAssignment
-																				onClick={() =>
-																					toggleAssignmentExpand(assignment.id)
-																				}
-																				disabled={!isAssignmentSelected}
+																	{!isEditingAssignment && (
+																		<S.AssignmentActions>
+																			<S.BtnExpand
+																				onClick={(e) => {
+																					e.stopPropagation();
+																					toggleAssignmentExpand(assignment.id);
+																				}}
 																			>
-																				{isExpanded ? "접기 ▲" : "문제 보기 ▼"}
-																			</S.BtnExpandAssignment>
-																		)}
-																</S.AssignmentHeaderLarge>
+																				{isExpanded ? "접기" : "펼치기"}
+																			</S.BtnExpand>
+																		</S.AssignmentActions>
+																	)}
+																</S.AssignmentHeader>
 
 																{isExpanded &&
 																	isAssignmentSelected &&
 																	assignment.problems &&
 																	assignment.problems.length > 0 && (
-																		<S.ProblemSelectionBox>
-																			<S.ProblemSelectionHeader>
+																		<S.ProblemsList>
+																			<S.ProblemsHeader>
 																				<S.CheckboxLabel>
 																					<input
 																						type="checkbox"
@@ -1342,74 +1394,81 @@ const TutorDashboard: React.FC = () => {
 																							)
 																						}
 																					/>
-																					<span>문제 전체 선택</span>
+																					<span>전체 문제 선택</span>
 																				</S.CheckboxLabel>
 																				<S.ItemCount>
 																					{selectedProblems.length} /{" "}
-																					{assignment.problems.length}개
+																					{assignment.problems.length}개 선택됨
 																				</S.ItemCount>
-																			</S.ProblemSelectionHeader>
-																			<S.ProblemListLarge>
-																				{assignment.problems.map(
-																					(problem, index) => (
-																						<S.ProblemItemLarge
-																							key={problem.id}
-																						>
-																							<S.ProblemItemHeader>
-																								<S.ProblemCheckbox
-																									checked={selectedProblems.includes(
+																			</S.ProblemsHeader>
+																			{assignment.problems.map((problem) => {
+																				const isProblemSelected =
+																					selectedProblems.includes(problem.id);
+																				const isEditingProblem =
+																					editingProblemId === problem.id;
+																				const problemEditData =
+																					copyFormData.problemEdits[
+																						problem.id
+																					] || {};
+																				const displayProblemTitle =
+																					problemEditData.title ||
+																					problem.title;
+
+																				return (
+																					<S.ProblemItem
+																						key={problem.id}
+																						$selected={isProblemSelected}
+																					>
+																						<S.CheckboxLabel>
+																							<input
+																								type="checkbox"
+																								checked={isProblemSelected}
+																								onChange={() =>
+																									handleProblemToggle(
+																										assignment.id,
 																										problem.id,
-																									)}
-																									onChange={() =>
-																										handleProblemToggle(
-																											assignment.id,
-																											problem.id,
-																										)
-																									}
-																								/>
-																							</S.ProblemItemHeader>
-																							<S.ProblemItemBody>
-																								<S.ProblemTitleRow>
-																									<S.ProblemTitleLarge>
-																										<S.ProblemNumber>
-																											{index + 1}.
-																										</S.ProblemNumber>
-																										{removeCopyLabel(
-																											problem.title,
-																										)}
-																									</S.ProblemTitleLarge>
-																									<S.BtnViewDetailCard
-																										onClick={async (e) => {
-																											e.stopPropagation();
-																											try {
-																												const problemInfo =
-																													await APIService.getProblemInfo(
-																														problem.id,
-																													);
-																												setSelectedProblemDetail(
-																													problemInfo.data ||
-																														problemInfo,
-																												);
-																											} catch (error) {
-																												console.error(
-																													"문제 정보 조회 실패:",
-																													error,
-																												);
-																												alert(
-																													"문제 정보를 불러오는데 실패했습니다.",
-																												);
+																									)
+																								}
+																							/>
+																							<S.ProblemInfo>
+																								{isEditingProblem ? (
+																									<S.EditForm>
+																										<S.EditInput
+																											type="text"
+																											value={
+																												problemEditData.title ||
+																												problem.title
 																											}
-																										}}
-																									>
-																										설명보기
-																									</S.BtnViewDetailCard>
-																								</S.ProblemTitleRow>
-																							</S.ProblemItemBody>
-																						</S.ProblemItemLarge>
-																					),
-																				)}
-																			</S.ProblemListLarge>
-																		</S.ProblemSelectionBox>
+																											onChange={(e) =>
+																												handleProblemEdit(
+																													problem.id,
+																													e.target.value,
+																												)
+																											}
+																											placeholder="문제 제목"
+																										/>
+																										<S.BtnSaveEdit
+																											onClick={(e) => {
+																												e.stopPropagation();
+																												setEditingProblemId(
+																													null,
+																												);
+																											}}
+																										>
+																											저장
+																										</S.BtnSaveEdit>
+																									</S.EditForm>
+																								) : (
+																									<S.ProblemTitle>
+																										{displayProblemTitle}
+																									</S.ProblemTitle>
+																								)}
+																							</S.ProblemInfo>
+																						</S.CheckboxLabel>
+																					</S.ProblemItem>
+																				);
+																			})}
+																		</S.ProblemsList>
 																	)}
 															</S.AssignmentItemLarge>
 														);
@@ -1424,341 +1483,154 @@ const TutorDashboard: React.FC = () => {
 								{copyStep === 4 && (
 									<S.StepContent>
 										<S.StepTitle>4단계: 최종 확인</S.StepTitle>
-										<S.StepDescription>
-											선택하신 내용을 확인하고 수업을 생성하세요.
-										</S.StepDescription>
-
-										<S.SummarySection>
+										<S.SummaryBox>
 											<S.SummaryItem>
-												<S.SummaryLabel>수업 정보</S.SummaryLabel>
-												<S.SummaryContent>
-													<S.SummaryRow>
-														<S.SummaryKey>제목:</S.SummaryKey>
-														<S.SummaryValue>
-															{copyFormData.courseTitle}
-														</S.SummaryValue>
-													</S.SummaryRow>
-													{copyFormData.description && (
-														<S.SummaryRow>
-															<S.SummaryKey>설명:</S.SummaryKey>
-															<S.SummaryValue>
-																{copyFormData.description}
-															</S.SummaryValue>
-														</S.SummaryRow>
-													)}
-													<S.SummaryRow>
-														<S.SummaryKey>년도:</S.SummaryKey>
-														<S.SummaryValue>
-															{copyFormData.year}년
-														</S.SummaryValue>
-													</S.SummaryRow>
-													<S.SummaryRow>
-														<S.SummaryKey>구분:</S.SummaryKey>
-														<S.SummaryValue>
-															{getSemesterLabel(copyFormData.semester)}
-														</S.SummaryValue>
-													</S.SummaryRow>
-												</S.SummaryContent>
+												<strong>새 수업 제목:</strong>{" "}
+												{copyFormData.courseTitle}
 											</S.SummaryItem>
-
-											{copyFormData.copyNotices ? (
+											<S.SummaryItem>
+												<strong>년도/학기:</strong> {copyFormData.year}년{" "}
+												{getSemesterLabel(copyFormData.semester)}
+											</S.SummaryItem>
+											{copyFormData.copyNotices && (
 												<S.SummaryItem>
-													<S.SummaryLabel>공지사항</S.SummaryLabel>
-													<S.SummaryContent>
-														<S.SummaryRow>
-															<S.SummaryKey>가져올 공지사항:</S.SummaryKey>
-															<S.SummaryValue>
-																{copyFormData.selectedNoticeIds.length}개 선택됨
-															</S.SummaryValue>
-														</S.SummaryRow>
-														{copyFormData.selectedNoticeIds.length > 0 && (
-															<S.SummaryList>
-																{sourceNotices
-																	.filter((n) =>
-																		copyFormData.selectedNoticeIds.includes(
-																			n.id,
-																		),
-																	)
-																	.map((notice) => (
-																		<S.SummaryListItem key={notice.id}>
-																			• {notice.title}
-																		</S.SummaryListItem>
-																	))}
-															</S.SummaryList>
-														)}
-													</S.SummaryContent>
-												</S.SummaryItem>
-											) : (
-												<S.SummaryItem>
-													<S.SummaryLabel>공지사항</S.SummaryLabel>
-													<S.SummaryContent>
-														<S.SummarySkipped>건너뛰기</S.SummarySkipped>
-													</S.SummaryContent>
+													<strong>공지사항:</strong>{" "}
+													{copyFormData.selectedNoticeIds.length}개 선택
 												</S.SummaryItem>
 											)}
-
-											{copyFormData.copyAssignments ? (
+											{copyFormData.copyAssignments && (
 												<S.SummaryItem>
-													<S.SummaryLabel>과제 및 문제</S.SummaryLabel>
-													<S.SummaryContent>
-														<S.SummaryRow>
-															<S.SummaryKey>가져올 과제:</S.SummaryKey>
-															<S.SummaryValue>
-																{copyFormData.selectedAssignmentIds.length}개
-																선택됨
-															</S.SummaryValue>
-														</S.SummaryRow>
-														{copyFormData.selectedAssignmentIds.length > 0 && (
-															<S.SummaryList>
-																{sourceAssignments
-																	.filter((a) =>
-																		copyFormData.selectedAssignmentIds.includes(
-																			a.id,
-																		),
-																	)
-																	.map((assignment) => {
-																		const selectedProblems =
-																			copyFormData.assignmentProblems[
-																				assignment.id
-																			] || [];
-																		return (
-																			<S.SummaryListItem key={assignment.id}>
-																				• {assignment.title} (
-																				{selectedProblems.length}개 문제)
-																			</S.SummaryListItem>
-																		);
-																	})}
-															</S.SummaryList>
-														)}
-													</S.SummaryContent>
-												</S.SummaryItem>
-											) : (
-												<S.SummaryItem>
-													<S.SummaryLabel>과제 및 문제</S.SummaryLabel>
-													<S.SummaryContent>
-														<S.SummarySkipped>건너뛰기</S.SummarySkipped>
-													</S.SummaryContent>
+													<strong>과제:</strong>{" "}
+													{copyFormData.selectedAssignmentIds.length}개 선택
 												</S.SummaryItem>
 											)}
-										</S.SummarySection>
+										</S.SummaryBox>
 									</S.StepContent>
 								)}
 							</S.ModalBody>
 
 							<S.ModalFooter>
-								{/* 1단계 버튼 */}
-								{copyStep === 1 && (
-									<>
-										<S.BtnCancel
-											onClick={() => {
-												setShowCopyModal(false);
-												setCopyStep(1);
-											}}
-										>
-											취소
-										</S.BtnCancel>
-										<S.BtnNext
-											onClick={() => setCopyStep(2)}
-											disabled={
-												!copyFormData.sourceSectionId ||
-												!copyFormData.courseTitle
+								{copyStep > 1 && (
+									<S.BtnCancel onClick={() => setCopyStep(copyStep - 1)}>
+										이전
+									</S.BtnCancel>
+								)}
+								<S.BtnCancel
+									onClick={() => {
+										setShowCopyModal(false);
+										setCopyStep(1);
+										setEditingNoticeId(null);
+										setEditingAssignmentId(null);
+										setEditingProblemId(null);
+									}}
+								>
+									취소
+								</S.BtnCancel>
+								{copyStep < 4 ? (
+									<S.BtnSubmit
+										onClick={() => {
+											if (copyStep === 1 && !copyFormData.sourceSectionId) {
+												alert("복사할 수업을 선택해주세요.");
+												return;
 											}
-										>
-											다음
-										</S.BtnNext>
-									</>
-								)}
-
-								{/* 2단계 버튼 */}
-								{copyStep === 2 && (
-									<>
-										<S.BtnPrev onClick={() => setCopyStep(1)}>이전</S.BtnPrev>
-										<S.BtnSkip
-											onClick={() => {
-												setCopyFormData((prev) => ({
-													...prev,
-													copyNotices: false,
-													selectedNoticeIds: [],
-												}));
-												setCopyStep(3);
-											}}
-										>
-											건너뛰기
-										</S.BtnSkip>
-										<S.BtnNext
-											onClick={() => {
-												setCopyFormData((prev) => ({
-													...prev,
-													copyNotices: true,
-												}));
-												setCopyStep(3);
-											}}
-											disabled={copyFormData.selectedNoticeIds.length === 0}
-										>
-											다음 ({copyFormData.selectedNoticeIds.length}개 선택)
-										</S.BtnNext>
-									</>
-								)}
-
-								{/* 3단계 버튼 */}
-								{copyStep === 3 && (
-									<>
-										<S.BtnPrev onClick={() => setCopyStep(2)}>이전</S.BtnPrev>
-										<S.BtnSkip
-											onClick={() => {
-												setCopyFormData((prev) => ({
-													...prev,
-													copyAssignments: false,
-													selectedAssignmentIds: [],
-													assignmentProblems: {},
-												}));
-												setCopyStep(4);
-											}}
-										>
-											건너뛰기
-										</S.BtnSkip>
-										<S.BtnNext
-											onClick={() => {
-												setCopyFormData((prev) => ({
-													...prev,
-													copyAssignments: true,
-												}));
-												setCopyStep(4);
-											}}
-											disabled={copyFormData.selectedAssignmentIds.length === 0}
-										>
-											다음 ({copyFormData.selectedAssignmentIds.length}개 과제)
-										</S.BtnNext>
-									</>
-								)}
-
-								{/* 4단계: 최종 확인 */}
-								{copyStep === 4 && (
-									<>
-										<S.BtnPrev onClick={() => setCopyStep(3)}>이전</S.BtnPrev>
-										<S.BtnSubmit onClick={handleCopySection}>
-											수업 만들기
-										</S.BtnSubmit>
-									</>
+											if (copyStep === 1 && !copyFormData.courseTitle) {
+												alert("새 수업 제목을 입력해주세요.");
+												return;
+											}
+											if (
+												copyStep === 2 &&
+												copyFormData.copyNotices &&
+												copyFormData.selectedNoticeIds.length === 0
+											) {
+												if (
+													!window.confirm(
+														"공지사항을 선택하지 않았습니다. 계속하시겠습니까?",
+													)
+												) {
+													return;
+												}
+											}
+											if (
+												copyStep === 3 &&
+												copyFormData.copyAssignments &&
+												copyFormData.selectedAssignmentIds.length === 0
+											) {
+												if (
+													!window.confirm(
+														"과제를 선택하지 않았습니다. 계속하시겠습니까?",
+													)
+												) {
+													return;
+												}
+											}
+											setCopyStep(copyStep + 1);
+										}}
+									>
+										다음
+									</S.BtnSubmit>
+								) : (
+									<S.BtnSubmit onClick={handleCopySection}>
+										복사하기
+									</S.BtnSubmit>
 								)}
 							</S.ModalFooter>
 						</S.ModalContent>
 					</S.ModalOverlay>
 				)}
 
-				{/* 상세보기 패널 */}
-				{(selectedNoticeDetail || selectedProblemDetail) && (
-					<>
-						<S.DetailOverlay
-							onClick={() => {
-								setSelectedNoticeDetail(null);
-								setSelectedProblemDetail(null);
-							}}
-						/>
-						<S.DetailPanel onClick={(e) => e.stopPropagation()}>
-							<S.DetailPanelHeader>
-								<h3>{selectedNoticeDetail ? "공지사항 상세" : "문제 설명"}</h3>
-								<S.BtnCloseDetail
-									onClick={() => {
-										setSelectedNoticeDetail(null);
-										setSelectedProblemDetail(null);
-									}}
-								>
+				{/* 공지사항 조회 모달 */}
+				{viewingNoticeId && (
+					<S.ModalOverlay onClick={() => setViewingNoticeId(null)}>
+						<S.ModalContent $view onClick={(e) => e.stopPropagation()}>
+							<S.ModalHeader>
+								<h2>공지사항 내용</h2>
+								<S.ModalClose onClick={() => setViewingNoticeId(null)}>
 									×
-								</S.BtnCloseDetail>
-							</S.DetailPanelHeader>
-							<S.DetailPanelContent>
-								{selectedNoticeDetail && (
-									<div>
-										<S.DetailTitle>{selectedNoticeDetail.title}</S.DetailTitle>
-										<S.DetailMeta>
-											작성일:{" "}
-											{new Date(
-												selectedNoticeDetail.createdAt,
-											).toLocaleDateString("ko-KR")}
-										</S.DetailMeta>
-										<S.DetailBody>{selectedNoticeDetail.content}</S.DetailBody>
-									</div>
-								)}
-								{selectedProblemDetail && (
-									<div>
-										<S.DetailTitle>{selectedProblemDetail.title}</S.DetailTitle>
-										<S.DetailMeta>
-											{selectedProblemDetail.timeLimit && (
-												<span>
-													시간 제한: {selectedProblemDetail.timeLimit}초
-												</span>
-											)}
-											{selectedProblemDetail.memoryLimit && (
-												<span>
-													메모리 제한: {selectedProblemDetail.memoryLimit}MB
-												</span>
-											)}
-										</S.DetailMeta>
-										<S.DetailBody>
-											<S.ProblemDescription>
-												{selectedProblemDetail.description ? (
-													(() => {
-														const description =
-															selectedProblemDetail.description;
-														const isMarkdown =
-															description.includes("# ") ||
-															description.includes("## ") ||
-															description.includes("```") ||
-															description.includes("**") ||
-															!description.includes("<");
+								</S.ModalClose>
+							</S.ModalHeader>
+							<S.ModalBody>
+								{(() => {
+									const notice = sourceNotices.find(
+										(n) => n.id === viewingNoticeId,
+									);
+									if (!notice) return <div>공지사항을 찾을 수 없습니다.</div>;
+									const editData = copyFormData.noticeEdits[notice.id] || {};
+									const displayTitle = editData.title || notice.title;
+									const displayContent = editData.content || notice.content;
 
-														return isMarkdown ? (
-															<ReactMarkdown
-																components={{
-																	code({
-																		node,
-																		className,
-																		children,
-																		...props
-																	}: any) {
-																		const inline = !className;
-																		return inline ? (
-																			<code
-																				className="tutor-inline-code"
-																				{...props}
-																			>
-																				{children}
-																			</code>
-																		) : (
-																			<pre className="tutor-code-block">
-																				<code className={className} {...props}>
-																					{children}
-																				</code>
-																			</pre>
-																		);
-																	},
-																}}
-															>
-																{description}
-															</ReactMarkdown>
-														) : (
-															<div
-																dangerouslySetInnerHTML={{
-																	__html: description,
-																}}
-															/>
-														);
-													})()
-												) : (
-													<p>설명이 없습니다.</p>
-												)}
-											</S.ProblemDescription>
-										</S.DetailBody>
-									</div>
-								)}
-							</S.DetailPanelContent>
-						</S.DetailPanel>
-					</>
+									return (
+										<S.NoticeView>
+											<S.NoticeViewTitle>{displayTitle}</S.NoticeViewTitle>
+											<S.NoticeViewMeta>
+												작성일:{" "}
+												{new Date(notice.createdAt).toLocaleDateString("ko-KR")}
+											</S.NoticeViewMeta>
+											<S.NoticeViewContent>
+												{displayContent}
+											</S.NoticeViewContent>
+											<S.NoticeViewActions>
+												<S.BtnEdit
+													onClick={() => {
+														setViewingNoticeId(null);
+														setEditingNoticeId(notice.id);
+													}}
+												>
+													수정하기
+												</S.BtnEdit>
+												<S.BtnCancel onClick={() => setViewingNoticeId(null)}>
+													닫기
+												</S.BtnCancel>
+											</S.NoticeViewActions>
+										</S.NoticeView>
+									);
+								})()}
+							</S.ModalBody>
+						</S.ModalContent>
+					</S.ModalOverlay>
 				)}
 			</S.Container>
 		</TutorLayout>
 	);
 };
 
-export default TutorDashboard;
+export default CourseManagement;

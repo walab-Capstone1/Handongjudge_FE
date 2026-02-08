@@ -10,7 +10,6 @@ import AuthCallback from "./pages/login/AuthCallback";
 import SignUpPageSocial from "./pages/SignUpPageSocial";
 import SignupEmailPage from "./pages/SignupEmailPage";
 import EnrollPage from "./pages/EnrollPage";
-import MainPage from "./pages/MainPage";
 // 수강 / 강의
 import ClassPage from "./pages/ClassPage";
 import CourseDashboardPage from "./pages/CourseDashboardPage";
@@ -24,16 +23,12 @@ import QuestionDetailPage from "./pages/QuestionDetailPage";
 import QuestionEditPage from "./pages/QuestionEditPage";
 import CodingQuizPage from "./pages/CodingQuizPage";
 import CodingQuizSolvePage from "./pages/CodingQuizSolvePage";
-// 마이페이지
-import MyInfoPage from "./pages/MyPage/MyInfoPage";
-import MyAssignmentsPage from "./pages/MyPage/MyAssignmentsPage";
+
 // 과제
-import AssignmentListPage from "./pages/AssignmentPage/AssignmentListPage";
-import AssignmentDetailPage from "./pages/AssignmentPage/AssignmentDetailPage";
+
 import ProblemSolvePage from "./pages/AssignmentPage/ProblemSolvePage";
-// Tutor (수업관리자)
-import TutorDashboard from "./pages/TutorPage/TutorDashboard";
-import CourseManagement from "./pages/TutorPage/CourseManagement";
+
+import CourseManagement from "./pages/TutorPage/Tutordashboard";
 import AssignmentManagement from "./pages/TutorPage/AssignmentManagement";
 import AssignmentCreatePage from "./pages/TutorPage/AssignmentCreatePage";
 import AssignmentEditPage from "./pages/TutorPage/AssignmentEditPage";
@@ -118,33 +113,13 @@ const App: React.FC = () => {
 					<Route path="/signup" element={<SignUpPageSocial />} />
 					<Route path="/signup/email" element={<SignupEmailPage />} />
 					<Route path="/enroll/:enrollmentCode" element={<EnrollPage />} />
-					<Route path="/main" element={<MainPage />} />
-					<Route path="/mypage/info" element={<MyInfoPage />} />
-					<Route path="/mypage/assignments" element={<MyAssignmentsPage />} />
-					<Route
-						path="/sections/:sectionId/assignments"
-						element={<AssignmentListPage />}
-					/>
-					<Route
-						path="/sections/:sectionId/assignments/:assignmentId/detail"
-						element={<AssignmentDetailPage />}
-					/>
 					<Route
 						path="/sections/:sectionId/assignments/:assignmentId/detail/problems/:problemId"
 						element={<ProblemSolvePage />}
 					/>
-
 					{/* 수업관리자 (tutor) 라우트 */}
 					<Route
 						path="/tutor"
-						element={
-							<AdminRoute>
-								<TutorDashboard />
-							</AdminRoute>
-						}
-					/>
-					<Route
-						path="/tutor/courses"
 						element={
 							<AdminRoute>
 								<CourseManagement />
@@ -264,14 +239,6 @@ const App: React.FC = () => {
 						}
 					/>
 					<Route
-						path="/tutor/users"
-						element={
-							<AdminRoute>
-								<UserManagement />
-							</AdminRoute>
-						}
-					/>
-					<Route
 						path="/tutor/users/section/:sectionId"
 						element={
 							<AdminRoute>
@@ -280,26 +247,10 @@ const App: React.FC = () => {
 						}
 					/>
 					<Route
-						path="/tutor/grades"
-						element={
-							<AdminRoute>
-								<GradeManagement />
-							</AdminRoute>
-						}
-					/>
-					<Route
 						path="/tutor/grades/section/:sectionId"
 						element={
 							<AdminRoute>
 								<GradeManagement />
-							</AdminRoute>
-						}
-					/>
-					<Route
-						path="/tutor/coding-tests"
-						element={
-							<AdminRoute>
-								<CodingTestManagement />
 							</AdminRoute>
 						}
 					/>
@@ -367,25 +318,7 @@ const App: React.FC = () => {
 							</AdminRoute>
 						}
 					/>
-					{/* 기존 /admin 라우트 리다이렉트 (하위 호환) */}
-					<Route
-						path="/admin"
-						element={
-							<AdminRoute>
-								<TutorDashboard />
-							</AdminRoute>
-						}
-					/>
-					<Route
-						path="/admin/*"
-						element={
-							<AdminRoute>
-								<TutorDashboard />
-							</AdminRoute>
-						}
-					/>
-
-					{/* 시스템 관리자 (super-admin) 라우트 */}
+					\{/* 시스템 관리자 (super-admin) 라우트 */}
 					<Route
 						path="/super-admin"
 						element={

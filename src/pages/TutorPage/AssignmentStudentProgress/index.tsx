@@ -180,6 +180,13 @@ const AssignmentStudentProgress: React.FC = () => {
 		else dialog.close();
 	}, [showDetailModal]);
 
+	// 문제별 제출 현황 카드 처음부터 모두 펼침
+	useEffect(() => {
+		if (problems.length > 0) {
+			setExpandedProblems(new Set(problems.map((p) => p.id)));
+		}
+	}, [problems]);
+
 	const getCompletionStatus = (student: StudentProgress): FilterStatus => {
 		const totalProblems = problems.length;
 		const solvedProblems = student.solvedProblems?.length || 0;

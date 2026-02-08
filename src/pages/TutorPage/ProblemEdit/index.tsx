@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { FaPalette, FaHighlighter } from "react-icons/fa";
 import TutorLayout from "../../../layouts/TutorLayout";
 import APIService from "../../../services/APIService";
@@ -61,9 +61,31 @@ function extractTextFromRTF(rtfContent: string): string {
 	return rtfContent;
 }
 
+type ProblemEditLocationState = {
+	fromAssignmentProblemList?: boolean;
+	sectionId?: string;
+	assignmentId?: number;
+} | null;
+
 const ProblemEdit: React.FC = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { problemId } = useParams<{ problemId: string }>();
+	const locationState = location.state as ProblemEditLocationState;
+
+	const getBackNavigation = () => {
+		if (
+			locationState?.fromAssignmentProblemList &&
+			locationState?.sectionId != null &&
+			locationState?.assignmentId != null
+		) {
+			return {
+				path: `/tutor/assignments/section/${locationState.sectionId}`,
+				state: { openProblemListForAssignmentId: locationState.assignmentId },
+			};
+		}
+		return { path: "/tutor/problems", state: undefined };
+	};
 	const [zipFile, setZipFile] = useState<File | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
@@ -617,7 +639,8 @@ const ProblemEdit: React.FC = () => {
 
 			await APIService.updateProblem(problemId, submitFormData);
 			alert("문제가 성공적으로 수정되었습니다.");
-			navigate("/tutor/problems");
+			const back = getBackNavigation();
+			navigate(back.path, { state: back.state });
 		} catch (err) {
 			console.error("문제 수정 실패:", err);
 			setError("문제 수정 중 오류가 발생했습니다.");
@@ -647,7 +670,10 @@ const ProblemEdit: React.FC = () => {
 					<S.PageTitle>문제 수정</S.PageTitle>
 					<S.BackButton
 						type="button"
-						onClick={() => navigate("/tutor/problems")}
+						onClick={() => {
+							const back = getBackNavigation();
+							navigate(back.path, { state: back.state });
+						}}
 						title="뒤로가기"
 					>
 						← 뒤로가기
@@ -1499,7 +1525,10 @@ const ProblemEdit: React.FC = () => {
 						<S.Actions>
 							<S.BackButton
 								type="button"
-								onClick={() => navigate("/tutor/problems")}
+								onClick={() => {
+									const back = getBackNavigation();
+									navigate(back.path, { state: back.state });
+								}}
 								disabled={submitting}
 								title="뒤로가기"
 							>

@@ -43,6 +43,7 @@ const ProblemListModal: React.FC<ProblemListModalProps> = ({
 	onSearchChange,
 	onProblemViewDetail,
 	onProblemUpdated,
+	onEditProblemNavigate,
 }) => {
 	const [editingProblemId, setEditingProblemId] = useState<number | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -704,7 +705,9 @@ const ProblemListModal: React.FC<ProblemListModalProps> = ({
 			onProblemDetail={onProblemDetail}
 			onProblemViewDetail={onProblemViewDetail}
 			onSearchChange={onSearchChange}
-			onEditProblem={(problemId) => setEditingProblemId(problemId)}
+			onEditProblem={
+				onEditProblemNavigate ?? ((problemId) => setEditingProblemId(problemId))
+			}
 		/>,
 		document.body,
 	);

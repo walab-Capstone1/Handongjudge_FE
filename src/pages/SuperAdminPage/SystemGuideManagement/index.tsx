@@ -4,7 +4,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import APIService from "../../../services/APIService";
 import Header from "../../../components/Header";
 import LoadingSpinner from "../../../components/LoadingSpinner";
-import * as S from "../../TutorPage/CourseManagement/styles";
+import * as S from "../../TutorPage/Tutordashboard/styles";
 import type { SystemGuide } from "./types";
 
 const SystemGuideManagement: React.FC = () => {

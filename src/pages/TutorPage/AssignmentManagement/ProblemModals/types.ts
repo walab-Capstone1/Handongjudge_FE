@@ -123,6 +123,8 @@ export interface ProblemListModalProps {
 	onProblemViewDetail?: (problemId: number) => void | Promise<void>;
 	onSearchChange: (value: string) => void;
 	onProblemUpdated?: () => void;
+	/** 수정 클릭 시 전체 문제 수정 페이지로 이동할 때 사용 (과제 관리에서 진입 시) */
+	onEditProblemNavigate?: (problemId: number) => void;
 }
 
 /** 목록 모드에서 보여줄 문제 타입 */

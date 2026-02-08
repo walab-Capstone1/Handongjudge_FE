@@ -1,77 +1,32 @@
-export interface Section {
-	sectionId: number;
-	courseTitle: string;
-	instructorName?: string;
-	year: number;
-	semester: string;
-	active: boolean;
-	studentCount?: number;
-	noticeCount?: number;
-	sectionNumber?: string;
+export interface Course {
+	id: number;
+	title: string;
+	description?: string;
+	semester?: string;
+	year?: number;
+	sections?: Section[];
 	createdAt?: string;
-	enrollmentCode?: string;
 }
 
-export interface UpcomingDeadline {
-	assignmentId: number;
-	title: string;
-	endDate: string;
-	submissionRate: number;
-	sectionId?: number;
-	sectionName?: string;
-}
-
-export interface SectionStat {
-	averageSubmissionRate: number;
-	atRiskStudents: number;
-	issues: number;
-	upcomingDeadlines: UpcomingDeadline[];
-	pendingGrading: number;
-	totalAssignments: number;
-	activeAssignments: number;
-}
-
-export interface FormData {
-	courseTitle: string;
-	description: string;
+export interface Section {
+	id: number;
 	sectionNumber: string;
-	year: number | string;
-	semester: string;
+	courseId: number;
+	courseTitle?: string;
+	enrollmentCode?: string;
+	maxStudents?: number;
+	currentStudents?: number;
 }
 
-export interface CopyFormData {
-	sourceSectionId: string;
-	courseTitle: string;
-	description: string;
-	year: number | string;
-	semester: string;
-	copyNotices: boolean;
-	copyAssignments: boolean;
-	selectedNoticeIds: number[];
-	selectedAssignmentIds: number[];
-	assignmentProblems: Record<number, number[]>;
-}
-
-export interface Notice {
-	id: number;
-	title: string;
-	content?: string;
-	createdAt: string;
-}
-
-export interface Problem {
-	id: number;
+export interface CreateCourseData {
 	title: string;
 	description?: string;
-	timeLimit?: number;
-	memoryLimit?: number;
+	semester: string;
+	year: number;
 }
 
-export interface Assignment {
-	id: number;
-	title: string;
-	description?: string;
-	endDate?: string;
-	active?: boolean;
-	problems: Problem[];
+export interface CreateSectionData {
+	courseId: number;
+	sectionNumber: string;
+	maxStudents?: number;
 }

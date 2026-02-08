@@ -95,16 +95,36 @@ export const SidebarScrollable = styled.div<{ $collapsed: boolean }>`
 `;
 
 export const SidebarHeader = styled.div<{ $collapsed: boolean }>`
-  padding: ${(props) => (props.$collapsed ? "1rem 0.5rem 0 0.5rem" : "1rem 1.5rem 0 1.5rem")};
+  min-height: 65px;
+  height: 65px;
+  padding: 0 ${(props) => (props.$collapsed ? "0.5rem" : "1.5rem")};
   margin: ${(props) => (props.$collapsed ? "0 0 0.5rem 0" : "0 -1.5rem 0.5rem -1.5rem")};
   border-bottom: none;
   display: flex;
-  align-items: ${(props) => (props.$collapsed ? "center" : "flex-end")};
-  justify-content: ${(props) => (props.$collapsed ? "center" : "flex-start")};
+  align-items: center;
+  justify-content: ${(props) => (props.$collapsed ? "center" : "space-between")};
   gap: 0.75rem;
   flex-shrink: 0;
   background: white !important;
   position: relative;
+  box-sizing: border-box;
+`;
+
+export const SidebarLogo = styled.img`
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+`;
+
+export const SidebarHeaderLeft = styled.div<{ $collapsed: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+  justify-content: ${(props) => (props.$collapsed ? "center" : "flex-start")};
 `;
 
 export const SidebarTitle = styled.h2<{ $collapsed: boolean }>`
@@ -120,7 +140,6 @@ export const SidebarTitle = styled.h2<{ $collapsed: boolean }>`
     width 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   width: ${(props) => (props.$collapsed ? 0 : "auto")};
-  flex: 1;
   position: ${(props) => (props.$collapsed ? "absolute" : "relative")};
   height: ${(props) => (props.$collapsed ? 0 : "auto")};
   padding: ${(props) => (props.$collapsed ? 0 : "inherit")};
@@ -130,9 +149,9 @@ export const SidebarToggleBtn = styled.button<{ $collapsed: boolean }>`
   background: transparent;
   border: none;
   border-radius: 6px;
-  width: ${(props) => (props.$collapsed ? "100%" : "2rem")};
-  height: 2.5rem;
-  min-height: 2.5rem;
+  width: ${(props) => (props.$collapsed ? "32px" : "2rem")};
+  height: 32px;
+  min-height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -142,10 +161,8 @@ export const SidebarToggleBtn = styled.button<{ $collapsed: boolean }>`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   font-weight: 600;
-  align-self: ${(props) => (props.$collapsed ? "center" : "flex-end")};
-  margin-bottom: 0;
-  margin: ${(props) => (props.$collapsed ? "0 auto" : "0")};
-  padding: ${(props) => (props.$collapsed ? "0.625rem 0" : "0")};
+  margin: 0;
+  padding: 0;
   position: relative;
 
   &:hover {

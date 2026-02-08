@@ -8,6 +8,7 @@ import CourseHeader from "../../components/CourseHeader";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import CourseCard from "../../components/CourseCard";
 import APIService from "../../services/APIService";
+import { FaGripLinesVertical, FaChevronLeft } from "react-icons/fa";
 import * as S from "./styles";
 import type {
 	SectionInfo,
@@ -536,7 +537,11 @@ const CourseDashboardPage: React.FC = () => {
 												key={course.id}
 												course={course}
 												onStatusUpdate={fetchDashboardData}
-												onEnroll={() => navigate(`/tutor/assignments/section/${course.sectionId}`)}
+												onEnroll={() =>
+													navigate(
+														`/tutor/assignments/section/${course.sectionId}`,
+													)
+												}
 											/>
 										))
 									) : (
@@ -698,8 +703,13 @@ const CourseDashboardPage: React.FC = () => {
 					<S.EnrollModal onClick={(e) => e.stopPropagation()}>
 						<S.EnrollModalHeader>
 							<h2>수업 참가</h2>
-							<S.EnrollModalClose onClick={() => setShowEnrollModal(false)}>
-								×
+							<S.EnrollModalClose
+								type="button"
+								onClick={() => setShowEnrollModal(false)}
+								aria-label="닫기"
+							>
+								<FaGripLinesVertical style={{ fontSize: "0.9rem" }} />
+								<FaChevronLeft style={{ fontSize: "0.65rem" }} />
 							</S.EnrollModalClose>
 						</S.EnrollModalHeader>
 						<S.EnrollModalBody>

@@ -460,15 +460,18 @@ export const EnrollModalHeader = styled.div`
 export const EnrollModalClose = styled.button`
   background: transparent;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1rem;
   color: #6b7280;
   cursor: pointer;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
+  padding: 4px;
+  min-width: 32px;
+  min-height: 32px;
+  width: auto;
+  height: auto;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
 
   &:hover {
     color: #374151;
