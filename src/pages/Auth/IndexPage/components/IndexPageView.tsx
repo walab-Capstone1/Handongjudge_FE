@@ -23,7 +23,7 @@ export default function IndexPageView(d: IndexPageHookReturn) {
 				<S.HeroSection>
 					<S.HeroContentWrapper>
 						<S.HeroContent>
-							<S.HeroTitle>Code Sturdy</S.HeroTitle>
+							<S.HeroTitle>H-CodeLab</S.HeroTitle>
 							<S.HeroDescription>
 								Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut sit
 								amet risus nisi, integer firibus faucibus pours. Maecenas

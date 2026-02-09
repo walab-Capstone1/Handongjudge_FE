@@ -308,7 +308,7 @@ export const ModalHeader = styled.div`
 	align-items: center;
 	padding: 1.75rem 2rem;
 	border-bottom: 1px solid #e5e7eb;
-	background: #f9fafb;
+	background: #667eea;
 	color: #1e293b;
 
 	h2 {

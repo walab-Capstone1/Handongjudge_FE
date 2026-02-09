@@ -82,12 +82,24 @@ export const SearchInput = styled.input`
 /* 모달 열림 시 search input focus 스타일 무시 */
 export const Filters = styled.div`
   display: flex;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+`;
+
+export const CurrentRoleBadge = styled.span<{ $role: "ADMIN" | "TUTOR" }>`
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  background: ${(p) => (p.$role === "ADMIN" ? "#e17055" : "#667eea")};
 `;
 
 export const Select = styled.select<{ $inHeader?: boolean }>`

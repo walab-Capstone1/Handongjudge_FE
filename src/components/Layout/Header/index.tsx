@@ -36,9 +36,9 @@ const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
 			<S.HeaderWrapper>
 				<S.Logo onClick={handleLogoClick}>
 					<S.LogoIcon>
-						<img src="/logo.svg" alt="CodeSturdy Logo" />
+						<img src="/logo.svg" alt="H-CodeLab Logo" />
 					</S.LogoIcon>
-					<S.LogoText>CodeSturdy</S.LogoText>
+					<S.LogoText>H-CodeLab</S.LogoText>
 				</S.Logo>
 				<S.HeaderLinks>
 					{isAuthenticated ? (

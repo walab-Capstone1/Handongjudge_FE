@@ -386,18 +386,18 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 				icon: FaChartBar,
 				subItems: [],
 			},
-			{
-				path: `/tutor/notifications/section/${currentSection.sectionId}`,
-				label: "수업 알림",
-				icon: FaBell,
-				subItems: [],
-			},
-			{
-				path: `/tutor/stats/section/${currentSection.sectionId}`,
-				label: "수업 통계",
-				icon: FaChartBar,
-				subItems: [],
-			},
+			// {
+			// 	path: `/tutor/notifications/section/${currentSection.sectionId}`,
+			// 	label: "수업 알림",
+			// 	icon: FaBell,
+			// 	subItems: [],
+			// },
+			// {
+			// 	path: `/tutor/stats/section/${currentSection.sectionId}`,
+			// 	label: "수업 통계",
+			// 	icon: FaChartBar,
+			// 	subItems: [],
+			// },
 		];
 
 		return baseMenus;

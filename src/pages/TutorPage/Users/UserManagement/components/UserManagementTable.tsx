@@ -18,7 +18,6 @@ interface UserManagementTableProps {
 	onSort: (field: SortField) => void;
 	onPageChange: (page: number) => void;
 	onItemsPerPageChange: (n: number) => void;
-	onStudentDetail: (student: Student) => void;
 	onAddTutor: (userId: number) => void;
 	onRemoveTutor: (userId: number) => void;
 	getSortIcon: (field: SortField) => React.ReactNode;
@@ -39,7 +38,6 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
 	onSort,
 	onPageChange,
 	onItemsPerPageChange,
-	onStudentDetail,
 	onAddTutor,
 	onRemoveTutor,
 	getSortIcon,
@@ -56,6 +54,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
 									{getSortIcon("name")}
 								</S.ThContent>
 							</S.Th>
+							<S.Th>학번</S.Th>
 							<S.Th className="sortable" onClick={() => onSort("email")}>
 								<S.ThContent>
 									이메일
@@ -65,19 +64,14 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
 							{!sectionId && <S.Th>과목</S.Th>}
 							{!sectionId && <S.Th>분반</S.Th>}
 							{sectionId && <S.Th>역할</S.Th>}
-							<S.Th className="sortable" onClick={() => onSort("progress")}>
-								<S.ThContent>
-									전체 과제 진도율
-									{getSortIcon("progress")}
-								</S.ThContent>
-							</S.Th>
 							<S.Th style={{ textAlign: "right" }}>작업</S.Th>
 						</tr>
 					</thead>
 					<tbody>
 						{paginatedStudents.map((student) => {
+							// API에서 내려준 role 우선, 없으면 기존 userRoles 사용
 							const userRole = sectionId
-								? userRoles[student.userId] || "STUDENT"
+								? (student.role ?? userRoles[student.userId] ?? "STUDENT")
 								: null;
 							const isAdmin = currentUserRole === "ADMIN";
 							const isTutor = userRole === "TUTOR";
@@ -86,6 +80,7 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
 							return (
 								<tr key={student.userId}>
 									<S.NameCell>{student.name}</S.NameCell>
+									<S.Td>{student.studentId ?? "-"}</S.Td>
 									<S.EmailCell>{student.email}</S.EmailCell>
 									{!sectionId && (
 										<S.CourseCell>{student.courseTitle}</S.CourseCell>
@@ -121,30 +116,8 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
 											</S.Badge>
 										</S.Td>
 									)}
-									<S.ProgressCell>
-										<S.ProgressInfo>
-											<S.ProgressBarContainer>
-												<S.ProgressBarFill
-													style={{
-														width: `${student.assignmentCompletionRate || 0}%`,
-													}}
-												/>
-											</S.ProgressBarContainer>
-											<S.ProgressText>
-												{student.assignmentCompletionRate
-													? `${student.assignmentCompletionRate.toFixed(1)}%`
-													: "0%"}
-											</S.ProgressText>
-										</S.ProgressInfo>
-									</S.ProgressCell>
 									<S.ActionsCellTd>
 										<S.ActionsCell>
-											<S.ActionButton
-												onClick={() => onStudentDetail(student)}
-												title="상세 보기"
-											>
-												상세 보기
-											</S.ActionButton>
 											{sectionId && isAdmin && (
 												<>
 													{isStudent && (

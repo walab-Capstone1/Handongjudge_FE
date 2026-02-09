@@ -108,7 +108,7 @@ export default function ProblemSetManagementView(
 					<S.ModalOverlay onClick={() => !d.isCreating && d.closeCreateModal()}>
 						<S.ModalContent onClick={(e) => e.stopPropagation()}>
 							<S.ModalHeader>
-								<h2>새 문제집 만들기</h2>
+								<h2 style={{ color: "white" }}>새 문제집 만들기</h2>
 								<S.ModalClose
 									type="button"
 									onClick={() => !d.isCreating && d.closeCreateModal()}

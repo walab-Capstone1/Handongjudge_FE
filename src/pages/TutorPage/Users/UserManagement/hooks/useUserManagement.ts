@@ -4,8 +4,6 @@ import APIService from "../../../../../services/APIService";
 import type {
 	Student,
 	SectionInfo,
-	Assignment,
-	ProblemStatus,
 	SortField,
 	SortDirection,
 	RoleFilter,
@@ -30,17 +28,6 @@ export function useUserManagement() {
 	const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
 	const [sortField, setSortField] = useState<SortField>("name");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-	const [showDetailModal, setShowDetailModal] = useState(false);
-	const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-	const [studentAssignments, setStudentAssignments] = useState<Assignment[]>(
-		[],
-	);
-	const [expandedAssignment, setExpandedAssignment] = useState<number | null>(
-		null,
-	);
-	const [assignmentProblemsDetail, setAssignmentProblemsDetail] = useState<
-		Record<number, ProblemStatus[]>
-	>({});
 
 	const fetchUserRoles = useCallback(
 		async (sid: number, studentsData: Student[]) => {
@@ -159,61 +146,6 @@ export function useUserManagement() {
 		[sectionId, fetchStudents],
 	);
 
-	const handleStudentDetailView = useCallback(async (student: Student) => {
-		setSelectedStudent(student);
-		setShowDetailModal(true);
-		try {
-			const response = await APIService.getStudentAssignmentsProgress(
-				student.userId,
-				student.sectionId,
-			);
-			const progressData = response?.data || response;
-			setStudentAssignments(progressData || []);
-		} catch (error) {
-			console.error("학생 과제 정보 조회 실패:", error);
-			setStudentAssignments([]);
-		}
-	}, []);
-
-	const handleToggleAssignmentDetail = useCallback(
-		async (assignmentId: number) => {
-			if (expandedAssignment === assignmentId) {
-				setExpandedAssignment(null);
-				return;
-			}
-			setExpandedAssignment(assignmentId);
-			if (assignmentProblemsDetail[assignmentId]) return;
-			if (!selectedStudent) return;
-			try {
-				const response = await APIService.getStudentAssignmentProblemsStatus(
-					selectedStudent.userId,
-					selectedStudent.sectionId,
-					assignmentId,
-				);
-				const problemsData = response?.data || response;
-				setAssignmentProblemsDetail((prev) => ({
-					...prev,
-					[assignmentId]: problemsData || [],
-				}));
-			} catch (error) {
-				console.error("과제 문제 상태 조회 실패:", error);
-				setAssignmentProblemsDetail((prev) => ({
-					...prev,
-					[assignmentId]: [],
-				}));
-			}
-		},
-		[expandedAssignment, assignmentProblemsDetail, selectedStudent],
-	);
-
-	const handleCloseDetailModal = useCallback(() => {
-		setShowDetailModal(false);
-		setSelectedStudent(null);
-		setStudentAssignments([]);
-		setExpandedAssignment(null);
-		setAssignmentProblemsDetail({});
-	}, []);
-
 	const filteredStudents = students.filter((student) => {
 		const matchesSearch =
 			student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -265,10 +197,6 @@ export function useUserManagement() {
 			case "email":
 				aValue = a.email || "";
 				bValue = b.email || "";
-				break;
-			case "progress":
-				aValue = a.assignmentCompletionRate ?? 0;
-				bValue = b.assignmentCompletionRate ?? 0;
 				break;
 			case "joinedAt":
 				aValue = a.joinedAt ? new Date(a.joinedAt).getTime() : 0;
@@ -328,11 +256,6 @@ export function useUserManagement() {
 		currentUserRole,
 		sortField,
 		sortDirection,
-		showDetailModal,
-		selectedStudent,
-		studentAssignments,
-		expandedAssignment,
-		assignmentProblemsDetail,
 		paginatedStudents,
 		sortedStudents,
 		totalPages,
@@ -340,9 +263,6 @@ export function useUserManagement() {
 		getSectionDisplayName,
 		fetchStudents,
 		handleSort,
-		handleStudentDetailView,
-		handleToggleAssignmentDetail,
-		handleCloseDetailModal,
 		handleAddTutor,
 		handleRemoveTutor,
 	};
