@@ -68,3 +68,32 @@ export const extractEnrollmentCode = (input: string): string => {
 
 	return trimmed;
 };
+
+/**
+ * 관리 중인 수업 API 응답을 CourseCardData로 변환
+ */
+export function transformManagingSection(section: {
+	sectionId: number;
+	sectionInfo?: {
+		courseTitle?: string;
+		sectionNumber?: string | number;
+		instructorName?: string;
+		active?: boolean;
+		courseId?: string;
+	};
+}): CourseCardData {
+	return {
+		id: section.sectionId,
+		sectionId: section.sectionId,
+		title: section.sectionInfo?.courseTitle ?? "",
+		subtitle: `${section.sectionInfo?.sectionNumber ?? ""}분반`,
+		batch: `${section.sectionInfo?.sectionNumber ?? ""}분반`,
+		courseName: `[${section.sectionInfo?.courseTitle ?? ""}]`,
+		status: [],
+		instructor: section.sectionInfo?.instructorName ?? "",
+		color: getRandomColor(section.sectionId),
+		active: section.sectionInfo?.active !== false,
+		createdAt: new Date().toISOString(),
+		courseId: section.sectionInfo?.courseId ?? "",
+	};
+}

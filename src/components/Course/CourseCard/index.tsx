@@ -29,6 +29,8 @@ interface CourseCardProps {
 	onStatusUpdate?: () => void;
 	showEnrollButton?: boolean;
 	onEnroll?: () => void;
+	/** true면 분반 배지 숨김 (예: /courses 참여한 수업 목록) */
+	hideBatch?: boolean;
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({
@@ -36,6 +38,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 	onStatusUpdate,
 	showEnrollButton = false,
 	onEnroll,
+	hideBatch = false,
 }) => {
 	const navigate = useNavigate();
 
@@ -128,7 +131,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 				<S.CardTitle>
 					<h3>{course.title}</h3>
 				</S.CardTitle>
-				{course.batch && <S.BatchBadge>{course.batch}</S.BatchBadge>}
+				{!hideBatch && course.batch && <S.BatchBadge>{course.batch}</S.BatchBadge>}
 			</S.CardHeader>
 
 			<S.CardContent>
