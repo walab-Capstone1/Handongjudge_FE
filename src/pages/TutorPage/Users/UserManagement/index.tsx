@@ -5,7 +5,6 @@ import { useUserManagement } from "./hooks/useUserManagement";
 import UserManagementHeader from "./components/UserManagementHeader";
 import UserManagementFilters from "./components/UserManagementFilters";
 import UserManagementTable from "./components/UserManagementTable";
-import StudentDetailModal from "./components/StudentDetailModal";
 import * as S from "./styles";
 import type { SortField } from "./types";
 
@@ -30,23 +29,15 @@ const UserManagement: FC = () => {
 		currentUserRole,
 		sortField,
 		sortDirection,
-		studentAssignments,
-		expandedAssignment,
-		assignmentProblemsDetail,
 		paginatedStudents,
 		totalPages,
 		uniqueSections,
 		getSectionDisplayName,
 		handleSort,
-		handleStudentDetailView,
-		handleToggleAssignmentDetail,
-		handleCloseDetailModal,
 		handleAddTutor,
 		handleRemoveTutor,
 	} = data;
 	const sortedStudents = data.sortedStudents;
-	const showDetailModal = data.showDetailModal;
-	const selectedStudent = data.selectedStudent;
 
 	const getSortIcon = (field: SortField) => {
 		if (sortField !== field) {
@@ -98,6 +89,7 @@ const UserManagement: FC = () => {
 					onSearchChange={setSearchTerm}
 					filterRole={filterRole}
 					onFilterRoleChange={setFilterRole}
+					currentUserRole={currentUserRole}
 				/>
 			)}
 			<UserManagementTable
@@ -115,18 +107,9 @@ const UserManagement: FC = () => {
 				onSort={handleSort}
 				onPageChange={setCurrentPage}
 				onItemsPerPageChange={setItemsPerPage}
-				onStudentDetail={handleStudentDetailView}
 				onAddTutor={handleAddTutor}
 				onRemoveTutor={handleRemoveTutor}
 				getSortIcon={getSortIcon}
-			/>
-			<StudentDetailModal
-				open={showDetailModal && selectedStudent !== null}
-				onClose={handleCloseDetailModal}
-				studentAssignments={studentAssignments}
-				expandedAssignment={expandedAssignment}
-				assignmentProblemsDetail={assignmentProblemsDetail}
-				onToggleAssignmentDetail={handleToggleAssignmentDetail}
 			/>
 		</TutorLayout>
 	);

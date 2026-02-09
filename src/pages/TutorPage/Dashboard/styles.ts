@@ -549,7 +549,8 @@ export const ModalHeader = styled.div`
   align-items: center;
   padding: 1.75rem 2rem;
   border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
+  /* linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
   color: white;
 
   h2 {

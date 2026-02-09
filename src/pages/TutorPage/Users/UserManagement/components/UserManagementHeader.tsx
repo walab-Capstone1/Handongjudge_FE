@@ -23,7 +23,7 @@ const UserManagementHeader: React.FC<UserManagementHeaderProps> = ({
 				<S.SearchBox>
 					<S.SearchInput
 						type="text"
-						placeholder="이름, 이메일, 팀ID로 검색..."
+						placeholder="이름, 이메일로 검색..."
 						value={searchTerm}
 						onChange={(e) => onSearchChange(e.target.value)}
 					/>

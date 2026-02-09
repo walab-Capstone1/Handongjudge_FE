@@ -51,9 +51,9 @@ const Navbar: React.FC = () => {
 					<S.LogoLink to="/index">
 						<S.LogoImage
 							src={`${process.env.PUBLIC_URL || ""}/logo.svg`}
-							alt="CodeSturdy"
+							alt="H-CodeLab"
 						/>
-						<span>CodeSturdy</span>
+						<span>H-CodeLab</span>
 					</S.LogoLink>
 					<S.NavLink to="/index">강의</S.NavLink>
 					{!checking && hasManagingSections && (

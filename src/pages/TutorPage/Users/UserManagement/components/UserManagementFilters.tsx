@@ -7,6 +7,8 @@ interface UserManagementFiltersProps {
 	onSearchChange: (value: string) => void;
 	filterRole: RoleFilter;
 	onFilterRoleChange: (value: RoleFilter) => void;
+	/** 현재 로그인한 사용자의 이 수업 내 역할 (관리자/튜터일 때만 표시) */
+	currentUserRole: string | null;
 }
 
 const UserManagementFilters: React.FC<UserManagementFiltersProps> = ({
@@ -14,13 +16,14 @@ const UserManagementFilters: React.FC<UserManagementFiltersProps> = ({
 	onSearchChange,
 	filterRole,
 	onFilterRoleChange,
+	currentUserRole,
 }) => (
 	<S.Container>
 		<S.Filters>
 			<S.SearchBox>
 				<S.SearchInput
 					type="text"
-					placeholder="이름, 이메일, 팀ID로 검색..."
+					placeholder="이름, 이메일로 검색..."
 					value={searchTerm}
 					onChange={(e) => onSearchChange(e.target.value)}
 				/>
@@ -34,6 +37,12 @@ const UserManagementFilters: React.FC<UserManagementFiltersProps> = ({
 				<option value="TUTOR">튜터</option>
 				<option value="ADMIN">관리자</option>
 			</S.Select>
+			{currentUserRole === "ADMIN" && (
+				<S.CurrentRoleBadge $role="ADMIN">현재 권한: 관리자</S.CurrentRoleBadge>
+			)}
+			{currentUserRole === "TUTOR" && (
+				<S.CurrentRoleBadge $role="TUTOR">현재 권한: 튜터</S.CurrentRoleBadge>
+			)}
 		</S.Filters>
 	</S.Container>
 );

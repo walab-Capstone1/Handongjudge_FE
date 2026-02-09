@@ -17,9 +17,9 @@ export default function LoginPageView(d: LoginPageHookReturn) {
 				<S.Logo>
 					<S.LogoImage
 						src={`${process.env.PUBLIC_URL || ""}/logo.svg`}
-						alt="CodeSturdy"
+						alt="H-CodeLab"
 					/>
-					<span>CodeSturdy</span>
+					<span>H-CodeLab</span>
 				</S.Logo>
 				<S.EnterpriseLink>기업서비스</S.EnterpriseLink>
 			</S.Header>
@@ -27,7 +27,7 @@ export default function LoginPageView(d: LoginPageHookReturn) {
 			<S.MainContent>
 				<S.LeftSection>
 					<S.WelcomeText>
-						반가워요, 개발자의 성장을 돕는 CodeSturdy입니다.
+						반가워요, 개발자의 성장을 돕는 H-CodeLab입니다.
 					</S.WelcomeText>
 					<S.Illustrations>
 						<S.IllustrationItem>
@@ -50,7 +50,7 @@ export default function LoginPageView(d: LoginPageHookReturn) {
 
 				<S.RightSection>
 					<S.LoginCard>
-						<S.LoginTitle>CodeSturdy 로그인</S.LoginTitle>
+						<S.LoginTitle>H-CodeLab 로그인</S.LoginTitle>
 						{(d.loginMessage || d.pendingEnrollmentCode) && (
 							<S.LoginMessage>
 								{d.loginMessage || "수업 참가를 위해 로그인이 필요합니다."}
