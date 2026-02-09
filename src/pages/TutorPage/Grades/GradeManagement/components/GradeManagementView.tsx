@@ -62,6 +62,9 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		handleViewCode,
 		handleSaveGradeForAssignment,
 		handleViewCodeForAssignment,
+		handleSaveGradeForQuiz,
+		handleSaveGradeForQuizCourse,
+		handleViewCodeForQuiz,
 		handleExportCSV,
 		handleShowBulkModal,
 		handleBulkSave,
@@ -153,6 +156,15 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						courseLoading={courseLoading}
 						courseGrades={courseGrades}
 						filteredCourseStudents={filteredCourseStudents}
+						editingGrade={editingGrade}
+						setEditingGrade={setEditingGrade}
+						gradeInputs={gradeInputs}
+						setGradeInputs={setGradeInputs}
+						comments={comments}
+						onSaveGrade={handleSaveGradeForAssignment}
+						onViewCode={handleViewCodeForAssignment}
+						onSaveGradeForQuiz={handleSaveGradeForQuizCourse}
+						onViewCodeForQuiz={handleViewCodeForQuiz}
 					/>
 				) : viewMode === "assignment" && !selectedAssignment ? (
 					<GradeManagementCourseTable
@@ -172,12 +184,31 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						courseLoading={courseLoading}
 						courseGrades={quizOnlyGrades}
 						filteredCourseStudents={filteredCourseStudents}
+						editingGrade={editingGrade}
+						setEditingGrade={setEditingGrade}
+						gradeInputs={gradeInputs}
+						setGradeInputs={setGradeInputs}
+						comments={comments}
+						onSaveGradeForQuiz={handleSaveGradeForQuizCourse}
+						onViewCodeForQuiz={handleViewCodeForQuiz}
 					/>
 				) : selectedQuiz && viewMode === "quiz" && grades.length > 0 ? (
 					<GradeManagementQuizTable
 						grades={grades}
 						filteredGrades={filteredGrades}
 						selectedQuiz={selectedQuiz}
+						editingGrade={editingGrade}
+						setEditingGrade={setEditingGrade}
+						gradeInputs={gradeInputs}
+						setGradeInputs={setGradeInputs}
+						comments={comments}
+						handleSaveGrade={handleSaveGradeForQuiz}
+						handleViewCode={
+							selectedQuiz
+								? (userId, problemId) =>
+										handleViewCodeForQuiz(selectedQuiz.id, userId, problemId)
+								: undefined
+						}
 					/>
 				) : selectedQuiz && viewMode === "quiz" ? (
 					<S.CourseTableContainer>
@@ -247,6 +278,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					hasAssignments={assignments.length > 0}
 					hasQuizzes={quizzes.length > 0}
 					selectedAssignment={selectedAssignment}
+					selectedQuiz={selectedQuiz}
 					loadingProblems={loadingProblems}
 					allAssignmentProblems={allAssignmentProblems}
 					allQuizProblems={allQuizProblems}

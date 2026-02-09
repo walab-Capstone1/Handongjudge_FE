@@ -184,10 +184,7 @@ export default function GradeManagementAssignmentTable({
 												) : (
 													<S.ScoreDisplay>
 														<S.ScoreValue>
-															{problem.score !== null &&
-															problem.score !== undefined
-																? `${problem.score} / ${problem.points ?? 0}`
-																: "-"}
+															{`${problem.score ?? 0} / ${problem.points ?? 0}`}
 														</S.ScoreValue>
 														<S.ScoreActions>
 															<button

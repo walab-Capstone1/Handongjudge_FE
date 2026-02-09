@@ -38,6 +38,19 @@ export interface GradeManagementCourseTableProps {
 		userId: number,
 		problemId: number,
 	) => void;
+	/** 수업 전체 보기 / 전체 퀴즈 보기에서 퀴즈 셀 편집·코드 보기 */
+	onSaveGradeForQuiz?: (
+		quizId: number,
+		userId: number,
+		problemId: number,
+		score: number | "",
+		comment: string,
+	) => void;
+	onViewCodeForQuiz?: (
+		quizId: number,
+		userId: number,
+		problemId: number,
+	) => void;
 }
 
 export default function GradeManagementCourseTable({
@@ -51,9 +64,17 @@ export default function GradeManagementCourseTable({
 	comments = {},
 	onSaveGrade,
 	onViewCode,
+	onSaveGradeForQuiz,
+	onViewCodeForQuiz,
 }: GradeManagementCourseTableProps) {
 	const hasAssignmentActions = Boolean(
 		onSaveGrade && onViewCode && setEditingGrade && setGradeInputs,
+	);
+	const hasQuizActions = Boolean(
+		onSaveGradeForQuiz &&
+			onViewCodeForQuiz &&
+			setEditingGrade &&
+			setGradeInputs,
 	);
 	return (
 		<S.CourseTableContainer>
@@ -258,9 +279,7 @@ export default function GradeManagementCourseTable({
 																) : (
 																	<S.ScoreDisplay>
 																		<S.ScoreValue>
-																			{score !== null
-																				? `${score} / ${problem.points ?? 0}`
-																				: "-"}
+																			{`${score ?? 0} / ${problem.points ?? 0}`}
 																		</S.ScoreValue>
 																		{hasAssignmentActions && (
 																			<S.ScoreActions>
@@ -366,52 +385,151 @@ export default function GradeManagementCourseTable({
 														problemGrade?.score !== undefined
 															? problemGrade.score
 															: null;
+													const quizCellKey = `quiz-${item.id}-${student.userId}-${problem.problemId}`;
+													const isEditingQuiz =
+														hasQuizActions &&
+														editingGrade?.userId === student.userId &&
+														editingGrade?.problemId === problem.problemId &&
+														editingGrade?.quizId === item.id;
+													const currentScore =
+														gradeInputs[quizCellKey] !== undefined
+															? gradeInputs[quizCellKey]
+															: score !== null
+																? score
+																: "";
+													const currentComment = comments[quizCellKey] ?? "";
 													return (
 														<S.TdCourseProblemCell
 															key={`${student.userId}-quiz-${item.id}-${problem.problemId}`}
 														>
-															<S.ScoreDisplay>
-																<S.ScoreValue>
-																	{score !== null
-																		? `${score} / ${problem.points ?? 0}`
-																		: "-"}
-																</S.ScoreValue>
-																{(problemGrade?.submitted || item.dueAt) && (
-																	<S.SubmissionInfo>
-																		{problemGrade?.submitted && (
-																			<S.SubmissionStatus
-																				$onTime={problemGrade.isOnTime}
+															{hasQuizActions && isEditingQuiz ? (
+																<S.EditForm>
+																	<input
+																		type="number"
+																		min={0}
+																		max={problem.points ?? 100}
+																		value={currentScore}
+																		onChange={(e) => {
+																			const v =
+																				e.target.value === ""
+																					? ""
+																					: Number(e.target.value);
+																			setGradeInputs?.((prev) => ({
+																				...prev,
+																				[quizCellKey]: v,
+																			}));
+																		}}
+																		placeholder="점수"
+																	/>
+																	<S.EditActions>
+																		<button
+																			type="button"
+																			onClick={() =>
+																				onSaveGradeForQuiz?.(
+																					item.id,
+																					student.userId,
+																					problem.problemId,
+																					currentScore,
+																					currentComment,
+																				)
+																			}
+																		>
+																			저장
+																		</button>
+																		<button
+																			type="button"
+																			onClick={() => {
+																				setEditingGrade?.(null);
+																				setGradeInputs?.((prev) => {
+																					const next = { ...prev };
+																					delete next[quizCellKey];
+																					return next;
+																				});
+																			}}
+																		>
+																			취소
+																		</button>
+																	</S.EditActions>
+																</S.EditForm>
+															) : (
+																<S.ScoreDisplay>
+																	<S.ScoreValue>
+																		{`${score ?? 0} / ${problem.points ?? 0}`}
+																	</S.ScoreValue>
+																	{hasQuizActions && (
+																		<S.ScoreActions>
+																			<button
+																				type="button"
+																				onClick={() => {
+																					setEditingGrade?.({
+																						userId: student.userId,
+																						problemId: problem.problemId,
+																						quizId: item.id,
+																					});
+																					setGradeInputs?.((prev) => ({
+																						...prev,
+																						[quizCellKey]:
+																							score !== null ? score : "",
+																					}));
+																				}}
+																				title="점수 입력/수정"
 																			>
-																				{problemGrade.isOnTime ? (
-																					<>
-																						<FaCheckCircle /> 정시 제출
-																					</>
-																				) : (
-																					<>
-																						<FaTimesCircle /> 기한 초과
-																					</>
-																				)}
-																			</S.SubmissionStatus>
-																		)}
-																		{item.dueAt && (
-																			<S.SubmissionDue>
-																				<FaCalendarAlt /> 제출 기한:{" "}
-																				{new Date(item.dueAt).toLocaleString(
-																					"ko-KR",
-																				)}
-																			</S.SubmissionDue>
-																		)}
-																		{problemGrade?.submittedAt && (
-																			<S.SubmissionTime>
-																				<FaClock /> 제출 시간:{" "}
-																				{new Date(
-																					problemGrade.submittedAt,
-																				).toLocaleString("ko-KR")}
-																			</S.SubmissionTime>
-																		)}
-																	</S.SubmissionInfo>
-																)}
-															</S.ScoreDisplay>
+																				<FaEdit />
+																			</button>
+																			{problemGrade?.submitted && (
+																				<button
+																					type="button"
+																					onClick={() =>
+																						onViewCodeForQuiz?.(
+																							item.id,
+																							student.userId,
+																							problem.problemId,
+																						)
+																					}
+																					title="코드 조회"
+																				>
+																					<FaCode />
+																				</button>
+																			)}
+																		</S.ScoreActions>
+																	)}
+																	{(problemGrade?.submitted || item.dueAt) && (
+																		<S.SubmissionInfo>
+																			{problemGrade?.submitted && (
+																				<S.SubmissionStatus
+																					$onTime={problemGrade.isOnTime}
+																				>
+																					{problemGrade.isOnTime ? (
+																						<>
+																							<FaCheckCircle /> 정시 제출
+																						</>
+																					) : (
+																						<>
+																							<FaTimesCircle /> 기한 초과
+																						</>
+																					)}
+																				</S.SubmissionStatus>
+																			)}
+																			{item.dueAt && (
+																				<S.SubmissionDue>
+																					<FaCalendarAlt /> 제출 기한:{" "}
+																					{new Date(item.dueAt).toLocaleString(
+																						"ko-KR",
+																					)}
+																				</S.SubmissionDue>
+																			)}
+																			{problemGrade?.submittedAt && (
+																				<S.SubmissionTime>
+																					<FaClock /> 제출 시간:{" "}
+																					{new Date(
+																						problemGrade.submittedAt,
+																					).toLocaleString("ko-KR")}
+																				</S.SubmissionTime>
+																			)}
+																		</S.SubmissionInfo>
+																	)}
+																</S.ScoreDisplay>
+															)}
 														</S.TdCourseProblemCell>
 													);
 												})}
