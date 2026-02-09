@@ -1,51 +1,52 @@
 import type React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { RecoilRoot } from "recoil";
-import AdminRoute from "./components/AdminRoute";
-import SuperAdminRoute from "./components/SuperAdminRoute";
-// 공통 / 로그인
-import IndexPage from "./pages/IndexPage";
-import LoginPage from "./pages/LoginPage";
-import AuthCallback from "./pages/login/AuthCallback";
-import SignUpPageSocial from "./pages/SignUpPageSocial";
-import SignupEmailPage from "./pages/SignupEmailPage";
-import EnrollPage from "./pages/EnrollPage";
-// 수강 / 강의
-import ClassPage from "./pages/ClassPage";
-import CourseDashboardPage from "./pages/CourseDashboardPage";
-import CourseAssignmentsPage from "./pages/CourseAssignmentsPage";
-import CourseNoticesPage from "./pages/CourseNoticesPage";
-import CourseNoticeDetailPage from "./pages/CourseNoticeDetailPage";
-import CourseNotificationsPage from "./pages/CourseNotificationsPage";
-import CourseCommunityPage from "./pages/CourseCommunityPage";
-import QuestionCreatePage from "./pages/QuestionCreatePage";
-import QuestionDetailPage from "./pages/QuestionDetailPage";
-import QuestionEditPage from "./pages/QuestionEditPage";
-import CodingQuizPage from "./pages/CodingQuizPage";
-import CodingQuizSolvePage from "./pages/CodingQuizSolvePage";
+import AdminRoute from "./components/Route/AdminRoute";
+import SuperAdminRoute from "./components/Route/SuperAdminRoute";
+// Auth (공통 / 로그인)
+import IndexPage from "./pages/Auth/IndexPage";
+import LoginPage from "./pages/Auth/LoginPage";
+import AuthCallback from "./pages/Auth/AuthCallback";
+import SignUpPageSocial from "./pages/Auth/SignUpPageSocial";
+import SignupEmailPage from "./pages/Auth/SignupEmailPage";
+import EnrollPage from "./pages/Auth/EnrollPage";
+// Course (수강 / 강의)
+import ClassPage from "./pages/Course/ClassPage";
+import CourseDashboardPage from "./pages/Course/Dashboard/CourseDashboardPage";
+import CourseAssignmentsPage from "./pages/Course/Assignments/CourseAssignmentsPage";
+import CourseNoticesPage from "./pages/Course/Notices/CourseNoticesPage";
+import CourseNoticeDetailPage from "./pages/Course/Notices/CourseNoticeDetailPage";
+import CourseNotificationsPage from "./pages/Course/Notifications/CourseNotificationsPage";
+import CourseCommunityPage from "./pages/Course/Community/CourseCommunityPage";
+import QuestionCreatePage from "./pages/Course/Community/QuestionCreatePage";
+import QuestionDetailPage from "./pages/Course/Community/QuestionDetailPage";
+import QuestionEditPage from "./pages/Course/Community/QuestionEditPage";
+import CodingQuizPage from "./pages/Course/CodingQuiz/CodingQuizPage";
+import CodingQuizSolvePage from "./pages/Course/CodingQuiz/CodingQuizSolvePage";
 
 // 과제
 
 import ProblemSolvePage from "./pages/AssignmentPage/ProblemSolvePage";
 
-import CourseManagement from "./pages/TutorPage/TutorDashboard";
-import AssignmentManagement from "./pages/TutorPage/AssignmentManagement";
-import AssignmentCreatePage from "./pages/TutorPage/AssignmentCreatePage";
-import AssignmentEditPage from "./pages/TutorPage/AssignmentEditPage";
-import AssignmentStudentProgress from "./pages/TutorPage/AssignmentStudentProgress";
-import UserManagement from "./pages/TutorPage/UserManagement";
-import GradeManagement from "./pages/TutorPage/GradeManagement";
-import NoticeManagementPage from "./pages/TutorPage/NoticeManagementPage";
-import NoticeCreatePage from "./pages/TutorPage/NoticeCreatePage";
-import NoticeEditPage from "./pages/TutorPage/NoticeEditPage";
-import CourseNotificationManagement from "./pages/TutorPage/CourseNotificationManagement";
-import ProblemManagement from "./pages/TutorPage/ProblemManagement";
-import ProblemSetManagement from "./pages/TutorPage/ProblemSetManagement";
-import ProblemSetEdit from "./pages/TutorPage/ProblemSetEdit";
-import ProblemCreate from "./pages/TutorPage/ProblemCreate";
-import ProblemEdit from "./pages/TutorPage/ProblemEdit";
-import SettingsPage from "./pages/TutorPage/SettingsPage";
-import CodingTestManagement from "./pages/TutorPage/CodingTestManagement";
+// Tutor (수업관리자)
+import CourseManagement from "./pages/TutorPage/Dashboard";
+import AssignmentManagement from "./pages/TutorPage/Assignments/AssignmentManagement";
+import AssignmentCreatePage from "./pages/TutorPage/Assignments/AssignmentCreatePage";
+import AssignmentEditPage from "./pages/TutorPage/Assignments/AssignmentEditPage";
+import AssignmentStudentProgress from "./pages/TutorPage/Assignments/AssignmentStudentProgress";
+import UserManagement from "./pages/TutorPage/Users/UserManagement";
+import GradeManagement from "./pages/TutorPage/Grades/GradeManagement";
+import NoticeManagementPage from "./pages/TutorPage/Notices/NoticeManagementPage";
+import NoticeCreatePage from "./pages/TutorPage/Notices/NoticeCreatePage";
+import NoticeEditPage from "./pages/TutorPage/Notices/NoticeEditPage";
+import CourseNotificationManagement from "./pages/TutorPage/Notifications/CourseNotificationManagement";
+import ProblemManagement from "./pages/TutorPage/Problems/ProblemManagement";
+import ProblemSetManagement from "./pages/TutorPage/Problems/ProblemSetManagement";
+import ProblemSetEdit from "./pages/TutorPage/Problems/ProblemSetEdit";
+import ProblemCreate from "./pages/TutorPage/Problems/ProblemCreate";
+import ProblemEdit from "./pages/TutorPage/Problems/ProblemEdit";
+import SettingsPage from "./pages/TutorPage/Settings/SettingsPage";
+import CodingTestManagement from "./pages/TutorPage/CodingTests/CodingTestManagement";
 // SuperAdmin (시스템 관리자)
 import SuperAdminDashboard from "./pages/SuperAdminPage/SuperAdminDashboard";
 import SystemNoticeManagement from "./pages/SuperAdminPage/SystemNoticeManagement";
@@ -318,7 +319,7 @@ const App: React.FC = () => {
 							</AdminRoute>
 						}
 					/>
-					\{/* 시스템 관리자 (super-admin) 라우트 */}
+					{/* 시스템 관리자 (super-admin) 라우트 */}
 					<Route
 						path="/super-admin"
 						element={

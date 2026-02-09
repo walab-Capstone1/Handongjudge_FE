@@ -1,0 +1,62 @@
+import type { ReactNode } from "react";
+import * as S from "../../AssignmentModals/styles";
+import type { ProblemListEditViewProps } from "../types";
+
+/**
+ * 문제 목록 모달 - 편집 모드 UI (오버레이, 헤더, 에러/로딩, 폼 영역)
+ */
+export default function ProblemListEditView({
+	title,
+	error,
+	loading,
+	onCancel,
+	children,
+}: ProblemListEditViewProps) {
+	return (
+		<S.Overlay onClick={onCancel} onKeyDown={() => {}} role="presentation">
+			<S.Content
+				$extraLarge
+				onClick={(e) => e.stopPropagation()}
+				onKeyDown={(e) => e.stopPropagation()}
+				role="presentation"
+			>
+				<S.Header>
+					<h2>문제 수정 - {title || "로딩 중..."}</h2>
+					<S.CloseButton type="button" onClick={onCancel}>
+						✕
+					</S.CloseButton>
+				</S.Header>
+
+				<S.Body
+					style={{
+						padding: "2rem",
+						overflowY: "auto",
+						maxHeight: "calc(90vh - 200px)",
+					}}
+				>
+					{error && (
+						<div
+							style={{
+								marginBottom: "1rem",
+								padding: "1rem",
+								background: "#fee",
+								color: "#c33",
+								borderRadius: "8px",
+							}}
+						>
+							{error}
+						</div>
+					)}
+
+					{loading ? (
+						<div style={{ textAlign: "center", padding: "3rem" }}>
+							로딩 중...
+						</div>
+					) : (
+						children
+					)}
+				</S.Body>
+			</S.Content>
+		</S.Overlay>
+	);
+}

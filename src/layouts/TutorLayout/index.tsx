@@ -1,8 +1,8 @@
 import type React from "react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import TutorHeader from "../../components/TutorHeader";
-import TutorNotificationPanel from "../../components/TutorNotificationPanel";
+import TutorHeader from "../../components/Tutor/TutorHeader";
+import TutorNotificationPanel from "../../components/Tutor/TutorNotificationPanel";
 import APIService from "../../services/APIService";
 import {
 	FaHome,
