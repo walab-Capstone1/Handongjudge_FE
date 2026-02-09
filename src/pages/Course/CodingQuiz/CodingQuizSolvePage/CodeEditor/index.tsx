@@ -30,6 +30,9 @@ interface CodeEditorProps {
 	onSessionSave?: () => void;
 	codeLoadSource?: string | null;
 	sessionCleared?: boolean;
+	isDeadlinePassed?: boolean;
+	isAssignmentActive?: boolean;
+	userRole?: string | null;
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -45,7 +48,18 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 	onSessionSave,
 	codeLoadSource = null,
 	sessionCleared = false,
+	isDeadlinePassed = false,
+	isAssignmentActive = true,
+	userRole = null,
 }) => {
+	// 관리자/튜터는 비활성화된 과제도 제출 가능
+	const isManager = userRole === "ADMIN" || userRole === "TUTOR";
+	const isSubmitDisabled = isSubmitting || isDeadlinePassed || (!isAssignmentActive && !isManager);
+	const disabledReason = isDeadlinePassed
+		? "과제 마감일이 지났습니다"
+		: !isAssignmentActive && !isManager
+			? "과제가 비활성화되었습니다"
+			: "";
 	const getBaseExtensions = () => [
 		bracketMatching(),
 		foldGutter(),
@@ -398,12 +412,19 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 					<S.SubmitButton
 						$variant="test"
 						onClick={onSubmitWithOutput}
-						disabled={isSubmitting}
-						title="테스트케이스별 상세 결과를 확인할 수 있습니다"
+						disabled={isSubmitDisabled}
+						title={
+							disabledReason ||
+							"테스트케이스별 상세 결과를 확인할 수 있습니다"
+						}
 					>
 						{isSubmitting ? "제출 중..." : "테스트하기"}
 					</S.SubmitButton>
-					<S.SubmitButton onClick={onSubmit} disabled={isSubmitting}>
+					<S.SubmitButton
+						onClick={onSubmit}
+						disabled={isSubmitDisabled}
+						title={disabledReason || "코드를 제출합니다"}
+					>
 						{isSubmitting ? "제출 중..." : "제출하기"}
 					</S.SubmitButton>
 				</S.EditorHeaderRight>

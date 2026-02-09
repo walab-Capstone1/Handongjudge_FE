@@ -49,6 +49,9 @@ const ProblemSolvePage: React.FC = () => {
 			handleHorizontalDragEnd={hook.handleHorizontalDragEnd}
 			handleVerticalDragEnd={hook.handleVerticalDragEnd}
 			gutterStyleCallback={hook.gutterStyleCallback}
+			isDeadlinePassed={hook.isDeadlinePassed}
+			isAssignmentActive={hook.isAssignmentActive}
+			userRole={hook.userRole}
 		/>
 	);
 };
