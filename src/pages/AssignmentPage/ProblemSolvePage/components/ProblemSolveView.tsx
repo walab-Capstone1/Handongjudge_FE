@@ -48,6 +48,9 @@ interface ProblemSolveViewProps {
 		gutterSize: number,
 		index: number,
 	) => Record<string, string>;
+	isDeadlinePassed: boolean;
+	isAssignmentActive: boolean;
+	userRole: string | null;
 }
 
 const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
@@ -79,6 +82,9 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 		handleHorizontalDragEnd,
 		handleVerticalDragEnd,
 		gutterStyleCallback,
+		isDeadlinePassed,
+		isAssignmentActive,
+		userRole,
 	} = props;
 	const navigate = useNavigate();
 
@@ -103,6 +109,9 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 				onSessionSave={saveToSession}
 				codeLoadSource={codeLoadSource}
 				sessionCleared={sessionCleared}
+				isDeadlinePassed={isDeadlinePassed}
+				isAssignmentActive={isAssignmentActive}
+				userRole={userRole}
 			/>
 		),
 		result: (

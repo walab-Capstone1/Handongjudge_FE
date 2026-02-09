@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import apiService from "../../../../services/APIService";
 import indexedDBManager from "../../../../utils/IndexedDBManager";
 import { getDefaultCode } from "../utils/getDefaultCode";
@@ -49,13 +49,18 @@ export function useProblemSolve() {
 		assignmentNumber?: string;
 		dueDate: string | null;
 		endDate: string | null;
+		active?: boolean;
 	}>({
 		title: "Loading...",
 		assignmentNumber: "",
 		dueDate: null,
 		endDate: null,
+		active: true,
 	});
 	const [isLoading, setIsLoading] = useState(true);
+	const [isDeadlinePassed, setIsDeadlinePassed] = useState(false);
+	const [isAssignmentActive, setIsAssignmentActive] = useState(true);
+	const navigate = useNavigate();
 	const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
 	const [verticalSizes, setVerticalSizes] = useState([70, 30]);
 	const [panelLayout, setPanelLayout] = useState<PanelLayout>({
@@ -68,12 +73,25 @@ export function useProblemSolve() {
 		useState<SessionSaveStatus>("idle");
 	const [codeLoadSource, setCodeLoadSource] = useState<CodeLoadSource>(null);
 	const [sessionCleared, setSessionCleared] = useState(false);
+	const [userRole, setUserRole] = useState<string | null>(null);
 
 	useEffect(() => {
 		const loadAllInfo = async () => {
 			if (!problemId || !sectionId || !assignmentId) return;
 			try {
 				setIsLoading(true);
+				
+				// 사용자 역할 확인 (비활성화된 과제 접근 체크용)
+				let currentUserRole: string | null = null;
+				try {
+					const roleResponse = await apiService.getMyRoleInSection(sectionId);
+					currentUserRole = roleResponse?.data?.role ?? roleResponse?.role ?? null;
+					setUserRole(currentUserRole);
+				} catch (roleError) {
+					console.warn("사용자 역할 확인 실패:", roleError);
+					// 역할 확인 실패해도 계속 진행
+				}
+
 				const [problemInfo, sectionInfoRes, assignmentInfoRes] =
 					await Promise.all([
 						apiService.getProblemInfo(problemId),
@@ -86,8 +104,45 @@ export function useProblemSolve() {
 				setCurrentProblem(problemData as Problem);
 				setSectionInfo(sectionData);
 				setAssignmentInfo(assignmentData);
-			} catch (error) {
+
+				// 과제 비활성화 체크 및 리다이렉트
+				const active = assignmentData?.active ?? true;
+				setIsAssignmentActive(active);
+
+				// 학생인 경우 비활성화된 과제 접근 차단 및 리다이렉트
+				if (!active) {
+					const isManager = currentUserRole === "ADMIN" || currentUserRole === "TUTOR";
+					
+					if (!isManager) {
+						// 학생인 경우: 알림 후 리다이렉트
+						alert("해당 과제는 비활성화되어 있어 접근할 수 없습니다.");
+						navigate(`/sections/${sectionId}/course-assignments`);
+						return;
+					}
+					// 관리자인 경우: 접근 허용 (조회만 가능, 제출은 불가)
+					console.warn("과제가 비활성화되어 있습니다. (관리자 접근)");
+				}
+
+				// 마감일 체크
+				if (assignmentData?.endDate) {
+					const endDate = new Date(assignmentData.endDate);
+					const now = new Date();
+					const deadlinePassed = now > endDate;
+					setIsDeadlinePassed(deadlinePassed);
+				} else {
+					setIsDeadlinePassed(false);
+				}
+			} catch (error: any) {
 				console.error("정보 로드 실패:", error);
+				// 비활성화된 과제 접근 시도한 경우 리다이렉트
+				if (
+					error?.message?.includes("비활성화") ||
+					error?.message?.includes("접근할 수 없습니다")
+				) {
+					alert("해당 과제는 비활성화되어 있어 접근할 수 없습니다.");
+					navigate(`/sections/${sectionId}/course-assignments`);
+					return;
+				}
 				setCurrentProblem({
 					title: "오류",
 					description: "문제를 불러오는데 실패했습니다.",
@@ -97,7 +152,7 @@ export function useProblemSolve() {
 			}
 		};
 		loadAllInfo();
-	}, [problemId, sectionId, assignmentId]);
+	}, [problemId, sectionId, assignmentId, navigate]);
 
 	useEffect(() => {
 		const initializeSession = async () => {
@@ -267,6 +322,19 @@ export function useProblemSolve() {
 			return;
 		}
 		if (!sectionId || !problemId) return;
+
+		// 마감일 및 비활성화 체크
+		if (isDeadlinePassed) {
+			alert("과제 마감일이 지났습니다.");
+			return;
+		}
+		// 관리자/튜터는 비활성화된 과제도 제출 가능
+		const isManager = userRole === "ADMIN" || userRole === "TUTOR";
+		if (!isAssignmentActive && !isManager) {
+			alert("해당 과제는 비활성화되어 있어 제출할 수 없습니다.");
+			return;
+		}
+
 		setIsSubmitting(true);
 		setSubmissionResult(null);
 		try {
@@ -298,6 +366,27 @@ export function useProblemSolve() {
 		} catch (error: unknown) {
 			const message =
 				error instanceof Error ? error.message : "코드 제출에 실패했습니다.";
+			
+			// 백엔드에서 마감일/비활성화 에러 응답 처리
+			if (
+				message.includes("마감일") ||
+				message.includes("비활성화") ||
+				message.includes("제출할 수 없습니다")
+			) {
+				setIsDeadlinePassed(message.includes("마감일"));
+				if (message.includes("비활성화")) {
+					setIsAssignmentActive(false);
+					// 비활성화된 과제인 경우 알림 후 리다이렉트
+					alert(message);
+					setTimeout(() => {
+						navigate(`/sections/${sectionId}/course-assignments`);
+					}, 1000);
+					setIsSubmitting(false);
+					return;
+				}
+				alert(message);
+			}
+
 			setSubmissionResult({
 				status: "error",
 				message,
@@ -307,7 +396,7 @@ export function useProblemSolve() {
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [code, language, sectionId, problemId, clearSessionAfterSubmission]);
+	}, [code, language, sectionId, problemId, clearSessionAfterSubmission, isDeadlinePassed, isAssignmentActive, navigate, userRole]);
 
 	const handleSubmitWithOutput = useCallback(async () => {
 		if (!code.trim()) {
@@ -315,6 +404,19 @@ export function useProblemSolve() {
 			return;
 		}
 		if (!sectionId || !problemId) return;
+
+		// 마감일 및 비활성화 체크
+		if (isDeadlinePassed) {
+			alert("과제 마감일이 지났습니다.");
+			return;
+		}
+		// 관리자/튜터는 비활성화된 과제도 테스트 가능
+		const isManager = userRole === "ADMIN" || userRole === "TUTOR";
+		if (!isAssignmentActive && !isManager) {
+			alert("해당 과제는 비활성화되어 있어 테스트할 수 없습니다.");
+			return;
+		}
+
 		setIsSubmitting(true);
 		setSubmissionResult(null);
 		try {
@@ -346,6 +448,27 @@ export function useProblemSolve() {
 		} catch (error: unknown) {
 			const message =
 				error instanceof Error ? error.message : "코드 제출에 실패했습니다.";
+			
+			// 백엔드에서 마감일/비활성화 에러 응답 처리
+			if (
+				message.includes("마감일") ||
+				message.includes("비활성화") ||
+				message.includes("제출할 수 없습니다")
+			) {
+				setIsDeadlinePassed(message.includes("마감일"));
+				if (message.includes("비활성화")) {
+					setIsAssignmentActive(false);
+					// 비활성화된 과제인 경우 알림 후 리다이렉트
+					alert(message);
+					setTimeout(() => {
+						navigate(`/sections/${sectionId}/course-assignments`);
+					}, 1000);
+					setIsSubmitting(false);
+					return;
+				}
+				alert(message);
+			}
+
 			setSubmissionResult({
 				status: "error",
 				message,
@@ -356,7 +479,7 @@ export function useProblemSolve() {
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [code, language, sectionId, problemId, clearSessionAfterSubmission]);
+	}, [code, language, sectionId, problemId, clearSessionAfterSubmission, isDeadlinePassed, isAssignmentActive, navigate, userRole]);
 
 	const handleHorizontalDragEnd = useCallback((sizes: number[]) => {
 		setHorizontalSizes(sizes);
@@ -406,5 +529,8 @@ export function useProblemSolve() {
 		handleHorizontalDragEnd,
 		handleVerticalDragEnd,
 		gutterStyleCallback,
+		isDeadlinePassed,
+		isAssignmentActive,
+		userRole,
 	};
 }
