@@ -52,13 +52,16 @@ export function useAuthCallback() {
 									const enrollResponse = await APIService.enrollByCode(
 										pendingEnrollmentCode,
 									);
-									const data = enrollResponse as { success?: boolean; courseTitle?: string };
+									const data = enrollResponse as {
+										success?: boolean;
+										courseTitle?: string;
+									};
 									if (data?.success) {
 										setStatus(
 											`${data.courseTitle ?? ""} 수강 신청이 완료되었습니다!`,
 										);
 										setTimeout(() => {
-											window.location.href = "/main";
+											window.location.href = "/index";
 										}, 1500);
 									} else {
 										setStatus("수업 참가 처리 중...");
@@ -76,7 +79,8 @@ export function useAuthCallback() {
 							} else {
 								const redirectTo =
 									urlParams.get("redirectTo") ||
-									(location.state as { redirectTo?: string } | null)?.redirectTo;
+									(location.state as { redirectTo?: string } | null)
+										?.redirectTo;
 
 								if (redirectTo) {
 									setStatus("소셜 로그인 성공! 이동합니다.");
@@ -104,11 +108,12 @@ export function useAuthCallback() {
 					return;
 				}
 
-				const { type, email, password } = (location.state as {
-					type?: string;
-					email?: string;
-					password?: string;
-				}) || {};
+				const { type, email, password } =
+					(location.state as {
+						type?: string;
+						email?: string;
+						password?: string;
+					}) || {};
 
 				if (!type) {
 					setStatus("잘못된 접근입니다.");
@@ -131,12 +136,15 @@ export function useAuthCallback() {
 							const enrollResponse = await APIService.enrollByCode(
 								pendingEnrollmentCode,
 							);
-							const data = enrollResponse as { success?: boolean; courseTitle?: string };
+							const data = enrollResponse as {
+								success?: boolean;
+								courseTitle?: string;
+							};
 							if (data?.success) {
 								setStatus(
 									`${data.courseTitle ?? ""} 수강 신청이 완료되었습니다!`,
 								);
-								setTimeout(() => navigate("/main"), 1500);
+								setTimeout(() => navigate("/index"), 1500);
 							} else {
 								setStatus("수업 참가 처리 중...");
 								setTimeout(
@@ -153,7 +161,9 @@ export function useAuthCallback() {
 							);
 						}
 					} else {
-						const redirectTo = (location.state as { redirectTo?: string } | null)?.redirectTo;
+						const redirectTo = (
+							location.state as { redirectTo?: string } | null
+						)?.redirectTo;
 						if (redirectTo) {
 							setStatus("로그인 성공! 이동합니다.");
 							setTimeout(() => navigate(redirectTo), 1500);
@@ -165,7 +175,9 @@ export function useAuthCallback() {
 				}
 			} catch (err: unknown) {
 				console.error("Auth callback error:", err);
-				setStatus(`로그인 실패: ${err instanceof Error ? err.message : String(err)}`);
+				setStatus(
+					`로그인 실패: ${err instanceof Error ? err.message : String(err)}`,
+				);
 				setTimeout(() => navigate("/login"), 3000);
 			}
 		};

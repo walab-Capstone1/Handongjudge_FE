@@ -32,13 +32,15 @@ export function useEnrollPage() {
 				await APIService.enrollByCode(enrollmentCode);
 			if (response.success) {
 				alert(`${response.courseTitle} 수강 신청이 완료되었습니다!`);
-				navigate("/main");
+				navigate("/index");
 			} else {
 				setError(response.message || "수강 신청에 실패했습니다.");
 			}
 		} catch (err: unknown) {
 			console.error("수강 신청 실패:", err);
-			setError(err instanceof Error ? err.message : "수강 신청에 실패했습니다.");
+			setError(
+				err instanceof Error ? err.message : "수강 신청에 실패했습니다.",
+			);
 		} finally {
 			setEnrollLoading(false);
 		}

@@ -296,8 +296,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 								onClick={() => d.setShowEnrollModal(false)}
 								aria-label="닫기"
 							>
-								<FaGripLinesVertical style={{ fontSize: "0.9rem" }} />
-								<FaChevronLeft style={{ fontSize: "0.65rem" }} />
+								X
 							</S.EnrollModalClose>
 						</S.EnrollModalHeader>
 						<S.EnrollModalBody>
