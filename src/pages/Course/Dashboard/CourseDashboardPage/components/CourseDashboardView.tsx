@@ -2,8 +2,6 @@ import type React from "react";
 import CourseSidebar from "../../../../../components/Course/CourseSidebar";
 import CourseHeader from "../../../../../components/Course/CourseHeader";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
-import CourseCard from "../../../../../components/Course/CourseCard";
-import { FaGripLinesVertical, FaChevronLeft } from "react-icons/fa";
 import * as S from "../styles";
 import { formatDeadline, formatDate } from "../utils/dateUtils";
 import type { Notice, Assignment, TransformedNotification } from "../types";
@@ -12,6 +10,14 @@ import type { CourseDashboardHookReturn } from "../hooks/useCourseDashboard";
 interface CourseDashboardViewProps extends CourseDashboardHookReturn {}
 
 const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
+	// /dashboard(섹션 미선택) 시 훅에서 /courses로 리다이렉트하므로 로딩만 표시
+	if (d.sectionId == null) {
+		return (
+			<div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+				<LoadingSpinner />
+			</div>
+		);
+	}
 	if (d.loading) {
 		return (
 			<S.Container $isCollapsed={d.isSidebarCollapsed}>
@@ -76,111 +82,129 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 
 				<S.DashboardBody>
 					<S.LeftColumn>
-						<S.ProfileSection>
-							<S.ProfileAvatar
-								src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/blBC3g5kkQ/pe2v4bz8_expires_30_days.png"
-								alt="User Avatar"
-							/>
-							<S.ProfileGreeting>
-								{d.auth.user?.name || "사용자"}님, 반가워요!
-							</S.ProfileGreeting>
-						</S.ProfileSection>
-
-						<S.CoursesSection>
-							<S.SectionHeader>
-								<S.SectionTitle>참여한 수업 목록</S.SectionTitle>
-								<S.JoinClassBtn onClick={() => d.setShowEnrollModal(true)}>
-									+ 수업 참가
-								</S.JoinClassBtn>
-							</S.SectionHeader>
-							<S.CoursesScrollContainer>
-								<S.CoursesGrid>
-									{d.transformedSections.length > 0 ? (
-										d.transformedSections.map((course) => (
-											<CourseCard
-												key={course.id}
-												course={course}
-												onStatusUpdate={d.fetchDashboardData}
-												onEnroll={() => {}}
-											/>
-										))
-									) : (
-										<S.NoCourses>
-											<span>수강 중인 수업이 없습니다.</span>
-										</S.NoCourses>
+						<S.CourseSummaryCard>
+							<S.SummaryBackButton
+								type="button"
+								onClick={() => d.navigate("/courses")}
+							>
+								내 강의실로 돌아가기
+							</S.SummaryBackButton>
+							<S.SummaryTitle>
+								{d.sectionInfo?.courseTitle ?? "수업"}
+								{d.sectionInfo?.sectionNumber != null &&
+									d.sectionInfo?.sectionNumber !== "" && (
+										<S.SummaryBadge>
+											{d.sectionInfo.sectionNumber}분반
+										</S.SummaryBadge>
 									)}
-								</S.CoursesGrid>
-							</S.CoursesScrollContainer>
-						</S.CoursesSection>
+							</S.SummaryTitle>
+							{d.sectionInfo?.instructorName && (
+								<S.SummaryRow>담당: {d.sectionInfo.instructorName}</S.SummaryRow>
+							)}
+							{d.sectionInfo?.description && (
+								<S.SummaryDescription>
+									{d.sectionInfo.description}
+								</S.SummaryDescription>
+							)}
+							<S.SummaryStats>
+								<S.SummaryStat>
+									과제 {(d.sectionAssignments ?? []).length}개
+								</S.SummaryStat>
+								<S.SummaryStat>
+									공지 {(d.sectionNotices ?? []).length}개
+								</S.SummaryStat>
+							</S.SummaryStats>
+						</S.CourseSummaryCard>
 
-						<S.CoursesSection>
-							<S.SectionHeader>
-								<S.SectionTitle>관리 중인 수업 목록</S.SectionTitle>
-								<S.CreateCourseBtn onClick={() => d.navigate("/tutor/courses")}>
-									+ 수업 만들기
-								</S.CreateCourseBtn>
-							</S.SectionHeader>
-							<S.CoursesScrollContainer>
-								<S.CoursesGrid>
-									{d.managingSections.length > 0 ? (
-										d.managingSections.map((course) => (
-											<CourseCard
-												key={course.id}
-												course={course}
-												onStatusUpdate={d.fetchDashboardData}
-												onEnroll={() =>
+						<S.Subsection>
+							<S.SubsectionTitle>다가오는 마감</S.SubsectionTitle>
+							<S.ContentBox>
+								{(() => {
+									const now = new Date();
+									const upcoming = (d.sectionAssignments ?? [])
+										.filter((a) => new Date(a.endDate) >= now)
+										.sort(
+											(a, b) =>
+												new Date(a.endDate).getTime() -
+												new Date(b.endDate).getTime(),
+										)
+										.slice(0, 2);
+									return upcoming.length > 0 ? (
+										upcoming.map((assignment: Assignment) => {
+											const dDay = d.calculateDDay(assignment.endDate);
+											const isExpired = dDay !== null && dDay < 0;
+											return (
+												<S.UpcomingDeadlineItem
+													key={assignment.id}
+													$isExpired={isExpired}
+													onClick={() => d.handleAssignmentClick(assignment)}
+												>
+													<S.UpcomingDeadlineTitle>
+														{assignment.title}
+													</S.UpcomingDeadlineTitle>
+													<S.UpcomingDeadlineDday $isExpired={isExpired}>
+														{dDay !== null
+															? dDay === 0
+																? "오늘 마감"
+																: dDay > 0
+																	? `D-${dDay}`
+																	: `D+${-dDay}`
+															: ""}
+													</S.UpcomingDeadlineDday>
+												</S.UpcomingDeadlineItem>
+											);
+										})
+									) : (
+										<S.NoContent>
+											<span>다가오는 마감이 없습니다.</span>
+										</S.NoContent>
+									);
+								})()}
+							</S.ContentBox>
+						</S.Subsection>
+
+						<S.Subsection>
+							<S.SubsectionTitle>코딩 테스트</S.SubsectionTitle>
+							<S.ContentBox>
+								{(d.sectionQuizzes ?? []).length > 0 ? (
+									(d.sectionQuizzes ?? [])
+										.slice(0, 3)
+										.map((quiz) => (
+											<S.QuizSummaryItem
+												key={quiz.id}
+												onClick={() =>
 													d.navigate(
-														`/tutor/assignments/section/${course.sectionId}`,
+														`/sections/${d.sectionId}/coding-quiz/${quiz.id}`,
 													)
 												}
-											/>
+											>
+												<S.QuizSummaryTitle>{quiz.title}</S.QuizSummaryTitle>
+												<S.QuizSummaryMeta>
+													{quiz.status === "ACTIVE"
+														? "진행 중"
+														: quiz.status === "ENDED"
+															? "종료"
+															: quiz.status === "WAITING"
+																? "예정"
+																: ""}
+												</S.QuizSummaryMeta>
+											</S.QuizSummaryItem>
 										))
-									) : (
-										<S.NoCourses>
-											<span>관리 중인 수업이 없습니다.</span>
-										</S.NoCourses>
-									)}
-								</S.CoursesGrid>
-							</S.CoursesScrollContainer>
-						</S.CoursesSection>
-
-						<S.CoursesSection>
-							<S.SectionHeader>
-								<S.SectionTitle>공개된 클래스</S.SectionTitle>
-							</S.SectionHeader>
-							<S.CoursesScrollContainer>
-								<S.CoursesGrid>
-									{d.publicSections.length > 0 ? (
-										d.publicSections.map((course) => (
-											<CourseCard
-												key={course.id}
-												course={course}
-												onStatusUpdate={d.fetchDashboardData}
-												showEnrollButton={true}
-												onEnroll={() => {
-													if (course.enrollmentCode) {
-														d.setEnrollmentCode(course.enrollmentCode);
-														d.setShowEnrollModal(true);
-													}
-												}}
-											/>
-										))
-									) : (
-										<S.NoCourses>
-											<span>공개된 클래스가 없습니다.</span>
-										</S.NoCourses>
-									)}
-								</S.CoursesGrid>
-							</S.CoursesScrollContainer>
-						</S.CoursesSection>
+								) : (
+									<S.NoContent>
+										<span>등록된 코딩 테스트가 없습니다.</span>
+									</S.NoContent>
+								)}
+							</S.ContentBox>
+						</S.Subsection>
 					</S.LeftColumn>
 
 					<S.RightColumn>
 						<S.Subsection>
 							<S.SubsectionTitle>알림</S.SubsectionTitle>
 							<S.ContentBox>
-								{d.allNotifications.length > 0 ? (
-									d.allNotifications.map(
+								{(d.sectionNotifications ?? []).length > 0 ? (
+									(d.sectionNotifications ?? []).map(
 										(notification: TransformedNotification) => (
 											<S.NotificationItem
 												key={notification.id}
@@ -215,13 +239,13 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 						<S.Subsection>
 							<S.SubsectionTitle>과제</S.SubsectionTitle>
 							<S.ContentBox>
-								{d.allAssignments.length > 0 ? (
-									d.allAssignments.map((assignment: Assignment) => {
+								{(d.sectionAssignments ?? []).length > 0 ? (
+									(d.sectionAssignments ?? []).map((assignment: Assignment) => {
 										const dDay = d.calculateDDay(assignment.endDate);
 										const isExpired = dDay !== null && dDay < 0;
 										return (
 											<S.AssignmentItem
-												key={`${assignment.sectionId}-${assignment.id}`}
+												key={assignment.id}
 												$isExpired={isExpired}
 												onClick={() => d.handleAssignmentClick(assignment)}
 											>
@@ -252,10 +276,10 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 						<S.Subsection>
 							<S.SubsectionTitle>공지사항</S.SubsectionTitle>
 							<S.ContentBox>
-								{d.allNotices.length > 0 ? (
-									d.allNotices.map((notice: Notice) => (
+								{(d.sectionNotices ?? []).length > 0 ? (
+									(d.sectionNotices ?? []).map((notice: Notice) => (
 										<S.NoticeItem
-											key={`${notice.sectionId}-${notice.id}`}
+											key={notice.id}
 											$isNew={notice.isNew}
 											onClick={() => d.handleNoticeClick(notice)}
 										>

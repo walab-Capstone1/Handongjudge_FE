@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
 import APIService from "../../../../../services/APIService";
 import type {
 	SectionInfo,
+	SectionQuiz,
 	CourseCardData,
 	Notice,
 	Assignment,
@@ -46,51 +47,9 @@ export function useCourseDashboard() {
 	const [managingSections, setManagingSections] = useState<CourseCardData[]>(
 		[],
 	);
+	const [sectionQuizzes, setSectionQuizzes] = useState<SectionQuiz[]>([]);
 
-	const publicSections: CourseCardData[] = [
-		{
-			id: 997,
-			title: "웹 프로그래밍 기초",
-			subtitle: "강의 ID: WEB001",
-			batch: "",
-			courseName: "[웹 프로그래밍 기초]",
-			status: [],
-			instructor: "박교수",
-			color: "purple",
-			sectionId: 997,
-			courseId: "WEB001",
-			active: true,
-			enrollmentCode: "WEB001-2024",
-		},
-		{
-			id: 996,
-			title: "머신러닝 입문",
-			subtitle: "강의 ID: ML001",
-			batch: "",
-			courseName: "[머신러닝 입문]",
-			status: [],
-			instructor: "최교수",
-			color: "orange",
-			sectionId: 996,
-			courseId: "ML001",
-			active: true,
-			enrollmentCode: "ML001-2024",
-		},
-		{
-			id: 995,
-			title: "컴퓨터 네트워크",
-			subtitle: "강의 ID: NET001",
-			batch: "",
-			courseName: "[컴퓨터 네트워크]",
-			status: [],
-			instructor: "정교수",
-			color: "red",
-			sectionId: 995,
-			courseId: "NET001",
-			active: true,
-			enrollmentCode: "NET001-2024",
-		},
-	];
+	const publicSections: CourseCardData[] = [];
 
 	const fetchManagingSections = useCallback(async () => {
 		if (!auth?.user) return;
@@ -312,12 +271,41 @@ export function useCourseDashboard() {
 		}
 	}, [sectionId]);
 
+	// /dashboard(섹션 미선택) 접근 시 강의실 목록으로 이동
 	useEffect(() => {
-		if (auth.user) {
+		if (sectionId == null) {
+			navigate("/courses", { replace: true });
+		}
+	}, [sectionId, navigate]);
+
+	const fetchSectionQuizzes = useCallback(async () => {
+		if (sectionId == null) return;
+		try {
+			const res = await APIService.getQuizzesBySection(sectionId);
+			const raw = res?.data ?? res ?? [];
+			const list = (Array.isArray(raw) ? raw : []).map(
+				(q: { id: number; title?: string; startTime?: string; endTime?: string; status?: string }) => ({
+					id: q.id,
+					title: q.title ?? "",
+					startTime: q.startTime ?? "",
+					endTime: q.endTime ?? "",
+					status: (q.status as SectionQuiz["status"]) ?? undefined,
+				}),
+			);
+			setSectionQuizzes(list);
+		} catch (err) {
+			console.error("코딩 테스트 목록 조회 실패:", err);
+			setSectionQuizzes([]);
+		}
+	}, [sectionId]);
+
+	useEffect(() => {
+		if (auth.user && sectionId != null) {
 			fetchDashboardData();
 			fetchManagingSections();
+			fetchSectionQuizzes();
 		}
-	}, [auth.user, fetchDashboardData, fetchManagingSections]);
+	}, [auth.user, sectionId, fetchDashboardData, fetchManagingSections, fetchSectionQuizzes]);
 
 	const handleMenuClick = useCallback((_menuId: string) => {}, []);
 
@@ -409,6 +397,35 @@ export function useCourseDashboard() {
 		(section) => transformSectionData(section, sectionNewItems),
 	);
 
+	// 현재 수업(sectionId) 기준으로만 필터링
+	const sectionNotices = useMemo(
+		() =>
+			sectionId != null
+				? allNotices.filter(
+						(n) => String(n.sectionId) === String(sectionId),
+					)
+				: [],
+		[allNotices, sectionId],
+	);
+	const sectionAssignments = useMemo(
+		() =>
+			sectionId != null
+				? allAssignments.filter(
+						(a) => String(a.sectionId) === String(sectionId),
+					)
+				: [],
+		[allAssignments, sectionId],
+	);
+	const sectionNotifications = useMemo(
+		() =>
+			sectionId != null
+				? allNotifications.filter(
+						(n) => String(n.sectionId) === String(sectionId),
+					)
+				: [],
+		[allNotifications, sectionId],
+	);
+
 	return {
 		sectionId,
 		auth,
@@ -420,6 +437,10 @@ export function useCourseDashboard() {
 		transformedSections,
 		managingSections,
 		publicSections,
+		sectionQuizzes,
+		sectionNotices,
+		sectionAssignments,
+		sectionNotifications,
 		allNotifications,
 		allAssignments,
 		allNotices,

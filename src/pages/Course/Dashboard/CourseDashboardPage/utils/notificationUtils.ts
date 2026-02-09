@@ -56,5 +56,6 @@ export const transformNotification = (
 		type: notif.type,
 		link: link,
 		sectionName: notif.sectionName,
+		sectionId: notif.sectionId,
 	};
 };

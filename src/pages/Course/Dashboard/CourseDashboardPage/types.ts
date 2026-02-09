@@ -7,6 +7,17 @@ export interface SectionInfo {
 	sectionNumber?: string | null;
 	instructorName?: string;
 	active?: boolean;
+	/** 수업 한 줄 소개 (백엔드에서 내려주는 경우) */
+	description?: string | null;
+}
+
+/** 대시보드 코딩 테스트 요약용 */
+export interface SectionQuiz {
+	id: number;
+	title: string;
+	startTime: string;
+	endTime: string;
+	status?: "WAITING" | "ACTIVE" | "ENDED";
 }
 
 export interface CourseCardData {
@@ -78,6 +89,7 @@ export interface TransformedNotification {
 	type: string;
 	link: string | null;
 	sectionName: string;
+	sectionId: number;
 }
 
 export interface SectionNewItems {
