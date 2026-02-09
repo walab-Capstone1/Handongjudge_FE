@@ -26,11 +26,13 @@ export default function GradeManagementCourseTable({
 						<tr>
 							<th rowSpan={2}>학생</th>
 							<th rowSpan={2}>학번</th>
-							{courseGrades.items.map((item) =>
-								item.type === "quiz" ? (
+							{courseGrades.items.map((item) => {
+								const colSpan =
+									item.problems.length > 0 ? item.problems.length + 1 : 2;
+								return item.type === "quiz" ? (
 									<S.CourseQuizHeader
 										key={`${item.type}-${item.id}`}
-										colSpan={item.problems.length + 1}
+										colSpan={colSpan}
 									>
 										<S.ItemTitle>
 											<S.ItemTypeBadge>퀴즈</S.ItemTypeBadge>
@@ -40,16 +42,19 @@ export default function GradeManagementCourseTable({
 								) : (
 									<S.CourseAssignmentHeader
 										key={`${item.type}-${item.id}`}
-										colSpan={item.problems.length + 1}
+										colSpan={colSpan}
 									>
 										<S.ItemTitle>{item.title}</S.ItemTitle>
 									</S.CourseAssignmentHeader>
-								),
-							)}
+								);
+							})}
 						</tr>
 						<tr>
 							{courseGrades.items.map((item) => (
 								<React.Fragment key={`${item.type}-${item.id}-problems`}>
+									{item.problems.length === 0 ? (
+										<S.ProblemHeader as="th">과제</S.ProblemHeader>
+									) : null}
 									{item.problems.map((problem) => (
 										<S.ProblemHeader
 											key={`${item.type}-${item.id}-${problem.problemId}`}
@@ -86,24 +91,30 @@ export default function GradeManagementCourseTable({
 											<React.Fragment
 												key={`${student.userId}-assignment-${item.id}`}
 											>
-												{item.problems.map((problem) => {
-													const problemGrade =
-														assignmentData?.problems?.[problem.problemId];
-													const score =
-														problemGrade?.score !== null &&
-														problemGrade?.score !== undefined
-															? problemGrade.score
-															: null;
-													return (
-														<td
-															key={`${student.userId}-assignment-${item.id}-${problem.problemId}`}
-														>
-															{score !== null
-																? `${score} / ${problem.points ?? 0}`
-																: "-"}
-														</td>
-													);
-												})}
+												{item.problems.length === 0 ? (
+													<S.TdCourseProblemCell>
+														<span style={{ color: "#94a3b8" }}>과제 없음</span>
+													</S.TdCourseProblemCell>
+												) : (
+													item.problems.map((problem) => {
+														const problemGrade =
+															assignmentData?.problems?.[problem.problemId];
+														const score =
+															problemGrade?.score !== null &&
+															problemGrade?.score !== undefined
+																? problemGrade.score
+																: null;
+														return (
+															<td
+																key={`${student.userId}-assignment-${item.id}-${problem.problemId}`}
+															>
+																{score !== null
+																	? `${score} / ${problem.points ?? 0}`
+																	: "-"}
+															</td>
+														);
+													})
+												)}
 												<S.TdCourseAssignmentTotalCell>
 													{assignmentData ? (
 														<strong>

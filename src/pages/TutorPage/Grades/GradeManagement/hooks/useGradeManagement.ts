@@ -222,23 +222,27 @@ export function useGradeManagement() {
 				item: assignment,
 				grades: assignmentGrades,
 			} of assignmentGradeResults) {
-				if (!assignmentGrades.length || !assignmentGrades[0]?.problemGrades) {
-					continue;
-				}
-				const problems = assignmentGrades[0].problemGrades.map(
-					(p: {
-						problemId: number;
-						problemTitle?: string;
-						points?: number;
-					}) => ({
-						problemId: p.problemId,
-						problemTitle: p.problemTitle,
-						points: p.points,
-					}),
-				);
-				const totalPoints =
-					assignmentGrades[0].totalPoints ??
-					problems.reduce((sum, p) => sum + (p.points ?? 0), 0);
+				if (!assignmentGrades.length) continue;
+				const hasProblems =
+					assignmentGrades[0]?.problemGrades &&
+					assignmentGrades[0].problemGrades.length > 0;
+				const problems = hasProblems
+					? assignmentGrades[0].problemGrades.map(
+							(p: {
+								problemId: number;
+								problemTitle?: string;
+								points?: number;
+							}) => ({
+								problemId: p.problemId,
+								problemTitle: p.problemTitle,
+								points: p.points,
+							}),
+						)
+					: [];
+				const totalPoints = hasProblems
+					? (assignmentGrades[0].totalPoints ??
+						problems.reduce((sum, p) => sum + (p.points ?? 0), 0))
+					: 0;
 				courseItems.push({
 					type: "assignment",
 					id: assignment.id,
@@ -277,52 +281,109 @@ export function useGradeManagement() {
 				}
 			}
 
+			// 코딩 테스트(퀴즈): 같은 제목이면 하나의 항목으로 묶어서 과제처럼 "항목 안에 문제 N개"로 표시
+			const quizGroupsByTitle = new Map<
+				string,
+				{
+					item: QuizItem;
+					problems: {
+						problemId: number;
+						problemTitle?: string;
+						points?: number;
+					}[];
+					grades: StudentGradeRow[];
+				}[]
+			>();
 			for (const { item: quiz, problems, grades: quizGrades } of quizResults) {
-				if (problems.length === 0) continue;
-				const totalPoints = problems.length;
+				const title = quiz.title ?? "";
+				if (!quizGroupsByTitle.has(title)) {
+					quizGroupsByTitle.set(title, []);
+				}
+				const list = quizGroupsByTitle.get(title);
+				if (list) {
+					list.push({
+						item: quiz,
+						problems: problems.map((p) => ({
+							problemId: p.problemId ?? (p as { id?: number }).id ?? 0,
+							problemTitle:
+								(p as { problemTitle?: string }).problemTitle ??
+								(p as { title?: string }).title,
+							points: p.points ?? 1,
+						})),
+						grades: quizGrades ?? [],
+					});
+				}
+			}
+
+			for (const [, group] of quizGroupsByTitle) {
+				if (group.length === 0) continue;
+				const first = group[0];
+				const mergedProblems = group.flatMap((g) => g.problems);
+				if (mergedProblems.length === 0) continue;
+				const totalPoints = mergedProblems.reduce(
+					(sum, p) => sum + (p.points ?? 1),
+					0,
+				);
 				courseItems.push({
 					type: "quiz",
-					id: quiz.id,
-					title: quiz.title,
-					problems: problems.map((p) => ({
-						problemId: p.problemId ?? (p as { id?: number }).id,
-						problemTitle:
-							(p as { problemTitle?: string }).problemTitle ??
-							(p as { title?: string }).title,
-						points: p.points ?? 1,
-					})),
+					id: first.item.id,
+					title: first.item.title,
+					problems: mergedProblems,
 					totalPoints,
 				});
-				if (quizGrades?.length > 0) {
-					for (const student of quizGrades) {
-						if (!studentMap.has(student.userId)) {
-							studentMap.set(student.userId, {
-								userId: student.userId,
-								studentName: student.studentName,
-								studentId: student.studentId,
-								assignments: {},
-								quizzes: {},
+				// 학생별로 그룹 내 퀴즈 성적 합쳐서 한 항목으로 저장
+				const studentToMerged = new Map<
+					number,
+					{
+						totalScore: number;
+						totalPoints: number;
+						problems: Record<number, ProblemGrade>;
+					}
+				>();
+				for (const g of group) {
+					for (const student of g.grades) {
+						if (!studentToMerged.has(student.userId)) {
+							studentToMerged.set(student.userId, {
+								totalScore: 0,
+								totalPoints: 0,
+								problems: {},
 							});
 						}
-						const studentEntry = studentMap.get(student.userId);
-						if (!studentEntry) continue;
-						const problemsMap: Record<number, ProblemGrade> = {};
-						for (const pg of student.problemGrades ?? []) {
-							problemsMap[pg.problemId] = pg;
+						const merged = studentToMerged.get(student.userId);
+						if (merged) {
+							merged.totalScore += student.totalScore ?? 0;
+							merged.totalPoints += student.totalPoints ?? 0;
+							for (const pg of student.problemGrades ?? []) {
+								merged.problems[pg.problemId] = pg;
+							}
 						}
-						const totalScore = student.totalScore ?? 0;
-						const quizTotalPoints = student.totalPoints ?? totalPoints ?? 0;
-						const ratio =
-							quizTotalPoints > 0
-								? `${((totalScore / quizTotalPoints) * 100).toFixed(1)}`
-								: "0.0";
-						studentEntry.quizzes[quiz.id] = {
-							totalScore,
-							totalPoints: quizTotalPoints,
-							ratio,
-							problems: problemsMap,
-						};
 					}
+				}
+				for (const [userId, merged] of studentToMerged) {
+					if (!studentMap.has(userId)) {
+						const firstStudent = group
+							.flatMap((g) => g.grades)
+							.find((s) => s.userId === userId);
+						studentMap.set(userId, {
+							userId,
+							studentName: firstStudent?.studentName,
+							studentId: firstStudent?.studentId,
+							assignments: {},
+							quizzes: {},
+						});
+					}
+					const studentEntry = studentMap.get(userId);
+					if (!studentEntry) continue;
+					const ratio =
+						merged.totalPoints > 0
+							? `${((merged.totalScore / merged.totalPoints) * 100).toFixed(1)}`
+							: "0.0";
+					studentEntry.quizzes[first.item.id] = {
+						totalScore: merged.totalScore,
+						totalPoints: merged.totalPoints,
+						ratio,
+						problems: merged.problems,
+					};
 				}
 			}
 
@@ -359,9 +420,6 @@ export function useGradeManagement() {
 						assignmentsResponse?.data ?? assignmentsResponse ?? [];
 					const arr = Array.isArray(assignmentsData) ? assignmentsData : [];
 					setAssignments(arr);
-					if (arr.length > 0) {
-						setSelectedAssignment((prev) => prev ?? arr[0]);
-					}
 				} catch (error) {
 					console.error("과제 목록 조회 실패:", error);
 					setAssignments([]);
@@ -392,7 +450,9 @@ export function useGradeManagement() {
 
 	useEffect(() => {
 		if (
-			viewMode === "course" &&
+			(viewMode === "course" ||
+				viewMode === "assignment" ||
+				viewMode === "quiz") &&
 			sectionId &&
 			(assignments.length > 0 || quizzes.length > 0)
 		) {

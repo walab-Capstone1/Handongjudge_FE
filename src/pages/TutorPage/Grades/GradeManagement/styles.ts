@@ -179,16 +179,18 @@ export const SecondaryButton = styled.button`
 export const TableContainer = styled.div`
   background: white;
   border-radius: 8px;
-  overflow: visible;
+  overflow: auto;
+  max-height: min(88vh, 1100px);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
   position: relative;
 `;
 
 export const Table = styled.table`
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     sans-serif;
 
@@ -197,22 +199,23 @@ export const Table = styled.table`
   }
 
   th {
-    padding: 0.75rem 1rem;
-    text-align: left;
+    padding: 0.45rem 0.4rem;
+    text-align: center;
     font-weight: 600;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: #475569;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     border-bottom: 1px solid #e2e8f0;
     background: #f8fafc;
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
       sans-serif;
+    white-space: nowrap;
 
     &:first-child {
-      padding-left: calc(1rem - 3px);
+      padding-left: 0.4rem;
       border-left: 3px solid transparent;
     }
   }
@@ -233,15 +236,16 @@ export const Table = styled.table`
   }
 
   td {
-    padding: 0.875rem 1rem;
-    font-size: 0.875rem;
+    padding: 0.95rem 0.4rem;
+    font-size: 0.8125rem;
     color: #1e293b;
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
+    text-align: center;
 
     &:first-child {
-      padding-left: calc(1rem - 3px);
+      padding-left: 0.4rem;
       border-left: 3px solid transparent;
     }
   }
@@ -249,19 +253,22 @@ export const Table = styled.table`
 
 export const ProblemHeader = styled.th`
   text-align: center !important;
-  min-width: 150px;
+  min-width: 56px;
+  max-width: 110px;
 `;
 
 export const CourseAssignmentHeader = styled.th`
   text-align: center !important;
   font-weight: 600;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   color: #475569;
   border-left: 1px solid #e2e8f0;
   border-right: 1px solid #e2e8f0;
   background: #f8fafc;
+  padding: 0.45rem 0.4rem;
+  min-width: 48px;
 
   &:first-of-type {
     border-left: none;
@@ -281,7 +288,7 @@ export const ItemTitle = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
 `;
 
 export const ItemTypeBadge = styled.span`
@@ -298,22 +305,24 @@ export const ItemTypeBadge = styled.span`
 
 export const CourseAssignmentTotalHeader = styled.th`
   text-align: center !important;
-  min-width: 100px;
+  min-width: 48px;
+  padding: 0.45rem 0.4rem;
   background: #f1f5f9 !important;
   font-weight: 600;
 `;
 
 export const ProblemTitle = styled.div`
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.1rem;
   text-transform: none;
   letter-spacing: normal;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: #1e293b;
+  line-height: 1.2;
 `;
 
 export const ProblemPoints = styled.div`
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #64748b;
   font-weight: 400;
   text-transform: none;
@@ -554,27 +563,30 @@ export const NoData = styled.div`
 export const TdStudentName = styled.td`
   font-weight: 600;
   color: #1e293b;
-  min-width: 120px;
-  font-size: 0.9375rem;
+  min-width: 68px;
+  font-size: 0.8125rem;
+  text-align: center;
 `;
 
 export const TdStudentId = styled.td`
   color: #64748b;
-  min-width: 100px;
-  font-size: 0.875rem;
+  min-width: 60px;
+  font-size: 0.8125rem;
+  text-align: center;
 `;
 
 export const TdProblemCell = styled.td`
   text-align: center;
-  min-width: 180px;
+  min-width: 56px;
   position: relative;
 `;
 
 export const ScoreDisplay = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
   align-items: center;
+  justify-content: center;
 `;
 
 export const ScoreValue = styled.div`
@@ -585,7 +597,7 @@ export const ScoreValue = styled.div`
 
 export const ScoreActions = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.3rem;
   justify-content: center;
 `;
 
@@ -636,9 +648,9 @@ export const BtnCode = styled.button`
 export const SubmissionInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  margin-top: 0.5rem;
+  gap: 0.15rem;
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
 `;
 
 export const SubmissionStatus = styled.span<{ $onTime?: boolean }>`
@@ -660,7 +672,7 @@ export const SubmissionTime = styled.span`
 export const EditForm = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
   align-items: center;
 `;
 
@@ -730,16 +742,16 @@ export const TdTotalCell = styled.td`
   text-align: center;
   font-weight: 600;
   color: #1e293b;
-  min-width: 100px;
-  font-size: 0.875rem;
+  min-width: 48px;
+  font-size: 0.8125rem;
 `;
 
 export const TdRatioCell = styled.td`
   text-align: center;
   font-weight: 600;
   color: #667eea;
-  min-width: 80px;
-  font-size: 0.875rem;
+  min-width: 42px;
+  font-size: 0.8125rem;
 `;
 
 export const CourseTableContainer = styled(TableContainer)`
@@ -747,18 +759,23 @@ export const CourseTableContainer = styled(TableContainer)`
 `;
 
 export const CourseTable = styled(Table)`
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
 `;
 
 export const TdCourseProblemCell = styled.td`
   background: transparent;
   text-align: center;
+  padding: 0.45rem 0.4rem;
 `;
 
 export const TdCourseAssignmentTotalCell = styled.td`
   background: #f1f5f9;
   font-weight: 600;
   text-align: center;
+  padding: 0.45rem 0.4rem;
+  min-width: 48px;
 `;
 
 /* Modals */

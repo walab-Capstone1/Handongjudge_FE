@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import TutorLayout from "../../../../../layouts/TutorLayout";
 import SectionNavigation from "../../../../../components/Navigation/SectionNavigation";
 import * as S from "../styles";
@@ -73,6 +73,28 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		setAllAssignmentProblems([]);
 	};
 
+	const assignmentOnlyGrades = useMemo(
+		() =>
+			courseGrades
+				? {
+						...courseGrades,
+						items: courseGrades.items.filter((i) => i.type === "assignment"),
+					}
+				: null,
+		[courseGrades],
+	);
+
+	const quizOnlyGrades = useMemo(
+		() =>
+			courseGrades
+				? {
+						...courseGrades,
+						items: courseGrades.items.filter((i) => i.type === "quiz"),
+					}
+				: null,
+		[courseGrades],
+	);
+
 	if (loading && !grades.length) {
 		return (
 			<TutorLayout selectedSection={currentSection}>
@@ -119,24 +141,37 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					onExportCSV={handleExportCSV}
 				/>
 
-				{/* 성적 테이블 */}
+				{/* 성적 테이블 - 수업 전체 / 전체 과제 / 전체 퀴즈: CourseTable 통일 */}
 				{viewMode === "course" ? (
 					<GradeManagementCourseTable
 						courseLoading={courseLoading}
 						courseGrades={courseGrades}
 						filteredCourseStudents={filteredCourseStudents}
 					/>
+				) : viewMode === "assignment" && !selectedAssignment ? (
+					<GradeManagementCourseTable
+						courseLoading={courseLoading}
+						courseGrades={assignmentOnlyGrades}
+						filteredCourseStudents={filteredCourseStudents}
+					/>
+				) : viewMode === "quiz" && !selectedQuiz ? (
+					<GradeManagementCourseTable
+						courseLoading={courseLoading}
+						courseGrades={quizOnlyGrades}
+						filteredCourseStudents={filteredCourseStudents}
+					/>
 				) : selectedQuiz && viewMode === "quiz" && grades.length > 0 ? (
 					<GradeManagementQuizTable
 						grades={grades}
 						filteredGrades={filteredGrades}
+						selectedQuiz={selectedQuiz}
 					/>
 				) : selectedQuiz && viewMode === "quiz" ? (
-					<S.TableContainer>
+					<S.CourseTableContainer>
 						<S.NoData>
 							<p>등록된 성적이 없습니다.</p>
 						</S.NoData>
-					</S.TableContainer>
+					</S.CourseTableContainer>
 				) : selectedAssignment && grades.length > 0 ? (
 					<GradeManagementAssignmentTable
 						grades={grades}
@@ -150,13 +185,17 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						handleViewCode={handleViewCode}
 					/>
 				) : selectedAssignment ? (
-					<S.NoData>
-						<p>등록된 성적이 없습니다.</p>
-					</S.NoData>
+					<S.CourseTableContainer>
+						<S.NoData>
+							<p>등록된 성적이 없습니다.</p>
+						</S.NoData>
+					</S.CourseTableContainer>
 				) : (
-					<S.NoData>
-						<p>과제를 선택하여 성적을 확인하세요.</p>
-					</S.NoData>
+					<S.CourseTableContainer>
+						<S.NoData>
+							<p>과제를 선택하여 성적을 확인하세요.</p>
+						</S.NoData>
+					</S.CourseTableContainer>
 				)}
 
 				<GradeCodeModal
