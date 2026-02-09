@@ -52,13 +52,18 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		loadingProblems,
 		allAssignmentProblems,
 		setAllAssignmentProblems,
+		allQuizProblems,
+		setAllQuizProblems,
 		bulkInputs,
 		setBulkInputs,
 		bulkSaving,
 		getSectionDisplayName,
 		handleSaveGrade,
 		handleViewCode,
+		handleSaveGradeForAssignment,
+		handleViewCodeForAssignment,
 		handleExportCSV,
+		handleShowBulkModal,
 		handleBulkSave,
 		handleSavePoints,
 		stats,
@@ -71,6 +76,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		setPointsInputs({});
 		setAssignmentProblems([]);
 		setAllAssignmentProblems([]);
+		setAllQuizProblems([]);
 	};
 
 	const assignmentOnlyGrades = useMemo(
@@ -136,12 +142,12 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					selectedQuiz={selectedQuiz}
 					setSelectedQuiz={setSelectedQuiz}
 					onShowPointsModal={() => setShowPointsModal(true)}
-					onShowBulkModal={() => setShowBulkModal(true)}
+					onShowBulkModal={handleShowBulkModal}
 					onShowStatsModal={() => setShowStatsModal(true)}
 					onExportCSV={handleExportCSV}
 				/>
 
-				{/* 성적 테이블 - 수업 전체 / 전체 과제 / 전체 퀴즈: CourseTable 통일 */}
+				{/* 성적 테이블 - 수업 전체 / 전체 과제 / 전체 퀴즈: CourseTable(고정 열+가로 스크롤); 과제·퀴즈 선택 시 해당 테이블 */}
 				{viewMode === "course" ? (
 					<GradeManagementCourseTable
 						courseLoading={courseLoading}
@@ -153,6 +159,13 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						courseLoading={courseLoading}
 						courseGrades={assignmentOnlyGrades}
 						filteredCourseStudents={filteredCourseStudents}
+						editingGrade={editingGrade}
+						setEditingGrade={setEditingGrade}
+						gradeInputs={gradeInputs}
+						setGradeInputs={setGradeInputs}
+						comments={comments}
+						onSaveGrade={handleSaveGradeForAssignment}
+						onViewCode={handleViewCodeForAssignment}
 					/>
 				) : viewMode === "quiz" && !selectedQuiz ? (
 					<GradeManagementCourseTable
@@ -176,6 +189,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					<GradeManagementAssignmentTable
 						grades={grades}
 						filteredGrades={filteredGrades}
+						selectedAssignment={selectedAssignment}
 						editingGrade={editingGrade}
 						setEditingGrade={setEditingGrade}
 						gradeInputs={gradeInputs}
@@ -205,7 +219,11 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 				/>
 
 				<GradeBulkInputModal
-					show={showBulkModal && !!selectedAssignment && grades.length > 0}
+					show={
+						showBulkModal &&
+						grades.length > 0 &&
+						(!!selectedAssignment || !!selectedQuiz)
+					}
 					grades={grades}
 					bulkInputs={bulkInputs}
 					setBulkInputs={setBulkInputs}
@@ -227,9 +245,11 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					show={showPointsModal}
 					viewMode={viewMode}
 					hasAssignments={assignments.length > 0}
+					hasQuizzes={quizzes.length > 0}
 					selectedAssignment={selectedAssignment}
 					loadingProblems={loadingProblems}
 					allAssignmentProblems={allAssignmentProblems}
+					allQuizProblems={allQuizProblems}
 					assignmentProblems={assignmentProblems}
 					pointsInputs={pointsInputs}
 					setPointsInputs={setPointsInputs}

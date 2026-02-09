@@ -11,6 +11,7 @@ import type {
 	EditingGrade,
 	AssignmentProblemRow,
 	AllAssignmentProblemsEntry,
+	AllQuizProblemsEntry,
 	CodeResponse,
 	ProblemGrade,
 } from "../types";
@@ -54,6 +55,9 @@ export function useGradeManagement() {
 	const [loadingProblems, setLoadingProblems] = useState(false);
 	const [allAssignmentProblems, setAllAssignmentProblems] = useState<
 		AllAssignmentProblemsEntry[]
+	>([]);
+	const [allQuizProblems, setAllQuizProblems] = useState<
+		AllQuizProblemsEntry[]
 	>([]);
 	const [bulkInputs, setBulkInputs] = useState<Record<number, number | "">>({});
 	const [bulkSaving, setBulkSaving] = useState(false);
@@ -243,12 +247,17 @@ export function useGradeManagement() {
 					? (assignmentGrades[0].totalPoints ??
 						problems.reduce((sum, p) => sum + (p.points ?? 0), 0))
 					: 0;
+				const assignmentDue =
+					(assignment as AssignmentItem).dueDate ??
+					(assignment as { endDate?: string }).endDate ??
+					(assignment as { deadline?: string }).deadline;
 				courseItems.push({
 					type: "assignment",
 					id: assignment.id,
 					title: assignment.title,
 					problems,
 					totalPoints,
+					dueAt: assignmentDue,
 				});
 				for (const student of assignmentGrades) {
 					if (!studentMap.has(student.userId)) {
@@ -324,12 +333,14 @@ export function useGradeManagement() {
 					(sum, p) => sum + (p.points ?? 1),
 					0,
 				);
+				const quizDue = (first.item as QuizItem).endTime;
 				courseItems.push({
 					type: "quiz",
 					id: first.item.id,
 					title: first.item.title,
 					problems: mergedProblems,
 					totalPoints,
+					dueAt: quizDue,
 				});
 				// 학생별로 그룹 내 퀴즈 성적 합쳐서 한 항목으로 저장
 				const studentToMerged = new Map<
@@ -466,12 +477,6 @@ export function useGradeManagement() {
 		fetchCourseGrades,
 	]);
 
-	useEffect(() => {
-		if (viewMode === "quiz" && quizzes.length > 0 && !selectedQuiz) {
-			setSelectedQuiz(quizzes[0]);
-		}
-	}, [viewMode, quizzes, selectedQuiz]);
-
 	const handleSaveGrade = useCallback(
 		async (
 			userId: number,
@@ -519,6 +524,54 @@ export function useGradeManagement() {
 		[selectedAssignment, sectionId],
 	);
 
+	const handleSaveGradeForAssignment = useCallback(
+		async (
+			assignmentId: number,
+			userId: number,
+			problemId: number,
+			score: number | "",
+			comment: string,
+		) => {
+			if (!sectionId) return;
+			try {
+				const gradeData = {
+					userId,
+					problemId,
+					score: score !== null && score !== "" ? Number(score) : null,
+					comment: comment || null,
+				};
+				await APIService.saveGrade(sectionId, assignmentId, gradeData);
+				await fetchCourseGrades();
+				setEditingGrade(null);
+				alert("성적이 저장되었습니다.");
+			} catch (error) {
+				console.error("성적 저장 실패:", error);
+				alert(`성적 저장에 실패했습니다. ${(error as Error).message ?? ""}`);
+			}
+		},
+		[sectionId, fetchCourseGrades],
+	);
+
+	const handleViewCodeForAssignment = useCallback(
+		async (assignmentId: number, userId: number, problemId: number) => {
+			if (!sectionId) return;
+			try {
+				const codeResponse = await APIService.getStudentAcceptedCode(
+					sectionId,
+					assignmentId,
+					userId,
+					problemId,
+				);
+				setSelectedCode(codeResponse);
+				setShowCodeModal(true);
+			} catch (error) {
+				console.error("코드 조회 실패:", error);
+				alert("코드를 불러올 수 없습니다.");
+			}
+		},
+		[sectionId],
+	);
+
 	const getSectionDisplayName = useCallback(() => {
 		if (!currentSection) return "";
 		const s = currentSection as {
@@ -551,6 +604,159 @@ export function useGradeManagement() {
 	}, [courseGrades, searchTerm]);
 
 	const handleExportCSV = useCallback(() => {
+		// 전체 과제 보기: 과제만 필터한 courseGrades로 내보내기
+		if (
+			viewMode === "assignment" &&
+			!selectedAssignment &&
+			courseGrades?.items?.length &&
+			filteredCourseStudents.length > 0
+		) {
+			const assignmentItems = courseGrades.items.filter(
+				(i) => i.type === "assignment",
+			);
+			if (assignmentItems.length > 0) {
+				const headers = ["학생명", "학번"];
+				for (const item of assignmentItems) {
+					for (const problem of item.problems) {
+						headers.push(
+							`${item.title} - ${problem.problemTitle ?? ""} (${problem.points ?? 0}점)`,
+						);
+					}
+					headers.push(`${item.title} 총점`);
+				}
+				headers.push("전체 총점", "전체 비율(%)");
+				const rows = [headers.join(",")];
+				for (const student of filteredCourseStudents) {
+					const row: string[] = [
+						`"${student.studentName ?? ""}"`,
+						`"${student.studentId ?? ""}"`,
+					];
+					let totalAllScore = 0;
+					let totalAllPoints = 0;
+					for (const item of assignmentItems) {
+						const assignmentData = student.assignments?.[item.id];
+						for (const problem of item.problems) {
+							const problemGrade =
+								assignmentData?.problems?.[problem.problemId];
+							const score =
+								problemGrade?.score !== null &&
+								problemGrade?.score !== undefined
+									? problemGrade.score
+									: "";
+							row.push(String(score));
+							if (typeof score === "number") {
+								totalAllScore += score;
+							}
+							totalAllPoints += problem.points ?? 0;
+						}
+						if (assignmentData) {
+							row.push(
+								`${assignmentData.totalScore} / ${assignmentData.totalPoints}`,
+							);
+						} else {
+							row.push("-");
+						}
+					}
+					const totalRatio =
+						totalAllPoints > 0
+							? ((totalAllScore / totalAllPoints) * 100).toFixed(1)
+							: "0.0";
+					row.push(`${totalAllScore} / ${totalAllPoints}`, totalRatio);
+					rows.push(row.join(","));
+				}
+				const csvContent = rows.join("\n");
+				const blob = new Blob([`\uFEFF${csvContent}`], {
+					type: "text/csv;charset=utf-8;",
+				});
+				const link = document.createElement("a");
+				link.href = URL.createObjectURL(blob);
+				const fileName = currentSection
+					? `${(currentSection as { courseTitle?: string }).courseTitle ?? ""}_${(currentSection as { sectionNumber?: string }).sectionNumber ?? ""}분반_과제전체성적_${new Date().toISOString().split("T")[0]}.csv`
+					: `과제전체성적_${new Date().toISOString().split("T")[0]}.csv`;
+				link.setAttribute("download", fileName);
+				link.style.visibility = "hidden";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(link.href);
+				return;
+			}
+		}
+
+		// 전체 퀴즈 보기: 퀴즈만 필터한 courseGrades로 내보내기
+		if (
+			viewMode === "quiz" &&
+			!selectedQuiz &&
+			courseGrades?.items?.length &&
+			filteredCourseStudents.length > 0
+		) {
+			const quizItems = courseGrades.items.filter((i) => i.type === "quiz");
+			if (quizItems.length > 0) {
+				const headers = ["학생명", "학번"];
+				for (const item of quizItems) {
+					for (const problem of item.problems) {
+						headers.push(
+							`${item.title} - ${problem.problemTitle ?? ""} (${problem.points ?? 0}점)`,
+						);
+					}
+					headers.push(`${item.title} 총점`);
+				}
+				headers.push("전체 총점", "전체 비율(%)");
+				const rows = [headers.join(",")];
+				for (const student of filteredCourseStudents) {
+					const row: string[] = [
+						`"${student.studentName ?? ""}"`,
+						`"${student.studentId ?? ""}"`,
+					];
+					let totalAllScore = 0;
+					let totalAllPoints = 0;
+					for (const item of quizItems) {
+						const quizData = student.quizzes?.[item.id];
+						for (const problem of item.problems) {
+							const problemGrade = quizData?.problems?.[problem.problemId];
+							const score =
+								problemGrade?.score !== null &&
+								problemGrade?.score !== undefined
+									? problemGrade.score
+									: "";
+							row.push(String(score));
+							if (typeof score === "number") {
+								totalAllScore += score;
+							}
+							totalAllPoints += problem.points ?? 0;
+						}
+						if (quizData) {
+							row.push(`${quizData.totalScore} / ${quizData.totalPoints}`);
+						} else {
+							row.push("-");
+						}
+					}
+					const totalRatio =
+						totalAllPoints > 0
+							? ((totalAllScore / totalAllPoints) * 100).toFixed(1)
+							: "0.0";
+					row.push(`${totalAllScore} / ${totalAllPoints}`, totalRatio);
+					rows.push(row.join(","));
+				}
+				const csvContent = rows.join("\n");
+				const blob = new Blob([`\uFEFF${csvContent}`], {
+					type: "text/csv;charset=utf-8;",
+				});
+				const link = document.createElement("a");
+				link.href = URL.createObjectURL(blob);
+				const fileName = currentSection
+					? `${(currentSection as { courseTitle?: string }).courseTitle ?? ""}_${(currentSection as { sectionNumber?: string }).sectionNumber ?? ""}분반_퀴즈전체성적_${new Date().toISOString().split("T")[0]}.csv`
+					: `퀴즈전체성적_${new Date().toISOString().split("T")[0]}.csv`;
+				link.setAttribute("download", fileName);
+				link.style.visibility = "hidden";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(link.href);
+				return;
+			}
+		}
+
 		if (
 			viewMode === "course" &&
 			courseGrades?.items?.length &&
@@ -758,12 +964,14 @@ export function useGradeManagement() {
 	]);
 
 	const handleBulkSave = useCallback(async () => {
-		if (
-			!selectedAssignment ||
-			!sectionId ||
-			Object.keys(bulkInputs).length === 0
-		) {
+		if (!sectionId || Object.keys(bulkInputs).length === 0) {
 			alert("입력할 점수가 없습니다.");
+			return;
+		}
+		const isQuiz = viewMode === "quiz" && selectedQuiz;
+		const isAssignment = viewMode === "assignment" && selectedAssignment;
+		if (!isQuiz && !isAssignment) {
+			alert("과제 또는 퀴즈를 선택해 주세요.");
 			return;
 		}
 		try {
@@ -791,12 +999,21 @@ export function useGradeManagement() {
 				setBulkSaving(false);
 				return;
 			}
-			await APIService.saveBulkGrades(
-				sectionId,
-				selectedAssignment.id,
-				bulkData,
-			);
-			await fetchGrades();
+			if (isQuiz && selectedQuiz) {
+				await APIService.saveBulkQuizGrades(
+					sectionId,
+					selectedQuiz.id,
+					bulkData,
+				);
+				await fetchQuizGrades();
+			} else if (selectedAssignment) {
+				await APIService.saveBulkGrades(
+					sectionId,
+					selectedAssignment.id,
+					bulkData,
+				);
+				await fetchGrades();
+			}
 			setShowBulkModal(false);
 			setBulkInputs({});
 			alert(`${bulkData.grades.length}개의 성적이 저장되었습니다.`);
@@ -806,63 +1023,152 @@ export function useGradeManagement() {
 		} finally {
 			setBulkSaving(false);
 		}
-	}, [selectedAssignment, sectionId, bulkInputs, filteredGrades, fetchGrades]);
+	}, [
+		viewMode,
+		selectedAssignment,
+		selectedQuiz,
+		sectionId,
+		bulkInputs,
+		filteredGrades,
+		fetchGrades,
+		fetchQuizGrades,
+	]);
+
+	const handleShowBulkModal = useCallback(() => {
+		const assignmentOk =
+			viewMode === "assignment" && selectedAssignment && grades.length > 0;
+		const quizOk =
+			viewMode === "quiz" && selectedQuiz && grades.length > 0;
+		if (assignmentOk || quizOk) {
+			setShowBulkModal(true);
+		} else {
+			alert(
+				"일괄 입력은 과제별 보기에서 과제를 선택하거나, 퀴즈별 보기에서 퀴즈를 선택한 후 사용할 수 있습니다.",
+			);
+		}
+	}, [viewMode, selectedAssignment, selectedQuiz, grades.length]);
 
 	useEffect(() => {
 		const fetchAssignmentProblemsForPoints = async () => {
 			if (!showPointsModal || !sectionId) return;
 			try {
 				setLoadingProblems(true);
-				if (viewMode === "course" && assignments.length > 0) {
-					const allProblemsData = await Promise.all(
-						assignments.map(async (assignment) => {
-							try {
-								const problemsResponse = await APIService.getAssignmentProblems(
-									sectionId,
-									assignment.id,
-								);
-								const problemsData =
-									problemsResponse?.data ?? problemsResponse ?? {};
-								const problems = problemsData.problems ?? problemsData ?? [];
-								const problemsArray = Array.isArray(problems) ? problems : [];
-								return {
-									assignmentId: assignment.id,
-									assignmentTitle: assignment.title,
-									problems: problemsArray.map(
-										(
-											p: AssignmentProblemRow & {
-												assignmentId?: number;
-												assignmentTitle?: string;
-											},
-										) => ({
-											...p,
-											assignmentId: assignment.id,
-											assignmentTitle: assignment.title,
-										}),
-									),
-								};
-							} catch (error) {
-								console.error(`과제 ${assignment.id}의 문제 조회 실패:`, error);
-								return {
-									assignmentId: assignment.id,
-									assignmentTitle: assignment.title,
-									problems: [] as AssignmentProblemRow[],
-								};
-							}
-						}),
-					);
-					setAllAssignmentProblems(allProblemsData);
+				if (
+					(viewMode === "course" || viewMode === "assignment") &&
+					(assignments.length > 0 || quizzes.length > 0)
+				) {
 					const initialPoints: Record<string, number | ""> = {};
-					for (const { problems } of allProblemsData) {
-						for (const problem of problems) {
-							const problemId = problem.id ?? problem.problemId;
-							if (problemId) {
-								const key = `${problem.assignmentId ?? 0}-${problemId}`;
-								initialPoints[key] =
-									problem.points && problem.points > 0 ? problem.points : 1;
+
+					if (assignments.length > 0) {
+						const allProblemsData = await Promise.all(
+							assignments.map(async (assignment) => {
+								try {
+									const problemsResponse =
+										await APIService.getAssignmentProblems(
+											sectionId,
+											assignment.id,
+										);
+									const problemsData =
+										problemsResponse?.data ?? problemsResponse ?? {};
+									const problems =
+										problemsData.problems ?? problemsData ?? [];
+									const problemsArray = Array.isArray(problems)
+										? problems
+										: [];
+									return {
+										assignmentId: assignment.id,
+										assignmentTitle: assignment.title,
+										problems: problemsArray.map(
+											(
+												p: AssignmentProblemRow & {
+													assignmentId?: number;
+													assignmentTitle?: string;
+												},
+											) => ({
+												...p,
+												assignmentId: assignment.id,
+												assignmentTitle: assignment.title,
+											}),
+										),
+									};
+								} catch (error) {
+									console.error(
+										`과제 ${assignment.id}의 문제 조회 실패:`,
+										error,
+									);
+									return {
+										assignmentId: assignment.id,
+										assignmentTitle: assignment.title,
+										problems: [] as AssignmentProblemRow[],
+									};
+								}
+							}),
+						);
+						setAllAssignmentProblems(allProblemsData);
+						for (const { problems } of allProblemsData) {
+							for (const problem of problems) {
+								const problemId = problem.id ?? problem.problemId;
+								if (problemId) {
+									const key = `${problem.assignmentId ?? 0}-${problemId}`;
+									initialPoints[key] =
+										problem.points && problem.points > 0
+											? problem.points
+											: 1;
+								}
 							}
 						}
+					} else {
+						setAllAssignmentProblems([]);
 					}
+
+					if (quizzes.length > 0) {
+						const allQuizData = await Promise.all(
+							quizzes.map(async (quiz) => {
+								try {
+									const problemsResponse =
+										await APIService.getQuizProblems(sectionId, quiz.id);
+									const problemsData =
+										problemsResponse?.data ?? problemsResponse ?? {};
+									const problems =
+										problemsData.problems ?? problemsData ?? [];
+									const problemsArray = Array.isArray(problems)
+										? problems
+										: [];
+									return {
+										quizId: quiz.id,
+										quizTitle: quiz.title,
+										problems: problemsArray,
+									};
+								} catch (error) {
+									console.error(
+										`퀴즈 ${quiz.id}(코딩 테스트) 문제 조회 실패:`,
+										error,
+									);
+									return {
+										quizId: quiz.id,
+										quizTitle: quiz.title,
+										problems: [] as AssignmentProblemRow[],
+									};
+								}
+							}),
+						);
+						setAllQuizProblems(allQuizData);
+						for (const { quizId, problems } of allQuizData) {
+							for (const problem of problems) {
+								const problemId = problem.id ?? problem.problemId;
+								if (problemId) {
+									const key = `quiz-${quizId}-${problemId}`;
+									initialPoints[key] =
+										problem.points && problem.points > 0
+											? problem.points
+											: 1;
+								}
+							}
+						}
+					} else {
+						setAllQuizProblems([]);
+					}
+
 					setPointsInputs(initialPoints);
 					setAssignmentProblems([]);
 				} else if (selectedAssignment) {
@@ -875,6 +1181,7 @@ export function useGradeManagement() {
 					const problemsArray = Array.isArray(problems) ? problems : [];
 					setAssignmentProblems(problemsArray);
 					setAllAssignmentProblems([]);
+					setAllQuizProblems([]);
 					const initialPoints: Record<string, number | ""> = {};
 					for (const problem of problemsArray) {
 						const problemId = problem.id ?? problem.problemId;
@@ -884,17 +1191,29 @@ export function useGradeManagement() {
 						}
 					}
 					setPointsInputs(initialPoints);
+				} else {
+					setAssignmentProblems([]);
+					setAllAssignmentProblems([]);
+					setAllQuizProblems([]);
 				}
 			} catch (error) {
-				console.error("과제 문제 조회 실패:", error);
+				console.error("과제/퀴즈 문제 조회 실패:", error);
 				setAssignmentProblems([]);
 				setAllAssignmentProblems([]);
+				setAllQuizProblems([]);
 			} finally {
 				setLoadingProblems(false);
 			}
 		};
 		fetchAssignmentProblemsForPoints();
-	}, [showPointsModal, selectedAssignment, sectionId, viewMode, assignments]);
+	}, [
+		showPointsModal,
+		selectedAssignment,
+		sectionId,
+		viewMode,
+		assignments,
+		quizzes,
+	]);
 
 	const handleSavePoints = useCallback(async () => {
 		if (!sectionId) {
@@ -903,7 +1222,7 @@ export function useGradeManagement() {
 		}
 		try {
 			setPointsSaving(true);
-			if (viewMode === "course" && allAssignmentProblems.length > 0) {
+			if (allAssignmentProblems.length > 0) {
 				let savedCount = 0;
 				let errorCount = 0;
 				for (const { assignmentId, problems } of allAssignmentProblems) {
@@ -946,6 +1265,9 @@ export function useGradeManagement() {
 				}
 				if (savedCount > 0) {
 					await fetchCourseGrades();
+					if (viewMode === "assignment" && selectedAssignment) {
+						await fetchGrades();
+					}
 					alert(
 						`${savedCount}개 과제의 배점이 저장되었습니다.${errorCount > 0 ? ` (${errorCount}개 실패)` : ""}`,
 					);
@@ -1013,6 +1335,104 @@ export function useGradeManagement() {
 	]);
 
 	const stats = useMemo(() => {
+		// 전체 과제 / 전체 퀴즈: courseGrades + filteredCourseStudents로 통계 계산
+		const useCourseGrades =
+			(viewMode === "assignment" && !selectedAssignment) ||
+			(viewMode === "quiz" && !selectedQuiz);
+		if (
+			useCourseGrades &&
+			courseGrades?.items?.length &&
+			filteredCourseStudents.length > 0
+		) {
+			const items = courseGrades.items.filter(
+				(i) =>
+					(viewMode === "assignment" && i.type === "assignment") ||
+					(viewMode === "quiz" && i.type === "quiz"),
+			);
+			if (items.length === 0) return null;
+			const problemStats: Array<{
+				problemId: number;
+				problemTitle: string;
+				points: number;
+				avg: number;
+				max: number;
+				min: number;
+				submittedCount: number;
+				totalCount: number;
+			}> = [];
+			for (const item of items) {
+				for (const problem of item.problems) {
+					const scores = filteredCourseStudents
+						.map((student) => {
+							const data =
+								item.type === "assignment"
+									? student.assignments?.[item.id]
+									: student.quizzes?.[item.id];
+							const pg = data?.problems?.[problem.problemId];
+							return pg?.score !== null && pg?.score !== undefined
+								? pg.score
+								: null;
+						})
+						.filter((s): s is number => s !== null);
+					const submittedCount = filteredCourseStudents.filter((student) => {
+						const data =
+							item.type === "assignment"
+								? student.assignments?.[item.id]
+								: student.quizzes?.[item.id];
+						const pg = data?.problems?.[problem.problemId];
+						return pg?.submitted ?? false;
+					}).length;
+					problemStats.push({
+						problemId: problem.problemId,
+						problemTitle: `${item.title} - ${problem.problemTitle ?? ""}`,
+						points: problem.points ?? 0,
+						avg:
+							scores.length > 0
+								? Number(
+										(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(
+											1,
+										),
+									)
+								: 0,
+						max: scores.length > 0 ? Math.max(...scores) : 0,
+						min: scores.length > 0 ? Math.min(...scores) : 0,
+						submittedCount,
+						totalCount: filteredCourseStudents.length,
+					});
+				}
+			}
+			const totalPoints = items.reduce(
+				(sum, item) =>
+					sum + item.problems.reduce((s, p) => s + (p.points ?? 0), 0),
+				0,
+			);
+			const totalScores = filteredCourseStudents.map((student) =>
+				items.reduce((sum, item) => {
+					const data =
+						item.type === "assignment"
+							? student.assignments?.[item.id]
+							: student.quizzes?.[item.id];
+					return sum + (data?.totalScore ?? 0);
+				}, 0),
+			);
+			const overallAvg =
+				totalScores.length > 0
+					? (
+							totalScores.reduce((a, b) => a + b, 0) / totalScores.length
+						).toFixed(1)
+					: "0";
+			return {
+				problemStats,
+				overall: {
+					avg: Number.parseFloat(overallAvg),
+					max: totalScores.length > 0 ? Math.max(...totalScores) : 0,
+					min: totalScores.length > 0 ? Math.min(...totalScores) : 0,
+					totalPoints,
+					totalStudents: filteredCourseStudents.length,
+				},
+			};
+		}
+
 		if (!grades.length || !grades[0]?.problemGrades) return null;
 		const problemStats = grades[0].problemGrades.map((problem) => {
 			const scores = grades
@@ -1066,7 +1486,14 @@ export function useGradeManagement() {
 				totalStudents: grades.length,
 			},
 		};
-	}, [grades]);
+	}, [
+		grades,
+		viewMode,
+		selectedAssignment,
+		selectedQuiz,
+		courseGrades,
+		filteredCourseStudents,
+	]);
 
 	return {
 		sectionId,
@@ -1109,13 +1536,18 @@ export function useGradeManagement() {
 		loadingProblems,
 		allAssignmentProblems,
 		setAllAssignmentProblems,
+		allQuizProblems,
+		setAllQuizProblems,
 		bulkInputs,
 		setBulkInputs,
 		bulkSaving,
 		getSectionDisplayName,
 		handleSaveGrade,
 		handleViewCode,
+		handleSaveGradeForAssignment,
+		handleViewCodeForAssignment,
 		handleExportCSV,
+		handleShowBulkModal,
 		handleBulkSave,
 		handleSavePoints,
 		stats,

@@ -14,12 +14,18 @@ export interface SectionInfo {
 export interface AssignmentItem {
 	id: number;
 	title: string;
+	/** 제출 마감 (API: endDate / dueDate / deadline 등) */
+	dueDate?: string;
+	endDate?: string;
+	deadline?: string;
 }
 
-/** 퀴즈 (getQuizzesBySection) */
+/** 퀴즈 (getQuizzesBySection, 코딩 테스트 등) */
 export interface QuizItem {
 	id: number;
 	title: string;
+	/** 제출 마감 (API: endTime 등) */
+	endTime?: string;
 }
 
 /** 문제별 성적 (problemGrades 요소) */
@@ -53,6 +59,8 @@ export interface CourseGradeItem {
 	title: string;
 	problems: { problemId: number; problemTitle?: string; points?: number }[];
 	totalPoints: number;
+	/** 제출 마감 (과제: endDate/dueDate, 퀴즈: endTime) */
+	dueAt?: string;
 }
 
 /** 수업 전체 보기 - 학생별 과제/퀴즈 점수 */
@@ -86,10 +94,11 @@ export interface CourseGradesData {
 	students: CourseStudentEntry[];
 }
 
-/** 편집 중인 셀 */
+/** 편집 중인 셀 (assignmentId 있으면 전체 과제 보기에서 편집) */
 export interface EditingGrade {
 	userId: number;
 	problemId: number;
+	assignmentId?: number;
 }
 
 /** 과제 문제 (getAssignmentProblems) */
@@ -107,6 +116,13 @@ export interface AssignmentProblemRow {
 export interface AllAssignmentProblemsEntry {
 	assignmentId: number;
 	assignmentTitle: string;
+	problems: AssignmentProblemRow[];
+}
+
+/** 수업 전체 배점용 퀴즈(코딩 테스트)별 문제 목록 */
+export interface AllQuizProblemsEntry {
+	quizId: number;
+	quizTitle: string;
 	problems: AssignmentProblemRow[];
 }
 

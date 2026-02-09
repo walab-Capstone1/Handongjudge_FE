@@ -176,21 +176,34 @@ export const SecondaryButton = styled.button`
   }
 `;
 
+/** 고정 열(학생, 학번) 너비 - sticky left 계산용. colgroup과 동일하게 유지 */
+export const STICKY_COL_1_WIDTH = "5.5rem";
+export const STICKY_COL_2_WIDTH = "6rem";
+
+/** 스크롤 영역 열 고정 너비 - 갯수와 상관없이 간격 통일, 가로 스크롤로 확장 */
+export const COL_SCORE_WIDTH = "5rem";
+export const COL_PROBLEM_WIDTH = "13rem";
+
 export const TableContainer = styled.div`
+  width: 100%;
+  max-width: 100%;
   background: white;
   border-radius: 8px;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   max-height: min(88vh, 1100px);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
   position: relative;
+  min-width: 0;
+  isolation: isolate;
 `;
 
+/* 열 개수와 관계없이 동일 간격 유지: 너비는 colgroup 합계만 사용, min-width 제거로 스크롤 시에도 간격 통일 */
 export const Table = styled.table`
   width: max-content;
-  min-width: 100%;
-  border-collapse: collapse;
-  table-layout: auto;
+  border-collapse: collapse !important;
+  table-layout: fixed;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     sans-serif;
 
@@ -198,8 +211,47 @@ export const Table = styled.table`
     background: #f8fafc;
   }
 
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc !important;
+    box-shadow: 0 1px 0 0 #e2e8f0;
+    /* tbody 셀(z-index:1) 위에 헤더가 보이도록 */
+    z-index: 5;
+  }
+
+  /* 두 번째 헤더 행(문제별 열): 세로 스크롤 시 첫 행 바로 아래에 고정 */
+  thead tr:nth-child(2) th {
+    top: 2.5rem;
+    background: #f8fafc !important;
+    box-shadow: 0 1px 0 0 #e2e8f0;
+    z-index: 5;
+  }
+
+  /* 학생·학번 헤더: 첫 번째 행의 1·2번째 th만 (가로 스크롤 시에도 고정, 세로 스크롤 시에도 최상단) */
+  thead tr:first-child th:first-child {
+    left: 0 !important;
+    z-index: 15 !important;
+    width: ${STICKY_COL_1_WIDTH} !important;
+    min-width: ${STICKY_COL_1_WIDTH} !important;
+    max-width: ${STICKY_COL_1_WIDTH} !important;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+    background: #f8fafc !important;
+  }
+
+  thead tr:first-child th:nth-child(2) {
+    left: ${STICKY_COL_1_WIDTH} !important;
+    z-index: 15 !important;
+    width: ${STICKY_COL_2_WIDTH} !important;
+    min-width: ${STICKY_COL_2_WIDTH} !important;
+    max-width: ${STICKY_COL_2_WIDTH} !important;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+    background: #f8fafc !important;
+  }
+
   th {
     padding: 0.45rem 0.4rem;
+    min-width: ${COL_SCORE_WIDTH};
     text-align: center;
     font-weight: 600;
     font-size: 0.75rem;
@@ -207,7 +259,6 @@ export const Table = styled.table`
     text-transform: uppercase;
     letter-spacing: 0.3px;
     border-bottom: 1px solid #e2e8f0;
-    background: #f8fafc;
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
@@ -223,7 +274,6 @@ export const Table = styled.table`
   tbody tr {
     border-bottom: 1px solid #f1f5f9;
     transition: background 0.2s ease;
-    position: relative;
     overflow: visible;
 
     &:hover {
@@ -237,6 +287,9 @@ export const Table = styled.table`
 
   td {
     padding: 0.95rem 0.4rem;
+    width: ${COL_SCORE_WIDTH};
+    min-width: ${COL_SCORE_WIDTH};
+    max-width: ${COL_SCORE_WIDTH};
     font-size: 0.8125rem;
     color: #1e293b;
     overflow: hidden;
@@ -249,12 +302,41 @@ export const Table = styled.table`
       border-left: 3px solid transparent;
     }
   }
+
+  /* SO 47556489: tbody 첫·두 번째 셀 sticky + 배경으로 가려지지 않게 */
+  tbody td:first-child {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 1 !important;
+    width: ${STICKY_COL_1_WIDTH} !important;
+    min-width: ${STICKY_COL_1_WIDTH} !important;
+    max-width: ${STICKY_COL_1_WIDTH} !important;
+    background: #fff !important;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+  }
+
+  tbody td:nth-child(2) {
+    position: sticky !important;
+    left: ${STICKY_COL_1_WIDTH} !important;
+    z-index: 1 !important;
+    width: ${STICKY_COL_2_WIDTH} !important;
+    min-width: ${STICKY_COL_2_WIDTH} !important;
+    max-width: ${STICKY_COL_2_WIDTH} !important;
+    background: #fff !important;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+  }
+
+  tbody tr:hover td:first-child,
+  tbody tr:hover td:nth-child(2) {
+    background: #f8fafc !important;
+  }
 `;
 
 export const ProblemHeader = styled.th`
   text-align: center !important;
-  min-width: 56px;
-  max-width: 110px;
+  width: ${COL_PROBLEM_WIDTH} !important;
+  min-width: ${COL_PROBLEM_WIDTH} !important;
+  max-width: ${COL_PROBLEM_WIDTH} !important;
 `;
 
 export const CourseAssignmentHeader = styled.th`
@@ -268,7 +350,7 @@ export const CourseAssignmentHeader = styled.th`
   border-right: 1px solid #e2e8f0;
   background: #f8fafc;
   padding: 0.45rem 0.4rem;
-  min-width: 48px;
+  min-width: ${COL_SCORE_WIDTH};
 
   &:first-of-type {
     border-left: none;
@@ -291,6 +373,15 @@ export const ItemTitle = styled.div`
   gap: 0.35rem;
 `;
 
+/** 헤더에서 제목 옆/아래 마감 시간 */
+export const ItemDue = styled.span`
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 0.15rem;
+`;
+
 export const ItemTypeBadge = styled.span`
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -305,7 +396,9 @@ export const ItemTypeBadge = styled.span`
 
 export const CourseAssignmentTotalHeader = styled.th`
   text-align: center !important;
-  min-width: 48px;
+  width: ${COL_SCORE_WIDTH} !important;
+  min-width: ${COL_SCORE_WIDTH} !important;
+  max-width: ${COL_SCORE_WIDTH} !important;
   padding: 0.45rem 0.4rem;
   background: #f1f5f9 !important;
   font-weight: 600;
@@ -559,18 +652,16 @@ export const NoData = styled.div`
   }
 `;
 
-/* Table cells - name/id */
+/* Table cells - name/id (sticky/left/z-index/background는 Table의 tbody td:first-child, :nth-child(2)에서 적용) */
 export const TdStudentName = styled.td`
   font-weight: 600;
   color: #1e293b;
-  min-width: 68px;
   font-size: 0.8125rem;
   text-align: center;
 `;
 
 export const TdStudentId = styled.td`
   color: #64748b;
-  min-width: 60px;
   font-size: 0.8125rem;
   text-align: center;
 `;
@@ -669,6 +760,14 @@ export const SubmissionTime = styled.span`
   font-size: 0.7rem;
 `;
 
+export const SubmissionDue = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #64748b;
+  font-size: 0.7rem;
+`;
+
 export const EditForm = styled.div`
   display: flex;
   flex-direction: column;
@@ -742,15 +841,9 @@ export const TdTotalCell = styled.td`
   text-align: center;
   font-weight: 600;
   color: #1e293b;
-  min-width: 48px;
-  font-size: 0.8125rem;
-`;
-
-export const TdRatioCell = styled.td`
-  text-align: center;
-  font-weight: 600;
-  color: #667eea;
-  min-width: 42px;
+  width: ${COL_SCORE_WIDTH};
+  min-width: ${COL_SCORE_WIDTH};
+  max-width: ${COL_SCORE_WIDTH};
   font-size: 0.8125rem;
 `;
 
@@ -758,24 +851,29 @@ export const CourseTableContainer = styled(TableContainer)`
   margin-top: 1.5rem;
 `;
 
-export const CourseTable = styled(Table)`
-  width: max-content;
-  min-width: 100%;
-  table-layout: auto;
-`;
+export const CourseTable = styled(Table)``;
 
 export const TdCourseProblemCell = styled.td`
-  background: transparent;
+  position: relative;
+  z-index: 0;
+  background: #fff;
   text-align: center;
   padding: 0.45rem 0.4rem;
+  width: ${COL_PROBLEM_WIDTH} !important;
+  min-width: ${COL_PROBLEM_WIDTH} !important;
+  max-width: ${COL_PROBLEM_WIDTH} !important;
 `;
 
 export const TdCourseAssignmentTotalCell = styled.td`
+  position: relative;
+  z-index: 0;
   background: #f1f5f9;
   font-weight: 600;
   text-align: center;
   padding: 0.45rem 0.4rem;
-  min-width: 48px;
+  width: ${COL_SCORE_WIDTH} !important;
+  min-width: ${COL_SCORE_WIDTH} !important;
+  max-width: ${COL_SCORE_WIDTH} !important;
 `;
 
 /* Modals */
