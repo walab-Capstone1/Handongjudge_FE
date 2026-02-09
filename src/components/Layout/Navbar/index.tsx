@@ -48,14 +48,14 @@ const Navbar: React.FC = () => {
 		<S.NavbarContainer>
 			<S.NavbarWrapper>
 				<S.NavLeft>
-					<S.LogoLink to="/main">
+					<S.LogoLink to="/index">
 						<S.LogoImage
 							src={`${process.env.PUBLIC_URL || ""}/logo.svg`}
 							alt="CodeSturdy"
 						/>
 						<span>CodeSturdy</span>
 					</S.LogoLink>
-					<S.NavLink to="/main">강의</S.NavLink>
+					<S.NavLink to="/index">강의</S.NavLink>
 					{!checking && hasManagingSections && (
 						<S.AdminLink to="/tutor">관리 페이지</S.AdminLink>
 					)}

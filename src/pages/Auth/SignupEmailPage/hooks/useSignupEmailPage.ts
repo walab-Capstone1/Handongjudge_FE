@@ -60,7 +60,7 @@ export function useSignupEmailPage() {
 						tokenManager.setAccessToken(response.accessToken);
 					}
 					alert("회원가입이 완료되었습니다!");
-					navigate("/main");
+					navigate("/index");
 				} else {
 					alert(response.message || "회원가입에 실패했습니다.");
 				}
