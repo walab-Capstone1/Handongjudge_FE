@@ -1,8 +1,6 @@
 import type React from "react";
 import * as S from "./styles";
-import type { Stats } from "./types";
-
-export type FilterStatus = "ALL" | "PENDING" | "RESOLVED";
+import type { Stats, FilterStatus } from "./types";
 
 interface CommunityStatsBarProps {
   filter: FilterStatus;

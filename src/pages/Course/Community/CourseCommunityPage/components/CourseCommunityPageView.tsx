@@ -1,7 +1,6 @@
 import CourseSidebar from "../../../../../components/Course/CourseSidebar";
 import CourseHeader from "../../../../../components/Course/CourseHeader";
 import CommunityHeader from "../CommunityHeader";
-import CommunityStatsBar from "../CommunityStatsBar";
 import CommunityFilterBar from "../CommunityFilterBar";
 import CommunitySearchBar from "../CommunitySearchBar";
 import QuestionList from "../QuestionList";
@@ -78,12 +77,6 @@ export default function CourseCommunityPageView(
 				/>
 				<S.CommunityBody>
 					<CommunityHeader onCreateQuestion={d.handleCreateQuestion} />
-
-					<CommunityStatsBar
-						filter={d.filter}
-						stats={d.stats}
-						onFilterChange={d.handleFilterChange}
-					/>
 
 					<CommunityFilterBar
 						assignmentFilter={d.assignmentFilter}
