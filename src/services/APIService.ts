@@ -602,6 +602,20 @@ class APIService {
 		);
 	}
 
+	async saveBulkQuizGrades(
+		sectionId: number | string,
+		quizId: number | string,
+		bulkGradeData: { grades: { userId: number; problemId: number; score: number }[] },
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/grades/bulk`,
+			{
+				method: "POST",
+				body: JSON.stringify(bulkGradeData),
+			},
+		);
+	}
+
 	async createQuiz(sectionId: number | string, quizData: any): Promise<any> {
 		return await this.request(`/sections/${sectionId}/quizzes`, {
 			method: "POST",

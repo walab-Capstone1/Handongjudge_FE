@@ -39,8 +39,8 @@ export default function GradeManagementHeader({
 	onExportCSV,
 }: GradeManagementHeaderProps) {
 	const showActionButtons =
-		selectedAssignment ||
-		selectedQuiz ||
+		(viewMode === "assignment" && assignments.length > 0) ||
+		(viewMode === "quiz" && quizzes.length > 0) ||
 		(viewMode === "course" && (assignments.length > 0 || quizzes.length > 0));
 
 	return (
@@ -121,9 +121,6 @@ export default function GradeManagementHeader({
 						onClick={() => {
 							setViewMode("quiz");
 							setSelectedAssignment(null);
-							if (quizzes.length > 0 && !selectedQuiz) {
-								setSelectedQuiz(quizzes[0]);
-							}
 						}}
 					>
 						퀴즈별 보기

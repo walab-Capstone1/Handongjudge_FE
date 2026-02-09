@@ -1,18 +1,60 @@
 import React from "react";
+import {
+	FaCheckCircle,
+	FaTimesCircle,
+	FaClock,
+	FaCalendarAlt,
+	FaEdit,
+	FaCode,
+} from "react-icons/fa";
 import * as S from "../styles";
-import type { CourseGradesData, CourseStudentEntry } from "../types";
+import type {
+	CourseGradesData,
+	CourseStudentEntry,
+	EditingGrade,
+} from "../types";
 
 export interface GradeManagementCourseTableProps {
 	courseLoading: boolean;
 	courseGrades: CourseGradesData | null;
 	filteredCourseStudents: CourseStudentEntry[];
+	/** 전체 과제 보기에서 편집/코드 보기용 (과제만 있을 때만 전달) */
+	editingGrade?: EditingGrade | null;
+	setEditingGrade?: (v: EditingGrade | null) => void;
+	gradeInputs?: Record<string, number | "">;
+	setGradeInputs?: React.Dispatch<
+		React.SetStateAction<Record<string, number | "">>
+	>;
+	comments?: Record<string, string>;
+	onSaveGrade?: (
+		assignmentId: number,
+		userId: number,
+		problemId: number,
+		score: number | "",
+		comment: string,
+	) => void;
+	onViewCode?: (
+		assignmentId: number,
+		userId: number,
+		problemId: number,
+	) => void;
 }
 
 export default function GradeManagementCourseTable({
 	courseLoading,
 	courseGrades,
 	filteredCourseStudents,
+	editingGrade = null,
+	setEditingGrade,
+	gradeInputs = {},
+	setGradeInputs,
+	comments = {},
+	onSaveGrade,
+	onViewCode,
 }: GradeManagementCourseTableProps) {
+	const hasAssignmentActions = Boolean(
+		onSaveGrade && onViewCode && setEditingGrade && setGradeInputs,
+	);
 	return (
 		<S.CourseTableContainer>
 			{courseLoading ? (
@@ -22,34 +64,82 @@ export default function GradeManagementCourseTable({
 				</S.LoadingContainer>
 			) : courseGrades?.items?.length && filteredCourseStudents.length > 0 ? (
 				<S.CourseTable>
+					<colgroup>
+						<col style={{ width: S.STICKY_COL_1_WIDTH }} />
+						<col style={{ width: S.STICKY_COL_2_WIDTH }} />
+						{courseGrades.items.flatMap((item) =>
+							item.problems.length === 0
+								? [
+										<col
+											key={`${item.type}-${item.id}-empty`}
+											style={{ width: S.COL_PROBLEM_WIDTH }}
+										/>,
+										<col
+											key={`${item.type}-${item.id}-total`}
+											style={{ width: S.COL_SCORE_WIDTH }}
+										/>,
+									]
+								: [
+										...item.problems.map((p) => (
+											<col
+												key={`${item.type}-${item.id}-${p.problemId}`}
+												style={{ width: S.COL_PROBLEM_WIDTH }}
+											/>
+										)),
+										<col
+											key={`${item.type}-${item.id}-total`}
+											style={{ width: S.COL_SCORE_WIDTH }}
+										/>,
+									],
+						)}
+					</colgroup>
 					<thead>
 						<tr>
 							<th rowSpan={2}>학생</th>
 							<th rowSpan={2}>학번</th>
-							{courseGrades.items.map((item) =>
-								item.type === "quiz" ? (
+							{courseGrades.items.map((item) => {
+								const colSpan =
+									item.problems.length > 0 ? item.problems.length + 1 : 2;
+								return item.type === "quiz" ? (
 									<S.CourseQuizHeader
 										key={`${item.type}-${item.id}`}
-										colSpan={item.problems.length + 1}
+										colSpan={colSpan}
 									>
-										<S.ItemTitle>
-											<S.ItemTypeBadge>퀴즈</S.ItemTypeBadge>
-											{item.title}
-										</S.ItemTitle>
+										<div>
+											<S.ItemTitle>
+												<S.ItemTypeBadge>퀴즈</S.ItemTypeBadge>
+												{item.title}
+											</S.ItemTitle>
+											{item.dueAt && (
+												<S.ItemDue>
+													마감: {new Date(item.dueAt).toLocaleString("ko-KR")}
+												</S.ItemDue>
+											)}
+										</div>
 									</S.CourseQuizHeader>
 								) : (
 									<S.CourseAssignmentHeader
 										key={`${item.type}-${item.id}`}
-										colSpan={item.problems.length + 1}
+										colSpan={colSpan}
 									>
-										<S.ItemTitle>{item.title}</S.ItemTitle>
+										<div>
+											<S.ItemTitle>{item.title}</S.ItemTitle>
+											{item.dueAt && (
+												<S.ItemDue>
+													마감: {new Date(item.dueAt).toLocaleString("ko-KR")}
+												</S.ItemDue>
+											)}
+										</div>
 									</S.CourseAssignmentHeader>
-								),
-							)}
+								);
+							})}
 						</tr>
 						<tr>
 							{courseGrades.items.map((item) => (
 								<React.Fragment key={`${item.type}-${item.id}-problems`}>
+									{item.problems.length === 0 ? (
+										<S.ProblemHeader as="th">과제</S.ProblemHeader>
+									) : null}
 									{item.problems.map((problem) => (
 										<S.ProblemHeader
 											key={`${item.type}-${item.id}-${problem.problemId}`}
@@ -86,24 +176,171 @@ export default function GradeManagementCourseTable({
 											<React.Fragment
 												key={`${student.userId}-assignment-${item.id}`}
 											>
-												{item.problems.map((problem) => {
-													const problemGrade =
-														assignmentData?.problems?.[problem.problemId];
-													const score =
-														problemGrade?.score !== null &&
-														problemGrade?.score !== undefined
-															? problemGrade.score
-															: null;
-													return (
-														<td
-															key={`${student.userId}-assignment-${item.id}-${problem.problemId}`}
-														>
-															{score !== null
-																? `${score} / ${problem.points ?? 0}`
-																: "-"}
-														</td>
-													);
-												})}
+												{item.problems.length === 0 ? (
+													<S.TdCourseProblemCell>
+														<span style={{ color: "#94a3b8" }}>과제 없음</span>
+													</S.TdCourseProblemCell>
+												) : (
+													item.problems.map((problem) => {
+														const problemGrade =
+															assignmentData?.problems?.[problem.problemId];
+														const score =
+															problemGrade?.score !== null &&
+															problemGrade?.score !== undefined
+																? problemGrade.score
+																: null;
+														const key = `${item.id}-${student.userId}-${problem.problemId}`;
+														const isEditing =
+															hasAssignmentActions &&
+															editingGrade?.userId === student.userId &&
+															editingGrade?.problemId === problem.problemId &&
+															editingGrade?.assignmentId === item.id;
+														const currentScore =
+															gradeInputs[key] !== undefined
+																? gradeInputs[key]
+																: score !== null
+																	? score
+																	: "";
+														const currentComment = comments[key] ?? "";
+														return (
+															<S.TdCourseProblemCell
+																key={`${student.userId}-assignment-${item.id}-${problem.problemId}`}
+															>
+																{hasAssignmentActions && isEditing ? (
+																	<S.EditForm>
+																		<input
+																			type="number"
+																			min={0}
+																			max={problem.points ?? 100}
+																			value={currentScore}
+																			onChange={(e) => {
+																				const v =
+																					e.target.value === ""
+																						? ""
+																						: Number(e.target.value);
+																				setGradeInputs?.((prev) => ({
+																					...prev,
+																					[key]: v,
+																				}));
+																			}}
+																			placeholder="점수"
+																		/>
+																		<S.EditActions>
+																			<button
+																				type="button"
+																				onClick={() =>
+																					onSaveGrade?.(
+																						item.id,
+																						student.userId,
+																						problem.problemId,
+																						currentScore,
+																						currentComment,
+																					)
+																				}
+																			>
+																				저장
+																			</button>
+																			<button
+																				type="button"
+																				onClick={() => {
+																					setEditingGrade?.(null);
+																					setGradeInputs?.((prev) => {
+																						const next = { ...prev };
+																						delete next[key];
+																						return next;
+																					});
+																				}}
+																			>
+																				취소
+																			</button>
+																		</S.EditActions>
+																	</S.EditForm>
+																) : (
+																	<S.ScoreDisplay>
+																		<S.ScoreValue>
+																			{score !== null
+																				? `${score} / ${problem.points ?? 0}`
+																				: "-"}
+																		</S.ScoreValue>
+																		{hasAssignmentActions && (
+																			<S.ScoreActions>
+																				<button
+																					type="button"
+																					onClick={() => {
+																						setEditingGrade?.({
+																							userId: student.userId,
+																							problemId: problem.problemId,
+																							assignmentId: item.id,
+																						});
+																						setGradeInputs?.((prev) => ({
+																							...prev,
+																							[key]:
+																								score !== null ? score : "",
+																						}));
+																					}}
+																					title="점수 입력/수정"
+																				>
+																					<FaEdit />
+																				</button>
+																				{problemGrade?.submitted && (
+																					<button
+																						type="button"
+																						onClick={() =>
+																							onViewCode?.(
+																								item.id,
+																								student.userId,
+																								problem.problemId,
+																							)
+																						}
+																						title="코드 조회"
+																					>
+																						<FaCode />
+																					</button>
+																				)}
+																			</S.ScoreActions>
+																		)}
+																		{(problemGrade?.submitted ||
+																			item.dueAt) && (
+																			<S.SubmissionInfo>
+																				{problemGrade?.submitted && (
+																					<S.SubmissionStatus
+																						$onTime={problemGrade.isOnTime}
+																					>
+																						{problemGrade.isOnTime ? (
+																							<>
+																								<FaCheckCircle /> 정시 제출
+																							</>
+																						) : (
+																							<>
+																								<FaTimesCircle /> 기한 초과
+																							</>
+																						)}
+																					</S.SubmissionStatus>
+																				)}
+																				{item.dueAt && (
+																					<S.SubmissionDue>
+																						<FaCalendarAlt /> 제출 기한:{" "}
+																						{new Date(
+																							item.dueAt,
+																						).toLocaleString("ko-KR")}
+																					</S.SubmissionDue>
+																				)}
+																				{problemGrade?.submittedAt && (
+																					<S.SubmissionTime>
+																						<FaClock /> 제출 시간:{" "}
+																						{new Date(
+																							problemGrade.submittedAt,
+																						).toLocaleString("ko-KR")}
+																					</S.SubmissionTime>
+																				)}
+																			</S.SubmissionInfo>
+																		)}
+																	</S.ScoreDisplay>
+																)}
+															</S.TdCourseProblemCell>
+														);
+													})
+												)}
 												<S.TdCourseAssignmentTotalCell>
 													{assignmentData ? (
 														<strong>
@@ -130,13 +367,52 @@ export default function GradeManagementCourseTable({
 															? problemGrade.score
 															: null;
 													return (
-														<td
+														<S.TdCourseProblemCell
 															key={`${student.userId}-quiz-${item.id}-${problem.problemId}`}
 														>
-															{score !== null
-																? `${score} / ${problem.points ?? 0}`
-																: "-"}
-														</td>
+															<S.ScoreDisplay>
+																<S.ScoreValue>
+																	{score !== null
+																		? `${score} / ${problem.points ?? 0}`
+																		: "-"}
+																</S.ScoreValue>
+																{(problemGrade?.submitted || item.dueAt) && (
+																	<S.SubmissionInfo>
+																		{problemGrade?.submitted && (
+																			<S.SubmissionStatus
+																				$onTime={problemGrade.isOnTime}
+																			>
+																				{problemGrade.isOnTime ? (
+																					<>
+																						<FaCheckCircle /> 정시 제출
+																					</>
+																				) : (
+																					<>
+																						<FaTimesCircle /> 기한 초과
+																					</>
+																				)}
+																			</S.SubmissionStatus>
+																		)}
+																		{item.dueAt && (
+																			<S.SubmissionDue>
+																				<FaCalendarAlt /> 제출 기한:{" "}
+																				{new Date(item.dueAt).toLocaleString(
+																					"ko-KR",
+																				)}
+																			</S.SubmissionDue>
+																		)}
+																		{problemGrade?.submittedAt && (
+																			<S.SubmissionTime>
+																				<FaClock /> 제출 시간:{" "}
+																				{new Date(
+																					problemGrade.submittedAt,
+																				).toLocaleString("ko-KR")}
+																			</S.SubmissionTime>
+																		)}
+																	</S.SubmissionInfo>
+																)}
+															</S.ScoreDisplay>
+														</S.TdCourseProblemCell>
 													);
 												})}
 												<S.TdCourseAssignmentTotalCell>
