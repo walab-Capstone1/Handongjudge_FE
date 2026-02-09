@@ -602,16 +602,66 @@ class APIService {
 		);
 	}
 
+	async saveQuizGrade(
+		sectionId: number | string,
+		quizId: number | string,
+		gradeData: {
+			userId: number;
+			problemId: number;
+			score: number | null;
+			comment?: string | null;
+		},
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/grades`,
+			{
+				method: "POST",
+				body: JSON.stringify(gradeData),
+			},
+		);
+	}
+
 	async saveBulkQuizGrades(
 		sectionId: number | string,
 		quizId: number | string,
-		bulkGradeData: { grades: { userId: number; problemId: number; score: number }[] },
+		bulkGradeData: {
+			grades: { userId: number; problemId: number; score: number }[];
+		},
 	): Promise<any> {
 		return await this.request(
 			`/sections/${sectionId}/quizzes/${quizId}/grades/bulk`,
 			{
 				method: "POST",
 				body: JSON.stringify(bulkGradeData),
+			},
+		);
+	}
+
+	async setQuizProblemPoints(
+		sectionId: number | string,
+		quizId: number | string,
+		problemId: number | string,
+		points: number,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/grades/problems/${problemId}/points`,
+			{
+				method: "PUT",
+				body: JSON.stringify({ points }),
+			},
+		);
+	}
+
+	async setBulkQuizProblemPoints(
+		sectionId: number | string,
+		quizId: number | string,
+		problemPoints: Record<number, number>,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/grades/points/bulk`,
+			{
+				method: "PUT",
+				body: JSON.stringify(problemPoints),
 			},
 		);
 	}
@@ -709,6 +759,23 @@ class APIService {
 			return response;
 		} catch (error) {
 			console.error("학생 코드 조회 실패:", error);
+			throw error;
+		}
+	}
+
+	async getStudentQuizAcceptedCode(
+		sectionId: number | string,
+		quizId: number | string,
+		userId: number | string,
+		problemId: number | string,
+	): Promise<any> {
+		try {
+			const response = await this.request(
+				`/sections/${sectionId}/quizzes/${quizId}/students/${userId}/problems/${problemId}/accepted-code`,
+			);
+			return response;
+		} catch (error) {
+			console.error("퀴즈 제출 코드 조회 실패:", error);
 			throw error;
 		}
 	}

@@ -572,6 +572,82 @@ export function useGradeManagement() {
 		[sectionId],
 	);
 
+	const handleViewCodeForQuiz = useCallback(
+		async (quizId: number, userId: number, problemId: number) => {
+			if (!sectionId) return;
+			try {
+				const codeResponse = await APIService.getStudentQuizAcceptedCode(
+					sectionId,
+					quizId,
+					userId,
+					problemId,
+				);
+				setSelectedCode(codeResponse);
+				setShowCodeModal(true);
+			} catch (error) {
+				console.error("퀴즈 코드 조회 실패:", error);
+				alert("코드를 불러올 수 없습니다.");
+			}
+		},
+		[sectionId],
+	);
+
+	const handleSaveGradeForQuiz = useCallback(
+		async (
+			userId: number,
+			problemId: number,
+			score: number | "",
+			comment: string,
+		) => {
+			if (!selectedQuiz || !sectionId) return;
+			try {
+				const gradeData = {
+					userId,
+					problemId,
+					score: score !== null && score !== "" ? Number(score) : null,
+					comment: comment || null,
+				};
+				await APIService.saveQuizGrade(sectionId, selectedQuiz.id, gradeData);
+				await fetchQuizGrades();
+				setEditingGrade(null);
+				alert("성적이 저장되었습니다.");
+			} catch (error) {
+				console.error("퀴즈 성적 저장 실패:", error);
+				alert(`성적 저장에 실패했습니다. ${(error as Error).message ?? ""}`);
+			}
+		},
+		[selectedQuiz, sectionId, fetchQuizGrades],
+	);
+
+	/** 수업 전체 보기에서 퀴즈 셀 저장 시 사용 (quizId 전달) */
+	const handleSaveGradeForQuizCourse = useCallback(
+		async (
+			quizId: number,
+			userId: number,
+			problemId: number,
+			score: number | "",
+			comment: string,
+		) => {
+			if (!sectionId) return;
+			try {
+				const gradeData = {
+					userId,
+					problemId,
+					score: score !== null && score !== "" ? Number(score) : null,
+					comment: comment || null,
+				};
+				await APIService.saveQuizGrade(sectionId, quizId, gradeData);
+				await fetchCourseGrades();
+				setEditingGrade(null);
+				alert("성적이 저장되었습니다.");
+			} catch (error) {
+				console.error("퀴즈 성적 저장 실패:", error);
+				alert(`성적 저장에 실패했습니다. ${(error as Error).message ?? ""}`);
+			}
+		},
+		[sectionId, fetchCourseGrades],
+	);
+
 	const getSectionDisplayName = useCallback(() => {
 		if (!currentSection) return "";
 		const s = currentSection as {
@@ -1037,14 +1113,23 @@ export function useGradeManagement() {
 	const handleShowBulkModal = useCallback(() => {
 		const assignmentOk =
 			viewMode === "assignment" && selectedAssignment && grades.length > 0;
-		const quizOk =
-			viewMode === "quiz" && selectedQuiz && grades.length > 0;
+		const quizOk = viewMode === "quiz" && selectedQuiz && grades.length > 0;
 		if (assignmentOk || quizOk) {
 			setShowBulkModal(true);
 		} else {
-			alert(
-				"일괄 입력은 과제별 보기에서 과제를 선택하거나, 퀴즈별 보기에서 퀴즈를 선택한 후 사용할 수 있습니다.",
-			);
+			if (viewMode === "quiz" && !selectedQuiz) {
+				alert(
+					"일괄 입력을 사용하려면 위 '퀴즈 선택'에서 퀴즈를 하나 선택한 후 사용해 주세요.",
+				);
+			} else if (viewMode === "assignment" && !selectedAssignment) {
+				alert(
+					"일괄 입력을 사용하려면 위에서 과제를 하나 선택한 후 사용해 주세요.",
+				);
+			} else {
+				alert(
+					"일괄 입력은 과제별 보기에서 과제를 선택하거나, 퀴즈별 보기에서 퀴즈를 선택한 후 사용할 수 있습니다.",
+				);
+			}
 		}
 	}, [viewMode, selectedAssignment, selectedQuiz, grades.length]);
 
@@ -1054,12 +1139,14 @@ export function useGradeManagement() {
 			try {
 				setLoadingProblems(true);
 				if (
-					(viewMode === "course" || viewMode === "assignment") &&
+					(viewMode === "course" ||
+						viewMode === "assignment" ||
+						viewMode === "quiz") &&
 					(assignments.length > 0 || quizzes.length > 0)
 				) {
 					const initialPoints: Record<string, number | ""> = {};
 
-					if (assignments.length > 0) {
+					if (viewMode !== "quiz" && assignments.length > 0) {
 						const allProblemsData = await Promise.all(
 							assignments.map(async (assignment) => {
 								try {
@@ -1070,11 +1157,8 @@ export function useGradeManagement() {
 										);
 									const problemsData =
 										problemsResponse?.data ?? problemsResponse ?? {};
-									const problems =
-										problemsData.problems ?? problemsData ?? [];
-									const problemsArray = Array.isArray(problems)
-										? problems
-										: [];
+									const problems = problemsData.problems ?? problemsData ?? [];
+									const problemsArray = Array.isArray(problems) ? problems : [];
 									return {
 										assignmentId: assignment.id,
 										assignmentTitle: assignment.title,
@@ -1111,9 +1195,7 @@ export function useGradeManagement() {
 								if (problemId) {
 									const key = `${problem.assignmentId ?? 0}-${problemId}`;
 									initialPoints[key] =
-										problem.points && problem.points > 0
-											? problem.points
-											: 1;
+										problem.points && problem.points > 0 ? problem.points : 1;
 								}
 							}
 						}
@@ -1121,23 +1203,34 @@ export function useGradeManagement() {
 						setAllAssignmentProblems([]);
 					}
 
-					if (quizzes.length > 0) {
+					if (
+						(viewMode === "course" || viewMode === "quiz") &&
+						quizzes.length > 0
+					) {
 						const allQuizData = await Promise.all(
 							quizzes.map(async (quiz) => {
 								try {
-									const problemsResponse =
-										await APIService.getQuizProblems(sectionId, quiz.id);
+									const problemsResponse = await APIService.getQuizProblems(
+										sectionId,
+										quiz.id,
+									);
 									const problemsData =
 										problemsResponse?.data ?? problemsResponse ?? {};
-									const problems =
-										problemsData.problems ?? problemsData ?? [];
-									const problemsArray = Array.isArray(problems)
-										? problems
-										: [];
+									const problems = problemsData.problems ?? problemsData ?? [];
+									const problemsArray = Array.isArray(problems) ? problems : [];
+									// 같은 퀴즈 내 동일 문제(problemId) 중복 제거
+									const seenProblemIds = new Set<number>();
+									const uniqueProblems = problemsArray.filter((p) => {
+										const id = p.problemId ?? p.id;
+										if (id == null) return true;
+										if (seenProblemIds.has(Number(id))) return false;
+										seenProblemIds.add(Number(id));
+										return true;
+									});
 									return {
 										quizId: quiz.id,
 										quizTitle: quiz.title,
-										problems: problemsArray,
+										problems: uniqueProblems,
 									};
 								} catch (error) {
 									console.error(
@@ -1152,16 +1245,29 @@ export function useGradeManagement() {
 								}
 							}),
 						);
-						setAllQuizProblems(allQuizData);
-						for (const { quizId, problems } of allQuizData) {
+						// 동일 퀴즈(quizId)가 두 번 나오지 않도록 중복 제거
+						const seenQuizIds = new Set<number>();
+						let dedupedQuizData = allQuizData.filter(({ quizId }) => {
+							if (seenQuizIds.has(quizId)) return false;
+							seenQuizIds.add(quizId);
+							return true;
+						});
+						// 같은 제목의 퀴즈가 여러 개면 첫 번째만 표시 (섹션 중복 방지)
+						const seenTitles = new Set<string>();
+						dedupedQuizData = dedupedQuizData.filter(({ quizTitle }) => {
+							const title = String(quizTitle ?? "").trim();
+							if (!title || seenTitles.has(title)) return false;
+							seenTitles.add(title);
+							return true;
+						});
+						setAllQuizProblems(dedupedQuizData);
+						for (const { quizId, problems } of dedupedQuizData) {
 							for (const problem of problems) {
 								const problemId = problem.id ?? problem.problemId;
 								if (problemId) {
 									const key = `quiz-${quizId}-${problemId}`;
 									initialPoints[key] =
-										problem.points && problem.points > 0
-											? problem.points
-											: 1;
+										problem.points && problem.points > 0 ? problem.points : 1;
 								}
 							}
 						}
@@ -1179,6 +1285,25 @@ export function useGradeManagement() {
 					const problemsData = problemsResponse?.data ?? problemsResponse ?? {};
 					const problems = problemsData.problems ?? problemsData ?? [];
 					const problemsArray = Array.isArray(problems) ? problems : [];
+					setAssignmentProblems(problemsArray);
+					setAllAssignmentProblems([]);
+					setAllQuizProblems([]);
+					const initialPoints: Record<string, number | ""> = {};
+					for (const problem of problemsArray) {
+						const problemId = problem.id ?? problem.problemId;
+						if (problemId) {
+							initialPoints[problemId] =
+								problem.points && problem.points > 0 ? problem.points : 1;
+						}
+					}
+					setPointsInputs(initialPoints);
+				} else if (viewMode === "quiz" && selectedQuiz) {
+					const problemsResponse = await APIService.getQuizProblems(
+						sectionId,
+						selectedQuiz.id,
+					);
+					const problemsData = problemsResponse?.data ?? problemsResponse ?? [];
+					const problemsArray = Array.isArray(problemsData) ? problemsData : [];
 					setAssignmentProblems(problemsArray);
 					setAllAssignmentProblems([]);
 					setAllQuizProblems([]);
@@ -1209,6 +1334,7 @@ export function useGradeManagement() {
 	}, [
 		showPointsModal,
 		selectedAssignment,
+		selectedQuiz,
 		sectionId,
 		viewMode,
 		assignments,
@@ -1222,7 +1348,7 @@ export function useGradeManagement() {
 		}
 		try {
 			setPointsSaving(true);
-			if (allAssignmentProblems.length > 0) {
+			if (allAssignmentProblems.length > 0 || allQuizProblems.length > 0) {
 				let savedCount = 0;
 				let errorCount = 0;
 				for (const { assignmentId, problems } of allAssignmentProblems) {
@@ -1263,17 +1389,103 @@ export function useGradeManagement() {
 						}
 					}
 				}
+				// 퀴즈 전체 배점 저장 (수업 전체 모드)
+				for (const { quizId, problems } of allQuizProblems) {
+					if (problems.length === 0) continue;
+					const problemPoints: Record<number, number> = {};
+					for (const problem of problems) {
+						const problemId = problem.id ?? problem.problemId;
+						if (!problemId) continue;
+						// 백엔드 API는 Problem.id(problemId)로 조회하므로 problemId 사용
+						const apiProblemId = problem.problemId ?? problem.id;
+						if (apiProblemId == null) continue;
+						const key = `quiz-${quizId}-${problemId}`;
+						const inputPoints = pointsInputs[key];
+						let finalPoints = 1;
+						if (
+							inputPoints !== undefined &&
+							inputPoints !== "" &&
+							inputPoints !== null
+						) {
+							const parsed = Number(inputPoints);
+							if (!Number.isNaN(parsed) && parsed >= 0) {
+								finalPoints = parsed > 0 ? parsed : 1;
+							}
+						} else {
+							const existing = problem.points;
+							finalPoints = existing && existing > 0 ? existing : 1;
+						}
+						problemPoints[Number(apiProblemId)] = finalPoints;
+					}
+					if (Object.keys(problemPoints).length > 0) {
+						try {
+							await APIService.setBulkQuizProblemPoints(
+								sectionId,
+								quizId,
+								problemPoints,
+							);
+							savedCount++;
+						} catch (error) {
+							console.error(`퀴즈 ${quizId} 배점 저장 실패:`, error);
+							errorCount++;
+						}
+					}
+				}
 				if (savedCount > 0) {
 					await fetchCourseGrades();
 					if (viewMode === "assignment" && selectedAssignment) {
 						await fetchGrades();
 					}
+					if (viewMode === "quiz" && selectedQuiz) {
+						await fetchQuizGrades();
+					}
 					alert(
-						`${savedCount}개 과제의 배점이 저장되었습니다.${errorCount > 0 ? ` (${errorCount}개 실패)` : ""}`,
+						`${savedCount}개 과제/퀴즈의 배점이 저장되었습니다.${errorCount > 0 ? ` (${errorCount}개 실패)` : ""}`,
 					);
 				} else {
 					alert("저장할 배점이 없습니다.");
 				}
+			} else if (
+				selectedQuiz &&
+				assignmentProblems.length > 0 &&
+				viewMode === "quiz"
+			) {
+				// 단일 퀴즈 배점 저장 (백엔드 API는 Problem.id로 조회하므로 problemId 사용)
+				const problemPoints: Record<number, number> = {};
+				for (const problem of assignmentProblems) {
+					const problemId = problem.id ?? problem.problemId;
+					if (!problemId) continue;
+					const apiProblemId = problem.problemId ?? problem.id;
+					if (apiProblemId == null) continue;
+					const inputPoints = pointsInputs[problemId];
+					let finalPoints = 1;
+					if (
+						inputPoints !== undefined &&
+						inputPoints !== "" &&
+						inputPoints !== null
+					) {
+						const parsed = Number(inputPoints);
+						if (!Number.isNaN(parsed) && parsed >= 0) {
+							finalPoints = parsed > 0 ? parsed : 1;
+						}
+					} else {
+						const existing = problem.points;
+						finalPoints = existing && existing > 0 ? existing : 1;
+					}
+					problemPoints[Number(apiProblemId)] = finalPoints;
+				}
+				if (Object.keys(problemPoints).length === 0) {
+					alert("유효한 배점을 입력해주세요.");
+					setPointsSaving(false);
+					return;
+				}
+				await APIService.setBulkQuizProblemPoints(
+					sectionId,
+					selectedQuiz.id,
+					problemPoints,
+				);
+				await fetchQuizGrades();
+				alert("배점이 저장되었습니다.");
 			} else if (selectedAssignment && assignmentProblems.length > 0) {
 				const problemPoints: Record<number, number> = {};
 				for (const problem of assignmentProblems) {
@@ -1327,11 +1539,14 @@ export function useGradeManagement() {
 		sectionId,
 		viewMode,
 		allAssignmentProblems,
+		allQuizProblems,
 		assignmentProblems,
 		selectedAssignment,
+		selectedQuiz,
 		pointsInputs,
 		fetchCourseGrades,
 		fetchGrades,
+		fetchQuizGrades,
 	]);
 
 	const stats = useMemo(() => {
@@ -1546,6 +1761,9 @@ export function useGradeManagement() {
 		handleViewCode,
 		handleSaveGradeForAssignment,
 		handleViewCodeForAssignment,
+		handleSaveGradeForQuiz,
+		handleSaveGradeForQuizCourse,
+		handleViewCodeForQuiz,
 		handleExportCSV,
 		handleShowBulkModal,
 		handleBulkSave,

@@ -94,11 +94,12 @@ export interface CourseGradesData {
 	students: CourseStudentEntry[];
 }
 
-/** 편집 중인 셀 (assignmentId 있으면 전체 과제 보기에서 편집) */
+/** 편집 중인 셀 (assignmentId: 과제 셀, quizId: 퀴즈 셀) */
 export interface EditingGrade {
 	userId: number;
 	problemId: number;
 	assignmentId?: number;
+	quizId?: number;
 }
 
 /** 과제 문제 (getAssignmentProblems) */
