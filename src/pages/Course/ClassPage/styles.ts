@@ -66,6 +66,38 @@ export const EnrollButton = styled.button`
   }
 `;
 
+export const CreateCourseButton = styled.button`
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f0f0ff;
+  }
+`;
+
+export const AdminPageButton = styled.button`
+  background: #5a67d8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #4c51bf;
+  }
+`;
+
 export const SearchAndSort = styled.div`
   display: flex;
   justify-content: space-between;

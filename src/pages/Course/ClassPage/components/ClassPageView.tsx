@@ -39,26 +39,34 @@ export default function ClassPageView(d: ClassPageHookReturn) {
 		<S.ClassPageContainer>
 			<Header onUserNameClick={() => {}} />
 			<S.ContentSection>
-				<S.PageTitle>수강 중인 코스</S.PageTitle>
+				<S.PageTitle>내 강의실</S.PageTitle>
 				<S.TabNavigation>
 					<S.Tab active={d.activeTab === "all"} onClick={() => d.setActiveTab("all")}>
-						전체 ({d.stats.all})
+						참여한 수업 목록 ({d.stats.all})
 					</S.Tab>
 					<S.Tab
 						active={d.activeTab === "in-progress"}
 						onClick={() => d.setActiveTab("in-progress")}
 					>
-						수강 중 ({d.stats.inProgress})
+						관리 중인 수업 목록 ({d.stats.inProgress})
 					</S.Tab>
 					<S.Tab
 						active={d.activeTab === "completed"}
 						onClick={() => d.setActiveTab("completed")}
 					>
-						수강 종료 ({d.stats.completed})
+						공개된 클래스 ({d.stats.completed})
 					</S.Tab>
 					<S.EnrollButton onClick={() => d.setShowEnrollModal(true)}>
 						수업 참가
 					</S.EnrollButton>
+					<S.CreateCourseButton onClick={() => d.navigate("/tutor")}>
+						수업 만들기
+					</S.CreateCourseButton>
+					{d.activeTab === "in-progress" && (
+						<S.AdminPageButton onClick={() => d.navigate("/tutor")}>
+							관리페이지
+						</S.AdminPageButton>
+					)}
 				</S.TabNavigation>
 				<S.SearchAndSort>
 					<S.SearchBar>
@@ -80,7 +88,11 @@ export default function ClassPageView(d: ClassPageHookReturn) {
 				</S.SearchAndSort>
 				{d.filteredSections.length === 0 ? (
 					<S.EmptyState>
-						<p>수강 중인 강의가 없습니다.</p>
+						<p>
+							{d.activeTab === "all" && "참여한 수업이 없습니다."}
+							{d.activeTab === "in-progress" && "관리 중인 수업이 없습니다."}
+							{d.activeTab === "completed" && "공개된 클래스가 없습니다."}
+						</p>
 					</S.EmptyState>
 				) : (
 					<S.CoursesGrid>
@@ -89,7 +101,18 @@ export default function ClassPageView(d: ClassPageHookReturn) {
 								key={course.id}
 								course={course}
 								onStatusUpdate={d.handleStatusUpdate}
-								onEnroll={() => {}}
+								hideBatch
+								showEnrollButton={
+									d.activeTab === "completed" && !!course.enrollmentCode
+								}
+								onEnroll={
+									d.activeTab === "completed" && course.enrollmentCode
+										? () => {
+												d.setEnrollmentCode(course.enrollmentCode ?? "");
+												d.setShowEnrollModal(true);
+											}
+										: undefined
+								}
 							/>
 						))}
 					</S.CoursesGrid>

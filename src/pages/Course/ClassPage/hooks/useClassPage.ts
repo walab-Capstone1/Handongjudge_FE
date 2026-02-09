@@ -1,15 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../hooks/useAuth";
 import APIService from "../../../../services/APIService";
 import type { Section, CourseCardData, TabType, SortType } from "../types";
 import {
 	transformSectionData,
+	transformManagingSection,
 	extractEnrollmentCode,
 } from "../utils/sectionUtils";
 
 export function useClassPage() {
+	const navigate = useNavigate();
 	const { user, isAuthenticated } = useAuth();
 	const [enrolledSections, setEnrolledSections] = useState<Section[]>([]);
+	const [managingSections, setManagingSections] = useState<CourseCardData[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState<TabType>("all");
@@ -41,50 +45,75 @@ export function useClassPage() {
 		}
 	}, [isAuthenticated]);
 
+	const fetchManagingSections = useCallback(async () => {
+		if (!isAuthenticated) return;
+		try {
+			const response = await APIService.getManagingSections();
+			const sectionsData = response?.data ?? response ?? [];
+			const transformed = Array.isArray(sectionsData)
+				? sectionsData.map(transformManagingSection)
+				: [];
+			setManagingSections(transformed);
+		} catch (err) {
+			console.error("관리 중인 수업 조회 실패:", err);
+			setManagingSections([]);
+		}
+	}, [isAuthenticated]);
+
 	useEffect(() => {
 		fetchEnrolledSections();
 	}, [fetchEnrolledSections]);
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			fetchManagingSections();
+		}
+	}, [isAuthenticated, fetchManagingSections]);
 
 	const handleStatusUpdate = useCallback(async () => {
 		try {
 			const response = await APIService.getUserEnrolledSections();
 			setEnrolledSections(response.data || response);
+			fetchManagingSections();
 		} catch (err) {
 			console.error("대시보드 새로고침 실패:", err);
 		}
-	}, []);
+	}, [fetchManagingSections]);
 
 	const getFilteredSections = useCallback((): CourseCardData[] => {
-		let filtered = enrolledSections.map(transformSectionData);
-		if (activeTab === "in-progress") {
-			filtered = filtered.filter((section) => section.active !== false);
-		} else if (activeTab === "completed") {
-			filtered = filtered.filter((section) => section.active === false);
+		let list: CourseCardData[];
+		if (activeTab === "all") {
+			list = enrolledSections.map(transformSectionData);
+		} else if (activeTab === "in-progress") {
+			list = [...managingSections];
+		} else {
+			list = [];
 		}
 		if (searchTerm) {
-			filtered = filtered.filter(
+			list = list.filter(
 				(section) =>
 					section.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
 					section.courseName.toLowerCase().includes(searchTerm.toLowerCase()),
 			);
 		}
 		if (sortBy === "recent") {
-			filtered.sort(
+			list.sort(
 				(a, b) =>
 					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
 			);
 		} else if (sortBy === "name") {
-			filtered.sort((a, b) => a.title.localeCompare(b.title));
+			list.sort((a, b) => a.title.localeCompare(b.title));
 		}
-		return filtered;
-	}, [enrolledSections, activeTab, searchTerm, sortBy]);
+		return list;
+	}, [enrolledSections, managingSections, activeTab, searchTerm, sortBy]);
 
 	const stats = useMemo(() => {
-		const all = enrolledSections.length;
-		const inProgress = enrolledSections.filter((s) => s.active !== false).length;
-		const completed = enrolledSections.filter((s) => s.active === false).length;
-		return { all, inProgress, completed };
-	}, [enrolledSections]);
+		return {
+			all: enrolledSections.length,
+			inProgress: managingSections.length,
+			completed: 0,
+		};
+	}, [enrolledSections, managingSections]);
 
 	const filteredSections = useMemo(
 		() => getFilteredSections(),
@@ -120,6 +149,7 @@ export function useClassPage() {
 	}, [enrollmentCode]);
 
 	return {
+		navigate,
 		userName,
 		loading,
 		error,

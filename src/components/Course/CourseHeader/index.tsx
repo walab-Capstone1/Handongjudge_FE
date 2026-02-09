@@ -32,18 +32,32 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
 					const response = await APIService.getMyRoleInSection(
 						Number(sectionId),
 					);
-					const role = response?.data || response;
+					// API가 문자열 직접 반환 / { data: "STUDENT" } / { data: { role: "STUDENT" } } 등 대응
+					let raw: unknown = response;
+					if (typeof response === "object" && response !== null) {
+						raw =
+							(response as { data?: unknown })?.data ??
+							(response as { role?: unknown })?.role ??
+							response;
+						if (typeof raw === "object" && raw !== null && "role" in raw) {
+							raw = (raw as { role: unknown }).role;
+						}
+					}
+					const role =
+						typeof raw === "string"
+							? raw.toUpperCase()
+							: String(raw ?? "").toUpperCase();
 
 					let roleText = "";
 					if (role === "ADMIN" || role === "INSTRUCTOR") {
-						roleText = "강의자";
+						roleText = "교수";
 					} else if (role === "TUTOR") {
 						roleText = "튜터";
 					} else if (role === "STUDENT") {
 						roleText = "학생";
 					}
 
-					setUserRole(roleText);
+					setUserRole(roleText || null);
 				} catch (error) {
 					console.error("역할 조회 실패:", error);
 					setUserRole(null);
@@ -78,7 +92,7 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
 			<S.UserSection>
 				<S.UserInfo>
 					{auth.user?.name || "사용자"}
-					{userRole && <S.UserRole> · {userRole}</S.UserRole>}
+					{userRole && <S.UserRole> {userRole}</S.UserRole>}
 				</S.UserInfo>
 			</S.UserSection>
 		</S.Container>

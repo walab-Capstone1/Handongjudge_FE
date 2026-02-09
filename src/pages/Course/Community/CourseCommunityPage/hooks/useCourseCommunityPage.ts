@@ -9,8 +9,8 @@ import type {
 	Stats,
 	Assignment,
 	Problem,
+	FilterStatus,
 } from "../types";
-import type { FilterStatus } from "../CommunityStatsBar";
 
 export function useCourseCommunityPage() {
 	const { sectionId } = useParams<{ sectionId: string }>();

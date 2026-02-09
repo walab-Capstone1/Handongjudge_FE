@@ -23,6 +23,8 @@ export interface CourseCardData {
 	courseId: string;
 	active: boolean;
 	createdAt: string;
+	/** 공개된 클래스 참가 시 사용 */
+	enrollmentCode?: string;
 }
 
 export interface StatusItem {

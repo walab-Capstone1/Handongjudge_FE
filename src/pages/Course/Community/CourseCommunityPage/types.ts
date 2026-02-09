@@ -30,6 +30,8 @@ export interface Stats {
 	resolved: number;
 }
 
+export type FilterStatus = "ALL" | "PENDING" | "RESOLVED";
+
 export interface Assignment {
 	id: number;
 	title: string;

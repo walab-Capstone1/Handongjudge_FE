@@ -81,6 +81,190 @@ export const ProfileGreeting = styled.span`
   line-height: 1.2;
 `;
 
+export const CourseSummaryCard = styled.div`
+  position: relative;
+  padding: 1rem 1.25rem;
+  background: #f8f9ff;
+  border: 1px solid #e0e4f7;
+  border-radius: 10px;
+  margin-top: 12px;
+`;
+
+export const SummaryBackButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  padding: 6px 12px;
+  background: white;
+  color: #667eea;
+  border: 1px solid #667eea;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: #667eea;
+    color: white;
+  }
+`;
+
+export const SummaryTitle = styled.div`
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const SummaryBadge = styled.span`
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.15);
+  padding: 2px 8px;
+  border-radius: 6px;
+`;
+
+export const SummaryRow = styled.div`
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+`;
+
+export const SummaryDescription = styled.p`
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.4;
+  margin: 8px 0 0 0;
+`;
+
+export const SummaryStats = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+`;
+
+export const SummaryStat = styled.span`
+  font-size: 0.85rem;
+  color: #667eea;
+  font-weight: 600;
+`;
+
+export const UpcomingDeadlineItem = styled.div<{ $isExpired?: boolean }>`
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: ${(props) => (props.$isExpired ? "#fef2f2" : "#f0f4ff")};
+  border: 1px solid ${(props) => (props.$isExpired ? "#fecaca" : "#c7d2fe")};
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${(props) => (props.$isExpired ? "#fee2e2" : "#e0e7ff")};
+  }
+  & + & {
+    margin-top: 8px;
+  }
+`;
+
+export const UpcomingDeadlineTitle = styled.span`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+`;
+
+export const UpcomingDeadlineDday = styled.span<{ $isExpired?: boolean }>`
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: ${(props) => (props.$isExpired ? "#dc2626" : "#667eea")};
+  flex-shrink: 0;
+`;
+
+export const QuickLinksGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+`;
+
+export const QuickLinkCard = styled.button`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 10px;
+  background: white;
+  border: 2px solid #e0e4f7;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+  }
+`;
+
+export const QuickLinkIcon = styled.span`
+  font-size: 1.5rem;
+`;
+
+export const QuickLinkLabel = styled.span`
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+`;
+
+export const QuizSummaryItem = styled.div`
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: #f0f4ff;
+  border: 1px solid #c7d2fe;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #e0e7ff;
+  }
+  & + & {
+    margin-top: 8px;
+  }
+`;
+
+export const QuizSummaryTitle = styled.span`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+`;
+
+export const QuizSummaryMeta = styled.span`
+  font-size: 0.8rem;
+  color: #667eea;
+  font-weight: 500;
+  flex-shrink: 0;
+`;
+
 export const CoursesSection = styled.div`
   flex: 0 0 auto;
   display: flex;

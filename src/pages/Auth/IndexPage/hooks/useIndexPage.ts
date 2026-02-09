@@ -44,18 +44,18 @@ export function useIndexPage() {
 
 	const handleGoToClassroom = useCallback(() => {
 		if (!isAuthenticated) {
-			navigate("/login", { state: { redirectTo: "/dashboard" } });
+			navigate("/login", { state: { redirectTo: "/courses" } });
 			return;
 		}
-		navigate("/dashboard");
+		navigate("/courses");
 	}, [isAuthenticated, navigate]);
 
 	const handleLecturesClick = useCallback(() => {
 		if (!isAuthenticated) {
-			navigate("/login", { state: { redirectTo: "/dashboard" } });
+			navigate("/login", { state: { redirectTo: "/courses" } });
 			return;
 		}
-		navigate("/dashboard");
+		navigate("/courses");
 	}, [isAuthenticated, navigate]);
 
 	const handleManagementClick = useCallback(() => {

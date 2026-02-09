@@ -292,3 +292,26 @@ export const CourseListItemSection = styled.div<{ $active?: boolean }>`
     color: #ffffff;
   }
 `;
+
+export const CourseListFooter = styled.div`
+  padding: 16px;
+  border-top: 1px solid #e0e0e0;
+`;
+
+export const CourseListLink = styled.button`
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid #667eea;
+  border-radius: 8px;
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: #667eea;
+    color: white;
+  }
+`;

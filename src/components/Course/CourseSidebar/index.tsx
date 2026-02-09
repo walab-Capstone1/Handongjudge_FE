@@ -12,6 +12,7 @@ import {
 	MdForum,
 	MdQuiz,
 	MdSettings,
+	MdClass,
 } from "react-icons/md";
 import APIService from "../../../services/APIService";
 import * as S from "./styles";
@@ -85,6 +86,13 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 	}, [user]);
 
 	const menuItems: MenuItem[] = [
+		{
+			id: "courses",
+			label: "수업 선택",
+			path: "#",
+			icon: MdClass,
+			type: "action",
+		},
 		{
 			id: "dashboard",
 			label: "대시보드",
@@ -211,18 +219,21 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 				<S.SidebarMenu>
 					{menuItems.map((item, index) => {
 						const IconComponent = item.icon;
-						const isActive = location.pathname.includes(
-							item.id === "assignment"
-								? "course-assignments"
-								: item.id === "coding-quiz"
-									? "coding-quiz"
-									: item.id === "notice"
-										? "course-notices"
-										: item.id === "notification"
-											? "alarm"
-											: item.id,
-						);
-						const isSubMenu = item.id !== "dashboard";
+						const isActive =
+							item.id === "courses"
+								? false
+								: location.pathname.includes(
+										item.id === "assignment"
+											? "course-assignments"
+											: item.id === "coding-quiz"
+												? "coding-quiz"
+												: item.id === "notice"
+													? "course-notices"
+													: item.id === "notification"
+														? "alarm"
+														: item.id,
+									);
+						const isSubMenu = item.id !== "dashboard" && item.id !== "courses";
 						return (
 							<S.MenuItem
 								key={item.id}
@@ -284,7 +295,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 					$collapsed={isCollapsed}
 				>
 					<S.CourseListHeader>
-						<S.CourseListTitle>Courses</S.CourseListTitle>
+						<S.CourseListTitle>수업 선택</S.CourseListTitle>
 						<S.CourseListClose onClick={() => setShowCourseList(false)}>
 							<MdClose />
 						</S.CourseListClose>
@@ -305,13 +316,21 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 									<S.CourseListItemTitle>
 										{course.courseTitle}
 									</S.CourseListItemTitle>
-									<S.CourseListItemSection>
-										{course.sectionNumber}분반
-									</S.CourseListItemSection>
 								</S.CourseListItem>
 							))
 						)}
 					</S.CourseListContent>
+					<S.CourseListFooter>
+						<S.CourseListLink
+							type="button"
+							onClick={() => {
+								navigate("/courses");
+								setShowCourseList(false);
+							}}
+						>
+							전체 강의실 보기
+						</S.CourseListLink>
+					</S.CourseListFooter>
 				</S.CourseListSidebar>
 			)}
 		</>
