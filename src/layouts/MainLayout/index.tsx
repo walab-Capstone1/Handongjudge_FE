@@ -1,5 +1,5 @@
 import type React from "react";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../components/Layout/Navbar";
 import * as S from "./styles";
 
 interface MainLayoutProps {

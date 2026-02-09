@@ -1,8 +1,8 @@
 import type React from "react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import TutorHeader from "../../components/TutorHeader";
-import TutorNotificationPanel from "../../components/TutorNotificationPanel";
+import TutorHeader from "../../components/Tutor/TutorHeader";
+import TutorNotificationPanel from "../../components/Tutor/TutorNotificationPanel";
 import APIService from "../../services/APIService";
 import {
 	FaHome,
@@ -12,8 +12,9 @@ import {
 	FaUsers,
 	FaCog,
 	FaChevronDown,
+	FaChevronRight,
 	FaBars,
-	FaTimes,
+	FaGripLinesVertical,
 	FaEdit,
 	FaFolder,
 	FaList,
@@ -24,6 +25,7 @@ import {
 	FaChartBar,
 	FaArrowLeft,
 	FaCode,
+	FaChevronLeft,
 } from "react-icons/fa";
 import * as S from "./styles";
 import type { Section, MenuItem, ExpandedMenus } from "./types";
@@ -268,12 +270,7 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 				icon: FaHome,
 				subItems: [],
 			},
-			{
-				path: "/tutor/courses",
-				label: "수업 만들기",
-				icon: FaPlus,
-				subItems: [],
-			},
+
 			{
 				path: "/tutor/problems",
 				label: "문제 관리",
@@ -523,9 +520,11 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 					<S.SidebarNav $collapsed={sidebarCollapsed}>
 						<S.SidebarScrollable $collapsed={sidebarCollapsed}>
 							<S.SidebarHeader $collapsed={sidebarCollapsed}>
-								<S.SidebarTitle $collapsed={sidebarCollapsed}>
-									관리 페이지
-								</S.SidebarTitle>
+								<S.SidebarHeaderLeft $collapsed={sidebarCollapsed}>
+									<S.SidebarTitle $collapsed={sidebarCollapsed}>
+										관리 페이지
+									</S.SidebarTitle>
+								</S.SidebarHeaderLeft>
 								<S.SidebarToggleBtn
 									$collapsed={sidebarCollapsed}
 									onClick={() => {
@@ -541,7 +540,28 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 										sidebarCollapsed ? "사이드바 펼치기" : "사이드바 접기"
 									}
 								>
-									{sidebarCollapsed ? <FaBars /> : <FaTimes />}
+									{sidebarCollapsed ? (
+										<span
+											style={{
+												display: "flex",
+												alignItems: "center",
+												gap: "4px",
+											}}
+										>
+											<FaBars />
+										</span>
+									) : (
+										<span
+											style={{
+												display: "flex",
+												alignItems: "center",
+												gap: "4px",
+											}}
+										>
+											<FaGripLinesVertical style={{ fontSize: "0.9rem" }} />
+											<FaChevronLeft style={{ fontSize: "0.65rem" }} />
+										</span>
+									)}
 								</S.SidebarToggleBtn>
 							</S.SidebarHeader>
 

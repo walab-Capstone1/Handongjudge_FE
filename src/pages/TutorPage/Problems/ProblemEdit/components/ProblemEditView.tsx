@@ -1,0 +1,123 @@
+import TutorLayout from "../../../../../layouts/TutorLayout";
+import type { ProblemEditHookReturn } from "../hooks/useProblemEdit";
+import * as S from "../styles";
+import ProblemEditBanners from "./ProblemEditBanners";
+import ProblemEditBasicFields from "./ProblemEditBasicFields";
+import ProblemEditDescriptionSection from "./ProblemEditDescriptionSection";
+import ProblemEditInputOutputSection from "./ProblemEditInputOutputSection";
+import ProblemEditSampleInputsSection from "./ProblemEditSampleInputsSection";
+import ProblemEditTestcasesSection from "./ProblemEditTestcasesSection";
+
+export default function ProblemEditView(d: ProblemEditHookReturn) {
+	if (d.loading) {
+		return (
+			<TutorLayout>
+				<S.ProblemEditGlobalStyle />
+				<S.Container className="problem-edit">
+					<S.LoadingContainer>
+						<S.LoadingSpinner />
+					</S.LoadingContainer>
+				</S.Container>
+			</TutorLayout>
+		);
+	}
+
+	const back = d.getBackNavigation();
+
+	return (
+		<TutorLayout>
+			<S.ProblemEditGlobalStyle />
+			<S.Container className="problem-edit">
+				<S.PageHeader>
+					<S.PageTitle>문제 수정</S.PageTitle>
+					<S.BackButton
+						type="button"
+						onClick={() => {
+							d.navigate(back.path, { state: back.state });
+						}}
+						title="뒤로가기"
+					>
+						← 뒤로가기
+					</S.BackButton>
+				</S.PageHeader>
+
+				{d.error && <S.ErrorMessage>{d.error}</S.ErrorMessage>}
+
+				<ProblemEditBanners
+					enableFullEdit={d.enableFullEdit}
+					setEnableFullEdit={d.setEnableFullEdit}
+				/>
+
+				<S.Form onSubmit={d.handleSubmit}>
+					<S.Step>
+						<S.FormGrid>
+							<ProblemEditBasicFields
+								formData={d.formData}
+								currentTag={d.currentTag}
+								setCurrentTag={d.setCurrentTag}
+								zipFile={d.zipFile}
+								enableFullEdit={d.enableFullEdit}
+								handleInputChange={d.handleInputChange}
+								handleTagAdd={d.handleTagAdd}
+								handleTagKeyPress={d.handleTagKeyPress}
+								handleTagRemove={d.handleTagRemove}
+								handleZipFileChange={d.handleZipFileChange}
+							/>
+
+							<ProblemEditDescriptionSection
+								descriptionRef={d.descriptionRef}
+								formData={d.formData}
+								setFormData={d.setFormData}
+								enableFullEdit={d.enableFullEdit}
+								getFullDescription={d.getFullDescription}
+								applyFormat={d.applyFormat}
+								insertTextAtCursor={d.insertTextAtCursor}
+							/>
+
+							<ProblemEditInputOutputSection
+								formData={d.formData}
+								enableFullEdit={d.enableFullEdit}
+								handleInputChange={d.handleInputChange}
+							/>
+
+							<ProblemEditSampleInputsSection
+								formData={d.formData}
+								enableFullEdit={d.enableFullEdit}
+								handleSampleInputChange={d.handleSampleInputChange}
+								addSampleInput={d.addSampleInput}
+								removeSampleInput={d.removeSampleInput}
+							/>
+
+							<ProblemEditTestcasesSection
+								formData={d.formData}
+								enableFullEdit={d.enableFullEdit}
+								parsedTestCases={d.parsedTestCases}
+								showParsedTestCases={d.showParsedTestCases}
+								setShowParsedTestCases={d.setShowParsedTestCases}
+								handleTestcaseAdd={d.handleTestcaseAdd}
+								handleTestcaseRemove={d.handleTestcaseRemove}
+								handleTestcaseChange={d.handleTestcaseChange}
+							/>
+						</S.FormGrid>
+
+						<S.Actions>
+							<S.BackButton
+								type="button"
+								onClick={() => {
+									d.navigate(back.path, { state: back.state });
+								}}
+								disabled={d.submitting}
+								title="뒤로가기"
+							>
+								← 뒤로가기
+							</S.BackButton>
+							<S.SubmitButton type="submit" disabled={d.submitting}>
+								{d.submitting ? "수정 중..." : "수정 완료"}
+							</S.SubmitButton>
+						</S.Actions>
+					</S.Step>
+				</S.Form>
+			</S.Container>
+		</TutorLayout>
+	);
+}

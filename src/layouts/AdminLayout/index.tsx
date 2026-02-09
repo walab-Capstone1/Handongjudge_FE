@@ -1,8 +1,8 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
-import Breadcrumb from "../../components/Breadcrumb";
+import Navbar from "../../components/Layout/Navbar";
+import Breadcrumb from "../../components/Layout/Breadcrumb";
 import APIService from "../../services/APIService";
 import * as S from "./styles";
 import type {
