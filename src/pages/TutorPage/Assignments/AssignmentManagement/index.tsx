@@ -32,6 +32,40 @@ const AssignmentManagement: React.FC = () => {
 
 	return (
 		<TutorLayout selectedSection={d.currentSection as SectionInfo | null}>
+			{(d.isAddingProblems || d.isSubmittingAdd || d.isSubmittingEdit) &&
+				createPortal(
+					<div
+						style={{
+							position: "fixed",
+							inset: 0,
+							backgroundColor: "rgba(0,0,0,0.35)",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 10000,
+						}}
+					>
+						<div
+							style={{
+								background: "white",
+								padding: "1.5rem 2rem",
+								borderRadius: "12px",
+								boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+							}}
+						>
+							<LoadingSpinner
+								message={
+									d.isAddingProblems
+										? "문제 추가 중..."
+										: d.isSubmittingAdd
+											? "과제 생성 중..."
+											: "과제 수정 중..."
+								}
+							/>
+						</div>
+					</div>,
+					document.body,
+				)}
 			<S.Container>
 				<AssignmentManagementHeader
 					sectionId={d.sectionId}
@@ -43,6 +77,7 @@ const AssignmentManagement: React.FC = () => {
 					onAddAssignment={d.handleAddAssignment}
 					onStandaloneProblemCreate={d.handleStandaloneProblemCreate}
 					onBulkProblemCreate={d.handleBulkProblemCreate}
+					isTutorOnly={d.isTutorOnly}
 				/>
 
 				{d.sectionId ? (
@@ -68,6 +103,7 @@ const AssignmentManagement: React.FC = () => {
 							onEdit={d.handleEdit}
 							onToggleActive={d.handleToggleActive}
 							onDelete={d.handleDelete}
+							isTutorOnly={d.isTutorOnly}
 							paginationProps={{
 								currentPage: d.currentPage,
 								totalItems: d.filteredAssignments.length,
@@ -108,6 +144,7 @@ const AssignmentManagement: React.FC = () => {
 							onToggleActive={d.handleToggleActive}
 							onDelete={d.handleDelete}
 							onRemoveProblem={d.handleRemoveProblem}
+							isTutorOnly={d.isTutorOnly}
 						/>
 					</S.ListViewWrapper>
 				)}
@@ -120,6 +157,7 @@ const AssignmentManagement: React.FC = () => {
 				onClose={d.handleCloseAddModal}
 				onSubmit={d.handleSubmitAdd}
 				onInputChange={d.handleInputChange}
+				loading={d.isSubmittingAdd}
 			/>
 
 			<AssignmentEditModal
@@ -130,6 +168,7 @@ const AssignmentManagement: React.FC = () => {
 				onClose={d.handleCloseEditModal}
 				onSubmit={d.handleSubmitEdit}
 				onInputChange={d.handleInputChange}
+				loading={d.isSubmittingEdit}
 			/>
 
 			<ProblemSelectModal
@@ -211,12 +250,8 @@ const AssignmentManagement: React.FC = () => {
 						}}
 						assignmentsForProblem={d.assignmentsForProblem}
 						assignmentProblems={d.assignmentProblems}
-						expandedAssignmentsForProblem={
-							d.expandedAssignmentsForProblem
-						}
-						loadingAssignmentsForProblem={
-							d.loadingAssignmentsForProblem
-						}
+						expandedAssignmentsForProblem={d.expandedAssignmentsForProblem}
+						loadingAssignmentsForProblem={d.loadingAssignmentsForProblem}
 						copyProblemSearchTerm={d.copyProblemSearchTerm}
 						onCopyProblemSearchTermChange={d.setCopyProblemSearchTerm}
 						problemViewMode={d.problemViewMode}
@@ -238,9 +273,7 @@ const AssignmentManagement: React.FC = () => {
 							d.closeCopyModal();
 						}}
 						onSelectAllInList={d.setSelectedProblemIds}
-						onOpenProblemDetail={(detail) =>
-							d.setSelectedProblemDetail(detail)
-						}
+						onOpenProblemDetail={(detail) => d.setSelectedProblemDetail(detail)}
 					/>,
 					document.body,
 				)}

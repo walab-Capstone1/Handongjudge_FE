@@ -53,10 +53,13 @@ interface AssignmentListViewProps {
 	) => void;
 	onDelete: (assignmentId: number) => void;
 	onRemoveProblem: (assignmentId: number, problemId: number) => void;
+	/** 조교(TUTOR) 전용 수업이면 수정/비활성화/삭제/문제추가 비표시 */
+	isTutorOnly?: boolean;
 }
 
 /**
  * 과제 리스트 뷰 컴포넌트 (전체 페이지용)
+ * 스타일: 상위 AssignmentManagement/styles.ts 의 ListViewWrapper (tutor-assignments-*, tutor-more-* 등)
  */
 const AssignmentListView: React.FC<AssignmentListViewProps> = ({
 	filteredAssignments,
@@ -72,6 +75,7 @@ const AssignmentListView: React.FC<AssignmentListViewProps> = ({
 	onToggleActive,
 	onDelete,
 	onRemoveProblem,
+	isTutorOnly,
 }) => {
 	return (
 		<div className="tutor-assignments-list">
@@ -129,58 +133,62 @@ const AssignmentListView: React.FC<AssignmentListViewProps> = ({
 									? "문제 목록 숨기기"
 									: "문제 목록 보기"}
 							</button>
-							<button
-								className="tutor-btn-list-action"
-								onClick={() => onAddProblem(assignment)}
-							>
-								문제 추가
-							</button>
-							<button
-								className="tutor-btn-list-action"
-								onClick={() => onEdit(assignment)}
-							>
-								수정
-							</button>
-							<div className="tutor-more-menu">
-								<button
-									className="tutor-btn-list-action tutor-btn-more"
-									title="더보기"
-									onClick={(e) => {
-										e.stopPropagation();
-										onToggleMoreMenu(assignment.id);
-									}}
-								>
-									⋯
-								</button>
-								{openMoreMenu === assignment.id && (
-									<div className="tutor-more-dropdown">
+							{!isTutorOnly && (
+								<>
+									<button
+										className="tutor-btn-list-action"
+										onClick={() => onAddProblem(assignment)}
+									>
+										문제 추가
+									</button>
+									<button
+										className="tutor-btn-list-action"
+										onClick={() => onEdit(assignment)}
+									>
+										수정
+									</button>
+									<div className="tutor-more-menu">
 										<button
-											className="tutor-btn-text-small"
+											className="tutor-btn-list-action tutor-btn-more"
+											title="더보기"
 											onClick={(e) => {
 												e.stopPropagation();
-												onToggleActive(
-													assignment.sectionId,
-													assignment.id,
-													assignment.active,
-												);
-												onToggleMoreMenu(null);
+												onToggleMoreMenu(assignment.id);
 											}}
 										>
-											{assignment.active ? "비활성화" : "활성화"}
+											⋯
 										</button>
-										<button
-											className="tutor-btn-text-small tutor-delete"
-											onClick={(e) => {
-												e.stopPropagation();
-												onDelete(assignment.id);
-												onToggleMoreMenu(null);
-											}}
-										>
-											삭제
-										</button>
+										{openMoreMenu === assignment.id && (
+											<div className="tutor-more-dropdown">
+												<button
+													className="tutor-btn-text-small"
+													onClick={(e) => {
+														e.stopPropagation();
+														onToggleActive(
+															assignment.sectionId,
+															assignment.id,
+															assignment.active,
+														);
+														onToggleMoreMenu(null);
+													}}
+												>
+													{assignment.active ? "비활성화" : "활성화"}
+												</button>
+												<button
+													className="tutor-btn-text-small tutor-delete"
+													onClick={(e) => {
+														e.stopPropagation();
+														onDelete(assignment.id);
+														onToggleMoreMenu(null);
+													}}
+												>
+													삭제
+												</button>
+											</div>
+										)}
 									</div>
-								)}
-							</div>
+								</>
+							)}
 						</div>
 					</div>
 
@@ -239,26 +247,30 @@ const AssignmentListView: React.FC<AssignmentListViewProps> = ({
 														: `제출 현황: 0/${submissionStats[assignment.id]?.totalStudents || assignment.totalStudents || 0}`}
 												</span>
 
-												<button
-													className="tutor-btn-remove-problem"
-													onClick={() =>
-														onRemoveProblem(assignment.id, problem.id)
-													}
-													title="문제 제거"
-												>
-													✕
-												</button>
+												{!isTutorOnly && (
+													<button
+														className="tutor-btn-remove-problem"
+														onClick={() =>
+															onRemoveProblem(assignment.id, problem.id)
+														}
+														title="문제 제거"
+													>
+														✕
+													</button>
+												)}
 											</div>
 										))
 									) : (
 										<div className="tutor-no-problems">
 											<p>등록된 문제가 없습니다.</p>
-											<button
-												className="tutor-btn-add-first-problem"
-												onClick={() => onAddProblem(assignment)}
-											>
-												첫 번째 문제 추가하기
-											</button>
+											{!isTutorOnly && (
+												<button
+													className="tutor-btn-add-first-problem"
+													onClick={() => onAddProblem(assignment)}
+												>
+													첫 번째 문제 추가하기
+												</button>
+											)}
 										</div>
 									)}
 								</div>

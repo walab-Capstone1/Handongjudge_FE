@@ -76,6 +76,7 @@ export function useDashboard() {
 		[],
 	);
 	const [showCopyModal, setShowCopyModal] = useState(false);
+	const [isCopyingSection, setIsCopyingSection] = useState(false);
 	const [copyFormData, setCopyFormData] =
 		useState<DashboardCopyFormData>(initialCopyFormData);
 	const [sourceNotices, setSourceNotices] = useState<DashboardNotice[]>([]);
@@ -165,7 +166,7 @@ export function useDashboard() {
 			alert("수업이 성공적으로 생성되었습니다!");
 			setShowCreateModal(false);
 			setFormData(initialFormData);
-			fetchSections();
+			await fetchSections();
 		} catch (err: unknown) {
 			console.error("수업 생성 실패:", err);
 			alert((err as Error).message || "수업 생성에 실패했습니다.");
@@ -411,15 +412,16 @@ export function useDashboard() {
 	};
 
 	const handleCopySection = async () => {
+		if (!copyFormData.sourceSectionId) {
+			alert("복사할 수업을 선택해주세요.");
+			return;
+		}
+		if (!copyFormData.courseTitle) {
+			alert("새 수업 제목을 입력해주세요.");
+			return;
+		}
+		setIsCopyingSection(true);
 		try {
-			if (!copyFormData.sourceSectionId) {
-				alert("복사할 수업을 선택해주세요.");
-				return;
-			}
-			if (!copyFormData.courseTitle) {
-				alert("새 수업 제목을 입력해주세요.");
-				return;
-			}
 			const response = await APIService.copySection(
 				Number.parseInt(copyFormData.sourceSectionId),
 				null,
@@ -454,6 +456,8 @@ export function useDashboard() {
 		} catch (err: unknown) {
 			console.error("수업 복사 실패:", err);
 			alert((err as Error).message || "수업 복사에 실패했습니다.");
+		} finally {
+			setIsCopyingSection(false);
 		}
 	};
 
@@ -505,6 +509,7 @@ export function useDashboard() {
 		availableCourses,
 		showCopyModal,
 		setShowCopyModal,
+		isCopyingSection,
 		copyFormData,
 		setCopyFormData,
 		sourceNotices,

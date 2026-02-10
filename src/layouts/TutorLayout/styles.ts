@@ -639,6 +639,37 @@ export const SectionCardEmptyText = styled.div<{ $collapsed: boolean }>`
     width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
+export const SidebarLinkCopyBtn = styled.button<{ $collapsed: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: ${(props) => (props.$collapsed ? "0.625rem 0" : "0.5rem 0.75rem")};
+  width: ${(props) => (props.$collapsed ? "100%" : "auto")};
+  margin-bottom: 0.25rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  min-height: 2.25rem;
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: #f3f4f6;
+    color: #667eea;
+  }
+
+  svg {
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+`;
+
 export const SidebarSectionMenuWrapper = styled.div<{ $visible: boolean }>`
   display: grid;
   grid-template-rows: ${(props) => (props.$visible ? "1fr" : "0fr")};

@@ -34,6 +34,7 @@ interface AssignmentEditModalProps {
 	onInputChange: (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => void;
+	loading?: boolean;
 }
 
 const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
@@ -44,6 +45,7 @@ const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
 	onClose,
 	onSubmit,
 	onInputChange,
+	loading = false,
 }) => {
 	if (!isOpen) return null;
 
@@ -120,10 +122,16 @@ const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
 					</S.FormRow>
 
 					<S.FormActions>
-						<S.ButtonSecondary type="button" onClick={onClose}>
+						<S.ButtonSecondary
+							type="button"
+							onClick={onClose}
+							disabled={loading}
+						>
 							취소
 						</S.ButtonSecondary>
-						<S.ButtonPrimary type="submit">수정 완료</S.ButtonPrimary>
+						<S.ButtonPrimary type="submit" disabled={loading}>
+							{loading ? "수정 중..." : "수정 완료"}
+						</S.ButtonPrimary>
 					</S.FormActions>
 				</S.Form>
 			</S.ModalContent>

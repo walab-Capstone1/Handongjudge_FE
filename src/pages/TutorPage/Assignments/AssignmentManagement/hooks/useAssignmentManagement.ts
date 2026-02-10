@@ -97,6 +97,9 @@ export function useAssignmentManagement() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [problemListSearchTerm, setProblemListSearchTerm] = useState("");
 	const [openMoreMenu, setOpenMoreMenu] = useState<number | null>(null);
+	const [isAddingProblems, setIsAddingProblems] = useState(false);
+	const [isSubmittingAdd, setIsSubmittingAdd] = useState(false);
+	const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
 
 	const sectionsForModal: SectionForModal[] = sections.map(
 		(s: {
@@ -135,11 +138,11 @@ export function useAssignmentManagement() {
 	const openProblemListForAssignmentId = (
 		location.state as { openProblemListForAssignmentId?: number } | null
 	)?.openProblemListForAssignmentId;
+	// 수정 페이지에서 뒤로가기 시 문제 목록 관리 모달이 다시 열리도록 처리
 	useEffect(() => {
 		if (openProblemListForAssignmentId == null || !assignments.length) return;
-		const assignment = assignments.find(
-			(a) => a.id === openProblemListForAssignmentId,
-		);
+		const assignmentId = Number(openProblemListForAssignmentId);
+		const assignment = assignments.find((a) => Number(a.id) === assignmentId);
 		if (assignment) {
 			setSelectedAssignmentForProblemList(assignment as Assignment);
 			setShowProblemListModal(true);
@@ -178,12 +181,13 @@ export function useAssignmentManagement() {
 	const handleSubmitAdd = useCallback(
 		async (e: React.FormEvent) => {
 			e.preventDefault();
+			const sid = formData.sectionId || sectionId;
+			if (!sid) {
+				alert("수업 정보가 없습니다.");
+				return;
+			}
+			setIsSubmittingAdd(true);
 			try {
-				const sid = formData.sectionId || sectionId;
-				if (!sid) {
-					alert("수업 정보가 없습니다.");
-					return;
-				}
 				const assignmentData: Record<string, string> = {
 					title: formData.title,
 					description: formData.description,
@@ -202,6 +206,8 @@ export function useAssignmentManagement() {
 			} catch (error) {
 				console.error("과제 생성 실패:", error);
 				alert("과제 생성에 실패했습니다.");
+			} finally {
+				setIsSubmittingAdd(false);
 			}
 		},
 		[formData, sectionId, handleCloseAddModal, refetchAssignments],
@@ -244,12 +250,13 @@ export function useAssignmentManagement() {
 		async (e: React.FormEvent) => {
 			e.preventDefault();
 			if (!selectedAssignment) return;
+			const sid = selectedAssignment.sectionId ?? sectionId;
+			if (!sid) {
+				alert("수업 정보가 없습니다.");
+				return;
+			}
+			setIsSubmittingEdit(true);
 			try {
-				const sid = selectedAssignment.sectionId ?? sectionId;
-				if (!sid) {
-					alert("수업 정보가 없습니다.");
-					return;
-				}
 				const assignmentData: Record<string, string> = {
 					title: formData.title,
 					description: formData.description,
@@ -272,6 +279,8 @@ export function useAssignmentManagement() {
 			} catch (error) {
 				console.error("과제 수정 실패:", error);
 				alert("과제 수정에 실패했습니다.");
+			} finally {
+				setIsSubmittingEdit(false);
 			}
 		},
 		[
@@ -394,6 +403,7 @@ export function useAssignmentManagement() {
 	const handleSelectProblem = useCallback(
 		async (problemIds: number[]) => {
 			if (!selectedAssignment) return;
+			setIsAddingProblems(true);
 			try {
 				for (const problemId of problemIds) {
 					const newProblemId = await APIService.copyProblem(problemId);
@@ -411,14 +421,27 @@ export function useAssignmentManagement() {
 			} catch (error) {
 				console.error("문제 추가 실패:", error);
 				alert(`문제 추가에 실패했습니다. ${(error as Error).message || ""}`);
+			} finally {
+				setIsAddingProblems(false);
 			}
 		},
 		[selectedAssignment, refetchAssignments],
 	);
 
+	const existingProblemIds = new Set(
+		(selectedAssignment?.problems ?? []).map((p: { id: number }) => p.id),
+	);
+	const existingProblemTitles = new Set(
+		(selectedAssignment?.problems ?? [])
+			.map((p: { title?: string }) => p.title)
+			.filter(Boolean),
+	);
+
 	const filteredProblems = availableProblems.filter(
-		(problem: { title?: string }) =>
-			problem.title?.toLowerCase().includes(problemSearchTerm.toLowerCase()),
+		(problem: { id: number; title?: string }) =>
+			problem.title?.toLowerCase().includes(problemSearchTerm.toLowerCase()) &&
+			!existingProblemIds.has(problem.id) &&
+			!(problem.title && existingProblemTitles.has(problem.title)),
 	);
 
 	const handleProblemToggle = useCallback((problemId: number) => {
@@ -793,10 +816,15 @@ export function useAssignmentManagement() {
 		setShowProblemDetailModal(false);
 	}, []);
 
+	const isTutorOnly =
+		(currentSection as { roleInSection?: string } | null)?.roleInSection ===
+		"TUTOR";
+
 	return {
 		loading,
 		sectionId,
 		currentSection,
+		isTutorOnly,
 		searchTerm,
 		setSearchTerm,
 		filterSection,
@@ -860,6 +888,9 @@ export function useAssignmentManagement() {
 		handleDelete,
 		handleToggleActive,
 		handleAddProblem,
+		isAddingProblems,
+		isSubmittingAdd,
+		isSubmittingEdit,
 		handleSectionChangeForProblemWrapper,
 		handleProblemToggleForAdd,
 		handleSelectAllProblemsForAssignment,

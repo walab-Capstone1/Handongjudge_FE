@@ -1,5 +1,7 @@
 import type { FC } from "react";
+import { createPortal } from "react-dom";
 import TutorLayout from "../../../layouts/TutorLayout";
+import LoadingSpinner from "../../../components/UI/LoadingSpinner";
 import { useDashboard } from "./hooks/useDashboard";
 import * as S from "./styles";
 import DashboardHeader from "./components/DashboardHeader";
@@ -17,6 +19,7 @@ const CourseManagement: FC = () => {
 		setShowCreateModal,
 		showCopyModal,
 		setShowCopyModal,
+		isCopyingSection,
 		copyStep,
 		setCopyStep,
 		editingNoticeId,
@@ -86,6 +89,32 @@ const CourseManagement: FC = () => {
 
 	return (
 		<TutorLayout>
+			{isCopyingSection &&
+				createPortal(
+					<div
+						style={{
+							position: "fixed",
+							inset: 0,
+							backgroundColor: "rgba(0,0,0,0.35)",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 10000,
+						}}
+					>
+						<div
+							style={{
+								background: "white",
+								padding: "1.5rem 2rem",
+								borderRadius: "12px",
+								boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+							}}
+						>
+							<LoadingSpinner message="수업 복사 중..." />
+						</div>
+					</div>,
+					document.body,
+				)}
 			{loading ? (
 				<S.LoadingContainer>
 					<S.LoadingSpinner />
@@ -96,6 +125,10 @@ const CourseManagement: FC = () => {
 					<DashboardHeader
 						totalCount={sections.length}
 						displayCount={filteredSections.length}
+						canCopySection={sections.some(
+							(s) =>
+								s.roleInSection === "ADMIN" || s.roleInSection === "INSTRUCTOR",
+						)}
 						onCopy={() => setShowCopyModal(true)}
 						onCreate={() => setShowCreateModal(true)}
 					/>
@@ -129,6 +162,7 @@ const CourseManagement: FC = () => {
 					<CopySectionModal
 						isOpen={showCopyModal}
 						onClose={closeCopyModal}
+						loading={isCopyingSection}
 						copyStep={copyStep}
 						setCopyStep={setCopyStep}
 						copyFormData={copyFormData}

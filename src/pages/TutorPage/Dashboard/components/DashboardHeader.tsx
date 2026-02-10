@@ -4,6 +4,8 @@ import * as S from "../styles";
 interface DashboardHeaderProps {
 	totalCount: number;
 	displayCount: number;
+	/** ADMIN인 수업이 하나라도 있을 때만 true (튜터 전용이면 복사 버튼 숨김) */
+	canCopySection: boolean;
 	onCopy: () => void;
 	onCreate: () => void;
 }
@@ -11,6 +13,7 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 	totalCount,
 	displayCount,
+	canCopySection,
 	onCopy,
 	onCreate,
 }) => (
@@ -23,7 +26,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 			</S.TitleStats>
 		</S.TitleLeft>
 		<S.TitleRight>
-			<S.CopyButton onClick={onCopy}>기존 수업 복사</S.CopyButton>
+			{canCopySection && (
+				<S.CopyButton onClick={onCopy}>기존 수업 복사</S.CopyButton>
+			)}
 			<S.CreateButton onClick={onCreate}>+ 새 수업 만들기</S.CreateButton>
 		</S.TitleRight>
 	</S.TitleHeader>
