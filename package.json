@@ -2,7 +2,7 @@
   "name": "handongjudge_fe",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/handongjudge",
+  "homepage": "/",
   "dependencies": {
     "@appletosolutions/reactbits": "^1.0.3",
     "@chakra-ui/react": "^3.30.0",
