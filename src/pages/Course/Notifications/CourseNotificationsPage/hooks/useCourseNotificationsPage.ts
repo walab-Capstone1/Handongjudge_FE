@@ -30,6 +30,7 @@ export function useCourseNotificationsPage() {
 		unread: 0,
 		notices: 0,
 		assignments: 0,
+		community: 0,
 	});
 
 	const fetchData = useCallback(async () => {
@@ -48,8 +49,7 @@ export function useCourseNotificationsPage() {
 				0,
 				200,
 			);
-			const notificationsList =
-				notificationsResponse.data?.content ?? [];
+			const notificationsList = notificationsResponse.data?.content ?? [];
 
 			const notificationList: Notification[] = notificationsList.map(
 				(notif: Record<string, unknown>) => {
@@ -59,22 +59,28 @@ export function useCourseNotificationsPage() {
 						"other";
 
 					switch (notif.type) {
-						case "NOTICE_CREATED":
-							title = (notif.noticeTitle as string) || "공지사항";
+						case "NOTICE_CREATED": {
+							const noticeTitle = (notif.noticeTitle as string) || "공지사항";
+							title = `교수님이 "${noticeTitle}" 공지를 올리셨습니다`;
 							link = notif.noticeId
 								? `/sections/${sectionId}/course-notices/${notif.noticeId}`
 								: null;
 							displayType = "notice";
 							break;
-						case "ASSIGNMENT_CREATED":
-							title = (notif.assignmentTitle as string) || "과제";
+						}
+						case "ASSIGNMENT_CREATED": {
+							const assignmentTitle =
+								(notif.assignmentTitle as string) || "과제";
+							title = `교수님이 ${assignmentTitle} 새 과제를 올리셨습니다!`;
 							link = notif.assignmentId
 								? `/sections/${sectionId}/course-assignments?assignmentId=${notif.assignmentId}`
 								: null;
 							displayType = "assignment";
 							break;
+						}
 						case "QUESTION_COMMENT":
-							title = (notif.message as string) || "내 질문에 댓글이 달렸습니다";
+							title =
+								(notif.message as string) || "내 질문에 댓글이 달렸습니다";
 							link = notif.questionId
 								? `/sections/${sectionId}/community/${notif.questionId}`
 								: null;
@@ -147,12 +153,16 @@ export function useCourseNotificationsPage() {
 			const assignmentCount = notificationList.filter(
 				(n) => n.type === "assignment",
 			).length;
+			const communityCount = notificationList.filter(
+				(n) => n.type === "community",
+			).length;
 
 			setStats({
 				total: notificationList.length,
 				unread: unreadCount,
 				notices: noticeCount,
 				assignments: assignmentCount,
+				community: communityCount,
 			});
 		} catch (error) {
 			console.error("데이터 로딩 실패:", error);

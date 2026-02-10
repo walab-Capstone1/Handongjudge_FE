@@ -131,8 +131,8 @@ export const NotificationsList = styled.div`
 `;
 
 export const NotificationCard = styled.div<{
-  $isNew: boolean;
-  $type: "notice" | "assignment" | "community" | "other";
+	$isNew: boolean;
+	$type: "notice" | "assignment" | "community" | "other";
 }>`
   display: flex;
   align-items: center;
@@ -143,12 +143,9 @@ export const NotificationCard = styled.div<{
   border: none;
   margin-bottom: 8px;
   background: ${(props) => {
-    if (props.$isNew) {
-      return props.$type === "assignment" ? "#000000" : "#B3BFF5";
-    } else {
-      return props.$type === "assignment" ? "#000000" : "#D9DFF9";
-    }
-  }};
+		if (props.$isNew) return "#B3BFF5";
+		return "#D9DFF9";
+	}};
 
   &:hover {
     opacity: 0.9;
@@ -167,8 +164,8 @@ export const NotificationContent = styled.div`
 `;
 
 export const NotificationTag = styled.span<{
-  $isNew: boolean;
-  $type: "notice" | "assignment" | "community" | "other";
+	$isNew: boolean;
+	$type: "notice" | "assignment" | "community" | "other";
 }>`
   padding: 4px 12px;
   border-radius: 12px;
@@ -184,8 +181,8 @@ export const NotificationTag = styled.span<{
 `;
 
 export const NotificationTitle = styled.span<{
-  $isNew: boolean;
-  $type: "notice" | "assignment" | "community" | "other";
+	$isNew: boolean;
+	$type: "notice" | "assignment" | "community" | "other";
 }>`
   font-size: 14px;
   font-weight: ${(props) => (props.$isNew ? "600" : "500")};
@@ -196,22 +193,19 @@ export const NotificationTitle = styled.span<{
   text-overflow: ellipsis;
   order: 2;
   color: ${(props) => {
-    if (props.$type === "assignment" && props.$isNew) return "#FFFFFF";
-    if (props.$type === "assignment" && !props.$isNew) return "#FFFFFF";
-    if (props.$type === "notice" && !props.$isNew) return "#667EEA";
-    return "#000000";
-  }};
+		if (props.$type === "notice" && !props.$isNew) return "#667EEA";
+		return "#000000";
+	}};
 `;
 
 export const NotificationDate = styled.span<{
-  $isNew: boolean;
-  $type: "notice" | "assignment" | "community" | "other";
+	$isNew: boolean;
+	$type: "notice" | "assignment" | "community" | "other";
 }>`
   color: ${(props) => {
-    if (props.$type === "assignment") return "#CCCCCC";
-    if (props.$type === "notice" && !props.$isNew) return "#667EEA";
-    return "#666666";
-  }};
+		if (props.$type === "notice" && !props.$isNew) return "#667EEA";
+		return "#666666";
+	}};
   font-size: 13px;
   font-weight: 400;
   margin-left: auto;
