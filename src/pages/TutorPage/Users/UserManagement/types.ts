@@ -2,6 +2,8 @@ export interface Student {
 	userId: number;
 	name: string;
 	email: string;
+	/** 학번 (회원가입 시 입력, API: studentId) */
+	studentId?: string;
 	teamId?: string;
 	sectionId: number;
 	sectionName?: string;
@@ -38,6 +40,6 @@ export interface ProblemStatus {
 	submissionCount: number;
 }
 
-export type SortField = "name" | "email" | "progress" | "joinedAt";
+export type SortField = "name" | "email" | "joinedAt";
 export type SortDirection = "asc" | "desc";
 export type RoleFilter = "ALL" | "STUDENT" | "TUTOR" | "ADMIN";

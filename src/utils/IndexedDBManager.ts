@@ -19,7 +19,7 @@ interface IDBOpenDBRequestEvent extends Event {
 }
 
 class IndexedDBManager {
-	private dbName = "CodeSturdyDB";
+	private dbName = "H-CodeLabDB";
 	private dbVersion = 1;
 	private storeName = "codeStorage";
 	private db: IDBDatabase | null = null;

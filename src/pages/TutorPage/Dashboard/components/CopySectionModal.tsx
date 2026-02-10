@@ -126,7 +126,7 @@ const CopySectionModal: React.FC<CopySectionModalProps> = (props) => {
 				onClick={(e) => e.stopPropagation()}
 			>
 				<S.ModalHeader>
-					<h2>기존 수업 복사</h2>
+					<h2 style={{ color: "white" }}>기존 수업 복사</h2>
 					<S.ModalClose onClick={onClose}>×</S.ModalClose>
 				</S.ModalHeader>
 				<S.ModalBody $large={copyStep > 1}>

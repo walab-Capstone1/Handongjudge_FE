@@ -25,7 +25,7 @@ const CreateSectionModal: React.FC<CreateSectionModalProps> = ({
 		<S.ModalOverlay onClick={onClose}>
 			<S.ModalContent onClick={(e) => e.stopPropagation()}>
 				<S.ModalHeader>
-					<h2>새 수업 만들기</h2>
+					<h2 style={{ color: "white" }}>새 수업 만들기</h2>
 					<S.ModalClose onClick={onClose}>×</S.ModalClose>
 				</S.ModalHeader>
 				<S.ModalBody>
@@ -57,7 +57,10 @@ const CreateSectionModal: React.FC<CreateSectionModalProps> = ({
 									type="text"
 									value={formData.courseTitle}
 									onChange={(e) =>
-										setFormData((prev) => ({ ...prev, courseTitle: e.target.value }))
+										setFormData((prev) => ({
+											...prev,
+											courseTitle: e.target.value,
+										}))
 									}
 									placeholder="예: 자바프로그래밍"
 								/>
@@ -67,7 +70,10 @@ const CreateSectionModal: React.FC<CreateSectionModalProps> = ({
 								<S.FormTextarea
 									value={formData.description}
 									onChange={(e) =>
-										setFormData((prev) => ({ ...prev, description: e.target.value }))
+										setFormData((prev) => ({
+											...prev,
+											description: e.target.value,
+										}))
 									}
 									placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
 									rows={3}
