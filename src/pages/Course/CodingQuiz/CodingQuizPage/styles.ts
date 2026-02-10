@@ -52,7 +52,7 @@ export const QuizList = styled.div`
   gap: 16px;
 `;
 
-export const QuizCard = styled.div<{ $status: string }>`
+export const QuizCard = styled.div<{ $status: string; $inactive?: boolean }>`
   background: white;
   border-radius: 12px;
   padding: 24px;
@@ -61,12 +61,17 @@ export const QuizCard = styled.div<{ $status: string }>`
   cursor: ${(props) => (props.$status === "WAITING" ? "not-allowed" : "pointer")};
   display: flex;
   flex-direction: column;
-  opacity: ${(props) => (props.$status === "WAITING" ? 0.7 : props.$status === "ENDED" ? 0.8 : 1)};
+  opacity: ${(props) => {
+    if (props.$inactive) return 0.6;
+    return props.$status === "WAITING" ? 0.7 : props.$status === "ENDED" ? 0.8 : 1;
+  }};
   border: ${(props) => (props.$status === "ACTIVE" ? "2px solid #667EEA" : "none")};
+  background: ${(props) => (props.$inactive ? "#F5F5F5" : "white")};
 
   &:hover {
     ${(props) =>
       props.$status !== "WAITING" &&
+      !props.$inactive &&
       `
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -209,5 +214,19 @@ export const ProblemItemTitle = styled.div`
 export const ProblemItemArrow = styled.div`
   font-size: 20px;
   color: #667eea;
+  flex-shrink: 0;
+`;
+
+export const InactiveBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #d1d5db;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 12px;
+  min-width: 60px;
   flex-shrink: 0;
 `;

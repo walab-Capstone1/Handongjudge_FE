@@ -689,6 +689,27 @@ export const InfoValue = styled.div`
   font-weight: 500;
 `;
 
+export const ActiveToggleButton = styled.button`
+  padding: 6px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
 /* Problems tab */
 export const ProblemsTabHeader = styled.div`
   display: flex;

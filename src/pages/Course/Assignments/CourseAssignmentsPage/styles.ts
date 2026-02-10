@@ -71,30 +71,34 @@ export const AssignmentsAccordion = styled.div`
   gap: 16px;
 `;
 
-export const AccordionItem = styled.div`
+export const AccordionItem = styled.div<{ $inactive?: boolean }>`
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background: #ffffff;
   overflow: hidden;
   transition: all 0.3s ease;
+  opacity: ${(props) => (props.$inactive ? 0.6 : 1)};
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 `;
 
-export const AccordionHeader = styled.div<{ $expanded: boolean }>`
+export const AccordionHeader = styled.div<{ $expanded: boolean; $inactive?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
   cursor: pointer;
-  background: ${(props) => (props.$expanded ? "#E8ECFF" : "#F8F9FF")};
+  background: ${(props) => {
+    if (props.$inactive) return "#F5F5F5";
+    return props.$expanded ? "#E8ECFF" : "#F8F9FF";
+  }};
   transition: background-color 0.2s ease;
   border-bottom: ${(props) => (props.$expanded ? "1px solid #D0D5F0" : "none")};
 
   &:hover {
-    background: #edf0ff;
+    background: ${(props) => (props.$inactive ? "#F5F5F5" : "#edf0ff")};
   }
 
   @media (max-width: 768px) {
@@ -137,6 +141,21 @@ export const AccordionTitle = styled.h3`
   color: #000000;
   margin: 0;
   flex-shrink: 0;
+`;
+
+export const InactiveBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #d1d5db;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 12px;
+  min-width: 60px;
+  flex-shrink: 0;
+  margin-left: 8px;
 `;
 
 export const AccordionDDay = styled.span<{ $expired: boolean }>`
