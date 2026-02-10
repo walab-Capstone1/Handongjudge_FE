@@ -838,7 +838,7 @@ class APIService {
 	}
 
 	async createCourse(courseData: any): Promise<any> {
-		return await this.request("/admin/courses", {
+		return await this.request("/courses", {
 			method: "POST",
 			body: JSON.stringify(courseData),
 		});

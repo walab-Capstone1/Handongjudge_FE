@@ -180,6 +180,10 @@ export const SecondaryButton = styled.button`
 export const STICKY_COL_1_WIDTH = "5.5rem";
 export const STICKY_COL_2_WIDTH = "6rem";
 
+/** 오른쪽 고정 열(전체 총점, 비율) - 수업 전체 보기 */
+export const STICKY_RIGHT_TOTAL_WIDTH = "4.5rem";
+export const STICKY_RIGHT_RATIO_WIDTH = "3.75rem";
+
 /** 스크롤 영역 열 고정 너비 - 갯수와 상관없이 간격 통일, 가로 스크롤로 확장 */
 export const COL_SCORE_WIDTH = "5rem";
 export const COL_PROBLEM_WIDTH = "13rem";
@@ -680,10 +684,33 @@ export const ScoreDisplay = styled.div`
   justify-content: center;
 `;
 
+export const ScoreRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+`;
+
 export const ScoreValue = styled.div`
   font-weight: 600;
   color: #667eea;
   font-size: 0.95rem;
+`;
+
+export const ScoreValueButton = styled.button`
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  &:hover {
+    color: #1d4ed8;
+  }
 `;
 
 export const ScoreActions = styled.div`
@@ -852,6 +879,58 @@ export const CourseTableContainer = styled(TableContainer)`
 `;
 
 export const CourseTable = styled(Table)``;
+
+/** 수업 전체 보기: 오른쪽에 전체 총점·비율 열 고정 */
+export const CourseTableWithStickyRight = styled(CourseTable)`
+  /* thead 첫 행: 마지막 두 열(전체 총점, 비율) 오른쪽 고정 */
+  thead tr:first-child th:nth-last-child(2) {
+    position: sticky !important;
+    right: ${STICKY_RIGHT_RATIO_WIDTH} !important;
+    z-index: 15 !important;
+    width: ${STICKY_RIGHT_TOTAL_WIDTH} !important;
+    min-width: ${STICKY_RIGHT_TOTAL_WIDTH} !important;
+    max-width: ${STICKY_RIGHT_TOTAL_WIDTH} !important;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.08);
+    background: #f8fafc !important;
+  }
+  thead tr:first-child th:nth-last-child(1) {
+    position: sticky !important;
+    right: 0 !important;
+    z-index: 15 !important;
+    width: ${STICKY_RIGHT_RATIO_WIDTH} !important;
+    min-width: ${STICKY_RIGHT_RATIO_WIDTH} !important;
+    max-width: ${STICKY_RIGHT_RATIO_WIDTH} !important;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.08);
+    background: #f8fafc !important;
+  }
+  /* thead 두 번째 행은 마지막 두 열이 rowSpan으로 비어 있음 */
+  tbody td:nth-last-child(2) {
+    position: sticky !important;
+    right: ${STICKY_RIGHT_RATIO_WIDTH} !important;
+    z-index: 1 !important;
+    width: ${STICKY_RIGHT_TOTAL_WIDTH} !important;
+    min-width: ${STICKY_RIGHT_TOTAL_WIDTH} !important;
+    max-width: ${STICKY_RIGHT_TOTAL_WIDTH} !important;
+    background: #f1f5f9 !important;
+    font-weight: 600 !important;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.08);
+  }
+  tbody td:nth-last-child(1) {
+    position: sticky !important;
+    right: 0 !important;
+    z-index: 1 !important;
+    width: ${STICKY_RIGHT_RATIO_WIDTH} !important;
+    min-width: ${STICKY_RIGHT_RATIO_WIDTH} !important;
+    max-width: ${STICKY_RIGHT_RATIO_WIDTH} !important;
+    background: #fff !important;
+    font-weight: 600 !important;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.08);
+  }
+  tbody tr:hover td:nth-last-child(2),
+  tbody tr:hover td:nth-last-child(1) {
+    background: #f8fafc !important;
+  }
+`;
 
 export const TdCourseProblemCell = styled.td`
   position: relative;
