@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
+import { normalizeNoticeContent } from "../../utils/normalizeNoticeContent";
 import type { NoticeFormData, SectionInfo } from "../types";
 
 export function useNoticeCreate() {
@@ -60,7 +61,11 @@ export function useNoticeCreate() {
 			}
 			try {
 				setLoading(true);
-				await APIService.createNotice(formData);
+				const contentToSend = normalizeNoticeContent(formData.content);
+				await APIService.createNotice({
+					...formData,
+					content: contentToSend,
+				});
 				alert("공지사항이 생성되었습니다.");
 				if (sectionId) {
 					navigate(`/tutor/notices/section/${sectionId}`);
