@@ -1094,6 +1094,20 @@ class APIService {
 		);
 	}
 
+	async toggleQuizActive(
+		sectionId: number | string,
+		quizId: number | string,
+		isActive: boolean,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/active`,
+			{
+				method: "PATCH",
+				body: JSON.stringify({ active: isActive }),
+			},
+		);
+	}
+
 	async getCourses(): Promise<any> {
 		return await this.request("/courses");
 	}

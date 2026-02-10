@@ -154,6 +154,28 @@ export default function CodingTestManagementView(
 												<S.InfoLabel>문제 수</S.InfoLabel>
 												<S.InfoValue>{d.problems.length}개</S.InfoValue>
 											</S.InfoItem>
+											<S.InfoItem>
+												<S.InfoLabel>활성화 상태</S.InfoLabel>
+												<S.InfoValue>
+													<S.ActiveToggleButton
+														type="button"
+														onClick={() => {
+															if (d.sectionId && d.selectedQuizDetail) {
+																const quizId = Number(d.quizId);
+																d.handleToggleActive(
+																	Number(d.sectionId),
+																	quizId,
+																	d.selectedQuizDetail.active,
+																);
+															}
+														}}
+													>
+														{d.selectedQuizDetail.active !== false
+															? "비활성화"
+															: "활성화"}
+													</S.ActiveToggleButton>
+												</S.InfoValue>
+											</S.InfoItem>
 										</S.QuizInfoGrid>
 									</S.QuizInfoSection>
 								)}

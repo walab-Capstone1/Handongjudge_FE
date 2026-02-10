@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useRecoilState } from "recoil";
-import { sidebarCollapsedState } from "../../../../../recoil/atoms";
+import { useRecoilValue, useRecoilState } from "recoil";
+import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
 import APIService from "../../../../../services/APIService";
 import type { Quiz, Problem, SectionInfo } from "../types";
 
 export function useCodingQuizPage() {
 	const { sectionId } = useParams<{ sectionId: string }>();
 	const navigate = useNavigate();
+	const auth = useRecoilValue(authState);
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(
 		sidebarCollapsedState,
 	);
@@ -17,11 +18,46 @@ export function useCodingQuizPage() {
 	const [quizzes, setQuizzes] = useState<Quiz[]>([]);
 	const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
 	const [quizProblems, setQuizProblems] = useState<Problem[]>([]);
+	const [userRole, setUserRole] = useState<string | null>(null);
+	const [isManager, setIsManager] = useState(false);
+
+	const fetchUserRole = useCallback(async () => {
+		if (!sectionId || !auth.user) return;
+
+		try {
+			const response = await APIService.getMyRoleInSection(Number(sectionId));
+			let raw: unknown = response;
+			if (typeof response === "object" && response !== null) {
+				raw =
+					(response as { data?: unknown })?.data ??
+					(response as { role?: unknown })?.role ??
+					response;
+				if (typeof raw === "object" && raw !== null && "role" in raw) {
+					raw = (raw as { role: unknown }).role;
+				}
+			}
+			const role =
+				typeof raw === "string"
+					? raw.toUpperCase()
+					: String(raw ?? "").toUpperCase();
+
+			setUserRole(role);
+			setIsManager(role === "ADMIN" || role === "TUTOR");
+		} catch (error) {
+			console.error("역할 조회 실패:", error);
+			setUserRole(null);
+			setIsManager(false);
+		}
+	}, [sectionId, auth.user]);
 
 	const fetchData = useCallback(async () => {
 		if (!sectionId) return;
 		try {
 			setLoading(true);
+			
+			// 사용자 역할 조회
+			await fetchUserRole();
+
 			const sectionData = await APIService.getSectionInfo(sectionId);
 			setSectionInfo(
 				(sectionData as { data?: SectionInfo })?.data ?? sectionData,
@@ -46,7 +82,7 @@ export function useCodingQuizPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [sectionId]);
+	}, [sectionId, fetchUserRole]);
 
 	useEffect(() => {
 		fetchData();
@@ -116,6 +152,8 @@ export function useCodingQuizPage() {
 		quizzes,
 		selectedQuiz,
 		quizProblems,
+		userRole,
+		isManager,
 		handleToggleSidebar,
 		handleQuizClick,
 		handleProblemSelect,

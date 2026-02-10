@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import { authState } from "../../../../../recoil/atoms";
 import apiService from "../../../../../services/APIService";
 import indexedDBManager from "../../../../../utils/IndexedDBManager";
 import { getDefaultCode, resultMapping } from "../utils";
@@ -18,6 +20,10 @@ export function useCodingQuizSolve() {
 		quizId: string;
 	}>();
 	const [searchParams] = useSearchParams();
+	const navigate = useNavigate();
+	const auth = useRecoilValue(authState);
+	const [userRole, setUserRole] = useState<string | null>(null);
+	const timeUpHandled = useRef(false);
 
 	const [language, setLanguage] = useState("c");
 	const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -61,6 +67,52 @@ export function useCodingQuizSolve() {
 	>("idle");
 	const [codeLoadSource, setCodeLoadSource] = useState<string | null>(null);
 	const [sessionCleared, setSessionCleared] = useState(false);
+
+	// 사용자 역할 확인
+	useEffect(() => {
+		const fetchUserRole = async () => {
+			if (!sectionId || !auth.user) return;
+			try {
+				const response = await apiService.getMyRoleInSection(Number(sectionId));
+				let raw: unknown = response;
+				if (typeof response === "object" && response !== null) {
+					raw =
+						(response as { data?: unknown })?.data ??
+						(response as { role?: unknown })?.role ??
+						response;
+					if (typeof raw === "object" && raw !== null && "role" in raw) {
+						raw = (raw as { role: unknown }).role;
+					}
+				}
+				const role =
+					typeof raw === "string"
+						? raw.toUpperCase()
+						: String(raw ?? "").toUpperCase();
+				setUserRole(role);
+			} catch (error) {
+				console.error("역할 조회 실패:", error);
+				setUserRole(null);
+			}
+		};
+		if (auth.isAuthenticated && sectionId) {
+			fetchUserRole();
+		}
+	}, [auth.isAuthenticated, auth.user, sectionId]);
+
+	const isManager = userRole === "ADMIN" || userRole === "TUTOR" || userRole === "SUPER_ADMIN";
+
+	// 퀴즈 종료 여부 확인 및 학생 리다이렉션
+	useEffect(() => {
+		if (!quizInfo.endTime || !sectionId || userRole === null) return;
+		
+		const now = new Date();
+		const endTime = new Date(quizInfo.endTime);
+		
+		// 학생이고 시간이 종료된 경우 리다이렉션
+		if (now > endTime && !isManager) {
+			navigate(`/sections/${sectionId}/coding-quiz`);
+		}
+	}, [quizInfo.endTime, sectionId, userRole, isManager, navigate]);
 
 	useEffect(() => {
 		const loadAllInfo = async () => {
@@ -127,7 +179,7 @@ export function useCodingQuizSolve() {
 			}
 		};
 		loadAllInfo();
-	}, [quizId, sectionId, searchParams]);
+	}, [quizId, sectionId, searchParams, isManager, navigate]);
 
 	useEffect(() => {
 		const initializeSession = async () => {
@@ -231,9 +283,21 @@ export function useCodingQuizSolve() {
 	}, [sessionId, selectedProblemId, sectionId, language]);
 
 	const handleTimeUp = useCallback(() => {
+		// 이미 처리된 경우 중복 실행 방지
+		if (timeUpHandled.current) return;
+		timeUpHandled.current = true;
+
 		setIsTimeUp(true);
-		alert("퀴즈 시간이 종료되었습니다. 자동으로 제출됩니다.");
-	}, []);
+		
+		// 학생인 경우 리다이렉션
+		if (!isManager && sectionId) {
+			alert("퀴즈 시간이 종료되었습니다.");
+			navigate(`/sections/${sectionId}/coding-quiz`);
+		} else {
+			// 관리자/튜터는 알림만 표시
+			alert("퀴즈 시간이 종료되었습니다.");
+		}
+	}, [isManager, sectionId, navigate]);
 
 	const handleProblemChange = useCallback(
 		async (problemId: number) => {
@@ -308,7 +372,8 @@ export function useCodingQuizSolve() {
 			alert("코드를 작성해주세요.");
 			return;
 		}
-		if (isTimeUp) {
+		// 관리자/튜터가 아니고 시간이 종료된 경우 제출 불가
+		if (!isManager && isTimeUp) {
 			alert("시간이 종료되어 제출할 수 없습니다.");
 			return;
 		}
@@ -371,7 +436,8 @@ export function useCodingQuizSolve() {
 			alert("코드를 작성해주세요.");
 			return;
 		}
-		if (isTimeUp) {
+		// 관리자/튜터가 아니고 시간이 종료된 경우 테스트 불가
+		if (!isManager && isTimeUp) {
 			alert("시간이 종료되어 테스트할 수 없습니다.");
 			return;
 		}
@@ -428,6 +494,7 @@ export function useCodingQuizSolve() {
 		sectionId,
 		selectedProblemId,
 		isTimeUp,
+		isManager,
 		clearSessionAfterSubmission,
 	]);
 

@@ -16,6 +16,7 @@ export interface Assignment {
 	totalProblems: number;
 	submittedProblems: number;
 	problems: Problem[];
+	active?: boolean;
 }
 
 export interface SectionInfo {

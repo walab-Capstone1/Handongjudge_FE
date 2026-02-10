@@ -123,11 +123,17 @@ export default function CodingQuizPageView(d: CodingQuizPageHookReturn) {
 									<S.QuizCard
 										key={quiz.id}
 										$status={quiz.status}
+										$inactive={d.isManager && quiz.active === false}
 										onClick={() => d.handleQuizClick(quiz)}
 									>
 										<S.QuizCardHeader>
 											<h3>{quiz.title}</h3>
-											{getStatusBadge(quiz.status)}
+											<div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+												{getStatusBadge(quiz.status)}
+												{d.isManager && quiz.active === false && (
+													<S.InactiveBadge>비활성화</S.InactiveBadge>
+												)}
+											</div>
 										</S.QuizCardHeader>
 										<S.QuizCardContent>
 											<S.QuizDescription>

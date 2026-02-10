@@ -74,9 +74,13 @@ export default function CourseAssignmentsPageView(
 					<S.AssignmentsAccordion>
 						{d.assignments.length > 0 ? (
 							d.assignments.map((assignment, index) => (
-								<S.AccordionItem key={assignment.id}>
+								<S.AccordionItem 
+									key={assignment.id}
+									$inactive={d.isManager && assignment.active === false}
+								>
 									<S.AccordionHeader
 										$expanded={d.expandedAssignmentIds.includes(assignment.id)}
+										$inactive={d.isManager && assignment.active === false}
 										onClick={() => d.toggleAssignment(assignment.id)}
 									>
 										<S.AccordionHeaderLeft>
@@ -89,6 +93,9 @@ export default function CourseAssignmentsPageView(
 												{String(index + 1).padStart(2, "0")}
 											</S.AccordionNumber>
 											<S.AccordionTitle>{assignment.title}</S.AccordionTitle>
+											{d.isManager && assignment.active === false && (
+												<S.InactiveBadge>비활성화</S.InactiveBadge>
+											)}
 											{assignment.dDay !== null && (
 												<S.AccordionDDay $expired={assignment.dDay < 0}>
 													{assignment.dDay < 0

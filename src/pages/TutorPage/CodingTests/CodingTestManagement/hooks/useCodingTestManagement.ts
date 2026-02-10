@@ -541,6 +541,23 @@ export function useCodingTestManagement() {
 		}
 	}, []);
 
+	const handleToggleActive = useCallback(
+		async (secId: number, quizId: number, currentActive?: boolean) => {
+			try {
+				const newActive = !currentActive;
+				await APIService.toggleQuizActive(secId, quizId, newActive);
+				fetchQuizzes();
+				if (quizId === Number(quizId)) {
+					fetchQuizDetail();
+				}
+			} catch (error) {
+				console.error("퀴즈 활성화 상태 변경 실패:", error);
+				alert("퀴즈 활성화 상태 변경에 실패했습니다.");
+			}
+		},
+		[fetchQuizzes, fetchQuizDetail, quizId],
+	);
+
 	const filteredQuizzes = quizzes.filter((quiz) => {
 		const matchesSearch =
 			quiz.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -612,6 +629,7 @@ export function useCodingTestManagement() {
 		handleStart,
 		handleStop,
 		handleEnd,
+		handleToggleActive,
 	};
 }
 
