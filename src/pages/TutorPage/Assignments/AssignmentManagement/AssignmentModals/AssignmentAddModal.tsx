@@ -27,6 +27,7 @@ interface AssignmentAddModalProps {
 			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 		>,
 	) => void;
+	loading?: boolean;
 }
 
 const AssignmentAddModal: React.FC<AssignmentAddModalProps> = ({
@@ -36,6 +37,7 @@ const AssignmentAddModal: React.FC<AssignmentAddModalProps> = ({
 	onClose,
 	onSubmit,
 	onInputChange,
+	loading = false,
 }) => {
 	if (!isOpen) return null;
 
@@ -130,10 +132,16 @@ const AssignmentAddModal: React.FC<AssignmentAddModalProps> = ({
 					</S.FormRow>
 
 					<S.FormActions>
-						<S.ButtonSecondary type="button" onClick={onClose}>
+						<S.ButtonSecondary
+							type="button"
+							onClick={onClose}
+							disabled={loading}
+						>
 							취소
 						</S.ButtonSecondary>
-						<S.ButtonPrimary type="submit">과제 생성</S.ButtonPrimary>
+						<S.ButtonPrimary type="submit" disabled={loading}>
+							{loading ? "생성 중..." : "과제 생성"}
+						</S.ButtonPrimary>
 					</S.FormActions>
 				</S.Form>
 			</S.ModalContent>

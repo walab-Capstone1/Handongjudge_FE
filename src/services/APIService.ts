@@ -500,7 +500,7 @@ class APIService {
 	}
 
 	async getInstructorDashboard(): Promise<any> {
-		return await this.request("/user/dashboard");
+		return await this.request("/user/dashboard?instructorOnly=true");
 	}
 
 	async getInstructorStudents(): Promise<any> {

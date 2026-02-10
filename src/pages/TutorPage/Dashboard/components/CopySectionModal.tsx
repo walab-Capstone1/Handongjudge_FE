@@ -11,6 +11,7 @@ import type {
 interface CopySectionModalProps {
 	isOpen: boolean;
 	onClose: () => void;
+	loading?: boolean;
 	copyStep: number;
 	setCopyStep: React.Dispatch<React.SetStateAction<number>>;
 	copyFormData: DashboardCopyFormData;
@@ -54,6 +55,7 @@ const CopySectionModal: React.FC<CopySectionModalProps> = (props) => {
 	const {
 		isOpen,
 		onClose,
+		loading = false,
 		copyStep,
 		setCopyStep,
 		copyFormData,
@@ -648,15 +650,24 @@ const CopySectionModal: React.FC<CopySectionModalProps> = (props) => {
 				</S.ModalBody>
 				<S.ModalFooter>
 					{copyStep > 1 && (
-						<S.BtnCancel onClick={() => setCopyStep(copyStep - 1)}>
+						<S.BtnCancel
+							onClick={() => setCopyStep(copyStep - 1)}
+							disabled={loading}
+						>
 							이전
 						</S.BtnCancel>
 					)}
-					<S.BtnCancel onClick={onClose}>취소</S.BtnCancel>
+					<S.BtnCancel onClick={onClose} disabled={loading}>
+						취소
+					</S.BtnCancel>
 					{copyStep < 4 ? (
-						<S.BtnSubmit onClick={handleNext}>다음</S.BtnSubmit>
+						<S.BtnSubmit onClick={handleNext} disabled={loading}>
+							다음
+						</S.BtnSubmit>
 					) : (
-						<S.BtnSubmit onClick={handleCopySection}>복사하기</S.BtnSubmit>
+						<S.BtnSubmit onClick={handleCopySection} disabled={loading}>
+							{loading ? "복사 중..." : "복사하기"}
+						</S.BtnSubmit>
 					)}
 				</S.ModalFooter>
 			</S.ModalContent>

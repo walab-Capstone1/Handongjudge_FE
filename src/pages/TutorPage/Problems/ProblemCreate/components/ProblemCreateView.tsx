@@ -1,6 +1,8 @@
 import type React from "react";
+import { createPortal } from "react-dom";
 import { FaPalette, FaHighlighter } from "react-icons/fa";
 import TutorLayout from "../../../../../layouts/TutorLayout";
+import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
 import ProblemPreview from "./ProblemPreview";
 import type { ProblemCreateHookReturn } from "../hooks/useProblemCreate";
@@ -8,6 +10,32 @@ import type { ProblemCreateHookReturn } from "../hooks/useProblemCreate";
 export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 	return (
 		<TutorLayout>
+			{d.loading &&
+				createPortal(
+					<div
+						style={{
+							position: "fixed",
+							inset: 0,
+							backgroundColor: "rgba(0,0,0,0.35)",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 10000,
+						}}
+					>
+						<div
+							style={{
+								background: "white",
+								padding: "1.5rem 2rem",
+								borderRadius: "12px",
+								boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+							}}
+						>
+							<LoadingSpinner message="문제 생성 중..." />
+						</div>
+					</div>,
+					document.body,
+				)}
 			<S.Container>
 				<S.PageHeader>
 					<S.PageTitle>새 문제 만들기</S.PageTitle>
@@ -82,7 +110,7 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 
 							<S.FormRow>
 								<S.FormSection>
-									<S.Label>시간 제한 (초)</S.Label>
+									<S.Label>시간 제한 (초) *</S.Label>
 									<S.Input
 										type="number"
 										name="timeLimit"
@@ -94,7 +122,7 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 									/>
 								</S.FormSection>
 								<S.FormSection>
-									<S.Label>메모리 제한 (MB)</S.Label>
+									<S.Label>메모리 제한 (MB) *</S.Label>
 									<S.Input
 										type="number"
 										name="memoryLimit"
@@ -137,7 +165,7 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 									<S.HelpText>
 										{d.loading
 											? "ZIP 파일 내용을 분석 중입니다..."
-											: "문제 ZIP 파일이 있다면 업로드하세요. 자동으로 내용이 채워집니다."}
+											: "문제 ZIP 파일이 있다면 업로드하세요. 자동으로 문제 설명, 문제 제목이 채워집니다."}
 									</S.HelpText>
 								</S.FileUploadWrapper>
 							</S.FormSection>

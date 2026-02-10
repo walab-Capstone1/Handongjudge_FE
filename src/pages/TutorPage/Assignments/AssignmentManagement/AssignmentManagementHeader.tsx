@@ -11,6 +11,8 @@ interface AssignmentManagementHeaderProps {
 	onAddAssignment: () => void;
 	onStandaloneProblemCreate: () => void;
 	onBulkProblemCreate: () => void;
+	/** 조교(TUTOR)인 수업이면 과제 추가/수정 등 제한 */
+	isTutorOnly?: boolean;
 }
 
 const AssignmentManagementHeader: React.FC<AssignmentManagementHeaderProps> = ({
@@ -23,6 +25,7 @@ const AssignmentManagementHeader: React.FC<AssignmentManagementHeaderProps> = ({
 	onAddAssignment,
 	onStandaloneProblemCreate,
 	onBulkProblemCreate,
+	isTutorOnly,
 }) => {
 	/* 2번 사진 원본: 헤더에 제목 + 오른쪽 "과제 추가하기" 버튼만, 뱃지 없음 */
 	if (sectionId) {
@@ -32,11 +35,13 @@ const AssignmentManagementHeader: React.FC<AssignmentManagementHeaderProps> = ({
 					<S.HeaderLeft>
 						<S.PageTitle>과제 관리</S.PageTitle>
 					</S.HeaderLeft>
-					<S.HeaderActions>
-						<S.BtnPrimary type="button" onClick={onAddAssignment}>
-							과제 추가하기
-						</S.BtnPrimary>
-					</S.HeaderActions>
+					{!isTutorOnly && (
+						<S.HeaderActions>
+							<S.BtnPrimary type="button" onClick={onAddAssignment}>
+								과제 추가하기
+							</S.BtnPrimary>
+						</S.HeaderActions>
+					)}
 				</S.PageHeader>
 				<S.FiltersSection>
 					<S.SearchBox>

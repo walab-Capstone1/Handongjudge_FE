@@ -26,6 +26,7 @@ import {
 	FaArrowLeft,
 	FaCode,
 	FaChevronLeft,
+	FaLink,
 } from "react-icons/fa";
 import * as S from "./styles";
 import type { Section, MenuItem, ExpandedMenus } from "./types";
@@ -58,6 +59,14 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 		const saved = localStorage.getItem("tutor_sidebarCollapsed");
 		return saved === "true";
 	});
+
+	const handleCopyTutorLink = useCallback(() => {
+		const tutorLink = `${window.location.origin}/tutor`;
+		navigator.clipboard
+			.writeText(tutorLink)
+			.then(() => alert("수업 링크가 복사되었습니다."))
+			.catch(() => alert("링크 복사에 실패했습니다."));
+	}, []);
 
 	useEffect(() => {
 		localStorage.setItem("tutor_expandedMenus", JSON.stringify(expandedMenus));
@@ -647,6 +656,15 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 											<S.SidebarSectionTitle $collapsed={sidebarCollapsed}>
 												수업 관리
 											</S.SidebarSectionTitle>
+											<S.SidebarLinkCopyBtn
+												$collapsed={sidebarCollapsed}
+												type="button"
+												onClick={handleCopyTutorLink}
+												title={sidebarCollapsed ? "수업 링크 복사" : ""}
+											>
+												<FaLink />
+												{!sidebarCollapsed && "수업 링크 복사"}
+											</S.SidebarLinkCopyBtn>
 											{sectionMenuItems.map((item) =>
 												renderMenuItem(item, true),
 											)}

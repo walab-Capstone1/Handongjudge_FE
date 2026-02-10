@@ -29,6 +29,8 @@ export interface DashboardSection {
 	active: boolean;
 	createdAt: string;
 	instructorName?: string;
+	/** 이 수업에서의 내 역할: INSTRUCTOR(강사) / ADMIN / TUTOR(조회·일부만) */
+	roleInSection?: string;
 }
 
 export interface DashboardFormData {
