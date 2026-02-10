@@ -310,51 +310,61 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 								</S.ModalClose>
 							</S.ModalHeader>
 							<S.ModalBody>
-								<S.DescriptionContent>
-									{d.getProblemTags(d.selectedProblem).length > 0 && (
-										<S.TagsInModal>
-											{d.getProblemTags(d.selectedProblem).map((tag, idx) => (
-												<S.TagInModal key={idx}>{tag}</S.TagInModal>
-											))}
-										</S.TagsInModal>
-									)}
-									<ReactMarkdown
-										components={{
-											h1: ({ node, ...props }: any) => (
-												<h1 className="problem-description-h1" {...props} />
-											),
-											h2: ({ node, ...props }: any) => (
-												<h2 className="problem-description-h2" {...props} />
-											),
-											h3: ({ node, ...props }: any) => (
-												<h3 className="problem-description-h3" {...props} />
-											),
-											code: ({ node, className, children, ...props }: any) => {
-												const inline = !className;
-												return inline ? (
-													<code
-														className="problem-description-inline-code"
-														{...props}
-													>
-														{children}
-													</code>
-												) : (
-													<pre className="problem-description-code-block">
-														<code {...props}>{children}</code>
-													</pre>
-												);
-											},
-											p: ({ node, ...props }: any) => (
-												<p
-													className="problem-description-paragraph"
-													{...props}
-												/>
-											),
-										}}
-									>
-										{d.selectedProblem.description || "*문제 설명이 없습니다.*"}
-									</ReactMarkdown>
-								</S.DescriptionContent>
+								{d.getProblemTags(d.selectedProblem).length > 0 && (
+									<S.TagsInModal>
+										{d.getProblemTags(d.selectedProblem).map((tag, idx) => (
+											<S.TagInModal key={idx}>{tag}</S.TagInModal>
+										))}
+									</S.TagsInModal>
+								)}
+								{(() => {
+									const desc =
+										d.selectedProblem.description || "*문제 설명이 없습니다.*";
+									const isHtml =
+										typeof desc === "string" && /<[^>]+>/.test(desc);
+									return isHtml ? (
+										<div dangerouslySetInnerHTML={{ __html: desc }} />
+									) : (
+										<S.DescriptionContent>
+											<ReactMarkdown
+												components={{
+													h1: ({ node, ...props }: any) => (
+														<h1 className="problem-description-h1" {...props} />
+													),
+													h2: ({ node, ...props }: any) => (
+														<h2 className="problem-description-h2" {...props} />
+													),
+													h3: ({ node, ...props }: any) => (
+														<h3 className="problem-description-h3" {...props} />
+													),
+													code: ({ node, className, children, ...props }: any) => {
+														const inline = !className;
+														return inline ? (
+															<code
+																className="problem-description-inline-code"
+																{...props}
+															>
+																{children}
+															</code>
+														) : (
+															<pre className="problem-description-code-block">
+																<code {...props}>{children}</code>
+															</pre>
+														);
+													},
+													p: ({ node, ...props }: any) => (
+														<p
+															className="problem-description-paragraph"
+															{...props}
+														/>
+													),
+												}}
+											>
+												{desc}
+											</ReactMarkdown>
+										</S.DescriptionContent>
+									);
+								})()}
 							</S.ModalBody>
 						</S.ModalContent>
 					</S.ModalOverlay>
