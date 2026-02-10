@@ -29,7 +29,7 @@ export function useAuthCallback() {
 						tokenManager.default.setAccessToken(accessToken);
 
 						const response = await fetch(
-							`${process.env.REACT_APP_API_URL || "http://localhost:8080/api"}/user/me`,
+							`${process.env.REACT_APP_API_URL || "http://10.10.200.10:8080/api"}/user/me`,
 							{
 								headers: {
 									Authorization: `Bearer ${accessToken}`,
