@@ -24,40 +24,46 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 		<S.PreviewWrapper>
 			{title && <S.PreviewTitle>{title}</S.PreviewTitle>}
 			{description && (
-				<S.PreviewDescription>
-					<ReactMarkdown
-						components={{
-							h1: ({ node, ...props }) => <S.PreviewH1 {...props} />,
-							h2: ({ node, ...props }) => <S.PreviewH2 {...props} />,
-							h3: ({ node, ...props }) => <S.PreviewH3 {...props} />,
-							code: ({
-								node,
-								inline,
-								className,
-								children,
-								...props
-							}: {
-								node?: unknown;
-								inline?: boolean;
-								className?: string;
-								children?: React.ReactNode;
-							}) =>
-								inline ? (
-									<S.PreviewInlineCode {...props}>
-										{children}
-									</S.PreviewInlineCode>
-								) : (
-									<S.PreviewCodeBlock>
-										<code {...props}>{children}</code>
-									</S.PreviewCodeBlock>
-								),
-							p: ({ node, ...props }) => <S.PreviewParagraph {...props} />,
-							hr: ({ node, ...props }) => <hr {...props} />,
-						}}
-					>
-						{description}
-					</ReactMarkdown>
-				</S.PreviewDescription>
+				<>
+					{typeof description === "string" && /<[^>]+>/.test(description) ? (
+						<div dangerouslySetInnerHTML={{ __html: description }} />
+					) : (
+						<S.PreviewDescription>
+							<ReactMarkdown
+								components={{
+									h1: ({ node, ...props }) => <S.PreviewH1 {...props} />,
+									h2: ({ node, ...props }) => <S.PreviewH2 {...props} />,
+									h3: ({ node, ...props }) => <S.PreviewH3 {...props} />,
+									code: ({
+										node,
+										inline,
+										className,
+										children,
+										...props
+									}: {
+										node?: unknown;
+										inline?: boolean;
+										className?: string;
+										children?: React.ReactNode;
+									}) =>
+										inline ? (
+											<S.PreviewInlineCode {...props}>
+												{children}
+											</S.PreviewInlineCode>
+										) : (
+											<S.PreviewCodeBlock>
+												<code {...props}>{children}</code>
+											</S.PreviewCodeBlock>
+										),
+									p: ({ node, ...props }) => <S.PreviewParagraph {...props} />,
+									hr: ({ node, ...props }) => <hr {...props} />,
+								}}
+							>
+								{description}
+							</ReactMarkdown>
+						</S.PreviewDescription>
+					)}
+				</>
 			)}
 			{inputFormat && (
 				<S.PreviewSection>

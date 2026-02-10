@@ -38,19 +38,42 @@ const ProblemEditDescriptionSection: React.FC<
 					id="problem-edit-description"
 					style={{ background: "#f5f5f5" }}
 				>
-					<div
-						style={{
-							padding: "12px",
-							minHeight: "300px",
-							whiteSpace: "pre-wrap",
-							color: "#666",
-							overflow: "auto",
-						}}
-					>
-						{formData.descriptionText ||
+					{(() => {
+						const desc =
 							formData.description ||
-							"(문제 설명 없음)"}
-					</div>
+							formData.descriptionText ||
+							"(문제 설명 없음)";
+						const isHtml =
+							typeof desc === "string" &&
+							desc !== "(문제 설명 없음)" &&
+							/<[^>]+>/.test(desc);
+						return isHtml ? (
+							<div
+								style={{
+									padding: "12px",
+									minHeight: "300px",
+									overflow: "auto",
+								}}
+								dangerouslySetInnerHTML={{
+									__html: formData.description || "",
+								}}
+							/>
+						) : (
+							<div
+								style={{
+									padding: "12px",
+									minHeight: "300px",
+									whiteSpace: "pre-wrap",
+									color: "#666",
+									overflow: "auto",
+								}}
+							>
+								{formData.descriptionText ||
+									formData.description ||
+									"(문제 설명 없음)"}
+							</div>
+						);
+					})()}
 				</S.EditorWrapper>
 				<S.Preview>
 					<S.PreviewHeader>미리보기</S.PreviewHeader>
