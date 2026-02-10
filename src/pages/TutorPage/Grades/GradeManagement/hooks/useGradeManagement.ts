@@ -680,6 +680,17 @@ export function useGradeManagement() {
 	}, [courseGrades, searchTerm]);
 
 	const handleExportCSV = useCallback(() => {
+		const formatDateForCSV = (s: string | undefined): string =>
+			s ? `"${new Date(s).toLocaleString("ko-KR")}"` : '""';
+		const getSubmissionDisplayForCSV = (
+			submittedAt: string | undefined,
+			dueAt: string | undefined,
+		): string => {
+			if (submittedAt) return formatDateForCSV(submittedAt);
+			if (dueAt && new Date() > new Date(dueAt)) return '"미제출"';
+			return '""';
+		};
+
 		// 전체 과제 보기: 과제만 필터한 courseGrades로 내보내기
 		if (
 			viewMode === "assignment" &&
@@ -697,6 +708,12 @@ export function useGradeManagement() {
 						headers.push(
 							`${item.title} - ${problem.problemTitle ?? ""} (${problem.points ?? 0}점)`,
 						);
+						headers.push(
+							`${item.title} - ${problem.problemTitle ?? ""} 제출일자`,
+						);
+						headers.push(
+							`${item.title} - ${problem.problemTitle ?? ""} 마감일자`,
+						);
 					}
 					headers.push(`${item.title} 총점`);
 				}
@@ -711,6 +728,7 @@ export function useGradeManagement() {
 					let totalAllPoints = 0;
 					for (const item of assignmentItems) {
 						const assignmentData = student.assignments?.[item.id];
+						const dueAt = item.dueAt;
 						for (const problem of item.problems) {
 							const problemGrade =
 								assignmentData?.problems?.[problem.problemId];
@@ -720,6 +738,10 @@ export function useGradeManagement() {
 									? problemGrade.score
 									: "";
 							row.push(String(score));
+							row.push(
+								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
+							);
+							row.push(formatDateForCSV(dueAt));
 							if (typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -774,6 +796,12 @@ export function useGradeManagement() {
 						headers.push(
 							`${item.title} - ${problem.problemTitle ?? ""} (${problem.points ?? 0}점)`,
 						);
+						headers.push(
+							`${item.title} - ${problem.problemTitle ?? ""} 제출일자`,
+						);
+						headers.push(
+							`${item.title} - ${problem.problemTitle ?? ""} 마감일자`,
+						);
 					}
 					headers.push(`${item.title} 총점`);
 				}
@@ -788,6 +816,7 @@ export function useGradeManagement() {
 					let totalAllPoints = 0;
 					for (const item of quizItems) {
 						const quizData = student.quizzes?.[item.id];
+						const dueAt = item.dueAt;
 						for (const problem of item.problems) {
 							const problemGrade = quizData?.problems?.[problem.problemId];
 							const score =
@@ -796,6 +825,10 @@ export function useGradeManagement() {
 									? problemGrade.score
 									: "";
 							row.push(String(score));
+							row.push(
+								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
+							);
+							row.push(formatDateForCSV(dueAt));
 							if (typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -844,6 +877,12 @@ export function useGradeManagement() {
 					headers.push(
 						`${item.title} - ${problem.problemTitle ?? ""} (${problem.points ?? 0}점)`,
 					);
+					headers.push(
+						`${item.title} - ${problem.problemTitle ?? ""} 제출일자`,
+					);
+					headers.push(
+						`${item.title} - ${problem.problemTitle ?? ""} 마감일자`,
+					);
 				}
 				headers.push(`${item.title} 총점`);
 			}
@@ -857,6 +896,7 @@ export function useGradeManagement() {
 				let totalAllScore = 0;
 				let totalAllPoints = 0;
 				for (const item of courseGrades.items) {
+					const dueAt = item.dueAt;
 					if (item.type === "assignment") {
 						const assignmentData = student.assignments?.[item.id];
 						for (const problem of item.problems) {
@@ -868,6 +908,10 @@ export function useGradeManagement() {
 									? problemGrade.score
 									: "";
 							row.push(String(score));
+							row.push(
+								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
+							);
+							row.push(formatDateForCSV(dueAt));
 							if (score !== "" && score !== null && typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -892,6 +936,10 @@ export function useGradeManagement() {
 									? problemGrade.score
 									: "";
 							row.push(String(score));
+							row.push(
+								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
+							);
+							row.push(formatDateForCSV(dueAt));
 							if (score !== "" && score !== null && typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -932,12 +980,15 @@ export function useGradeManagement() {
 		}
 
 		if (viewMode === "quiz" && selectedQuiz && grades.length > 0) {
+			const quizDueAt = selectedQuiz.endTime;
 			const headers = ["학생명", "학번"];
 			if (grades[0]?.problemGrades) {
 				for (const problem of grades[0].problemGrades) {
 					headers.push(
 						`${problem.problemTitle ?? ""} (${problem.points ?? 0}점)`,
 					);
+					headers.push(`${problem.problemTitle ?? ""} 제출일자`);
+					headers.push(`${problem.problemTitle ?? ""} 마감일자`);
 				}
 			}
 			headers.push("총점", "비율(%)");
@@ -953,6 +1004,8 @@ export function useGradeManagement() {
 							? problem.score
 							: "";
 					row.push(String(score));
+					row.push(getSubmissionDisplayForCSV(problem.submittedAt, quizDueAt));
+					row.push(formatDateForCSV(quizDueAt));
 				}
 				const totalScore = student.totalScore ?? 0;
 				const totalPoints = student.totalPoints ?? 0;
@@ -984,12 +1037,18 @@ export function useGradeManagement() {
 			return;
 		}
 
+		const assignmentDueAt =
+			selectedAssignment.dueDate ??
+			(selectedAssignment as { endDate?: string }).endDate ??
+			(selectedAssignment as { deadline?: string }).deadline;
 		const headers = ["학생명", "학번"];
 		if (grades[0]?.problemGrades) {
 			for (const problem of grades[0].problemGrades) {
 				headers.push(
 					`${problem.problemTitle ?? ""} (${problem.points ?? 0}점)`,
 				);
+				headers.push(`${problem.problemTitle ?? ""} 제출일자`);
+				headers.push(`${problem.problemTitle ?? ""} 마감일자`);
 			}
 		}
 		headers.push("총점", "비율(%)");
@@ -1005,6 +1064,10 @@ export function useGradeManagement() {
 						? problem.score
 						: "";
 				row.push(String(score));
+				row.push(
+					getSubmissionDisplayForCSV(problem.submittedAt, assignmentDueAt),
+				);
+				row.push(formatDateForCSV(assignmentDueAt));
 			}
 			const totalScore = student.totalScore ?? 0;
 			const totalPoints = student.totalPoints ?? 0;
