@@ -500,7 +500,7 @@ class APIService {
 	}
 
 	async getInstructorDashboard(): Promise<any> {
-		return await this.request("/user/dashboard");
+		return await this.request("/user/dashboard?instructorOnly=true");
 	}
 
 	async getInstructorStudents(): Promise<any> {
@@ -838,7 +838,7 @@ class APIService {
 	}
 
 	async createCourse(courseData: any): Promise<any> {
-		return await this.request("/admin/courses", {
+		return await this.request("/courses", {
 			method: "POST",
 			body: JSON.stringify(courseData),
 		});
@@ -1087,6 +1087,20 @@ class APIService {
 	): Promise<any> {
 		return await this.request(
 			`/sections/${sectionId}/assignments/${assignmentId}/active`,
+			{
+				method: "PATCH",
+				body: JSON.stringify({ active: isActive }),
+			},
+		);
+	}
+
+	async toggleQuizActive(
+		sectionId: number | string,
+		quizId: number | string,
+		isActive: boolean,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/active`,
 			{
 				method: "PATCH",
 				body: JSON.stringify({ active: isActive }),

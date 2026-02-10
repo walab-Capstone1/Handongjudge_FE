@@ -35,7 +35,9 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 						</S.TitleStats>
 					</S.TitleLeft>
 					<S.TitleRight>
-						<S.CreateButton onClick={() => d.navigate("/tutor/problems/create")}>
+						<S.CreateButton
+							onClick={() => d.navigate("/tutor/problems/create")}
+						>
 							+ 새 문제 만들기
 						</S.CreateButton>
 					</S.TitleRight>
@@ -184,20 +186,18 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 															>
 																{problem.title}
 															</S.TitleText>
-															{problem.isUsed && (
-																<S.UsageBadge
-																	title={`${problem.assignmentCount || 0}개 과제에서 사용 중`}
-																>
-																	사용 중
-																	{problem.assignmentCount &&
-																		problem.assignmentCount > 0 && (
-																			<S.UsageCount>
-																				{" "}
-																				({problem.assignmentCount})
-																			</S.UsageCount>
-																		)}
-																</S.UsageBadge>
-															)}
+															{problem.isUsed &&
+																(problem.assignmentCount ?? 0) > 0 && (
+																	<S.UsageBadge
+																		title={`${problem.assignmentCount}개 과제에서 사용 중`}
+																	>
+																		사용 중
+																		<S.UsageCount>
+																			{" "}
+																			({problem.assignmentCount})
+																		</S.UsageCount>
+																	</S.UsageBadge>
+																)}
 														</S.TitleRow>
 														{d.getProblemTags(problem).length > 0 && (
 															<S.Tags>
@@ -297,64 +297,68 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 
 				{/* 문제 설명 모달 */}
 				{d.showProblemModal && d.selectedProblem && (
-					<S.ModalOverlay
-						onClick={d.closeProblemModal}
-					>
+					<S.ModalOverlay onClick={d.closeProblemModal}>
 						<S.ModalContent $large onClick={(e) => e.stopPropagation()}>
 							<S.ModalHeader>
 								<h2>{d.selectedProblem.title}</h2>
-								<S.ModalClose
-									onClick={d.closeProblemModal}
-								>
-									×
-								</S.ModalClose>
+								<S.ModalClose onClick={d.closeProblemModal}>×</S.ModalClose>
 							</S.ModalHeader>
 							<S.ModalBody>
-								<S.DescriptionContent>
-									{d.getProblemTags(d.selectedProblem).length > 0 && (
-										<S.TagsInModal>
-											{d.getProblemTags(d.selectedProblem).map((tag, idx) => (
-												<S.TagInModal key={idx}>{tag}</S.TagInModal>
-											))}
-										</S.TagsInModal>
-									)}
-									<ReactMarkdown
-										components={{
-											h1: ({ node, ...props }: any) => (
-												<h1 className="problem-description-h1" {...props} />
-											),
-											h2: ({ node, ...props }: any) => (
-												<h2 className="problem-description-h2" {...props} />
-											),
-											h3: ({ node, ...props }: any) => (
-												<h3 className="problem-description-h3" {...props} />
-											),
-											code: ({ node, className, children, ...props }: any) => {
-												const inline = !className;
-												return inline ? (
-													<code
-														className="problem-description-inline-code"
-														{...props}
-													>
-														{children}
-													</code>
-												) : (
-													<pre className="problem-description-code-block">
-														<code {...props}>{children}</code>
-													</pre>
-												);
-											},
-											p: ({ node, ...props }: any) => (
-												<p
-													className="problem-description-paragraph"
-													{...props}
-												/>
-											),
-										}}
-									>
-										{d.selectedProblem.description || "*문제 설명이 없습니다.*"}
-									</ReactMarkdown>
-								</S.DescriptionContent>
+								{d.getProblemTags(d.selectedProblem).length > 0 && (
+									<S.TagsInModal>
+										{d.getProblemTags(d.selectedProblem).map((tag, idx) => (
+											<S.TagInModal key={idx}>{tag}</S.TagInModal>
+										))}
+									</S.TagsInModal>
+								)}
+								{(() => {
+									const desc =
+										d.selectedProblem.description || "*문제 설명이 없습니다.*";
+									const isHtml =
+										typeof desc === "string" && /<[^>]+>/.test(desc);
+									return isHtml ? (
+										<div dangerouslySetInnerHTML={{ __html: desc }} />
+									) : (
+										<S.DescriptionContent>
+											<ReactMarkdown
+												components={{
+													h1: ({ node, ...props }: any) => (
+														<h1 className="problem-description-h1" {...props} />
+													),
+													h2: ({ node, ...props }: any) => (
+														<h2 className="problem-description-h2" {...props} />
+													),
+													h3: ({ node, ...props }: any) => (
+														<h3 className="problem-description-h3" {...props} />
+													),
+													code: ({ node, className, children, ...props }: any) => {
+														const inline = !className;
+														return inline ? (
+															<code
+																className="problem-description-inline-code"
+																{...props}
+															>
+																{children}
+															</code>
+														) : (
+															<pre className="problem-description-code-block">
+																<code {...props}>{children}</code>
+															</pre>
+														);
+													},
+													p: ({ node, ...props }: any) => (
+														<p
+															className="problem-description-paragraph"
+															{...props}
+														/>
+													),
+												}}
+											>
+												{desc}
+											</ReactMarkdown>
+										</S.DescriptionContent>
+									);
+								})()}
 							</S.ModalBody>
 						</S.ModalContent>
 					</S.ModalOverlay>
@@ -362,9 +366,7 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 
 				{/* 삭제 확인 모달 */}
 				{d.showDeleteModal && d.problemToDelete && (
-					<S.ModalOverlay
-						onClick={d.closeDeleteModal}
-					>
+					<S.ModalOverlay onClick={d.closeDeleteModal}>
 						<S.ModalContent onClick={(e) => e.stopPropagation()}>
 							<S.ModalHeader>
 								<h2>문제 삭제 확인</h2>
@@ -400,16 +402,11 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 
 				{/* 복사 모달 */}
 				{d.showCopyModal && d.problemToCopy && (
-					<S.ModalOverlay
-						onClick={d.closeCopyModal}
-					>
+					<S.ModalOverlay onClick={d.closeCopyModal}>
 						<S.ModalContent onClick={(e) => e.stopPropagation()}>
 							<S.ModalHeader>
 								<h2>문제 복사</h2>
-								<S.ModalClose
-									onClick={d.closeCopyModal}
-									disabled={d.isCopying}
-								>
+								<S.ModalClose onClick={d.closeCopyModal} disabled={d.isCopying}>
 									×
 								</S.ModalClose>
 							</S.ModalHeader>
@@ -429,10 +426,7 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 								</S.FormGroup>
 							</S.ModalBody>
 							<S.ModalFooter>
-								<S.BtnCancel
-									onClick={d.closeCopyModal}
-									disabled={d.isCopying}
-								>
+								<S.BtnCancel onClick={d.closeCopyModal} disabled={d.isCopying}>
 									취소
 								</S.BtnCancel>
 								<S.BtnSubmit
@@ -448,9 +442,7 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 
 				{/* 사용 현황 모달 */}
 				{d.showUsageModal && d.problemForUsage && (
-					<S.ModalOverlay
-						onClick={d.closeUsageModal}
-					>
+					<S.ModalOverlay onClick={d.closeUsageModal}>
 						<S.ModalContent $large onClick={(e) => e.stopPropagation()}>
 							<S.ModalHeader>
 								<h2>문제 사용 현황</h2>
@@ -561,7 +553,9 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 																				fontSize: "14px",
 																			}}
 																		>
-																			{d.formatDateTime(usage.assignmentEndDate)}
+																			{d.formatDateTime(
+																				usage.assignmentEndDate,
+																			)}
 																		</td>
 																	</tr>
 																))}
@@ -574,7 +568,9 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 										{d.problemUsage.problemSets &&
 											d.problemUsage.problemSets.length > 0 && (
 												<S.UsageSection>
-													<h3>문제집 ({d.problemUsage.problemSets.length}개)</h3>
+													<h3>
+														문제집 ({d.problemUsage.problemSets.length}개)
+													</h3>
 													<S.UsageTableWrapper>
 														<S.UsageTable>
 															<thead>
@@ -704,7 +700,7 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 							</S.ModalBody>
 							<S.ModalFooter>
 								<S.BtnCancel
-onClick={d.closeUsageModal}
+									onClick={d.closeUsageModal}
 									disabled={d.loadingUsage}
 								>
 									닫기

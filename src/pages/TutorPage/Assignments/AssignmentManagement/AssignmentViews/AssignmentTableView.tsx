@@ -44,10 +44,13 @@ interface AssignmentTableViewProps {
 	) => void;
 	onDelete: (assignmentId: number) => void;
 	paginationProps: PaginationProps;
+	/** 조교(TUTOR) 전용 수업이면 수정/비활성화/삭제/문제추가 비표시 */
+	isTutorOnly?: boolean;
 }
 
 /**
  * 과제 테이블 뷰 컴포넌트 (분반별 페이지용)
+ * 스타일: 상위 AssignmentManagement/styles.ts 의 TableViewWrapper (tutor-assignments-*, tutor-more-* 등)
  */
 const AssignmentTableView: React.FC<AssignmentTableViewProps> = ({
 	paginatedAssignments,
@@ -60,6 +63,7 @@ const AssignmentTableView: React.FC<AssignmentTableViewProps> = ({
 	onToggleActive,
 	onDelete,
 	paginationProps,
+	isTutorOnly,
 }) => {
 	return (
 		<div className="tutor-assignments-table-container">
@@ -116,85 +120,91 @@ const AssignmentTableView: React.FC<AssignmentTableViewProps> = ({
 										: `0/${assignment.totalStudents || 0}`}
 								</td>
 								<td className="tutor-assignment-actions-cell">
-									<div className="tutor-assignment-actions-inline">
-										<div className="tutor-assignment-primary-actions">
-											<button
-												type="button"
-												className="tutor-btn-table-action"
-												onClick={() => onProblemListManage(assignment)}
-												title="문제 목록 관리"
-											>
-												목록
-											</button>
-											<button
-												type="button"
-												className="tutor-btn-table-action"
-												onClick={() => onAddProblem(assignment)}
-												title="문제 추가"
-											>
-												추가
-											</button>
-											<button
-												type="button"
-												className="tutor-btn-table-action tutor-btn-edit"
-												onClick={() => onEdit(assignment)}
-												title="수정"
-											>
-												수정
-											</button>
-										</div>
-										<div className="tutor-assignment-secondary-actions">
-											<div className="tutor-secondary-actions-layer">
+									{isTutorOnly ? (
+										<span className="tutor-assignment-view-only">
+											조회 전용
+										</span>
+									) : (
+										<div className="tutor-assignment-actions-inline">
+											<div className="tutor-assignment-primary-actions">
 												<button
 													type="button"
-													className="tutor-btn-table-action tutor-btn-secondary-action"
-													onClick={(e) => {
-														e.stopPropagation();
-														onToggleActive(
-															assignment.sectionId,
-															assignment.id,
-															assignment.active,
-														);
-													}}
-													title={assignment.active ? "비활성화" : "활성화"}
+													className="tutor-btn-table-action"
+													onClick={() => onProblemListManage(assignment)}
+													title="문제 목록 관리"
 												>
-													{assignment.active ? "비활성화" : "활성화"}
+													목록
 												</button>
-												<div className="tutor-more-menu">
+												<button
+													type="button"
+													className="tutor-btn-table-action"
+													onClick={() => onAddProblem(assignment)}
+													title="문제 추가"
+												>
+													추가
+												</button>
+												<button
+													type="button"
+													className="tutor-btn-table-action tutor-btn-edit"
+													onClick={() => onEdit(assignment)}
+													title="수정"
+												>
+													수정
+												</button>
+											</div>
+											<div className="tutor-assignment-secondary-actions">
+												<div className="tutor-secondary-actions-layer">
 													<button
 														type="button"
-														className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-more"
+														className="tutor-btn-table-action tutor-btn-secondary-action"
 														onClick={(e) => {
 															e.stopPropagation();
-															onToggleMoreMenu(
-																openMoreMenu === assignment.id
-																	? null
-																	: assignment.id,
+															onToggleActive(
+																assignment.sectionId,
+																assignment.id,
+																assignment.active,
 															);
 														}}
-														title="더보기"
+														title={assignment.active ? "비활성화" : "활성화"}
 													>
-														⋯
+														{assignment.active ? "비활성화" : "활성화"}
 													</button>
-													{openMoreMenu === assignment.id && (
-														<div className="tutor-more-dropdown">
-															<button
-																type="button"
-																className="tutor-btn-text-small tutor-delete"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	onDelete(assignment.id);
-																	onToggleMoreMenu(null);
-																}}
-															>
-																삭제
-															</button>
-														</div>
-													)}
+													<div className="tutor-more-menu">
+														<button
+															type="button"
+															className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-more"
+															onClick={(e) => {
+																e.stopPropagation();
+																onToggleMoreMenu(
+																	openMoreMenu === assignment.id
+																		? null
+																		: assignment.id,
+																);
+															}}
+															title="더보기"
+														>
+															⋯
+														</button>
+														{openMoreMenu === assignment.id && (
+															<div className="tutor-more-dropdown">
+																<button
+																	type="button"
+																	className="tutor-btn-text-small tutor-delete"
+																	onClick={(e) => {
+																		e.stopPropagation();
+																		onDelete(assignment.id);
+																		onToggleMoreMenu(null);
+																	}}
+																>
+																	삭제
+																</button>
+															</div>
+														)}
+													</div>
 												</div>
 											</div>
 										</div>
-									</div>
+									)}
 								</td>
 							</tr>
 						))

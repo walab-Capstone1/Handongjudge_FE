@@ -1,12 +1,5 @@
 import type React from "react";
-import {
-	FaEdit,
-	FaCode,
-	FaCheckCircle,
-	FaTimesCircle,
-	FaClock,
-	FaCalendarAlt,
-} from "react-icons/fa";
+import { FaCode, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import * as S from "../styles";
 import type { StudentGradeRow, EditingGrade, AssignmentItem } from "../types";
 
@@ -53,7 +46,7 @@ export default function GradeManagementAssignmentTable({
 
 	return (
 		<S.CourseTableContainer>
-			<S.CourseTable>
+			<S.CourseTableWithStickyRight>
 				<colgroup>
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
 					<col style={{ width: S.STICKY_COL_2_WIDTH }} />
@@ -63,6 +56,8 @@ export default function GradeManagementAssignmentTable({
 							))
 						: [<col key="no-problem" style={{ width: S.COL_PROBLEM_WIDTH }} />]}
 					<col style={{ width: S.COL_SCORE_WIDTH }} />
+					<col style={{ width: S.STICKY_RIGHT_TOTAL_WIDTH }} />
+					<col style={{ width: S.STICKY_RIGHT_RATIO_WIDTH }} />
 				</colgroup>
 				<thead>
 					{hasProblems ? (
@@ -77,13 +72,10 @@ export default function GradeManagementAssignmentTable({
 									<S.ItemTitle>
 										{selectedAssignment?.title ?? "과제"}
 									</S.ItemTitle>
-									{assignmentDue && (
-										<S.ItemDue>
-											마감: {new Date(assignmentDue).toLocaleString("ko-KR")}
-										</S.ItemDue>
-									)}
 								</S.CourseAssignmentHeader>
 								<th rowSpan={2}>총점</th>
+								<th rowSpan={2}>전체 총점</th>
+								<th rowSpan={2}>비율</th>
 							</tr>
 							<tr>
 								{grades[0]?.problemGrades?.map((p) => (
@@ -100,13 +92,10 @@ export default function GradeManagementAssignmentTable({
 							<th>학번</th>
 							<S.CourseAssignmentHeader as="th">
 								<S.ItemTitle>과제</S.ItemTitle>
-								{assignmentDue && (
-									<S.ItemDue>
-										마감: {new Date(assignmentDue).toLocaleString("ko-KR")}
-									</S.ItemDue>
-								)}
 							</S.CourseAssignmentHeader>
 							<th>총점</th>
+							<th>전체 총점</th>
+							<th>비율</th>
 						</tr>
 					)}
 				</thead>
@@ -183,11 +172,8 @@ export default function GradeManagementAssignmentTable({
 													</S.EditForm>
 												) : (
 													<S.ScoreDisplay>
-														<S.ScoreValue>
-															{`${problem.score ?? 0} / ${problem.points ?? 0}`}
-														</S.ScoreValue>
-														<S.ScoreActions>
-															<button
+														<S.ScoreRow>
+															<S.ScoreValueButton
 																type="button"
 																onClick={() => {
 																	setEditingGrade({
@@ -205,8 +191,8 @@ export default function GradeManagementAssignmentTable({
 																}}
 																title="점수 입력/수정"
 															>
-																<FaEdit />
-															</button>
+																{`${problem.score ?? 0} / ${problem.points ?? 0}`}
+															</S.ScoreValueButton>
 															{problem.submitted && (
 																<button
 																	type="button"
@@ -221,49 +207,29 @@ export default function GradeManagementAssignmentTable({
 																	<FaCode />
 																</button>
 															)}
-														</S.ScoreActions>
-														{(problem.submitted ||
-															selectedAssignment?.dueDate ||
-															selectedAssignment?.endDate ||
-															selectedAssignment?.deadline) && (
-															<S.SubmissionInfo>
-																{problem.submitted && (
+															{(problem.submitted ||
+																(assignmentDue &&
+																	new Date() > new Date(assignmentDue))) &&
+																(problem.submitted ? (
 																	<S.SubmissionStatus
 																		$onTime={problem.isOnTime}
 																	>
 																		{problem.isOnTime ? (
 																			<>
-																				<FaCheckCircle /> 정시 제출
+																				<FaCheckCircle />
 																			</>
 																		) : (
 																			<>
-																				<FaTimesCircle /> 기한 초과
+																				<FaTimesCircle />
 																			</>
 																		)}
 																	</S.SubmissionStatus>
-																)}
-																{(() => {
-																	const dueAt =
-																		selectedAssignment?.dueDate ??
-																		selectedAssignment?.endDate ??
-																		selectedAssignment?.deadline;
-																	return dueAt ? (
-																		<S.SubmissionDue>
-																			<FaCalendarAlt /> 제출 기한:{" "}
-																			{new Date(dueAt).toLocaleString("ko-KR")}
-																		</S.SubmissionDue>
-																	) : null;
-																})()}
-																{problem.submittedAt && (
-																	<S.SubmissionTime>
-																		<FaClock /> 제출 시간:{" "}
-																		{new Date(
-																			problem.submittedAt,
-																		).toLocaleString("ko-KR")}
-																	</S.SubmissionTime>
-																)}
-															</S.SubmissionInfo>
-														)}
+																) : (
+																	<S.SubmissionStatus $onTime={false}>
+																		<FaTimesCircle />
+																	</S.SubmissionStatus>
+																))}
+														</S.ScoreRow>
 													</S.ScoreDisplay>
 												)}
 											</S.TdCourseProblemCell>
@@ -279,11 +245,21 @@ export default function GradeManagementAssignmentTable({
 										{totalScore} / {totalPoints}
 									</strong>
 								</S.TdCourseAssignmentTotalCell>
+								<td>
+									<strong>
+										{totalScore} / {totalPoints}
+									</strong>
+								</td>
+								<td>
+									{totalPoints > 0
+										? `${((totalScore / totalPoints) * 100).toFixed(1)}%`
+										: "-"}
+								</td>
 							</tr>
 						);
 					})}
 				</tbody>
-			</S.CourseTable>
+			</S.CourseTableWithStickyRight>
 		</S.CourseTableContainer>
 	);
 }

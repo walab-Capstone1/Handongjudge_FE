@@ -48,43 +48,49 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 		<ProblemPreviewWrapper>
 			{title && <ProblemPreviewTitle>{title}</ProblemPreviewTitle>}
 			{description && (
-				<ProblemPreviewDescription>
-					<ReactMarkdown
-						components={{
-							h1: ({ node, ...props }) => (
-								<h1 className="problem-preview-h1" {...props} />
-							),
-							h2: ({ node, ...props }) => <ProblemPreviewH2 {...props} />,
-							h3: ({ node, ...props }) => <ProblemPreviewH3 {...props} />,
-							code: ({
-								node,
-								inline,
-								className,
-								children,
-								...props
-							}: {
-								node?: unknown;
-								inline?: boolean;
-								className?: string;
-								children?: ReactNode;
-							}) =>
-								inline ? (
-									<code className="problem-preview-inline-code" {...props}>
-										{children}
-									</code>
-								) : (
-									<ProblemPreviewCodeBlock>
-										<code className={className} {...props}>
-											{children}
-										</code>
-									</ProblemPreviewCodeBlock>
-								),
-							p: ({ node, ...props }) => <ProblemPreviewParagraph {...props} />,
-						}}
-					>
-						{description}
-					</ReactMarkdown>
-				</ProblemPreviewDescription>
+				<>
+					{typeof description === "string" && /<[^>]+>/.test(description) ? (
+						<div dangerouslySetInnerHTML={{ __html: description }} />
+					) : (
+						<ProblemPreviewDescription>
+							<ReactMarkdown
+								components={{
+									h1: ({ node, ...props }) => (
+										<h1 className="problem-preview-h1" {...props} />
+									),
+									h2: ({ node, ...props }) => <ProblemPreviewH2 {...props} />,
+									h3: ({ node, ...props }) => <ProblemPreviewH3 {...props} />,
+									code: ({
+										node,
+										inline,
+										className,
+										children,
+										...props
+									}: {
+										node?: unknown;
+										inline?: boolean;
+										className?: string;
+										children?: ReactNode;
+									}) =>
+										inline ? (
+											<code className="problem-preview-inline-code" {...props}>
+												{children}
+											</code>
+										) : (
+											<ProblemPreviewCodeBlock>
+												<code className={className} {...props}>
+													{children}
+												</code>
+											</ProblemPreviewCodeBlock>
+										),
+									p: ({ node, ...props }) => <ProblemPreviewParagraph {...props} />,
+								}}
+							>
+								{description}
+							</ReactMarkdown>
+						</ProblemPreviewDescription>
+					)}
+				</>
 			)}
 			{inputFormat && (
 				<ProblemPreviewSection>

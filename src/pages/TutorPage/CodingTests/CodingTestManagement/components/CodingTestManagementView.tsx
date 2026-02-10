@@ -1,4 +1,5 @@
 import type React from "react";
+import { createPortal } from "react-dom";
 import TutorLayout from "../../../../../layouts/TutorLayout";
 import SectionNavigation from "../../../../../components/Navigation/SectionNavigation";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
@@ -153,6 +154,28 @@ export default function CodingTestManagementView(
 											<S.InfoItem>
 												<S.InfoLabel>문제 수</S.InfoLabel>
 												<S.InfoValue>{d.problems.length}개</S.InfoValue>
+											</S.InfoItem>
+											<S.InfoItem>
+												<S.InfoLabel>활성화 상태</S.InfoLabel>
+												<S.InfoValue>
+													<S.ActiveToggleButton
+														type="button"
+														onClick={() => {
+															if (d.sectionId && d.selectedQuizDetail) {
+																const quizId = Number(d.quizId);
+																d.handleToggleActive(
+																	Number(d.sectionId),
+																	quizId,
+																	d.selectedQuizDetail.active,
+																);
+															}
+														}}
+													>
+														{d.selectedQuizDetail.active !== false
+															? "비활성화"
+															: "활성화"}
+													</S.ActiveToggleButton>
+												</S.InfoValue>
 											</S.InfoItem>
 										</S.QuizInfoGrid>
 									</S.QuizInfoSection>
@@ -609,6 +632,38 @@ export default function CodingTestManagementView(
 
 	return (
 		<TutorLayout selectedSection={d.currentSection}>
+			{(d.isSubmittingCreate || d.isSubmittingEdit) &&
+				createPortal(
+					<div
+						style={{
+							position: "fixed",
+							inset: 0,
+							backgroundColor: "rgba(0,0,0,0.35)",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 10000,
+						}}
+					>
+						<div
+							style={{
+								background: "white",
+								padding: "1.5rem 2rem",
+								borderRadius: "12px",
+								boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+							}}
+						>
+							<LoadingSpinner
+								message={
+									d.isSubmittingCreate
+										? "코딩 테스트 생성 중..."
+										: "코딩 테스트 수정 중..."
+								}
+							/>
+						</div>
+					</div>,
+					document.body,
+				)}
 			<S.Container>
 				{d.currentSection && d.sectionId && (
 					<SectionNavigation
@@ -835,8 +890,12 @@ export default function CodingTestManagementView(
 									>
 										취소
 									</S.CancelButton>
-									<S.SubmitButton type="button" onClick={d.handleSubmitCreate}>
-										생성
+									<S.SubmitButton
+										type="button"
+										onClick={d.handleSubmitCreate}
+										disabled={d.isSubmittingCreate}
+									>
+										{d.isSubmittingCreate ? "생성 중..." : "생성"}
 									</S.SubmitButton>
 								</S.ModalFooter>
 							</S.ModalBody>
@@ -962,8 +1021,12 @@ export default function CodingTestManagementView(
 									>
 										취소
 									</S.CancelButton>
-									<S.SubmitButton type="button" onClick={d.handleSubmitEdit}>
-										수정
+									<S.SubmitButton
+										type="button"
+										onClick={d.handleSubmitEdit}
+										disabled={d.isSubmittingEdit}
+									>
+										{d.isSubmittingEdit ? "수정 중..." : "수정"}
 									</S.SubmitButton>
 								</S.ModalFooter>
 							</S.ModalBody>

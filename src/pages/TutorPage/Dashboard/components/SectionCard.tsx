@@ -21,6 +21,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
 }) => {
 	const navigate = useNavigate();
 	const isActive = section.active !== false;
+	const isTutorOnly = section.roleInSection === "TUTOR";
 
 	return (
 		<S.CourseCard key={section.sectionId}>
@@ -29,6 +30,11 @@ const SectionCard: React.FC<SectionCardProps> = ({
 				<S.StatusBadge $active={isActive}>
 					{isActive ? "활성" : "비활성"}
 				</S.StatusBadge>
+				{isTutorOnly && (
+					<S.StatusBadge $active={false} title="조회·일부 기능만 가능">
+						조교
+					</S.StatusBadge>
+				)}
 			</S.CardHeader>
 			<S.StatsCompact>
 				<S.StatItem>
@@ -54,13 +60,15 @@ const SectionCard: React.FC<SectionCardProps> = ({
 				)}
 			</S.StatsCompact>
 			<S.ActionsCompact>
-				<S.ToggleButton
-					$active={isActive}
-					onClick={() => onToggleActive(section.sectionId, isActive)}
-					title={isActive ? "비활성화하기" : "활성화하기"}
-				>
-					{isActive ? "활성" : "비활성"}
-				</S.ToggleButton>
+				{!isTutorOnly && (
+					<S.ToggleButton
+						$active={isActive}
+						onClick={() => onToggleActive(section.sectionId, isActive)}
+						title={isActive ? "비활성화하기" : "활성화하기"}
+					>
+						{isActive ? "활성" : "비활성"}
+					</S.ToggleButton>
+				)}
 				<S.ActionButtonsCompact>
 					<S.ActionButton
 						onClick={() =>
@@ -109,16 +117,18 @@ const SectionCard: React.FC<SectionCardProps> = ({
 						</S.DropdownToggle>
 						{openDropdownId === section.sectionId && (
 							<S.DropdownMenu>
-								<S.DropdownItem
-									$delete
-									onClick={(e) => {
-										e.stopPropagation();
-										onDropdownToggle(0);
-										onDelete(section.sectionId, section.courseTitle);
-									}}
-								>
-									삭제
-								</S.DropdownItem>
+								{!isTutorOnly && (
+									<S.DropdownItem
+										$delete
+										onClick={(e) => {
+											e.stopPropagation();
+											onDropdownToggle(0);
+											onDelete(section.sectionId, section.courseTitle);
+										}}
+									>
+										삭제
+									</S.DropdownItem>
+								)}
 							</S.DropdownMenu>
 						)}
 					</S.DropdownContainer>

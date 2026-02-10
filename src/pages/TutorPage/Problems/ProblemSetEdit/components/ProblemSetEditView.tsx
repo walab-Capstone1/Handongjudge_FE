@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import EmptyState from "../../../../../components/UI/EmptyState";
 import Alert from "../../../../../components/UI/Alert";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
@@ -37,6 +38,32 @@ export default function ProblemSetEditView(d: ProblemSetEditHookReturn) {
 
 	return (
 		<TutorLayout>
+			{d.isAdding &&
+				createPortal(
+					<div
+						style={{
+							position: "fixed",
+							inset: 0,
+							backgroundColor: "rgba(0,0,0,0.35)",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 10000,
+						}}
+					>
+						<div
+							style={{
+								background: "white",
+								padding: "1.5rem 2rem",
+								borderRadius: "12px",
+								boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+							}}
+						>
+							<LoadingSpinner message="문제 추가 중..." />
+						</div>
+					</div>,
+					document.body,
+				)}
 			<S.Container>
 				{d.alertMessage && (
 					<Alert

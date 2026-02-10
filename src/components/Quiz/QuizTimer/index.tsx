@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as S from "./styles";
 
 interface QuizTimerProps {
@@ -10,6 +10,7 @@ interface QuizTimerProps {
 const QuizTimer: React.FC<QuizTimerProps> = ({ endTime, onTimeUp }) => {
 	const [timeRemaining, setTimeRemaining] = useState(0);
 	const [isExpired, setIsExpired] = useState(false);
+	const timeUpCalled = useRef(false);
 
 	useEffect(() => {
 		if (!endTime) return;
@@ -22,7 +23,9 @@ const QuizTimer: React.FC<QuizTimerProps> = ({ endTime, onTimeUp }) => {
 			if (diff <= 0) {
 				setTimeRemaining(0);
 				setIsExpired(true);
-				if (onTimeUp) {
+				// onTimeUp은 한 번만 호출되도록 처리
+				if (onTimeUp && !timeUpCalled.current) {
+					timeUpCalled.current = true;
 					onTimeUp();
 				}
 				return;

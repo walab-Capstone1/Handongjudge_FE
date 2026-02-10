@@ -1,12 +1,5 @@
 import type React from "react";
-import {
-	FaEdit,
-	FaCode,
-	FaCheckCircle,
-	FaTimesCircle,
-	FaClock,
-	FaCalendarAlt,
-} from "react-icons/fa";
+import { FaCode, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import * as S from "../styles";
 import type { StudentGradeRow, QuizItem, EditingGrade } from "../types";
 
@@ -58,7 +51,7 @@ export default function GradeManagementQuizTable({
 
 	return (
 		<S.CourseTableContainer>
-			<S.CourseTable>
+			<S.CourseTableWithStickyRight>
 				<colgroup>
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
 					<col style={{ width: S.STICKY_COL_2_WIDTH }} />
@@ -66,6 +59,8 @@ export default function GradeManagementQuizTable({
 						<col key={p.problemId} style={{ width: S.COL_PROBLEM_WIDTH }} />
 					))}
 					<col style={{ width: S.COL_SCORE_WIDTH }} />
+					<col style={{ width: S.STICKY_RIGHT_TOTAL_WIDTH }} />
+					<col style={{ width: S.STICKY_RIGHT_RATIO_WIDTH }} />
 				</colgroup>
 				<thead>
 					<tr>
@@ -77,14 +72,10 @@ export default function GradeManagementQuizTable({
 									<S.ItemTypeBadge>퀴즈</S.ItemTypeBadge>
 									{quizTitle}
 								</S.ItemTitle>
-								{selectedQuiz?.endTime && (
-									<S.ItemDue>
-										마감:{" "}
-										{new Date(selectedQuiz.endTime).toLocaleString("ko-KR")}
-									</S.ItemDue>
-								)}
 							</div>
 						</S.CourseQuizHeader>
+						<th rowSpan={2}>전체 총점</th>
+						<th rowSpan={2}>비율</th>
 					</tr>
 					<tr>
 						{problemGrades.map((p) => (
@@ -172,12 +163,9 @@ export default function GradeManagementQuizTable({
 												</S.EditForm>
 											) : (
 												<S.ScoreDisplay>
-													<S.ScoreValue>
-														{`${problem.score ?? 0} / ${problem.points ?? 0}`}
-													</S.ScoreValue>
-													{canEdit && (
-														<S.ScoreActions>
-															<button
+													<S.ScoreRow>
+														{canEdit ? (
+															<S.ScoreValueButton
 																type="button"
 																onClick={() => {
 																	setEditingGrade({
@@ -195,31 +183,35 @@ export default function GradeManagementQuizTable({
 																}}
 																title="점수 입력/수정"
 															>
-																<FaEdit />
+																{`${problem.score ?? 0} / ${problem.points ?? 0}`}
+															</S.ScoreValueButton>
+														) : (
+															<S.ScoreValue>
+																{`${problem.score ?? 0} / ${problem.points ?? 0}`}
+															</S.ScoreValue>
+														)}
+														{canEdit && problem.submitted && handleViewCode && (
+															<button
+																type="button"
+																onClick={() =>
+																	handleViewCode(
+																		student.userId,
+																		problem.problemId,
+																	)
+																}
+																title="코드 조회"
+															>
+																<FaCode />
 															</button>
-															{problem.submitted && handleViewCode && (
-																<button
-																	type="button"
-																	onClick={() =>
-																		handleViewCode(
-																			student.userId,
-																			problem.problemId,
-																		)
-																	}
-																	title="코드 조회"
-																>
-																	<FaCode />
-																</button>
-															)}
-														</S.ScoreActions>
-													)}
-													{(problem.submitted || selectedQuiz?.endTime) && (
-														<S.SubmissionInfo>
-															{problem.submitted && (
+														)}
+														{(problem.submitted ||
+															(selectedQuiz?.endTime &&
+																new Date() > new Date(selectedQuiz.endTime))) &&
+															(problem.submitted ? (
 																<S.SubmissionStatus $onTime={problem.isOnTime}>
 																	{problem.isOnTime ? (
 																		<>
-																			<FaCheckCircle /> 정시 제출
+																			<FaCheckCircle />
 																		</>
 																	) : (
 																		<>
@@ -227,25 +219,12 @@ export default function GradeManagementQuizTable({
 																		</>
 																	)}
 																</S.SubmissionStatus>
-															)}
-															{selectedQuiz?.endTime && (
-																<S.SubmissionDue>
-																	<FaCalendarAlt /> 제출 기한:{" "}
-																	{new Date(
-																		selectedQuiz.endTime,
-																	).toLocaleString("ko-KR")}
-																</S.SubmissionDue>
-															)}
-															{problem.submittedAt && (
-																<S.SubmissionTime>
-																	<FaClock /> 제출 시간:{" "}
-																	{new Date(problem.submittedAt).toLocaleString(
-																		"ko-KR",
-																	)}
-																</S.SubmissionTime>
-															)}
-														</S.SubmissionInfo>
-													)}
+															) : (
+																<S.SubmissionStatus $onTime={false}>
+																	<FaTimesCircle />
+																</S.SubmissionStatus>
+															))}
+													</S.ScoreRow>
 												</S.ScoreDisplay>
 											)}
 										</S.TdCourseProblemCell>
@@ -256,11 +235,21 @@ export default function GradeManagementQuizTable({
 										{totalScore} / {totalPoints}
 									</strong>
 								</S.TdCourseAssignmentTotalCell>
+								<td>
+									<strong>
+										{totalScore} / {totalPoints}
+									</strong>
+								</td>
+								<td>
+									{totalPoints > 0
+										? `${((totalScore / totalPoints) * 100).toFixed(1)}%`
+										: "-"}
+								</td>
 							</tr>
 						);
 					})}
 				</tbody>
-			</S.CourseTable>
+			</S.CourseTableWithStickyRight>
 		</S.CourseTableContainer>
 	);
 }

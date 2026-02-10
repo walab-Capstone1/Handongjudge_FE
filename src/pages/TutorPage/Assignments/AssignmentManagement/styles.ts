@@ -564,7 +564,7 @@ export const CopyFooterBtnPrimary = styled(BtnPrimary)`
 export const TableViewWrapper = styled.div`
   .tutor-assignments-table-container {
     margin-top: 0;
-    overflow-x: auto;
+    /* overflow 제거: 내부 더보기(⋯) 드롭다운이 잘리지 않도록 (가로 스크롤 필요 시 페이지 전체 스크롤) */
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     background: white;
@@ -668,6 +668,11 @@ export const TableViewWrapper = styled.div`
   .tutor-assignment-actions-cell {
     white-space: nowrap;
     text-align: right;
+  }
+
+  .tutor-assignment-view-only {
+    color: #64748b;
+    font-size: 0.875rem;
   }
 
   .tutor-assignment-actions-inline {
@@ -846,7 +851,7 @@ export const ListViewWrapper = styled.div`
     background: white;
     border: 2px solid #e5e7eb;
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
     transition: all 0.2s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   }

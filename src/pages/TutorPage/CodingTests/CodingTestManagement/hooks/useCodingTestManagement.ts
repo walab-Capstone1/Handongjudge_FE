@@ -47,6 +47,8 @@ export function useCodingTestManagement() {
 	const [allProblems, setAllProblems] = useState<ProblemOption[]>([]);
 	const [problemSearchTerm, setProblemSearchTerm] = useState("");
 	const [currentProblemPage, setCurrentProblemPage] = useState(1);
+	const [isSubmittingCreate, setIsSubmittingCreate] = useState(false);
+	const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
 
 	const fetchQuizzes = useCallback(async () => {
 		if (!sectionId) return;
@@ -227,7 +229,8 @@ export function useCodingTestManagement() {
 	}, [getFilteredProblems, currentProblemPage]);
 
 	const getTotalPages = useCallback(
-		(): number => Math.ceil(getFilteredProblems().length / PROBLEMS_PER_PAGE) || 1,
+		(): number =>
+			Math.ceil(getFilteredProblems().length / PROBLEMS_PER_PAGE) || 1,
 		[getFilteredProblems],
 	);
 
@@ -350,6 +353,7 @@ export function useCodingTestManagement() {
 			return;
 		}
 		if (!sectionId) return;
+		setIsSubmittingCreate(true);
 		try {
 			const copiedProblemIds: number[] = [];
 			for (const problemId of selectedProblemIds) {
@@ -374,6 +378,8 @@ export function useCodingTestManagement() {
 		} catch (error) {
 			console.error("코딩 테스트 생성 실패:", error);
 			alert("코딩 테스트 생성에 실패했습니다.");
+		} finally {
+			setIsSubmittingCreate(false);
 		}
 	}, [
 		formData.title,
@@ -399,6 +405,7 @@ export function useCodingTestManagement() {
 			return;
 		}
 		if (!selectedQuiz || !sectionId) return;
+		setIsSubmittingEdit(true);
 		try {
 			const copiedProblemIds: number[] = [];
 			for (const problemId of selectedProblemIds) {
@@ -424,6 +431,8 @@ export function useCodingTestManagement() {
 		} catch (error) {
 			console.error("코딩 테스트 수정 실패:", error);
 			alert("코딩 테스트 수정에 실패했습니다.");
+		} finally {
+			setIsSubmittingEdit(false);
 		}
 	}, [
 		formData.title,
@@ -448,8 +457,7 @@ export function useCodingTestManagement() {
 		setSelectedProblemIds((prev) => {
 			const filtered = getFilteredProblems();
 			const allSelected =
-				filtered.length > 0 &&
-				filtered.every((p) => prev.includes(p.id));
+				filtered.length > 0 && filtered.every((p) => prev.includes(p.id));
 			if (allSelected) {
 				const filteredIds = filtered.map((p) => p.id);
 				return prev.filter((id) => !filteredIds.includes(id));
@@ -459,12 +467,17 @@ export function useCodingTestManagement() {
 		});
 	}, [getFilteredProblems]);
 
-	const handleRemoveProblemFromQuiz = useCallback(async (_problemId: number) => {
-		if (!window.confirm("정말로 이 문제를 코딩테스트에서 제거하시겠습니까?")) {
-			return;
-		}
-		alert("문제 제거 기능은 백엔드 API 구현이 필요합니다.");
-	}, []);
+	const handleRemoveProblemFromQuiz = useCallback(
+		async (_problemId: number) => {
+			if (
+				!window.confirm("정말로 이 문제를 코딩테스트에서 제거하시겠습니까?")
+			) {
+				return;
+			}
+			alert("문제 제거 기능은 백엔드 API 구현이 필요합니다.");
+		},
+		[],
+	);
 
 	const closeProblemModal = useCallback(() => {
 		setShowProblemModal(false);
@@ -541,6 +554,23 @@ export function useCodingTestManagement() {
 		}
 	}, []);
 
+	const handleToggleActive = useCallback(
+		async (secId: number, quizId: number, currentActive?: boolean) => {
+			try {
+				const newActive = !currentActive;
+				await APIService.toggleQuizActive(secId, quizId, newActive);
+				fetchQuizzes();
+				if (quizId === Number(quizId)) {
+					fetchQuizDetail();
+				}
+			} catch (error) {
+				console.error("퀴즈 활성화 상태 변경 실패:", error);
+				alert("퀴즈 활성화 상태 변경에 실패했습니다.");
+			}
+		},
+		[fetchQuizzes, fetchQuizDetail, quizId],
+	);
+
 	const filteredQuizzes = quizzes.filter((quiz) => {
 		const matchesSearch =
 			quiz.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -602,6 +632,8 @@ export function useCodingTestManagement() {
 		handleEditQuiz,
 		handleDeleteQuiz,
 		handleSubmitCreate,
+		isSubmittingCreate,
+		isSubmittingEdit,
 		handleSubmitEdit,
 		handleProblemToggle,
 		handleSelectAllProblems,
@@ -612,6 +644,7 @@ export function useCodingTestManagement() {
 		handleStart,
 		handleStop,
 		handleEnd,
+		handleToggleActive,
 	};
 }
 

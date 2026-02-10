@@ -6,6 +6,7 @@ export interface Quiz {
   endTime: Date;
   status: "WAITING" | "ACTIVE" | "ENDED";
   problemCount: number;
+  active?: boolean;
 }
 
 export interface Problem {

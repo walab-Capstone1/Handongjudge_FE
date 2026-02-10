@@ -56,4 +56,5 @@ export interface QuizDetail {
 	startTime: Date;
 	endTime: Date;
 	status?: string;
+	active?: boolean;
 }

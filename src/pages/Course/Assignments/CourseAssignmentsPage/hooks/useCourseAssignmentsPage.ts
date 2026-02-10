@@ -31,6 +31,37 @@ export function useCourseAssignmentsPage() {
 	const [expandedAssignmentIds, setExpandedAssignmentIds] = useState<number[]>(
 		[],
 	);
+	const [userRole, setUserRole] = useState<string | null>(null);
+	const [isManager, setIsManager] = useState(false);
+
+	const fetchUserRole = useCallback(async () => {
+		if (!sectionId || !auth.user) return;
+
+		try {
+			const response = await APIService.getMyRoleInSection(Number(sectionId));
+			let raw: unknown = response;
+			if (typeof response === "object" && response !== null) {
+				raw =
+					(response as { data?: unknown })?.data ??
+					(response as { role?: unknown })?.role ??
+					response;
+				if (typeof raw === "object" && raw !== null && "role" in raw) {
+					raw = (raw as { role: unknown }).role;
+				}
+			}
+			const role =
+				typeof raw === "string"
+					? raw.toUpperCase()
+					: String(raw ?? "").toUpperCase();
+
+			setUserRole(role);
+			setIsManager(role === "ADMIN" || role === "TUTOR");
+		} catch (error) {
+			console.error("역할 조회 실패:", error);
+			setUserRole(null);
+			setIsManager(false);
+		}
+	}, [sectionId, auth.user]);
 
 	const fetchAssignmentsData = useCallback(async () => {
 		if (!sectionId || !auth.user) return;
@@ -38,6 +69,9 @@ export function useCourseAssignmentsPage() {
 		try {
 			setLoading(true);
 			setError(null);
+
+			// 사용자 역할 조회
+			await fetchUserRole();
 
 			const sectionResponse = await APIService.getSectionInfo(sectionId);
 			const sectionData = sectionResponse.data || sectionResponse;
@@ -125,7 +159,7 @@ export function useCourseAssignmentsPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [sectionId, auth.user]);
+	}, [sectionId, auth.user, fetchUserRole]);
 
 	useEffect(() => {
 		if (sectionId && auth.user) {
@@ -198,6 +232,8 @@ export function useCourseAssignmentsPage() {
 		sectionInfo,
 		assignments,
 		expandedAssignmentIds,
+		userRole,
+		isManager,
 		fetchAssignmentsData,
 		toggleAssignment,
 		formatDate,
