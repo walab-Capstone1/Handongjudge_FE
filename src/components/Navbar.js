@@ -26,7 +26,7 @@ const Navbar = () => {
       <div className="navbar-container">
         <div className="nav-left">
           <Link to="/main" className="logo-link">
-            <img src={`${process.env.PUBLIC_URL || ''}/logo.svg`} alt="HandongJudge" className="logo-image" />
+            <img src={`${process.env.PUBLIC_URL}/logo.svg`} alt="HandongJudge" className="logo-image" />
             <span>HandongJudge</span>
           </Link>
           <Link to="/main" className="nav-link">강의</Link>
