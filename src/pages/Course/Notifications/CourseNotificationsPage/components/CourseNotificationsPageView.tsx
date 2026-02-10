@@ -60,6 +60,7 @@ export default function CourseNotificationsPageView(
 							<S.StatItem>안 읽음 {d.stats.unread}</S.StatItem>
 							<S.StatItem>공지 {d.stats.notices}</S.StatItem>
 							<S.StatItem>과제 {d.stats.assignments}</S.StatItem>
+							<S.StatItem>커뮤니티 {d.stats.community}</S.StatItem>
 						</S.NotificationsStats>
 						<S.SortButton onClick={d.handleSortToggle}>
 							<span>최신순</span>
@@ -78,9 +79,7 @@ export default function CourseNotificationsPageView(
 									key={notification.id}
 									$isNew={notification.isNew}
 									$type={notification.type}
-									onClick={() =>
-										d.handleNotificationClick(notification)
-									}
+									onClick={() => d.handleNotificationClick(notification)}
 								>
 									<S.NotificationContent>
 										<S.NotificationTag

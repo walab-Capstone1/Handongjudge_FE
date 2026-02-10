@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
+import { normalizeNoticeContent } from "../../utils/normalizeNoticeContent";
 import type { NoticeFormData, SectionInfo } from "../types";
 
 export function useNoticeEdit() {
@@ -106,7 +107,11 @@ export function useNoticeEdit() {
 			}
 			try {
 				setSaving(true);
-				await APIService.updateNotice(noticeId!, formData);
+				const contentToSend = normalizeNoticeContent(formData.content);
+				await APIService.updateNotice(noticeId!, {
+					...formData,
+					content: contentToSend,
+				});
 				alert("공지사항이 수정되었습니다.");
 				if (sectionId) {
 					navigate(`/tutor/notices/section/${sectionId}`);
