@@ -18,6 +18,9 @@ import { extractEnrollmentCode } from "../utils/enrollmentUtils";
 import { transformSectionData, getRandomColor } from "../utils/sectionUtils";
 import { transformNotification } from "../utils/notificationUtils";
 
+/** 튜터 제외 알림을 한 번만 표시하기 위한 플래그 (리마운트 시 ref 초기화 방지) */
+let tutorRemovedAlertShownThisSession = false;
+
 export function useCourseDashboard() {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -273,13 +276,12 @@ export function useCourseDashboard() {
 	}, [sectionId]);
 
 	// 튜터에서 제외된 뒤 /dashboard로 리다이렉트된 경우: 한 번만 메시지 표시 후 강의실로
-	const tutorRemovedShownRef = useRef(false);
 	useEffect(() => {
 		const state = location.state as { tutorRemoved?: boolean } | null;
-		if (!state?.tutorRemoved || tutorRemovedShownRef.current) return;
-		tutorRemovedShownRef.current = true;
-		navigate("/courses", { replace: true, state: {} });
+		if (!state?.tutorRemoved || tutorRemovedAlertShownThisSession) return;
+		tutorRemovedAlertShownThisSession = true;
 		alert("튜터에서 제외되었습니다.");
+		navigate("/courses", { replace: true, state: {} });
 	}, [location.state, navigate]);
 
 	// /dashboard(섹션 미선택) 접근 시 강의실 목록으로 이동

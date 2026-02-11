@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import APIService from "../../../services/APIService";
 
@@ -15,6 +15,7 @@ const TutorAccessGate: React.FC<TutorAccessGateProps> = ({ children }) => {
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(true);
 	const [allowed, setAllowed] = useState(false);
+	const deniedHandledRef = useRef(false);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -26,16 +27,22 @@ const TutorAccessGate: React.FC<TutorAccessGateProps> = ({ children }) => {
 				const list = Array.isArray(data) ? data : [];
 				if (cancelled) return;
 				if (list.length === 0) {
-					alert("학생은 들어갈 수 없습니다.");
-					navigate("/courses", { replace: true });
+					if (!deniedHandledRef.current) {
+						deniedHandledRef.current = true;
+						alert("학생은 들어갈 수 없습니다.");
+						navigate("/courses", { replace: true });
+					}
 					setAllowed(false);
 				} else {
 					setAllowed(true);
 				}
 			} catch {
 				if (cancelled) return;
-				alert("학생은 들어갈 수 없습니다.");
-				navigate("/courses", { replace: true });
+				if (!deniedHandledRef.current) {
+					deniedHandledRef.current = true;
+					alert("학생은 들어갈 수 없습니다.");
+					navigate("/courses", { replace: true });
+				}
 				setAllowed(false);
 			} finally {
 				if (!cancelled) setLoading(false);
