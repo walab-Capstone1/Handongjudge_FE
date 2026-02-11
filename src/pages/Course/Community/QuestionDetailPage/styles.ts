@@ -211,14 +211,38 @@ export const QuestionMeta = styled.div`
 export const QuestionContent = styled.div`
   padding: 24px 0;
   line-height: 1.8;
+  font-size: 15px;
+  color: #333;
+  word-wrap: break-word;
 
   pre {
     white-space: pre-wrap;
     word-wrap: break-word;
-    font-family: inherit;
-    margin: 0;
-    font-size: 15px;
+    font-family: "Courier New", monospace;
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 14px;
     color: #333;
+    overflow-x: auto;
+  }
+
+  code {
+    font-family: "Courier New", monospace;
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 14px;
+  }
+
+  p {
+    margin: 12px 0;
+  }
+
+  ul, ol {
+    margin: 12px 0;
+    padding-left: 24px;
   }
 `;
 
@@ -280,6 +304,10 @@ export const CommentForm = styled.form`
   padding: 24px;
   background: #f8f9fa;
   border-radius: 8px;
+`;
+
+export const EditorWrapper = styled.div`
+  margin-bottom: 12px;
 `;
 
 export const CommentTextarea = styled.textarea`
@@ -424,15 +452,34 @@ export const CommentDate = styled.span`
 
 export const CommentContent = styled.div`
   margin-bottom: 12px;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  word-wrap: break-word;
 
   pre {
     white-space: pre-wrap;
     word-wrap: break-word;
-    font-family: inherit;
-    margin: 0;
-    font-size: 14px;
+    font-family: "Courier New", monospace;
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 13px;
     color: #333;
-    line-height: 1.6;
+    overflow-x: auto;
+  }
+
+  code {
+    font-family: "Courier New", monospace;
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+  }
+
+  p {
+    margin: 8px 0;
   }
 `;
 
