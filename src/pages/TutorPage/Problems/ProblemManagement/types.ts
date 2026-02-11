@@ -9,6 +9,8 @@ export interface Problem {
 	tags?: string[] | string;
 	isUsed?: boolean;
 	assignmentCount?: number;
+	problemSetCount?: number;
+	quizCount?: number;
 }
 
 export interface Section {

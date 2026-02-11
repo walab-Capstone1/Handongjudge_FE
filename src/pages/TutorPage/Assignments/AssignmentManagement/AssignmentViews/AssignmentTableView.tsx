@@ -120,12 +120,8 @@ const AssignmentTableView: React.FC<AssignmentTableViewProps> = ({
 										: `0/${assignment.totalStudents || 0}`}
 								</td>
 								<td className="tutor-assignment-actions-cell">
-									{isTutorOnly ? (
-										<span className="tutor-assignment-view-only">
-											조회 전용
-										</span>
-									) : (
-										<div className="tutor-assignment-actions-inline">
+									<div className="tutor-assignment-actions-inline">
+										{!isTutorOnly && (
 											<div className="tutor-assignment-primary-actions">
 												<button
 													type="button"
@@ -152,59 +148,59 @@ const AssignmentTableView: React.FC<AssignmentTableViewProps> = ({
 													수정
 												</button>
 											</div>
-											<div className="tutor-assignment-secondary-actions">
-												<div className="tutor-secondary-actions-layer">
+										)}
+										<div className="tutor-assignment-secondary-actions">
+											<div className="tutor-secondary-actions-layer">
+												<button
+													type="button"
+													className="tutor-btn-table-action tutor-btn-secondary-action"
+													onClick={(e) => {
+														e.stopPropagation();
+														onToggleActive(
+															assignment.sectionId,
+															assignment.id,
+															assignment.active,
+														);
+													}}
+													title={assignment.active ? "비활성화" : "활성화"}
+												>
+													{assignment.active ? "비활성화" : "활성화"}
+												</button>
+												<div className="tutor-more-menu">
 													<button
 														type="button"
-														className="tutor-btn-table-action tutor-btn-secondary-action"
+														className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-more"
 														onClick={(e) => {
 															e.stopPropagation();
-															onToggleActive(
-																assignment.sectionId,
-																assignment.id,
-																assignment.active,
+															onToggleMoreMenu(
+																openMoreMenu === assignment.id
+																	? null
+																	: assignment.id,
 															);
 														}}
-														title={assignment.active ? "비활성화" : "활성화"}
+														title="더보기"
 													>
-														{assignment.active ? "비활성화" : "활성화"}
+														⋯
 													</button>
-													<div className="tutor-more-menu">
-														<button
-															type="button"
-															className="tutor-btn-table-action tutor-btn-secondary-action tutor-btn-more"
-															onClick={(e) => {
-																e.stopPropagation();
-																onToggleMoreMenu(
-																	openMoreMenu === assignment.id
-																		? null
-																		: assignment.id,
-																);
-															}}
-															title="더보기"
-														>
-															⋯
-														</button>
-														{openMoreMenu === assignment.id && (
-															<div className="tutor-more-dropdown">
-																<button
-																	type="button"
-																	className="tutor-btn-text-small tutor-delete"
-																	onClick={(e) => {
-																		e.stopPropagation();
-																		onDelete(assignment.id);
-																		onToggleMoreMenu(null);
-																	}}
-																>
-																	삭제
-																</button>
-															</div>
-														)}
-													</div>
+													{openMoreMenu === assignment.id && (
+														<div className="tutor-more-dropdown">
+															<button
+																type="button"
+																className="tutor-btn-text-small tutor-delete"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	onDelete(assignment.id);
+																	onToggleMoreMenu(null);
+																}}
+															>
+																삭제
+															</button>
+														</div>
+													)}
 												</div>
 											</div>
 										</div>
-									)}
+									</div>
 								</td>
 							</tr>
 						))

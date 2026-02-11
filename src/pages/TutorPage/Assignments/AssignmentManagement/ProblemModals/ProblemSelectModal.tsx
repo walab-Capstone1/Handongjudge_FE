@@ -578,7 +578,7 @@ const ProblemSelectModal: React.FC<ProblemSelectModalProps> = ({
 						type="button"
 						onClick={() => {
 							onClose();
-							navigate("/tutor/problems/create");
+							onCreateNew();
 						}}
 					>
 						새 문제 만들기

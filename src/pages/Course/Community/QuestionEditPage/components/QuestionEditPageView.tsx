@@ -1,5 +1,6 @@
 import CourseSidebar from "../../../../../components/Course/CourseSidebar";
 import CourseHeader from "../../../../../components/Course/CourseHeader";
+import TipTapEditor from "../../../../../components/Editor/TipTapEditor";
 import type { QuestionEditPageHookReturn } from "../hooks/useQuestionEditPage";
 import * as S from "../styles";
 
@@ -74,23 +75,21 @@ export default function QuestionEditPageView(d: QuestionEditPageHookReturn) {
 							<S.CharCount>{d.formData.title.length}/200</S.CharCount>
 						</S.FormGroup>
 
-						<S.FormGroup>
-							<S.FormLabel>
-								내용 <S.Required>*</S.Required>
-							</S.FormLabel>
-							<S.FormTextarea
-								placeholder="질문 내용을 자세히 작성해주세요"
-								value={d.formData.content}
-								onChange={(e) =>
-									d.setFormData((prev) => ({
-										...prev,
-										content: e.target.value,
-									}))
-								}
-								rows={15}
-								aria-label="질문 내용"
-							/>
-						</S.FormGroup>
+					<S.FormGroup>
+						<S.FormLabel>
+							내용 <S.Required>*</S.Required>
+						</S.FormLabel>
+						<TipTapEditor
+							content={d.formData.content}
+							onChange={(html) =>
+								d.setFormData((prev) => ({
+									...prev,
+									content: html,
+								}))
+							}
+							placeholder="질문 내용을 자세히 작성해주세요"
+						/>
+					</S.FormGroup>
 
 						<S.FormOptions>
 							<S.OptionGroup>

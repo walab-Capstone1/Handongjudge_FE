@@ -22,6 +22,7 @@ export function useAssignmentManagement() {
 
 	const {
 		assignments,
+		setAssignments,
 		sections,
 		currentSection,
 		loading,
@@ -467,21 +468,53 @@ export function useAssignmentManagement() {
 		async (assignmentId: number, problemId: number) => {
 			if (!window.confirm("이 문제를 과제에서 제거하시겠습니까?")) return;
 			try {
+				// 낙관적 업데이트: 화면에서 바로 제거
+				setAssignments((prev) =>
+					prev.map((a) => {
+						if (a.id !== assignmentId) return a;
+						const nextProblems = (a.problems || []).filter(
+							(p: { id: number }) => p.id !== problemId,
+						);
+						return {
+							...a,
+							problems: nextProblems,
+							problemCount: nextProblems.length,
+						};
+					}),
+				);
 				await APIService.removeProblemFromAssignment(assignmentId, problemId);
 				alert("문제가 성공적으로 제거되었습니다.");
-				refetchAssignments();
+				// 서버와 동기화
+				await refetchAssignments();
 			} catch (error) {
 				console.error("문제 제거 실패:", error);
 				alert("문제 제거에 실패했습니다.");
+				// 실패 시 목록 다시 불러오기
+				await refetchAssignments();
 			}
 		},
-		[refetchAssignments],
+		[refetchAssignments, setAssignments],
 	);
 
 	const handleCreateNewProblem = useCallback(() => {
 		setShowProblemModal(false);
 		setShowCreateProblemModal(true);
 	}, []);
+
+	/** 문제 추가 모달에서 "새 문제 만들기" 클릭 시 → 문제 생성 페이지로 이동 (해당 과제에 나중에 자동 추가되도록 state 전달) */
+	const handleNavigateToCreatePage = useCallback(() => {
+		setShowProblemModal(false);
+		if (selectedAssignment && sectionId) {
+			navigate("/tutor/problems/create", {
+				state: {
+					fromAssignmentId: selectedAssignment.id,
+					sectionId,
+				},
+			});
+		} else {
+			navigate("/tutor/problems/create");
+		}
+	}, [selectedAssignment, sectionId, navigate]);
 
 	const handleProblemInputChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -543,10 +576,29 @@ export function useAssignmentManagement() {
 					fd.append("descriptionFile", problemFormData.descriptionFile);
 				if (problemFormData.zipFile)
 					fd.append("zipFile", problemFormData.zipFile);
-				await APIService.createProblem(fd);
-				alert(
-					"문제가 성공적으로 생성되었습니다. 문제 목록에서 원하는 과제에 추가할 수 있습니다.",
-				);
+				const createResult = await APIService.createProblem(fd);
+				const newProblemId =
+					typeof createResult === "number"
+						? createResult
+						: (createResult?.id ?? createResult?.data);
+
+				if (
+					selectedAssignment &&
+					newProblemId != null &&
+					!Number.isNaN(Number(newProblemId))
+				) {
+					await APIService.addProblemToAssignment(
+						selectedAssignment.id,
+						Number(newProblemId),
+					);
+					alert(
+						"문제가 생성되어 해당 과제에 추가되었습니다. 과제 목록에서 확인할 수 있습니다.",
+					);
+				} else {
+					alert(
+						"문제가 성공적으로 생성되었습니다. 문제 목록에서 원하는 과제에 추가할 수 있습니다.",
+					);
+				}
 				setShowCreateProblemModal(false);
 				resetProblemForm();
 				refetchAssignments();
@@ -555,7 +607,7 @@ export function useAssignmentManagement() {
 				alert(`문제 생성에 실패했습니다.\n${(error as Error).message || ""}`);
 			}
 		},
-		[problemFormData, resetProblemForm, refetchAssignments],
+		[problemFormData, resetProblemForm, refetchAssignments, selectedAssignment],
 	);
 
 	const closeProblemModals = useCallback(() => {
@@ -816,6 +868,7 @@ export function useAssignmentManagement() {
 		setShowProblemDetailModal(false);
 	}, []);
 
+	// 튜터는 과제 관리에서 활성/비활성·삭제만 가능, 추가/수정/문제추가는 어드민만
 	const isTutorOnly =
 		(currentSection as { roleInSection?: string } | null)?.roleInSection ===
 		"TUTOR";
@@ -825,6 +878,7 @@ export function useAssignmentManagement() {
 		sectionId,
 		currentSection,
 		isTutorOnly,
+		assignments,
 		searchTerm,
 		setSearchTerm,
 		filterSection,
@@ -900,6 +954,7 @@ export function useAssignmentManagement() {
 		handleSelectAllProblems,
 		handleRemoveProblem,
 		handleCreateNewProblem,
+		handleNavigateToCreatePage,
 		handleProblemInputChange,
 		handleCreateProblemSubmit,
 		closeProblemModals,

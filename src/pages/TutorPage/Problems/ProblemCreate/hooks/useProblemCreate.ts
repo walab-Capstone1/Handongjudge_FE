@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
 import type { ProblemFormData, SampleInput, ParsedTestcase } from "../types";
 
@@ -35,8 +35,16 @@ function convertMarkdownHeadingsToHtml(html: string): string {
 	return convertedLines.join("\n");
 }
 
+/** 과제 관리에서 "새 문제 만들기"로 진입했을 때 location.state 타입 */
+interface FromAssignmentState {
+	fromAssignmentId?: number;
+	sectionId?: string;
+}
+
 export function useProblemCreate() {
 	const navigate = useNavigate();
+	const location = useLocation();
+	const locationState = location.state as FromAssignmentState | null;
 	const descriptionRef = useRef<HTMLDivElement>(null);
 
 	const [zipFile, setZipFile] = useState<File | null>(null);
@@ -46,6 +54,7 @@ export function useProblemCreate() {
 	const [showParsedTestCases, setShowParsedTestCases] = useState(false);
 	const [formData, setFormData] = useState<ProblemFormData>(initialFormData);
 	const [currentTag, setCurrentTag] = useState("");
+	const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
 
 	useEffect(() => {
 		if (descriptionRef.current) {
@@ -117,8 +126,7 @@ export function useProblemCreate() {
 							descriptionRef.current.innerHTML = htmlDescription;
 						}
 					}
-					const testCases =
-						parsedData.testCases ?? parsedData.testcases ?? [];
+					const testCases = parsedData.testCases ?? parsedData.testcases ?? [];
 					if (testCases.length > 0) {
 						const sampleTestCases = testCases.filter(
 							(tc: ParsedTestcase) => tc.type === "sample",
@@ -138,8 +146,7 @@ export function useProblemCreate() {
 					}
 				}
 			} catch (err) {
-				const message =
-					err instanceof Error ? err.message : "알 수 없는 오류";
+				const message = err instanceof Error ? err.message : "알 수 없는 오류";
 				setError(`ZIP 파일 파싱 중 오류가 발생했습니다: ${message}`);
 			} finally {
 				setLoading(false);
@@ -283,22 +290,33 @@ export function useProblemCreate() {
 		return full;
 	}, [formData]);
 
+	const clearFieldError = useCallback((name: string) => {
+		setFieldErrors((prev) => ({ ...prev, [name]: false }));
+	}, []);
+
 	const handleSubmit = useCallback(
 		async (e: React.FormEvent) => {
 			e.preventDefault();
+			const errs: Record<string, boolean> = {};
+			if (!formData.title?.trim()) errs.title = true;
+			if (!formData.timeLimit?.trim()) errs.timeLimit = true;
+			if (!formData.memoryLimit?.trim()) errs.memoryLimit = true;
+			const hasDescription =
+				(formData.description?.trim() || formData.descriptionText?.trim()) ?? "";
+			if (!hasDescription) errs.description = true;
+			setFieldErrors(errs);
+			if (Object.keys(errs).length > 0) return;
+
 			setLoading(true);
 			setError(null);
 			try {
 				const submitFormData = new FormData();
 				submitFormData.append("title", formData.title);
-				submitFormData.append(
-					"description",
-					getFullDescriptionForBackend(),
-				);
+				submitFormData.append("description", getFullDescriptionForBackend());
 				submitFormData.append("inputFormat", formData.inputFormat);
 				submitFormData.append("outputFormat", formData.outputFormat);
 				submitFormData.append("tags", JSON.stringify(formData.tags));
-				submitFormData.append("difficulty", formData.difficulty);
+				submitFormData.append("difficulty", formData.difficulty?.trim() || "1");
 				submitFormData.append("timeLimit", formData.timeLimit || "0");
 				submitFormData.append("memoryLimit", formData.memoryLimit || "0");
 				submitFormData.append(
@@ -316,25 +334,17 @@ export function useProblemCreate() {
 						const inputFile = new File([inputBlob], `${baseName}.in`, {
 							type: "text/plain",
 						});
-						submitFormData.append(
-							`testcase_${testcaseIndex}`,
-							inputFile,
-						);
+						submitFormData.append(`testcase_${testcaseIndex}`, inputFile);
 						testcaseIndex++;
 					}
 					if (testcase.output) {
 						const outputBlob = new Blob([testcase.output], {
 							type: "text/plain",
 						});
-						const outputFile = new File(
-							[outputBlob],
-							`${baseName}.ans`,
-							{ type: "text/plain" },
-						);
-						submitFormData.append(
-							`testcase_${testcaseIndex}`,
-							outputFile,
-						);
+						const outputFile = new File([outputBlob], `${baseName}.ans`, {
+							type: "text/plain",
+						});
+						submitFormData.append(`testcase_${testcaseIndex}`, outputFile);
 						testcaseIndex++;
 					}
 				});
@@ -343,9 +353,35 @@ export function useProblemCreate() {
 					testcaseIndex++;
 				});
 
-				await APIService.createProblem(submitFormData);
-				alert("문제가 성공적으로 생성되었습니다.");
-				navigate("/tutor/problems");
+				const createResult = await APIService.createProblem(submitFormData);
+				const newProblemId =
+					typeof createResult === "number"
+						? createResult
+						: (createResult?.id ?? createResult?.data);
+
+				const fromAssignmentId = locationState?.fromAssignmentId;
+				const sectionId = locationState?.sectionId;
+
+				if (
+					fromAssignmentId != null &&
+					sectionId &&
+					newProblemId != null &&
+					!Number.isNaN(Number(newProblemId))
+				) {
+					await APIService.addProblemToAssignment(
+						fromAssignmentId,
+						Number(newProblemId),
+					);
+					alert(
+						"문제가 생성되어 해당 과제에 추가되었습니다. 과제 관리 페이지로 이동합니다.",
+					);
+					navigate(`/tutor/assignments/section/${sectionId}`, {
+						replace: true,
+					});
+				} else {
+					alert("문제가 성공적으로 생성되었습니다.");
+					navigate("/tutor/problems");
+				}
 			} catch (err) {
 				console.error("문제 생성 실패:", err);
 				setError("문제 생성 중 오류가 발생했습니다.");
@@ -358,6 +394,7 @@ export function useProblemCreate() {
 			parsedTestCases,
 			getFullDescriptionForBackend,
 			navigate,
+			locationState,
 		],
 	);
 
@@ -397,6 +434,8 @@ export function useProblemCreate() {
 		getFullDescription,
 		handleSubmit,
 		clearZipFile,
+		fieldErrors,
+		clearFieldError,
 	};
 }
 

@@ -11,6 +11,7 @@ import GradeCodeModal from "./GradeCodeModal";
 import GradeBulkInputModal from "./GradeBulkInputModal";
 import GradeStatsModal from "./GradeStatsModal";
 import GradePointsModal from "./GradePointsModal";
+import GradeProblemDetailModal from "./GradeProblemDetailModal";
 
 export default function GradeManagementView(d: GradeManagementHookReturn) {
 	const {
@@ -72,6 +73,10 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		stats,
 		filteredGrades,
 		filteredCourseStudents,
+		showProblemDetailModal,
+		problemDetail,
+		openProblemDetail,
+		closeProblemDetailModal,
 	} = d;
 
 	const handleClosePointsModal = () => {
@@ -165,6 +170,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						onViewCode={handleViewCodeForAssignment}
 						onSaveGradeForQuiz={handleSaveGradeForQuizCourse}
 						onViewCodeForQuiz={handleViewCodeForQuiz}
+						onProblemDetail={openProblemDetail}
 					/>
 				) : viewMode === "assignment" && !selectedAssignment ? (
 					<GradeManagementCourseTable
@@ -178,6 +184,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						comments={comments}
 						onSaveGrade={handleSaveGradeForAssignment}
 						onViewCode={handleViewCodeForAssignment}
+						onProblemDetail={openProblemDetail}
 					/>
 				) : viewMode === "quiz" && !selectedQuiz ? (
 					<GradeManagementCourseTable
@@ -191,6 +198,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						comments={comments}
 						onSaveGradeForQuiz={handleSaveGradeForQuizCourse}
 						onViewCodeForQuiz={handleViewCodeForQuiz}
+						onProblemDetail={openProblemDetail}
 					/>
 				) : selectedQuiz && viewMode === "quiz" && grades.length > 0 ? (
 					<GradeManagementQuizTable
@@ -209,6 +217,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 										handleViewCodeForQuiz(selectedQuiz.id, userId, problemId)
 								: undefined
 						}
+						onProblemDetail={openProblemDetail}
 					/>
 				) : selectedQuiz && viewMode === "quiz" ? (
 					<S.CourseTableContainer>
@@ -228,6 +237,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						comments={comments}
 						handleSaveGrade={handleSaveGrade}
 						handleViewCode={handleViewCode}
+						onProblemDetail={openProblemDetail}
 					/>
 				) : selectedAssignment ? (
 					<S.CourseTableContainer>
@@ -288,6 +298,12 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					pointsSaving={pointsSaving}
 					onClose={handleClosePointsModal}
 					onSave={handleSavePoints}
+				/>
+
+				<GradeProblemDetailModal
+					isOpen={showProblemDetailModal}
+					problemDetail={problemDetail}
+					onClose={closeProblemDetailModal}
 				/>
 			</S.Container>
 		</TutorLayout>

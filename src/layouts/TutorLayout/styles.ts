@@ -643,7 +643,7 @@ export const SidebarLinkCopyBtn = styled.button<{ $collapsed: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: ${(props) => (props.$collapsed ? "0.625rem 0" : "0.5rem 0.75rem")};
+  padding: ${(props) => (props.$collapsed ? "0.625rem 0 0.625rem 0.35rem" : "0.5rem 0.75rem")};
   width: ${(props) => (props.$collapsed ? "100%" : "auto")};
   margin-bottom: 0.25rem;
   border: none;
@@ -667,6 +667,11 @@ export const SidebarLinkCopyBtn = styled.button<{ $collapsed: boolean }>`
   svg {
     flex-shrink: 0;
     font-size: 1rem;
+    ${(props) =>
+			props.$collapsed &&
+			css`
+        margin-left: 4px;
+      `}
   }
 `;
 

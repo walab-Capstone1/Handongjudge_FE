@@ -14,6 +14,7 @@ export interface Section {
 		| "SPECIAL"
 		| "IRREGULAR";
 	instructor: string;
+	enrollmentCode?: string;
 	_role?: "ADMIN" | "TUTOR";
 	_isAdmin?: boolean;
 }

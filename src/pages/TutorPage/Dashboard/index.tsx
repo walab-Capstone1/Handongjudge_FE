@@ -1,4 +1,6 @@
 import type { FC } from "react";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import TutorLayout from "../../../layouts/TutorLayout";
 import LoadingSpinner from "../../../components/UI/LoadingSpinner";
@@ -11,7 +13,11 @@ import CreateSectionModal from "./components/CreateSectionModal";
 import CopySectionModal from "./components/CopySectionModal";
 import ViewNoticeModal from "./components/ViewNoticeModal";
 
+let tutorRemovedAlertShown = false;
+
 const CourseManagement: FC = () => {
+	const location = useLocation();
+	const navigate = useNavigate();
 	const dashboard = useDashboard();
 	const {
 		loading,
@@ -19,6 +25,7 @@ const CourseManagement: FC = () => {
 		setShowCreateModal,
 		showCopyModal,
 		setShowCopyModal,
+		isCreatingSection,
 		isCopyingSection,
 		copyStep,
 		setCopyStep,
@@ -44,7 +51,6 @@ const CourseManagement: FC = () => {
 		availableYears,
 		formData,
 		setFormData,
-		availableCourses,
 		copyFormData,
 		setCopyFormData,
 		sourceNotices,
@@ -71,6 +77,15 @@ const CourseManagement: FC = () => {
 		handleCopySection,
 	} = dashboard;
 
+	// 튜터에서 제외된 뒤 /tutor로 리다이렉트된 경우: 한 번만 메시지 표시 (리마운트 시 중복 방지)
+	useEffect(() => {
+		const state = location.state as { tutorRemoved?: boolean } | null;
+		if (!state?.tutorRemoved || tutorRemovedAlertShown) return;
+		tutorRemovedAlertShown = true;
+		alert("튜터에서 제외되었습니다.");
+		navigate("/tutor", { replace: true, state: {} });
+	}, [location.state, navigate]);
+
 	const closeCopyModal = () => {
 		setShowCopyModal(false);
 		setCopyStep(1);
@@ -89,6 +104,32 @@ const CourseManagement: FC = () => {
 
 	return (
 		<TutorLayout>
+			{isCreatingSection &&
+				createPortal(
+					<div
+						style={{
+							position: "fixed",
+							inset: 0,
+							backgroundColor: "rgba(0,0,0,0.35)",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 10000,
+						}}
+					>
+						<div
+							style={{
+								background: "white",
+								padding: "1.5rem 2rem",
+								borderRadius: "12px",
+								boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+							}}
+						>
+							<LoadingSpinner message="수업 만들기..." />
+						</div>
+					</div>,
+					document.body,
+				)}
 			{isCopyingSection &&
 				createPortal(
 					<div
@@ -156,7 +197,6 @@ const CourseManagement: FC = () => {
 						onClose={() => setShowCreateModal(false)}
 						formData={formData}
 						setFormData={setFormData}
-						availableCourses={availableCourses}
 						onSubmit={handleCreateSection}
 					/>
 					<CopySectionModal
@@ -167,7 +207,10 @@ const CourseManagement: FC = () => {
 						setCopyStep={setCopyStep}
 						copyFormData={copyFormData}
 						setCopyFormData={setCopyFormData}
-						sections={sections}
+						sections={sections.filter(
+							(s) =>
+								s.roleInSection === "ADMIN" || s.roleInSection === "INSTRUCTOR",
+						)}
 						sourceNotices={sourceNotices}
 						sourceAssignments={sourceAssignments}
 						loadingNotices={loadingNotices}

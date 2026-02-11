@@ -27,7 +27,9 @@ interface CodeEditorProps {
 	onSubmit: () => void;
 	onSubmitWithOutput: () => void;
 	sessionSaveStatus?: "idle" | "saving" | "saved" | "error";
-	onSessionSave?: () => void;
+	onSessionSave?: (showModal?: boolean) => void;
+	onBackendSave?: (showModal?: boolean) => void;
+	saveMode?: "session" | "backend";
 	codeLoadSource?: string | null;
 	sessionCleared?: boolean;
 	isDeadlinePassed?: boolean;
@@ -46,6 +48,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 	onSubmitWithOutput,
 	sessionSaveStatus = "idle",
 	onSessionSave,
+	onBackendSave,
+	saveMode = "session",
 	codeLoadSource = null,
 	sessionCleared = false,
 	isDeadlinePassed = false,
@@ -380,16 +384,26 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 							</S.SaveStatus>
 						)}
 						{!sessionCleared && sessionSaveStatus === "saving" && (
-							<S.SaveStatus $status="saving">💾 세션 저장 중...</S.SaveStatus>
+							<S.SaveStatus $status="saving">
+								💾 {saveMode === "backend" ? "저장 중..." : "세션 저장 중..."}
+							</S.SaveStatus>
 						)}
 						{!sessionCleared && sessionSaveStatus === "saved" && (
-							<S.SaveStatus $status="saved">✅ 세션 저장됨</S.SaveStatus>
+							<S.SaveStatus $status="saved">
+								{saveMode === "backend" ? "저장됨" : "세션 저장됨"}
+							</S.SaveStatus>
 						)}
 						{!sessionCleared && sessionSaveStatus === "error" && (
-							<S.SaveStatus $status="error">⚠️ 세션 저장 실패</S.SaveStatus>
+							<S.SaveStatus $status="error">
+								⚠️ {saveMode === "backend" ? "저장 실패" : "세션 저장 실패"}
+							</S.SaveStatus>
 						)}
 
-						<S.ShortcutHint>Ctrl+S로 세션 저장</S.ShortcutHint>
+						{saveMode === "backend" ? (
+							<S.ShortcutHint>Ctrl+S로 저장</S.ShortcutHint>
+						) : (
+							<S.ShortcutHint>Ctrl+S로 세션 저장</S.ShortcutHint>
+						)}
 					</S.SessionSaveStatus>
 				</S.EditorHeaderLeft>
 				<S.EditorHeaderRight>
@@ -409,6 +423,13 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 							</S.DueDateText>
 						</S.DueDateInfo>
 					)}
+					<S.SubmitButton
+						$variant="save"
+						onClick={() => saveMode === "backend" ? onBackendSave?.(true) : onSessionSave?.(true)}
+						title={saveMode === "backend" ? "백엔드에 저장합니다" : "세션에 저장합니다 (Ctrl+S)"}
+					>
+						저장하기
+					</S.SubmitButton>
 					<S.SubmitButton
 						$variant="test"
 						onClick={onSubmitWithOutput}

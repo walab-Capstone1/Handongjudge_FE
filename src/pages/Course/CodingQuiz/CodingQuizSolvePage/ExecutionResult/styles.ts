@@ -20,7 +20,8 @@ export const ResultArea = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    min-height: 0;
+    overflow-y: auto;
   }
 `;
 
@@ -172,10 +173,10 @@ export const TestcasesSection = styled.div`
   margin-top: 16px;
   border-top: 1px solid #30363d;
   padding-top: 16px;
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;
 
   .problem-solve-page.light & {
     border-top: 1px solid #e1e4e8;
@@ -225,8 +226,10 @@ export const TestcaseButton = styled.button<{
 		props.$selected &&
 		`
     border-color: #58a6ff;
-    background-color: rgba(88, 166, 255, 0.1);
+    border-width: 3px;
+    background-color: rgba(88, 166, 255, 0.2);
     color: #58a6ff;
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.5);
   `}
 
   ${(props) => {
@@ -307,8 +310,10 @@ export const TestcaseButton = styled.button<{
 			props.$selected &&
 			`
       border-color: #0969da;
-      background-color: rgba(9, 105, 218, 0.1);
+      border-width: 3px;
+      background-color: rgba(9, 105, 218, 0.15);
       color: #0969da;
+      box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.4);
     `}
 
     ${(props) => {
@@ -376,11 +381,19 @@ export const TestcaseButton = styled.button<{
 			}
 		}}
   }
+
+  ${(props) =>
+		props.$selected &&
+		`
+    box-shadow: 0 0 0 2px #58a6ff;
+    .problem-solve-page.light & {
+      box-shadow: 0 0 0 2px #0969da;
+    }
+  `}
 `;
 
 export const SelectedTestcase = styled.div`
-  flex: 1;
-  overflow-y: auto;
+  flex-shrink: 0;
   border: 1px solid #30363d;
   border-radius: 8px;
   background-color: #0d1117;

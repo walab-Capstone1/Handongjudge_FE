@@ -1,9 +1,11 @@
+export type ProblemStatus = "ACCEPTED" | "SUBMITTED" | "NOT_SUBMITTED";
+
 export interface Problem {
 	id: number;
 	title: string;
 	description?: string;
 	submitted: boolean;
-	status: string;
+	status: ProblemStatus;
 }
 
 export interface Assignment {

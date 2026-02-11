@@ -341,6 +341,9 @@ export const ProblemHeader = styled.th`
   width: ${COL_PROBLEM_WIDTH} !important;
   min-width: ${COL_PROBLEM_WIDTH} !important;
   max-width: ${COL_PROBLEM_WIDTH} !important;
+  border-right: 1px solid #e2e8f0;
+  padding: 0.45rem 0.4rem;
+  vertical-align: middle;
 `;
 
 export const CourseAssignmentHeader = styled.th`
@@ -416,6 +419,7 @@ export const ProblemTitle = styled.div`
   font-size: 0.75rem;
   color: #1e293b;
   line-height: 1.2;
+  text-align: center;
 `;
 
 export const ProblemPoints = styled.div`
@@ -424,6 +428,7 @@ export const ProblemPoints = styled.div`
   font-weight: 400;
   text-transform: none;
   letter-spacing: normal;
+  text-align: center;
 `;
 
 export const StudentRow = styled.tr<{ $highlight?: boolean }>`
@@ -941,6 +946,7 @@ export const TdCourseProblemCell = styled.td`
   width: ${COL_PROBLEM_WIDTH} !important;
   min-width: ${COL_PROBLEM_WIDTH} !important;
   max-width: ${COL_PROBLEM_WIDTH} !important;
+  border-right: 1px solid #e2e8f0;
 `;
 
 export const TdCourseAssignmentTotalCell = styled.td`
@@ -1030,6 +1036,23 @@ export const ModalBody = styled.div`
   padding: 2rem;
   flex: 1;
   overflow-y: auto;
+`;
+
+export const ProblemDetailMeta = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
+`;
+
+export const ProblemDetailBody = styled.div`
+  line-height: 1.7;
+  font-size: 0.95rem;
+
+  p { margin: 0 0 0.75rem; }
+  pre { background: #f1f5f9; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+  code { font-family: "Courier New", monospace; }
 `;
 
 export const CodeDisplay = styled.pre`

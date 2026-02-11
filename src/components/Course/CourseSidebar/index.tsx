@@ -50,33 +50,51 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 	const [showCourseList, setShowCourseList] = useState(false);
 	const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
 	const [loadingCourses, setLoadingCourses] = useState(false);
-	const [hasManagingSections, setHasManagingSections] = useState(false);
+	/** 관리 중인 수업 sectionId 목록 (현재 수업에서 관리자인지 판단용) */
+	const [managingSectionIds, setManagingSectionIds] = useState<number[]>([]);
 	const [checkingManagingSections, setCheckingManagingSections] =
 		useState(true);
 	const courseListRef = useRef<HTMLDivElement>(null);
 
 	const hasSectionId =
 		sectionId !== null && sectionId !== undefined && Number(sectionId) > 0;
+	const currentSectionIdNum = hasSectionId ? Number(sectionId) : 0;
+	const isSuperAdmin = user?.role === "SUPER_ADMIN";
+	/** 현재 수업에서 ADMIN/TUTOR일 때만 관리 페이지 표시 (SUPER_ADMIN은 항상 표시) */
+	const showAdminLink =
+		!checkingManagingSections &&
+		(isSuperAdmin ||
+			(managingSectionIds.length > 0 &&
+				(!hasSectionId || managingSectionIds.includes(currentSectionIdNum))));
 
 	useEffect(() => {
 		const checkManagingSections = async () => {
 			if (!user) {
+				setManagingSectionIds([]);
 				setCheckingManagingSections(false);
 				return;
 			}
 
-			if (user?.role === "SUPER_ADMIN") {
-				setHasManagingSections(true);
+			if (user.role === "SUPER_ADMIN") {
+				setManagingSectionIds([]);
 				setCheckingManagingSections(false);
 				return;
 			}
 
 			try {
 				const response = await APIService.getManagingSections();
-				setHasManagingSections((response?.data || []).length > 0);
-			} catch (error) {
-				console.error("관리 중인 수업 확인 실패:", error);
-				setHasManagingSections(false);
+				const data = response?.data ?? response;
+				const list = Array.isArray(data) ? data : [];
+				const ids = list
+					.map((s: { sectionId?: number | string }) => {
+						const id = s.sectionId;
+						const num = typeof id === "string" ? Number.parseInt(id, 10) : id;
+						return Number.isNaN(num) ? null : num;
+					})
+					.filter((id): id is number => id != null);
+				setManagingSectionIds(ids);
+			} catch {
+				setManagingSectionIds([]);
 			} finally {
 				setCheckingManagingSections(false);
 			}
@@ -133,7 +151,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 					},
 				]
 			: []),
-		...(!checkingManagingSections && hasManagingSections
+		...(showAdminLink
 			? [
 					{
 						id: "admin",

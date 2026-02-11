@@ -204,7 +204,7 @@ export const DueDateText = styled.span`
   font-weight: 500;
 `;
 
-export const SubmitButton = styled.button<{ $variant?: "test" }>`
+export const SubmitButton = styled.button<{ $variant?: "test" | "save" }>`
   padding: 6px 12px;
   background-color: #2f81f7;
   color: white;
@@ -219,6 +219,15 @@ export const SubmitButton = styled.button<{ $variant?: "test" }>`
 		props.$variant === "test" &&
 		`
     margin-left: 8px;
+  `}
+
+  ${(props) =>
+		props.$variant === "save" &&
+		`
+    background-color: #28a745;
+    &:hover {
+      background-color: #218838;
+    }
   `}
 
   &:hover {

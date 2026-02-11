@@ -196,6 +196,41 @@ export function useProblemSolve() {
 		}
 	}, [sessionId, code, language, problemId, sectionId]);
 
+	const [showSaveModal, setShowSaveModal] = useState(false);
+
+	const saveToBackend = useCallback(async (showModal = false) => {
+		if (
+			!code ||
+			code === getDefaultCode(language) ||
+			!problemId ||
+			!sectionId
+		)
+			return;
+		try {
+			setSessionSaveStatus("saving");
+			await apiService.saveProgress(
+				problemId,
+				sectionId,
+				language,
+				code,
+			);
+			setSessionSaveStatus("saved");
+			
+			if (showModal) {
+				// 저장하기 버튼: 모달 표시
+				setShowSaveModal(true);
+				setTimeout(() => setShowSaveModal(false), 2000);
+			} else {
+				// Ctrl+S: 상태 메시지만
+				setTimeout(() => setSessionSaveStatus("idle"), 2000);
+			}
+		} catch (error) {
+			console.error("백엔드 저장 실패:", error);
+			setSessionSaveStatus("error");
+			setTimeout(() => setSessionSaveStatus("idle"), 2000);
+		}
+	}, [code, language, problemId, sectionId]);
+
 	const loadFromSession = useCallback(async (): Promise<string | null> => {
 		if (!sessionId || !problemId || !sectionId) return null;
 		try {
@@ -226,27 +261,18 @@ export function useProblemSolve() {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if ((event.ctrlKey || event.metaKey) && event.key === "s") {
 				event.preventDefault();
-				saveToSession();
+				saveToBackend(); // 백엔드에 직접 저장
 			}
 		};
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [saveToSession]);
+	}, [saveToBackend]);
 
 	useEffect(() => {
 		const loadCode = async () => {
-			if (!problemId || !sectionId || !language || !sessionId) return;
+			if (!problemId || !sectionId || !language) return;
 			try {
-				const sessionCode = await loadFromSession();
-				if (
-					sessionCode &&
-					sessionCode.trim() !== "" &&
-					sessionCode !== getDefaultCode(language)
-				) {
-					setCode(sessionCode);
-					setCodeLoadSource("session");
-					return;
-				}
+				// 백엔드에서만 불러오기 (세션 불러오기 제거)
 				const response = await apiService.loadProgress(
 					problemId,
 					sectionId,
@@ -280,7 +306,7 @@ export function useProblemSolve() {
 			}
 		};
 		loadCode();
-	}, [problemId, sectionId, language, sessionId, loadFromSession]);
+	}, [problemId, sectionId, language]);
 
 	const handlePanelMove = useCallback(
 		(draggedPanelId: string, targetPanelId: string) => {
@@ -526,6 +552,8 @@ export function useProblemSolve() {
 		handleSubmit,
 		handleSubmitWithOutput,
 		saveToSession,
+		saveToBackend,
+		showSaveModal,
 		handleHorizontalDragEnd,
 		handleVerticalDragEnd,
 		gutterStyleCallback,

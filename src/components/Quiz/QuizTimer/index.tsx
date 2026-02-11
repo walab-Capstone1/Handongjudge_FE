@@ -5,9 +5,10 @@ import * as S from "./styles";
 interface QuizTimerProps {
 	endTime: string | Date;
 	onTimeUp?: () => void;
+	compact?: boolean;
 }
 
-const QuizTimer: React.FC<QuizTimerProps> = ({ endTime, onTimeUp }) => {
+const QuizTimer: React.FC<QuizTimerProps> = ({ endTime, onTimeUp, compact }) => {
 	const [timeRemaining, setTimeRemaining] = useState(0);
 	const [isExpired, setIsExpired] = useState(false);
 	const timeUpCalled = useRef(false);
@@ -55,9 +56,9 @@ const QuizTimer: React.FC<QuizTimerProps> = ({ endTime, onTimeUp }) => {
 
 	if (isExpired) {
 		return (
-			<S.Container $expired>
-				<S.Label>시간 종료</S.Label>
-				<S.Value>00:00</S.Value>
+			<S.Container $expired $compact={compact}>
+				<S.Label $compact={compact}>시간 종료</S.Label>
+				<S.Value $compact={compact}>00:00</S.Value>
 			</S.Container>
 		);
 	}
@@ -66,9 +67,9 @@ const QuizTimer: React.FC<QuizTimerProps> = ({ endTime, onTimeUp }) => {
 	const isWarning = minutes < 5;
 
 	return (
-		<S.Container $warning={isWarning}>
-			<S.Label>남은 시간</S.Label>
-			<S.Value>{formatTime(timeRemaining)}</S.Value>
+		<S.Container $warning={isWarning} $compact={compact}>
+			<S.Label $compact={compact}>남은 시간</S.Label>
+			<S.Value $compact={compact}>{formatTime(timeRemaining)}</S.Value>
 		</S.Container>
 	);
 };

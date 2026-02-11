@@ -186,7 +186,22 @@ export function useUserManagement() {
 		setCurrentPage(1);
 	}, [searchTerm, filterSection, filterRole]);
 
+	const roleSortOrder = (role: string | undefined): number => {
+		if (role === "ADMIN") return 0;
+		if (role === "TUTOR") return 1;
+		return 2; // STUDENT or 미지정
+	};
+
 	const sortedStudents = [...filteredStudents].sort((a, b) => {
+		// 수강관리 분반 페이지: 기본으로 관리자(ADMIN)가 항상 위, 그다음 튜터, 그다음 수강생
+		if (sectionId) {
+			const aRole = userRoles[a.userId] ?? a.role;
+			const bRole = userRoles[b.userId] ?? b.role;
+			const aRoleOrder = roleSortOrder(aRole);
+			const bRoleOrder = roleSortOrder(bRole);
+			if (aRoleOrder !== bRoleOrder) return aRoleOrder - bRoleOrder;
+		}
+
 		let aValue: string | number;
 		let bValue: string | number;
 		switch (sortField) {

@@ -7,7 +7,11 @@ import * as S from "../styles";
 import ProblemPreview from "./ProblemPreview";
 import type { ProblemCreateHookReturn } from "../hooks/useProblemCreate";
 
+const REQUIRED_MSG = "필수 항목(*)을 입력해 주세요.";
+
 export default function ProblemCreateView(d: ProblemCreateHookReturn) {
+	const hasRequiredErrors = Object.keys(d.fieldErrors).length > 0;
+
 	return (
 		<TutorLayout>
 			{d.loading &&
@@ -50,6 +54,9 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 				{d.error && <S.ErrorMessage>{d.error}</S.ErrorMessage>}
 
 				<S.Form onSubmit={d.handleSubmit}>
+					{hasRequiredErrors && (
+						<S.RequiredMessage role="alert">{REQUIRED_MSG}</S.RequiredMessage>
+					)}
 					<S.Step>
 						<S.FormGrid>
 							<S.FormSection>
@@ -58,9 +65,13 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 									type="text"
 									name="title"
 									value={d.formData.title}
-									onChange={d.handleInputChange}
+									onChange={(e) => {
+										d.clearFieldError("title");
+										d.handleInputChange(e);
+									}}
 									required
 									placeholder="문제 제목을 입력하세요"
+									style={d.fieldErrors.title ? { borderColor: "#dc2626" } : undefined}
 								/>
 							</S.FormSection>
 
@@ -115,10 +126,14 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 										type="number"
 										name="timeLimit"
 										value={d.formData.timeLimit}
-										onChange={d.handleInputChange}
+										onChange={(e) => {
+											d.clearFieldError("timeLimit");
+											d.handleInputChange(e);
+										}}
 										min={0}
 										step={0.1}
 										placeholder="예: 2.0"
+										style={d.fieldErrors.timeLimit ? { borderColor: "#dc2626" } : undefined}
 									/>
 								</S.FormSection>
 								<S.FormSection>
@@ -127,9 +142,13 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 										type="number"
 										name="memoryLimit"
 										value={d.formData.memoryLimit}
-										onChange={d.handleInputChange}
+										onChange={(e) => {
+											d.clearFieldError("memoryLimit");
+											d.handleInputChange(e);
+										}}
 										min={0}
 										placeholder="예: 256"
+										style={d.fieldErrors.memoryLimit ? { borderColor: "#dc2626" } : undefined}
 									/>
 								</S.FormSection>
 							</S.FormRow>
@@ -172,7 +191,9 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 
 							<S.FormSection as={S.DescriptionSection}>
 								<S.Label>문제 설명 *</S.Label>
-								<S.DescriptionEditor>
+								<S.DescriptionEditor
+									style={d.fieldErrors.description ? { border: "1px solid #dc2626", borderRadius: 8 } : undefined}
+								>
 									<S.EditorWrapper>
 										<S.EditorToolbar>
 											<S.HeadingSelect
@@ -328,6 +349,7 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 												}));
 											}}
 											onInput={(e) => {
+												d.clearFieldError("description");
 												const target = e.currentTarget;
 												const htmlContent = target?.innerHTML || "";
 												const textContent =
