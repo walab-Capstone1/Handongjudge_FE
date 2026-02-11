@@ -1,5 +1,6 @@
 import CourseSidebar from "../../../../../components/Course/CourseSidebar";
 import CourseHeader from "../../../../../components/Course/CourseHeader";
+import TipTapEditor from "../../../../../components/Editor/TipTapEditor";
 import {
 	formatDate,
 	type QuestionDetailPageHookReturn,
@@ -158,9 +159,9 @@ export default function QuestionDetailPageView(
 							)}
 						</S.QuestionMeta>
 
-						<S.QuestionContent>
-							<pre>{question.content}</pre>
-						</S.QuestionContent>
+					<S.QuestionContent>
+						<div dangerouslySetInnerHTML={{ __html: question.content }} />
+					</S.QuestionContent>
 
 						<S.QuestionActions>
 							<S.ActionBtn
@@ -175,34 +176,34 @@ export default function QuestionDetailPageView(
 					</S.QuestionCard>
 
 					<S.CommentsSection>
-						<S.CommentsTitle>댓글 {d.comments.length}개</S.CommentsTitle>
+					<S.CommentsTitle>댓글 {d.comments.length}개</S.CommentsTitle>
 
-						<S.CommentForm onSubmit={d.handleSubmitComment}>
-							<S.CommentTextarea
+					<S.CommentForm onSubmit={d.handleSubmitComment}>
+						<S.EditorWrapper>
+							<TipTapEditor
+								content={d.commentContent}
+								onChange={(html) => d.setCommentContent(html)}
 								placeholder="댓글을 작성하세요..."
-								value={d.commentContent}
-								onChange={(e) => d.setCommentContent(e.target.value)}
-								rows={4}
-								aria-label="댓글 내용"
 							/>
-							<S.CommentFormFooter>
-								<S.CommentOption>
-									<input
-										type="checkbox"
-										checked={d.commentAnonymous}
-										onChange={(e) => d.setCommentAnonymous(e.target.checked)}
-										aria-label="익명으로 작성"
-									/>
-									<span>익명으로 작성</span>
-								</S.CommentOption>
-								<S.BtnSubmitComment
-									type="submit"
-									disabled={d.submittingComment}
-								>
-									{d.submittingComment ? "작성 중..." : "댓글 작성"}
-								</S.BtnSubmitComment>
-							</S.CommentFormFooter>
-						</S.CommentForm>
+						</S.EditorWrapper>
+						<S.CommentFormFooter>
+							<S.CommentOption>
+								<input
+									type="checkbox"
+									checked={d.commentAnonymous}
+									onChange={(e) => d.setCommentAnonymous(e.target.checked)}
+									aria-label="익명으로 작성"
+								/>
+								<span>익명으로 작성</span>
+							</S.CommentOption>
+							<S.BtnSubmitComment
+								type="submit"
+								disabled={d.submittingComment}
+							>
+								{d.submittingComment ? "작성 중..." : "댓글 작성"}
+							</S.BtnSubmitComment>
+						</S.CommentFormFooter>
+					</S.CommentForm>
 
 						<S.CommentsList>
 							{d.comments.length === 0 ? (
@@ -233,9 +234,9 @@ export default function QuestionDetailPageView(
 											</S.CommentDate>
 										</S.CommentHeader>
 
-										<S.CommentContent>
-											<pre>{comment.content}</pre>
-										</S.CommentContent>
+									<S.CommentContent>
+										<div dangerouslySetInnerHTML={{ __html: comment.content }} />
+									</S.CommentContent>
 
 										<S.CommentActions>
 											<S.ActionBtnSmall

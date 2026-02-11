@@ -142,8 +142,12 @@ export default function CourseAssignmentsPageView(
 																}
 															>
 																<S.ProblemTitle>{problem.title}</S.ProblemTitle>
-																<S.ProblemBadge $submitted={problem.submitted}>
-																	{problem.submitted ? "제출" : "미제출"}
+																<S.ProblemBadge $status={problem.status}>
+																	{problem.status === "ACCEPTED"
+																		? "정답"
+																		: problem.status === "SUBMITTED"
+																			? "제출"
+																			: "미제출"}
 																</S.ProblemBadge>
 															</S.AccordionProblemItem>
 														))}

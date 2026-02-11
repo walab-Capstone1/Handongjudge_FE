@@ -83,6 +83,15 @@ export default function CodingQuizPageView(d: CodingQuizPageHookReturn) {
 									onClick={() => d.handleProblemSelect(problem.id)}
 								>
 									<S.ProblemItemTitle>{problem.title}</S.ProblemItemTitle>
+									<S.ProblemBadge
+										$status={problem.status ?? "NOT_SUBMITTED"}
+									>
+										{problem.status === "ACCEPTED"
+											? "정답"
+											: problem.status === "SUBMITTED"
+												? "제출"
+												: "미제출"}
+									</S.ProblemBadge>
 									<S.ProblemItemArrow>→</S.ProblemItemArrow>
 								</S.ProblemItem>
 							))}

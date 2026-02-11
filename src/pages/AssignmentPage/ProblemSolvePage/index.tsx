@@ -46,6 +46,8 @@ const ProblemSolvePage: React.FC = () => {
 			handleSubmit={hook.handleSubmit}
 			handleSubmitWithOutput={hook.handleSubmitWithOutput}
 			saveToSession={hook.saveToSession}
+			saveToBackend={hook.saveToBackend}
+			showSaveModal={hook.showSaveModal}
 			handleHorizontalDragEnd={hook.handleHorizontalDragEnd}
 			handleVerticalDragEnd={hook.handleVerticalDragEnd}
 			gutterStyleCallback={hook.gutterStyleCallback}

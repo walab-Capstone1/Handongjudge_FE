@@ -41,6 +41,8 @@ interface ProblemSolveViewProps {
 	handleSubmit: () => void;
 	handleSubmitWithOutput: () => void;
 	saveToSession: () => void;
+	saveToBackend: (showModal?: boolean) => void;
+	showSaveModal: boolean;
 	handleHorizontalDragEnd: (sizes: number[]) => void;
 	handleVerticalDragEnd: (sizes: number[]) => void;
 	gutterStyleCallback: (
@@ -79,6 +81,8 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 		handleSubmit,
 		handleSubmitWithOutput,
 		saveToSession,
+		saveToBackend,
+		showSaveModal,
 		handleHorizontalDragEnd,
 		handleVerticalDragEnd,
 		gutterStyleCallback,
@@ -107,6 +111,8 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 				onSubmitWithOutput={handleSubmitWithOutput}
 				sessionSaveStatus={sessionSaveStatus}
 				onSessionSave={saveToSession}
+				onBackendSave={saveToBackend}
+				saveMode="backend"
 				codeLoadSource={codeLoadSource}
 				sessionCleared={sessionCleared}
 				isDeadlinePassed={isDeadlinePassed}
@@ -143,6 +149,13 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 	return (
 		<DndProvider backend={HTML5Backend}>
 			<S.PageWrapper className={`problem-solve-page ${theme}`} $theme={theme}>
+				{showSaveModal && (
+					<S.SaveModal>
+						<S.SaveModalContent>
+							<S.SaveModalText>저장되었습니다</S.SaveModalText>
+						</S.SaveModalContent>
+					</S.SaveModal>
+				)}
 				<S.Header $theme={theme}>
 					<S.Breadcrumb>
 						<S.BreadcrumbLink

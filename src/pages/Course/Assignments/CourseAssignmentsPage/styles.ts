@@ -1,4 +1,5 @@
 import styled, { keyframes } from "styled-components";
+import type { ProblemStatus } from "./types";
 
 const slideDown = keyframes`
   from {
@@ -292,13 +293,21 @@ export const ProblemTitle = styled.span`
   flex: 1;
 `;
 
-export const ProblemBadge = styled.span<{ $submitted: boolean }>`
+export const ProblemBadge = styled.span<{ $status: ProblemStatus }>`
   font-size: 12px;
   font-weight: 600;
   padding: 6px 14px;
   border-radius: 14px;
-  background: ${(props) => (props.$submitted ? "#667EEA" : "#EEEEEE")};
-  color: ${(props) => (props.$submitted ? "#FFFFFF" : "#888888")};
+  background: ${(props) =>
+    props.$status === "ACCEPTED"
+      ? "#22C55E"
+      : props.$status === "SUBMITTED"
+        ? "#667EEA"
+        : "#EEEEEE"};
+  color: ${(props) =>
+    props.$status === "ACCEPTED" || props.$status === "SUBMITTED"
+      ? "#FFFFFF"
+      : "#888888"};
 `;
 
 export const NoAssignmentsMessage = styled.div`
