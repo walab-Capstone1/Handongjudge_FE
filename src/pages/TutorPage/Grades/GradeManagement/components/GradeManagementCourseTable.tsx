@@ -44,6 +44,7 @@ export interface GradeManagementCourseTableProps {
 		userId: number,
 		problemId: number,
 	) => void;
+	onProblemDetail?: (problemId: number) => void;
 }
 
 export default function GradeManagementCourseTable({
@@ -59,16 +60,8 @@ export default function GradeManagementCourseTable({
 	onViewCode,
 	onSaveGradeForQuiz,
 	onViewCodeForQuiz,
+	onProblemDetail,
 }: GradeManagementCourseTableProps) {
-	const hasAssignmentActions = Boolean(
-		onSaveGrade && onViewCode && setEditingGrade && setGradeInputs,
-	);
-	const hasQuizActions = Boolean(
-		onSaveGradeForQuiz &&
-			onViewCodeForQuiz &&
-			setEditingGrade &&
-			setGradeInputs,
-	);
 	return (
 		<S.CourseTableContainer>
 			{courseLoading ? (
@@ -153,13 +146,31 @@ export default function GradeManagementCourseTable({
 											key={`${item.type}-${item.id}-${problem.problemId}`}
 											as="th"
 										>
-											<S.ProblemTitle>
-												{problem.problemTitle ?? ""}
-											</S.ProblemTitle>
-											<S.ProblemPoints>
-												({problem.points ?? 0}
-												점)
-											</S.ProblemPoints>
+											{onProblemDetail ? (
+												<button
+													type="button"
+													onClick={() => onProblemDetail(problem.problemId)}
+													style={{
+														background: "none",
+														border: "none",
+														cursor: "pointer",
+														textAlign: "center",
+														padding: 0,
+														font: "inherit",
+														width: "100%",
+													}}
+												>
+													<S.ProblemTitle>
+														{problem.problemTitle ?? ""}
+													</S.ProblemTitle>
+												</button>
+											) : (
+												<>
+													<S.ProblemTitle>
+														{problem.problemTitle ?? ""}
+													</S.ProblemTitle>
+												</>
+											)}
 										</S.ProblemHeader>
 									))}
 									<S.CourseAssignmentTotalHeader
@@ -174,18 +185,21 @@ export default function GradeManagementCourseTable({
 					</thead>
 					<tbody>
 						{filteredCourseStudents.map((student) => {
-							// 현재 표시 중인 항목(과제/퀴즈 필터 반영)만으로 총점·비율 계산
 							let totalScore = 0;
 							let totalPoints = 0;
 							for (const item of courseGrades.items) {
-								const maxPoints = item.totalPoints ?? 0;
-								totalPoints += maxPoints;
 								if (item.type === "assignment") {
 									const data = student.assignments?.[item.id];
-									if (data) totalScore += data.totalScore;
+									if (data) {
+										totalScore += data.totalScore;
+										totalPoints += data.totalPoints;
+									}
 								} else if (item.type === "quiz") {
 									const data = student.quizzes?.[item.id];
-									if (data) totalScore += data.totalScore;
+									if (data) {
+										totalScore += data.totalScore;
+										totalPoints += data.totalPoints;
+									}
 								}
 							}
 							const ratio =
@@ -213,276 +227,22 @@ export default function GradeManagementCourseTable({
 														item.problems.map((problem) => {
 															const problemGrade =
 																assignmentData?.problems?.[problem.problemId];
-															const score =
-																problemGrade?.score !== null &&
-																problemGrade?.score !== undefined
-																	? problemGrade.score
-																	: null;
-															const key = `${item.id}-${student.userId}-${problem.problemId}`;
-															const isEditing =
-																hasAssignmentActions &&
-																editingGrade?.userId === student.userId &&
-																editingGrade?.problemId === problem.problemId &&
-																editingGrade?.assignmentId === item.id;
-															const currentScore =
-																gradeInputs[key] !== undefined
-																	? gradeInputs[key]
-																	: score !== null
-																		? score
-																		: "";
-															const currentComment = comments[key] ?? "";
 															return (
 																<S.TdCourseProblemCell
 																	key={`${student.userId}-assignment-${item.id}-${problem.problemId}`}
 																>
-																	{hasAssignmentActions && isEditing ? (
-																		<S.EditForm>
-																			<input
-																				type="number"
-																				min={0}
-																				max={problem.points ?? 100}
-																				value={currentScore}
-																				onChange={(e) => {
-																					const v =
-																						e.target.value === ""
-																							? ""
-																							: Number(e.target.value);
-																					setGradeInputs?.((prev) => ({
-																						...prev,
-																						[key]: v,
-																					}));
-																				}}
-																				placeholder="점수"
-																			/>
-																			<S.EditActions>
-																				<button
-																					type="button"
-																					onClick={() =>
-																						onSaveGrade?.(
-																							item.id,
-																							student.userId,
-																							problem.problemId,
-																							currentScore,
-																							currentComment,
-																						)
-																					}
-																				>
-																					저장
-																				</button>
-																				<button
-																					type="button"
-																					onClick={() => {
-																						setEditingGrade?.(null);
-																						setGradeInputs?.((prev) => {
-																							const next = { ...prev };
-																							delete next[key];
-																							return next;
-																						});
-																					}}
-																				>
-																					취소
-																				</button>
-																			</S.EditActions>
-																		</S.EditForm>
-																	) : (
-																		<S.ScoreDisplay>
-																			<S.ScoreRow>
-																				{hasAssignmentActions ? (
-																					<S.ScoreValueButton
-																						type="button"
-																						onClick={() => {
-																							setEditingGrade?.({
-																								userId: student.userId,
-																								problemId: problem.problemId,
-																								assignmentId: item.id,
-																							});
-																							setGradeInputs?.((prev) => ({
-																								...prev,
-																								[key]:
-																									score !== null ? score : "",
-																							}));
-																						}}
-																						title="점수 입력/수정"
-																					>
-																						{`${score ?? 0} / ${problem.points ?? 0}`}
-																					</S.ScoreValueButton>
-																				) : (
-																					<S.ScoreValue>
-																						{`${score ?? 0} / ${problem.points ?? 0}`}
-																					</S.ScoreValue>
-																				)}
-																				{hasAssignmentActions &&
-																					problemGrade?.submitted && (
-																						<button
-																							type="button"
-																							onClick={() =>
-																								onViewCode?.(
-																									item.id,
-																									student.userId,
-																									problem.problemId,
-																								)
-																							}
-																							title="코드 조회"
-																						>
-																							<FaCode />
-																						</button>
-																					)}
-																				{(problemGrade?.submitted ||
-																					(item.dueAt &&
-																						new Date() >
-																							new Date(item.dueAt))) &&
-																					(problemGrade?.submitted ? (
-																						<S.SubmissionStatus
-																							$onTime={problemGrade.isOnTime}
-																						>
-																							{problemGrade.isOnTime ? (
-																								<>
-																									<FaCheckCircle />
-																								</>
-																							) : (
-																								<>
-																									<FaTimesCircle />
-																								</>
-																							)}
-																						</S.SubmissionStatus>
-																					) : (
-																						<S.SubmissionStatus $onTime={false}>
-																							<FaTimesCircle />
-																						</S.SubmissionStatus>
-																					))}
-																			</S.ScoreRow>
-																		</S.ScoreDisplay>
-																	)}
-																</S.TdCourseProblemCell>
-															);
-														})
-													)}
-													<S.TdCourseAssignmentTotalCell>
-														{assignmentData ? (
-															<strong>
-																{assignmentData.totalScore} /{" "}
-																{assignmentData.totalPoints}
-															</strong>
-														) : (
-															"-"
-														)}
-													</S.TdCourseAssignmentTotalCell>
-												</React.Fragment>
-											);
-										}
-										if (item.type === "quiz") {
-											const quizData = student.quizzes?.[item.id];
-											return (
-												<React.Fragment
-													key={`${student.userId}-quiz-${item.id}`}
-												>
-													{item.problems.map((problem) => {
-														const problemGrade =
-															quizData?.problems?.[problem.problemId];
-														const score =
-															problemGrade?.score !== null &&
-															problemGrade?.score !== undefined
-																? problemGrade.score
-																: null;
-														const quizCellKey = `quiz-${item.id}-${student.userId}-${problem.problemId}`;
-														const isEditingQuiz =
-															hasQuizActions &&
-															editingGrade?.userId === student.userId &&
-															editingGrade?.problemId === problem.problemId &&
-															editingGrade?.quizId === item.id;
-														const currentScore =
-															gradeInputs[quizCellKey] !== undefined
-																? gradeInputs[quizCellKey]
-																: score !== null
-																	? score
-																	: "";
-														const currentComment = comments[quizCellKey] ?? "";
-														return (
-															<S.TdCourseProblemCell
-																key={`${student.userId}-quiz-${item.id}-${problem.problemId}`}
-															>
-																{hasQuizActions && isEditingQuiz ? (
-																	<S.EditForm>
-																		<input
-																			type="number"
-																			min={0}
-																			max={problem.points ?? 100}
-																			value={currentScore}
-																			onChange={(e) => {
-																				const v =
-																					e.target.value === ""
-																						? ""
-																						: Number(e.target.value);
-																				setGradeInputs?.((prev) => ({
-																					...prev,
-																					[quizCellKey]: v,
-																				}));
-																			}}
-																			placeholder="점수"
-																		/>
-																		<S.EditActions>
-																			<button
-																				type="button"
-																				onClick={() =>
-																					onSaveGradeForQuiz?.(
-																						item.id,
-																						student.userId,
-																						problem.problemId,
-																						currentScore,
-																						currentComment,
-																					)
-																				}
-																			>
-																				저장
-																			</button>
-																			<button
-																				type="button"
-																				onClick={() => {
-																					setEditingGrade?.(null);
-																					setGradeInputs?.((prev) => {
-																						const next = { ...prev };
-																						delete next[quizCellKey];
-																						return next;
-																					});
-																				}}
-																			>
-																				취소
-																			</button>
-																		</S.EditActions>
-																	</S.EditForm>
-																) : (
 																	<S.ScoreDisplay>
 																		<S.ScoreRow>
-																			{hasQuizActions ? (
-																				<S.ScoreValueButton
-																					type="button"
-																					onClick={() => {
-																						setEditingGrade?.({
-																							userId: student.userId,
-																							problemId: problem.problemId,
-																							quizId: item.id,
-																						});
-																						setGradeInputs?.((prev) => ({
-																							...prev,
-																							[quizCellKey]:
-																								score !== null ? score : "",
-																						}));
-																					}}
-																					title="점수 입력/수정"
-																				>
-																					{`${score ?? 0} / ${problem.points ?? 0}`}
-																				</S.ScoreValueButton>
-																			) : (
-																				<S.ScoreValue>
-																					{`${score ?? 0} / ${problem.points ?? 0}`}
-																				</S.ScoreValue>
-																			)}
-																			{hasQuizActions &&
-																				problemGrade?.submitted && (
+																			<S.ScoreValue>
+																				{problemGrade?.score ?? 0} /{" "}
+																				{problem.points ?? 1}
+																			</S.ScoreValue>
+																			{problemGrade?.submitted &&
+																				onViewCode && (
 																					<button
 																						type="button"
 																						onClick={() =>
-																							onViewCodeForQuiz?.(
+																							onViewCode(
 																								item.id,
 																								student.userId,
 																								problem.problemId,
@@ -517,7 +277,82 @@ export default function GradeManagementCourseTable({
 																				))}
 																		</S.ScoreRow>
 																	</S.ScoreDisplay>
-																)}
+																</S.TdCourseProblemCell>
+															);
+														})
+													)}
+													<S.TdCourseAssignmentTotalCell>
+														{assignmentData ? (
+															<strong>
+																{assignmentData.totalScore} /{" "}
+																{assignmentData.totalPoints}
+															</strong>
+														) : (
+															"-"
+														)}
+													</S.TdCourseAssignmentTotalCell>
+												</React.Fragment>
+											);
+										}
+										if (item.type === "quiz") {
+											const quizData = student.quizzes?.[item.id];
+											return (
+												<React.Fragment
+													key={`${student.userId}-quiz-${item.id}`}
+												>
+													{item.problems.map((problem) => {
+														const problemGrade =
+															quizData?.problems?.[problem.problemId];
+														return (
+															<S.TdCourseProblemCell
+																key={`${student.userId}-quiz-${item.id}-${problem.problemId}`}
+															>
+																<S.ScoreDisplay>
+																	<S.ScoreRow>
+																		<S.ScoreValue>
+																			{problemGrade?.score ?? 0} /{" "}
+																			{problem.points ?? 1}
+																		</S.ScoreValue>
+																		{problemGrade?.submitted &&
+																			onViewCodeForQuiz && (
+																				<button
+																					type="button"
+																					onClick={() =>
+																						onViewCodeForQuiz(
+																							item.id,
+																							student.userId,
+																							problem.problemId,
+																						)
+																					}
+																					title="코드 조회"
+																				>
+																					<FaCode />
+																				</button>
+																			)}
+																		{(problemGrade?.submitted ||
+																			(item.dueAt &&
+																				new Date() > new Date(item.dueAt))) &&
+																			(problemGrade?.submitted ? (
+																				<S.SubmissionStatus
+																					$onTime={problemGrade.isOnTime}
+																				>
+																					{problemGrade.isOnTime ? (
+																						<>
+																							<FaCheckCircle />
+																						</>
+																					) : (
+																						<>
+																							<FaTimesCircle />
+																						</>
+																					)}
+																				</S.SubmissionStatus>
+																			) : (
+																				<S.SubmissionStatus $onTime={false}>
+																					<FaTimesCircle />
+																				</S.SubmissionStatus>
+																			))}
+																	</S.ScoreRow>
+																</S.ScoreDisplay>
 															</S.TdCourseProblemCell>
 														);
 													})}

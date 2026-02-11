@@ -147,48 +147,48 @@ const AssignmentListView: React.FC<AssignmentListViewProps> = ({
 									>
 										수정
 									</button>
-									<div className="tutor-more-menu">
-										<button
-											className="tutor-btn-list-action tutor-btn-more"
-											title="더보기"
-											onClick={(e) => {
-												e.stopPropagation();
-												onToggleMoreMenu(assignment.id);
-											}}
-										>
-											⋯
-										</button>
-										{openMoreMenu === assignment.id && (
-											<div className="tutor-more-dropdown">
-												<button
-													className="tutor-btn-text-small"
-													onClick={(e) => {
-														e.stopPropagation();
-														onToggleActive(
-															assignment.sectionId,
-															assignment.id,
-															assignment.active,
-														);
-														onToggleMoreMenu(null);
-													}}
-												>
-													{assignment.active ? "비활성화" : "활성화"}
-												</button>
-												<button
-													className="tutor-btn-text-small tutor-delete"
-													onClick={(e) => {
-														e.stopPropagation();
-														onDelete(assignment.id);
-														onToggleMoreMenu(null);
-													}}
-												>
-													삭제
-												</button>
-											</div>
-										)}
-									</div>
 								</>
 							)}
+							<div className="tutor-more-menu">
+								<button
+									className="tutor-btn-list-action tutor-btn-more"
+									title="더보기"
+									onClick={(e) => {
+										e.stopPropagation();
+										onToggleMoreMenu(assignment.id);
+									}}
+								>
+									⋯
+								</button>
+								{openMoreMenu === assignment.id && (
+									<div className="tutor-more-dropdown">
+										<button
+											className="tutor-btn-text-small"
+											onClick={(e) => {
+												e.stopPropagation();
+												onToggleActive(
+													assignment.sectionId,
+													assignment.id,
+													assignment.active,
+												);
+												onToggleMoreMenu(null);
+											}}
+										>
+											{assignment.active ? "비활성화" : "활성화"}
+										</button>
+										<button
+											className="tutor-btn-text-small tutor-delete"
+											onClick={(e) => {
+												e.stopPropagation();
+												onDelete(assignment.id);
+												onToggleMoreMenu(null);
+											}}
+										>
+											삭제
+										</button>
+									</div>
+								)}
+							</div>
 						</div>
 					</div>
 

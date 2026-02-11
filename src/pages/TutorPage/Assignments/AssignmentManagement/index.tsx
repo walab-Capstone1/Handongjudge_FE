@@ -280,7 +280,11 @@ const AssignmentManagement: React.FC = () => {
 
 			<ProblemListModal
 				isOpen={d.showProblemListModal}
-				selectedAssignment={d.selectedAssignmentForProblemList}
+				selectedAssignment={
+					d.assignments.find(
+						(a) => a.id === d.selectedAssignmentForProblemList?.id,
+					) ?? d.selectedAssignmentForProblemList
+				}
 				submissionStats={d.submissionStats}
 				searchTerm={d.problemListSearchTerm}
 				onEditProblemNavigate={

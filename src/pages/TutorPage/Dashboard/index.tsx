@@ -1,4 +1,6 @@
 import type { FC } from "react";
+import { useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import TutorLayout from "../../../layouts/TutorLayout";
 import LoadingSpinner from "../../../components/UI/LoadingSpinner";
@@ -12,6 +14,8 @@ import CopySectionModal from "./components/CopySectionModal";
 import ViewNoticeModal from "./components/ViewNoticeModal";
 
 const CourseManagement: FC = () => {
+	const location = useLocation();
+	const navigate = useNavigate();
 	const dashboard = useDashboard();
 	const {
 		loading,
@@ -70,6 +74,16 @@ const CourseManagement: FC = () => {
 		handleProblemEdit,
 		handleCopySection,
 	} = dashboard;
+
+	// 튜터에서 제외된 뒤 /tutor로 리다이렉트된 경우: 한 번만 메시지 표시
+	const tutorRemovedShownRef = useRef(false);
+	useEffect(() => {
+		const state = location.state as { tutorRemoved?: boolean } | null;
+		if (!state?.tutorRemoved || tutorRemovedShownRef.current) return;
+		tutorRemovedShownRef.current = true;
+		navigate("/tutor", { replace: true, state: {} });
+		alert("튜터에서 제외되었습니다.");
+	}, [location.state, navigate]);
 
 	const closeCopyModal = () => {
 		setShowCopyModal(false);
@@ -192,7 +206,10 @@ const CourseManagement: FC = () => {
 						setCopyStep={setCopyStep}
 						copyFormData={copyFormData}
 						setCopyFormData={setCopyFormData}
-						sections={sections}
+						sections={sections.filter(
+							(s) =>
+								s.roleInSection === "ADMIN" || s.roleInSection === "INSTRUCTOR",
+						)}
 						sourceNotices={sourceNotices}
 						sourceAssignments={sourceAssignments}
 						loadingNotices={loadingNotices}

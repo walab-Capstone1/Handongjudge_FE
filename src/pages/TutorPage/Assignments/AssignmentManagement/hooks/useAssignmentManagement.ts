@@ -22,6 +22,7 @@ export function useAssignmentManagement() {
 
 	const {
 		assignments,
+		setAssignments,
 		sections,
 		currentSection,
 		loading,
@@ -467,15 +468,32 @@ export function useAssignmentManagement() {
 		async (assignmentId: number, problemId: number) => {
 			if (!window.confirm("이 문제를 과제에서 제거하시겠습니까?")) return;
 			try {
+				// 낙관적 업데이트: 화면에서 바로 제거
+				setAssignments((prev) =>
+					prev.map((a) => {
+						if (a.id !== assignmentId) return a;
+						const nextProblems = (a.problems || []).filter(
+							(p: { id: number }) => p.id !== problemId,
+						);
+						return {
+							...a,
+							problems: nextProblems,
+							problemCount: nextProblems.length,
+						};
+					}),
+				);
 				await APIService.removeProblemFromAssignment(assignmentId, problemId);
 				alert("문제가 성공적으로 제거되었습니다.");
-				refetchAssignments();
+				// 서버와 동기화
+				await refetchAssignments();
 			} catch (error) {
 				console.error("문제 제거 실패:", error);
 				alert("문제 제거에 실패했습니다.");
+				// 실패 시 목록 다시 불러오기
+				await refetchAssignments();
 			}
 		},
-		[refetchAssignments],
+		[refetchAssignments, setAssignments],
 	);
 
 	const handleCreateNewProblem = useCallback(() => {
@@ -850,6 +868,7 @@ export function useAssignmentManagement() {
 		setShowProblemDetailModal(false);
 	}, []);
 
+	// 튜터는 과제 관리에서 활성/비활성·삭제만 가능, 추가/수정/문제추가는 어드민만
 	const isTutorOnly =
 		(currentSection as { roleInSection?: string } | null)?.roleInSection ===
 		"TUTOR";
@@ -859,6 +878,7 @@ export function useAssignmentManagement() {
 		sectionId,
 		currentSection,
 		isTutorOnly,
+		assignments,
 		searchTerm,
 		setSearchTerm,
 		filterSection,

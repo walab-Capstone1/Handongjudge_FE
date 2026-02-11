@@ -61,6 +61,13 @@ export function useGradeManagement() {
 	>([]);
 	const [bulkInputs, setBulkInputs] = useState<Record<number, number | "">>({});
 	const [bulkSaving, setBulkSaving] = useState(false);
+	const [showProblemDetailModal, setShowProblemDetailModal] = useState(false);
+	const [problemDetail, setProblemDetail] = useState<{
+		title?: string;
+		description?: string;
+		timeLimit?: number;
+		memoryLimit?: number;
+	} | null>(null);
 
 	const fetchQuizGrades = useCallback(async () => {
 		if (!selectedQuiz || !sectionId) return;
@@ -591,6 +598,44 @@ export function useGradeManagement() {
 		},
 		[sectionId],
 	);
+
+	const openProblemDetail = useCallback(async (problemId: number) => {
+		try {
+			const response = await APIService.getProblemInfo(problemId);
+			const info = response?.data ?? response ?? {};
+			let description: string | undefined =
+				info.description != null ? String(info.description) : undefined;
+			try {
+				const parsed = await APIService.parseProblemZip(problemId);
+				const data = parsed?.data ?? parsed;
+				if (data?.description != null) {
+					description =
+						typeof data.description === "string"
+							? data.description
+							: String(data.description);
+				}
+			} catch {
+				// ignore parse failure
+			}
+			setProblemDetail({
+				title: info.title ?? "문제",
+				description,
+				timeLimit:
+					info.timeLimit != null ? Number(info.timeLimit) : undefined,
+				memoryLimit:
+					info.memoryLimit != null ? Number(info.memoryLimit) : undefined,
+			});
+			setShowProblemDetailModal(true);
+		} catch (err) {
+			console.error("문제 정보 조회 실패:", err);
+			alert("문제 정보를 불러오는데 실패했습니다.");
+		}
+	}, []);
+
+	const closeProblemDetailModal = useCallback(() => {
+		setShowProblemDetailModal(false);
+		setProblemDetail(null);
+	}, []);
 
 	const handleSaveGradeForQuiz = useCallback(
 		async (
@@ -1834,6 +1879,10 @@ export function useGradeManagement() {
 		stats,
 		filteredGrades,
 		filteredCourseStudents,
+		showProblemDetailModal,
+		problemDetail,
+		openProblemDetail,
+		closeProblemDetailModal,
 	};
 }
 

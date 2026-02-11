@@ -61,12 +61,17 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 	});
 
 	const handleCopyTutorLink = useCallback(() => {
-		const tutorLink = `${window.location.origin}/tutor`;
-		navigator.clipboard
-			.writeText(tutorLink)
-			.then(() => alert("수업 링크가 복사되었습니다."))
-			.catch(() => alert("링크 복사에 실패했습니다."));
-	}, []);
+		const enrollmentCode = currentSection?.enrollmentCode;
+		if (enrollmentCode) {
+			const enrollmentLink = `${window.location.origin}/enroll/${enrollmentCode}`;
+			navigator.clipboard
+				.writeText(enrollmentLink)
+				.then(() => alert("수업 참가 링크가 복사되었습니다!"))
+				.catch(() => alert("링크 복사에 실패했습니다."));
+		} else {
+			alert("선택된 수업의 참가 코드가 없습니다.");
+		}
+	}, [currentSection?.enrollmentCode]);
 
 	useEffect(() => {
 		localStorage.setItem("tutor_expandedMenus", JSON.stringify(expandedMenus));
@@ -108,21 +113,48 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 		try {
 			const response = await APIService.getManagingSections();
 			const sectionsData = response?.data || [];
+			const isSectionPage = /\/tutor\/.*\/section\/(\d+)/.test(location.pathname);
+			const urlSectionIdMatch = location.pathname.match(/\/section\/(\d+)/);
+			const urlSectionId = urlSectionIdMatch ? urlSectionIdMatch[1] : null;
 
-			const transformedSections: Section[] = sectionsData.map(
-				(section: any) => ({
-					sectionId: section.sectionId,
-					courseTitle: section.sectionInfo?.courseTitle || "",
-					sectionNumber: section.sectionInfo?.sectionNumber || "",
-					year: section.sectionInfo?.year || new Date().getFullYear(),
-					semester: section.sectionInfo?.semester || "SPRING",
-					instructor: section.sectionInfo?.instructorName || "",
-					_role: section.role,
-					_isAdmin: section.role === "ADMIN",
-				}),
-			);
+			const transformedSections: Section[] = Array.isArray(sectionsData)
+				? sectionsData.map((section: { sectionId: number; sectionInfo?: { courseTitle?: string; sectionNumber?: string; year?: number; semester?: string; instructorName?: string; enrollmentCode?: string }; role?: string }) => ({
+						sectionId: section.sectionId,
+						courseTitle: section.sectionInfo?.courseTitle || "",
+						sectionNumber: section.sectionInfo?.sectionNumber || "",
+						year: section.sectionInfo?.year ?? new Date().getFullYear(),
+						semester: (section.sectionInfo?.semester as Section["semester"]) || "SPRING",
+						instructor: section.sectionInfo?.instructorName || "",
+						enrollmentCode: section.sectionInfo?.enrollmentCode || undefined,
+						_role: section.role === "ADMIN" ? "ADMIN" : "TUTOR",
+						_isAdmin: section.role === "ADMIN",
+					}))
+				: [];
+
+			// 관리할 수업이 없으면(튜터 아님/전부 제외) 학생 대시보드로 리다이렉트
+			if (transformedSections.length === 0) {
+				navigate("/dashboard", {
+					replace: true,
+					state: { tutorRemoved: true },
+				});
+				return;
+			}
 
 			setSections(transformedSections);
+
+			// 수업 관련 URL인데 해당 수업 권한이 없으면 /tutor로 리다이렉트
+			if (urlSectionId && isSectionPage) {
+				const hasAccess = transformedSections.some(
+					(s) => s.sectionId === Number.parseInt(urlSectionId, 10),
+				);
+				if (!hasAccess) {
+					navigate("/tutor", {
+						replace: true,
+						state: { tutorRemoved: true },
+					});
+					return;
+				}
+			}
 
 			const requiresSectionId =
 				location.pathname.includes("/section/") ||
@@ -134,7 +166,7 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 
 			if (sectionIdFromUrl) {
 				const found = transformedSections.find(
-					(s) => s.sectionId === Number.parseInt(sectionIdFromUrl),
+					(s) => s.sectionId === Number.parseInt(sectionIdFromUrl, 10),
 				);
 				if (found) {
 					setCurrentSection(found);
@@ -178,6 +210,11 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 			}
 		} catch (error) {
 			console.error("수업 목록 조회 실패:", error);
+			// 권한 없음(403 등)이면 학생 대시보드로
+			navigate("/dashboard", {
+				replace: true,
+				state: { tutorRemoved: true },
+			});
 		}
 	}, [sectionIdFromUrl, selectedSection, location.pathname, navigate]);
 
