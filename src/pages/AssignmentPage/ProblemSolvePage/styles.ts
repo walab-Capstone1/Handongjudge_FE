@@ -204,3 +204,48 @@ export const MainSplit = styled.div`
 	overflow: hidden;
 	min-height: 0;
 `;
+
+export const SaveModal = styled.div`
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 10000;
+	animation: fadeIn 0.2s ease-in-out;
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translate(-50%, -50%) scale(0.9);
+		}
+		to {
+			opacity: 1;
+			transform: translate(-50%, -50%) scale(1);
+		}
+	}
+`;
+
+export const SaveModalContent = styled.div`
+	background-color: #4a5568;
+	color: white;
+	padding: 20px 40px;
+	border-radius: 12px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-weight: 600;
+	font-size: 16px;
+
+	.problem-solve-page.light & {
+		background-color: #718096;
+	}
+`;
+
+export const SaveModalIcon = styled.span`
+	font-size: 24px;
+`;
+
+export const SaveModalText = styled.span`
+	font-size: 16px;
+`;

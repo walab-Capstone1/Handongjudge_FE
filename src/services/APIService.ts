@@ -232,6 +232,22 @@ class APIService {
 		sectionId: number | string,
 		language: string,
 	): Promise<any> {
+		// 먼저 저장된 진행 상황 확인
+		try {
+			const progressResult = await this.request(
+				`/progress/load?problemId=${problemId}&sectionId=${sectionId}&language=${language}`,
+				{
+					method: "GET",
+				},
+			);
+			if (progressResult?.codeString || progressResult?.data?.codeString) {
+				return progressResult;
+			}
+		} catch (err) {
+			console.warn("진행 상황 불러오기 실패, 제출 기록 시도:", err);
+		}
+		
+		// 진행 상황이 없으면 제출 기록 확인
 		return await this.request(
 			`/submissions/lastSubmitCode?problemId=${problemId}&sectionId=${sectionId}&language=${language}`,
 			{
