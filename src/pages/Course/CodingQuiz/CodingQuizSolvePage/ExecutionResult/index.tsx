@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "./styles";
 
@@ -44,6 +44,19 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 	isSubmitting,
 }) => {
 	const [selectedTestcase, setSelectedTestcase] = useState<number | null>(null);
+
+	// 테스트케이스 결과가 있으면 첫 번째 세부사항을 기본으로 표시
+	useEffect(() => {
+		if (
+			submissionResult?.type === "output" &&
+			submissionResult?.outputList &&
+			submissionResult.outputList.length > 0
+		) {
+			setSelectedTestcase(0);
+		} else {
+			setSelectedTestcase(null);
+		}
+	}, [submissionResult?.type, submissionResult?.outputList]);
 
 	const getTestcaseResultText = (result: string | null): string => {
 		const resultTexts: { [key: string]: string } = {
@@ -128,16 +141,19 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 
 		const { result, outputList } = submissionResult;
 		const { passed, total } = getTestcaseSummary(outputList);
+		const hasOutputList = outputList && outputList.length > 0;
 
 		if (result === "AC") {
 			return {
 				type: "success" as const,
 				title: "정답",
-				description: `모든 테스트케이스 통과 (${total}/${total})`,
-				details: outputList
+				description: hasOutputList
+					? `모든 테스트케이스 통과 (${total}/${total})`
+					: "정답",
+				details: hasOutputList
 					? [
-							`실행 시간: ${Math.max(...outputList.map((t) => t.runtime || 0))}ms`,
-							`메모리 사용: ${formatMemory(Math.max(...outputList.map((t) => t.memory_used || 0)))}`,
+							`실행 시간: ${Math.max(...outputList!.map((t) => t.runtime || 0))}ms`,
+							`메모리 사용: ${formatMemory(Math.max(...outputList!.map((t) => t.memory_used || 0)))}`,
 						]
 					: [],
 			};
@@ -146,32 +162,40 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 			return {
 				type: "error" as const,
 				title: "오답",
-				description: `${failedCount}개 테스트케이스 실패 (${passed}/${total})`,
-				details: outputList
+				description: hasOutputList
+					? `${failedCount}개 테스트케이스 실패 (${passed}/${total})`
+					: "오답",
+				details: hasOutputList
 					? [
-							`첫 번째 실패: 테스트케이스 #${outputList.find((t) => t.result !== "correct")?.testcase_rank || 1}`,
+							`첫 번째 실패: 테스트케이스 #${outputList!.find((t) => t.result !== "correct")?.testcase_rank || 1}`,
 						]
-					: [],
+					: ["테스트하기를 통해 테스트케이스를 확인하세요."],
 			};
 		} else if (result === "TLE") {
 			return {
 				type: "warning" as const,
 				title: "시간 초과",
-				description: `실행 시간 제한 초과 (${passed}/${total})`,
+				description: hasOutputList
+					? `실행 시간 제한 초과 (${passed}/${total})`
+					: "실행 시간 제한 초과",
 				details: ["실행 시간을 단축해보세요"],
 			};
 		} else if (result === "MLE") {
 			return {
 				type: "warning" as const,
 				title: "메모리 초과",
-				description: `메모리 제한 초과 (${passed}/${total})`,
+				description: hasOutputList
+					? `메모리 제한 초과 (${passed}/${total})`
+					: "메모리 제한 초과",
 				details: ["메모리 사용량을 줄여보세요"],
 			};
 		} else if (result === "RE") {
 			return {
 				type: "error" as const,
 				title: "런타임 에러",
-				description: `실행 중 오류 발생 (${passed}/${total})`,
+				description: hasOutputList
+					? `실행 중 오류 발생 (${passed}/${total})`
+					: "실행 중 오류 발생",
 				details: ["코드 로직을 다시 확인해보세요"],
 			};
 		} else if (result === "CE") {

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
 import APIService from "../../../../../services/APIService";
-import type { Assignment, SectionInfo } from "../types";
+import type { Assignment, ProblemStatus, SectionInfo } from "../types";
 
 function calculateDDay(endDate: string): number | null {
 	if (!endDate) return null;
@@ -104,18 +104,20 @@ export function useCourseAssignmentsPage() {
 						}
 
 						const problems = problemsList.map((problem: { id: number; title: string; description?: string }) => {
-							const status = problemsStatus.find(
+							const statusEntry = problemsStatus.find(
 								(s: { problemId: number }) => s.problemId === problem.id,
 							);
-							const isSubmitted =
-								status &&
-								(status.status === "SUBMITTED" || status.status === "COMPLETED");
+							const raw = statusEntry ? statusEntry.status : "NOT_SUBMITTED";
+							const problemStatus: ProblemStatus =
+								raw === "ACCEPTED" || raw === "SUBMITTED" ? raw : "NOT_SUBMITTED";
+							const submitted =
+								problemStatus === "SUBMITTED" || problemStatus === "ACCEPTED";
 							return {
 								id: problem.id,
 								title: problem.title,
 								description: problem.description,
-								submitted: !!isSubmitted,
-								status: status ? status.status : "NOT_SUBMITTED",
+								submitted,
+								status: problemStatus,
 							};
 						});
 
