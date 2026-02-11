@@ -113,22 +113,39 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 		try {
 			const response = await APIService.getManagingSections();
 			const sectionsData = response?.data || [];
-			const isSectionPage = /\/tutor\/.*\/section\/(\d+)/.test(location.pathname);
+			const isSectionPage = /\/tutor\/.*\/section\/(\d+)/.test(
+				location.pathname,
+			);
 			const urlSectionIdMatch = location.pathname.match(/\/section\/(\d+)/);
 			const urlSectionId = urlSectionIdMatch ? urlSectionIdMatch[1] : null;
 
 			const transformedSections: Section[] = Array.isArray(sectionsData)
-				? sectionsData.map((section: { sectionId: number; sectionInfo?: { courseTitle?: string; sectionNumber?: string; year?: number; semester?: string; instructorName?: string; enrollmentCode?: string }; role?: string }) => ({
-						sectionId: section.sectionId,
-						courseTitle: section.sectionInfo?.courseTitle || "",
-						sectionNumber: section.sectionInfo?.sectionNumber || "",
-						year: section.sectionInfo?.year ?? new Date().getFullYear(),
-						semester: (section.sectionInfo?.semester as Section["semester"]) || "SPRING",
-						instructor: section.sectionInfo?.instructorName || "",
-						enrollmentCode: section.sectionInfo?.enrollmentCode || undefined,
-						_role: section.role === "ADMIN" ? "ADMIN" : "TUTOR",
-						_isAdmin: section.role === "ADMIN",
-					}))
+				? sectionsData.map(
+						(section: {
+							sectionId: number;
+							sectionInfo?: {
+								courseTitle?: string;
+								sectionNumber?: string;
+								year?: number;
+								semester?: string;
+								instructorName?: string;
+								enrollmentCode?: string;
+							};
+							role?: string;
+						}) => ({
+							sectionId: section.sectionId,
+							courseTitle: section.sectionInfo?.courseTitle || "",
+							sectionNumber: section.sectionInfo?.sectionNumber || "",
+							year: section.sectionInfo?.year ?? new Date().getFullYear(),
+							semester:
+								(section.sectionInfo?.semester as Section["semester"]) ||
+								"SPRING",
+							instructor: section.sectionInfo?.instructorName || "",
+							enrollmentCode: section.sectionInfo?.enrollmentCode || undefined,
+							_role: section.role === "ADMIN" ? "ADMIN" : "TUTOR",
+							_isAdmin: section.role === "ADMIN",
+						}),
+					)
 				: [];
 
 			// 관리할 수업이 없으면(튜터 아님/전부 제외) 학생 대시보드로 리다이렉트
@@ -142,16 +159,14 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 
 			setSections(transformedSections);
 
-			// 수업 관련 URL인데 해당 수업 권한이 없으면 /tutor로 리다이렉트
+			// 수업 관련 URL인데 해당 수업 권한이 없으면 강의실로 보냄 (튜터 대시로 보내지 않음)
 			if (urlSectionId && isSectionPage) {
 				const hasAccess = transformedSections.some(
 					(s) => s.sectionId === Number.parseInt(urlSectionId, 10),
 				);
 				if (!hasAccess) {
-					navigate("/tutor", {
-						replace: true,
-						state: { tutorRemoved: true },
-					});
+					alert("해당 수업에 대한 권한이 없습니다.");
+					navigate("/courses", { replace: true });
 					return;
 				}
 			}

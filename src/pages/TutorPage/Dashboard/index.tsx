@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import TutorLayout from "../../../layouts/TutorLayout";
@@ -12,6 +12,8 @@ import SectionGrid from "./components/SectionGrid";
 import CreateSectionModal from "./components/CreateSectionModal";
 import CopySectionModal from "./components/CopySectionModal";
 import ViewNoticeModal from "./components/ViewNoticeModal";
+
+let tutorRemovedAlertShown = false;
 
 const CourseManagement: FC = () => {
 	const location = useLocation();
@@ -75,14 +77,13 @@ const CourseManagement: FC = () => {
 		handleCopySection,
 	} = dashboard;
 
-	// 튜터에서 제외된 뒤 /tutor로 리다이렉트된 경우: 한 번만 메시지 표시
-	const tutorRemovedShownRef = useRef(false);
+	// 튜터에서 제외된 뒤 /tutor로 리다이렉트된 경우: 한 번만 메시지 표시 (리마운트 시 중복 방지)
 	useEffect(() => {
 		const state = location.state as { tutorRemoved?: boolean } | null;
-		if (!state?.tutorRemoved || tutorRemovedShownRef.current) return;
-		tutorRemovedShownRef.current = true;
-		navigate("/tutor", { replace: true, state: {} });
+		if (!state?.tutorRemoved || tutorRemovedAlertShown) return;
+		tutorRemovedAlertShown = true;
 		alert("튜터에서 제외되었습니다.");
+		navigate("/tutor", { replace: true, state: {} });
 	}, [location.state, navigate]);
 
 	const closeCopyModal = () => {
