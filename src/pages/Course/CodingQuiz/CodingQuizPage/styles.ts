@@ -211,6 +211,25 @@ export const ProblemItemTitle = styled.div`
   color: #1a1a1a;
 `;
 
+export const ProblemBadge = styled.span<{
+  $status: "ACCEPTED" | "SUBMITTED" | "NOT_SUBMITTED";
+}>`
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 14px;
+  background: ${(props) =>
+    props.$status === "ACCEPTED"
+      ? "#22C55E"
+      : props.$status === "SUBMITTED"
+        ? "#667EEA"
+        : "#EEEEEE"};
+  color: ${(props) =>
+    props.$status === "ACCEPTED" || props.$status === "SUBMITTED"
+      ? "#FFFFFF"
+      : "#888888"};
+`;
+
 export const ProblemItemArrow = styled.div`
   font-size: 20px;
   color: #667eea;

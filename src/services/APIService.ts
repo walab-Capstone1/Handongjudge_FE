@@ -526,6 +526,16 @@ class APIService {
 		);
 	}
 
+	async getStudentQuizProblemsStatus(
+		userId: number | string,
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/user/students/${userId}/sections/${sectionId}/quizzes/${quizId}/problems-status`,
+		);
+	}
+
 	async getSectionStudents(sectionId: number | string): Promise<any> {
 		return await this.request(`/user/sections/${sectionId}/students`);
 	}

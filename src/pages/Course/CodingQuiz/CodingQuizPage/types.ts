@@ -9,10 +9,13 @@ export interface Quiz {
   active?: boolean;
 }
 
+export type ProblemStatus = "ACCEPTED" | "SUBMITTED" | "NOT_SUBMITTED";
+
 export interface Problem {
   id: number;
   title: string;
   order: number;
+  status?: ProblemStatus;
 }
 
 export interface SectionInfo {

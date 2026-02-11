@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
 import APIService from "../../../../../services/APIService";
-import type { Quiz, Problem, SectionInfo } from "../types";
+import type { ProblemStatus, Quiz, Problem, SectionInfo } from "../types";
 
 export function useCodingQuizPage() {
 	const { sectionId } = useParams<{ sectionId: string }>();
@@ -94,18 +94,37 @@ export function useCodingQuizPage() {
 
 	const handleQuizClick = useCallback(
 		async (quiz: Quiz) => {
-			if (quiz.status === "WAITING" || !sectionId) return;
+			if (quiz.status === "WAITING" || !sectionId || !auth.user) return;
 			try {
-				const problemsResponse = await APIService.getQuizProblems(
-					sectionId,
-					quiz.id,
-				);
+				const [problemsResponse, statusResponse] = await Promise.all([
+					APIService.getQuizProblems(sectionId, quiz.id),
+					APIService.getStudentQuizProblemsStatus(
+						auth.user.id,
+						sectionId,
+						quiz.id,
+					).catch(() => ({ data: [] })),
+				]);
 				const problemsData = problemsResponse.data || problemsResponse;
+				const statusList = statusResponse.data ?? statusResponse ?? [];
+				const statusMap = Array.isArray(statusList)
+					? (statusList as { problemId: number; status: string }[]).reduce(
+							(acc, s) => {
+								acc[s.problemId] =
+									s.status === "ACCEPTED" || s.status === "SUBMITTED"
+										? (s.status as ProblemStatus)
+										: "NOT_SUBMITTED";
+								return acc;
+							},
+							{} as Record<number, ProblemStatus>,
+						)
+					: {};
+
 				const problems = (Array.isArray(problemsData) ? problemsData : []).map(
 					(p: { problemId: number; title: string; problemOrder: number }) => ({
 						id: p.problemId,
 						title: p.title,
 						order: p.problemOrder,
+						status: statusMap[p.problemId] ?? "NOT_SUBMITTED",
 					}),
 				);
 				setSelectedQuiz(quiz);
@@ -114,7 +133,7 @@ export function useCodingQuizPage() {
 				console.error("문제 목록 조회 실패:", err);
 			}
 		},
-		[sectionId],
+		[sectionId, auth.user],
 	);
 
 	const handleProblemSelect = useCallback(

@@ -10,17 +10,18 @@ import ExecutionResult from "../ExecutionResult";
 import DraggablePanel from "../DraggablePanel";
 import QuizTimer from "../../../../../components/Quiz/QuizTimer";
 import type { UseCodingQuizSolveReturn } from "../hooks/useCodingQuizSolve";
+import * as S from "../styles";
 
 export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 	const navigate = useNavigate();
 
 	if (d.isLoading) {
 		return (
-			<div className={`problem-solve-page ${d.theme}`}>
-				<div className="loading-container">
+			<S.PageWrapper className={`problem-solve-page ${d.theme}`} $theme={d.theme}>
+				<S.LoadingContainer $theme={d.theme}>
 					<LoadingSpinner />
-				</div>
-			</div>
+				</S.LoadingContainer>
+			</S.PageWrapper>
 		);
 	}
 
@@ -75,74 +76,74 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 
 	return (
 		<DndProvider backend={HTML5Backend}>
-			<div className={`problem-solve-page ${d.theme}`}>
-				<div className="problem-solve-header quiz-header">
-					<div className="breadcrumb">
-						<span
-							className="breadcrumb-link"
+			<S.PageWrapper className={`problem-solve-page ${d.theme}`} $theme={d.theme}>
+				<S.Header $theme={d.theme}>
+					<S.Breadcrumb>
+						<S.BreadcrumbLink
+							type="button"
 							onClick={() => navigate(`/sections/${d.sectionId}/coding-quiz`)}
-							onKeyDown={(e) =>
-								e.key === "Enter" &&
-								navigate(`/sections/${d.sectionId}/coding-quiz`)
-							}
-							role="button"
-							tabIndex={0}
 						>
 							코딩 테스트
-						</span>
+						</S.BreadcrumbLink>
 						<span> › </span>
-						<strong>{d.quizInfo.title}</strong>
-					</div>
-					<div className="header-right">
+						<S.BreadcrumbCurrent $theme={d.theme}>
+							{d.quizInfo.title}
+							{d.problems.length > 1 &&
+								` · ${d.problems.findIndex((p) => p.id === d.selectedProblemId) + 1}번 문제`}
+						</S.BreadcrumbCurrent>
+					</S.Breadcrumb>
+					<S.Controls>
 						{d.problems.length > 1 && (
-							<div className="problem-selector-header">
+							<S.ProblemSelectorWrap>
 								{d.problems.map((problem, index) => (
-									<button
+									<S.ProblemSelectorBtn
 										key={problem.id}
 										type="button"
-										className={`problem-selector-btn ${d.selectedProblemId === problem.id ? "active" : ""}`}
+										$active={d.selectedProblemId === problem.id}
 										onClick={() => d.handleProblemChange(problem.id)}
 									>
 										{index + 1}
-									</button>
+									</S.ProblemSelectorBtn>
 								))}
-							</div>
+							</S.ProblemSelectorWrap>
 						)}
-						<QuizTimer
-							endTime={d.quizInfo.endTime!}
-							onTimeUp={d.handleTimeUp}
-						/>
-						<div className="controls">
-							<button
-								type="button"
-								className={`theme-button ${d.theme === "light" ? "active" : ""}`}
-								onClick={() => d.setTheme("light")}
-							>
-								Light
-							</button>
-							<button
-								type="button"
-								className={`theme-button ${d.theme === "dark" ? "active" : ""}`}
-								onClick={() => d.setTheme("dark")}
-							>
-								Dark
-							</button>
-							<select
-								className="language-select"
-								value={d.language}
-								onChange={(e) => d.handleLanguageChange(e.target.value)}
-								disabled={d.isTimeUp}
-							>
-								<option value="c">C</option>
-								<option value="cpp">C++</option>
-								<option value="java">Java</option>
-								<option value="python">Python</option>
-							</select>
-						</div>
-					</div>
-				</div>
+						<S.TimerWrap>
+							<QuizTimer
+								endTime={d.quizInfo.endTime!}
+								onTimeUp={d.handleTimeUp}
+							/>
+						</S.TimerWrap>
+						<S.ThemeButton
+							type="button"
+							$active={d.theme === "light"}
+							$theme={d.theme}
+							onClick={() => d.setTheme("light")}
+						>
+							Light
+						</S.ThemeButton>
+						<S.ThemeButton
+							type="button"
+							$active={d.theme === "dark"}
+							$theme={d.theme}
+							onClick={() => d.setTheme("dark")}
+						>
+							Dark
+						</S.ThemeButton>
+						<S.LanguageSelect
+							$theme={d.theme}
+							value={d.language}
+							onChange={(e) => d.handleLanguageChange(e.target.value)}
+							disabled={d.isTimeUp}
+						>
+							<option value="c">C</option>
+							<option value="cpp">C++</option>
+							<option value="java">Java</option>
+							<option value="python">Python</option>
+						</S.LanguageSelect>
+					</S.Controls>
+				</S.Header>
 
-				<div className="main-split">
+				<S.MainSplit>
 					<Split
 						sizes={d.horizontalSizes}
 						direction="horizontal"
@@ -170,8 +171,8 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 							{renderPanel(d.panelLayout.bottomRight, true)}
 						</Split>
 					</Split>
-				</div>
-			</div>
+				</S.MainSplit>
+			</S.PageWrapper>
 		</DndProvider>
 	);
 }
