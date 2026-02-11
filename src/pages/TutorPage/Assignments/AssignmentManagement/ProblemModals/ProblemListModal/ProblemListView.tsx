@@ -2,6 +2,13 @@ import * as S from "../../AssignmentModals/styles";
 import { removeCopyLabel } from "../../../../../../utils/problemUtils";
 import type { ProblemListViewProps } from "../types";
 
+function getDifficultyLabel(
+	difficulty: string | number | null | undefined,
+): string {
+	if (difficulty == null || String(difficulty).trim() === "") return "Level 1";
+	return `Level ${difficulty}`;
+}
+
 /**
  * 문제 목록 모달 - 목록 모드 UI (검색, 테이블, 빈 상태)
  */
@@ -91,7 +98,7 @@ export default function ProblemListView({
 															{removeCopyLabel(problem.title ?? "")}
 														</S.BtnLink>
 													</S.ProblemTitleCell>
-													<td>{problem.difficulty ?? "N/A"}</td>
+													<td>{getDifficultyLabel(problem.difficulty)}</td>
 													<td>{getStatusText()}</td>
 													<td>
 														<S.BtnTableAction

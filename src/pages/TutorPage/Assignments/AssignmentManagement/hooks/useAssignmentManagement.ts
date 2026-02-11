@@ -483,6 +483,21 @@ export function useAssignmentManagement() {
 		setShowCreateProblemModal(true);
 	}, []);
 
+	/** 문제 추가 모달에서 "새 문제 만들기" 클릭 시 → 문제 생성 페이지로 이동 (해당 과제에 나중에 자동 추가되도록 state 전달) */
+	const handleNavigateToCreatePage = useCallback(() => {
+		setShowProblemModal(false);
+		if (selectedAssignment && sectionId) {
+			navigate("/tutor/problems/create", {
+				state: {
+					fromAssignmentId: selectedAssignment.id,
+					sectionId,
+				},
+			});
+		} else {
+			navigate("/tutor/problems/create");
+		}
+	}, [selectedAssignment, sectionId, navigate]);
+
 	const handleProblemInputChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			const { name, value, files } = e.target;
@@ -543,10 +558,29 @@ export function useAssignmentManagement() {
 					fd.append("descriptionFile", problemFormData.descriptionFile);
 				if (problemFormData.zipFile)
 					fd.append("zipFile", problemFormData.zipFile);
-				await APIService.createProblem(fd);
-				alert(
-					"문제가 성공적으로 생성되었습니다. 문제 목록에서 원하는 과제에 추가할 수 있습니다.",
-				);
+				const createResult = await APIService.createProblem(fd);
+				const newProblemId =
+					typeof createResult === "number"
+						? createResult
+						: (createResult?.id ?? createResult?.data);
+
+				if (
+					selectedAssignment &&
+					newProblemId != null &&
+					!Number.isNaN(Number(newProblemId))
+				) {
+					await APIService.addProblemToAssignment(
+						selectedAssignment.id,
+						Number(newProblemId),
+					);
+					alert(
+						"문제가 생성되어 해당 과제에 추가되었습니다. 과제 목록에서 확인할 수 있습니다.",
+					);
+				} else {
+					alert(
+						"문제가 성공적으로 생성되었습니다. 문제 목록에서 원하는 과제에 추가할 수 있습니다.",
+					);
+				}
 				setShowCreateProblemModal(false);
 				resetProblemForm();
 				refetchAssignments();
@@ -555,7 +589,7 @@ export function useAssignmentManagement() {
 				alert(`문제 생성에 실패했습니다.\n${(error as Error).message || ""}`);
 			}
 		},
-		[problemFormData, resetProblemForm, refetchAssignments],
+		[problemFormData, resetProblemForm, refetchAssignments, selectedAssignment],
 	);
 
 	const closeProblemModals = useCallback(() => {
@@ -900,6 +934,7 @@ export function useAssignmentManagement() {
 		handleSelectAllProblems,
 		handleRemoveProblem,
 		handleCreateNewProblem,
+		handleNavigateToCreatePage,
 		handleProblemInputChange,
 		handleCreateProblemSubmit,
 		closeProblemModals,

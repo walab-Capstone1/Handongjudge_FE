@@ -190,7 +190,7 @@ const AssignmentManagement: React.FC = () => {
 					d.setCopyProblemSearchTerm("");
 					d.setProblemViewMode("list");
 				}}
-				onCreateNew={d.handleCreateNewProblem}
+				onCreateNew={d.handleNavigateToCreatePage}
 				onProblemDetail={d.openProblemDetail}
 			/>
 

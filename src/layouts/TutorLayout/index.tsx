@@ -104,88 +104,94 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 		return `${year}-${semesterNum}`;
 	};
 
-	useEffect(() => {
-		const fetchSections = async () => {
-			try {
-				const response = await APIService.getManagingSections();
-				const sectionsData = response?.data || [];
+	const fetchSections = useCallback(async () => {
+		try {
+			const response = await APIService.getManagingSections();
+			const sectionsData = response?.data || [];
 
-				const transformedSections: Section[] = sectionsData.map(
-					(section: any) => ({
-						sectionId: section.sectionId,
-						courseTitle: section.sectionInfo?.courseTitle || "",
-						sectionNumber: section.sectionInfo?.sectionNumber || "",
-						year: section.sectionInfo?.year || new Date().getFullYear(),
-						semester: section.sectionInfo?.semester || "SPRING",
-						instructor: section.sectionInfo?.instructorName || "",
-						_role: section.role,
-						_isAdmin: section.role === "ADMIN",
-					}),
+			const transformedSections: Section[] = sectionsData.map(
+				(section: any) => ({
+					sectionId: section.sectionId,
+					courseTitle: section.sectionInfo?.courseTitle || "",
+					sectionNumber: section.sectionInfo?.sectionNumber || "",
+					year: section.sectionInfo?.year || new Date().getFullYear(),
+					semester: section.sectionInfo?.semester || "SPRING",
+					instructor: section.sectionInfo?.instructorName || "",
+					_role: section.role,
+					_isAdmin: section.role === "ADMIN",
+				}),
+			);
+
+			setSections(transformedSections);
+
+			const requiresSectionId =
+				location.pathname.includes("/section/") ||
+				location.pathname.match(/\/tutor\/(assignments|notices|users)(\/|$)/);
+
+			const lastSelectedSectionId = localStorage.getItem(
+				"tutor_lastSelectedSectionId",
+			);
+
+			if (sectionIdFromUrl) {
+				const found = transformedSections.find(
+					(s) => s.sectionId === Number.parseInt(sectionIdFromUrl),
 				);
-
-				setSections(transformedSections);
-
-				const requiresSectionId =
-					location.pathname.includes("/section/") ||
-					location.pathname.match(/\/tutor\/(assignments|notices|users)(\/|$)/);
-
-				const lastSelectedSectionId = localStorage.getItem(
-					"tutor_lastSelectedSectionId",
-				);
-
-				if (sectionIdFromUrl) {
-					const found = transformedSections.find(
-						(s) => s.sectionId === Number.parseInt(sectionIdFromUrl),
-					);
-					if (found) {
-						setCurrentSection(found);
-						localStorage.setItem(
-							"tutor_lastSelectedSectionId",
-							found.sectionId.toString(),
-						);
-					}
-				} else if (selectedSection) {
-					setCurrentSection(selectedSection);
+				if (found) {
+					setCurrentSection(found);
 					localStorage.setItem(
 						"tutor_lastSelectedSectionId",
-						selectedSection.sectionId.toString(),
+						found.sectionId.toString(),
 					);
-				} else if (lastSelectedSectionId) {
-					const found = transformedSections.find(
-						(s) => s.sectionId === Number.parseInt(lastSelectedSectionId),
-					);
-					if (found) {
-						setCurrentSection(found);
-						if (requiresSectionId && !sectionIdFromUrl) {
-							if (
-								location.pathname === "/tutor" ||
-								location.pathname === "/tutor/"
-							) {
-								navigate(`/tutor/assignments/section/${found.sectionId}`, {
-									replace: true,
-								});
-							} else if (
-								location.pathname.match(
-									/\/tutor\/(assignments|notices|users)(\/|$)/,
-								)
-							) {
-								const basePath = location.pathname.replace(
-									/\/section\/\d+/,
-									"",
-								);
-								navigate(`${basePath}/section/${found.sectionId}`, {
-									replace: true,
-								});
-							}
+				}
+			} else if (selectedSection) {
+				setCurrentSection(selectedSection);
+				localStorage.setItem(
+					"tutor_lastSelectedSectionId",
+					selectedSection.sectionId.toString(),
+				);
+			} else if (lastSelectedSectionId) {
+				const found = transformedSections.find(
+					(s) => s.sectionId === Number.parseInt(lastSelectedSectionId),
+				);
+				if (found) {
+					setCurrentSection(found);
+					if (requiresSectionId && !sectionIdFromUrl) {
+						if (
+							location.pathname === "/tutor" ||
+							location.pathname === "/tutor/"
+						) {
+							navigate(`/tutor/assignments/section/${found.sectionId}`, {
+								replace: true,
+							});
+						} else if (
+							location.pathname.match(
+								/\/tutor\/(assignments|notices|users)(\/|$)/,
+							)
+						) {
+							const basePath = location.pathname.replace(/\/section\/\d+/, "");
+							navigate(`${basePath}/section/${found.sectionId}`, {
+								replace: true,
+							});
 						}
 					}
 				}
-			} catch (error) {
-				console.error("수업 목록 조회 실패:", error);
 			}
-		};
-		fetchSections();
+		} catch (error) {
+			console.error("수업 목록 조회 실패:", error);
+		}
 	}, [sectionIdFromUrl, selectedSection, location.pathname, navigate]);
+
+	useEffect(() => {
+		fetchSections();
+	}, [fetchSections]);
+
+	useEffect(() => {
+		const handler = () => {
+			fetchSections();
+		};
+		window.addEventListener("tutor-sections-refresh", handler);
+		return () => window.removeEventListener("tutor-sections-refresh", handler);
+	}, [fetchSections]);
 
 	useEffect(() => {
 		if (showSectionModal) {

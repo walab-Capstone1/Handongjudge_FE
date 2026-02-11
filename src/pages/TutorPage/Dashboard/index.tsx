@@ -19,6 +19,7 @@ const CourseManagement: FC = () => {
 		setShowCreateModal,
 		showCopyModal,
 		setShowCopyModal,
+		isCreatingSection,
 		isCopyingSection,
 		copyStep,
 		setCopyStep,
@@ -44,7 +45,6 @@ const CourseManagement: FC = () => {
 		availableYears,
 		formData,
 		setFormData,
-		availableCourses,
 		copyFormData,
 		setCopyFormData,
 		sourceNotices,
@@ -89,6 +89,32 @@ const CourseManagement: FC = () => {
 
 	return (
 		<TutorLayout>
+			{isCreatingSection &&
+				createPortal(
+					<div
+						style={{
+							position: "fixed",
+							inset: 0,
+							backgroundColor: "rgba(0,0,0,0.35)",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 10000,
+						}}
+					>
+						<div
+							style={{
+								background: "white",
+								padding: "1.5rem 2rem",
+								borderRadius: "12px",
+								boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+							}}
+						>
+							<LoadingSpinner message="수업 만들기..." />
+						</div>
+					</div>,
+					document.body,
+				)}
 			{isCopyingSection &&
 				createPortal(
 					<div
@@ -156,7 +182,6 @@ const CourseManagement: FC = () => {
 						onClose={() => setShowCreateModal(false)}
 						formData={formData}
 						setFormData={setFormData}
-						availableCourses={availableCourses}
 						onSubmit={handleCreateSection}
 					/>
 					<CopySectionModal

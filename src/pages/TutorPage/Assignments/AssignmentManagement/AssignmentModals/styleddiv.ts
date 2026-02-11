@@ -611,6 +611,17 @@ export const ButtonPrimary = styled.button`
   }
 `;
 
+export const RequiredMessage = styled.p`
+  margin: 0 0 1rem 0;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+`;
+
 export const FormActions = styled.div`
   display: flex;
   justify-content: flex-end;
