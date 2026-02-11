@@ -9,6 +9,7 @@ import CodeEditor from "../CodeEditor";
 import ExecutionResult from "../ExecutionResult";
 import DraggablePanel from "../DraggablePanel";
 import QuizTimer from "../../../../../components/Quiz/QuizTimer";
+import ProblemSelectModal from "../ProblemSelectModal";
 import type { UseCodingQuizSolveReturn } from "../hooks/useCodingQuizSolve";
 import * as S from "../styles";
 
@@ -77,8 +78,29 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 	return (
 		<DndProvider backend={HTML5Backend}>
 			<S.PageWrapper className={`problem-solve-page ${d.theme}`} $theme={d.theme}>
+				{d.showSaveModal && (
+					<S.SaveModal>
+						<S.SaveModalContent>
+							<S.SaveModalText>저장되었습니다</S.SaveModalText>
+						</S.SaveModalContent>
+					</S.SaveModal>
+				)}
+				<ProblemSelectModal
+					isOpen={d.isProblemModalOpen}
+					problems={d.problems}
+					currentProblemId={d.selectedProblemId}
+					onClose={() => d.setIsProblemModalOpen(false)}
+					onSelectProblem={d.handleProblemChange}
+				/>
 				<S.Header $theme={d.theme}>
 					<S.Breadcrumb>
+						<S.BreadcrumbLink
+							type="button"
+							onClick={() => navigate(`/sections/${d.sectionId}/dashboard`)}
+						>
+							{d.sectionInfo?.courseTitle ?? "수업"}
+						</S.BreadcrumbLink>
+						<span> › </span>
 						<S.BreadcrumbLink
 							type="button"
 							onClick={() => navigate(`/sections/${d.sectionId}/coding-quiz`)}
@@ -87,30 +109,24 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 						</S.BreadcrumbLink>
 						<span> › </span>
 						<S.BreadcrumbCurrent $theme={d.theme}>
-							{d.quizInfo.title}
-							{d.problems.length > 1 &&
-								` · ${d.problems.findIndex((p) => p.id === d.selectedProblemId) + 1}번 문제`}
+							{d.currentProblem?.title ?? d.quizInfo.title}
 						</S.BreadcrumbCurrent>
 					</S.Breadcrumb>
 					<S.Controls>
 						{d.problems.length > 1 && (
-							<S.ProblemSelectorWrap>
-								{d.problems.map((problem, index) => (
-									<S.ProblemSelectorBtn
-										key={problem.id}
-										type="button"
-										$active={d.selectedProblemId === problem.id}
-										onClick={() => d.handleProblemChange(problem.id)}
-									>
-										{index + 1}
-									</S.ProblemSelectorBtn>
-								))}
-							</S.ProblemSelectorWrap>
+							<S.ProblemNavigateButton
+								type="button"
+								onClick={() => d.setIsProblemModalOpen(true)}
+								$theme={d.theme}
+							>
+								다른 문제로 이동
+							</S.ProblemNavigateButton>
 						)}
 						<S.TimerWrap>
 							<QuizTimer
 								endTime={d.quizInfo.endTime!}
 								onTimeUp={d.handleTimeUp}
+								compact
 							/>
 						</S.TimerWrap>
 						<S.ThemeButton

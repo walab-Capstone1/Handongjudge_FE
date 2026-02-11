@@ -67,6 +67,8 @@ export function useCodingQuizSolve() {
 	>("idle");
 	const [codeLoadSource, setCodeLoadSource] = useState<string | null>(null);
 	const [sessionCleared, setSessionCleared] = useState(false);
+	const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
+	const [showSaveModal, setShowSaveModal] = useState(false);
 
 	// 사용자 역할 확인
 	useEffect(() => {
@@ -212,6 +214,7 @@ export function useCodingQuizSolve() {
 		const loadCode = async () => {
 			if (!selectedProblemId || !sectionId || !language || !sessionId) return;
 			try {
+				// 1순위: 세션에서 불러오기
 				const sessionCode = await loadFromSession();
 				if (
 					sessionCode &&
@@ -222,6 +225,35 @@ export function useCodingQuizSolve() {
 					setCodeLoadSource("session");
 					return;
 				}
+				
+				// 2순위: 백엔드에서 제출 기록 불러오기
+				const response = await apiService.loadProgress(
+					selectedProblemId,
+					sectionId,
+					language,
+				);
+				const raw = response as
+					| { codeString?: string; code?: string }
+					| string
+					| undefined;
+				const backendCode =
+					typeof raw === "object" && raw !== null
+						? (raw?.codeString ?? raw?.code ?? undefined)
+						: typeof raw === "string"
+							? raw
+							: undefined;
+				if (
+					backendCode &&
+					typeof backendCode === "string" &&
+					backendCode.trim() !== "" &&
+					backendCode !== getDefaultCode(language)
+				) {
+					setCode(backendCode);
+					setCodeLoadSource("backend");
+					return;
+				}
+				
+				// 3순위: 기본 코드
 				setCode(getDefaultCode(language));
 				setCodeLoadSource("default");
 			} catch {
@@ -232,7 +264,7 @@ export function useCodingQuizSolve() {
 		loadCode();
 	}, [selectedProblemId, sectionId, language, sessionId, loadFromSession]);
 
-	const saveToSession = useCallback(async () => {
+	const saveToSession = useCallback(async (showModal = false) => {
 		if (
 			!sessionId ||
 			!code ||
@@ -250,7 +282,15 @@ export function useCodingQuizSolve() {
 				code,
 			);
 			setSessionSaveStatus("saved");
-			setTimeout(() => setSessionSaveStatus("idle"), 2000);
+			
+			if (showModal) {
+				// 저장하기 버튼: 모달 표시
+				setShowSaveModal(true);
+				setTimeout(() => setShowSaveModal(false), 2000);
+			} else {
+				// Ctrl+S: 상태 메시지만
+				setTimeout(() => setSessionSaveStatus("idle"), 2000);
+			}
 		} catch (error) {
 			console.error("세션 저장 실패:", error);
 			setSessionSaveStatus("error");
@@ -258,10 +298,22 @@ export function useCodingQuizSolve() {
 		}
 	}, [sessionId, code, language, selectedProblemId, sectionId]);
 
+	// Ctrl+S 단축키 핸들러
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+				event.preventDefault();
+				saveToSession(false); // 모달 없이 저장
+			}
+		};
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	}, [saveToSession]);
+
 	useEffect(() => {
 		if (!sessionId || isTimeUp) return;
 		const autoSaveInterval = setInterval(() => {
-			saveToSession();
+			saveToSession(false); // 자동 저장도 모달 없이
 		}, 10000);
 		return () => clearInterval(autoSaveInterval);
 	}, [sessionId, isTimeUp, saveToSession]);
@@ -406,7 +458,7 @@ export function useCodingQuizSolve() {
 					code,
 					type: "judge",
 				});
-				await clearSessionAfterSubmission();
+				// 제출 후 세션 유지 (백엔드에서 불러올 수 있도록)
 			} else {
 				throw new Error("제출 응답을 받지 못했습니다.");
 			}
@@ -460,18 +512,18 @@ export function useCodingQuizSolve() {
 					message: `알 수 없는 결과: ${result}`,
 					color: "#6c757d",
 				};
-				setSubmissionResult({
-					status: "completed",
-					result,
-					resultInfo,
-					submissionId: res.submissionId,
-					submittedAt: res.submittedAt,
-					language: res.language ?? language,
-					code,
-					outputList: res.outputList,
-					type: "output",
-				});
-				await clearSessionAfterSubmission();
+			setSubmissionResult({
+				status: "completed",
+				result,
+				resultInfo,
+				submissionId: res.submissionId,
+				submittedAt: res.submittedAt,
+				language: res.language ?? language,
+				code,
+				outputList: res.outputList,
+				type: "output",
+			});
+			// 제출 후 세션 유지 (백엔드에서 불러올 수 있도록)
 			} else {
 				throw new Error("제출 응답을 받지 못했습니다.");
 			}
@@ -522,6 +574,7 @@ export function useCodingQuizSolve() {
 
 	return {
 		sectionId,
+		sectionInfo,
 		quizInfo,
 		problems,
 		selectedProblemId,
@@ -542,6 +595,9 @@ export function useCodingQuizSolve() {
 		horizontalSizes,
 		verticalSizes,
 		panelLayout,
+		isProblemModalOpen,
+		setIsProblemModalOpen,
+		showSaveModal,
 		handleTimeUp,
 		handleProblemChange,
 		handlePanelMove,

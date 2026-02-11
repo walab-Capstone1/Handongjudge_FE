@@ -126,7 +126,10 @@ export const LoadingContainer = styled.div<{ $theme: "light" | "dark" }>`
 `;
 
 export const Header = styled.div<{ $theme: "light" | "dark" }>`
-	padding: 12px 24px;
+	flex-shrink: 0;
+	min-height: 48px;
+	max-height: 48px;
+	padding: 0 24px;
 	border-bottom: 1px solid ${(p) => (p.$theme === "light" ? "#e1e4e8" : "#30363d")};
 	background-color: ${(p) => (p.$theme === "light" ? "#ffffff" : "#161b22")};
 	display: flex;
@@ -215,8 +218,7 @@ export const ProblemSelectorWrap = styled.div`
 `;
 
 export const ProblemSelectorBtn = styled.button<{ $active?: boolean }>`
-	padding: 6px 10px;
-	min-width: 36px;
+	padding: 6px 12px;
 	border-radius: 6px;
 	border: 1px solid #30363d;
 	background-color: #21262d;
@@ -224,6 +226,10 @@ export const ProblemSelectorBtn = styled.button<{ $active?: boolean }>`
 	font-size: 12px;
 	font-weight: 600;
 	cursor: pointer;
+	white-space: nowrap;
+	max-width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 
 	.problem-solve-page.light & {
 		border-color: #e1e4e8;
@@ -243,4 +249,65 @@ export const ProblemSelectorBtn = styled.button<{ $active?: boolean }>`
 			color: #0969da;
 		}
 	`}
+`;
+
+export const ProblemNavigateButton = styled.button<{ $theme: "light" | "dark" }>`
+	padding: 6px 12px;
+	border-radius: 6px;
+	border: 1px solid ${(p) => (p.$theme === "light" ? "#e1e4e8" : "#30363d")};
+	background-color: ${(p) => (p.$theme === "light" ? "#ffffff" : "#21262d")};
+	color: ${(p) => (p.$theme === "light" ? "#24292e" : "#c9d1d9")};
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: all 0.2s;
+
+	&:hover {
+		border-color: ${(p) => (p.$theme === "light" ? "#0969da" : "#58a6ff")};
+		background-color: ${(p) =>
+			p.$theme === "light" ? "rgba(9, 105, 218, 0.1)" : "rgba(88, 166, 255, 0.15)"};
+		color: ${(p) => (p.$theme === "light" ? "#0969da" : "#58a6ff")};
+	}
+`;
+
+export const SaveModal = styled.div`
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 10000;
+	animation: fadeIn 0.2s ease-in-out;
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translate(-50%, -50%) scale(0.9);
+		}
+		to {
+			opacity: 1;
+			transform: translate(-50%, -50%) scale(1);
+		}
+	}
+`;
+
+export const SaveModalContent = styled.div`
+	background-color: #4a5568;
+	color: white;
+	padding: 20px 40px;
+	border-radius: 12px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-weight: 600;
+	font-size: 16px;
+
+	.problem-solve-page.light & {
+		background-color: #718096;
+	}
+`;
+
+export const SaveModalText = styled.span`
+	font-size: 16px;
 `;
