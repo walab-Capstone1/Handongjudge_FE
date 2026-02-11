@@ -61,7 +61,7 @@ export function useAuthCallback() {
 											`${data.courseTitle ?? ""} 수강 신청이 완료되었습니다!`,
 										);
 										setTimeout(() => {
-											window.location.href = "/index";
+											window.location.href = "/courses";
 										}, 1500);
 									} else {
 										setStatus("수업 참가 처리 중...");
@@ -88,9 +88,9 @@ export function useAuthCallback() {
 										window.location.href = redirectTo;
 									}, 1500);
 								} else {
-									setStatus("소셜 로그인 성공! 인덱스 페이지로 이동합니다.");
+									setStatus("소셜 로그인 성공! 강의실 목록으로 이동합니다.");
 									setTimeout(() => {
-										window.location.href = "/index";
+										window.location.href = "/courses";
 									}, 1500);
 								}
 							}
@@ -144,7 +144,7 @@ export function useAuthCallback() {
 								setStatus(
 									`${data.courseTitle ?? ""} 수강 신청이 완료되었습니다!`,
 								);
-								setTimeout(() => navigate("/index"), 1500);
+								setTimeout(() => navigate("/courses"), 1500);
 							} else {
 								setStatus("수업 참가 처리 중...");
 								setTimeout(
@@ -168,8 +168,8 @@ export function useAuthCallback() {
 							setStatus("로그인 성공! 이동합니다.");
 							setTimeout(() => navigate(redirectTo), 1500);
 						} else {
-							setStatus("로그인 성공! 인덱스 페이지로 이동합니다.");
-							setTimeout(() => navigate("/index"), 1500);
+							setStatus("로그인 성공! 강의실 목록으로 이동합니다.");
+							setTimeout(() => navigate("/courses"), 1500);
 						}
 					}
 				}

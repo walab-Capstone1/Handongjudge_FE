@@ -153,6 +153,28 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 					)}
 				</S.FiltersSection>
 
+				<S.UsageBadgeLegend>
+					<span>뱃지 의미:</span>
+					<span>
+						<S.UsageBadgeAssignment as="span" style={{ cursor: "default" }}>
+							과제
+						</S.UsageBadgeAssignment>
+						과제에서 사용 중
+					</span>
+					<span>
+						<S.UsageBadgeProblemSet as="span" style={{ cursor: "default" }}>
+							문제집
+						</S.UsageBadgeProblemSet>
+						문제집에서 사용 중
+					</span>
+					<span>
+						<S.UsageBadgeQuiz as="span" style={{ cursor: "default" }}>
+							코딩테스트
+						</S.UsageBadgeQuiz>
+						코딩테스트에서 사용 중
+					</span>
+				</S.UsageBadgeLegend>
+
 				<S.ResponsiveWrapper>
 					<S.TableContainer>
 						{d.filteredProblems.length > 0 ? (
@@ -186,18 +208,30 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 															>
 																{problem.title}
 															</S.TitleText>
-															{problem.isUsed &&
-																(problem.assignmentCount ?? 0) > 0 && (
-																	<S.UsageBadge
-																		title={`${problem.assignmentCount}개 과제에서 사용 중`}
-																	>
-																		사용 중
-																		<S.UsageCount>
-																			{" "}
-																			({problem.assignmentCount})
-																		</S.UsageCount>
-																	</S.UsageBadge>
-																)}
+															{(problem.assignmentCount ?? 0) > 0 && (
+																<S.UsageBadgeAssignment
+																	title={`${problem.assignmentCount}개 과제에서 사용 중`}
+																>
+																	과제
+																	<S.UsageCount>({problem.assignmentCount})</S.UsageCount>
+																</S.UsageBadgeAssignment>
+															)}
+															{(problem.problemSetCount ?? 0) > 0 && (
+																<S.UsageBadgeProblemSet
+																	title={`${problem.problemSetCount}개 문제집에서 사용 중`}
+																>
+																	문제집
+																	<S.UsageCount>({problem.problemSetCount})</S.UsageCount>
+																</S.UsageBadgeProblemSet>
+															)}
+															{(problem.quizCount ?? 0) > 0 && (
+																<S.UsageBadgeQuiz
+																	title={`${problem.quizCount}개 코딩테스트에서 사용 중`}
+																>
+																	코딩테스트
+																	<S.UsageCount>({problem.quizCount})</S.UsageCount>
+																</S.UsageBadgeQuiz>
+															)}
 														</S.TitleRow>
 														{d.getProblemTags(problem).length > 0 && (
 															<S.Tags>

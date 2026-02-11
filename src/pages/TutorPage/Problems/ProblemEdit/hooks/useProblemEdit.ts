@@ -528,7 +528,7 @@ export function useProblemEdit() {
 				const submitFormData = new FormData();
 				submitFormData.append("title", formData.title);
 				submitFormData.append("tags", JSON.stringify(formData.tags));
-				submitFormData.append("difficulty", formData.difficulty);
+				submitFormData.append("difficulty", formData.difficulty?.trim() || "1");
 				submitFormData.append(
 					"metadataUpdated",
 					enableFullEdit ? "false" : "true",

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 import AdminRoute from "./components/Route/AdminRoute";
 import SuperAdminRoute from "./components/Route/SuperAdminRoute";
+import TutorAccessGate from "./components/Route/TutorAccessGate";
 // Auth (공통 / 로그인)
 import IndexPage from "./pages/Auth/IndexPage";
 import LoginPage from "./pages/Auth/LoginPage";
@@ -118,12 +119,14 @@ const App: React.FC = () => {
 						path="/sections/:sectionId/assignments/:assignmentId/detail/problems/:problemId"
 						element={<ProblemSolvePage />}
 					/>
-					{/* 수업관리자 (tutor) 라우트 */}
+					{/* 수업관리자 (tutor) 라우트 - 학생은 접근 불가, alert 후 /courses로 */}
 					<Route
 						path="/tutor"
 						element={
 							<AdminRoute>
-								<CourseManagement />
+								<TutorAccessGate>
+									<CourseManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -131,7 +134,9 @@ const App: React.FC = () => {
 						path="/tutor/assignments"
 						element={
 							<AdminRoute>
-								<AssignmentManagement />
+								<TutorAccessGate>
+									<AssignmentManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -139,7 +144,9 @@ const App: React.FC = () => {
 						path="/tutor/assignments/section/:sectionId"
 						element={
 							<AdminRoute>
-								<AssignmentManagement />
+								<TutorAccessGate>
+									<AssignmentManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -147,7 +154,9 @@ const App: React.FC = () => {
 						path="/tutor/assignments/section/:sectionId/create"
 						element={
 							<AdminRoute>
-								<AssignmentCreatePage />
+								<TutorAccessGate>
+									<AssignmentCreatePage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -155,7 +164,9 @@ const App: React.FC = () => {
 						path="/tutor/assignments/section/:sectionId/:assignmentId/edit"
 						element={
 							<AdminRoute>
-								<AssignmentEditPage />
+								<TutorAccessGate>
+									<AssignmentEditPage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -163,7 +174,9 @@ const App: React.FC = () => {
 						path="/tutor/assignments/section/:sectionId/progress"
 						element={
 							<AdminRoute>
-								<AssignmentStudentProgress />
+								<TutorAccessGate>
+									<AssignmentStudentProgress />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -171,7 +184,9 @@ const App: React.FC = () => {
 						path="/tutor/assignments/section/:sectionId/progress/:assignmentId"
 						element={
 							<AdminRoute>
-								<AssignmentStudentProgress />
+								<TutorAccessGate>
+									<AssignmentStudentProgress />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -179,7 +194,9 @@ const App: React.FC = () => {
 						path="/tutor/notices"
 						element={
 							<AdminRoute>
-								<NoticeManagementPage />
+								<TutorAccessGate>
+									<NoticeManagementPage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -187,7 +204,9 @@ const App: React.FC = () => {
 						path="/tutor/notices/section/:sectionId"
 						element={
 							<AdminRoute>
-								<NoticeManagementPage />
+								<TutorAccessGate>
+									<NoticeManagementPage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -195,7 +214,9 @@ const App: React.FC = () => {
 						path="/tutor/notices/create"
 						element={
 							<AdminRoute>
-								<NoticeCreatePage />
+								<TutorAccessGate>
+									<NoticeCreatePage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -203,7 +224,9 @@ const App: React.FC = () => {
 						path="/tutor/notices/section/:sectionId/create"
 						element={
 							<AdminRoute>
-								<NoticeCreatePage />
+								<TutorAccessGate>
+									<NoticeCreatePage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -211,7 +234,9 @@ const App: React.FC = () => {
 						path="/tutor/notices/:noticeId/edit"
 						element={
 							<AdminRoute>
-								<NoticeEditPage />
+								<TutorAccessGate>
+									<NoticeEditPage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -219,7 +244,9 @@ const App: React.FC = () => {
 						path="/tutor/notices/section/:sectionId/:noticeId/edit"
 						element={
 							<AdminRoute>
-								<NoticeEditPage />
+								<TutorAccessGate>
+									<NoticeEditPage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -227,7 +254,9 @@ const App: React.FC = () => {
 						path="/tutor/notifications"
 						element={
 							<AdminRoute>
-								<CourseNotificationManagement />
+								<TutorAccessGate>
+									<CourseNotificationManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -235,7 +264,9 @@ const App: React.FC = () => {
 						path="/tutor/notifications/section/:sectionId"
 						element={
 							<AdminRoute>
-								<CourseNotificationManagement />
+								<TutorAccessGate>
+									<CourseNotificationManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -243,7 +274,9 @@ const App: React.FC = () => {
 						path="/tutor/users/section/:sectionId"
 						element={
 							<AdminRoute>
-								<UserManagement />
+								<TutorAccessGate>
+									<UserManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -251,7 +284,9 @@ const App: React.FC = () => {
 						path="/tutor/grades/section/:sectionId"
 						element={
 							<AdminRoute>
-								<GradeManagement />
+								<TutorAccessGate>
+									<GradeManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -259,7 +294,9 @@ const App: React.FC = () => {
 						path="/tutor/coding-tests/section/:sectionId"
 						element={
 							<AdminRoute>
-								<CodingTestManagement />
+								<TutorAccessGate>
+									<CodingTestManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -267,7 +304,9 @@ const App: React.FC = () => {
 						path="/tutor/coding-tests/section/:sectionId/:quizId"
 						element={
 							<AdminRoute>
-								<CodingTestManagement />
+								<TutorAccessGate>
+									<CodingTestManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -275,7 +314,9 @@ const App: React.FC = () => {
 						path="/tutor/problems"
 						element={
 							<AdminRoute>
-								<ProblemManagement />
+								<TutorAccessGate>
+									<ProblemManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -283,7 +324,9 @@ const App: React.FC = () => {
 						path="/tutor/problems/create"
 						element={
 							<AdminRoute>
-								<ProblemCreate />
+								<TutorAccessGate>
+									<ProblemCreate />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -291,7 +334,9 @@ const App: React.FC = () => {
 						path="/tutor/problems/:problemId/edit"
 						element={
 							<AdminRoute>
-								<ProblemEdit />
+								<TutorAccessGate>
+									<ProblemEdit />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -299,7 +344,9 @@ const App: React.FC = () => {
 						path="/tutor/problems/sets"
 						element={
 							<AdminRoute>
-								<ProblemSetManagement />
+								<TutorAccessGate>
+									<ProblemSetManagement />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -307,7 +354,9 @@ const App: React.FC = () => {
 						path="/tutor/problems/sets/:problemSetId/edit"
 						element={
 							<AdminRoute>
-								<ProblemSetEdit />
+								<TutorAccessGate>
+									<ProblemSetEdit />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>
@@ -315,7 +364,9 @@ const App: React.FC = () => {
 						path="/tutor/settings"
 						element={
 							<AdminRoute>
-								<SettingsPage />
+								<TutorAccessGate>
+									<SettingsPage />
+								</TutorAccessGate>
 							</AdminRoute>
 						}
 					/>

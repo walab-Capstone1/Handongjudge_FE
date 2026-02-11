@@ -190,9 +190,10 @@ export const FilterSelect = styled.select`
 export const TableContainer = styled.div`
   background: white;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
+  padding-bottom: 4rem;
 `;
 
 export const Table = styled.table`
@@ -280,8 +281,8 @@ export const TitleText = styled.span<{ $clickable?: boolean }>`
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 
   ${(props) =>
-    props.$clickable &&
-    `
+		props.$clickable &&
+		`
     cursor: pointer;
     transition: color 0.2s ease;
     text-decoration: underline;
@@ -292,11 +293,10 @@ export const TitleText = styled.span<{ $clickable?: boolean }>`
   `}
 `;
 
-export const UsageBadge = styled.span`
+const usageBadgeBase = `
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.75rem;
-  background: #667eea;
   color: white;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -305,10 +305,53 @@ export const UsageBadge = styled.span`
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 `;
 
+export const UsageBadge = styled.span`
+  ${usageBadgeBase}
+  background: #667eea;
+`;
+
+/** 과제에서 사용 중 */
+export const UsageBadgeAssignment = styled.span`
+  ${usageBadgeBase}
+  background: #667eea;
+`;
+
+/** 문제집에서 사용 중 */
+export const UsageBadgeProblemSet = styled.span`
+  ${usageBadgeBase}
+  background: #059669;
+`;
+
+/** 코딩테스트(퀴즈)에서 사용 중 */
+export const UsageBadgeQuiz = styled.span`
+  ${usageBadgeBase}
+  background: #d97706;
+`;
+
 export const UsageCount = styled.span`
   margin-left: 0.25rem;
   opacity: 0.9;
   font-weight: 500;
+`;
+
+/** 사용 현황 뱃지 범례 */
+export const UsageBadgeLegend = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.8125rem;
+  color: #475569;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  & > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 `;
 
 export const Tags = styled.div`
@@ -428,9 +471,9 @@ export const MoreMenuItem = styled.button<{ $delete?: boolean }>`
 
 // Table Action Buttons
 export const TableActionButton = styled.button<{
-  $edit?: boolean;
-  $secondary?: boolean;
-  $delete?: boolean;
+	$edit?: boolean;
+	$secondary?: boolean;
+	$delete?: boolean;
 }>`
   padding: 0.5rem 1rem;
   border: 1px solid #e5e7eb;
@@ -447,8 +490,8 @@ export const TableActionButton = styled.button<{
   min-width: fit-content;
 
   ${(props) =>
-    props.$edit &&
-    `
+		props.$edit &&
+		`
     color: #667eea;
     border-color: #667eea;
 
@@ -459,8 +502,8 @@ export const TableActionButton = styled.button<{
   `}
 
   ${(props) =>
-    props.$secondary &&
-    `
+		props.$secondary &&
+		`
     background: #f3f4f6;
     color: #6b7280;
     border: 1px solid #e5e7eb;
@@ -473,9 +516,9 @@ export const TableActionButton = styled.button<{
   `}
 
   ${(props) =>
-    props.$secondary &&
-    props.$delete &&
-    `
+		props.$secondary &&
+		props.$delete &&
+		`
     color: #ef4444;
     border-color: #fee2e2;
 

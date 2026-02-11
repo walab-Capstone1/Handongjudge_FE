@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
 import APIService from "../../../../../services/APIService";
@@ -15,13 +15,11 @@ import type {
 } from "../types";
 import { calculateDDay } from "../utils/dateUtils";
 import { extractEnrollmentCode } from "../utils/enrollmentUtils";
-import {
-	transformSectionData,
-	getRandomColor,
-} from "../utils/sectionUtils";
+import { transformSectionData, getRandomColor } from "../utils/sectionUtils";
 import { transformNotification } from "../utils/notificationUtils";
 
 export function useCourseDashboard() {
+	const location = useLocation();
 	const navigate = useNavigate();
 	const { sectionId: sectionIdParam } = useParams<{ sectionId?: string }>();
 	const sectionId = sectionIdParam || null;
@@ -133,7 +131,9 @@ export function useCourseDashboard() {
 					);
 					const assignments = assignmentsResponse.data || assignmentsResponse;
 					const assignmentsWithSection = (
-						assignments as Array<Assignment & { sectionId?: number; sectionName?: string }>
+						assignments as Array<
+							Assignment & { sectionId?: number; sectionName?: string }
+						>
 					).map((a) => ({
 						...a,
 						sectionId: section.sectionId,
@@ -150,7 +150,12 @@ export function useCourseDashboard() {
 							);
 						const notifications = notificationsResponse.data?.content || [];
 						const notificationsWithSection = notifications.map(
-							(notif: Notification & { sectionId?: number; sectionName?: string }) => ({
+							(
+								notif: Notification & {
+									sectionId?: number;
+									sectionName?: string;
+								},
+							) => ({
 								...notif,
 								sectionId: section.sectionId,
 								sectionName: section.courseTitle,
@@ -237,12 +242,10 @@ export function useCourseDashboard() {
 				(a: Assignment) => new Date(a.endDate) < now,
 			);
 			activeAssignments.sort(
-				(a, b) =>
-					new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
+				(a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
 			);
 			expiredAssignments.sort(
-				(a, b) =>
-					new Date(b.endDate).getTime() - new Date(a.endDate).getTime(),
+				(a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime(),
 			);
 			const sortedAssignments = [
 				...activeAssignments,
@@ -263,13 +266,21 @@ export function useCourseDashboard() {
 			setSectionNewItems(newSectionItems);
 		} catch (err: unknown) {
 			console.error("대시보드 데이터 조회 실패:", err);
-			setError(
-				(err as Error).message || "데이터를 불러오는데 실패했습니다.",
-			);
+			setError((err as Error).message || "데이터를 불러오는데 실패했습니다.");
 		} finally {
 			setLoading(false);
 		}
 	}, [sectionId]);
+
+	// 튜터에서 제외된 뒤 /dashboard로 리다이렉트된 경우: 한 번만 메시지 표시 후 강의실로
+	const tutorRemovedShownRef = useRef(false);
+	useEffect(() => {
+		const state = location.state as { tutorRemoved?: boolean } | null;
+		if (!state?.tutorRemoved || tutorRemovedShownRef.current) return;
+		tutorRemovedShownRef.current = true;
+		navigate("/courses", { replace: true, state: {} });
+		alert("튜터에서 제외되었습니다.");
+	}, [location.state, navigate]);
 
 	// /dashboard(섹션 미선택) 접근 시 강의실 목록으로 이동
 	useEffect(() => {
@@ -284,7 +295,13 @@ export function useCourseDashboard() {
 			const res = await APIService.getQuizzesBySection(sectionId);
 			const raw = res?.data ?? res ?? [];
 			const list = (Array.isArray(raw) ? raw : []).map(
-				(q: { id: number; title?: string; startTime?: string; endTime?: string; status?: string }) => ({
+				(q: {
+					id: number;
+					title?: string;
+					startTime?: string;
+					endTime?: string;
+					status?: string;
+				}) => ({
 					id: q.id,
 					title: q.title ?? "",
 					startTime: q.startTime ?? "",
@@ -305,7 +322,13 @@ export function useCourseDashboard() {
 			fetchManagingSections();
 			fetchSectionQuizzes();
 		}
-	}, [auth.user, sectionId, fetchDashboardData, fetchManagingSections, fetchSectionQuizzes]);
+	}, [
+		auth.user,
+		sectionId,
+		fetchDashboardData,
+		fetchManagingSections,
+		fetchSectionQuizzes,
+	]);
 
 	const handleMenuClick = useCallback((_menuId: string) => {}, []);
 
@@ -315,9 +338,7 @@ export function useCourseDashboard() {
 				navigate(notification.link);
 				if (notification.isNew && notification.id) {
 					try {
-						await APIService.markCommunityNotificationAsRead(
-							notification.id,
-						);
+						await APIService.markCommunityNotificationAsRead(notification.id);
 						fetchDashboardData();
 					} catch (err) {
 						console.error("알림 읽음 처리 실패:", err);
@@ -386,12 +407,7 @@ export function useCourseDashboard() {
 		} finally {
 			setEnrollLoading(false);
 		}
-	}, [
-		enrollmentCode,
-		auth.user,
-		navigate,
-		fetchDashboardData,
-	]);
+	}, [enrollmentCode, auth.user, navigate, fetchDashboardData]);
 
 	const transformedSections: CourseCardData[] = enrolledSections.map(
 		(section) => transformSectionData(section, sectionNewItems),
@@ -401,9 +417,7 @@ export function useCourseDashboard() {
 	const sectionNotices = useMemo(
 		() =>
 			sectionId != null
-				? allNotices.filter(
-						(n) => String(n.sectionId) === String(sectionId),
-					)
+				? allNotices.filter((n) => String(n.sectionId) === String(sectionId))
 				: [],
 		[allNotices, sectionId],
 	);

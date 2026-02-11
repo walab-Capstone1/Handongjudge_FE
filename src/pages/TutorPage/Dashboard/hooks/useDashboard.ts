@@ -6,7 +6,6 @@ import type {
 	DashboardCopyFormData,
 	DashboardNotice,
 	DashboardAssignment,
-	DashboardCourse,
 } from "../types";
 
 const initialFormData: DashboardFormData = {
@@ -72,10 +71,8 @@ export function useDashboard() {
 	const [filterStatus, setFilterStatus] = useState("ALL");
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [formData, setFormData] = useState<DashboardFormData>(initialFormData);
-	const [availableCourses, setAvailableCourses] = useState<DashboardCourse[]>(
-		[],
-	);
 	const [showCopyModal, setShowCopyModal] = useState(false);
+	const [isCreatingSection, setIsCreatingSection] = useState(false);
 	const [isCopyingSection, setIsCopyingSection] = useState(false);
 	const [copyFormData, setCopyFormData] =
 		useState<DashboardCopyFormData>(initialCopyFormData);
@@ -110,19 +107,8 @@ export function useDashboard() {
 		}
 	};
 
-	const fetchAvailableCourses = async () => {
-		try {
-			const courses = await APIService.getCourses();
-			setAvailableCourses(courses || []);
-		} catch (error) {
-			console.error("강의 목록 조회 실패:", error);
-			setAvailableCourses([]);
-		}
-	};
-
 	useEffect(() => {
 		fetchSections();
-		fetchAvailableCourses();
 	}, []);
 
 	useEffect(() => {
@@ -142,20 +128,17 @@ export function useDashboard() {
 	}, [openDropdownId]);
 
 	const handleCreateSection = async () => {
+		if (!formData.courseTitle?.toString().trim()) {
+			alert("새 강의 제목을 입력해주세요.");
+			return;
+		}
+		setIsCreatingSection(true);
 		try {
-			let courseId: number;
-			if (formData.courseId) {
-				courseId = Number.parseInt(formData.courseId);
-			} else if (formData.courseTitle) {
-				const courseResponse = await APIService.createCourse({
-					title: formData.courseTitle,
-					description: formData.description || "",
-				});
-				courseId = courseResponse.id;
-			} else {
-				alert("강의를 선택하거나 새 강의 제목을 입력해주세요.");
-				return;
-			}
+			const courseResponse = await APIService.createCourse({
+				title: formData.courseTitle.toString().trim(),
+				description: formData.description?.toString() || "",
+			});
+			const courseId = courseResponse.id;
 			await APIService.createSection({
 				courseId,
 				instructorId: await APIService.getCurrentUserId(),
@@ -167,9 +150,12 @@ export function useDashboard() {
 			setShowCreateModal(false);
 			setFormData(initialFormData);
 			await fetchSections();
+			window.dispatchEvent(new Event("tutor-sections-refresh"));
 		} catch (err: unknown) {
 			console.error("수업 생성 실패:", err);
 			alert((err as Error).message || "수업 생성에 실패했습니다.");
+		} finally {
+			setIsCreatingSection(false);
 		}
 	};
 
@@ -506,9 +492,9 @@ export function useDashboard() {
 		setShowCreateModal,
 		formData,
 		setFormData,
-		availableCourses,
 		showCopyModal,
 		setShowCopyModal,
+		isCreatingSection,
 		isCopyingSection,
 		copyFormData,
 		setCopyFormData,

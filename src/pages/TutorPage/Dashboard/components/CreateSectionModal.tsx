@@ -1,13 +1,15 @@
 import type React from "react";
+import { useState } from "react";
 import * as S from "../styles";
-import type { DashboardFormData, DashboardCourse } from "../types";
+import type { DashboardFormData } from "../types";
+
+const REQUIRED_MSG = "필수 항목(*)을 입력해 주세요.";
 
 interface CreateSectionModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	formData: DashboardFormData;
 	setFormData: React.Dispatch<React.SetStateAction<DashboardFormData>>;
-	availableCourses: DashboardCourse[];
 	onSubmit: () => void;
 }
 
@@ -16,10 +18,30 @@ const CreateSectionModal: React.FC<CreateSectionModalProps> = ({
 	onClose,
 	formData,
 	setFormData,
-	availableCourses,
 	onSubmit,
 }) => {
+	const [errors, setErrors] = useState<Record<string, boolean>>({});
+
 	if (!isOpen) return null;
+
+	const titleTrimmed = formData.courseTitle?.toString().trim() ?? "";
+	const yearVal =
+		formData.year != null && formData.year !== ""
+			? Number(formData.year)
+			: Number.NaN;
+	const yearOk = !Number.isNaN(yearVal) && yearVal >= 2020 && yearVal <= 2099;
+	const hasTitle = titleTrimmed.length > 0;
+
+	const handleSubmit = () => {
+		const errs: Record<string, boolean> = {};
+		if (!hasTitle) errs.courseTitle = true;
+		if (!yearOk) errs.year = true;
+		setErrors(errs);
+		if (Object.keys(errs).length > 0) return;
+		onSubmit();
+	};
+
+	const hasErrors = Object.keys(errors).length > 0;
 
 	return (
 		<S.ModalOverlay onClick={onClose}>
@@ -29,75 +51,64 @@ const CreateSectionModal: React.FC<CreateSectionModalProps> = ({
 					<S.ModalClose onClick={onClose}>×</S.ModalClose>
 				</S.ModalHeader>
 				<S.ModalBody>
+					{hasErrors && (
+						<S.RequiredMessage role="alert">{REQUIRED_MSG}</S.RequiredMessage>
+					)}
 					<S.FormGroup>
-						<label>강의 선택 또는 새 강의 제목 입력</label>
-						<S.FormSelect
-							value={formData.courseId}
+						<label htmlFor="create-section-course-title">강의 제목 *</label>
+						<S.FormInput
+							id="create-section-course-title"
+							type="text"
+							value={formData.courseTitle}
+							onChange={(e) => {
+								setErrors((prev) => ({ ...prev, courseTitle: false }));
+								setFormData((prev) => ({
+									...prev,
+									courseTitle: e.target.value,
+								}));
+							}}
+							placeholder="예: 자바프로그래밍"
+							style={
+								errors.courseTitle ? { borderColor: "#dc2626" } : undefined
+							}
+						/>
+					</S.FormGroup>
+					<S.FormGroup>
+						<label htmlFor="create-section-description">수업 설명</label>
+						<S.FormTextarea
+							id="create-section-description"
+							value={formData.description}
 							onChange={(e) =>
 								setFormData((prev) => ({
 									...prev,
-									courseId: e.target.value,
-									courseTitle: "",
+									description: e.target.value,
 								}))
 							}
-						>
-							<option value="">새 강의 만들기</option>
-							{availableCourses.map((course) => (
-								<option key={course.id} value={course.id}>
-									{course.title}
-								</option>
-							))}
-						</S.FormSelect>
+							placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
+							rows={3}
+						/>
 					</S.FormGroup>
-					{!formData.courseId && (
-						<>
-							<S.FormGroup>
-								<label>새 강의 제목</label>
-								<S.FormInput
-									type="text"
-									value={formData.courseTitle}
-									onChange={(e) =>
-										setFormData((prev) => ({
-											...prev,
-											courseTitle: e.target.value,
-										}))
-									}
-									placeholder="예: 자바프로그래밍"
-								/>
-							</S.FormGroup>
-							<S.FormGroup>
-								<label>수업 설명</label>
-								<S.FormTextarea
-									value={formData.description}
-									onChange={(e) =>
-										setFormData((prev) => ({
-											...prev,
-											description: e.target.value,
-										}))
-									}
-									placeholder="수업에 대한 설명을 입력하세요 (선택사항)"
-									rows={3}
-								/>
-							</S.FormGroup>
-						</>
-					)}
 					<S.FormRow>
 						<S.FormGroup>
-							<label>년도</label>
+							<label htmlFor="create-section-year">년도 *</label>
 							<S.FormInput
+								id="create-section-year"
 								type="number"
 								value={formData.year}
-								onChange={(e) =>
-									setFormData((prev) => ({ ...prev, year: e.target.value }))
-								}
+								onChange={(e) => {
+									setErrors((prev) => ({ ...prev, year: false }));
+									setFormData((prev) => ({ ...prev, year: e.target.value }));
+								}}
 								placeholder="2025"
 								min={2020}
 								max={2099}
+								style={errors.year ? { borderColor: "#dc2626" } : undefined}
 							/>
 						</S.FormGroup>
 						<S.FormGroup>
-							<label>구분</label>
+							<label htmlFor="create-section-semester">구분 *</label>
 							<S.FormSelect
+								id="create-section-semester"
 								value={formData.semester}
 								onChange={(e) =>
 									setFormData((prev) => ({ ...prev, semester: e.target.value }))
@@ -117,8 +128,9 @@ const CreateSectionModal: React.FC<CreateSectionModalProps> = ({
 				<S.ModalFooter>
 					<S.BtnCancel onClick={onClose}>취소</S.BtnCancel>
 					<S.BtnSubmit
-						onClick={onSubmit}
-						disabled={!formData.courseId && !formData.courseTitle}
+						type="button"
+						onClick={handleSubmit}
+						disabled={!hasTitle || !yearOk}
 					>
 						생성하기
 					</S.BtnSubmit>

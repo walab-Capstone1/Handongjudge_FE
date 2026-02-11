@@ -190,7 +190,7 @@ const AssignmentManagement: React.FC = () => {
 					d.setCopyProblemSearchTerm("");
 					d.setProblemViewMode("list");
 				}}
-				onCreateNew={d.handleCreateNewProblem}
+				onCreateNew={d.handleNavigateToCreatePage}
 				onProblemDetail={d.openProblemDetail}
 			/>
 
@@ -280,7 +280,11 @@ const AssignmentManagement: React.FC = () => {
 
 			<ProblemListModal
 				isOpen={d.showProblemListModal}
-				selectedAssignment={d.selectedAssignmentForProblemList}
+				selectedAssignment={
+					d.assignments.find(
+						(a) => a.id === d.selectedAssignmentForProblemList?.id,
+					) ?? d.selectedAssignmentForProblemList
+				}
 				submissionStats={d.submissionStats}
 				searchTerm={d.problemListSearchTerm}
 				onEditProblemNavigate={

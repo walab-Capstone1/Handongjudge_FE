@@ -55,6 +55,16 @@ export const ErrorMessage = styled.div`
   border: 1px solid #fecaca;
 `;
 
+export const RequiredMessage = styled.p`
+  margin: 0 0 1rem 0;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+`;
+
 /* Form */
 export const Form = styled.form`
   margin-top: 2rem;
