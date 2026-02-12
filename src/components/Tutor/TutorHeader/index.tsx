@@ -62,7 +62,7 @@ const TutorHeader: React.FC = () => {
 		<S.Header>
 			<S.Container>
 				<S.Left>
-					<S.LogoLink to="/tutor">
+					<S.LogoLink to="/courses">
 						<S.LogoImage
 							src={`${process.env.PUBLIC_URL || ""}/logo.svg`}
 							alt="H-CodeLab"

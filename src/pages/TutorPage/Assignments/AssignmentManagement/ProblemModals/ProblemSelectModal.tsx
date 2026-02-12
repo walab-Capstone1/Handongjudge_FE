@@ -175,13 +175,14 @@ const ProblemSelectModal: React.FC<ProblemSelectModalProps> = ({
 						sectionId,
 						selectedAssignmentForSection.id,
 					);
-					const problems =
+					// 백엔드는 List<ProblemDto>를 그대로 반환(배열)하거나, 일부는 { problems } 형태일 수 있음
+					const raw =
 						response?.problems ??
 						response?.data?.problems ??
 						response?.data ??
-						response ??
-						[];
-					setSectionProblems(Array.isArray(problems) ? problems : []);
+						response;
+					const problems = Array.isArray(raw) ? raw : [];
+					setSectionProblems(problems);
 				} catch (error) {
 					console.error("과제 문제 조회 실패:", error);
 					setSectionProblems([]);
