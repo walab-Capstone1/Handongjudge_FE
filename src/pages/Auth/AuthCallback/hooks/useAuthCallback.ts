@@ -123,7 +123,18 @@ export function useAuthCallback() {
 
 				if (type === "login") {
 					setStatus("로그인 중...");
-					await login(email ?? "", password ?? "");
+					const result = await login(email ?? "", password ?? "");
+
+					if (!result?.success) {
+						const err = (result as { error?: { message?: string } })?.error;
+						const errMsg =
+							(typeof err === "object" && err?.message) ||
+							error ||
+							"이메일 또는 비밀번호를 확인해주세요.";
+						setStatus(`로그인 실패: ${errMsg}`);
+						setTimeout(() => navigate("/login", { replace: true }), 2000);
+						return;
+					}
 
 					const pendingEnrollmentCode = sessionStorage.getItem(
 						"pendingEnrollmentCode",
