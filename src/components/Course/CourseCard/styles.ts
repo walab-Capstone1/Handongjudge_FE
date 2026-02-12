@@ -42,21 +42,7 @@ export const CardHeader = styled.div<{
   flex-direction: column;
   justify-content: space-between;
   background: #fafbfc;
-  border-bottom: 3px solid
-    ${(props) => {
-			switch (props.$color) {
-				case "purple":
-				case "blue":
-					return "#667eea";
-				case "orange":
-				case "green":
-					return "#9ca3af";
-				case "red":
-					return "#6b7280";
-				default:
-					return "#667eea";
-			}
-		}};
+  border-bottom: 3px solid #667eea;
   opacity: ${(props) => (props.$opacity ? 0.6 : 1)};
 `;
 

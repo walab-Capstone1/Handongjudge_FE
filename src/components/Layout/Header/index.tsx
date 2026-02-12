@@ -1,5 +1,5 @@
 import type React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import * as S from "./styles";
 
@@ -9,6 +9,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { logout, user, isAuthenticated } = useAuth();
 
 	const userName = user?.name || user?.username || user?.email || "";
@@ -16,10 +17,10 @@ const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
 	const handleLogout = async () => {
 		try {
 			await logout();
-			window.location.href = "/index";
+			navigate("/index");
 		} catch (error) {
 			console.error("로그아웃 실패:", error);
-			window.location.href = "/index";
+			navigate("/index");
 		}
 	};
 
@@ -27,8 +28,13 @@ const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
 		navigate("/login");
 	};
 
+	// 로그인·/courses에서는 /index, 나머지는 /courses
 	const handleLogoClick = () => {
-		navigate("/index");
+		navigate(
+			location.pathname === "/login" || location.pathname === "/courses"
+				? "/index"
+				: "/courses",
+		);
 	};
 
 	return (

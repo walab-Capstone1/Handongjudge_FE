@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
 	FaEnvelope,
 	FaLock,
@@ -14,7 +15,7 @@ export default function LoginPageView(d: LoginPageHookReturn) {
 	return (
 		<S.OnboardingContainer>
 			<S.Header>
-				<S.Logo>
+				<S.Logo as={Link} to="/index">
 					<S.LogoImage
 						src={`${process.env.PUBLIC_URL || ""}/logo.svg`}
 						alt="H-CodeLab"
