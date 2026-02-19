@@ -60,7 +60,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 		sectionId !== null && sectionId !== undefined && Number(sectionId) > 0;
 	const currentSectionIdNum = hasSectionId ? Number(sectionId) : 0;
 	const isSuperAdmin = user?.role === "SUPER_ADMIN";
-	/** 현재 수업에서 ADMIN/TUTOR일 때만 관리 페이지 표시 (SUPER_ADMIN은 항상 표시) */
+	/** 현재 수업에서만: 이 수업의 교수·튜터일 때만 관리 페이지 표시 (다른 수업에서 교수여도 이 수업에서 학생이면 숨김) */
 	const showAdminLink =
 		!checkingManagingSections &&
 		(isSuperAdmin ||
