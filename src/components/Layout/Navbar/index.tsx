@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import APIService from "../../../services/APIService";
 import * as S from "./styles";
@@ -8,6 +8,8 @@ import * as S from "./styles";
 const Navbar: React.FC = () => {
 	const { user, isAuthenticated, logout } = useAuth();
 	const navigate = useNavigate();
+	const location = useLocation();
+	const logoTo = location.pathname === "/courses" ? "/index" : "/courses";
 	const [hasManagingSections, setHasManagingSections] = useState(false);
 	const [checking, setChecking] = useState(true);
 
@@ -48,7 +50,7 @@ const Navbar: React.FC = () => {
 		<S.NavbarContainer>
 			<S.NavbarWrapper>
 				<S.NavLeft>
-					<S.LogoLink to="/index">
+					<S.LogoLink to={logoTo}>
 						<S.LogoImage
 							src={`${process.env.PUBLIC_URL || ""}/logo.svg`}
 							alt="H-CodeLab"

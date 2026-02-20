@@ -71,9 +71,11 @@ export const extractEnrollmentCode = (input: string): string => {
 
 /**
  * 관리 중인 수업 API 응답을 CourseCardData로 변환
+ * createdAt은 정렬(최근 개설일 순)용으로 사용
  */
 export function transformManagingSection(section: {
 	sectionId: number;
+	createdAt?: string | null;
 	sectionInfo?: {
 		courseTitle?: string;
 		sectionNumber?: string | number;
@@ -82,6 +84,10 @@ export function transformManagingSection(section: {
 		courseId?: string;
 	};
 }): CourseCardData {
+	const createdAt =
+		section.createdAt && section.createdAt.trim() !== ""
+			? section.createdAt
+			: new Date().toISOString();
 	return {
 		id: section.sectionId,
 		sectionId: section.sectionId,
@@ -93,7 +99,7 @@ export function transformManagingSection(section: {
 		instructor: section.sectionInfo?.instructorName ?? "",
 		color: getRandomColor(section.sectionId),
 		active: section.sectionInfo?.active !== false,
-		createdAt: new Date().toISOString(),
+		createdAt,
 		courseId: section.sectionInfo?.courseId ?? "",
 	};
 }

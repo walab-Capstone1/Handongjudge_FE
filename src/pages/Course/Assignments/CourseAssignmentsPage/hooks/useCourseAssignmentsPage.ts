@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
@@ -33,6 +33,8 @@ export function useCourseAssignmentsPage() {
 	);
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const [isManager, setIsManager] = useState(false);
+	/** 알림 등에서 assignmentId 쿼리로 진입 시 한 번만 펼치기 위해 적용한 URL 값 (접은 뒤 다시 펼쳐지지 않도록) */
+	const expandedFromQueryRef = useRef<string | null>(null);
 
 	const fetchUserRole = useCallback(async () => {
 		if (!sectionId || !auth.user) return;
@@ -82,81 +84,96 @@ export function useCourseAssignmentsPage() {
 			const assignmentsList = assignmentsResponse.data || assignmentsResponse;
 
 			const assignmentsWithProgress = await Promise.all(
-				assignmentsList.map(async (assignment: Assignment & { endDate: string }) => {
-					try {
-						const problemsResponse = await APIService.getAssignmentProblems(
-							sectionId,
-							assignment.id,
-						);
-						const problemsList = problemsResponse.data || problemsResponse;
-
-						let problemsStatus: { problemId: number; status: string }[] = [];
+				assignmentsList.map(
+					async (assignment: Assignment & { endDate: string }) => {
 						try {
-							const statusResponse =
-								await APIService.getStudentAssignmentProblemsStatus(
-									auth.user!.id,
-									sectionId,
-									assignment.id,
-								);
-							problemsStatus = statusResponse.data || statusResponse;
-						} catch {
-							// ignore
-						}
-
-						const problems = problemsList.map((problem: { id: number; title: string; description?: string }) => {
-							const statusEntry = problemsStatus.find(
-								(s: { problemId: number }) => s.problemId === problem.id,
+							const problemsResponse = await APIService.getAssignmentProblems(
+								sectionId,
+								assignment.id,
 							);
-							const raw = statusEntry ? statusEntry.status : "NOT_SUBMITTED";
-							const problemStatus: ProblemStatus =
-								raw === "ACCEPTED" || raw === "SUBMITTED" ? raw : "NOT_SUBMITTED";
-							const submitted =
-								problemStatus === "SUBMITTED" || problemStatus === "ACCEPTED";
+							const problemsList = problemsResponse.data || problemsResponse;
+
+							let problemsStatus: { problemId: number; status: string }[] = [];
+							try {
+								const statusResponse =
+									await APIService.getStudentAssignmentProblemsStatus(
+										auth.user!.id,
+										sectionId,
+										assignment.id,
+									);
+								problemsStatus = statusResponse.data || statusResponse;
+							} catch {
+								// ignore
+							}
+
+							const problems = problemsList.map(
+								(problem: {
+									id: number;
+									title: string;
+									description?: string;
+								}) => {
+									const statusEntry = problemsStatus.find(
+										(s: { problemId: number }) => s.problemId === problem.id,
+									);
+									const raw = statusEntry
+										? statusEntry.status
+										: "NOT_SUBMITTED";
+									const problemStatus: ProblemStatus =
+										raw === "ACCEPTED" || raw === "SUBMITTED"
+											? raw
+											: "NOT_SUBMITTED";
+									const submitted =
+										problemStatus === "SUBMITTED" ||
+										problemStatus === "ACCEPTED";
+									return {
+										id: problem.id,
+										title: problem.title,
+										description: problem.description,
+										submitted,
+										status: problemStatus,
+									};
+								},
+							);
+
+							const totalProblems = problems.length;
+							const submittedProblems = problems.filter(
+								(p: { submitted: boolean }) => p.submitted,
+							).length;
+							const progress =
+								totalProblems > 0
+									? Math.round((submittedProblems / totalProblems) * 100)
+									: 0;
+							const dDay = calculateDDay(assignment.endDate);
+
 							return {
-								id: problem.id,
-								title: problem.title,
-								description: problem.description,
-								submitted,
-								status: problemStatus,
+								...assignment,
+								progress,
+								dDay,
+								totalProblems,
+								submittedProblems,
+								problems,
 							};
-						});
-
-						const totalProblems = problems.length;
-						const submittedProblems = problems.filter(
-							(p: { submitted: boolean }) => p.submitted,
-						).length;
-						const progress =
-							totalProblems > 0
-								? Math.round((submittedProblems / totalProblems) * 100)
-								: 0;
-						const dDay = calculateDDay(assignment.endDate);
-
-						return {
-							...assignment,
-							progress,
-							dDay,
-							totalProblems,
-							submittedProblems,
-							problems,
-						};
-					} catch {
-						return {
-							...assignment,
-							progress: 0,
-							dDay: calculateDDay(assignment.endDate),
-							totalProblems: 0,
-							submittedProblems: 0,
-							problems: [],
-						};
-					}
-				}),
+						} catch {
+							return {
+								...assignment,
+								progress: 0,
+								dDay: calculateDDay(assignment.endDate),
+								totalProblems: 0,
+								submittedProblems: 0,
+								problems: [],
+							};
+						}
+					},
+				),
 			);
 
 			setAssignments(assignmentsWithProgress);
 		} catch (err: unknown) {
 			console.error("과제 데이터 조회 실패:", err);
 			setError(
-				err instanceof Error ? err.message : "데이터를 불러오는데 실패했습니다.",
+				err instanceof Error
+					? err.message
+					: "데이터를 불러오는데 실패했습니다.",
 			);
 		} finally {
 			setLoading(false);
@@ -169,15 +186,21 @@ export function useCourseAssignmentsPage() {
 		}
 	}, [sectionId, auth.user, fetchAssignmentsData]);
 
+	// 알림 등에서 assignmentId 쿼리로 진입 시 해당 과제만 한 번만 펼침. (같은 URL에 대해 한 번 적용 후 ref로 막아서 접기 시 다시 펼쳐지지 않음)
 	useEffect(() => {
 		const assignmentId = searchParams.get("assignmentId");
-		if (assignmentId && assignments.length > 0) {
-			const assignmentIdNum = Number.parseInt(assignmentId, 10);
-			if (!Number.isNaN(assignmentIdNum) && !expandedAssignmentIds.includes(assignmentIdNum)) {
-				setExpandedAssignmentIds((prev) => [...prev, assignmentIdNum]);
-			}
+		if (!assignmentId || assignments.length === 0) {
+			expandedFromQueryRef.current = null;
+			return;
 		}
-	}, [searchParams, assignments, expandedAssignmentIds]);
+		const assignmentIdNum = Number.parseInt(assignmentId, 10);
+		if (Number.isNaN(assignmentIdNum)) return;
+		if (expandedFromQueryRef.current === assignmentId) return;
+		expandedFromQueryRef.current = assignmentId;
+		setExpandedAssignmentIds((prev) =>
+			prev.includes(assignmentIdNum) ? prev : [...prev, assignmentIdNum],
+		);
+	}, [searchParams, assignments]);
 
 	const toggleAssignment = useCallback((assignmentId: number) => {
 		setExpandedAssignmentIds((prev) =>
