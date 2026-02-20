@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import TutorHeader from "../../components/Tutor/TutorHeader";
 import TutorNotificationPanel from "../../components/Tutor/TutorNotificationPanel";
@@ -59,6 +59,8 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 		const saved = localStorage.getItem("tutor_sidebarCollapsed");
 		return saved === "true";
 	});
+	/** 이번 세션에서 한 번이라도 관리할 수업이 있었는지 (있었다가 0이 되면 = 교수가 튜터 제외한 경우만 리다이렉트) */
+	const hadManagingSectionsRef = useRef(false);
 
 	const handleCopyTutorLink = useCallback(() => {
 		const enrollmentCode = currentSection?.enrollmentCode;
@@ -148,12 +150,20 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 					)
 				: [];
 
-			// 관리할 수업이 없으면(튜터 아님/전부 제외) 학생 대시보드로 리다이렉트
+			if (transformedSections.length > 0) {
+				hadManagingSectionsRef.current = true;
+			}
+
+			// 관리할 수업이 없을 때: 이전에 있었는데 지금 0이면 = 교수가 튜터에서 제외한 경우만 "튜터에서 제외됐습니다" 후 리다이렉트
 			if (transformedSections.length === 0) {
-				navigate("/dashboard", {
-					replace: true,
-					state: { tutorRemoved: true },
-				});
+				if (hadManagingSectionsRef.current) {
+					navigate("/dashboard", {
+						replace: true,
+						state: { tutorRemoved: true },
+					});
+					return;
+				}
+				setSections([]);
 				return;
 			}
 
@@ -225,11 +235,13 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 			}
 		} catch (error) {
 			console.error("수업 목록 조회 실패:", error);
-			// 권한 없음(403 등)이면 학생 대시보드로
-			navigate("/dashboard", {
-				replace: true,
-				state: { tutorRemoved: true },
-			});
+			// API 실패 시: 이번 세션에서 관리할 수업이 있었던 경우에만 "튜터에서 제외됐습니다" 느낌으로 리다이렉트
+			if (hadManagingSectionsRef.current) {
+				navigate("/dashboard", {
+					replace: true,
+					state: { tutorRemoved: true },
+				});
+			}
 		}
 	}, [sectionIdFromUrl, selectedSection, location.pathname, navigate]);
 
