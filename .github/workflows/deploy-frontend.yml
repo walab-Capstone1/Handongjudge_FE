@@ -2,7 +2,7 @@ name: Deploy Frontend
 
 on:
   push:
-    branches: [ deploy-hj ]
+    branches: [ deploy ]
 
 jobs:
   deploy:
@@ -30,7 +30,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "build/*"
-          target: "/var/www/hj/"
+          target: "/var/www/hcl/"
           strip_components: 1
           rm: false
 
