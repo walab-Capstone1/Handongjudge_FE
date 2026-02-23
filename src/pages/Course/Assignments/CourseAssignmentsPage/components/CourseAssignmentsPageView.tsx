@@ -106,8 +106,16 @@ export default function CourseAssignmentsPageView(
 										</S.AccordionHeaderLeft>
 										<S.AccordionHeaderRight>
 											<S.AccordionDeadline>
-												[마감일 | {d.formatDate(assignment.endDate)} 23:59 까지
-												제출]
+												[마감일 |{" "}
+												{(() => {
+													const deadline = d.formatDeadline(
+														assignment.endDate,
+													);
+													return deadline
+														? `${deadline} 까지 제출`
+														: "미설정";
+												})()}
+												]
 											</S.AccordionDeadline>
 											<S.ProgressInfo>
 												<S.MiniProgressBar>

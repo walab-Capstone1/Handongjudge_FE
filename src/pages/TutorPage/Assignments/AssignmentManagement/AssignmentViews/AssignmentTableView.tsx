@@ -29,6 +29,18 @@ interface PaginationProps {
 	showItemsPerPage?: boolean;
 }
 
+/** 마감일 문자열을 로컬 기준 "YYYY년 M월 D일"로 포맷 (표시 일관성) */
+function formatDueDate(value: string | undefined): string {
+	if (!value?.trim()) return "미설정";
+	const d = new Date(value);
+	if (Number.isNaN(d.getTime())) return "미설정";
+	return d.toLocaleDateString("ko-KR", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+}
+
 interface AssignmentTableViewProps {
 	paginatedAssignments: Assignment[];
 	submissionStats: SubmissionStats;
@@ -103,13 +115,10 @@ const AssignmentTableView: React.FC<AssignmentTableViewProps> = ({
 									</div>
 								</td>
 								<td className="tutor-assignment-due-date-cell">
-									{assignment.dueDate
-										? new Date(assignment.dueDate).toLocaleDateString("ko-KR", {
-												year: "numeric",
-												month: "short",
-												day: "numeric",
-											})
-										: "미설정"}
+									{formatDueDate(
+										assignment.dueDate ??
+											(assignment as { endDate?: string }).endDate,
+									)}
 								</td>
 								<td className="tutor-assignment-problem-count-cell">
 									{assignment.problemCount || 0}개
