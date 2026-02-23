@@ -26,16 +26,19 @@ const NoticeTable: FC<NoticeTableProps> = ({
 		<S.Table>
 			<S.Thead>
 				<tr>
-					<S.Th width="40%" align="left">
+					<S.Th width="35%" align="left">
 						제목
+					</S.Th>
+					<S.Th width="15%" align="left">
+						작성자
 					</S.Th>
 					<S.Th width="20%" align="left">
 						수업
 					</S.Th>
-					<S.Th width="20%" align="right">
+					<S.Th width="15%" align="right">
 						작성일
 					</S.Th>
-					<S.Th width="20%" align="right">
+					<S.Th width="15%" align="right">
 						관리
 					</S.Th>
 				</tr>
@@ -43,7 +46,7 @@ const NoticeTable: FC<NoticeTableProps> = ({
 			<S.Tbody>
 				{notices.length === 0 ? (
 					<tr>
-						<S.EmptyMessage colSpan={4}>
+						<S.EmptyMessage colSpan={5}>
 							{totalCount === 0
 								? "작성된 공지사항이 없습니다."
 								: "검색 조건에 맞는 공지사항이 없습니다."}
@@ -52,7 +55,7 @@ const NoticeTable: FC<NoticeTableProps> = ({
 				) : (
 					notices.map((notice) => (
 						<S.Tr key={String(notice.id)} disabled={notice.active === false}>
-							<S.Td width="40%" align="left">
+							<S.Td width="35%" align="left">
 								<div>
 									<S.NoticeTitle>
 										{notice.title}
@@ -63,17 +66,23 @@ const NoticeTable: FC<NoticeTableProps> = ({
 									)}
 								</div>
 							</S.Td>
+							<S.Td width="15%" align="left">
+								{notice.instructorName ?? "-"}
+							</S.Td>
 							<S.Td width="20%" align="left">
 								{getSectionNameWithoutSection(notice.sectionName)}
 							</S.Td>
-							<S.Td width="20%" align="right">
-								{new Date(notice.createdAt).toLocaleDateString("ko-KR", {
-									year: "numeric",
-									month: "short",
-									day: "numeric",
-								})}
+							<S.Td width="15%" align="right">
+								{(() => {
+									const d = new Date(notice.createdAt);
+									if (Number.isNaN(d.getTime())) return "-";
+									const y = d.getUTCFullYear();
+									const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+									const day = String(d.getUTCDate()).padStart(2, "0");
+									return `${y}.${m}.${day}`;
+								})()}
 							</S.Td>
-							<S.Td width="20%" align="right">
+							<S.Td width="15%" align="right">
 								<S.ActionsInline>
 									<S.PrimaryActions>
 										<S.TableButton

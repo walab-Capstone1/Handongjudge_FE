@@ -15,6 +15,18 @@ import type {
 
 const ASSIGNMENTS_PER_PAGE = 10;
 
+/** API는 UTC로 저장하므로, 수정 폼의 datetime-local에 넣을 땐 로컬 시간으로 변환 (그렇지 않으면 테이블은 20일인데 폼에는 19일로 보이는 현상 발생) */
+function toLocalDateTimeInputValue(isoOrDate: string | Date): string {
+	const d = typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate;
+	if (Number.isNaN(d.getTime())) return "";
+	const y = d.getFullYear();
+	const m = String(d.getMonth() + 1).padStart(2, "0");
+	const day = String(d.getDate()).padStart(2, "0");
+	const h = String(d.getHours()).padStart(2, "0");
+	const min = String(d.getMinutes()).padStart(2, "0");
+	return `${y}-${m}-${day}T${h}:${min}`;
+}
+
 export function useAssignmentManagement() {
 	const { sectionId } = useParams<{ sectionId: string }>();
 	const navigate = useNavigate();
@@ -194,6 +206,15 @@ export function useAssignmentManagement() {
 					description: formData.description,
 					assignmentNumber: formData.assignmentNumber,
 				};
+				if (formData.startDate && formData.dueDate) {
+					const start = new Date(formData.startDate).getTime();
+					const end = new Date(formData.dueDate).getTime();
+					if (end < start) {
+						alert("마감일은 시작일보다 빠를 수 없습니다.");
+						setIsSubmittingAdd(false);
+						return;
+					}
+				}
 				if (formData.startDate) {
 					assignmentData.startDate = new Date(formData.startDate).toISOString();
 				}
@@ -230,10 +251,8 @@ export function useAssignmentManagement() {
 				title: assignment.title || "",
 				description: assignment.description || "",
 				sectionId: sectionId || String(assignment.sectionId ?? ""),
-				startDate: a.startDate
-					? new Date(a.startDate).toISOString().slice(0, 16)
-					: "",
-				dueDate: endDate ? new Date(endDate).toISOString().slice(0, 16) : "",
+				startDate: a.startDate ? toLocalDateTimeInputValue(a.startDate) : "",
+				dueDate: endDate ? toLocalDateTimeInputValue(endDate) : "",
 				assignmentNumber: a.assignmentNumber || "",
 			} as AssignmentFormData);
 			setShowEditModal(true);
@@ -258,6 +277,15 @@ export function useAssignmentManagement() {
 			}
 			setIsSubmittingEdit(true);
 			try {
+				if (formData.startDate && formData.dueDate) {
+					const start = new Date(formData.startDate).getTime();
+					const end = new Date(formData.dueDate).getTime();
+					if (end < start) {
+						alert("마감일은 시작일보다 빠를 수 없습니다.");
+						setIsSubmittingEdit(false);
+						return;
+					}
+				}
 				const assignmentData: Record<string, string> = {
 					title: formData.title,
 					description: formData.description,
@@ -817,14 +845,22 @@ export function useAssignmentManagement() {
 		}));
 	}, []);
 
-	const filteredAssignments = assignments.filter((a: Assignment) => {
-		const matchSearch =
-			a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			a.description?.toLowerCase().includes(searchTerm.toLowerCase());
-		const matchSection =
-			filterSection === "ALL" || a.sectionName?.includes(filterSection);
-		return matchSearch && matchSection;
-	});
+	const filteredAssignments = assignments
+		.filter((a: Assignment) => {
+			const matchSearch =
+				a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				a.description?.toLowerCase().includes(searchTerm.toLowerCase());
+			const matchSection =
+				filterSection === "ALL" || a.sectionName?.includes(filterSection);
+			return matchSearch && matchSection;
+		})
+		.sort((a: Assignment, b: Assignment) => {
+			const dueA = a.dueDate ?? (a as Assignment & { endDate?: string }).endDate ?? "";
+			const dueB = b.dueDate ?? (b as Assignment & { endDate?: string }).endDate ?? "";
+			const timeA = dueA ? new Date(dueA).getTime() : Number.MAX_SAFE_INTEGER;
+			const timeB = dueB ? new Date(dueB).getTime() : Number.MAX_SAFE_INTEGER;
+			return timeA - timeB;
+		});
 
 	const totalPages = Math.ceil(
 		filteredAssignments.length / ASSIGNMENTS_PER_PAGE,

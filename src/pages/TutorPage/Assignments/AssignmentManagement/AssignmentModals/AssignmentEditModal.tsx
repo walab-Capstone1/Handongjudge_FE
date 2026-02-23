@@ -57,7 +57,20 @@ const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
 					<S.ModalCloseButton onClick={onClose}>✕</S.ModalCloseButton>
 				</S.ModalHeader>
 
-				<S.Form onSubmit={onSubmit}>
+				<S.Form
+					onSubmit={(e) => {
+						e.preventDefault();
+						if (formData.startDate && formData.dueDate) {
+							const start = new Date(formData.startDate).getTime();
+							const end = new Date(formData.dueDate).getTime();
+							if (end < start) {
+								alert("마감일은 시작일보다 빠를 수 없습니다.");
+								return;
+							}
+						}
+						onSubmit(e);
+					}}
+				>
 					<S.FormRow>
 						<S.FormGroup>
 							<S.Label htmlFor="edit-title">과제명 *</S.Label>

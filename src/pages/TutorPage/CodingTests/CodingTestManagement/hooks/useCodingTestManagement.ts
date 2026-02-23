@@ -12,6 +12,18 @@ import type {
 
 const PROBLEMS_PER_PAGE = 10;
 
+/** API는 UTC로 저장하므로, 수정 폼의 datetime-local에 넣을 땐 로컬 시간으로 변환 */
+function toLocalDateTimeInputValue(isoOrDate: string | Date): string {
+	const d = typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate;
+	if (Number.isNaN(d.getTime())) return "";
+	const y = d.getFullYear();
+	const m = String(d.getMonth() + 1).padStart(2, "0");
+	const day = String(d.getDate()).padStart(2, "0");
+	const h = String(d.getHours()).padStart(2, "0");
+	const min = String(d.getMinutes()).padStart(2, "0");
+	return `${y}-${m}-${day}T${h}:${min}`;
+}
+
 export function useCodingTestManagement() {
 	const { sectionId, quizId } = useParams<{
 		sectionId: string;
@@ -67,11 +79,17 @@ export function useCodingTestManagement() {
 			}
 			const formattedQuizzes = (
 				Array.isArray(quizzesData) ? quizzesData : []
-			).map((quiz: QuizRaw) => ({
-				...quiz,
-				startTime: new Date(quiz.startTime),
-				endTime: new Date(quiz.endTime),
-			})) as CodingTest[];
+			)
+				.map((quiz: QuizRaw) => ({
+					...quiz,
+					startTime: new Date(quiz.startTime),
+					endTime: new Date(quiz.endTime),
+				}))
+				.sort((a: CodingTest, b: CodingTest) => {
+					const tA = new Date(a.startTime).getTime();
+					const tB = new Date(b.startTime).getTime();
+					return tA - tB;
+				}) as CodingTest[];
 			setQuizzes(formattedQuizzes);
 		} catch (error) {
 			console.error("코딩 테스트 조회 실패:", error);
@@ -299,8 +317,8 @@ export function useCodingTestManagement() {
 				setFormData({
 					title: quiz.title,
 					description: quiz.description ?? "",
-					startTime: start.toISOString().slice(0, 16),
-					endTime: end.toISOString().slice(0, 16),
+					startTime: toLocalDateTimeInputValue(start),
+					endTime: toLocalDateTimeInputValue(end),
 					problemIds,
 				});
 				setSelectedProblemIds(problemIds);
