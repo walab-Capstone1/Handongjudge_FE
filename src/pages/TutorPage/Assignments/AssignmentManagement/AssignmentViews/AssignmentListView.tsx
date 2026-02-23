@@ -100,12 +100,20 @@ const AssignmentListView: React.FC<AssignmentListViewProps> = ({
 								<span className="tutor-assignment-meta-item">
 									<span className="tutor-meta-label">마감일</span>
 									<span className="tutor-meta-value">
-										{assignment.dueDate
-											? new Date(assignment.dueDate).toLocaleDateString(
-													"ko-KR",
-													{ month: "short", day: "numeric" },
-												)
-											: "미설정"}
+										{(() => {
+											const raw =
+												assignment.dueDate ??
+												(assignment as { endDate?: string }).endDate;
+											if (!raw?.trim()) return "미설정";
+											const d = new Date(raw);
+											return Number.isNaN(d.getTime())
+												? "미설정"
+												: d.toLocaleDateString("ko-KR", {
+														year: "numeric",
+														month: "long",
+														day: "numeric",
+													});
+										})()}
 									</span>
 								</span>
 								<span className="tutor-assignment-meta-item">

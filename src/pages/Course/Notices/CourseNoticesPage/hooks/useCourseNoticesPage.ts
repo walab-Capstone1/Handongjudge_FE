@@ -70,12 +70,14 @@ export function useCourseNoticesPage() {
 		});
 	}, [sortOrder]);
 
+	/** 공지 작성일: API가 UTC로 저장하므로 날짜만 UTC 기준으로 표시 (23일 19:51 UTC → 23일) */
 	const formatDate = useCallback((dateString: string): string => {
 		if (!dateString) return "";
 		const date = new Date(dateString);
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, "0");
-		const day = String(date.getDate()).padStart(2, "0");
+		if (Number.isNaN(date.getTime())) return "";
+		const year = date.getUTCFullYear();
+		const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+		const day = String(date.getUTCDate()).padStart(2, "0");
 		return `${year}.${month}.${day}`;
 	}, []);
 

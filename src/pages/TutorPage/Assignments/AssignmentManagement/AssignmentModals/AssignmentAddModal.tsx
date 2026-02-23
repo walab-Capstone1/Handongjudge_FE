@@ -53,6 +53,14 @@ const AssignmentAddModal: React.FC<AssignmentAddModalProps> = ({
 		if (!formData.title?.trim()) errs.title = true;
 		if (!formData.startDate?.trim()) errs.startDate = true;
 		if (!formData.dueDate?.trim()) errs.dueDate = true;
+		if (formData.startDate && formData.dueDate) {
+			const start = new Date(formData.startDate).getTime();
+			const end = new Date(formData.dueDate).getTime();
+			if (end < start) {
+				alert("마감일은 시작일보다 빠를 수 없습니다.");
+				return;
+			}
+		}
 		setErrors(errs);
 		if (Object.keys(errs).length > 0) {
 			return;
