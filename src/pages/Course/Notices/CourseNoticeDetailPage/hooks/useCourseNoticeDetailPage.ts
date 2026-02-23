@@ -67,10 +67,12 @@ export function useCourseNoticeDetailPage() {
 		}
 	}, [sectionId, noticeId, auth.user, fetchNoticeDetail]);
 
+	/** 공지 작성일: API가 UTC로 저장하므로 날짜만 UTC 기준으로 표시 */
 	const formatDate = useCallback((dateString: string): string => {
 		if (!dateString) return "";
 		const date = new Date(dateString);
-		return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+		if (Number.isNaN(date.getTime())) return "";
+		return `${date.getUTCFullYear()}.${String(date.getUTCMonth() + 1).padStart(2, "0")}.${String(date.getUTCDate()).padStart(2, "0")}`;
 	}, []);
 
 	const handleMenuClick = useCallback(

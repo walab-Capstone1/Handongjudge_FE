@@ -4,6 +4,7 @@ export interface Notice {
 	content: string;
 	sectionId: number;
 	sectionName: string;
+	instructorName?: string;
 	createdAt: string;
 	active: boolean;
 	isNew?: boolean;
