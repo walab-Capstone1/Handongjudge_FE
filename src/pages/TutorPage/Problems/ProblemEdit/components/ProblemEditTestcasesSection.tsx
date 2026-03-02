@@ -12,6 +12,8 @@ type ProblemEditTestcasesSectionProps = Pick<
 	| "handleTestcaseAdd"
 	| "handleTestcaseRemove"
 	| "handleTestcaseChange"
+	| "handleParsedTestcaseRemove"
+	| "handleParsedTestcaseChange"
 >;
 
 const ProblemEditTestcasesSection: React.FC<
@@ -25,6 +27,8 @@ const ProblemEditTestcasesSection: React.FC<
 	handleTestcaseAdd,
 	handleTestcaseRemove,
 	handleTestcaseChange,
+	handleParsedTestcaseRemove,
+	handleParsedTestcaseChange,
 }) => (
 	<>
 		{enableFullEdit && (
@@ -111,7 +115,7 @@ const ProblemEditTestcasesSection: React.FC<
 						>
 							<span>{showParsedTestCases ? "▼" : "▶"}</span>
 							<span>
-								기존 테스트케이스 ({parsedTestCases.length}개) - 조회 전용
+								기존 테스트케이스 ({parsedTestCases.length}개)
 							</span>
 						</S.ParsedToggle>
 						{showParsedTestCases && (
@@ -125,10 +129,22 @@ const ProblemEditTestcasesSection: React.FC<
 												<S.TestcaseName>
 													{testCase.name ?? `테스트케이스 ${idx + 1}`}
 												</S.TestcaseName>
-												<S.TestcaseTypeBadge>
-													{testCase.type === "sample" ? "샘플" : "비밀"}
-												</S.TestcaseTypeBadge>
+												<S.TestcaseTypeSelect
+													value={testCase.type ?? "secret"}
+													onChange={(e) =>
+														handleParsedTestcaseChange(idx, "type", e.target.value)
+													}
+												>
+													<option value="sample">샘플</option>
+													<option value="secret">비밀</option>
+												</S.TestcaseTypeSelect>
 											</S.TestcaseHeaderLeft>
+											<S.TestcaseRemoveBtn
+												type="button"
+												onClick={() => handleParsedTestcaseRemove(idx)}
+											>
+												삭제
+											</S.TestcaseRemoveBtn>
 										</S.TestcaseHeaderCompact>
 										<S.TestcaseBodyCompact>
 											{testCase.input && (

@@ -681,6 +681,9 @@ export const ParsedTestcaseHeader = styled.div`
   border-bottom: 1px solid #cbd5e1;
   font-size: 0.9rem;
   color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 export const ParsedTestcaseContent = styled.div`

@@ -123,10 +123,12 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 								parsedTestCases={d.parsedTestCases}
 								showParsedTestCases={d.showParsedTestCases}
 								setShowParsedTestCases={d.setShowParsedTestCases}
-								handleTestcaseAdd={d.handleTestcaseAdd}
-								handleTestcaseRemove={d.handleTestcaseRemove}
-								handleTestcaseChange={d.handleTestcaseChange}
-							/>
+						handleTestcaseAdd={d.handleTestcaseAdd}
+							handleTestcaseRemove={d.handleTestcaseRemove}
+							handleTestcaseChange={d.handleTestcaseChange}
+							handleParsedTestcaseRemove={d.handleParsedTestcaseRemove}
+							handleParsedTestcaseChange={d.handleParsedTestcaseChange}
+						/>
 						</S.FormGrid>
 
 						<S.Actions>

@@ -409,6 +409,24 @@ const ProblemListModal: React.FC<ProblemListModalProps> = ({
 		}));
 	};
 
+	const handleParsedTestcaseRemove = (index: number) => {
+		setParsedTestCases((prev) => prev.filter((_, i) => i !== index));
+	};
+
+	const handleParsedTestcaseChange = (
+		index: number,
+		field: string,
+		value: string,
+	) => {
+		setParsedTestCases((prev) => {
+			const next = [...prev];
+			if (next[index]) {
+				next[index] = { ...next[index], [field]: value };
+			}
+			return next;
+		});
+	};
+
 	const handleTestcaseChange = (
 		index: number,
 		field: string,
@@ -656,6 +674,8 @@ const ProblemListModal: React.FC<ProblemListModalProps> = ({
 		handleTestcaseAdd,
 		handleTestcaseRemove,
 		handleTestcaseChange,
+		handleParsedTestcaseRemove,
+		handleParsedTestcaseChange,
 		handleZipFileChange,
 		applyFormat,
 		insertText,
