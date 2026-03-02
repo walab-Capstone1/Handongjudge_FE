@@ -1,5 +1,7 @@
-import type React from "react";
+import React from "react";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import type { Components } from "react-markdown";
 import * as S from "./styles";
 
 interface Problem {
@@ -13,19 +15,70 @@ interface ProblemDescriptionProps {
 	problemDescription?: string;
 }
 
+// react-markdown v10에서 'inline' prop 제거됨 → Context로 블록/인라인 코드 구분
+const InsidePreContext = React.createContext(false);
+
+function DescPre({ children }: { children?: React.ReactNode }) {
+	return (
+		<InsidePreContext.Provider value={true}>
+			<pre className="code-block">{children}</pre>
+		</InsidePreContext.Provider>
+	);
+}
+
+function DescCode({
+	children,
+	className,
+}: {
+	children?: React.ReactNode;
+	className?: string;
+}) {
+	const insidePre = React.useContext(InsidePreContext);
+	if (insidePre) {
+		return <code className={className}>{children}</code>;
+	}
+	return <code className="inline-code">{children}</code>;
+}
+
+// 코드 블록 밖에서:
+//  - \n 1번  → "  \n"  (마크다운 hard break = <br>)
+//  - \n 2번  → 단락 분리
+//  - \n 3번+ → 단락 분리 + 빈 줄(\u00A0) 삽입
+const NBSP = "\u00A0";
+
+function prepareMarkdown(text: string): string {
+	return text
+		.split(/(```[\s\S]*?```)/g)
+		.map((part, i) => {
+			if (i % 2 === 1) return part; // 코드 블록 내부 → 그대로
+			return part
+				.replace(/\n{2,}/g, (match) => {
+					const extra = match.length - 2;
+					if (extra === 0) return "\n\n";
+					return "\n\n" + `${NBSP}\n\n`.repeat(extra);
+				})
+				.replace(/(?<!\n)\n(?!\n)/g, "  \n");
+		})
+		.join("");
+}
+
+const mdComponents: Components = {
+	pre: DescPre,
+	code: DescCode,
+	table({ children, ...props }) {
+		return (
+			<div className="table-wrapper">
+				<table {...props}>{children}</table>
+			</div>
+		);
+	},
+};
+
 const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
 	currentProblem,
 	problemDescription = "",
 }) => {
 	const description = currentProblem.description || problemDescription;
-	const isMarkdown =
-		description &&
-		(description.includes("# ") ||
-			description.includes("## ") ||
-			description.includes("```") ||
-			description.includes("**") ||
-			description.includes("* ") ||
-			!description.includes("<"));
 
 	return (
 		<S.DescriptionArea>
@@ -49,35 +102,15 @@ const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
 			</S.DescriptionHeader>
 
 			<S.DescriptionContent>
-				{isMarkdown ? (
+				{description ? (
 					<ReactMarkdown
-						components={{
-							code({ node, inline, className, children, ...props }: any) {
-								return inline ? (
-									<code className="inline-code" {...props}>
-										{children}
-									</code>
-								) : (
-									<pre className="code-block">
-										<code className={className} {...props}>
-											{children}
-										</code>
-									</pre>
-								);
-							},
-							table({ children, ...props }) {
-								return (
-									<div className="table-wrapper">
-										<table {...props}>{children}</table>
-									</div>
-								);
-							},
-						}}
+						components={mdComponents}
+						rehypePlugins={[rehypeRaw]}
 					>
-						{description}
+						{prepareMarkdown(description)}
 					</ReactMarkdown>
 				) : (
-					<div dangerouslySetInnerHTML={{ __html: description }} />
+					<p>문제 설명이 없습니다.</p>
 				)}
 			</S.DescriptionContent>
 		</S.DescriptionArea>

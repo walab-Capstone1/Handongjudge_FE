@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
 import type { ProblemFormData, SampleInput, ParsedTestcase } from "../types";
@@ -55,16 +55,6 @@ export function useProblemCreate() {
 	const [formData, setFormData] = useState<ProblemFormData>(initialFormData);
 	const [currentTag, setCurrentTag] = useState("");
 	const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
-
-	useEffect(() => {
-		if (descriptionRef.current) {
-			const currentContent = descriptionRef.current.innerHTML || "";
-			const newContent = formData.description || "";
-			if (currentContent !== newContent) {
-				descriptionRef.current.innerHTML = newContent;
-			}
-		}
-	}, [formData.description]);
 
 	const handleZipFileChange = useCallback(
 		async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -239,29 +229,58 @@ export function useProblemCreate() {
 		}));
 	}, []);
 
-	const applyFormat = useCallback((command: string, value?: string) => {
-		if (descriptionRef.current) {
-			descriptionRef.current.focus();
-			document.execCommand(command, false, value ?? undefined);
-		}
+	/** 커서 위치에 텍스트를 삽입하고 description 상태를 동기화합니다. */
+	const insertMarkdownText = useCallback((text: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		document.execCommand("insertText", false, text);
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
 	}, []);
 
-	const insertText = useCallback((text: string) => {
-		if (descriptionRef.current) {
-			descriptionRef.current.focus();
-			document.execCommand("insertText", false, text);
+	/**
+	 * 선택된 텍스트를 마크다운 인라인 문법으로 감쌉니다.
+	 * 선택 없으면 문법 기호만 삽입합니다.
+	 */
+	const wrapWithMarkdown = useCallback((syntax: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		const selection = window.getSelection();
+		if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
+			const selectedText = selection.getRangeAt(0).toString();
+			document.execCommand("insertText", false, `${syntax}${selectedText}${syntax}`);
+		} else {
+			document.execCommand("insertText", false, `${syntax}${syntax}`);
 		}
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
+	}, []);
+
+	/**
+	 * 현재 줄 앞에 마크다운 제목 문법(#, ## 등)을 삽입합니다.
+	 * HeadingSelect의 value("h1"~"h6" | "p")를 받습니다.
+	 */
+	const insertMarkdownHeading = useCallback((headingValue: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		const levelMap: Record<string, string> = {
+			h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### ", p: "",
+		};
+		const prefix = levelMap[headingValue] ?? "";
+		if (prefix) {
+			document.execCommand("insertText", false, prefix);
+		}
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
 	}, []);
 
 	const getFullDescription = useCallback(
-		(): {
-			title: string;
-			description: string;
-			inputFormat: string;
-			outputFormat: string;
-			sampleInputs: SampleInput[];
-		} => ({
+		() => ({
 			title: formData.title,
+			// description은 항상 순수 마크다운 텍스트로 저장됩니다
 			description: formData.description || "",
 			inputFormat: formData.inputFormat,
 			outputFormat: formData.outputFormat,
@@ -278,6 +297,7 @@ export function useProblemCreate() {
 		if (formData.outputFormat) {
 			full += "\n\n## 출력 형식\n" + formData.outputFormat;
 		}
+		// 예제는 내용이 있을 때만 추가합니다 (빈 값이면 "## 예제" 섹션 자체를 생략)
 		if (formData.sampleInputs.some((s) => s.input || s.output)) {
 			full += "\n\n## 예제";
 			formData.sampleInputs.forEach((sample, idx) => {
@@ -429,8 +449,9 @@ export function useProblemCreate() {
 		removeSampleInput,
 		handleTestcaseAdd,
 		handleTestcaseRemove,
-		applyFormat,
-		insertText,
+		insertMarkdownText,
+		wrapWithMarkdown,
+		insertMarkdownHeading,
 		getFullDescription,
 		handleSubmit,
 		clearZipFile,
