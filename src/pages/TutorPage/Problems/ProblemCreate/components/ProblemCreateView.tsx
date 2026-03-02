@@ -1,6 +1,5 @@
 import type React from "react";
 import { createPortal } from "react-dom";
-import { FaPalette, FaHighlighter } from "react-icons/fa";
 import TutorLayout from "../../../../../layouts/TutorLayout";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
@@ -189,303 +188,192 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 								</S.FileUploadWrapper>
 							</S.FormSection>
 
-							<S.FormSection as={S.DescriptionSection}>
-								<S.Label>문제 설명 *</S.Label>
-								<S.DescriptionEditor
-									style={d.fieldErrors.description ? { border: "1px solid #dc2626", borderRadius: 8 } : undefined}
-								>
-									<S.EditorWrapper>
-										<S.EditorToolbar>
-											<S.HeadingSelect
-												onChange={(e) => {
-													const v = e.target.value;
-													if (v) {
-														d.applyFormat("formatBlock", v);
-														e.target.value = "";
-													}
-												}}
-												title="제목 스타일"
-											>
-												<option value="">제목 스타일</option>
-												<option value="h1">제목 1</option>
-												<option value="h2">제목 2</option>
-												<option value="h3">제목 3</option>
-												<option value="h4">제목 4</option>
-												<option value="p">일반 텍스트</option>
-											</S.HeadingSelect>
-											<S.ToolbarDivider />
-											<S.ToolbarButton
-												type="button"
-												onClick={() => d.applyFormat("bold")}
-												title="Bold"
-											>
-												<strong>B</strong>
-											</S.ToolbarButton>
-											<S.ToolbarButton
-												type="button"
-												onClick={() => d.applyFormat("italic")}
-												title="Italic"
-											>
-												<em>I</em>
-											</S.ToolbarButton>
-											<S.ToolbarButton
-												type="button"
-												onClick={() => d.applyFormat("underline")}
-												title="Underline"
-											>
-												<u>U</u>
-											</S.ToolbarButton>
-											<S.ToolbarDivider />
-											<S.ToolbarButton
-												type="button"
-												onClick={() => d.applyFormat("insertUnorderedList")}
-												title="Bullet List"
-											>
-												•
-											</S.ToolbarButton>
-											<S.ToolbarButton
-												type="button"
-												onClick={() => d.applyFormat("insertOrderedList")}
-												title="Numbered List"
-											>
-												1.
-											</S.ToolbarButton>
-											<S.ToolbarDivider />
-											<S.ToolbarButton
-												type="button"
-												onClick={() =>
-													d.applyFormat("formatBlock", "blockquote")
-												}
-												title="Quote"
-											>
-												"
-											</S.ToolbarButton>
-											<S.ToolbarButton
-												type="button"
-												onClick={() => d.insertText("```\n코드\n```")}
-												title="Code Block"
-											>
-												&lt;&gt;
-											</S.ToolbarButton>
-											<S.ToolbarDivider />
-											<S.HeadingSelect
-												onChange={(e) => {
-													const v = e.target.value;
-													if (v) {
-														document.execCommand("fontSize", false, v);
-														d.descriptionRef.current?.focus();
-														e.target.value = "";
-													}
-												}}
-												title="글자 크기"
-											>
-												<option value="">글자 크기</option>
-												<option value="1">매우 작게</option>
-												<option value="2">작게</option>
-												<option value="3">보통</option>
-												<option value="4">크게</option>
-												<option value="5">매우 크게</option>
-												<option value="6">아주 크게</option>
-												<option value="7">최대 크기</option>
-											</S.HeadingSelect>
-											<S.ToolbarDivider />
-											<S.ColorWrapper>
-												<S.ColorLabel
-													htmlFor="textColorPicker"
-													title="텍스트 색상"
-												>
-													<FaPalette />
-												</S.ColorLabel>
-												<S.ColorPicker
-													type="color"
-													id="textColorPicker"
-													onChange={(e) =>
-														d.applyFormat("foreColor", e.target.value)
-													}
-												/>
-											</S.ColorWrapper>
-											<S.ColorWrapper>
-												<S.ColorLabel htmlFor="bgColorPicker" title="배경 색상">
-													<FaHighlighter />
-												</S.ColorLabel>
-												<S.ColorPicker
-													type="color"
-													id="bgColorPicker"
-													onChange={(e) =>
-														d.applyFormat("backColor", e.target.value)
-													}
-												/>
-											</S.ColorWrapper>
-										</S.EditorToolbar>
-										<S.TextEditor
-											ref={d.descriptionRef}
-											contentEditable
-											suppressContentEditableWarning
-											data-placeholder="문제 설명을 입력하세요"
-											onPaste={(e) => {
+						<S.FormSection as={S.DescriptionSection}>
+							<S.Label>문제 설명 *</S.Label>
+							<S.DescriptionEditor
+								style={d.fieldErrors.description ? { border: "1px solid #dc2626", borderRadius: 8 } : undefined}
+							>
+								<S.EditorWrapper>
+									{/* 마크다운 전용 툴바 */}
+									<S.EditorToolbar>
+								<S.HeadingSelect
+										onChange={(e) => {
+											const v = e.target.value;
+											if (v) {
+												d.insertMarkdownHeading(v);
+												e.target.value = "";
+											}
+										}}
+										title="제목 스타일 (# 삽입)"
+									>
+										<option value="">제목 스타일</option>
+										<option value="h1">제목 1 (#)</option>
+										<option value="h2">제목 2 (##)</option>
+										<option value="h3">제목 3 (###)</option>
+										<option value="h4">제목 4 (####)</option>
+									</S.HeadingSelect>
+									<S.HeadingSelect
+										onChange={(e) => {
+											const size = e.target.value;
+											if (!size) return;
+											const el = d.descriptionRef.current;
+											if (!el) { e.target.value = ""; return; }
+											el.focus();
+											const openTag = `<span style="font-size: ${size}">`;
+											const closeTag = `</span>`;
+											const sel = window.getSelection();
+											if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
+												const selectedText = sel.getRangeAt(0).toString();
+												document.execCommand("insertText", false, `${openTag}${selectedText}${closeTag}`);
+											} else {
+												document.execCommand("insertText", false, `${openTag}${closeTag}`);
+											}
+											const plain = el.innerText || el.textContent || "";
+											d.setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
+											e.target.value = "";
+										}}
+										title="글자 크기"
+									>
+										<option value="">글자 크기</option>
+										<option value="0.75em">작게 (0.75x)</option>
+										<option value="1em">기본 (1x)</option>
+										<option value="1.25em">크게 (1.25x)</option>
+										<option value="1.5em">더 크게 (1.5x)</option>
+										<option value="2em">매우 크게 (2x)</option>
+									</S.HeadingSelect>
+									<S.ToolbarDivider />
+										<S.ToolbarButton
+											type="button"
+											onClick={() => d.wrapWithMarkdown("**")}
+											title="Bold (**텍스트**)"
+										>
+											<strong>B</strong>
+										</S.ToolbarButton>
+										<S.ToolbarButton
+											type="button"
+											onClick={() => d.wrapWithMarkdown("*")}
+											title="Italic (*텍스트*)"
+										>
+											<em>I</em>
+										</S.ToolbarButton>
+										<S.ToolbarButton
+											type="button"
+											onClick={() => d.wrapWithMarkdown("`")}
+											title="인라인 코드 (`코드`)"
+										>
+											{"</>"}
+										</S.ToolbarButton>
+										<S.ToolbarDivider />
+										<S.ToolbarButton
+											type="button"
+											onClick={() => d.insertMarkdownText("\n- ")}
+											title="글머리 기호 목록"
+										>
+											•
+										</S.ToolbarButton>
+										<S.ToolbarButton
+											type="button"
+											onClick={() => d.insertMarkdownText("\n1. ")}
+											title="번호 매기기 목록"
+										>
+											1.
+										</S.ToolbarButton>
+										<S.ToolbarDivider />
+										<S.ToolbarButton
+											type="button"
+											onClick={() => d.insertMarkdownText("\n> ")}
+											title="인용문 (> 텍스트)"
+										>
+											"
+										</S.ToolbarButton>
+										<S.ToolbarButton
+											type="button"
+											onClick={() => d.insertMarkdownText("\n```\n코드\n```\n")}
+											title="코드 블록"
+										>
+											&lt;&gt;
+										</S.ToolbarButton>
+										<S.ToolbarButton
+											type="button"
+											onClick={() => d.insertMarkdownText("\n---\n")}
+											title="구분선"
+										>
+											—
+										</S.ToolbarButton>
+									</S.EditorToolbar>
+									<S.TextEditor
+										ref={d.descriptionRef}
+										contentEditable
+										suppressContentEditableWarning
+										data-placeholder="마크다운으로 문제 설명을 입력하세요 (예: # 제목, **굵게**, ```코드```)"
+										onPaste={(e) => {
+											// 마크다운 텍스트로 붙여넣기: 순수 텍스트만 받습니다
+											e.preventDefault();
+											const paste =
+												e.clipboardData?.getData("text") ?? "";
+											const selection = window.getSelection();
+											if (!selection?.rangeCount) return;
+											const range = selection.getRangeAt(0);
+											range.deleteContents();
+											range.insertNode(document.createTextNode(paste));
+											range.collapse(false);
+											selection.removeAllRanges();
+											selection.addRange(range);
+											// 순수 텍스트를 description으로 저장
+											const plain =
+												d.descriptionRef.current?.innerText ||
+												d.descriptionRef.current?.textContent ||
+												"";
+											d.clearFieldError("description");
+											d.setFormData((prev) => ({
+												...prev,
+												description: plain,
+												descriptionText: plain,
+											}));
+										}}
+										onInput={(e) => {
+											d.clearFieldError("description");
+											const plain =
+												e.currentTarget?.innerText ||
+												e.currentTarget?.textContent ||
+												"";
+											d.setFormData((prev) => ({
+												...prev,
+												description: plain,
+												descriptionText: plain,
+											}));
+										}}
+										onBlur={(e) => {
+											const plain =
+												e.currentTarget?.innerText ||
+												e.currentTarget?.textContent ||
+												"";
+											d.setFormData((prev) => ({
+												...prev,
+												description: plain,
+												descriptionText: plain,
+											}));
+										}}
+										onKeyDown={(e) => {
+											if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
 												e.preventDefault();
-												const clipboardData =
-													e.clipboardData || (window as any).clipboardData;
-												const paste = clipboardData
-													? clipboardData.getData("text")
-													: "";
-												const selection = window.getSelection();
-												if (!selection?.rangeCount) return;
-												const range = selection.getRangeAt(0);
-												range.deleteContents();
-												const textNode = document.createTextNode(paste);
-												range.insertNode(textNode);
-												range.collapse(false);
-												const htmlContent =
-													d.descriptionRef.current?.innerHTML || "";
-												const textContent =
-													d.descriptionRef.current?.textContent ||
-													d.descriptionRef.current?.innerText ||
-													"";
-												d.setFormData((prev) => ({
-													...prev,
-													description: htmlContent,
-													descriptionText: textContent,
-												}));
-											}}
-											onInput={(e) => {
-												d.clearFieldError("description");
-												const target = e.currentTarget;
-												const htmlContent = target?.innerHTML || "";
-												const textContent =
-													target?.textContent || target?.innerText || "";
-												d.setFormData((prev) => ({
-													...prev,
-													description: htmlContent,
-													descriptionText: textContent,
-												}));
-											}}
-											onBlur={(e) => {
-												const target = e.currentTarget;
-												const htmlContent = target?.innerHTML || "";
-												const textContent =
-													target?.textContent || target?.innerText || "";
-												d.setFormData((prev) => ({
-													...prev,
-													description: htmlContent,
-													descriptionText: textContent,
-												}));
-											}}
-											onKeyDown={(e) => {
-												if (e.key === "Enter") {
-													const editor = d.descriptionRef.current;
-													if (!editor) return;
-													const selection = window.getSelection();
-													if (!selection?.rangeCount) return;
-													const range = selection.getRangeAt(0);
-													let textNode = range.startContainer;
-													if (textNode.nodeType !== Node.TEXT_NODE) {
-														const walker = document.createTreeWalker(
-															textNode,
-															NodeFilter.SHOW_TEXT,
-															null,
-														);
-														textNode = walker.nextNode() || textNode;
-													}
-													if (
-														textNode &&
-														textNode.nodeType === Node.TEXT_NODE
-													) {
-														const text = textNode.textContent || "";
-														const cursorPos = range.startOffset;
-														const lineStart =
-															text.lastIndexOf("\n", cursorPos - 1) + 1;
-														const lineText = text.substring(
-															lineStart,
-															cursorPos,
-														);
-														const headingMatch = lineText
-															.trim()
-															.match(/^(#{1,6})\s*(.+)$/);
-														if (headingMatch) {
-															e.preventDefault();
-															const hashCount = headingMatch[1].length;
-															const titleText = headingMatch[2].trim();
-															const headingLevel = Math.min(
-																Math.max(hashCount, 1),
-																6,
-															);
-															const headingTag = `h${headingLevel}`;
-															const beforeText = text.substring(0, lineStart);
-															const afterText = text.substring(cursorPos);
-															const parent = textNode.parentNode;
-															if (!parent) return;
-															if (lineStart > 0) {
-																const beforeNode =
-																	document.createTextNode(beforeText);
-																parent.insertBefore(beforeNode, textNode);
-															}
-															const headingElement =
-																document.createElement(headingTag);
-															headingElement.textContent = titleText;
-															parent.insertBefore(headingElement, textNode);
-															if (afterText.length > 0) {
-																const afterNode = document.createTextNode(
-																	"\n" + afterText,
-																);
-																parent.insertBefore(afterNode, textNode);
-															}
-															parent.removeChild(textNode);
-															const newRange = document.createRange();
-															const newTextNode =
-																parent.childNodes[parent.childNodes.length - 1];
-															if (
-																newTextNode &&
-																newTextNode.nodeType === Node.TEXT_NODE
-															) {
-																newRange.setStart(newTextNode, 0);
-															} else {
-																const emptyText = document.createTextNode("");
-																parent.appendChild(emptyText);
-																newRange.setStart(emptyText, 0);
-															}
-															newRange.collapse(true);
-															selection.removeAllRanges();
-															selection.addRange(newRange);
-															d.setFormData((prev) => ({
-																...prev,
-																description: editor.innerHTML,
-															}));
-															return;
-														}
-													}
-												}
-												if (
-													(e.ctrlKey || e.metaKey) &&
-													e.key === "z" &&
-													!e.shiftKey
-												) {
-													e.preventDefault();
-													document.execCommand("undo", false);
-												}
-												if (
-													(e.ctrlKey || e.metaKey) &&
-													e.key === "z" &&
-													e.shiftKey
-												) {
-													e.preventDefault();
-													document.execCommand("redo", false);
-												}
-												if ((e.ctrlKey || e.metaKey) && e.key === "y") {
-													e.preventDefault();
-													document.execCommand("redo", false);
-												}
-											}}
-										/>
-									</S.EditorWrapper>
-									<S.Preview>
-										<S.PreviewHeader>미리보기</S.PreviewHeader>
-										<S.PreviewContent>
-											<ProblemPreview {...d.getFullDescription()} />
-										</S.PreviewContent>
-									</S.Preview>
-								</S.DescriptionEditor>
-							</S.FormSection>
+												document.execCommand("undo", false);
+											}
+											if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
+												e.preventDefault();
+												document.execCommand("redo", false);
+											}
+										}}
+									/>
+								</S.EditorWrapper>
+								<S.Preview>
+									<S.PreviewHeader>미리보기</S.PreviewHeader>
+									<S.PreviewContent>
+										<ProblemPreview {...d.getFullDescription()} />
+									</S.PreviewContent>
+								</S.Preview>
+							</S.DescriptionEditor>
+						</S.FormSection>
 
 							<S.FormRow>
 								<S.FormSection>

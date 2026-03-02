@@ -1,11 +1,52 @@
-import type React from "react";
+import React from "react";
 import TutorLayout from "../../../../../layouts/TutorLayout";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import Alert from "../../../../../components/UI/Alert";
 import EmptyState from "../../../../../components/UI/EmptyState";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
 import type { ProblemManagementHookReturn } from "../hooks/useProblemManagement";
+
+// ──────────────────────────────────────────────
+// 마크다운 코드블록 렌더링 (ProblemPreview와 동일한 방식)
+// react-markdown v10에서 'inline' prop 제거 → Context로 구분
+// ──────────────────────────────────────────────
+const InsidePreContext = React.createContext(false);
+
+function ModalMarkdownPre({ children }: { children?: React.ReactNode }) {
+	return (
+		<InsidePreContext.Provider value={true}>
+			<pre className="problem-description-code-block">{children}</pre>
+		</InsidePreContext.Provider>
+	);
+}
+
+function ModalMarkdownCode({
+	children,
+	className,
+}: {
+	children?: React.ReactNode;
+	className?: string;
+}) {
+	const insidePre = React.useContext(InsidePreContext);
+	if (insidePre) {
+		return <code className={className}>{children}</code>;
+	}
+	return <code className="problem-description-inline-code">{children}</code>;
+}
+
+/**
+ * 빈 ## 예제 섹션 제거 (예제를 추가하지 않았는데 자동 생성된 경우)
+ * getFullDescriptionForBackend 이전 버전에서 always-append 로직으로 저장된 경우 처리
+ */
+function stripEmptyExamplesSection(text: string): string {
+	// 빈 코드블록 패턴: ```\n\n```  (내용 없음)
+	return text.replace(
+		/\n\n## 예제(?:\n\n### 예제 [^\n]+\n```\n\n```)+/g,
+		"",
+	);
+}
 
 export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 	if (d.loading) {
@@ -345,54 +386,40 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 										))}
 									</S.TagsInModal>
 								)}
-								{(() => {
-									const desc =
-										d.selectedProblem.description || "*문제 설명이 없습니다.*";
-									const isHtml =
-										typeof desc === "string" && /<[^>]+>/.test(desc);
-									return isHtml ? (
-										<div dangerouslySetInnerHTML={{ __html: desc }} />
-									) : (
-										<S.DescriptionContent>
-											<ReactMarkdown
-												components={{
-													h1: ({ node, ...props }: any) => (
-														<h1 className="problem-description-h1" {...props} />
-													),
-													h2: ({ node, ...props }: any) => (
-														<h2 className="problem-description-h2" {...props} />
-													),
-													h3: ({ node, ...props }: any) => (
-														<h3 className="problem-description-h3" {...props} />
-													),
-													code: ({ node, className, children, ...props }: any) => {
-														const inline = !className;
-														return inline ? (
-															<code
-																className="problem-description-inline-code"
-																{...props}
-															>
-																{children}
-															</code>
-														) : (
-															<pre className="problem-description-code-block">
-																<code {...props}>{children}</code>
-															</pre>
-														);
-													},
-													p: ({ node, ...props }: any) => (
-														<p
-															className="problem-description-paragraph"
-															{...props}
-														/>
-													),
-												}}
-											>
-												{desc}
-											</ReactMarkdown>
-										</S.DescriptionContent>
-									);
-								})()}
+							{(() => {
+								const rawDesc =
+									d.selectedProblem.description || "*문제 설명이 없습니다.*";
+								// 빈 예제 섹션 제거 후 렌더링
+								const desc = stripEmptyExamplesSection(rawDesc);
+								return (
+									<S.DescriptionContent>
+										<ReactMarkdown
+											rehypePlugins={[rehypeRaw]}
+											components={{
+												pre: ModalMarkdownPre,
+												code: ModalMarkdownCode,
+												h1: ({ node: _n, ...props }: any) => (
+													<h1 className="problem-description-h1" {...props} />
+												),
+												h2: ({ node: _n, ...props }: any) => (
+													<h2 className="problem-description-h2" {...props} />
+												),
+												h3: ({ node: _n, ...props }: any) => (
+													<h3 className="problem-description-h3" {...props} />
+												),
+												p: ({ node: _n, ...props }: any) => (
+													<p
+														className="problem-description-paragraph"
+														{...props}
+													/>
+												),
+											}}
+										>
+											{desc}
+										</ReactMarkdown>
+									</S.DescriptionContent>
+								);
+							})()}
 							</S.ModalBody>
 						</S.ModalContent>
 					</S.ModalOverlay>
