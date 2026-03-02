@@ -134,6 +134,17 @@ class TokenManager {
 			this.accessToken = token;
 			return { accessToken: token };
 		}
+		// Access Token이 만료됐어도 Refresh Token 쿠키로 재발급 시도
+		if (token) {
+			try {
+				const refreshed = await this.refreshToken();
+				if (refreshed.accessToken) {
+					return { accessToken: refreshed.accessToken };
+				}
+			} catch {
+				// Refresh Token도 만료됨 → null 반환
+			}
+		}
 		return null;
 	}
 }
