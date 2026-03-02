@@ -229,6 +229,10 @@ export function useProblemCreate() {
 		}));
 	}, []);
 
+	const handleParsedTestcaseRemove = useCallback((index: number) => {
+		setParsedTestCases((prev) => prev.filter((_, i) => i !== index));
+	}, []);
+
 	/** 커서 위치에 텍스트를 삽입하고 description 상태를 동기화합니다. */
 	const insertMarkdownText = useCallback((text: string) => {
 		const el = descriptionRef.current;
@@ -449,6 +453,7 @@ export function useProblemCreate() {
 		removeSampleInput,
 		handleTestcaseAdd,
 		handleTestcaseRemove,
+		handleParsedTestcaseRemove,
 		insertMarkdownText,
 		wrapWithMarkdown,
 		insertMarkdownHeading,
