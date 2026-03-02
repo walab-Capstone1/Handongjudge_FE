@@ -453,6 +453,25 @@ export const PreviewSection = styled.div`
   margin-top: 2rem;
 `;
 
+export const PreviewH1 = styled.h1`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #667eea;
+`;
+
+export const PreviewInlineCode = styled.code`
+  background: #f1f5f9;
+  color: #e11d48;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+`;
+
 export const PreviewH2 = styled.h2`
   font-size: 1.25rem;
   font-weight: 600;

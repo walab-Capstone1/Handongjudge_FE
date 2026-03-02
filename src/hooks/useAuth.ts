@@ -19,6 +19,7 @@ export const useAuth = () => {
       },
       // 토큰 만료 시
       () => {
+        window.alert("세션이 만료되었습니다. 다시 로그인해주세요.");
         setAuth({
           isAuthenticated: false,
           user: null,
