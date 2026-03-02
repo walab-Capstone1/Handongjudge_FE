@@ -423,6 +423,23 @@ export function useProblemEdit() {
 		}));
 	}, []);
 
+	const handleParsedTestcaseRemove = useCallback((index: number) => {
+		setParsedTestCases((prev) => prev.filter((_, i) => i !== index));
+	}, []);
+
+	const handleParsedTestcaseChange = useCallback(
+		(index: number, field: keyof ParsedTestcase, value: string) => {
+			setParsedTestCases((prev) => {
+				const next = [...prev];
+				if (next[index]) {
+					next[index] = { ...next[index], [field]: value };
+				}
+				return next;
+			});
+		},
+		[],
+	);
+
 	const handleTestcaseChange = useCallback(
 		(index: number, field: keyof TestcaseItem, value: string) => {
 			setFormData((prev) => {
@@ -691,6 +708,8 @@ export function useProblemEdit() {
 		handleTestcaseAdd,
 		handleTestcaseRemove,
 		handleTestcaseChange,
+		handleParsedTestcaseRemove,
+		handleParsedTestcaseChange,
 		getFullDescription,
 		insertMarkdownText,
 		wrapWithMarkdown,

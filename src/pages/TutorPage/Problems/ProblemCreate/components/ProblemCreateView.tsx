@@ -507,6 +507,12 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 																<strong>{testCase.name}</strong> (
 																{testCase.type === "sample" ? "샘플" : "비밀"})
 															</span>
+															<S.TestcaseRemove
+																type="button"
+																onClick={() => d.handleParsedTestcaseRemove(idx)}
+															>
+																×
+															</S.TestcaseRemove>
 														</S.ParsedTestcaseHeader>
 														<S.ParsedTestcaseContent>
 															<div>
@@ -520,10 +526,6 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 														</S.ParsedTestcaseContent>
 													</S.ParsedTestcaseItem>
 												))}
-												<S.HelpText>
-													이 테스트케이스들은 ZIP 파일에 포함되어 있습니다. 문제
-													생성 시 자동으로 포함됩니다.
-												</S.HelpText>
 											</S.ParsedTestcases>
 										)}
 									</S.ParsedTestcasesSection>
