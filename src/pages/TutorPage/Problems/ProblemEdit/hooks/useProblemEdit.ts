@@ -195,7 +195,11 @@ export function useProblemEdit() {
 					formData.descriptionText || formData.description;
 			}
 		}
-	}, [enableFullEdit, formData.description, formData.descriptionText]);
+		// enableFullEdit이 켜질 때만 에디터 내용을 초기화해야 합니다.
+		// formData.description을 의존성에 포함하면 타이핑마다 innerHTML이
+		// 재설정되어 커서(포커스)가 초기화됩니다.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [enableFullEdit]);
 
 	const handleZipFileChange = useCallback(
 		async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -476,6 +480,7 @@ export function useProblemEdit() {
 		if (formData.outputFormat) {
 			full += `\n\n## 출력 형식\n${formData.outputFormat}`;
 		}
+		// 예제는 내용이 있을 때만 추가합니다 (빈 값이면 "## 예제" 섹션 자체를 생략)
 		if (formData.sampleInputs.some((s) => s.input || s.output)) {
 			full += "\n\n## 예제";
 			formData.sampleInputs.forEach((sample, idx) => {
@@ -488,18 +493,46 @@ export function useProblemEdit() {
 		return full;
 	}, [formData]);
 
-	const applyFormat = useCallback((command: string, value?: string | null) => {
-		if (descriptionRef.current) {
-			descriptionRef.current.focus();
-			document.execCommand(command, false, value ?? undefined);
-		}
+	/** 마크다운 텍스트를 커서 위치에 삽입하고 formData를 동기화합니다. */
+	const insertMarkdownText = useCallback((text: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		document.execCommand("insertText", false, text);
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
 	}, []);
 
-	const insertTextAtCursor = useCallback((text: string) => {
-		if (descriptionRef.current) {
-			descriptionRef.current.focus();
-			document.execCommand("insertText", false, text);
+	/** 선택된 텍스트를 마크다운 인라인 문법으로 감쌉니다. */
+	const wrapWithMarkdown = useCallback((syntax: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		const selection = window.getSelection();
+		if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
+			const selectedText = selection.getRangeAt(0).toString();
+			document.execCommand("insertText", false, `${syntax}${selectedText}${syntax}`);
+		} else {
+			document.execCommand("insertText", false, `${syntax}${syntax}`);
 		}
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
+	}, []);
+
+	/** 마크다운 제목 문법(#, ## 등)을 삽입합니다. */
+	const insertMarkdownHeading = useCallback((headingValue: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		const levelMap: Record<string, string> = {
+			h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### ", p: "",
+		};
+		const prefix = levelMap[headingValue] ?? "";
+		if (prefix) {
+			document.execCommand("insertText", false, prefix);
+		}
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
 	}, []);
 
 	const handleSubmit = useCallback(
@@ -659,8 +692,9 @@ export function useProblemEdit() {
 		handleTestcaseRemove,
 		handleTestcaseChange,
 		getFullDescription,
-		applyFormat,
-		insertTextAtCursor,
+		insertMarkdownText,
+		wrapWithMarkdown,
+		insertMarkdownHeading,
 		handleSubmit,
 	};
 }
