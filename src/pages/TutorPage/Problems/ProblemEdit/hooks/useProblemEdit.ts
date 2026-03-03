@@ -92,6 +92,7 @@ export function useProblemEdit() {
 				.replace(/\r/g, "\n")
 				.trim();
 			const parsed = parseDescriptionSections(descriptionText);
+			const description = parsed.mainDescription;
 			const mainDescriptionText = parsed.mainDescription;
 			let timeLimit = "";
 			if (parsedData?.timeLimit != null) {
@@ -136,11 +137,11 @@ export function useProblemEdit() {
 				}
 			}
 			setFormData({
-				title: parsedData?.title ?? problem?.title ?? "",
-				description: parsed.mainDescription,
-				descriptionText: parsed.mainDescription,
-				inputFormat: parsed.inputFormat ?? "",
-				outputFormat: parsed.outputFormat ?? "",
+				title: problem?.title ?? parsedData?.title ?? "",
+				description: mainDescriptionText,
+				descriptionText: mainDescriptionText,
+				inputFormat: parsed.inputFormat,
+				outputFormat: parsed.outputFormat,
 				tags,
 				difficulty:
 					parsedData?.difficulty != null
