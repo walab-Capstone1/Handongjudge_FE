@@ -39,7 +39,7 @@ export function extractTextFromRTF(rtfContent: string): string {
 export function stripDuplicateInputOutputExample(description: string): string {
 	if (!description || !description.includes("입력 형식")) return description;
 	const normalized = description.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-	const regex = /(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/g;
+	const regex = /(\n|^)\s*##\s*입력\s*형식(?:\s|[\n\r]|$)/g;
 	const matches = [...normalized.matchAll(regex)];
 	if (matches.length < 2) return description;
 	const secondMatch = matches[1];
@@ -55,8 +55,8 @@ export function stripDuplicateInputOutputExample(description: string): string {
 export function descriptionForPreview(description: string): string {
 	if (!description || !description.includes("입력 형식")) return description;
 	const normalized = description.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-	// (\n|^) = 줄바꿈 또는 문자열 시작 다음에 오는 "## 입력 형식"
-	const match = normalized.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+	// (\n|^) 다음 "## 입력 형식", 뒤에 공백/줄바꿈/끝 허용 → 본문만 반환
+	const match = normalized.match(/(\n|^)\s*##\s*입력\s*형식(?:\s|[\n\r]|$)/);
 	if (!match || match.index == null) return description;
 	return normalized.slice(0, match.index).trim();
 }
