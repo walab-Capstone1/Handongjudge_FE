@@ -39,4 +39,6 @@ export interface ProblemPreviewProps {
 	inputFormat: string;
 	outputFormat: string;
 	sampleInputs: SampleInput[];
+	/** true면 미리보기에 본문만 표시(입력/출력/예제는 폼에서만 보이게) */
+	descriptionOnly?: boolean;
 }

@@ -218,6 +218,7 @@ export function useProblemCreate() {
 				...prev,
 				testcases: [...prev.testcases, ...files],
 			}));
+			setFieldErrors((prev) => ({ ...prev, testcases: false }));
 		},
 		[],
 	);
@@ -231,6 +232,7 @@ export function useProblemCreate() {
 
 	const handleParsedTestcaseRemove = useCallback((index: number) => {
 		setParsedTestCases((prev) => prev.filter((_, i) => i !== index));
+		setFieldErrors((prev) => ({ ...prev, testcases: false }));
 	}, []);
 
 	/** 커서 위치에 텍스트를 삽입하고 description 상태를 동기화합니다. */
@@ -284,7 +286,6 @@ export function useProblemCreate() {
 	const getFullDescription = useCallback(
 		() => ({
 			title: formData.title,
-			// description은 항상 순수 마크다운 텍스트로 저장됩니다
 			description: formData.description || "",
 			inputFormat: formData.inputFormat,
 			outputFormat: formData.outputFormat,
@@ -293,8 +294,35 @@ export function useProblemCreate() {
 		[formData],
 	);
 
+	/** 미리보기용: 입력/출력/예제는 폼에서만 보이게, 미리보기에는 문제 설명만 표시 */
+	const getDescriptionOnlyForPreview = useCallback(
+		() => {
+			const desc =
+				formData.description || formData.descriptionText || "";
+			const normalized = desc.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+			// 줄 맨 앞이든 중간이든 "## 입력 형식" 이하는 잘라서 본문만
+			const match = normalized.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+			const mainOnly =
+				match && match.index != null
+					? normalized.slice(0, match.index).trim()
+					: desc;
+			return {
+				title: formData.title,
+				description: mainOnly,
+				inputFormat: "",
+				outputFormat: "",
+				sampleInputs: [],
+			};
+		},
+		[formData],
+	);
+
 	const getFullDescriptionForBackend = useCallback((): string => {
-		let full = formData.descriptionText || "";
+		// 본문만 사용(이미 "## 입력 형식" 이하가 있으면 제거 후 한 번만 붙임 → 저장 시 중복 방지)
+		const raw = (formData.descriptionText || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+		const mainMatch = raw.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+		const mainOnly = mainMatch && mainMatch.index != null ? raw.slice(0, mainMatch.index).trim() : raw;
+		let full = mainOnly;
 		if (formData.inputFormat) {
 			full += "\n\n## 입력 형식\n" + formData.inputFormat;
 		}
@@ -321,6 +349,9 @@ export function useProblemCreate() {
 	const handleSubmit = useCallback(
 		async (e: React.FormEvent) => {
 			e.preventDefault();
+			setLoading(true);
+			setError(null);
+
 			const errs: Record<string, boolean> = {};
 			if (!formData.title?.trim()) errs.title = true;
 			if (!formData.timeLimit?.trim()) errs.timeLimit = true;
@@ -328,11 +359,25 @@ export function useProblemCreate() {
 			const hasDescription =
 				(formData.description?.trim() || formData.descriptionText?.trim()) ?? "";
 			if (!hasDescription) errs.description = true;
-			setFieldErrors(errs);
-			if (Object.keys(errs).length > 0) return;
+			const hasTestcases =
+				parsedTestCases.some(
+					(tc) => (tc.input?.trim() && tc.output?.trim()),
+				) || formData.testcases.length > 0;
+			if (!hasTestcases) errs.testcases = true;
 
-			setLoading(true);
-			setError(null);
+			setFieldErrors(errs);
+			if (Object.keys(errs).length > 0) {
+				setLoading(false);
+				const messages: string[] = [];
+				if (errs.title) messages.push("• 문제 제목");
+				if (errs.timeLimit) messages.push("• 시간 제한");
+				if (errs.memoryLimit) messages.push("• 메모리 제한");
+				if (errs.description) messages.push("• 문제 설명");
+				if (errs.testcases) messages.push("• 테스트케이스 (최소 1개 이상)");
+				alert("다음 항목을 입력해 주세요:\n\n" + messages.join("\n"));
+				return;
+			}
+
 			try {
 				const submitFormData = new FormData();
 				submitFormData.append("title", formData.title);
@@ -458,6 +503,7 @@ export function useProblemCreate() {
 		wrapWithMarkdown,
 		insertMarkdownHeading,
 		getFullDescription,
+		getDescriptionOnlyForPreview,
 		handleSubmit,
 		clearZipFile,
 		fieldErrors,

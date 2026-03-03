@@ -2,6 +2,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import type { Components } from "react-markdown";
+import { stripDuplicateInputOutputExample } from "../../../../TutorPage/Problems/ProblemEdit/utils/problemEditUtils";
 import * as S from "./styles";
 
 interface Problem {
@@ -78,7 +79,9 @@ const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
 	currentProblem,
 	problemDescription = "",
 }) => {
-	const description = currentProblem.description || problemDescription;
+	const description = stripDuplicateInputOutputExample(
+		currentProblem.description || problemDescription,
+	);
 
 	return (
 		<S.DescriptionArea>

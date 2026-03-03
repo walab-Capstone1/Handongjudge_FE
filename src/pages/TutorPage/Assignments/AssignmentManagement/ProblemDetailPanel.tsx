@@ -1,6 +1,7 @@
 import type React from "react";
 import { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import { stripDuplicateInputOutputExample } from "../../Problems/ProblemEdit/utils/problemEditUtils";
 import * as S from "./styles";
 
 export interface ProblemDetailData {
@@ -37,7 +38,9 @@ const ProblemDetailPanel: React.FC<ProblemDetailPanelProps> = ({
 
 	if (!detail) return null;
 
-	const desc = detail.description;
+	const desc = detail.description
+		? stripDuplicateInputOutputExample(String(detail.description))
+		: detail.description;
 	const isMd =
 		desc &&
 		typeof desc === "string" &&
