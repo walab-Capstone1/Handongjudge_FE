@@ -126,7 +126,7 @@ export function useProblemEdit() {
 				}
 			}
 			setFormData({
-				title: parsedData?.title ?? problem?.title ?? "",
+				title: problem?.title ?? parsedData?.title ?? "",
 				description,
 				descriptionText,
 				inputFormat: "",
