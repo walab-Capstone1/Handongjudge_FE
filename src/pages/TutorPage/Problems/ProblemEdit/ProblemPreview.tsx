@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import type { ProblemPreviewProps, SampleInput } from "./types";
+import { descriptionForPreview } from "./utils/problemEditUtils";
 import * as S from "./styles";
 
 // react-markdown v10: 'inline' prop 제거됨 → Context로 블록/인라인 코드 구분
@@ -64,12 +65,14 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 	inputFormat,
 	outputFormat,
 	sampleInputs,
+	descriptionOnly = false,
 }) => {
 	const hasContent =
 		description ||
-		inputFormat ||
-		outputFormat ||
-		sampleInputs?.some((s: SampleInput) => s.input || s.output);
+		(!descriptionOnly &&
+			(inputFormat ||
+				outputFormat ||
+				sampleInputs?.some((s: SampleInput) => s.input || s.output)));
 
 	if (!hasContent) {
 		return <S.PreviewEmpty>문제 설명을 입력하세요</S.PreviewEmpty>;
@@ -81,12 +84,12 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 	{description && (
 		<S.PreviewDescription>
 			<ReactMarkdown components={mdComponents} rehypePlugins={[rehypeRaw]}>
-				{prepareMarkdown(description)}
+				{prepareMarkdown(descriptionForPreview(description))}
 			</ReactMarkdown>
 		</S.PreviewDescription>
 	)}
 
-			{inputFormat && (
+			{!descriptionOnly && inputFormat && (
 				<S.PreviewSection>
 					<S.PreviewH2>입력 형식</S.PreviewH2>
 					<S.PreviewContentText>
@@ -99,7 +102,7 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 				</S.PreviewSection>
 			)}
 
-			{outputFormat && (
+			{!descriptionOnly && outputFormat && (
 				<S.PreviewSection>
 					<S.PreviewH2>출력 형식</S.PreviewH2>
 					<S.PreviewContentText>
@@ -112,7 +115,7 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 				</S.PreviewSection>
 			)}
 
-			{sampleInputs?.some((s) => s.input || s.output) && (
+			{!descriptionOnly && sampleInputs?.some((s) => s.input || s.output) && (
 				<S.PreviewSection>
 					<S.PreviewH2>예제</S.PreviewH2>
 					{sampleInputs.map((sample, idx) => {

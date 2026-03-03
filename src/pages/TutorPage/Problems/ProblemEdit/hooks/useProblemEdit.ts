@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
-import { parseTags, extractTextFromRTF } from "../utils/problemEditUtils";
+import { parseTags, extractTextFromRTF, parseDescriptionSections, descriptionForPreview } from "../utils/problemEditUtils";
 import type {
 	ProblemFormData,
 	ParsedTestcase,
@@ -85,9 +85,15 @@ export function useProblemEdit() {
 			} catch (err) {
 				console.warn("ZIP 파싱 실패 (계속 진행):", err);
 			}
-			const description = parsedData?.description ?? problem?.description ?? "";
-			const descriptionText =
-				description.replace(/<[^>]*>/g, "") || description;
+			const rawDescription = parsedData?.description ?? problem?.description ?? "";
+			const descriptionText = (rawDescription || "")
+				.replace(/<[^>]*>/g, "")
+				.replace(/\r\n/g, "\n")
+				.replace(/\r/g, "\n")
+				.trim();
+			const parsed = parseDescriptionSections(descriptionText);
+			const description = parsed.mainDescription;
+			const mainDescriptionText = parsed.mainDescription;
 			let timeLimit = "";
 			if (parsedData?.timeLimit != null) {
 				timeLimit = String(parsedData.timeLimit);
@@ -116,7 +122,12 @@ export function useProblemEdit() {
 			const testCases = parsedData?.testCases ?? parsedData?.testcases ?? [];
 			setParsedTestCases(testCases);
 			let sampleInputs: SampleInput[] = [{ input: "", output: "" }];
-			if (testCases.length > 0) {
+			const hasParsedSamples =
+				parsed.sampleInputs.length > 0 &&
+				parsed.sampleInputs.some((s) => s.input || s.output);
+			if (hasParsedSamples) {
+				sampleInputs = parsed.sampleInputs;
+			} else if (testCases.length > 0) {
 				const samples = testCases.filter((tc) => tc.type === "sample");
 				if (samples.length > 0) {
 					sampleInputs = samples.map((tc) => ({
@@ -127,10 +138,10 @@ export function useProblemEdit() {
 			}
 			setFormData({
 				title: problem?.title ?? parsedData?.title ?? "",
-				description,
-				descriptionText,
-				inputFormat: "",
-				outputFormat: "",
+				description: mainDescriptionText,
+				descriptionText: mainDescriptionText,
+				inputFormat: parsed.inputFormat,
+				outputFormat: parsed.outputFormat,
 				tags,
 				difficulty:
 					parsedData?.difficulty != null
@@ -146,11 +157,11 @@ export function useProblemEdit() {
 			setEnableFullEdit(false);
 			setTimeout(() => {
 				if (descriptionRef.current) {
-					const isHTML = /<[^>]+>/.test(description);
+					const isHTML = /<[^>]+>/.test(mainDescriptionText);
 					if (isHTML) {
-						descriptionRef.current.innerHTML = description;
+						descriptionRef.current.innerHTML = mainDescriptionText;
 					} else {
-						descriptionRef.current.textContent = descriptionText;
+						descriptionRef.current.textContent = mainDescriptionText;
 					}
 					setIsInitialLoad(false);
 				}
@@ -317,12 +328,14 @@ export function useProblemEdit() {
 
 	const handleSampleInputChange = useCallback(
 		(index: number, field: "input" | "output", value: string) => {
-			const newSamples = [...formData.sampleInputs];
-			if (newSamples[index])
-				newSamples[index] = { ...newSamples[index], [field]: value };
-			setFormData((prev) => ({ ...prev, sampleInputs: newSamples }));
+			setFormData((prev) => {
+				const newSamples = [...prev.sampleInputs];
+				if (newSamples[index])
+					newSamples[index] = { ...newSamples[index], [field]: value };
+				return { ...prev, sampleInputs: newSamples };
+			});
 		},
-		[formData.sampleInputs],
+		[],
 	);
 
 	const addSampleInput = useCallback(() => {
@@ -489,8 +502,40 @@ export function useProblemEdit() {
 		[formData],
 	);
 
+	/** 미리보기용: 문제 설명 본문만 (입력/출력/예제는 비움) */
+	const getDescriptionOnlyForPreview = useCallback(
+		() => ({
+			title: formData.title,
+			description: (formData.description ?? formData.descriptionText ?? "").includes(
+				"## 입력 형식",
+			)
+				? (formData.description ?? formData.descriptionText ?? "")
+						.split("\n\n## 입력 형식")[0]
+						.trim()
+				: formData.description ?? formData.descriptionText ?? "",
+			inputFormat: "",
+			outputFormat: "",
+			sampleInputs: [],
+		}),
+		[formData],
+	);
+
+	/** 미리보기용: 본문 + 입력 형식 + 출력 형식 + 예제 입출력 모두 표시 */
+	const getFullPreviewProps = useCallback(
+		() => ({
+			title: formData.title,
+			description: descriptionForPreview(formData.descriptionText ?? ""),
+			inputFormat: formData.inputFormat ?? "",
+			outputFormat: formData.outputFormat ?? "",
+			sampleInputs: formData.sampleInputs ?? [],
+		}),
+		[formData],
+	);
+
 	const getFullDescriptionForBackend = useCallback((): string => {
-		let full = formData.descriptionText ?? "";
+		// 본문만 사용(이미 "## 입력 형식" 이하가 있으면 제거 후 한 번만 붙임 → 저장 시 중복 방지)
+		const mainOnly = descriptionForPreview(formData.descriptionText ?? "");
+		let full = mainOnly;
 		if (formData.inputFormat) {
 			full += `\n\n## 입력 형식\n${formData.inputFormat}`;
 		}
@@ -556,25 +601,40 @@ export function useProblemEdit() {
 		async (e: React.FormEvent) => {
 			e.preventDefault();
 			if (!problemId) return;
+
+			if (enableFullEdit) {
+				const hasDescription =
+					(formData.description?.trim() || formData.descriptionText?.trim()) ?? "";
+				if (!hasDescription) {
+					alert("문제 설명을 입력해 주세요.");
+					return;
+				}
+				const hasTestcases =
+					parsedTestCases.some(
+						(tc) => tc.input?.trim() && tc.output?.trim(),
+					) ||
+					formData.testcases.some(
+						(tc) => tc.input?.trim() && tc.output?.trim(),
+					);
+				if (!hasTestcases) {
+					alert("테스트케이스가 최소 1개 이상 필요합니다. (입력/출력 쌍 모두 있어야 합니다)");
+					return;
+				}
+				const incomplete = validateTestCases();
+				if (incomplete.length > 0) {
+					const message = incomplete
+						.map((tc) => `- ${tc.name}: ${tc.missing} 파일이 없습니다`)
+						.join("\n");
+					alert(
+						`다음 테스트케이스에 입력/출력이 비어 있습니다:\n\n${message}\n\n모든 테스트케이스를 완성한 후 제출해 주세요.`,
+					);
+					return;
+				}
+			}
+
 			setSubmitting(true);
 			setError(null);
 			try {
-				if (enableFullEdit) {
-					const incomplete = validateTestCases();
-					if (incomplete.length > 0) {
-						const message = incomplete
-							.map((tc) => `- ${tc.name}: ${tc.missing} 파일이 없습니다`)
-							.join("\n");
-						if (
-							!window.confirm(
-								`다음 테스트케이스에 입력/출력 쌍이 완성되지 않았습니다:\n\n${message}\n\n그래도 제출하시겠습니까?`,
-							)
-						) {
-							setSubmitting(false);
-							return;
-						}
-					}
-				}
 				const submitFormData = new FormData();
 				submitFormData.append("title", formData.title);
 				submitFormData.append("tags", JSON.stringify(formData.tags));
@@ -711,6 +771,8 @@ export function useProblemEdit() {
 		handleParsedTestcaseRemove,
 		handleParsedTestcaseChange,
 		getFullDescription,
+		getDescriptionOnlyForPreview,
+		getFullPreviewProps,
 		insertMarkdownText,
 		wrapWithMarkdown,
 		insertMarkdownHeading,

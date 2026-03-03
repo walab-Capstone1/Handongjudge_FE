@@ -468,16 +468,29 @@ const ProblemListModal: React.FC<ProblemListModalProps> = ({
 		}
 	};
 
-	const getFullDescription = () => ({
-		title: formData.title,
-		description: formData.description || "",
-		inputFormat: formData.inputFormat,
-		outputFormat: formData.outputFormat,
-		sampleInputs: formData.sampleInputs,
-	});
+	const getFullDescription = () => {
+		const raw =
+			(formData.description || formData.descriptionText || "")
+				.replace(/\r\n/g, "\n")
+				.replace(/\r/g, "\n");
+		const match = raw.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+		const descriptionOnly =
+			match && match.index != null ? raw.slice(0, match.index).trim() : raw;
+		return {
+			title: formData.title,
+			description: descriptionOnly,
+			inputFormat: formData.inputFormat,
+			outputFormat: formData.outputFormat,
+			sampleInputs: formData.sampleInputs,
+		};
+	};
 
 	const getFullDescriptionForBackend = () => {
-		let full = formData.descriptionText || "";
+		const raw = (formData.descriptionText || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+		const mainMatch = raw.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+		const mainOnly =
+			mainMatch && mainMatch.index != null ? raw.slice(0, mainMatch.index).trim() : raw;
+		let full = mainOnly;
 		if (formData.inputFormat)
 			full += `\n\n## 입력 형식\n${formData.inputFormat}`;
 		if (formData.outputFormat)

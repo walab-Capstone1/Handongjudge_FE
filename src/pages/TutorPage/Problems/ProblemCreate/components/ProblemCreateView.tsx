@@ -54,7 +54,15 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 
 				<S.Form onSubmit={d.handleSubmit}>
 					{hasRequiredErrors && (
-						<S.RequiredMessage role="alert">{REQUIRED_MSG}</S.RequiredMessage>
+						<S.RequiredMessage role="alert">
+							{REQUIRED_MSG}
+							{d.fieldErrors.testcases && (
+								<>
+									<br />
+									테스트케이스가 최소 1개 이상 필요합니다.
+								</>
+							)}
+						</S.RequiredMessage>
 					)}
 					<S.Step>
 						<S.FormGrid>
@@ -369,7 +377,7 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 								<S.Preview>
 									<S.PreviewHeader>미리보기</S.PreviewHeader>
 									<S.PreviewContent>
-										<ProblemPreview {...d.getFullDescription()} />
+										<ProblemPreview {...d.getDescriptionOnlyForPreview()} descriptionOnly />
 									</S.PreviewContent>
 								</S.Preview>
 							</S.DescriptionEditor>
