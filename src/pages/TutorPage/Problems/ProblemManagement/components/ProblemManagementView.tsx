@@ -7,6 +7,7 @@ import EmptyState from "../../../../../components/UI/EmptyState";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
 import type { ProblemManagementHookReturn } from "../hooks/useProblemManagement";
+import { stripDuplicateInputOutputExample } from "../../ProblemEdit/utils/problemEditUtils";
 
 // ──────────────────────────────────────────────
 // 마크다운 코드블록 렌더링 (ProblemPreview와 동일한 방식)
@@ -389,8 +390,10 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 							{(() => {
 								const rawDesc =
 									d.selectedProblem.description || "*문제 설명이 없습니다.*";
-								// 빈 예제 섹션 제거 후 렌더링
-								const desc = stripEmptyExamplesSection(rawDesc);
+								// 중복된 "## 입력 형식"~"## 예제" 블록 제거 후, 빈 예제 섹션 제거
+								const desc = stripEmptyExamplesSection(
+									stripDuplicateInputOutputExample(rawDesc),
+								);
 								return (
 									<S.DescriptionContent>
 										<ReactMarkdown

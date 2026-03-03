@@ -97,7 +97,8 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 							formData={d.formData}
 							setFormData={d.setFormData}
 							enableFullEdit={d.enableFullEdit}
-							getFullDescription={d.getFullDescription}
+							getDescriptionOnlyForPreview={d.getDescriptionOnlyForPreview}
+							getFullPreviewProps={d.getFullPreviewProps}
 							insertMarkdownText={d.insertMarkdownText}
 							wrapWithMarkdown={d.wrapWithMarkdown}
 							insertMarkdownHeading={d.insertMarkdownHeading}

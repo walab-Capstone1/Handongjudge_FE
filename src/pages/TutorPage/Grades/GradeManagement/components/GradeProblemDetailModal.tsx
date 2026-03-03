@@ -1,6 +1,7 @@
 import type React from "react";
 import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
+import { stripDuplicateInputOutputExample } from "../../../Problems/ProblemEdit/utils/problemEditUtils";
 import * as S from "../styles";
 
 export interface GradeProblemDetailModalProps {
@@ -21,7 +22,9 @@ export default function GradeProblemDetailModal({
 }: GradeProblemDetailModalProps) {
 	if (!isOpen || !problemDetail) return null;
 
-	const description = problemDetail.description ?? "";
+	const description = stripDuplicateInputOutputExample(
+		problemDetail.description ?? "",
+	);
 	const isMarkdown =
 		description.includes("# ") ||
 		description.includes("## ") ||
