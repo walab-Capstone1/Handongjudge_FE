@@ -415,9 +415,32 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 									/>
 								</S.EditorWrapper>
 								<S.Preview>
-									<S.PreviewHeader>미리보기</S.PreviewHeader>
+									<S.PreviewHeader>
+										<span>미리보기</span>
+										<S.PreviewModeToggle>
+											<S.PreviewModeButton
+												type="button"
+												$active={d.previewMode === "descriptionOnly"}
+												onClick={() => d.setPreviewMode("descriptionOnly")}
+											>
+												문제 설명만
+											</S.PreviewModeButton>
+											<S.PreviewModeButton
+												type="button"
+												$active={d.previewMode === "full"}
+												onClick={() => d.setPreviewMode("full")}
+											>
+												전체
+											</S.PreviewModeButton>
+										</S.PreviewModeToggle>
+									</S.PreviewHeader>
 									<S.PreviewContent>
-										<ProblemPreview {...d.getDescriptionOnlyForPreview()} descriptionOnly />
+										<ProblemPreview
+											{...(d.previewMode === "descriptionOnly"
+												? d.getDescriptionOnlyForPreview()
+												: d.getFullDescriptionForPreview())}
+											descriptionOnly={d.previewMode === "descriptionOnly"}
+										/>
 									</S.PreviewContent>
 								</S.Preview>
 							</S.DescriptionEditor>

@@ -98,6 +98,8 @@ export function useProblemCreate() {
 
 	const [zipFile, setZipFile] = useState<File | null>(null);
 	const [folderFormatFolderName, setFolderFormatFolderName] = useState<string | null>(null);
+	/** "descriptionOnly" = 문제 설명만, "full" = 전체(입력/출력/예제 포함) */
+	const [previewMode, setPreviewMode] = useState<"descriptionOnly" | "full">("full");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [parsedTestCases, setParsedTestCases] = useState<ParsedTestcase[]>([]);
@@ -437,6 +439,22 @@ export function useProblemCreate() {
 		[formData],
 	);
 
+	/** 전체 미리보기용: 본문(mainOnly) + 입력/출력/예제 (중복 방지 위해 mainOnly 사용) */
+	const getFullDescriptionForPreview = useCallback(() => {
+		const desc = formData.description || formData.descriptionText || "";
+		const normalized = desc.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+		const match = normalized.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+		const mainOnly =
+			match && match.index != null ? normalized.slice(0, match.index).trim() : desc;
+		return {
+			title: formData.title,
+			description: mainOnly,
+			inputFormat: formData.inputFormat,
+			outputFormat: formData.outputFormat,
+			sampleInputs: formData.sampleInputs,
+		};
+	}, [formData]);
+
 	/** 미리보기용: 입력/출력/예제는 폼에서만 보이게, 미리보기에는 문제 설명만 표시 */
 	const getDescriptionOnlyForPreview = useCallback(
 		() => {
@@ -637,7 +655,10 @@ export function useProblemCreate() {
 		wrapWithMarkdown,
 		insertMarkdownHeading,
 		getFullDescription,
+		getFullDescriptionForPreview,
 		getDescriptionOnlyForPreview,
+		previewMode,
+		setPreviewMode,
 		handleSubmit,
 		clearZipFile,
 		clearFolderFormatZip,
