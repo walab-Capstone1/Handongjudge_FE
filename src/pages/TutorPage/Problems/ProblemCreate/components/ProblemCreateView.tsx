@@ -1,5 +1,6 @@
 import type React from "react";
 import { createPortal } from "react-dom";
+import { useRef, useEffect } from "react";
 import TutorLayout from "../../../../../layouts/TutorLayout";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
@@ -10,6 +11,14 @@ const REQUIRED_MSG = "필수 항목(*)을 입력해 주세요.";
 
 export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 	const hasRequiredErrors = Object.keys(d.fieldErrors).length > 0;
+	const folderDirInputRef = useRef<HTMLInputElement>(null);
+	useEffect(() => {
+		const el = folderDirInputRef.current;
+		if (el) {
+			el.setAttribute("webkitdirectory", "");
+			el.setAttribute("directory", "");
+		}
+	}, []);
 
 	return (
 		<TutorLayout>
@@ -176,7 +185,7 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 												? "파싱 중..."
 												: d.zipFile
 													? `✓ ${d.zipFile.name}`
-													: "ZIP 파일 선택"}
+													: "ZIP 파일 선택 (DomJudge)"}
 										</S.FileLabelInline>
 										{d.zipFile && !d.loading && (
 											<S.RemoveZipButton
@@ -191,7 +200,38 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 									<S.HelpText>
 										{d.loading
 											? "ZIP 파일 내용을 분석 중입니다..."
-											: "문제 ZIP 파일이 있다면 업로드하세요. 자동으로 문제 설명, 문제 제목이 채워집니다."}
+											: "DomJudge 형식(problem_statement/, problem.yaml 등) ZIP"}
+									</S.HelpText>
+								</S.FileUploadWrapper>
+								<S.FileUploadWrapper style={{ marginTop: 12 }}>
+									<input
+										ref={folderDirInputRef}
+										type="file"
+										id="folderFormatDirInput"
+										style={{ display: "none" }}
+										onChange={d.handleFolderFormatFolderChange}
+										disabled={d.loading}
+									/>
+									<S.FileRow>
+										<S.FileLabelInline htmlFor="folderFormatDirInput">
+											{d.loading
+												? "파싱 중..."
+												: d.folderFormatFolderName
+													? `✓ ${d.folderFormatFolderName}`
+													: "문제 폴더 선택"}
+										</S.FileLabelInline>
+										{d.folderFormatFolderName && !d.loading && (
+											<S.RemoveZipButton
+												type="button"
+												onClick={d.clearFolderFormatZip}
+												title="폴더 형식 제거"
+											>
+												×
+											</S.RemoveZipButton>
+										)}
+									</S.FileRow>
+									<S.HelpText>
+										description.md, problem.ini, testcases/ 포함 폴더 (일부만 있어도 파싱됨)
 									</S.HelpText>
 								</S.FileUploadWrapper>
 							</S.FormSection>
@@ -375,9 +415,32 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 									/>
 								</S.EditorWrapper>
 								<S.Preview>
-									<S.PreviewHeader>미리보기</S.PreviewHeader>
+									<S.PreviewHeader>
+										<span>미리보기</span>
+										<S.PreviewModeToggle>
+											<S.PreviewModeButton
+												type="button"
+												$active={d.previewMode === "descriptionOnly"}
+												onClick={() => d.setPreviewMode("descriptionOnly")}
+											>
+												문제 설명만
+											</S.PreviewModeButton>
+											<S.PreviewModeButton
+												type="button"
+												$active={d.previewMode === "full"}
+												onClick={() => d.setPreviewMode("full")}
+											>
+												전체
+											</S.PreviewModeButton>
+										</S.PreviewModeToggle>
+									</S.PreviewHeader>
 									<S.PreviewContent>
-										<ProblemPreview {...d.getDescriptionOnlyForPreview()} descriptionOnly />
+										<ProblemPreview
+											{...(d.previewMode === "descriptionOnly"
+												? d.getDescriptionOnlyForPreview()
+												: d.getFullDescriptionForPreview())}
+											descriptionOnly={d.previewMode === "descriptionOnly"}
+										/>
 									</S.PreviewContent>
 								</S.Preview>
 							</S.DescriptionEditor>

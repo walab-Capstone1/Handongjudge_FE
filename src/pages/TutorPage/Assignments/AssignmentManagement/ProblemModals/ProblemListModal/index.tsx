@@ -550,78 +550,45 @@ const ProblemListModal: React.FC<ProblemListModalProps> = ({
 			}
 
 			if (enableFullEdit) {
-				const submitFormData = new FormData();
-				submitFormData.append("title", formData.title);
-				submitFormData.append("tags", JSON.stringify(formData.tags));
-				submitFormData.append("difficulty", formData.difficulty);
-				submitFormData.append("description", getFullDescriptionForBackend());
-				submitFormData.append("inputFormat", formData.inputFormat);
-				submitFormData.append("outputFormat", formData.outputFormat);
-				submitFormData.append(
-					"timeLimit",
-					formData.timeLimit || originalTimeLimit || "1",
-				);
-				submitFormData.append(
-					"memoryLimit",
-					formData.memoryLimit || originalMemoryLimit || "256",
-				);
-				submitFormData.append(
-					"sampleInputs",
-					JSON.stringify(formData.sampleInputs),
-				);
+				const toTestCaseDto = (
+					tc: ProblemListTestcaseItem,
+					idx: number,
+				): { name: string; input: string; output: string; type: "sample" | "secret" } | null => {
+					const input = tc.input?.trim() ?? "";
+					const output = tc.output?.trim() ?? "";
+					if (!input || !output) return null;
+					return {
+						name: tc.name ?? `testcase_${idx}`,
+						input,
+						output,
+						type: tc.type === "sample" ? "sample" : "secret",
+					};
+				};
 
-				let testcaseIndex = 0;
-				for (const testcase of parsedTestCases) {
-					const baseName = testcase.name ?? `testcase_${testcaseIndex}`;
-					if (testcase.input) {
-						const inputBlob = new Blob([testcase.input], {
-							type: "text/plain",
-						});
-						const inputFile = new File([inputBlob], `${baseName}.in`, {
-							type: "text/plain",
-						});
-						submitFormData.append(`testcase_${testcaseIndex}`, inputFile);
-						testcaseIndex++;
-					}
-					if (testcase.output) {
-						const outputBlob = new Blob([testcase.output], {
-							type: "text/plain",
-						});
-						const outputFile = new File([outputBlob], `${baseName}.ans`, {
-							type: "text/plain",
-						});
-						submitFormData.append(`testcase_${testcaseIndex}`, outputFile);
-						testcaseIndex++;
-					}
-				}
+				const testcasesFromParsed = parsedTestCases
+					.map((tc, idx) => toTestCaseDto(tc, idx))
+					.filter((t): t is NonNullable<typeof t> => t != null);
+				const testcasesFromForm = formData.testcases
+					.map((tc, idx) => toTestCaseDto(tc, idx))
+					.filter((t): t is NonNullable<typeof t> => t != null);
+				const testcases = [...testcasesFromParsed, ...testcasesFromForm];
 
-				for (const testcase of formData.testcases) {
-					const baseName = testcase.name ?? `testcase_${testcaseIndex}`;
-					if (testcase.input) {
-						const inputBlob = new Blob([testcase.input], {
-							type: "text/plain",
-						});
-						const inputFile = new File([inputBlob], `${baseName}.in`, {
-							type: "text/plain",
-						});
-						submitFormData.append(`testcase_${testcaseIndex}`, inputFile);
-						testcaseIndex++;
-					}
-					if (testcase.output) {
-						const outputBlob = new Blob([testcase.output], {
-							type: "text/plain",
-						});
-						const outputFile = new File([outputBlob], `${baseName}.ans`, {
-							type: "text/plain",
-						});
-						submitFormData.append(`testcase_${testcaseIndex}`, outputFile);
-						testcaseIndex++;
-					}
-				}
+				const createRequest = {
+					title: formData.title,
+					description: getFullDescriptionForBackend(),
+					inputFormat: formData.inputFormat || undefined,
+					outputFormat: formData.outputFormat || undefined,
+					tags: JSON.stringify(formData.tags),
+					difficulty: formData.difficulty,
+					timeLimit: formData.timeLimit || originalTimeLimit || "1",
+					memoryLimit: formData.memoryLimit || originalMemoryLimit || "256",
+					sampleInputs: JSON.stringify(formData.sampleInputs),
+					testcases,
+				};
 
 				const newProblemResponse =
-					await APIService.createProblem(submitFormData);
-				const newProblemId = newProblemResponse?.data ?? newProblemResponse;
+					await APIService.createProblem(createRequest);
+				const newProblemId = newProblemResponse;
 
 				await APIService.addProblemToAssignment(
 					selectedAssignment.id,

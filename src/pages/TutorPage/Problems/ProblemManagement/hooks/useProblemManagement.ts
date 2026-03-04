@@ -41,6 +41,8 @@ export function useProblemManagement() {
 	const [loadingUsageData, setLoadingUsageData] = useState(false);
 	const [availableTags, setAvailableTags] = useState<string[]>([]);
 	const [openMoreMenu, setOpenMoreMenu] = useState<number | null>(null);
+	const [selectedProblemIds, setSelectedProblemIds] = useState<number[]>([]);
+	const [isExporting, setIsExporting] = useState(false);
 
 	const fetchProblems = useCallback(async () => {
 		try {
@@ -379,6 +381,120 @@ export function useProblemManagement() {
 		}
 	}, [loadingUsage]);
 
+	const toggleProblemSelection = useCallback((problemId: number) => {
+		setSelectedProblemIds((prev) =>
+			prev.includes(problemId)
+				? prev.filter((id) => id !== problemId)
+				: [...prev, problemId],
+		);
+	}, []);
+
+	const selectAllFiltered = useCallback(() => {
+		const ids = filteredProblems.map((p) => p.id);
+		setSelectedProblemIds((prev) => {
+			const allSelected = ids.every((id) => prev.includes(id));
+			return allSelected ? prev.filter((id) => !ids.includes(id)) : [...new Set([...prev, ...ids])];
+		});
+	}, [filteredProblems]);
+
+	const clearSelection = useCallback(() => {
+		setSelectedProblemIds([]);
+	}, []);
+
+	const isAllFilteredSelected =
+		filteredProblems.length > 0 &&
+		filteredProblems.every((p) => selectedProblemIds.includes(p.id));
+
+	const triggerDownload = useCallback((blob: Blob, filename: string) => {
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}, []);
+
+	const handleExportSingle = useCallback(
+		async (problem: Problem) => {
+			try {
+				setIsExporting(true);
+				const blob = await APIService.exportProblem(problem.id);
+				triggerDownload(blob, `problem-${problem.id}.zip`);
+				setAlertMessage(`문제 "${problem.title}" 내보내기가 완료되었습니다.`);
+				setAlertType("success");
+				setTimeout(() => setAlertMessage(null), 3000);
+			} catch (error: unknown) {
+				console.error("문제 내보내기 실패:", error);
+				setAlertMessage(
+					`내보내기에 실패했습니다. ${error instanceof Error ? error.message : ""}`,
+				);
+				setAlertType("error");
+				setTimeout(() => setAlertMessage(null), 5000);
+			} finally {
+				setIsExporting(false);
+			}
+		},
+		[triggerDownload],
+	);
+
+	const handleExportBulk = useCallback(async () => {
+		const ids = selectedProblemIds;
+		if (ids.length === 0) {
+			setAlertMessage("내보낼 문제를 선택하세요.");
+			setAlertType("error");
+			setTimeout(() => setAlertMessage(null), 3000);
+			return;
+		}
+		try {
+			setIsExporting(true);
+			const blob = await APIService.exportProblemsBulk(ids);
+			triggerDownload(blob, "problems-export.zip");
+			setAlertMessage(`${ids.length}개 문제 내보내기가 완료되었습니다.`);
+			setAlertType("success");
+			clearSelection();
+			setTimeout(() => setAlertMessage(null), 3000);
+		} catch (error: unknown) {
+			console.error("Bulk 내보내기 실패:", error);
+			setAlertMessage(
+				`내보내기에 실패했습니다. ${error instanceof Error ? error.message : ""}`,
+			);
+			setAlertType("error");
+			setTimeout(() => setAlertMessage(null), 5000);
+		} finally {
+			setIsExporting(false);
+		}
+	}, [selectedProblemIds, triggerDownload, clearSelection]);
+
+	const handleExportFiltered = useCallback(async () => {
+		const ids = filteredProblems.map((p) => p.id);
+		if (ids.length === 0) {
+			setAlertMessage("내보낼 문제가 없습니다.");
+			setAlertType("error");
+			setTimeout(() => setAlertMessage(null), 3000);
+			return;
+		}
+		try {
+			setIsExporting(true);
+			const blob = await APIService.exportProblemsBulk(ids);
+			triggerDownload(blob, "problems-export.zip");
+			setAlertMessage(`${ids.length}개 문제 내보내기가 완료되었습니다.`);
+			setAlertType("success");
+			clearSelection();
+			setTimeout(() => setAlertMessage(null), 3000);
+		} catch (error: unknown) {
+			console.error("전체 내보내기 실패:", error);
+			setAlertMessage(
+				`내보내기에 실패했습니다. ${error instanceof Error ? error.message : ""}`,
+			);
+			setAlertType("error");
+			setTimeout(() => setAlertMessage(null), 5000);
+		} finally {
+			setIsExporting(false);
+		}
+	}, [filteredProblems, triggerDownload, clearSelection]);
+
 	return {
 		problems,
 		loading,
@@ -434,6 +550,15 @@ export function useProblemManagement() {
 		closeDeleteModal,
 		closeCopyModal,
 		closeUsageModal,
+		selectedProblemIds,
+		toggleProblemSelection,
+		selectAllFiltered,
+		clearSelection,
+		isAllFilteredSelected,
+		isExporting,
+		handleExportSingle,
+		handleExportBulk,
+		handleExportFiltered,
 	};
 }
 

@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { FaFileExport } from "react-icons/fa";
 import TutorLayout from "../../../../../layouts/TutorLayout";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -50,6 +52,30 @@ function stripEmptyExamplesSection(text: string): string {
 }
 
 export default function ProblemManagementView(d: ProblemManagementHookReturn) {
+	const [dropdownRect, setDropdownRect] = useState<{
+		top: number;
+		right: number;
+	} | null>(null);
+
+	useEffect(() => {
+		if (d.openMoreMenu == null) return;
+		const handleScroll = () => {
+			d.setOpenMoreMenu(null);
+			setDropdownRect(null);
+		};
+		const handleClickOutside = () => {
+			d.setOpenMoreMenu(null);
+			setDropdownRect(null);
+		};
+		window.addEventListener("scroll", handleScroll, true);
+		const id = setTimeout(() => document.addEventListener("click", handleClickOutside), 0);
+		return () => {
+			window.removeEventListener("scroll", handleScroll, true);
+			clearTimeout(id);
+			document.removeEventListener("click", handleClickOutside);
+		};
+	}, [d.openMoreMenu]);
+
 	if (d.loading) {
 		return (
 			<TutorLayout>
@@ -77,6 +103,24 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 						</S.TitleStats>
 					</S.TitleLeft>
 					<S.TitleRight>
+						<S.ExportButton
+							onClick={() => {
+								if (d.selectedProblemIds.length > 0) {
+									d.handleExportBulk();
+								} else {
+									d.handleExportFiltered();
+								}
+							}}
+							disabled={d.isExporting || d.filteredProblems.length === 0}
+							title={
+								d.selectedProblemIds.length > 0
+									? `선택한 ${d.selectedProblemIds.length}개 문제 내보내기`
+									: "현재 필터 결과 전체 내보내기"
+							}
+						>
+							<FaFileExport style={{ marginRight: "0.5rem", flexShrink: 0 }} />
+							{d.isExporting ? "내보내는 중..." : "전체 내보내기"}
+						</S.ExportButton>
 						<S.CreateButton
 							onClick={() => d.navigate("/tutor/problems/create")}
 						>
@@ -216,6 +260,27 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 						코딩테스트에서 사용 중
 					</span>
 				</S.UsageBadgeLegend>
+				<S.UsageBadgeLegend>
+					<span>
+						☑ 체크박스로 여러 문제를 선택한 뒤, 위 &quot;전체 내보내기&quot; 또는 선택 바의
+						&quot;선택한 문제 ZIP으로 내보내기&quot;로 CodeLab problem 포맷 ZIP을 내보낼 수 있습니다.
+					</span>
+				</S.UsageBadgeLegend>
+
+				{d.selectedProblemIds.length > 0 && (
+					<S.SelectionBar>
+						<span>{d.selectedProblemIds.length}개 문제 선택됨</span>
+						<S.SelectionBarButton onClick={d.clearSelection}>
+							선택 해제
+						</S.SelectionBarButton>
+						<S.SelectionBarButton
+							onClick={d.handleExportBulk}
+							disabled={d.isExporting}
+						>
+							{d.isExporting ? "내보내는 중..." : "선택한 문제 ZIP으로 내보내기"}
+						</S.SelectionBarButton>
+					</S.SelectionBar>
+				)}
 
 				<S.ResponsiveWrapper>
 					<S.TableContainer>
@@ -223,6 +288,14 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 							<S.Table>
 								<thead>
 									<tr>
+										<th className="checkbox-cell">
+											<input
+												type="checkbox"
+												checked={d.isAllFilteredSelected}
+												onChange={d.selectAllFiltered}
+												aria-label="전체 선택"
+											/>
+										</th>
 										<th className="id-cell">ID</th>
 										<th className="title-cell">문제 제목</th>
 										<th className="meta-cell">시간 제한</th>
@@ -234,6 +307,14 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 								<tbody>
 									{d.filteredProblems.map((problem) => (
 										<tr key={problem.id}>
+											<td className="checkbox-cell">
+												<input
+													type="checkbox"
+													checked={d.selectedProblemIds.includes(problem.id)}
+													onChange={() => d.toggleProblemSelection(problem.id)}
+													aria-label={`${problem.title} 선택`}
+												/>
+											</td>
 											<S.IdCell>
 												<S.IdText>#{problem.id}</S.IdText>
 											</S.IdCell>
@@ -327,30 +408,61 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 																	$delete
 																	onClick={(e) => {
 																		e.stopPropagation();
-																		d.setOpenMoreMenu(
-																			d.openMoreMenu === problem.id
-																				? null
-																				: problem.id,
-																		);
+																		const btn = e.currentTarget;
+																		const rect = btn.getBoundingClientRect();
+																		if (d.openMoreMenu === problem.id) {
+																			d.setOpenMoreMenu(null);
+																			setDropdownRect(null);
+																		} else {
+																			setDropdownRect({
+																				top: rect.bottom + 4,
+																				right: window.innerWidth - rect.right,
+																			});
+																			d.setOpenMoreMenu(problem.id);
+																		}
 																	}}
 																	title="더보기"
 																>
 																	⋯
 																</S.TableActionButton>
-																{d.openMoreMenu === problem.id && (
-																	<S.MoreDropdown>
-																		<S.MoreMenuItem
-																			$delete
-																			onClick={(e) => {
-																				e.stopPropagation();
-																				d.handleDeleteClick(problem);
-																				d.setOpenMoreMenu(null);
-																			}}
+																{d.openMoreMenu === problem.id &&
+																	dropdownRect &&
+																	createPortal(
+																		<S.MoreDropdown
+																			$fixed
+																			style={
+																				{
+																					"--dropdown-top": `${dropdownRect.top}px`,
+																					"--dropdown-right": `${dropdownRect.right}px`,
+																				} as React.CSSProperties
+																			}
+																			onClick={(e) => e.stopPropagation()}
 																		>
-																			삭제
-																		</S.MoreMenuItem>
-																	</S.MoreDropdown>
-																)}
+																			<S.MoreMenuItem
+																				onClick={(e) => {
+																					e.stopPropagation();
+																					d.handleExportSingle(problem);
+																					d.setOpenMoreMenu(null);
+																					setDropdownRect(null);
+																				}}
+																				style={{ cursor: "pointer" }}
+																			>
+																				내보내기
+																			</S.MoreMenuItem>
+																			<S.MoreMenuItem
+																				$delete
+																				onClick={(e) => {
+																					e.stopPropagation();
+																					d.handleDeleteClick(problem);
+																					d.setOpenMoreMenu(null);
+																					setDropdownRect(null);
+																				}}
+																			>
+																				삭제
+																			</S.MoreMenuItem>
+																		</S.MoreDropdown>,
+																		document.body,
+																	)}
 															</S.MoreMenu>
 														</S.SecondaryActionsLayer>
 													</S.SecondaryActions>

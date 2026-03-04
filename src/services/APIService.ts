@@ -264,20 +264,31 @@ class APIService {
 		return await this.request("/problems");
 	}
 
-	async createProblem(formData: FormData): Promise<any> {
+	/**
+	 * 단일 문제 생성 (JSON body, 백엔드 ProblemCreateRequest DTO)
+	 */
+	async createProblem(request: {
+		title: string;
+		description: string;
+		inputFormat?: string;
+		outputFormat?: string;
+		tags?: string;
+		difficulty?: string;
+		timeLimit?: string;
+		memoryLimit?: string;
+		sampleInputs?: string;
+		testcases: { name: string; input: string; output: string; type?: string }[];
+	}): Promise<number> {
 		const url = `${this.baseURL}/problems`;
 		const accessToken = tokenManager.getAccessToken();
-
-		console.log("문제 생성 API 호출 - 토큰 상태:", {
-			hasToken: !!accessToken,
-			tokenLength: accessToken ? accessToken.length : 0,
-		});
 
 		const config: RequestInit = {
 			method: "POST",
 			credentials: "include",
-			headers: {},
-			body: formData,
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(request),
 		};
 
 		if (accessToken) {
@@ -289,21 +300,22 @@ class APIService {
 			const response = await fetch(url, config);
 
 			if (response.status === 401) {
-				console.log("토큰 만료, 갱신 시도 중...");
-				try {
-					await tokenManager.refreshToken();
-					const newAccessToken = tokenManager.getAccessToken();
-					if (newAccessToken) {
-						(config.headers as Record<string, string>).Authorization =
-							`Bearer ${newAccessToken}`;
-						const retryResponse = await fetch(url, config);
-						return this.handleResponse(retryResponse);
-					}
-				} catch (refreshError) {
-					console.error("토큰 갱신 실패:", refreshError);
-					tokenManager.clearTokens();
-					throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
+				await tokenManager.refreshToken();
+				const newAccessToken = tokenManager.getAccessToken();
+				if (newAccessToken) {
+					(config.headers as Record<string, string>).Authorization =
+						`Bearer ${newAccessToken}`;
+					const retryResponse = await fetch(url, {
+						...config,
+						headers: {
+							...config.headers,
+							Authorization: `Bearer ${newAccessToken}`,
+						},
+					});
+					return this.handleResponse(retryResponse);
 				}
+				tokenManager.clearTokens();
+				throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
 			}
 
 			return this.handleResponse(response);
@@ -328,6 +340,80 @@ class APIService {
 		return await this.request(`/assignments/${assignmentId}/${problemId}`, {
 			method: "POST",
 		});
+	}
+
+	async parseFolderFormatFiles(formData: FormData): Promise<any> {
+		const url = `${this.baseURL}/problems/parse-folder`;
+		const accessToken = tokenManager.getAccessToken();
+
+		const config: RequestInit = {
+			method: "POST",
+			credentials: "include",
+			headers: {},
+			body: formData,
+		};
+
+		if (accessToken) {
+			(config.headers as Record<string, string>).Authorization =
+				`Bearer ${accessToken}`;
+		}
+
+		try {
+			const response = await fetch(url, config);
+
+			if (response.status === 401) {
+				await tokenManager.refreshToken();
+				const newAccessToken = tokenManager.getAccessToken();
+				if (newAccessToken) {
+					(config.headers as Record<string, string>).Authorization =
+						`Bearer ${newAccessToken}`;
+					const retryResponse = await fetch(url, config);
+					return this.handleResponse(retryResponse);
+				}
+			}
+
+			return this.handleResponse(response);
+		} catch (error) {
+			console.error("폴더 형식 파싱 오류:", error);
+			throw error;
+		}
+	}
+
+	async parseFolderFormatZip(formData: FormData): Promise<any> {
+		const url = `${this.baseURL}/problems/parse-folder-zip`;
+		const accessToken = tokenManager.getAccessToken();
+
+		const config: RequestInit = {
+			method: "POST",
+			credentials: "include",
+			headers: {},
+			body: formData,
+		};
+
+		if (accessToken) {
+			(config.headers as Record<string, string>).Authorization =
+				`Bearer ${accessToken}`;
+		}
+
+		try {
+			const response = await fetch(url, config);
+
+			if (response.status === 401) {
+				await tokenManager.refreshToken();
+				const newAccessToken = tokenManager.getAccessToken();
+				if (newAccessToken) {
+					(config.headers as Record<string, string>).Authorization =
+						`Bearer ${newAccessToken}`;
+					const retryResponse = await fetch(url, config);
+					return this.handleResponse(retryResponse);
+				}
+			}
+
+			return this.handleResponse(response);
+		} catch (error) {
+			console.error("폴더 형식 ZIP 파싱 오류:", error);
+			throw error;
+		}
 	}
 
 	async parseZipFile(formData: FormData): Promise<any> {
@@ -448,6 +534,40 @@ class APIService {
 			},
 			body: JSON.stringify(body),
 		});
+	}
+
+	/**
+	 * 단일 문제 Export (HandongJudge 포맷 ZIP 다운로드)
+	 */
+	async exportProblem(problemId: number | string): Promise<Blob> {
+		const url = `${this.baseURL}/problems/${problemId}/export`;
+		const accessToken = tokenManager.getAccessToken();
+		const config: RequestInit = {
+			method: "GET",
+			credentials: "include",
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		};
+		const response = await fetch(url, config);
+		if (!response.ok) throw new Error(`Export 실패: ${response.status}`);
+		return response.blob();
+	}
+
+	/**
+	 * 여러 문제 Bulk Export (HandongJudge 포맷 ZIP 하나로 다운로드)
+	 */
+	async exportProblemsBulk(problemIds: number[]): Promise<Blob> {
+		if (!problemIds.length) throw new Error("내보낼 문제를 선택하세요.");
+		const query = problemIds.map((id) => `ids=${id}`).join("&");
+		const url = `${this.baseURL}/problems/export?${query}`;
+		const accessToken = tokenManager.getAccessToken();
+		const config: RequestInit = {
+			method: "GET",
+			credentials: "include",
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		};
+		const response = await fetch(url, config);
+		if (!response.ok) throw new Error(`Bulk Export 실패: ${response.status}`);
+		return response.blob();
 	}
 
 	async copySection(

@@ -1,7 +1,12 @@
 import { useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
-import type { ProblemFormData, SampleInput, ParsedTestcase } from "../types";
+import type {
+	ProblemFormData,
+	ProblemCreateRequest,
+	TestCaseDto,
+	ParsedTestcase,
+} from "../types";
 
 const initialFormData: ProblemFormData = {
 	title: "",
@@ -16,6 +21,50 @@ const initialFormData: ProblemFormData = {
 	sampleInputs: [{ input: "", output: "" }],
 	testcases: [],
 };
+
+function readFileAsText(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const r = new FileReader();
+		r.onload = () => resolve((r.result as string) ?? "");
+		r.onerror = reject;
+		r.readAsText(file);
+	});
+}
+
+/** File[] (.in/.out) 쌍을 TestCaseDto[]로 변환 */
+async function filesToTestCases(files: File[]): Promise<TestCaseDto[]> {
+	const byBase: Record<
+		string,
+		{ inFile?: File; outFile?: File }
+	> = {};
+	for (const f of files) {
+		const lower = f.name.toLowerCase();
+		const base = f.name.replace(/\.(in|out|ans)$/i, "");
+		if (lower.endsWith(".in")) {
+			if (!byBase[base]) byBase[base] = {};
+			byBase[base].inFile = f;
+		} else if (lower.endsWith(".out") || lower.endsWith(".ans")) {
+			if (!byBase[base]) byBase[base] = {};
+			byBase[base].outFile = f;
+		}
+	}
+	const result: TestCaseDto[] = [];
+	for (const [name, pair] of Object.entries(byBase)) {
+		if (pair.inFile && pair.outFile) {
+			const [input, output] = await Promise.all([
+				readFileAsText(pair.inFile),
+				readFileAsText(pair.outFile),
+			]);
+			result.push({
+				name,
+				input,
+				output,
+				type: "secret",
+			});
+		}
+	}
+	return result;
+}
 
 function convertMarkdownHeadingsToHtml(html: string): string {
 	if (!html) return html;
@@ -48,6 +97,9 @@ export function useProblemCreate() {
 	const descriptionRef = useRef<HTMLDivElement>(null);
 
 	const [zipFile, setZipFile] = useState<File | null>(null);
+	const [folderFormatFolderName, setFolderFormatFolderName] = useState<string | null>(null);
+	/** "descriptionOnly" = 문제 설명만, "full" = 전체(입력/출력/예제 포함) */
+	const [previewMode, setPreviewMode] = useState<"descriptionOnly" | "full">("full");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [parsedTestCases, setParsedTestCases] = useState<ParsedTestcase[]>([]);
@@ -64,6 +116,7 @@ export function useProblemCreate() {
 				setError("ZIP 파일만 업로드 가능합니다.");
 				return;
 			}
+			setFolderFormatFolderName(null);
 			setZipFile(file);
 			setError(null);
 			setLoading(true);
@@ -138,6 +191,98 @@ export function useProblemCreate() {
 			} catch (err) {
 				const message = err instanceof Error ? err.message : "알 수 없는 오류";
 				setError(`ZIP 파일 파싱 중 오류가 발생했습니다: ${message}`);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[],
+	);
+
+	const handleFolderFormatFolderChange = useCallback(
+		async (e: React.ChangeEvent<HTMLInputElement>) => {
+			const fileList = e.target.files;
+			if (!fileList || fileList.length === 0) return;
+			const files = Array.from(fileList);
+			setZipFile(null);
+			const firstPath = (files[0] as File & { webkitRelativePath?: string }).webkitRelativePath || files[0].name;
+			const folderName = firstPath.includes("/") ? firstPath.split("/")[0] : firstPath;
+			setFolderFormatFolderName(folderName);
+			setError(null);
+			setLoading(true);
+			try {
+				const fd = new FormData();
+				for (const file of files) {
+					const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+					fd.append("files", file, path);
+				}
+				const parsedData = await APIService.parseFolderFormatFiles(fd);
+				if (parsedData) {
+					if (parsedData.title) {
+						setFormData((prev) => ({ ...prev, title: parsedData.title }));
+					}
+					if (
+						parsedData.timeLimit != null &&
+						parsedData.timeLimit !== undefined
+					) {
+						setFormData((prev) => ({
+							...prev,
+							timeLimit: String(parsedData.timeLimit),
+						}));
+					}
+					if (
+						parsedData.memoryLimit != null &&
+						parsedData.memoryLimit !== undefined
+					) {
+						setFormData((prev) => ({
+							...prev,
+							memoryLimit: String(parsedData.memoryLimit),
+						}));
+					}
+					if (parsedData.description) {
+						const processedDescription = convertMarkdownHeadingsToHtml(
+							parsedData.description,
+						);
+						const hasHtmlTags = /<[a-z][\s\S]*>/i.test(processedDescription);
+						let htmlDescription: string;
+						if (hasHtmlTags) {
+							htmlDescription = processedDescription;
+						} else {
+							htmlDescription = processedDescription
+								.replace(/\n/g, "<br>")
+								.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+								.replace(/\*(.*?)\*/g, "<em>$1</em>");
+						}
+						setFormData((prev) => ({
+							...prev,
+							description: htmlDescription,
+							descriptionText: parsedData.description,
+						}));
+						if (descriptionRef.current) {
+							descriptionRef.current.innerHTML = htmlDescription;
+						}
+					}
+					const testCases = parsedData.testCases ?? parsedData.testcases ?? [];
+					if (testCases.length > 0) {
+						const sampleTestCases = testCases.filter(
+							(tc: ParsedTestcase) => tc.type === "sample",
+						);
+						if (sampleTestCases.length > 0) {
+							setFormData((prev) => ({
+								...prev,
+								sampleInputs: sampleTestCases.map((tc: ParsedTestcase) => ({
+									input: tc.input ?? "",
+									output: tc.output ?? "",
+								})),
+							}));
+						}
+						setParsedTestCases(testCases);
+					} else {
+						setParsedTestCases([]);
+					}
+				}
+			} catch (err) {
+				const message = err instanceof Error ? err.message : "알 수 없는 오류";
+				setError(`폴더 형식 파싱 중 오류가 발생했습니다: ${message}`);
 			} finally {
 				setLoading(false);
 			}
@@ -294,6 +439,22 @@ export function useProblemCreate() {
 		[formData],
 	);
 
+	/** 전체 미리보기용: 본문(mainOnly) + 입력/출력/예제 (중복 방지 위해 mainOnly 사용) */
+	const getFullDescriptionForPreview = useCallback(() => {
+		const desc = formData.description || formData.descriptionText || "";
+		const normalized = desc.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+		const match = normalized.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+		const mainOnly =
+			match && match.index != null ? normalized.slice(0, match.index).trim() : desc;
+		return {
+			title: formData.title,
+			description: mainOnly,
+			inputFormat: formData.inputFormat,
+			outputFormat: formData.outputFormat,
+			sampleInputs: formData.sampleInputs,
+		};
+	}, [formData]);
+
 	/** 미리보기용: 입력/출력/예제는 폼에서만 보이게, 미리보기에는 문제 설명만 표시 */
 	const getDescriptionOnlyForPreview = useCallback(
 		() => {
@@ -379,54 +540,36 @@ export function useProblemCreate() {
 			}
 
 			try {
-				const submitFormData = new FormData();
-				submitFormData.append("title", formData.title);
-				submitFormData.append("description", getFullDescriptionForBackend());
-				submitFormData.append("inputFormat", formData.inputFormat);
-				submitFormData.append("outputFormat", formData.outputFormat);
-				submitFormData.append("tags", JSON.stringify(formData.tags));
-				submitFormData.append("difficulty", formData.difficulty?.trim() || "1");
-				submitFormData.append("timeLimit", formData.timeLimit || "0");
-				submitFormData.append("memoryLimit", formData.memoryLimit || "0");
-				submitFormData.append(
-					"sampleInputs",
-					JSON.stringify(formData.sampleInputs),
-				);
+				const testcasesFromParsed: TestCaseDto[] = parsedTestCases
+					.filter((tc) => tc.input?.trim() && tc.output?.trim())
+					.map((tc, idx) => ({
+						name: tc.name ?? `testcase_${idx}`,
+						input: tc.input ?? "",
+						output: tc.output ?? "",
+						type: (tc.type === "sample" ? "sample" : "secret") as "sample" | "secret",
+					}));
 
-				let testcaseIndex = 0;
-				parsedTestCases.forEach((testcase) => {
-					const baseName = testcase.name ?? `testcase_${testcaseIndex}`;
-					if (testcase.input) {
-						const inputBlob = new Blob([testcase.input], {
-							type: "text/plain",
-						});
-						const inputFile = new File([inputBlob], `${baseName}.in`, {
-							type: "text/plain",
-						});
-						submitFormData.append(`testcase_${testcaseIndex}`, inputFile);
-						testcaseIndex++;
-					}
-					if (testcase.output) {
-						const outputBlob = new Blob([testcase.output], {
-							type: "text/plain",
-						});
-						const outputFile = new File([outputBlob], `${baseName}.ans`, {
-							type: "text/plain",
-						});
-						submitFormData.append(`testcase_${testcaseIndex}`, outputFile);
-						testcaseIndex++;
-					}
-				});
-				formData.testcases.forEach((file) => {
-					submitFormData.append(`testcase_${testcaseIndex}`, file);
-					testcaseIndex++;
-				});
+				const testcasesFromFiles = await filesToTestCases(formData.testcases);
+				const testcases: TestCaseDto[] = [
+					...testcasesFromParsed,
+					...testcasesFromFiles,
+				];
 
-				const createResult = await APIService.createProblem(submitFormData);
-				const newProblemId =
-					typeof createResult === "number"
-						? createResult
-						: (createResult?.id ?? createResult?.data);
+				const request: ProblemCreateRequest = {
+					title: formData.title,
+					description: getFullDescriptionForBackend(),
+					inputFormat: formData.inputFormat || undefined,
+					outputFormat: formData.outputFormat || undefined,
+					tags: JSON.stringify(formData.tags),
+					difficulty: formData.difficulty?.trim() || "1",
+					timeLimit: formData.timeLimit || "0",
+					memoryLimit: formData.memoryLimit || "0",
+					sampleInputs: JSON.stringify(formData.sampleInputs),
+					testcases,
+				};
+
+				const createResult = await APIService.createProblem(request);
+				const newProblemId = createResult;
 
 				const fromAssignmentId = locationState?.fromAssignmentId;
 				const sectionId = locationState?.sectionId;
@@ -474,6 +617,13 @@ export function useProblemCreate() {
 		if (el) el.value = "";
 	}, []);
 
+	const clearFolderFormatZip = useCallback(() => {
+		setFolderFormatFolderName(null);
+		setParsedTestCases([]);
+		const dirEl = document.getElementById("folderFormatDirInput") as HTMLInputElement;
+		if (dirEl) dirEl.value = "";
+	}, []);
+
 	return {
 		navigate,
 		descriptionRef,
@@ -489,6 +639,8 @@ export function useProblemCreate() {
 		currentTag,
 		setCurrentTag,
 		handleZipFileChange,
+		handleFolderFormatFolderChange,
+		folderFormatFolderName,
 		handleInputChange,
 		handleTagAdd,
 		handleTagKeyPress,
@@ -503,9 +655,13 @@ export function useProblemCreate() {
 		wrapWithMarkdown,
 		insertMarkdownHeading,
 		getFullDescription,
+		getFullDescriptionForPreview,
 		getDescriptionOnlyForPreview,
+		previewMode,
+		setPreviewMode,
 		handleSubmit,
 		clearZipFile,
+		clearFolderFormatZip,
 		fieldErrors,
 		clearFieldError,
 	};
