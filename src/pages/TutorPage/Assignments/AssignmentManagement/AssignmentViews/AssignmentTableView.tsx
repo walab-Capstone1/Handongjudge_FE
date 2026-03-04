@@ -85,7 +85,13 @@ const AssignmentTableView: React.FC<AssignmentTableViewProps> = ({
 						<th className="tutor-assignment-title-cell">과제 제목</th>
 						<th className="tutor-assignment-due-date-cell">마감일</th>
 						<th className="tutor-assignment-problem-count-cell">문제 수</th>
-						<th className="tutor-assignment-submission-cell">제출 현황</th>
+						<th
+							className="tutor-assignment-submission-cell"
+							title="해당 과제의 모든 문제를 1번 이상 제출한 학생 수 / 분반 전체 학생 수"
+						>
+							모든 문제 완료
+							<span className="tutor-column-subtitle">(명/전체)</span>
+						</th>
 						<th className="tutor-assignment-actions-cell">관리</th>
 					</tr>
 				</thead>

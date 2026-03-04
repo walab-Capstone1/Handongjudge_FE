@@ -776,12 +776,26 @@ export const SubmissionInfo = styled.div`
   margin-top: 0.25rem;
 `;
 
-export const SubmissionStatus = styled.span<{ $onTime?: boolean }>`
+export const SubmissionStatus = styled.span<{ $onTime?: boolean; $late?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.25rem;
   font-weight: 600;
-  color: ${(p) => (p.$onTime ? "#10b981" : "#ef4444")};
+  color: ${(p) =>
+    p.$onTime ? "#10b981" : p.$late ? "#eab308" : "#94a3b8"};
+`;
+
+export const GradeLegend = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  & span {
+    display: inline-flex;
+    align-items: center;
+  }
 `;
 
 export const SubmissionTime = styled.span`
@@ -880,7 +894,7 @@ export const TdTotalCell = styled.td`
 `;
 
 export const CourseTableContainer = styled(TableContainer)`
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 `;
 
 export const CourseTable = styled(Table)``;

@@ -56,7 +56,10 @@ const ProgressListView: FC<ProgressListViewProps> = ({
 								<th>과제 제목</th>
 								<th>마감일</th>
 								<th>문제 수</th>
-								<th>제출 현황</th>
+								<th title="해당 과제의 모든 문제를 1번 이상 제출한 학생 수 / 분반 전체 학생 수">
+									모든 문제 완료
+									<S.ColumnSubtitle>(명/전체)</S.ColumnSubtitle>
+								</th>
 							</tr>
 						</thead>
 						<tbody>
