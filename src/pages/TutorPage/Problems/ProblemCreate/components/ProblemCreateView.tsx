@@ -218,7 +218,7 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 												? "파싱 중..."
 												: d.folderFormatFolderName
 													? `✓ ${d.folderFormatFolderName}`
-													: "폴더 형식 폴더 선택"}
+													: "문제 폴더 선택"}
 										</S.FileLabelInline>
 										{d.folderFormatFolderName && !d.loading && (
 											<S.RemoveZipButton
