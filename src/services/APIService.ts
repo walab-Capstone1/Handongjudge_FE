@@ -570,6 +570,44 @@ class APIService {
 		return response.blob();
 	}
 
+	/**
+	 * Bulk Parse (HandongJudge 포맷 ZIP 파싱)
+	 */
+	async parseBulkZip(formData: FormData): Promise<any> {
+		const url = `${this.baseURL}/problems/bulk/parse`;
+		let accessToken = tokenManager.getAccessToken();
+		const doFetch = () => {
+			const config: RequestInit = {
+				method: "POST",
+				credentials: "include",
+				headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+				body: formData,
+			};
+			return fetch(url, config);
+		};
+		let response = await doFetch();
+		if (response.status === 401) {
+			await tokenManager.refreshToken();
+			accessToken = tokenManager.getAccessToken();
+			if (accessToken) response = await doFetch();
+		}
+		if (!response.ok) {
+			const err = await response.json().catch(() => ({}));
+			throw new Error(err.message || `Bulk Parse 실패: ${response.status}`);
+		}
+		return response.json();
+	}
+
+	/**
+	 * Bulk Create (승인된 문제 목록 생성)
+	 */
+	async bulkCreateProblems(problems: any[]): Promise<any> {
+		return await this.request("/problems/bulk", {
+			method: "POST",
+			body: JSON.stringify({ problems }),
+		});
+	}
+
 	async copySection(
 		sectionId: number | string,
 		sectionNumber: string,
