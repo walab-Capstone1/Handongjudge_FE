@@ -536,6 +536,40 @@ class APIService {
 		});
 	}
 
+	/**
+	 * 단일 문제 Export (HandongJudge 포맷 ZIP 다운로드)
+	 */
+	async exportProblem(problemId: number | string): Promise<Blob> {
+		const url = `${this.baseURL}/problems/${problemId}/export`;
+		const accessToken = tokenManager.getAccessToken();
+		const config: RequestInit = {
+			method: "GET",
+			credentials: "include",
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		};
+		const response = await fetch(url, config);
+		if (!response.ok) throw new Error(`Export 실패: ${response.status}`);
+		return response.blob();
+	}
+
+	/**
+	 * 여러 문제 Bulk Export (HandongJudge 포맷 ZIP 하나로 다운로드)
+	 */
+	async exportProblemsBulk(problemIds: number[]): Promise<Blob> {
+		if (!problemIds.length) throw new Error("내보낼 문제를 선택하세요.");
+		const query = problemIds.map((id) => `ids=${id}`).join("&");
+		const url = `${this.baseURL}/problems/export?${query}`;
+		const accessToken = tokenManager.getAccessToken();
+		const config: RequestInit = {
+			method: "GET",
+			credentials: "include",
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		};
+		const response = await fetch(url, config);
+		if (!response.ok) throw new Error(`Bulk Export 실패: ${response.status}`);
+		return response.blob();
+	}
+
 	async copySection(
 		sectionId: number | string,
 		sectionNumber: string,
