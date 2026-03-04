@@ -293,19 +293,21 @@ export const ProblemTitle = styled.span`
   flex: 1;
 `;
 
-export const ProblemBadge = styled.span<{ $status: ProblemStatus }>`
+export const ProblemBadge = styled.span<{ $status: ProblemStatus; $late?: boolean }>`
   font-size: 12px;
   font-weight: 600;
   padding: 6px 14px;
   border-radius: 14px;
   background: ${(props) =>
-    props.$status === "ACCEPTED"
-      ? "#22C55E"
-      : props.$status === "SUBMITTED"
-        ? "#667EEA"
-        : "#EEEEEE"};
+    props.$late
+      ? "#EAB308"
+      : props.$status === "ACCEPTED"
+        ? "#22C55E"
+        : props.$status === "SUBMITTED"
+          ? "#667EEA"
+          : "#EEEEEE"};
   color: ${(props) =>
-    props.$status === "ACCEPTED" || props.$status === "SUBMITTED"
+    props.$status === "ACCEPTED" || props.$status === "SUBMITTED" || props.$late
       ? "#FFFFFF"
       : "#888888"};
 `;

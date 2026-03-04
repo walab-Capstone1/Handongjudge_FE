@@ -56,14 +56,11 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 	isAssignmentActive = true,
 	userRole = null,
 }) => {
-	// 관리자/튜터는 비활성화된 과제도 제출 가능
+	// 관리자/튜터는 비활성화된 과제도 제출 가능; 마감일 지나면 지각 제출 가능(버튼 비활성화 안 함)
 	const isManager = userRole === "ADMIN" || userRole === "TUTOR";
-	const isSubmitDisabled = isSubmitting || isDeadlinePassed || (!isAssignmentActive && !isManager);
-	const disabledReason = isDeadlinePassed
-		? "과제 마감일이 지났습니다"
-		: !isAssignmentActive && !isManager
-			? "과제가 비활성화되었습니다"
-			: "";
+	const isSubmitDisabled = isSubmitting || (!isAssignmentActive && !isManager);
+	const disabledReason =
+		!isAssignmentActive && !isManager ? "과제가 비활성화되었습니다" : "";
 	const getBaseExtensions = () => [
 		bracketMatching(),
 		foldGutter(),

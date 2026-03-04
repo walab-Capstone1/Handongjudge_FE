@@ -599,16 +599,29 @@ export function useAssignmentManagement() {
 			}
 			try {
 				const fd = new FormData();
-				fd.append("title", problemFormData.title);
-				if (problemFormData.descriptionFile)
-					fd.append("descriptionFile", problemFormData.descriptionFile);
-				if (problemFormData.zipFile)
-					fd.append("zipFile", problemFormData.zipFile);
-				const createResult = await APIService.createProblem(fd);
-				const newProblemId =
-					typeof createResult === "number"
-						? createResult
-						: (createResult?.id ?? createResult?.data);
+				fd.append("zipFile", problemFormData.zipFile);
+				const parsed = await APIService.parseZipFile(fd);
+				const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
+				const testcases = testCases.map(
+					(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+						name: tc.name ?? `testcase_${idx}`,
+						input: tc.input ?? "",
+						output: tc.output ?? "",
+						type: tc.type === "sample" ? "sample" : "secret",
+					}),
+				);
+				const createRequest = {
+					title: problemFormData.title.trim(),
+					description: parsed?.description ?? "",
+					timeLimit: String(parsed?.timeLimit ?? 1),
+					memoryLimit: String(parsed?.memoryLimit ?? 256),
+					tags: JSON.stringify([]),
+					difficulty: parsed?.difficulty ?? "1",
+					sampleInputs: JSON.stringify([]),
+					testcases,
+				};
+				const createResult = await APIService.createProblem(createRequest);
+				const newProblemId = createResult;
 
 				if (
 					selectedAssignment &&
@@ -687,12 +700,28 @@ export function useAssignmentManagement() {
 			}
 			try {
 				const fd = new FormData();
-				fd.append("title", problemFormData.title);
-				if (problemFormData.descriptionFile)
-					fd.append("descriptionFile", problemFormData.descriptionFile);
-				if (problemFormData.zipFile)
-					fd.append("zipFile", problemFormData.zipFile);
-				const response = await APIService.createProblem(fd);
+				fd.append("zipFile", problemFormData.zipFile);
+				const parsed = await APIService.parseZipFile(fd);
+				const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
+				const testcases = testCases.map(
+					(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+						name: tc.name ?? `testcase_${idx}`,
+						input: tc.input ?? "",
+						output: tc.output ?? "",
+						type: tc.type === "sample" ? "sample" : "secret",
+					}),
+				);
+				const createRequest = {
+					title: problemFormData.title.trim(),
+					description: parsed?.description ?? "",
+					timeLimit: String(parsed?.timeLimit ?? 1),
+					memoryLimit: String(parsed?.memoryLimit ?? 256),
+					tags: JSON.stringify([]),
+					difficulty: parsed?.difficulty ?? "1",
+					sampleInputs: JSON.stringify([]),
+					testcases,
+				};
+				const response = await APIService.createProblem(createRequest);
 				const problemId =
 					typeof response === "number"
 						? response
@@ -805,13 +834,31 @@ export function useAssignmentManagement() {
 				const created: { id: number; title: string }[] = [];
 				for (let i = 0; i < bulkProblemData.problems.length; i++) {
 					const p = bulkProblemData.problems[i];
+					if (!p.zipFile) continue;
 					const fd = new FormData();
-					fd.append("title", p.title);
-					if (p.descriptionFile)
-						fd.append("descriptionFile", p.descriptionFile);
-					if (p.zipFile) fd.append("zipFile", p.zipFile);
+					fd.append("zipFile", p.zipFile);
+					const parsed = await APIService.parseZipFile(fd);
+					const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
+					const testcases = testCases.map(
+						(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+							name: tc.name ?? `testcase_${idx}`,
+							input: tc.input ?? "",
+							output: tc.output ?? "",
+							type: tc.type === "sample" ? "sample" : "secret",
+						}),
+					);
+					const createRequest = {
+						title: p.title.trim(),
+						description: parsed?.description ?? "",
+						timeLimit: String(parsed?.timeLimit ?? 1),
+						memoryLimit: String(parsed?.memoryLimit ?? 256),
+						tags: JSON.stringify([]),
+						difficulty: parsed?.difficulty ?? "1",
+						sampleInputs: JSON.stringify([]),
+						testcases,
+					};
 					try {
-						const res = await APIService.createProblem(fd);
+						const res = await APIService.createProblem(createRequest);
 						const id =
 							typeof res === "number" ? res : (res as { id: number }).id;
 						created.push({ id, title: p.title });

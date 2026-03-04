@@ -46,6 +46,7 @@ import ProblemSetManagement from "./pages/TutorPage/Problems/ProblemSetManagemen
 import ProblemSetEdit from "./pages/TutorPage/Problems/ProblemSetEdit";
 import ProblemCreate from "./pages/TutorPage/Problems/ProblemCreate";
 import ProblemEdit from "./pages/TutorPage/Problems/ProblemEdit";
+import ProblemImport from "./pages/TutorPage/Problems/ProblemImport";
 import SettingsPage from "./pages/TutorPage/Settings/SettingsPage";
 import CodingTestManagement from "./pages/TutorPage/CodingTests/CodingTestManagement";
 // SuperAdmin (시스템 관리자)
@@ -316,6 +317,16 @@ const App: React.FC = () => {
 							<AdminRoute>
 								<TutorAccessGate>
 									<ProblemManagement />
+								</TutorAccessGate>
+							</AdminRoute>
+						}
+					/>
+					<Route
+						path="/tutor/problems/import"
+						element={
+							<AdminRoute>
+								<TutorAccessGate>
+									<ProblemImport />
 								</TutorAccessGate>
 							</AdminRoute>
 						}

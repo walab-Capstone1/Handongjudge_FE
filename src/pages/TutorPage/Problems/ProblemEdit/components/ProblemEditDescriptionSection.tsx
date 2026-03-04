@@ -10,7 +10,8 @@ type ProblemEditDescriptionSectionProps = Pick<
 	| "formData"
 	| "setFormData"
 	| "enableFullEdit"
-	| "getFullDescription"
+	| "getDescriptionOnlyForPreview"
+	| "getFullPreviewProps"
 	| "insertMarkdownText"
 	| "wrapWithMarkdown"
 	| "insertMarkdownHeading"
@@ -25,7 +26,8 @@ const ProblemEditDescriptionSection: React.FC<
 	formData,
 	setFormData,
 	enableFullEdit,
-	getFullDescription,
+	getDescriptionOnlyForPreview,
+	getFullPreviewProps,
 	insertMarkdownText,
 	wrapWithMarkdown,
 	insertMarkdownHeading,
@@ -57,7 +59,7 @@ const ProblemEditDescriptionSection: React.FC<
 				<S.Preview>
 					<S.PreviewHeader>미리보기</S.PreviewHeader>
 					<S.PreviewContent>
-						<ProblemPreview {...getFullDescription()} />
+						<ProblemPreview {...getFullPreviewProps()} />
 					</S.PreviewContent>
 				</S.Preview>
 			</S.DescriptionEditor>
@@ -239,7 +241,7 @@ const ProblemEditDescriptionSection: React.FC<
 				<S.Preview>
 					<S.PreviewHeader>미리보기</S.PreviewHeader>
 					<S.PreviewContent>
-						<ProblemPreview {...getFullDescription()} />
+						<ProblemPreview {...getFullPreviewProps()} />
 					</S.PreviewContent>
 				</S.Preview>
 			</S.DescriptionEditor>

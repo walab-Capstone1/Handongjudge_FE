@@ -97,7 +97,8 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 							formData={d.formData}
 							setFormData={d.setFormData}
 							enableFullEdit={d.enableFullEdit}
-							getFullDescription={d.getFullDescription}
+							getDescriptionOnlyForPreview={d.getDescriptionOnlyForPreview}
+							getFullPreviewProps={d.getFullPreviewProps}
 							insertMarkdownText={d.insertMarkdownText}
 							wrapWithMarkdown={d.wrapWithMarkdown}
 							insertMarkdownHeading={d.insertMarkdownHeading}
@@ -123,10 +124,12 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 								parsedTestCases={d.parsedTestCases}
 								showParsedTestCases={d.showParsedTestCases}
 								setShowParsedTestCases={d.setShowParsedTestCases}
-								handleTestcaseAdd={d.handleTestcaseAdd}
-								handleTestcaseRemove={d.handleTestcaseRemove}
-								handleTestcaseChange={d.handleTestcaseChange}
-							/>
+						handleTestcaseAdd={d.handleTestcaseAdd}
+							handleTestcaseRemove={d.handleTestcaseRemove}
+							handleTestcaseChange={d.handleTestcaseChange}
+							handleParsedTestcaseRemove={d.handleParsedTestcaseRemove}
+							handleParsedTestcaseChange={d.handleParsedTestcaseChange}
+						/>
 						</S.FormGrid>
 
 						<S.Actions>

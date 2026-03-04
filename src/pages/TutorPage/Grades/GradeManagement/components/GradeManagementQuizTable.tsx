@@ -1,5 +1,5 @@
 import type React from "react";
-import { FaCode, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaCode, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
 import * as S from "../styles";
 import type { StudentGradeRow, QuizItem, EditingGrade } from "../types";
 
@@ -52,6 +52,11 @@ export default function GradeManagementQuizTable({
 
 	return (
 		<S.CourseTableContainer>
+			<S.GradeLegend>
+				<span><FaCheckCircle style={{ color: "#22c55e", marginRight: 4 }} /> 제시간 제출</span>
+				<span><FaExclamationTriangle style={{ color: "#eab308", marginRight: 4 }} /> 지각 제출</span>
+				<span><FaTimesCircle style={{ color: "#94a3b8", marginRight: 4 }} /> 미제출</span>
+			</S.GradeLegend>
 			<S.CourseTableWithStickyRight>
 				<colgroup>
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
@@ -139,20 +144,16 @@ export default function GradeManagementQuizTable({
 													(selectedQuiz?.endTime &&
 														new Date() > new Date(selectedQuiz.endTime))) &&
 													(problem.submitted ? (
-														<S.SubmissionStatus $onTime={problem.isOnTime}>
+														<S.SubmissionStatus $onTime={problem.isOnTime} $late={!problem.isOnTime}>
 															{problem.isOnTime ? (
-																<>
-																	<FaCheckCircle />
-																</>
+																<FaCheckCircle title="제시간 제출" />
 															) : (
-																<>
-																	<FaTimesCircle /> 기한 초과
-																</>
+																<FaExclamationTriangle title="지각 제출" />
 															)}
 														</S.SubmissionStatus>
 													) : (
-														<S.SubmissionStatus $onTime={false}>
-															<FaTimesCircle />
+														<S.SubmissionStatus $onTime={false} $late={false}>
+															<FaTimesCircle title="미제출" />
 														</S.SubmissionStatus>
 													))}
 											</S.ScoreRow>

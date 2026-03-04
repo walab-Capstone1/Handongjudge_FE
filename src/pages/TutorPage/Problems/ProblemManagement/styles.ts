@@ -105,6 +105,60 @@ export const CreateButton = styled.button`
   }
 `;
 
+export const ExportButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  white-space: nowrap;
+
+  &:hover {
+    background: white;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+`;
+
+export const SelectionBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+`;
+
+export const SelectionBarButton = styled.button`
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+`;
+
 // Filters Section
 export const FiltersSection = styled.div`
   display: flex;
@@ -220,6 +274,12 @@ export const Table = styled.table`
     &.actions-cell {
       text-align: right;
     }
+
+    &.checkbox-cell {
+      width: 48px;
+      text-align: center;
+      padding: 0.75rem;
+    }
   }
 
   td {
@@ -228,6 +288,12 @@ export const Table = styled.table`
     color: #64748b;
     font-size: 0.95rem;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+
+    &.checkbox-cell {
+      width: 48px;
+      text-align: center;
+      padding: 0.75rem;
+    }
   }
 
   tbody tr:hover {
@@ -427,19 +493,20 @@ export const SecondaryActionsLayer = styled.div`
 export const MoreMenu = styled.div`
   position: relative;
   display: inline-block;
-  z-index: 100;
+  z-index: 1;
 `;
 
-export const MoreDropdown = styled.div`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 0.375rem;
+export const MoreDropdown = styled.div<{ $fixed?: boolean }>`
+  position: ${(p) => (p.$fixed ? "fixed" : "absolute")};
+  top: ${(p) => (p.$fixed ? "var(--dropdown-top, 0)" : "100%")};
+  right: ${(p) => (p.$fixed ? "var(--dropdown-right, 0)" : "0")};
+  left: ${(p) => (p.$fixed ? "auto" : "auto")};
+  margin-top: ${(p) => (p.$fixed ? "0" : "0.375rem")};
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 10000 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 999999 !important;
   min-width: auto;
   width: auto;
   display: flex;

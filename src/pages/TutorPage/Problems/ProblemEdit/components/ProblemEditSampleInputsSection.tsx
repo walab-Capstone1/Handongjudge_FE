@@ -86,9 +86,7 @@ const ProblemEditSampleInputsSection: React.FC<
 		) : (
 			<>
 				{formData.sampleInputs.map((sample, idx) => (
-					<S.SampleItem
-						key={`sample-${idx}-${sample.input?.slice(0, 10) ?? ""}-${sample.output?.slice(0, 10) ?? ""}`}
-					>
+					<S.SampleItem key={`sample-${idx}`}>
 						<S.SampleHeader>
 							<span>예제 #{idx + 1}</span>
 							{formData.sampleInputs.length > 1 && (

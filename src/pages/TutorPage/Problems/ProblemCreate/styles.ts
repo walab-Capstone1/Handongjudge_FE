@@ -376,12 +376,41 @@ export const Preview = styled.div`
 `;
 
 export const PreviewHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   padding: 0.75rem 1rem;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
   font-weight: 500;
   font-size: 0.875rem;
   color: #64748b;
+`;
+
+export const PreviewModeToggle = styled.div`
+  display: flex;
+  gap: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: white;
+`;
+
+export const PreviewModeButton = styled.button<{ $active?: boolean }>`
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+  background: ${(p) => (p.$active ? "#667eea" : "transparent")};
+  color: ${(p) => (p.$active ? "white" : "#64748b")};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${(p) => (p.$active ? "#5a67d8" : "#f1f5f9")};
+  }
 `;
 
 export const PreviewContent = styled.div`
@@ -681,6 +710,9 @@ export const ParsedTestcaseHeader = styled.div`
   border-bottom: 1px solid #cbd5e1;
   font-size: 0.9rem;
   color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 export const ParsedTestcaseContent = styled.div`

@@ -11,6 +11,8 @@ export interface ProblemPreviewProps {
 	inputFormat: string;
 	outputFormat: string;
 	sampleInputs: SampleInput[];
+	/** true면 미리보기에 본문만 표시(입력/출력/예제는 폼에서만 보이게) */
+	descriptionOnly?: boolean;
 }
 
 // react-markdown v10에서는 'inline' prop이 제거됨.
@@ -94,29 +96,41 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 	inputFormat,
 	outputFormat,
 	sampleInputs,
+	descriptionOnly: descriptionOnlyMode = false,
 }) => {
 	const hasContent =
 		description ||
-		inputFormat ||
-		outputFormat ||
-		(sampleInputs && sampleInputs.some((s) => s.input || s.output));
+		(!descriptionOnlyMode &&
+			(inputFormat ||
+				outputFormat ||
+				(sampleInputs && sampleInputs.some((s) => s.input || s.output))));
 
 	if (!hasContent) {
 		return <S.PreviewEmpty>문제 설명을 입력하세요</S.PreviewEmpty>;
 	}
 
+	// 본문에 "## 입력 형식" 이하가 포함돼 있으면 미리보기에서는 제거 (전용 필드에서만 한 번 표시)
+	const descOnly =
+		description && description.includes("입력 형식")
+			? (() => {
+					const n = description.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+					const m = n.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+					return m && m.index != null ? n.slice(0, m.index).trim() : description;
+				})()
+			: description || "";
+
 	return (
 		<div>
 	
-		{description && (
+		{descOnly && (
 		<S.PreviewSection>
 			<ReactMarkdown components={mdComponents} rehypePlugins={[rehypeRaw]}>
-				{prepareMarkdown(description)}
+				{prepareMarkdown(descOnly)}
 			</ReactMarkdown>
 		</S.PreviewSection>
 	)}
 
-	{inputFormat && (
+	{!descriptionOnlyMode && inputFormat && (
 		<S.PreviewSection>
 			<S.PreviewH2>입력</S.PreviewH2>
 			<ReactMarkdown components={mdComponents} rehypePlugins={[rehypeRaw]}>
@@ -125,7 +139,7 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 		</S.PreviewSection>
 	)}
 
-	{outputFormat && (
+	{!descriptionOnlyMode && outputFormat && (
 		<S.PreviewSection>
 			<S.PreviewH2>출력</S.PreviewH2>
 			<ReactMarkdown components={mdComponents} rehypePlugins={[rehypeRaw]}>
@@ -134,7 +148,7 @@ const ProblemPreview: React.FC<ProblemPreviewProps> = ({
 		</S.PreviewSection>
 	)}
 
-			{sampleInputs && sampleInputs.some((s) => s.input || s.output) && (
+			{!descriptionOnlyMode && sampleInputs && sampleInputs.some((s) => s.input || s.output) && (
 				<S.PreviewSection>
 					<S.PreviewH2>예제</S.PreviewH2>
 				{sampleInputs.map((sample, index) => {

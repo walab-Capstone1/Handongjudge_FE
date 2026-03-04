@@ -6,6 +6,8 @@ export interface Problem {
 	description?: string;
 	submitted: boolean;
 	status: ProblemStatus;
+	/** 제출 시 마감일 이전 여부 (미제출이면 undefined) */
+	isOnTime?: boolean;
 }
 
 export interface Assignment {

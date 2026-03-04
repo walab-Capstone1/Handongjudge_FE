@@ -150,11 +150,11 @@ export default function CourseAssignmentsPageView(
 																}
 															>
 																<S.ProblemTitle>{problem.title}</S.ProblemTitle>
-																<S.ProblemBadge $status={problem.status}>
+																<S.ProblemBadge $status={problem.status} $late={problem.status !== "NOT_SUBMITTED" && problem.isOnTime === false}>
 																	{problem.status === "ACCEPTED"
-																		? "정답"
+																		? (problem.isOnTime === false ? "지각 정답" : "정답")
 																		: problem.status === "SUBMITTED"
-																			? "제출"
+																			? (problem.isOnTime === false ? "지각 제출" : "제출")
 																			: "미제출"}
 																</S.ProblemBadge>
 															</S.AccordionProblemItem>
