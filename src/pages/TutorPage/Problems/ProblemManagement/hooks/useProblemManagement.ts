@@ -421,7 +421,11 @@ export function useProblemManagement() {
 			try {
 				setIsExporting(true);
 				const blob = await APIService.exportProblem(problem.id);
-				triggerDownload(blob, `problem-${problem.id}.zip`);
+				const safeName = (problem.title || `problem-${problem.id}`)
+					.replace(/[/\\:*?"<>|]/g, "_")
+					.replace(/\s+/g, "_")
+					.trim() || `problem-${problem.id}`;
+				triggerDownload(blob, `${safeName}.zip`);
 				setAlertMessage(`문제 "${problem.title}" 내보내기가 완료되었습니다.`);
 				setAlertType("success");
 				setTimeout(() => setAlertMessage(null), 3000);

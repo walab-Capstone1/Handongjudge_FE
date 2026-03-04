@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { FaFileExport } from "react-icons/fa";
+import { FaFileExport, FaFileImport } from "react-icons/fa";
 import TutorLayout from "../../../../../layouts/TutorLayout";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -103,6 +103,13 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 						</S.TitleStats>
 					</S.TitleLeft>
 					<S.TitleRight>
+						<S.ExportButton
+							style={{ background: "rgba(255,255,255,0.85)" }}
+							onClick={() => d.navigate("/tutor/problems/import")}
+						>
+							<FaFileImport style={{ marginRight: "0.5rem", flexShrink: 0 }} />
+							문제 가져오기
+						</S.ExportButton>
 						<S.ExportButton
 							onClick={() => {
 								if (d.selectedProblemIds.length > 0) {
