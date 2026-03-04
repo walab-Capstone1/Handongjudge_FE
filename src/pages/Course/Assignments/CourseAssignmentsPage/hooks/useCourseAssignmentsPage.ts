@@ -114,7 +114,7 @@ export function useCourseAssignmentsPage() {
 								}) => {
 									const statusEntry = problemsStatus.find(
 										(s: { problemId: number }) => s.problemId === problem.id,
-									);
+									) as { problemId: number; status: string; isOnTime?: boolean } | undefined;
 									const raw = statusEntry
 										? statusEntry.status
 										: "NOT_SUBMITTED";
@@ -131,6 +131,7 @@ export function useCourseAssignmentsPage() {
 										description: problem.description,
 										submitted,
 										status: problemStatus,
+										isOnTime: statusEntry?.isOnTime,
 									};
 								},
 							);

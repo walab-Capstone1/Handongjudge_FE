@@ -122,8 +122,8 @@ const AssignmentListView: React.FC<AssignmentListViewProps> = ({
 										{assignment.problemCount || 0}개
 									</span>
 								</span>
-								<span className="tutor-assignment-meta-item">
-									<span className="tutor-meta-label">제출현황</span>
+								<span className="tutor-assignment-meta-item" title="해당 과제의 모든 문제를 1번 이상 제출한 학생 수 / 분반 전체 학생 수">
+									<span className="tutor-meta-label">모든 문제 완료 (명/전체)</span>
 									<span className="tutor-meta-value">
 										{submissionStats[assignment.id]
 											? `${submissionStats[assignment.id].submittedStudents}/${submissionStats[assignment.id].totalStudents}`

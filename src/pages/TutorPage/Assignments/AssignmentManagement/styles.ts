@@ -654,8 +654,18 @@ export const TableViewWrapper = styled.div`
     font-size: 0.95rem;
     color: #1e293b;
     font-weight: 600;
-    white-space: nowrap;
     text-align: right;
+  }
+
+  .tutor-assignment-submission-cell {
+    white-space: normal;
+  }
+  .tutor-assignment-submission-cell .tutor-column-subtitle {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    opacity: 0.85;
+    margin-top: 2px;
   }
 
   .tutor-table-empty {
