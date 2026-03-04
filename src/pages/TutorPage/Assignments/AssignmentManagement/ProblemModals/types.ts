@@ -180,6 +180,8 @@ export interface ProblemListEditFormHandlers {
 	handleTestcaseAdd: (e: ChangeEvent<HTMLInputElement>) => void;
 	handleTestcaseRemove: (index: number) => void;
 	handleTestcaseChange: (index: number, field: string, value: string) => void;
+	handleParsedTestcaseRemove: (index: number) => void;
+	handleParsedTestcaseChange: (index: number, field: string, value: string) => void;
 	handleZipFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
 	applyFormat: (command: string, value?: string | null) => void;
 	insertText: (text: string) => void;

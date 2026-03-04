@@ -92,7 +92,6 @@ export const DescriptionContent = styled.div`
   padding: 16px 0;
   line-height: 1.6;
   color: #eff5f2;
-  white-space: pre-wrap;
   word-wrap: break-word;
 
   .problem-solve-page.light & {

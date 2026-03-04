@@ -92,15 +92,17 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 								handleZipFileChange={d.handleZipFileChange}
 							/>
 
-							<ProblemEditDescriptionSection
-								descriptionRef={d.descriptionRef}
-								formData={d.formData}
-								setFormData={d.setFormData}
-								enableFullEdit={d.enableFullEdit}
-								getFullDescription={d.getFullDescription}
-								applyFormat={d.applyFormat}
-								insertTextAtCursor={d.insertTextAtCursor}
-							/>
+						<ProblemEditDescriptionSection
+							descriptionRef={d.descriptionRef}
+							formData={d.formData}
+							setFormData={d.setFormData}
+							enableFullEdit={d.enableFullEdit}
+							getDescriptionOnlyForPreview={d.getDescriptionOnlyForPreview}
+							getFullPreviewProps={d.getFullPreviewProps}
+							insertMarkdownText={d.insertMarkdownText}
+							wrapWithMarkdown={d.wrapWithMarkdown}
+							insertMarkdownHeading={d.insertMarkdownHeading}
+						/>
 
 							<ProblemEditInputOutputSection
 								formData={d.formData}
@@ -122,10 +124,12 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 								parsedTestCases={d.parsedTestCases}
 								showParsedTestCases={d.showParsedTestCases}
 								setShowParsedTestCases={d.setShowParsedTestCases}
-								handleTestcaseAdd={d.handleTestcaseAdd}
-								handleTestcaseRemove={d.handleTestcaseRemove}
-								handleTestcaseChange={d.handleTestcaseChange}
-							/>
+						handleTestcaseAdd={d.handleTestcaseAdd}
+							handleTestcaseRemove={d.handleTestcaseRemove}
+							handleTestcaseChange={d.handleTestcaseChange}
+							handleParsedTestcaseRemove={d.handleParsedTestcaseRemove}
+							handleParsedTestcaseChange={d.handleParsedTestcaseChange}
+						/>
 						</S.FormGrid>
 
 						<S.Actions>

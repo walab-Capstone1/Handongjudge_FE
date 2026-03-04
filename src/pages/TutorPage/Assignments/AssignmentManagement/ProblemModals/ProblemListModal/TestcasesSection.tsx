@@ -12,7 +12,11 @@ export interface TestcasesSectionProps {
 	setShowParsedTestCases: (v: boolean) => void;
 	handlers: Pick<
 		ProblemListEditFormHandlers,
-		"handleTestcaseAdd" | "handleTestcaseRemove" | "handleTestcaseChange"
+		| "handleTestcaseAdd"
+		| "handleTestcaseRemove"
+		| "handleTestcaseChange"
+		| "handleParsedTestcaseRemove"
+		| "handleParsedTestcaseChange"
 	>;
 }
 
@@ -27,8 +31,13 @@ export default function TestcasesSection({
 	setShowParsedTestCases,
 	handlers,
 }: TestcasesSectionProps) {
-	const { handleTestcaseAdd, handleTestcaseRemove, handleTestcaseChange } =
-		handlers;
+	const {
+		handleTestcaseAdd,
+		handleTestcaseRemove,
+		handleTestcaseChange,
+		handleParsedTestcaseRemove,
+		handleParsedTestcaseChange,
+	} = handlers;
 
 	return (
 		<fieldset className="problem-create-form-section">
@@ -138,7 +147,7 @@ export default function TestcasesSection({
 					>
 						<span>{showParsedTestCases ? "▼" : "▶"}</span>
 						<span>
-							기존 테스트케이스 ({parsedTestCases.length}개) - 조회 전용
+							기존 테스트케이스 ({parsedTestCases.length}개)
 						</span>
 					</button>
 					{showParsedTestCases && (
@@ -153,10 +162,27 @@ export default function TestcasesSection({
 											<span className="problem-create-testcase-name">
 												{testCase.name ?? `테스트케이스 ${idx + 1}`}
 											</span>
-											<span className="problem-create-testcase-type-badge">
-												{testCase.type === "sample" ? "샘플" : "비밀"}
-											</span>
+											<select
+												value={testCase.type ?? "secret"}
+												onChange={(e) =>
+													handleParsedTestcaseChange(idx, "type", e.target.value)
+												}
+												className="problem-create-testcase-type-select"
+												disabled={!enableFullEdit}
+											>
+												<option value="sample">샘플</option>
+												<option value="secret">비밀</option>
+											</select>
 										</div>
+										{enableFullEdit && (
+											<button
+												type="button"
+												onClick={() => handleParsedTestcaseRemove(idx)}
+												className="problem-create-testcase-remove-btn"
+											>
+												삭제
+											</button>
+										)}
 									</div>
 									<div className="problem-create-testcase-body-compact">
 										{testCase.input && (

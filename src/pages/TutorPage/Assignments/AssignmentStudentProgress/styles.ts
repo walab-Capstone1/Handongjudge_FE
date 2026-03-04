@@ -842,6 +842,16 @@ export const AssignmentsTableContainer = styled.div`
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
+export const ColumnSubtitle = styled.span`
+	display: block;
+	font-size: 0.7rem;
+	font-weight: 500;
+	opacity: 0.85;
+	text-transform: none;
+	letter-spacing: 0;
+	margin-top: 2px;
+`;
+
 export const AssignmentsTable = styled.table`
 	width: 100%;
 	border-collapse: collapse;

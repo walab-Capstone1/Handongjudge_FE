@@ -349,11 +349,7 @@ export function useProblemSolve() {
 		}
 		if (!sectionId || !problemId) return;
 
-		// 마감일 및 비활성화 체크
-		if (isDeadlinePassed) {
-			alert("과제 마감일이 지났습니다.");
-			return;
-		}
+		// 비활성화 체크 (마감일 지나면 지각 제출로 허용)
 		// 관리자/튜터는 비활성화된 과제도 제출 가능
 		const isManager = userRole === "ADMIN" || userRole === "TUTOR";
 		if (!isAssignmentActive && !isManager) {
@@ -392,27 +388,19 @@ export function useProblemSolve() {
 		} catch (error: unknown) {
 			const message =
 				error instanceof Error ? error.message : "코드 제출에 실패했습니다.";
-			
-			// 백엔드에서 마감일/비활성화 에러 응답 처리
+			// 백엔드에서 비활성화 에러만 처리 (마감일 지나면 지각 제출 허용)
 			if (
-				message.includes("마감일") ||
 				message.includes("비활성화") ||
 				message.includes("제출할 수 없습니다")
 			) {
-				setIsDeadlinePassed(message.includes("마감일"));
-				if (message.includes("비활성화")) {
-					setIsAssignmentActive(false);
-					// 비활성화된 과제인 경우 알림 후 리다이렉트
-					alert(message);
-					setTimeout(() => {
-						navigate(`/sections/${sectionId}/course-assignments`);
-					}, 1000);
-					setIsSubmitting(false);
-					return;
-				}
+				setIsAssignmentActive(false);
 				alert(message);
+				setTimeout(() => {
+					navigate(`/sections/${sectionId}/course-assignments`);
+				}, 1000);
+				setIsSubmitting(false);
+				return;
 			}
-
 			setSubmissionResult({
 				status: "error",
 				message,
@@ -422,7 +410,7 @@ export function useProblemSolve() {
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [code, language, sectionId, problemId, clearSessionAfterSubmission, isDeadlinePassed, isAssignmentActive, navigate, userRole]);
+	}, [code, language, sectionId, problemId, clearSessionAfterSubmission, isAssignmentActive, navigate, userRole]);
 
 	const handleSubmitWithOutput = useCallback(async () => {
 		if (!code.trim()) {
@@ -431,11 +419,7 @@ export function useProblemSolve() {
 		}
 		if (!sectionId || !problemId) return;
 
-		// 마감일 및 비활성화 체크
-		if (isDeadlinePassed) {
-			alert("과제 마감일이 지났습니다.");
-			return;
-		}
+		// 비활성화 체크 (마감일 지나면 지각 제출로 허용)
 		// 관리자/튜터는 비활성화된 과제도 테스트 가능
 		const isManager = userRole === "ADMIN" || userRole === "TUTOR";
 		if (!isAssignmentActive && !isManager) {
@@ -474,27 +458,18 @@ export function useProblemSolve() {
 		} catch (error: unknown) {
 			const message =
 				error instanceof Error ? error.message : "코드 제출에 실패했습니다.";
-			
-			// 백엔드에서 마감일/비활성화 에러 응답 처리
 			if (
-				message.includes("마감일") ||
 				message.includes("비활성화") ||
 				message.includes("제출할 수 없습니다")
 			) {
-				setIsDeadlinePassed(message.includes("마감일"));
-				if (message.includes("비활성화")) {
-					setIsAssignmentActive(false);
-					// 비활성화된 과제인 경우 알림 후 리다이렉트
-					alert(message);
-					setTimeout(() => {
-						navigate(`/sections/${sectionId}/course-assignments`);
-					}, 1000);
-					setIsSubmitting(false);
-					return;
-				}
+				setIsAssignmentActive(false);
 				alert(message);
+				setTimeout(() => {
+					navigate(`/sections/${sectionId}/course-assignments`);
+				}, 1000);
+				setIsSubmitting(false);
+				return;
 			}
-
 			setSubmissionResult({
 				status: "error",
 				message,
@@ -505,7 +480,7 @@ export function useProblemSolve() {
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [code, language, sectionId, problemId, clearSessionAfterSubmission, isDeadlinePassed, isAssignmentActive, navigate, userRole]);
+	}, [code, language, sectionId, problemId, clearSessionAfterSubmission, isAssignmentActive, navigate, userRole]);
 
 	const handleHorizontalDragEnd = useCallback((sizes: number[]) => {
 		setHorizontalSizes(sizes);

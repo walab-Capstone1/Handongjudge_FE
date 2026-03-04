@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
-import { parseTags, extractTextFromRTF } from "../utils/problemEditUtils";
+import { parseTags, extractTextFromRTF, parseDescriptionSections, descriptionForPreview } from "../utils/problemEditUtils";
 import type {
 	ProblemFormData,
 	ParsedTestcase,
@@ -85,9 +85,15 @@ export function useProblemEdit() {
 			} catch (err) {
 				console.warn("ZIP 파싱 실패 (계속 진행):", err);
 			}
-			const description = parsedData?.description ?? problem?.description ?? "";
-			const descriptionText =
-				description.replace(/<[^>]*>/g, "") || description;
+			const rawDescription = parsedData?.description ?? problem?.description ?? "";
+			const descriptionText = (rawDescription || "")
+				.replace(/<[^>]*>/g, "")
+				.replace(/\r\n/g, "\n")
+				.replace(/\r/g, "\n")
+				.trim();
+			const parsed = parseDescriptionSections(descriptionText);
+			const description = parsed.mainDescription;
+			const mainDescriptionText = parsed.mainDescription;
 			let timeLimit = "";
 			if (parsedData?.timeLimit != null) {
 				timeLimit = String(parsedData.timeLimit);
@@ -116,7 +122,12 @@ export function useProblemEdit() {
 			const testCases = parsedData?.testCases ?? parsedData?.testcases ?? [];
 			setParsedTestCases(testCases);
 			let sampleInputs: SampleInput[] = [{ input: "", output: "" }];
-			if (testCases.length > 0) {
+			const hasParsedSamples =
+				parsed.sampleInputs.length > 0 &&
+				parsed.sampleInputs.some((s) => s.input || s.output);
+			if (hasParsedSamples) {
+				sampleInputs = parsed.sampleInputs;
+			} else if (testCases.length > 0) {
 				const samples = testCases.filter((tc) => tc.type === "sample");
 				if (samples.length > 0) {
 					sampleInputs = samples.map((tc) => ({
@@ -126,11 +137,11 @@ export function useProblemEdit() {
 				}
 			}
 			setFormData({
-				title: parsedData?.title ?? problem?.title ?? "",
-				description,
-				descriptionText,
-				inputFormat: "",
-				outputFormat: "",
+				title: problem?.title ?? parsedData?.title ?? "",
+				description: mainDescriptionText,
+				descriptionText: mainDescriptionText,
+				inputFormat: parsed.inputFormat,
+				outputFormat: parsed.outputFormat,
 				tags,
 				difficulty:
 					parsedData?.difficulty != null
@@ -146,11 +157,11 @@ export function useProblemEdit() {
 			setEnableFullEdit(false);
 			setTimeout(() => {
 				if (descriptionRef.current) {
-					const isHTML = /<[^>]+>/.test(description);
+					const isHTML = /<[^>]+>/.test(mainDescriptionText);
 					if (isHTML) {
-						descriptionRef.current.innerHTML = description;
+						descriptionRef.current.innerHTML = mainDescriptionText;
 					} else {
-						descriptionRef.current.textContent = descriptionText;
+						descriptionRef.current.textContent = mainDescriptionText;
 					}
 					setIsInitialLoad(false);
 				}
@@ -195,7 +206,11 @@ export function useProblemEdit() {
 					formData.descriptionText || formData.description;
 			}
 		}
-	}, [enableFullEdit, formData.description, formData.descriptionText]);
+		// enableFullEdit이 켜질 때만 에디터 내용을 초기화해야 합니다.
+		// formData.description을 의존성에 포함하면 타이핑마다 innerHTML이
+		// 재설정되어 커서(포커스)가 초기화됩니다.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [enableFullEdit]);
 
 	const handleZipFileChange = useCallback(
 		async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,12 +328,14 @@ export function useProblemEdit() {
 
 	const handleSampleInputChange = useCallback(
 		(index: number, field: "input" | "output", value: string) => {
-			const newSamples = [...formData.sampleInputs];
-			if (newSamples[index])
-				newSamples[index] = { ...newSamples[index], [field]: value };
-			setFormData((prev) => ({ ...prev, sampleInputs: newSamples }));
+			setFormData((prev) => {
+				const newSamples = [...prev.sampleInputs];
+				if (newSamples[index])
+					newSamples[index] = { ...newSamples[index], [field]: value };
+				return { ...prev, sampleInputs: newSamples };
+			});
 		},
-		[formData.sampleInputs],
+		[],
 	);
 
 	const addSampleInput = useCallback(() => {
@@ -419,6 +436,23 @@ export function useProblemEdit() {
 		}));
 	}, []);
 
+	const handleParsedTestcaseRemove = useCallback((index: number) => {
+		setParsedTestCases((prev) => prev.filter((_, i) => i !== index));
+	}, []);
+
+	const handleParsedTestcaseChange = useCallback(
+		(index: number, field: keyof ParsedTestcase, value: string) => {
+			setParsedTestCases((prev) => {
+				const next = [...prev];
+				if (next[index]) {
+					next[index] = { ...next[index], [field]: value };
+				}
+				return next;
+			});
+		},
+		[],
+	);
+
 	const handleTestcaseChange = useCallback(
 		(index: number, field: keyof TestcaseItem, value: string) => {
 			setFormData((prev) => {
@@ -468,14 +502,47 @@ export function useProblemEdit() {
 		[formData],
 	);
 
+	/** 미리보기용: 문제 설명 본문만 (입력/출력/예제는 비움) */
+	const getDescriptionOnlyForPreview = useCallback(
+		() => ({
+			title: formData.title,
+			description: (formData.description ?? formData.descriptionText ?? "").includes(
+				"## 입력 형식",
+			)
+				? (formData.description ?? formData.descriptionText ?? "")
+						.split("\n\n## 입력 형식")[0]
+						.trim()
+				: formData.description ?? formData.descriptionText ?? "",
+			inputFormat: "",
+			outputFormat: "",
+			sampleInputs: [],
+		}),
+		[formData],
+	);
+
+	/** 미리보기용: 본문 + 입력 형식 + 출력 형식 + 예제 입출력 모두 표시 */
+	const getFullPreviewProps = useCallback(
+		() => ({
+			title: formData.title,
+			description: descriptionForPreview(formData.descriptionText ?? ""),
+			inputFormat: formData.inputFormat ?? "",
+			outputFormat: formData.outputFormat ?? "",
+			sampleInputs: formData.sampleInputs ?? [],
+		}),
+		[formData],
+	);
+
 	const getFullDescriptionForBackend = useCallback((): string => {
-		let full = formData.descriptionText ?? "";
+		// 본문만 사용(이미 "## 입력 형식" 이하가 있으면 제거 후 한 번만 붙임 → 저장 시 중복 방지)
+		const mainOnly = descriptionForPreview(formData.descriptionText ?? "");
+		let full = mainOnly;
 		if (formData.inputFormat) {
 			full += `\n\n## 입력 형식\n${formData.inputFormat}`;
 		}
 		if (formData.outputFormat) {
 			full += `\n\n## 출력 형식\n${formData.outputFormat}`;
 		}
+		// 예제는 내용이 있을 때만 추가합니다 (빈 값이면 "## 예제" 섹션 자체를 생략)
 		if (formData.sampleInputs.some((s) => s.input || s.output)) {
 			full += "\n\n## 예제";
 			formData.sampleInputs.forEach((sample, idx) => {
@@ -488,43 +555,86 @@ export function useProblemEdit() {
 		return full;
 	}, [formData]);
 
-	const applyFormat = useCallback((command: string, value?: string | null) => {
-		if (descriptionRef.current) {
-			descriptionRef.current.focus();
-			document.execCommand(command, false, value ?? undefined);
-		}
+	/** 마크다운 텍스트를 커서 위치에 삽입하고 formData를 동기화합니다. */
+	const insertMarkdownText = useCallback((text: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		document.execCommand("insertText", false, text);
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
 	}, []);
 
-	const insertTextAtCursor = useCallback((text: string) => {
-		if (descriptionRef.current) {
-			descriptionRef.current.focus();
-			document.execCommand("insertText", false, text);
+	/** 선택된 텍스트를 마크다운 인라인 문법으로 감쌉니다. */
+	const wrapWithMarkdown = useCallback((syntax: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		const selection = window.getSelection();
+		if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
+			const selectedText = selection.getRangeAt(0).toString();
+			document.execCommand("insertText", false, `${syntax}${selectedText}${syntax}`);
+		} else {
+			document.execCommand("insertText", false, `${syntax}${syntax}`);
 		}
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
+	}, []);
+
+	/** 마크다운 제목 문법(#, ## 등)을 삽입합니다. */
+	const insertMarkdownHeading = useCallback((headingValue: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		const levelMap: Record<string, string> = {
+			h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### ", p: "",
+		};
+		const prefix = levelMap[headingValue] ?? "";
+		if (prefix) {
+			document.execCommand("insertText", false, prefix);
+		}
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
 	}, []);
 
 	const handleSubmit = useCallback(
 		async (e: React.FormEvent) => {
 			e.preventDefault();
 			if (!problemId) return;
+
+			if (enableFullEdit) {
+				const hasDescription =
+					(formData.description?.trim() || formData.descriptionText?.trim()) ?? "";
+				if (!hasDescription) {
+					alert("문제 설명을 입력해 주세요.");
+					return;
+				}
+				const hasTestcases =
+					parsedTestCases.some(
+						(tc) => tc.input?.trim() && tc.output?.trim(),
+					) ||
+					formData.testcases.some(
+						(tc) => tc.input?.trim() && tc.output?.trim(),
+					);
+				if (!hasTestcases) {
+					alert("테스트케이스가 최소 1개 이상 필요합니다. (입력/출력 쌍 모두 있어야 합니다)");
+					return;
+				}
+				const incomplete = validateTestCases();
+				if (incomplete.length > 0) {
+					const message = incomplete
+						.map((tc) => `- ${tc.name}: ${tc.missing} 파일이 없습니다`)
+						.join("\n");
+					alert(
+						`다음 테스트케이스에 입력/출력이 비어 있습니다:\n\n${message}\n\n모든 테스트케이스를 완성한 후 제출해 주세요.`,
+					);
+					return;
+				}
+			}
+
 			setSubmitting(true);
 			setError(null);
 			try {
-				if (enableFullEdit) {
-					const incomplete = validateTestCases();
-					if (incomplete.length > 0) {
-						const message = incomplete
-							.map((tc) => `- ${tc.name}: ${tc.missing} 파일이 없습니다`)
-							.join("\n");
-						if (
-							!window.confirm(
-								`다음 테스트케이스에 입력/출력 쌍이 완성되지 않았습니다:\n\n${message}\n\n그래도 제출하시겠습니까?`,
-							)
-						) {
-							setSubmitting(false);
-							return;
-						}
-					}
-				}
 				const submitFormData = new FormData();
 				submitFormData.append("title", formData.title);
 				submitFormData.append("tags", JSON.stringify(formData.tags));
@@ -658,9 +768,14 @@ export function useProblemEdit() {
 		handleTestcaseAdd,
 		handleTestcaseRemove,
 		handleTestcaseChange,
+		handleParsedTestcaseRemove,
+		handleParsedTestcaseChange,
 		getFullDescription,
-		applyFormat,
-		insertTextAtCursor,
+		getDescriptionOnlyForPreview,
+		getFullPreviewProps,
+		insertMarkdownText,
+		wrapWithMarkdown,
+		insertMarkdownHeading,
 		handleSubmit,
 	};
 }

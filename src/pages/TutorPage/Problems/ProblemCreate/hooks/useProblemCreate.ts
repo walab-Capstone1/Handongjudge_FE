@@ -1,7 +1,12 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
-import type { ProblemFormData, SampleInput, ParsedTestcase } from "../types";
+import type {
+	ProblemFormData,
+	ProblemCreateRequest,
+	TestCaseDto,
+	ParsedTestcase,
+} from "../types";
 
 const initialFormData: ProblemFormData = {
 	title: "",
@@ -16,6 +21,50 @@ const initialFormData: ProblemFormData = {
 	sampleInputs: [{ input: "", output: "" }],
 	testcases: [],
 };
+
+function readFileAsText(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const r = new FileReader();
+		r.onload = () => resolve((r.result as string) ?? "");
+		r.onerror = reject;
+		r.readAsText(file);
+	});
+}
+
+/** File[] (.in/.out) 쌍을 TestCaseDto[]로 변환 */
+async function filesToTestCases(files: File[]): Promise<TestCaseDto[]> {
+	const byBase: Record<
+		string,
+		{ inFile?: File; outFile?: File }
+	> = {};
+	for (const f of files) {
+		const lower = f.name.toLowerCase();
+		const base = f.name.replace(/\.(in|out|ans)$/i, "");
+		if (lower.endsWith(".in")) {
+			if (!byBase[base]) byBase[base] = {};
+			byBase[base].inFile = f;
+		} else if (lower.endsWith(".out") || lower.endsWith(".ans")) {
+			if (!byBase[base]) byBase[base] = {};
+			byBase[base].outFile = f;
+		}
+	}
+	const result: TestCaseDto[] = [];
+	for (const [name, pair] of Object.entries(byBase)) {
+		if (pair.inFile && pair.outFile) {
+			const [input, output] = await Promise.all([
+				readFileAsText(pair.inFile),
+				readFileAsText(pair.outFile),
+			]);
+			result.push({
+				name,
+				input,
+				output,
+				type: "secret",
+			});
+		}
+	}
+	return result;
+}
 
 function convertMarkdownHeadingsToHtml(html: string): string {
 	if (!html) return html;
@@ -48,6 +97,9 @@ export function useProblemCreate() {
 	const descriptionRef = useRef<HTMLDivElement>(null);
 
 	const [zipFile, setZipFile] = useState<File | null>(null);
+	const [folderFormatFolderName, setFolderFormatFolderName] = useState<string | null>(null);
+	/** "descriptionOnly" = 문제 설명만, "full" = 전체(입력/출력/예제 포함) */
+	const [previewMode, setPreviewMode] = useState<"descriptionOnly" | "full">("full");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [parsedTestCases, setParsedTestCases] = useState<ParsedTestcase[]>([]);
@@ -55,16 +107,6 @@ export function useProblemCreate() {
 	const [formData, setFormData] = useState<ProblemFormData>(initialFormData);
 	const [currentTag, setCurrentTag] = useState("");
 	const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
-
-	useEffect(() => {
-		if (descriptionRef.current) {
-			const currentContent = descriptionRef.current.innerHTML || "";
-			const newContent = formData.description || "";
-			if (currentContent !== newContent) {
-				descriptionRef.current.innerHTML = newContent;
-			}
-		}
-	}, [formData.description]);
 
 	const handleZipFileChange = useCallback(
 		async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,6 +116,7 @@ export function useProblemCreate() {
 				setError("ZIP 파일만 업로드 가능합니다.");
 				return;
 			}
+			setFolderFormatFolderName(null);
 			setZipFile(file);
 			setError(null);
 			setLoading(true);
@@ -155,6 +198,98 @@ export function useProblemCreate() {
 		[],
 	);
 
+	const handleFolderFormatFolderChange = useCallback(
+		async (e: React.ChangeEvent<HTMLInputElement>) => {
+			const fileList = e.target.files;
+			if (!fileList || fileList.length === 0) return;
+			const files = Array.from(fileList);
+			setZipFile(null);
+			const firstPath = (files[0] as File & { webkitRelativePath?: string }).webkitRelativePath || files[0].name;
+			const folderName = firstPath.includes("/") ? firstPath.split("/")[0] : firstPath;
+			setFolderFormatFolderName(folderName);
+			setError(null);
+			setLoading(true);
+			try {
+				const fd = new FormData();
+				for (const file of files) {
+					const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+					fd.append("files", file, path);
+				}
+				const parsedData = await APIService.parseFolderFormatFiles(fd);
+				if (parsedData) {
+					if (parsedData.title) {
+						setFormData((prev) => ({ ...prev, title: parsedData.title }));
+					}
+					if (
+						parsedData.timeLimit != null &&
+						parsedData.timeLimit !== undefined
+					) {
+						setFormData((prev) => ({
+							...prev,
+							timeLimit: String(parsedData.timeLimit),
+						}));
+					}
+					if (
+						parsedData.memoryLimit != null &&
+						parsedData.memoryLimit !== undefined
+					) {
+						setFormData((prev) => ({
+							...prev,
+							memoryLimit: String(parsedData.memoryLimit),
+						}));
+					}
+					if (parsedData.description) {
+						const processedDescription = convertMarkdownHeadingsToHtml(
+							parsedData.description,
+						);
+						const hasHtmlTags = /<[a-z][\s\S]*>/i.test(processedDescription);
+						let htmlDescription: string;
+						if (hasHtmlTags) {
+							htmlDescription = processedDescription;
+						} else {
+							htmlDescription = processedDescription
+								.replace(/\n/g, "<br>")
+								.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+								.replace(/\*(.*?)\*/g, "<em>$1</em>");
+						}
+						setFormData((prev) => ({
+							...prev,
+							description: htmlDescription,
+							descriptionText: parsedData.description,
+						}));
+						if (descriptionRef.current) {
+							descriptionRef.current.innerHTML = htmlDescription;
+						}
+					}
+					const testCases = parsedData.testCases ?? parsedData.testcases ?? [];
+					if (testCases.length > 0) {
+						const sampleTestCases = testCases.filter(
+							(tc: ParsedTestcase) => tc.type === "sample",
+						);
+						if (sampleTestCases.length > 0) {
+							setFormData((prev) => ({
+								...prev,
+								sampleInputs: sampleTestCases.map((tc: ParsedTestcase) => ({
+									input: tc.input ?? "",
+									output: tc.output ?? "",
+								})),
+							}));
+						}
+						setParsedTestCases(testCases);
+					} else {
+						setParsedTestCases([]);
+					}
+				}
+			} catch (err) {
+				const message = err instanceof Error ? err.message : "알 수 없는 오류";
+				setError(`폴더 형식 파싱 중 오류가 발생했습니다: ${message}`);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[],
+	);
+
 	const handleInputChange = useCallback(
 		(
 			e: React.ChangeEvent<
@@ -228,6 +363,7 @@ export function useProblemCreate() {
 				...prev,
 				testcases: [...prev.testcases, ...files],
 			}));
+			setFieldErrors((prev) => ({ ...prev, testcases: false }));
 		},
 		[],
 	);
@@ -239,28 +375,61 @@ export function useProblemCreate() {
 		}));
 	}, []);
 
-	const applyFormat = useCallback((command: string, value?: string) => {
-		if (descriptionRef.current) {
-			descriptionRef.current.focus();
-			document.execCommand(command, false, value ?? undefined);
-		}
+	const handleParsedTestcaseRemove = useCallback((index: number) => {
+		setParsedTestCases((prev) => prev.filter((_, i) => i !== index));
+		setFieldErrors((prev) => ({ ...prev, testcases: false }));
 	}, []);
 
-	const insertText = useCallback((text: string) => {
-		if (descriptionRef.current) {
-			descriptionRef.current.focus();
-			document.execCommand("insertText", false, text);
+	/** 커서 위치에 텍스트를 삽입하고 description 상태를 동기화합니다. */
+	const insertMarkdownText = useCallback((text: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		document.execCommand("insertText", false, text);
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
+	}, []);
+
+	/**
+	 * 선택된 텍스트를 마크다운 인라인 문법으로 감쌉니다.
+	 * 선택 없으면 문법 기호만 삽입합니다.
+	 */
+	const wrapWithMarkdown = useCallback((syntax: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		const selection = window.getSelection();
+		if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
+			const selectedText = selection.getRangeAt(0).toString();
+			document.execCommand("insertText", false, `${syntax}${selectedText}${syntax}`);
+		} else {
+			document.execCommand("insertText", false, `${syntax}${syntax}`);
 		}
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
+	}, []);
+
+	/**
+	 * 현재 줄 앞에 마크다운 제목 문법(#, ## 등)을 삽입합니다.
+	 * HeadingSelect의 value("h1"~"h6" | "p")를 받습니다.
+	 */
+	const insertMarkdownHeading = useCallback((headingValue: string) => {
+		const el = descriptionRef.current;
+		if (!el) return;
+		el.focus();
+		const levelMap: Record<string, string> = {
+			h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### ", p: "",
+		};
+		const prefix = levelMap[headingValue] ?? "";
+		if (prefix) {
+			document.execCommand("insertText", false, prefix);
+		}
+		const plain = el.innerText || el.textContent || "";
+		setFormData((prev) => ({ ...prev, description: plain, descriptionText: plain }));
 	}, []);
 
 	const getFullDescription = useCallback(
-		(): {
-			title: string;
-			description: string;
-			inputFormat: string;
-			outputFormat: string;
-			sampleInputs: SampleInput[];
-		} => ({
+		() => ({
 			title: formData.title,
 			description: formData.description || "",
 			inputFormat: formData.inputFormat,
@@ -270,14 +439,58 @@ export function useProblemCreate() {
 		[formData],
 	);
 
+	/** 전체 미리보기용: 본문(mainOnly) + 입력/출력/예제 (중복 방지 위해 mainOnly 사용) */
+	const getFullDescriptionForPreview = useCallback(() => {
+		const desc = formData.description || formData.descriptionText || "";
+		const normalized = desc.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+		const match = normalized.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+		const mainOnly =
+			match && match.index != null ? normalized.slice(0, match.index).trim() : desc;
+		return {
+			title: formData.title,
+			description: mainOnly,
+			inputFormat: formData.inputFormat,
+			outputFormat: formData.outputFormat,
+			sampleInputs: formData.sampleInputs,
+		};
+	}, [formData]);
+
+	/** 미리보기용: 입력/출력/예제는 폼에서만 보이게, 미리보기에는 문제 설명만 표시 */
+	const getDescriptionOnlyForPreview = useCallback(
+		() => {
+			const desc =
+				formData.description || formData.descriptionText || "";
+			const normalized = desc.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+			// 줄 맨 앞이든 중간이든 "## 입력 형식" 이하는 잘라서 본문만
+			const match = normalized.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+			const mainOnly =
+				match && match.index != null
+					? normalized.slice(0, match.index).trim()
+					: desc;
+			return {
+				title: formData.title,
+				description: mainOnly,
+				inputFormat: "",
+				outputFormat: "",
+				sampleInputs: [],
+			};
+		},
+		[formData],
+	);
+
 	const getFullDescriptionForBackend = useCallback((): string => {
-		let full = formData.descriptionText || "";
+		// 본문만 사용(이미 "## 입력 형식" 이하가 있으면 제거 후 한 번만 붙임 → 저장 시 중복 방지)
+		const raw = (formData.descriptionText || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+		const mainMatch = raw.match(/(\n|^)\s*##\s*입력\s*형식\s*[\n\r]/);
+		const mainOnly = mainMatch && mainMatch.index != null ? raw.slice(0, mainMatch.index).trim() : raw;
+		let full = mainOnly;
 		if (formData.inputFormat) {
 			full += "\n\n## 입력 형식\n" + formData.inputFormat;
 		}
 		if (formData.outputFormat) {
 			full += "\n\n## 출력 형식\n" + formData.outputFormat;
 		}
+		// 예제는 내용이 있을 때만 추가합니다 (빈 값이면 "## 예제" 섹션 자체를 생략)
 		if (formData.sampleInputs.some((s) => s.input || s.output)) {
 			full += "\n\n## 예제";
 			formData.sampleInputs.forEach((sample, idx) => {
@@ -297,6 +510,9 @@ export function useProblemCreate() {
 	const handleSubmit = useCallback(
 		async (e: React.FormEvent) => {
 			e.preventDefault();
+			setLoading(true);
+			setError(null);
+
 			const errs: Record<string, boolean> = {};
 			if (!formData.title?.trim()) errs.title = true;
 			if (!formData.timeLimit?.trim()) errs.timeLimit = true;
@@ -304,60 +520,56 @@ export function useProblemCreate() {
 			const hasDescription =
 				(formData.description?.trim() || formData.descriptionText?.trim()) ?? "";
 			if (!hasDescription) errs.description = true;
+			const hasTestcases =
+				parsedTestCases.some(
+					(tc) => (tc.input?.trim() && tc.output?.trim()),
+				) || formData.testcases.length > 0;
+			if (!hasTestcases) errs.testcases = true;
+
 			setFieldErrors(errs);
-			if (Object.keys(errs).length > 0) return;
+			if (Object.keys(errs).length > 0) {
+				setLoading(false);
+				const messages: string[] = [];
+				if (errs.title) messages.push("• 문제 제목");
+				if (errs.timeLimit) messages.push("• 시간 제한");
+				if (errs.memoryLimit) messages.push("• 메모리 제한");
+				if (errs.description) messages.push("• 문제 설명");
+				if (errs.testcases) messages.push("• 테스트케이스 (최소 1개 이상)");
+				alert("다음 항목을 입력해 주세요:\n\n" + messages.join("\n"));
+				return;
+			}
 
-			setLoading(true);
-			setError(null);
 			try {
-				const submitFormData = new FormData();
-				submitFormData.append("title", formData.title);
-				submitFormData.append("description", getFullDescriptionForBackend());
-				submitFormData.append("inputFormat", formData.inputFormat);
-				submitFormData.append("outputFormat", formData.outputFormat);
-				submitFormData.append("tags", JSON.stringify(formData.tags));
-				submitFormData.append("difficulty", formData.difficulty?.trim() || "1");
-				submitFormData.append("timeLimit", formData.timeLimit || "0");
-				submitFormData.append("memoryLimit", formData.memoryLimit || "0");
-				submitFormData.append(
-					"sampleInputs",
-					JSON.stringify(formData.sampleInputs),
-				);
+				const testcasesFromParsed: TestCaseDto[] = parsedTestCases
+					.filter((tc) => tc.input?.trim() && tc.output?.trim())
+					.map((tc, idx) => ({
+						name: tc.name ?? `testcase_${idx}`,
+						input: tc.input ?? "",
+						output: tc.output ?? "",
+						type: (tc.type === "sample" ? "sample" : "secret") as "sample" | "secret",
+					}));
 
-				let testcaseIndex = 0;
-				parsedTestCases.forEach((testcase) => {
-					const baseName = testcase.name ?? `testcase_${testcaseIndex}`;
-					if (testcase.input) {
-						const inputBlob = new Blob([testcase.input], {
-							type: "text/plain",
-						});
-						const inputFile = new File([inputBlob], `${baseName}.in`, {
-							type: "text/plain",
-						});
-						submitFormData.append(`testcase_${testcaseIndex}`, inputFile);
-						testcaseIndex++;
-					}
-					if (testcase.output) {
-						const outputBlob = new Blob([testcase.output], {
-							type: "text/plain",
-						});
-						const outputFile = new File([outputBlob], `${baseName}.ans`, {
-							type: "text/plain",
-						});
-						submitFormData.append(`testcase_${testcaseIndex}`, outputFile);
-						testcaseIndex++;
-					}
-				});
-				formData.testcases.forEach((file) => {
-					submitFormData.append(`testcase_${testcaseIndex}`, file);
-					testcaseIndex++;
-				});
+				const testcasesFromFiles = await filesToTestCases(formData.testcases);
+				const testcases: TestCaseDto[] = [
+					...testcasesFromParsed,
+					...testcasesFromFiles,
+				];
 
-				const createResult = await APIService.createProblem(submitFormData);
-				const newProblemId =
-					typeof createResult === "number"
-						? createResult
-						: (createResult?.id ?? createResult?.data);
+				const request: ProblemCreateRequest = {
+					title: formData.title,
+					description: getFullDescriptionForBackend(),
+					inputFormat: formData.inputFormat || undefined,
+					outputFormat: formData.outputFormat || undefined,
+					tags: JSON.stringify(formData.tags),
+					difficulty: formData.difficulty?.trim() || "1",
+					timeLimit: formData.timeLimit || "0",
+					memoryLimit: formData.memoryLimit || "0",
+					sampleInputs: JSON.stringify(formData.sampleInputs),
+					testcases,
+				};
+
+				const createResult = await APIService.createProblem(request);
+				const newProblemId = createResult;
 
 				const fromAssignmentId = locationState?.fromAssignmentId;
 				const sectionId = locationState?.sectionId;
@@ -405,6 +617,13 @@ export function useProblemCreate() {
 		if (el) el.value = "";
 	}, []);
 
+	const clearFolderFormatZip = useCallback(() => {
+		setFolderFormatFolderName(null);
+		setParsedTestCases([]);
+		const dirEl = document.getElementById("folderFormatDirInput") as HTMLInputElement;
+		if (dirEl) dirEl.value = "";
+	}, []);
+
 	return {
 		navigate,
 		descriptionRef,
@@ -420,6 +639,8 @@ export function useProblemCreate() {
 		currentTag,
 		setCurrentTag,
 		handleZipFileChange,
+		handleFolderFormatFolderChange,
+		folderFormatFolderName,
 		handleInputChange,
 		handleTagAdd,
 		handleTagKeyPress,
@@ -429,11 +650,18 @@ export function useProblemCreate() {
 		removeSampleInput,
 		handleTestcaseAdd,
 		handleTestcaseRemove,
-		applyFormat,
-		insertText,
+		handleParsedTestcaseRemove,
+		insertMarkdownText,
+		wrapWithMarkdown,
+		insertMarkdownHeading,
 		getFullDescription,
+		getFullDescriptionForPreview,
+		getDescriptionOnlyForPreview,
+		previewMode,
+		setPreviewMode,
 		handleSubmit,
 		clearZipFile,
+		clearFolderFormatZip,
 		fieldErrors,
 		clearFieldError,
 	};

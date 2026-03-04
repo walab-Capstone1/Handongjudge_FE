@@ -1,5 +1,5 @@
 import React from "react";
-import { FaCheckCircle, FaTimesCircle, FaCode } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaCode } from "react-icons/fa";
 import * as S from "../styles";
 import type {
 	CourseGradesData,
@@ -64,6 +64,13 @@ export default function GradeManagementCourseTable({
 }: GradeManagementCourseTableProps) {
 	return (
 		<S.CourseTableContainer>
+			{!courseLoading && courseGrades?.items?.length && filteredCourseStudents.length > 0 && (
+				<S.GradeLegend>
+					<span><FaCheckCircle style={{ color: "#22c55e", marginRight: 4 }} /> 제시간 제출</span>
+					<span><FaExclamationTriangle style={{ color: "#eab308", marginRight: 4 }} /> 지각 제출</span>
+					<span><FaTimesCircle style={{ color: "#94a3b8", marginRight: 4 }} /> 미제출</span>
+				</S.GradeLegend>
+			)}
 			{courseLoading ? (
 				<S.LoadingContainer>
 					<S.LoadingSpinner />
@@ -259,20 +266,17 @@ export default function GradeManagementCourseTable({
 																				(problemGrade?.submitted ? (
 																					<S.SubmissionStatus
 																						$onTime={problemGrade.isOnTime}
+																						$late={!problemGrade.isOnTime}
 																					>
 																						{problemGrade.isOnTime ? (
-																							<>
-																								<FaCheckCircle />
-																							</>
+																							<FaCheckCircle title="제시간 제출" />
 																						) : (
-																							<>
-																								<FaTimesCircle />
-																							</>
+																							<FaExclamationTriangle title="지각 제출" />
 																						)}
 																					</S.SubmissionStatus>
 																				) : (
-																					<S.SubmissionStatus $onTime={false}>
-																						<FaTimesCircle />
+																					<S.SubmissionStatus $onTime={false} $late={false}>
+																						<FaTimesCircle title="미제출" />
 																					</S.SubmissionStatus>
 																				))}
 																		</S.ScoreRow>
@@ -335,20 +339,17 @@ export default function GradeManagementCourseTable({
 																			(problemGrade?.submitted ? (
 																				<S.SubmissionStatus
 																					$onTime={problemGrade.isOnTime}
+																					$late={!problemGrade.isOnTime}
 																				>
 																					{problemGrade.isOnTime ? (
-																						<>
-																							<FaCheckCircle />
-																						</>
+																						<FaCheckCircle title="제시간 제출" />
 																					) : (
-																						<>
-																							<FaTimesCircle />
-																						</>
+																						<FaExclamationTriangle title="지각 제출" />
 																					)}
 																				</S.SubmissionStatus>
 																			) : (
-																				<S.SubmissionStatus $onTime={false}>
-																					<FaTimesCircle />
+																				<S.SubmissionStatus $onTime={false} $late={false}>
+																					<FaTimesCircle title="미제출" />
 																				</S.SubmissionStatus>
 																			))}
 																	</S.ScoreRow>
