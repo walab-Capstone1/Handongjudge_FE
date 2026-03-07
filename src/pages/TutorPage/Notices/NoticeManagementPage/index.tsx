@@ -23,6 +23,8 @@ const NoticeManagementPage: FC = () => {
 		handleEditNotice,
 		handleDeleteNotice,
 		handleToggleActive,
+		handleBulkToggleActive,
+		sectionAllActive,
 		handleCopyEnrollmentLink,
 	} = useNoticeManagement();
 
@@ -52,6 +54,8 @@ const NoticeManagementPage: FC = () => {
 					uniqueSections={uniqueSections}
 					onCreateNotice={handleCreateNotice}
 					onCopyEnrollmentLink={handleCopyEnrollmentLink}
+					sectionAllActive={sectionAllActive}
+					onBulkToggleActive={handleBulkToggleActive}
 				/>
 				<NoticeTable
 					notices={filteredNotices}

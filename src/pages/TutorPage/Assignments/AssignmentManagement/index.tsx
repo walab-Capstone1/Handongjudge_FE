@@ -78,6 +78,8 @@ const AssignmentManagement: React.FC = () => {
 					onStandaloneProblemCreate={d.handleStandaloneProblemCreate}
 					onBulkProblemCreate={d.handleBulkProblemCreate}
 					isTutorOnly={d.isTutorOnly}
+					sectionAllActive={d.sectionAllActive}
+					onBulkToggleActive={d.handleBulkToggleActive}
 				/>
 
 				{d.sectionId ? (

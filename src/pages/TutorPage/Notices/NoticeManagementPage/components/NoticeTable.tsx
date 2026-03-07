@@ -2,6 +2,7 @@ import type { FC } from "react";
 import * as S from "../styles";
 import { getSectionNameWithoutSection } from "../utils/sectionUtils";
 import type { Notice } from "../types";
+import ActiveToggle from "../../../../../components/UI/ActiveToggle";
 
 interface NoticeTableProps {
 	notices: Notice[];
@@ -95,16 +96,13 @@ const NoticeTable: FC<NoticeTableProps> = ({
 									</S.PrimaryActions>
 									<S.SecondaryActions>
 										<S.SecondaryActionsLayer>
-											<S.TableButton
-												variant="secondary"
-												onClick={(e) => {
-													e.stopPropagation();
-													onToggleActive(notice.id, notice.active);
-												}}
-												title={notice.active ? "비활성화" : "활성화"}
-											>
-												{notice.active ? "비활성화" : "활성화"}
-											</S.TableButton>
+											<ActiveToggle
+												active={notice.active}
+												onToggle={() =>
+													onToggleActive(notice.id, notice.active)
+												}
+												showLabel={true}
+											/>
 											<S.MoreMenu>
 												<S.TableButton
 													variant="secondary"

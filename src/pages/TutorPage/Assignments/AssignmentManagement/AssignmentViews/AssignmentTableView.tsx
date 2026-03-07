@@ -1,5 +1,6 @@
 import type React from "react";
 import AssignmentPagination from "../../../../../components/Navigation/Pagination/AssignmentPagination";
+import ActiveToggle from "../../../../../components/UI/ActiveToggle";
 
 interface Assignment {
 	id: number;
@@ -166,21 +167,19 @@ const AssignmentTableView: React.FC<AssignmentTableViewProps> = ({
 										)}
 										<div className="tutor-assignment-secondary-actions">
 											<div className="tutor-secondary-actions-layer">
-												<button
-													type="button"
-													className="tutor-btn-table-action tutor-btn-secondary-action"
-													onClick={(e) => {
-														e.stopPropagation();
-														onToggleActive(
-															assignment.sectionId,
-															assignment.id,
-															assignment.active,
-														);
-													}}
-													title={assignment.active ? "비활성화" : "활성화"}
-												>
-													{assignment.active ? "비활성화" : "활성화"}
-												</button>
+												{!isTutorOnly && (
+													<ActiveToggle
+														active={assignment.active !== false}
+														onToggle={() =>
+															onToggleActive(
+																assignment.sectionId,
+																assignment.id,
+																assignment.active,
+															)
+														}
+														showLabel={true}
+													/>
+												)}
 												<div className="tutor-more-menu">
 													<button
 														type="button"
