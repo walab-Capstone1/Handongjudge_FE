@@ -372,6 +372,30 @@ export function useAssignmentManagement() {
 		[refetchAssignments],
 	);
 
+	const handleBulkToggleActive = useCallback(
+		async (targetActive: boolean) => {
+			if (!sectionId) return;
+			const list = assignments;
+			for (const a of list) {
+				if (a.active === targetActive) continue;
+				try {
+					await APIService.toggleAssignmentActive(
+						a.sectionId,
+						a.id,
+						targetActive,
+					);
+				} catch (error) {
+					console.error("과제 활성/비활성 변경 실패:", error);
+					alert("일부 과제 활성/비활성 변경에 실패했습니다.");
+					await refetchAssignments();
+					return;
+				}
+			}
+			await refetchAssignments();
+		},
+		[sectionId, assignments, refetchAssignments],
+	);
+
 	const handleAddProblem = useCallback(
 		async (assignment: Assignment) => {
 			setSelectedAssignment(assignment);
@@ -956,6 +980,12 @@ export function useAssignmentManagement() {
 		(currentSection as { roleInSection?: string } | null)?.roleInSection ===
 		"TUTOR";
 
+	const sectionAssignments = sectionId ? assignments : [];
+	// 전체 활성화: 모든 항목이 비활성이면 OFF, 하나라도 활성이 있으면 ON
+	const sectionAllActive =
+		sectionAssignments.length > 0 &&
+		sectionAssignments.some((a: Assignment) => a.active !== false);
+
 	return {
 		loading,
 		sectionId,
@@ -1024,6 +1054,8 @@ export function useAssignmentManagement() {
 		handleInputChange,
 		handleDelete,
 		handleToggleActive,
+		handleBulkToggleActive,
+		sectionAllActive,
 		handleAddProblem,
 		isAddingProblems,
 		isSubmittingAdd,

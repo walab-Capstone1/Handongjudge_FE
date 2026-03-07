@@ -108,6 +108,25 @@ export function useNoticeManagement() {
 		[fetchNotices],
 	);
 
+	const handleBulkToggleActive = useCallback(
+		async (targetActive: boolean) => {
+			if (!sectionId) return;
+			for (const notice of notices) {
+				if (notice.active === targetActive) continue;
+				try {
+					await APIService.toggleNoticeActive(notice.id, targetActive);
+				} catch (error) {
+					console.error("공지사항 활성/비활성 변경 실패:", error);
+					alert("일부 공지사항 활성/비활성 변경에 실패했습니다.");
+					await fetchNotices();
+					return;
+				}
+			}
+			await fetchNotices();
+		},
+		[sectionId, notices, fetchNotices],
+	);
+
 	const handleCopyEnrollmentLink = useCallback(() => {
 		if (currentSection?.enrollmentCode) {
 			const enrollmentLink = `${window.location.origin}/enroll/${currentSection.enrollmentCode}`;
@@ -133,6 +152,11 @@ export function useNoticeManagement() {
 
 	const uniqueSections = getUniqueSections(notices);
 
+	const sectionNotices = sectionId ? notices : [];
+	// 전체 활성화: 모든 항목이 비활성이면 OFF, 하나라도 활성이 있으면 ON
+	const sectionAllActive =
+		sectionNotices.length > 0 && sectionNotices.some((n) => n.active);
+
 	return {
 		sectionId,
 		notices,
@@ -151,6 +175,8 @@ export function useNoticeManagement() {
 		handleEditNotice,
 		handleDeleteNotice,
 		handleToggleActive,
+		handleBulkToggleActive,
+		sectionAllActive,
 		handleCopyEnrollmentLink,
 	};
 }

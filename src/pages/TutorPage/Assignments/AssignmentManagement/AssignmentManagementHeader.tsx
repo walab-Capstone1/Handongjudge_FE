@@ -1,5 +1,6 @@
 import type React from "react";
 import * as S from "./styles";
+import ActiveToggle from "../../../../components/UI/ActiveToggle";
 
 interface AssignmentManagementHeaderProps {
 	sectionId: string | undefined;
@@ -13,6 +14,9 @@ interface AssignmentManagementHeaderProps {
 	onBulkProblemCreate: () => void;
 	/** 조교(TUTOR)인 수업이면 과제 추가/수정 등 제한 */
 	isTutorOnly?: boolean;
+	/** 분반 페이지일 때 전체 활성/비활성 토글 (sectionId 있을 때만 사용) */
+	sectionAllActive?: boolean;
+	onBulkToggleActive?: (targetActive: boolean) => void;
 }
 
 const AssignmentManagementHeader: React.FC<AssignmentManagementHeaderProps> = ({
@@ -26,6 +30,8 @@ const AssignmentManagementHeader: React.FC<AssignmentManagementHeaderProps> = ({
 	onStandaloneProblemCreate,
 	onBulkProblemCreate,
 	isTutorOnly,
+	sectionAllActive = false,
+	onBulkToggleActive,
 }) => {
 	/* 2번 사진 원본: 헤더에 제목 + 오른쪽 "과제 추가하기" 버튼만, 뱃지 없음 */
 	if (sectionId) {
@@ -35,13 +41,23 @@ const AssignmentManagementHeader: React.FC<AssignmentManagementHeaderProps> = ({
 					<S.HeaderLeft>
 						<S.PageTitle>과제 관리</S.PageTitle>
 					</S.HeaderLeft>
-					{!isTutorOnly && (
-						<S.HeaderActions>
+					<S.HeaderActions>
+						{!isTutorOnly && onBulkToggleActive && (
+							<S.BulkToggleWrap>
+								<span>전체 활성화</span>
+								<ActiveToggle
+									active={sectionAllActive}
+									onToggle={() => onBulkToggleActive(!sectionAllActive)}
+									showLabel={true}
+								/>
+							</S.BulkToggleWrap>
+						)}
+						{!isTutorOnly && (
 							<S.BtnPrimary type="button" onClick={onAddAssignment}>
 								과제 추가하기
 							</S.BtnPrimary>
-						</S.HeaderActions>
-					)}
+						)}
+					</S.HeaderActions>
 				</S.PageHeader>
 				<S.FiltersSection>
 					<S.SearchBox>

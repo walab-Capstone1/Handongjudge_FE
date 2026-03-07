@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import * as S from "../styles";
 import type { Section } from "../types";
+import ActiveToggle from "../../../../../components/UI/ActiveToggle";
 
 interface NoticeHeaderProps {
 	isSectionPage: boolean;
@@ -12,6 +13,8 @@ interface NoticeHeaderProps {
 	uniqueSections: { id: number; name: string }[];
 	onCreateNotice: () => void;
 	onCopyEnrollmentLink: () => void;
+	sectionAllActive?: boolean;
+	onBulkToggleActive?: (targetActive: boolean) => void;
 }
 
 const NoticeHeader: FC<NoticeHeaderProps> = ({
@@ -24,6 +27,8 @@ const NoticeHeader: FC<NoticeHeaderProps> = ({
 	uniqueSections,
 	onCreateNotice,
 	onCopyEnrollmentLink,
+	sectionAllActive = false,
+	onBulkToggleActive,
 }) => {
 	if (isSectionPage && currentSection) {
 		return (
@@ -32,6 +37,16 @@ const NoticeHeader: FC<NoticeHeaderProps> = ({
 					<S.PageTitle>{currentSection.courseTitle}</S.PageTitle>
 				</S.HeaderLeft>
 				<S.HeaderRight>
+					{onBulkToggleActive && (
+						<S.BulkToggleWrap>
+							<span>전체 활성화</span>
+							<ActiveToggle
+								active={sectionAllActive}
+								onToggle={() => onBulkToggleActive(!sectionAllActive)}
+								showLabel={true}
+							/>
+						</S.BulkToggleWrap>
+					)}
 					{currentSection.enrollmentCode && (
 						<S.LinkCopyButton
 							onClick={onCopyEnrollmentLink}
