@@ -1,6 +1,7 @@
 import type React from "react";
 import { removeCopyLabel } from "../../../../../utils/problemUtils";
 import { getDifficultyColor } from "../../../../../utils/assignmentUtils";
+import ActiveToggle from "../../../../../components/UI/ActiveToggle";
 
 interface Problem {
 	id: number;
@@ -157,33 +158,32 @@ const AssignmentListView: React.FC<AssignmentListViewProps> = ({
 									</button>
 								</>
 							)}
+							{!isTutorOnly && (
+								<ActiveToggle
+									active={assignment.active !== false}
+									onToggle={() =>
+										onToggleActive(
+											assignment.sectionId,
+											assignment.id,
+											assignment.active,
+										)
+									}
+									showLabel={true}
+								/>
+							)}
 							<div className="tutor-more-menu">
 								<button
 									className="tutor-btn-list-action tutor-btn-more"
 									title="더보기"
 									onClick={(e) => {
 										e.stopPropagation();
-										onToggleMoreMenu(assignment.id);
+										onToggleMoreMenu(openMoreMenu === assignment.id ? null : assignment.id);
 									}}
 								>
 									⋯
 								</button>
 								{openMoreMenu === assignment.id && (
 									<div className="tutor-more-dropdown">
-										<button
-											className="tutor-btn-text-small"
-											onClick={(e) => {
-												e.stopPropagation();
-												onToggleActive(
-													assignment.sectionId,
-													assignment.id,
-													assignment.active,
-												);
-												onToggleMoreMenu(null);
-											}}
-										>
-											{assignment.active ? "비활성화" : "활성화"}
-										</button>
 										<button
 											className="tutor-btn-text-small tutor-delete"
 											onClick={(e) => {

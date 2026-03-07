@@ -61,6 +61,14 @@ export const HeaderRight = styled.div`
   flex-wrap: wrap;
 `;
 
+export const BulkToggleWrap = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  font-size: 0.875rem;
+`;
+
 export const PageTitle = styled.h1`
   font-size: 1.875rem;
   font-weight: 700;
@@ -329,7 +337,7 @@ export const NewBadge = styled.span`
 
 export const ActionsInline = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: center;
   justify-content: flex-end;
   flex-wrap: nowrap;
