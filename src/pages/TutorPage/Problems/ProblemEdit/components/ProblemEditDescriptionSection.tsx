@@ -10,6 +10,8 @@ type ProblemEditDescriptionSectionProps = Pick<
 	| "formData"
 	| "setFormData"
 	| "enableFullEdit"
+	| "previewMode"
+	| "setPreviewMode"
 	| "getDescriptionOnlyForPreview"
 	| "getFullPreviewProps"
 	| "insertMarkdownText"
@@ -26,6 +28,8 @@ const ProblemEditDescriptionSection: React.FC<
 	formData,
 	setFormData,
 	enableFullEdit,
+	previewMode,
+	setPreviewMode,
 	getDescriptionOnlyForPreview,
 	getFullPreviewProps,
 	insertMarkdownText,
@@ -65,7 +69,7 @@ const ProblemEditDescriptionSection: React.FC<
 			</S.DescriptionEditor>
 		)}
 
-		{/* 편집 모드: 마크다운 에디터 */}
+		{/* 편집 모드(문제 변환 후): 마크다운 에디터 + 문제 설명만/전체 토글 */}
 		{enableFullEdit && (
 			<S.DescriptionEditor>
 				<S.EditorWrapper>
@@ -239,9 +243,32 @@ const ProblemEditDescriptionSection: React.FC<
 					/>
 				</S.EditorWrapper>
 				<S.Preview>
-					<S.PreviewHeader>미리보기</S.PreviewHeader>
+					<S.PreviewHeader>
+						<span>미리보기</span>
+						<S.PreviewModeToggle>
+							<S.PreviewModeButton
+								type="button"
+								$active={previewMode === "descriptionOnly"}
+								onClick={() => setPreviewMode("descriptionOnly")}
+							>
+								문제 설명만
+							</S.PreviewModeButton>
+							<S.PreviewModeButton
+								type="button"
+								$active={previewMode === "full"}
+								onClick={() => setPreviewMode("full")}
+							>
+								전체
+							</S.PreviewModeButton>
+						</S.PreviewModeToggle>
+					</S.PreviewHeader>
 					<S.PreviewContent>
-						<ProblemPreview {...getFullPreviewProps()} />
+						<ProblemPreview
+							{...(previewMode === "descriptionOnly"
+								? getDescriptionOnlyForPreview()
+								: getFullPreviewProps())}
+							descriptionOnly={previewMode === "descriptionOnly"}
+						/>
 					</S.PreviewContent>
 				</S.Preview>
 			</S.DescriptionEditor>
