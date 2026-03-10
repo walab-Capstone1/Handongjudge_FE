@@ -60,6 +60,8 @@ export function useProblemEdit() {
 	const [originalTimeLimit, setOriginalTimeLimit] = useState("");
 	const [originalMemoryLimit, setOriginalMemoryLimit] = useState("");
 	const [enableFullEdit, setEnableFullEdit] = useState(false);
+	/** "descriptionOnly" = 문제 설명만, "full" = 전체(입력/출력/예제 포함) */
+	const [previewMode, setPreviewMode] = useState<"descriptionOnly" | "full">("full");
 	const [parsedTestCases, setParsedTestCases] = useState<ParsedTestcase[]>([]);
 	const [showParsedTestCases, setShowParsedTestCases] = useState(false);
 
@@ -771,6 +773,8 @@ export function useProblemEdit() {
 		handleParsedTestcaseRemove,
 		handleParsedTestcaseChange,
 		getFullDescription,
+		previewMode,
+		setPreviewMode,
 		getDescriptionOnlyForPreview,
 		getFullPreviewProps,
 		insertMarkdownText,
