@@ -122,7 +122,9 @@ export const Body = styled.div`
 export const Actions = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-right: 2rem;
   gap: 1rem;
+  padding-bottom: 2rem;
   padding-top: 1.5rem;
   margin-top: auto;
   border-top: 1px solid #e5e7eb;
