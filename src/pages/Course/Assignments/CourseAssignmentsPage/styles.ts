@@ -293,6 +293,13 @@ export const ProblemTitle = styled.span`
   flex: 1;
 `;
 
+export const ProblemStatusBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+`;
+
 export const ProblemBadge = styled.span<{ $status: ProblemStatus; $late?: boolean }>`
   font-size: 12px;
   font-weight: 600;
@@ -310,6 +317,19 @@ export const ProblemBadge = styled.span<{ $status: ProblemStatus; $late?: boolea
     props.$status === "ACCEPTED" || props.$status === "SUBMITTED" || props.$late
       ? "#FFFFFF"
       : "#888888"};
+`;
+
+export const ProblemSubmissionMeta = styled.div`
+  font-size: 12px;
+  color: #666666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+export const LateMinutes = styled.span`
+  color: #c2410c;
+  font-weight: 600;
 `;
 
 export const NoAssignmentsMessage = styled.div`

@@ -114,7 +114,13 @@ export function useCourseAssignmentsPage() {
 								}) => {
 									const statusEntry = problemsStatus.find(
 										(s: { problemId: number }) => s.problemId === problem.id,
-									) as { problemId: number; status: string; isOnTime?: boolean } | undefined;
+									) as {
+										problemId: number;
+										status: string;
+										isOnTime?: boolean;
+										submittedAt?: string;
+										minutesLate?: number;
+									} | undefined;
 									const raw = statusEntry
 										? statusEntry.status
 										: "NOT_SUBMITTED";
@@ -125,6 +131,12 @@ export function useCourseAssignmentsPage() {
 									const submitted =
 										problemStatus === "SUBMITTED" ||
 										problemStatus === "ACCEPTED";
+									const submittedAt =
+										statusEntry?.submittedAt != null
+											? typeof statusEntry.submittedAt === "string"
+												? statusEntry.submittedAt
+												: new Date(statusEntry.submittedAt).toISOString()
+											: undefined;
 									return {
 										id: problem.id,
 										title: problem.title,
@@ -132,6 +144,8 @@ export function useCourseAssignmentsPage() {
 										submitted,
 										status: problemStatus,
 										isOnTime: statusEntry?.isOnTime,
+										submittedAt,
+										minutesLate: statusEntry?.minutesLate,
 									};
 								},
 							);
@@ -233,6 +247,32 @@ export function useCourseAssignmentsPage() {
 		return `${year}.${month}.${day} ${hours}:${minutes}`;
 	}, []);
 
+	/** 제출 시각을 "YYYY.MM.DD HH:mm"으로 표시 */
+	const formatSubmissionTime = useCallback((dateString: string | undefined): string => {
+		if (!dateString?.trim()) return "";
+		const date = new Date(dateString);
+		if (Number.isNaN(date.getTime())) return "";
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, "0");
+		const day = String(date.getDate()).padStart(2, "0");
+		const hours = String(date.getHours()).padStart(2, "0");
+		const minutes = String(date.getMinutes()).padStart(2, "0");
+		return `${year}.${month}.${day} ${hours}:${minutes}`;
+	}, []);
+
+	/** 지각 분 수를 "N일 N시간 N분 늦음" 형식으로 표시 (0인 단위는 생략) */
+	const formatMinutesLate = useCallback((totalMinutes: number): string => {
+		if (totalMinutes < 0) return "";
+		const days = Math.floor(totalMinutes / (60 * 24));
+		const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+		const mins = totalMinutes % 60;
+		const parts: string[] = [];
+		if (days > 0) parts.push(`${days}일`);
+		if (hours > 0) parts.push(`${hours}시간`);
+		if (mins > 0 || parts.length === 0) parts.push(`${mins}분`);
+		return `${parts.join(" ")} 늦음`;
+	}, []);
+
 	const handleMenuClick = useCallback(
 		(menuId: string) => {
 			switch (menuId) {
@@ -277,6 +317,8 @@ export function useCourseAssignmentsPage() {
 		toggleAssignment,
 		formatDate,
 		formatDeadline,
+		formatSubmissionTime,
+		formatMinutesLate,
 		handleMenuClick,
 		handleProblemClick,
 		handleToggleSidebar,
