@@ -150,13 +150,23 @@ export default function CourseAssignmentsPageView(
 																}
 															>
 																<S.ProblemTitle>{problem.title}</S.ProblemTitle>
-																<S.ProblemBadge $status={problem.status} $late={problem.status !== "NOT_SUBMITTED" && problem.isOnTime === false}>
-																	{problem.status === "ACCEPTED"
-																		? (problem.isOnTime === false ? "지각 정답" : "정답")
-																		: problem.status === "SUBMITTED"
-																			? (problem.isOnTime === false ? "지각 제출" : "제출")
-																			: "미제출"}
-																</S.ProblemBadge>
+																<S.ProblemStatusBlock>
+																	<S.ProblemBadge $status={problem.status} $late={problem.status !== "NOT_SUBMITTED" && problem.isOnTime === false}>
+																		{problem.status === "ACCEPTED"
+																			? (problem.isOnTime === false ? "지각 정답" : "정답")
+																			: problem.status === "SUBMITTED"
+																				? (problem.isOnTime === false ? "지각 제출" : "제출")
+																				: "미제출"}
+																	</S.ProblemBadge>
+																	{problem.status !== "NOT_SUBMITTED" && problem.submittedAt && (
+																		<S.ProblemSubmissionMeta>
+																			<span>{d.formatSubmissionTime(problem.submittedAt)}</span>
+																			{problem.isOnTime === false && problem.minutesLate != null && (
+																				<S.LateMinutes>· {d.formatMinutesLate(problem.minutesLate)}</S.LateMinutes>
+																			)}
+																		</S.ProblemSubmissionMeta>
+																	)}
+																</S.ProblemStatusBlock>
 															</S.AccordionProblemItem>
 														))}
 													</S.AccordionProblemsList>

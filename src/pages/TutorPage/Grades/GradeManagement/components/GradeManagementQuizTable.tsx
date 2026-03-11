@@ -50,6 +50,13 @@ export default function GradeManagementQuizTable({
 	const problemGrades = grades[0]?.problemGrades ?? [];
 	const quizTitle = selectedQuiz?.title ?? "퀴즈";
 
+	const submissionTitle = (label: string, submittedAt?: string) =>
+		submittedAt
+			? `${label} · 제출: ${new Date(submittedAt).toLocaleString("ko-KR")}`
+			: label;
+	const getSubmittedAt = (p: { submittedAt?: string; submitted_at?: string }) =>
+		p.submittedAt ?? p.submitted_at;
+
 	return (
 		<S.CourseTableContainer>
 			<S.GradeLegend>
@@ -146,14 +153,20 @@ export default function GradeManagementQuizTable({
 													(problem.submitted ? (
 														<S.SubmissionStatus $onTime={problem.isOnTime} $late={!problem.isOnTime}>
 															{problem.isOnTime ? (
-																<FaCheckCircle title="제시간 제출" />
+																<span title={submissionTitle("제시간 제출", getSubmittedAt(problem))}>
+																	<FaCheckCircle />
+																</span>
 															) : (
-																<FaExclamationTriangle title="지각 제출" />
+																<span title={submissionTitle("지각 제출", getSubmittedAt(problem))}>
+																	<FaExclamationTriangle />
+																</span>
 															)}
 														</S.SubmissionStatus>
 													) : (
 														<S.SubmissionStatus $onTime={false} $late={false}>
-															<FaTimesCircle title="미제출" />
+															<span title="미제출">
+																<FaTimesCircle />
+															</span>
 														</S.SubmissionStatus>
 													))}
 											</S.ScoreRow>

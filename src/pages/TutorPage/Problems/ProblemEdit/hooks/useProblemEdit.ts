@@ -431,6 +431,26 @@ export function useProblemEdit() {
 		[formData.testcases, parsedTestCases],
 	);
 
+	const handleTestcaseAddManual = useCallback(() => {
+		const n =
+			formData.testcases.length +
+			parsedTestCases.length +
+			1;
+		setFormData((prev) => ({
+			...prev,
+			testcases: [
+				...prev.testcases,
+				{
+					name: `테스트케이스 ${n}`,
+					input: "",
+					output: "",
+					type: "secret" as const,
+					isNew: true,
+				},
+			],
+		}));
+	}, [formData.testcases.length, parsedTestCases.length]);
+
 	const handleTestcaseRemove = useCallback((index: number) => {
 		setFormData((prev) => ({
 			...prev,
@@ -768,6 +788,7 @@ export function useProblemEdit() {
 		addSampleInput,
 		removeSampleInput,
 		handleTestcaseAdd,
+		handleTestcaseAddManual,
 		handleTestcaseRemove,
 		handleTestcaseChange,
 		handleParsedTestcaseRemove,

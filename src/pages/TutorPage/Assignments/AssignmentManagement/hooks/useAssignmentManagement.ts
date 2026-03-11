@@ -481,20 +481,11 @@ export function useAssignmentManagement() {
 		[selectedAssignment, refetchAssignments],
 	);
 
-	const existingProblemIds = new Set(
-		(selectedAssignment?.problems ?? []).map((p: { id: number }) => p.id),
-	);
-	const existingProblemTitles = new Set(
-		(selectedAssignment?.problems ?? [])
-			.map((p: { title?: string }) => p.title)
-			.filter(Boolean),
-	);
-
 	const filteredProblems = availableProblems.filter(
 		(problem: { id: number; title?: string }) =>
-			problem.title?.toLowerCase().includes(problemSearchTerm.toLowerCase()) &&
-			!existingProblemIds.has(problem.id) &&
-			!(problem.title && existingProblemTitles.has(problem.title)),
+			(problem.title ?? "")
+				.toLowerCase()
+				.includes(problemSearchTerm.toLowerCase()),
 	);
 
 	const handleProblemToggle = useCallback((problemId: number) => {
@@ -627,7 +618,15 @@ export function useAssignmentManagement() {
 				const parsed = await APIService.parseZipFile(fd);
 				const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
 				const testcases = testCases.map(
-					(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+					(
+						tc: {
+							name?: string;
+							input?: string;
+							output?: string;
+							type?: string;
+						},
+						idx: number,
+					) => ({
 						name: tc.name ?? `testcase_${idx}`,
 						input: tc.input ?? "",
 						output: tc.output ?? "",
@@ -728,7 +727,15 @@ export function useAssignmentManagement() {
 				const parsed = await APIService.parseZipFile(fd);
 				const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
 				const testcases = testCases.map(
-					(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+					(
+						tc: {
+							name?: string;
+							input?: string;
+							output?: string;
+							type?: string;
+						},
+						idx: number,
+					) => ({
 						name: tc.name ?? `testcase_${idx}`,
 						input: tc.input ?? "",
 						output: tc.output ?? "",
@@ -864,7 +871,15 @@ export function useAssignmentManagement() {
 					const parsed = await APIService.parseZipFile(fd);
 					const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
 					const testcases = testCases.map(
-						(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+						(
+							tc: {
+								name?: string;
+								input?: string;
+								output?: string;
+								type?: string;
+							},
+							idx: number,
+						) => ({
 							name: tc.name ?? `testcase_${idx}`,
 							input: tc.input ?? "",
 							output: tc.output ?? "",
@@ -926,8 +941,10 @@ export function useAssignmentManagement() {
 			return matchSearch && matchSection;
 		})
 		.sort((a: Assignment, b: Assignment) => {
-			const dueA = a.dueDate ?? (a as Assignment & { endDate?: string }).endDate ?? "";
-			const dueB = b.dueDate ?? (b as Assignment & { endDate?: string }).endDate ?? "";
+			const dueA =
+				a.dueDate ?? (a as Assignment & { endDate?: string }).endDate ?? "";
+			const dueB =
+				b.dueDate ?? (b as Assignment & { endDate?: string }).endDate ?? "";
 			const timeA = dueA ? new Date(dueA).getTime() : Number.MAX_SAFE_INTEGER;
 			const timeB = dueB ? new Date(dueB).getTime() : Number.MAX_SAFE_INTEGER;
 			return timeA - timeB;
