@@ -147,6 +147,18 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 					</S.SearchBox>
 					<S.FilterGroup>
 						<S.FilterSelect
+							id="filter-original"
+							value={d.filterOriginalOnly}
+							onChange={(e) =>
+								d.setFilterOriginalOnly(e.target.value as "ALL" | "ORIGINAL")
+							}
+						>
+							<option value="ALL">전체 문제</option>
+							<option value="ORIGINAL">원본(오리지널)만</option>
+						</S.FilterSelect>
+					</S.FilterGroup>
+					<S.FilterGroup>
+						<S.FilterSelect
 							id="filter-usage"
 							value={d.filterUsageStatus}
 							onChange={(e) => {
@@ -603,7 +615,7 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 										type="text"
 										value={d.copyTitle}
 										onChange={(e) => d.setCopyTitle(e.target.value)}
-										placeholder="복사본 문제 제목을 입력하세요"
+										placeholder="문제 제목을 입력하세요"
 										disabled={d.isCopying}
 									/>
 								</S.FormGroup>

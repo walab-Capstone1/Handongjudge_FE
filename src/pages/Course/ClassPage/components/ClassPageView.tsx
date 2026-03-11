@@ -113,6 +113,11 @@ export default function ClassPageView(d: ClassPageHookReturn) {
 											}
 										: undefined
 								}
+								overrideLinkPath={
+									d.activeTab === "in-progress" && course.sectionId
+										? `/tutor/assignments/section/${course.sectionId}`
+										: undefined
+								}
 							/>
 						))}
 					</S.CoursesGrid>

@@ -536,7 +536,7 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 										파일 선택
 									</S.FileLabelInline>
 									<S.HelpText>
-										테스트케이스 입력(.in) 및 출력(.ans) 파일
+										테스트케이스 입력(.in) 및 출력(.ans) 파일 · 아래에서 직접 입력도 가능
 									</S.HelpText>
 								</S.FileUploadWrapper>
 								<S.TestcaseList>
@@ -552,6 +552,124 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 										</S.TestcaseItem>
 									))}
 								</S.TestcaseList>
+
+								<div style={{ marginTop: "1rem" }}>
+									<button
+										type="button"
+										onClick={d.handleManualTestcaseAdd}
+										style={{
+											padding: "8px 14px",
+											borderRadius: "6px",
+											border: "1px solid #cbd5e1",
+											background: "#f8fafc",
+											cursor: "pointer",
+											fontSize: "14px",
+										}}
+									>
+										+ 테스트케이스 직접 추가
+									</button>
+								</div>
+								{d.manualTestCases.length > 0 && (
+									<S.ParsedTestcasesSection style={{ marginTop: "1rem" }}>
+										<S.Label style={{ marginBottom: "0.5rem" }}>
+											직접 추가한 테스트케이스 ({d.manualTestCases.length}개)
+										</S.Label>
+										<S.ParsedTestcases>
+											{d.manualTestCases.map((tc, idx) => (
+												<S.ParsedTestcaseItem key={idx}>
+													<S.ParsedTestcaseHeader>
+														<span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+															<input
+																type="text"
+																value={tc.name ?? ""}
+																onChange={(e) =>
+																	d.handleManualTestcaseChange(idx, "name", e.target.value)
+																}
+																placeholder="이름"
+																style={{
+																	width: "120px",
+																	padding: "0.35rem 0.5rem",
+																	fontSize: "0.9rem",
+																	border: "1px solid #cbd5e1",
+																	borderRadius: "4px",
+																}}
+															/>
+															<select
+																value={tc.type ?? "secret"}
+																onChange={(e) =>
+																	d.handleManualTestcaseChange(
+																		idx,
+																		"type",
+																		e.target.value as "sample" | "secret",
+																	)
+																}
+																style={{
+																	padding: "0.35rem 0.5rem",
+																	borderRadius: "4px",
+																	border: "1px solid #cbd5e1",
+																	fontSize: "0.85rem",
+																}}
+															>
+																<option value="sample">샘플</option>
+																<option value="secret">비밀</option>
+															</select>
+														</span>
+														<S.TestcaseRemove
+															type="button"
+															onClick={() => d.handleManualTestcaseRemove(idx)}
+														>
+															×
+														</S.TestcaseRemove>
+													</S.ParsedTestcaseHeader>
+													<S.ParsedTestcaseContent>
+														<div>
+															<strong>입력:</strong>
+															<textarea
+																value={tc.input ?? ""}
+																onChange={(e) =>
+																	d.handleManualTestcaseChange(idx, "input", e.target.value)
+																}
+																rows={3}
+																placeholder="입력 데이터"
+																style={{
+																	width: "100%",
+																	fontFamily: "monospace",
+																	fontSize: "0.85rem",
+																	padding: "8px",
+																	border: "1px solid #e2e8f0",
+																	borderRadius: "4px",
+																	marginTop: "4px",
+																	resize: "vertical",
+																}}
+															/>
+														</div>
+														<div>
+															<strong>출력:</strong>
+															<textarea
+																value={tc.output ?? ""}
+																onChange={(e) =>
+																	d.handleManualTestcaseChange(idx, "output", e.target.value)
+																}
+																rows={3}
+																placeholder="출력 데이터"
+																style={{
+																	width: "100%",
+																	fontFamily: "monospace",
+																	fontSize: "0.85rem",
+																	padding: "8px",
+																	border: "1px solid #e2e8f0",
+																	borderRadius: "4px",
+																	marginTop: "4px",
+																	resize: "vertical",
+																}}
+															/>
+														</div>
+													</S.ParsedTestcaseContent>
+												</S.ParsedTestcaseItem>
+											))}
+										</S.ParsedTestcases>
+									</S.ParsedTestcasesSection>
+								)}
 
 								{d.parsedTestCases.length > 0 && (
 									<S.ParsedTestcasesSection>

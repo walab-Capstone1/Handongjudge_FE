@@ -163,8 +163,16 @@ export function useDashboard() {
 		sectionId: number,
 		currentActive: boolean,
 	) => {
+		const newActive = !currentActive;
+		const message = newActive
+			? "이 수업을 활성화하시겠습니까?"
+			: "이 수업을 비활성화하시겠습니까?";
+
+		if (!window.confirm(message)) {
+			return;
+		}
+
 		try {
-			const newActive = !currentActive;
 			await APIService.toggleSectionActive(sectionId, newActive);
 			alert(
 				newActive ? "수업이 활성화되었습니다." : "수업이 비활성화되었습니다.",

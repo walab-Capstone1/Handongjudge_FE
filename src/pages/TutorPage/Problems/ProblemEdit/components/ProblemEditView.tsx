@@ -127,6 +127,7 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 								showParsedTestCases={d.showParsedTestCases}
 								setShowParsedTestCases={d.setShowParsedTestCases}
 						handleTestcaseAdd={d.handleTestcaseAdd}
+							handleTestcaseAddManual={d.handleTestcaseAddManual}
 							handleTestcaseRemove={d.handleTestcaseRemove}
 							handleTestcaseChange={d.handleTestcaseChange}
 							handleParsedTestcaseRemove={d.handleParsedTestcaseRemove}

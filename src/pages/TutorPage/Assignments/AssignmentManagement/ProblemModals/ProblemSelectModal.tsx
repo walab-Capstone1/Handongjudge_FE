@@ -480,8 +480,7 @@ const ProblemSelectModal: React.FC<ProblemSelectModalProps> = ({
 										<span>전체 선택</span>
 									</label>
 									<S.ItemCount>
-										{selectedProblemIds.length} / {currentProblems.length}개
-										선택됨
+										{selectedProblemIds.length} / {currentProblems.length}개 선택됨
 									</S.ItemCount>
 								</div>
 							)}

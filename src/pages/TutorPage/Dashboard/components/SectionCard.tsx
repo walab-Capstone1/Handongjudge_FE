@@ -95,7 +95,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
 						성적
 					</S.ActionButton>
 					<S.ActionButton
-						$primary
 						onClick={() =>
 							navigate(`/tutor/assignments/section/${section.sectionId}`)
 						}
