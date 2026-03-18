@@ -392,10 +392,34 @@ export const Subsection = styled.div`
   gap: 8px;
 `;
 
+export const SubsectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 0;
+`;
+
 export const SubsectionTitle = styled(SectionTitle)`
   font-size: 16px !important;
   color: #000000 !important;
   margin-bottom: 0;
+`;
+
+export const SubsectionMoreLink = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #667eea;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 export const ContentBox = styled.div`

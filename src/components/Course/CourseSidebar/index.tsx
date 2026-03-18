@@ -234,7 +234,9 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 			>
 				<S.SidebarHeader>
 					<S.SidebarHeaderLeft onClick={() => !isCollapsed && navigate("/courses")}>
-						<S.SidebarLogo src="/logo.svg" alt="H-CodeLab Logo" />
+						{!isCollapsed && (
+							<S.SidebarLogo src="/logo.svg" alt="H-CodeLab Logo" />
+						)}
 						{!isCollapsed && <S.SidebarTitle>H-CodeLab</S.SidebarTitle>}
 					</S.SidebarHeaderLeft>
 					{onToggleSidebar && (
