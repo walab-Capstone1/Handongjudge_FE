@@ -247,13 +247,16 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 												))}
 											</S.SummaryDetails>
 										)}
-										<S.SubmissionInfo>
-											제출 ID: {submissionResult.submissionId} | 언어:{" "}
-											{submissionResult.language} | 제출 시간:{" "}
-											{new Date(submissionResult.submittedAt).toLocaleString(
-												"ko-KR",
+										{submissionResult.status !== "error" &&
+											submissionResult.submittedAt && (
+												<S.SubmissionInfo>
+													제출 ID: {submissionResult.submissionId} | 언어:{" "}
+													{submissionResult.language} | 제출 시간:{" "}
+													{new Date(
+														submissionResult.submittedAt,
+													).toLocaleString("ko-KR")}
+												</S.SubmissionInfo>
 											)}
-										</S.SubmissionInfo>
 									</S.ResultSummary>
 								);
 							} else {
@@ -267,12 +270,19 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 										style={{ color: submissionResult.resultInfo?.color }}
 									>
 										<strong>{submissionResult.resultInfo?.message}</strong>
-										<br />
-										제출 ID: {submissionResult.submissionId} | 언어:{" "}
-										{submissionResult.language} | 제출 시간:{" "}
-										{new Date(submissionResult.submittedAt).toLocaleString(
-											"ko-KR",
-										)}
+										{submissionResult.status !== "error" &&
+											submissionResult.submittedAt && (
+												<>
+													<br />
+													<S.SubmissionInfo>
+														제출 ID: {submissionResult.submissionId} | 언어:{" "}
+														{submissionResult.language} | 제출 시간:{" "}
+														{new Date(
+															submissionResult.submittedAt,
+														).toLocaleString("ko-KR")}
+													</S.SubmissionInfo>
+												</>
+											)}
 									</S.ResultSummary>
 								);
 							}

@@ -64,6 +64,9 @@ export interface Assignment {
 	sectionName: string;
 	title: string;
 	endDate: string;
+	/** 문제 제출 진행 (과제 페이지와 동일 표시용, 다가오는 마감에서만 채움) */
+	submittedProblems?: number;
+	totalProblems?: number;
 }
 
 export interface Notification {

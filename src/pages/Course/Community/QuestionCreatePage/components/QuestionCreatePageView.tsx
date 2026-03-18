@@ -40,6 +40,7 @@ export default function QuestionCreatePageView(
 				activeMenu="커뮤니티"
 				isCollapsed={isSidebarCollapsed}
 				onMenuClick={() => {}}
+				onToggleSidebar={handleToggleSidebar}
 			/>
 			<S.Content $isCollapsed={isSidebarCollapsed}>
 				<CourseHeader

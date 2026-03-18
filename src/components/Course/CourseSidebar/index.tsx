@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import {
@@ -8,12 +8,11 @@ import {
 	MdAnnouncement,
 	MdNotifications,
 	MdLogout,
-	MdClose,
 	MdForum,
 	MdQuiz,
 	MdSettings,
-	MdClass,
 } from "react-icons/md";
+import { FaGripLinesVertical, FaChevronRight, FaBars } from "react-icons/fa";
 import APIService from "../../../services/APIService";
 import * as S from "./styles";
 
@@ -25,17 +24,12 @@ interface MenuItem {
 	type?: string;
 }
 
-interface Course {
-	sectionId: number;
-	courseTitle: string;
-	sectionNumber: string;
-}
-
 interface CourseSidebarProps {
 	sectionId?: number | string | null;
 	activeMenu?: string;
 	onMenuClick?: (menuId: string) => void;
 	isCollapsed?: boolean;
+	onToggleSidebar?: () => void;
 }
 
 const CourseSidebar: React.FC<CourseSidebarProps> = ({
@@ -43,18 +37,15 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 	activeMenu = "대시보드",
 	onMenuClick,
 	isCollapsed = false,
+	onToggleSidebar,
 }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { logout, user } = useAuth();
-	const [showCourseList, setShowCourseList] = useState(false);
-	const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
-	const [loadingCourses, setLoadingCourses] = useState(false);
 	/** 관리 중인 수업 sectionId 목록 (현재 수업에서 관리자인지 판단용) */
 	const [managingSectionIds, setManagingSectionIds] = useState<number[]>([]);
 	const [checkingManagingSections, setCheckingManagingSections] =
 		useState(true);
-	const courseListRef = useRef<HTMLDivElement>(null);
 
 	const hasSectionId =
 		sectionId !== null && sectionId !== undefined && Number(sectionId) > 0;
@@ -104,13 +95,6 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 	}, [user]);
 
 	const menuItems: MenuItem[] = [
-		{
-			id: "courses",
-			label: "수업 선택",
-			path: "#",
-			icon: MdClass,
-			type: "action",
-		},
 		{
 			id: "dashboard",
 			label: "대시보드",
@@ -163,84 +147,44 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 			: []),
 	];
 
-	useEffect(() => {
-		const fetchEnrolledCourses = async () => {
-			if (showCourseList && enrolledCourses.length === 0) {
-				try {
-					setLoadingCourses(true);
-					const response = await APIService.getUserEnrolledSections();
-					setEnrolledCourses(response.data || response);
-				} catch (error) {
-					console.error("강의 목록 조회 실패:", error);
-				} finally {
-					setLoadingCourses(false);
-				}
-			}
-		};
-		fetchEnrolledCourses();
-	}, [showCourseList, enrolledCourses.length]);
-
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				courseListRef.current &&
-				!courseListRef.current.contains(event.target as Node)
-			) {
-				setShowCourseList(false);
-			}
-		};
-
-		if (showCourseList) {
-			document.addEventListener("mousedown", handleClickOutside);
-		}
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, [showCourseList]);
-
-	useEffect(() => {
-		const handleEscKey = (event: KeyboardEvent) => {
-			if (event.key === "Escape") {
-				setShowCourseList(false);
-			}
-		};
-
-		if (showCourseList) {
-			document.addEventListener("keydown", handleEscKey);
-		}
-		return () => {
-			document.removeEventListener("keydown", handleEscKey);
-		};
-	}, [showCourseList]);
-
-	const handleCourseSelect = (selectedSectionId: number) => {
-		const currentPath = location.pathname;
-		const newPath = currentPath.replace(
-			/\/sections\/\d+/,
-			`/sections/${selectedSectionId}`,
-		);
-		navigate(newPath);
-		setShowCourseList(false);
-	};
-
 	return (
 		<>
 			<S.Sidebar
 				$collapsed={isCollapsed}
 				className={isCollapsed ? "collapsed" : ""}
 			>
-				<S.SidebarHeader onClick={() => !isCollapsed && navigate("/courses")}>
-					<S.SidebarLogo src="/logo.svg" alt="H-CodeLab Logo" />
-					{!isCollapsed && <S.SidebarTitle>H-CodeLab</S.SidebarTitle>}
+				<S.SidebarHeader>
+					<S.SidebarHeaderLeft onClick={() => !isCollapsed && navigate("/courses")}>
+						{!isCollapsed && (
+							<S.SidebarLogo src="/logo.svg" alt="H-CodeLab Logo" />
+						)}
+						{!isCollapsed && <S.SidebarTitle>H-CodeLab</S.SidebarTitle>}
+					</S.SidebarHeaderLeft>
+					{onToggleSidebar && (
+						<S.SidebarToggleButton
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onToggleSidebar();
+							}}
+							aria-label={isCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
+						>
+							{isCollapsed ? (
+								<span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+									<FaGripLinesVertical style={{ fontSize: "0.9rem" }} />
+									<FaChevronRight style={{ fontSize: "0.65rem" }} />
+								</span>
+							) : (
+								<FaBars />
+							)}
+						</S.SidebarToggleButton>
+					)}
 				</S.SidebarHeader>
 
 				<S.SidebarMenu>
 					{menuItems.map((item, index) => {
 						const IconComponent = item.icon;
-						const isActive =
-							item.id === "courses"
-								? false
-								: location.pathname.includes(
+						const isActive = location.pathname.includes(
 										item.id === "assignment"
 											? "course-assignments"
 											: item.id === "coding-quiz"
@@ -250,8 +194,8 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 													: item.id === "notification"
 														? "alarm"
 														: item.id,
-									);
-						const isSubMenu = item.id !== "dashboard" && item.id !== "courses";
+								);
+						const isSubMenu = item.id !== "dashboard";
 						return (
 							<S.MenuItem
 								key={item.id}
@@ -263,16 +207,11 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 								style={
 									isSubMenu
 										? {
-												animationDelay: `${(index - 1) * 0.1}s`,
+												animationDelay: `${index * 0.1}s`,
 											}
 										: {}
 								}
 								onClick={() => {
-									if (item.type === "action" && item.id === "courses") {
-										setShowCourseList(!showCourseList);
-										return;
-									}
-
 									if (item.path && item.path !== "#") {
 										navigate(item.path);
 									}
@@ -305,52 +244,6 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 					{!isCollapsed && <S.MenuText>로그아웃</S.MenuText>}
 				</S.SidebarLogout>
 			</S.Sidebar>
-
-			{showCourseList && (
-				<S.CourseListSidebar
-					ref={courseListRef}
-					$show={showCourseList}
-					$collapsed={isCollapsed}
-				>
-					<S.CourseListHeader>
-						<S.CourseListTitle>수업 선택</S.CourseListTitle>
-						<S.CourseListClose onClick={() => setShowCourseList(false)}>
-							<MdClose />
-						</S.CourseListClose>
-					</S.CourseListHeader>
-
-					<S.CourseListContent>
-						{loadingCourses ? (
-							<S.CourseListLoading>로딩 중...</S.CourseListLoading>
-						) : (
-							enrolledCourses.map((course) => (
-								<S.CourseListItem
-									key={course.sectionId}
-									$active={
-										course.sectionId === Number.parseInt(String(sectionId))
-									}
-									onClick={() => handleCourseSelect(course.sectionId)}
-								>
-									<S.CourseListItemTitle>
-										{course.courseTitle}
-									</S.CourseListItemTitle>
-								</S.CourseListItem>
-							))
-						)}
-					</S.CourseListContent>
-					<S.CourseListFooter>
-						<S.CourseListLink
-							type="button"
-							onClick={() => {
-								navigate("/courses");
-								setShowCourseList(false);
-							}}
-						>
-							전체 강의실 보기
-						</S.CourseListLink>
-					</S.CourseListFooter>
-				</S.CourseListSidebar>
-			)}
 		</>
 	);
 };

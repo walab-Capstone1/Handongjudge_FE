@@ -90,10 +90,33 @@ export const CourseSummaryCard = styled.div`
   margin-top: 12px;
 `;
 
-export const SummaryBackButton = styled.button`
+export const SummaryBackRow = styled.div`
   position: absolute;
   top: 1rem;
   right: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const SummaryCourseChangeButton = styled.button`
+  padding: 6px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border: 1px solid #667eea;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: #667eea;
+    color: white;
+  }
+`;
+
+export const SummaryBackButton = styled.button`
   padding: 6px 12px;
   background: white;
   color: #667eea;
@@ -159,12 +182,13 @@ export const UpcomingDeadlineItem = styled.div<{ $isExpired?: boolean }>`
   border-radius: 8px;
   cursor: pointer;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: ${(props) => (props.$isExpired ? "#fef2f2" : "#f0f4ff")};
   border: 1px solid ${(props) => (props.$isExpired ? "#fecaca" : "#c7d2fe")};
   transition: background 0.2s ease;
+  min-height: 40px;
+  box-sizing: border-box;
 
   &:hover {
     background: ${(props) => (props.$isExpired ? "#fee2e2" : "#e0e7ff")};
@@ -178,11 +202,49 @@ export const UpcomingDeadlineTitle = styled.span`
   font-size: 0.9rem;
   font-weight: 600;
   color: #374151;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
+`;
+
+export const UpcomingDeadlineRightRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+`;
+
+export const UpcomingDeadlineDeadline = styled.span`
+  font-size: 0.7rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  flex-shrink: 0;
+`;
+
+export const UpcomingDeadlineBar = styled.div`
+  width: 80px;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+`;
+
+export const UpcomingDeadlineBarFill = styled.div<{ $progress: number }>`
+  height: 100%;
+  width: ${(p) => Math.min(100, Math.max(0, p.$progress))}%;
+  background: #667eea;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+`;
+
+export const UpcomingDeadlineProgress = styled.span`
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #667eea;
+  flex-shrink: 0;
 `;
 
 export const UpcomingDeadlineDday = styled.span<{ $isExpired?: boolean }>`
@@ -392,10 +454,34 @@ export const Subsection = styled.div`
   gap: 8px;
 `;
 
+export const SubsectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 0;
+`;
+
 export const SubsectionTitle = styled(SectionTitle)`
   font-size: 16px !important;
   color: #000000 !important;
   margin-bottom: 0;
+`;
+
+export const SubsectionMoreLink = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #667eea;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 export const ContentBox = styled.div`

@@ -255,6 +255,41 @@ export function useCourseDashboard() {
 				...expiredAssignments,
 			].slice(0, 5);
 
+			// 다가오는 마감 2건에 대해 제출 진행률 채우기 (과제 페이지와 동일)
+			const upcomingTwo = activeAssignments.slice(0, 2);
+			const userId = auth?.user?.id;
+			if (userId != null) {
+				await Promise.all(
+					upcomingTwo.map(
+						async (a: Assignment & { submittedProblems?: number; totalProblems?: number }) => {
+							try {
+								const [problemsRes, statusRes] = await Promise.all([
+									APIService.getAssignmentProblems(a.sectionId, a.id),
+									APIService.getStudentAssignmentProblemsStatus(
+										userId,
+										a.sectionId,
+										a.id,
+									),
+								]);
+								const problemsList = problemsRes?.data ?? problemsRes ?? [];
+								const problemsStatus = statusRes?.data ?? statusRes ?? [];
+								const totalProblems = Array.isArray(problemsList) ? problemsList.length : 0;
+								const submittedProblems = Array.isArray(problemsStatus)
+									? problemsStatus.filter(
+											(s: { status?: string }) =>
+												s.status === "ACCEPTED" || s.status === "SUBMITTED",
+										).length
+									: 0;
+								a.submittedProblems = submittedProblems;
+								a.totalProblems = totalProblems;
+							} catch {
+								// 진행률 조회 실패 시 필드 없음 유지
+							}
+						},
+					),
+				);
+			}
+
 			const sortedNotifications = [...notificationsList]
 				.sort(
 					(a, b) =>
@@ -273,7 +308,7 @@ export function useCourseDashboard() {
 		} finally {
 			setLoading(false);
 		}
-	}, [sectionId]);
+	}, [sectionId, auth?.user?.id]);
 
 	// 튜터에서 제외된 뒤 /dashboard로 리다이렉트된 경우: 한 번만 메시지 표시 후 강의실로
 	useEffect(() => {

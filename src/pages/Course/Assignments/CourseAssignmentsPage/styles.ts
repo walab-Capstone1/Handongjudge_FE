@@ -1,5 +1,4 @@
 import styled, { keyframes } from "styled-components";
-import type { ProblemStatus } from "./types";
 
 const slideDown = keyframes`
   from {
@@ -52,6 +51,25 @@ export const AssignmentsBody = styled.div`
 
 export const AssignmentsHeader = styled.div`
   margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+`;
+
+export const SortSelect = styled.select`
+  margin-left: auto;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
 `;
 
 export const AssignmentsTitle = styled.h2`
@@ -59,6 +77,7 @@ export const AssignmentsTitle = styled.h2`
   font-weight: bold;
   color: #000000;
   margin: 0 0 8px 0;
+  width: 100%;
 `;
 
 export const AssignmentsSummary = styled.span`
@@ -249,11 +268,69 @@ export const AccordionProblemsSection = styled.div`
   margin-top: 24px;
 `;
 
+export const ProblemsSectionRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+`;
+
 export const ProblemsSubtitle = styled.h4`
   font-size: 15px;
   font-weight: 600;
   color: #000000;
-  margin: 0 0 16px 0;
+  margin: 0;
+`;
+
+export const ProblemSortRow = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const ProblemSortSelect = styled.select`
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+export type ProblemBadgeType = "correct" | "correctLate" | "wrong" | "wrongLate" | "notSubmitted";
+
+const badgeStyles: Record<
+  ProblemBadgeType,
+  { bg: string; color: string }
+> = {
+  correct: { bg: "#22C55E", color: "#FFFFFF" },
+  correctLate: { bg: "#EAB308", color: "#FFFFFF" },
+  wrong: { bg: "#EF4444", color: "#FFFFFF" },
+  wrongLate: { bg: "#F97316", color: "#FFFFFF" },
+  notSubmitted: { bg: "#E5E7EB", color: "#6B7280" },
+};
+
+export const BadgeLegend = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+`;
+
+export const BadgeLegendItem = styled.span<{ $badgeType: ProblemBadgeType }>`
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: ${(p) => badgeStyles[p.$badgeType].bg};
+  color: ${(p) => badgeStyles[p.$badgeType].color};
 `;
 
 export const AccordionProblemsList = styled.div`
@@ -295,28 +372,20 @@ export const ProblemTitle = styled.span`
 
 export const ProblemStatusBlock = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
 `;
 
-export const ProblemBadge = styled.span<{ $status: ProblemStatus; $late?: boolean }>`
+export const ProblemBadge = styled.span<{ $badgeType: ProblemBadgeType }>`
   font-size: 12px;
   font-weight: 600;
   padding: 6px 14px;
   border-radius: 14px;
-  background: ${(props) =>
-    props.$late
-      ? "#EAB308"
-      : props.$status === "ACCEPTED"
-        ? "#22C55E"
-        : props.$status === "SUBMITTED"
-          ? "#667EEA"
-          : "#EEEEEE"};
-  color: ${(props) =>
-    props.$status === "ACCEPTED" || props.$status === "SUBMITTED" || props.$late
-      ? "#FFFFFF"
-      : "#888888"};
+  background: ${(p) => badgeStyles[p.$badgeType].bg};
+  color: ${(p) => badgeStyles[p.$badgeType].color};
 `;
 
 export const ProblemSubmissionMeta = styled.div`

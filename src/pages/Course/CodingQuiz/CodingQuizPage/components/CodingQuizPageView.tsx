@@ -28,6 +28,7 @@ export default function CodingQuizPageView(d: CodingQuizPageHookReturn) {
 					activeMenu="코딩퀴즈"
 					isCollapsed={d.isSidebarCollapsed}
 					onMenuClick={() => {}}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<CourseHeader
@@ -49,6 +50,7 @@ export default function CodingQuizPageView(d: CodingQuizPageHookReturn) {
 					activeMenu="코딩퀴즈"
 					isCollapsed={d.isSidebarCollapsed}
 					onMenuClick={() => {}}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<CourseHeader
@@ -109,6 +111,7 @@ export default function CodingQuizPageView(d: CodingQuizPageHookReturn) {
 				activeMenu="코딩퀴즈"
 				isCollapsed={d.isSidebarCollapsed}
 				onMenuClick={() => {}}
+				onToggleSidebar={d.handleToggleSidebar}
 			/>
 			<S.Content $isCollapsed={d.isSidebarCollapsed}>
 				<CourseHeader

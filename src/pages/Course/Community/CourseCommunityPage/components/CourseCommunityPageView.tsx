@@ -19,6 +19,7 @@ export default function CourseCommunityPageView(
 					activeMenu="커뮤니티"
 					isCollapsed={d.isSidebarCollapsed}
 					onMenuClick={() => {}}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<CourseHeader
@@ -42,6 +43,7 @@ export default function CourseCommunityPageView(
 					activeMenu="커뮤니티"
 					isCollapsed={d.isSidebarCollapsed}
 					onMenuClick={() => {}}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<CourseHeader
@@ -64,6 +66,7 @@ export default function CourseCommunityPageView(
 				activeMenu="커뮤니티"
 				isCollapsed={d.isSidebarCollapsed}
 				onMenuClick={() => {}}
+				onToggleSidebar={d.handleToggleSidebar}
 			/>
 			<S.Content $isCollapsed={d.isSidebarCollapsed}>
 				<CourseHeader

@@ -30,23 +30,60 @@ export const Sidebar = styled.div<{ $collapsed?: boolean }>`
 export const SidebarHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   padding: 20px 20px;
   gap: 12px;
   margin-bottom: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   height: 61px;
   box-sizing: border-box;
-  cursor: pointer;
   transition: background-color 0.2s ease;
 
   ${Sidebar}[class*="collapsed"] & {
-    justify-content: center;
-    padding: 20px 0;
+    justify-content: space-between;
+    padding: 20px 8px;
+    gap: 4px;
   }
+`;
+
+export const SidebarHeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba(102, 126, 234, 0.15);
+    opacity: 0.9;
+  }
+
+  ${Sidebar}[class*="collapsed"] & {
+    flex: 0;
+    justify-content: center;
+  }
+`;
+
+export const SidebarToggleButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border-radius: 4px;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
   }
 `;
 
@@ -68,7 +105,7 @@ export const SidebarMenu = styled.div`
   flex-direction: column;
   gap: 14px;
   flex: 1;
-  padding-top: 37px;
+  padding-top: 18px;
 `;
 
 export const MenuItem = styled.div<{
@@ -102,7 +139,7 @@ export const MenuItem = styled.div<{
 		`
     background: #667EEA;
     border-radius: 5px;
-    margin: 0 ${props.$collapsed ? "10px" : "14px"};
+    margin: 0;
     padding: 9px ${props.$collapsed ? "0" : "20px"};
     justify-content: ${props.$collapsed ? "center" : "flex-start"};
   `}

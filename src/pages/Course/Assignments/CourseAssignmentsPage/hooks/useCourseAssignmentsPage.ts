@@ -31,6 +31,10 @@ export function useCourseAssignmentsPage() {
 	const [expandedAssignmentIds, setExpandedAssignmentIds] = useState<number[]>(
 		[],
 	);
+	/** 과제별 문제 목록 정렬: 푼 문제 먼저 / 안 푼 문제 먼저 (과제 id -> 정렬 방식) */
+	const [problemSortByAssignmentId, setProblemSortByAssignmentId] = useState<
+		Record<number, "solvedFirst" | "unsolvedFirst">
+	>({});
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const [isManager, setIsManager] = useState(false);
 	/** 알림 등에서 assignmentId 쿼리로 진입 시 한 번만 펼치기 위해 적용한 URL 값 (접은 뒤 다시 펼쳐지지 않도록) */
@@ -225,6 +229,33 @@ export function useCourseAssignmentsPage() {
 		);
 	}, []);
 
+	/** 해당 과제의 문제 목록을 현재 정렬 설정에 따라 정렬 */
+	const getSortedProblems = useCallback(
+		(assignment: Assignment) => {
+			const sort = problemSortByAssignmentId[assignment.id] ?? "unsolvedFirst";
+			const list = [...(assignment.problems ?? [])];
+			const order = (p: Assignment["problems"][0]) =>
+				p.status === "ACCEPTED" ? 2 : p.status === "SUBMITTED" ? 1 : 0;
+			if (sort === "solvedFirst") {
+				list.sort((a, b) => order(b) - order(a));
+			} else {
+				list.sort((a, b) => order(a) - order(b));
+			}
+			return list;
+		},
+		[problemSortByAssignmentId],
+	);
+
+	const setProblemSortForAssignment = useCallback(
+		(assignmentId: number, value: "solvedFirst" | "unsolvedFirst") => {
+			setProblemSortByAssignmentId((prev) => ({
+				...prev,
+				[assignmentId]: value,
+			}));
+		},
+		[],
+	);
+
 	const formatDate = useCallback((dateString: string): string => {
 		if (!dateString) return "";
 		const date = new Date(dateString);
@@ -310,6 +341,9 @@ export function useCourseAssignmentsPage() {
 		isSidebarCollapsed,
 		sectionInfo,
 		assignments,
+		getSortedProblems,
+		problemSortByAssignmentId,
+		setProblemSortForAssignment,
 		expandedAssignmentIds,
 		userRole,
 		isManager,
