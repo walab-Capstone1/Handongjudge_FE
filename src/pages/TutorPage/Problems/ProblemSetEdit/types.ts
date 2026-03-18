@@ -2,6 +2,7 @@ export interface ProblemSet {
 	id: number;
 	title: string;
 	description?: string;
+	tags?: string;
 	problems?: Problem[];
 }
 
@@ -11,6 +12,7 @@ export interface Problem {
 	difficulty?: string;
 	timeLimit?: number;
 	memoryLimit?: number;
+	createdAt?: string;
 }
 
 export type FilterType = "all" | "available" | "added";
