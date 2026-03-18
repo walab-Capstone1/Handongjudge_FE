@@ -388,6 +388,19 @@ export const StudentsTh = styled.th`
 	}
 `;
 
+export const StudentsThSortable = styled(StudentsTh)`
+	cursor: pointer;
+	user-select: none;
+	transition: background 0.15s ease;
+	padding: 0.65rem 0.85rem;
+	vertical-align: middle;
+	box-sizing: border-box;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.12);
+	}
+`;
+
 export const StudentsTbody = styled.tbody``;
 
 export const StudentsTr = styled.tr`
