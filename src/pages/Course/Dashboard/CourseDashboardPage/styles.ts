@@ -159,13 +159,11 @@ export const UpcomingDeadlineItem = styled.div<{ $isExpired?: boolean }>`
   border-radius: 8px;
   cursor: pointer;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: ${(props) => (props.$isExpired ? "#fef2f2" : "#f0f4ff")};
   border: 1px solid ${(props) => (props.$isExpired ? "#fecaca" : "#c7d2fe")};
   transition: background 0.2s ease;
-  max-height: 40px;
   min-height: 40px;
   box-sizing: border-box;
 
@@ -181,21 +179,49 @@ export const UpcomingDeadlineTitle = styled.span`
   font-size: 0.9rem;
   font-weight: 600;
   color: #374151;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   flex: 1;
   min-width: 0;
-`;
-
-export const UpcomingDeadlineMeta = styled.span`
-  font-size: 0.7rem;
-  color: #6b7280;
-  white-space: nowrap;
-  flex-shrink: 0;
-  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const UpcomingDeadlineRightRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+`;
+
+export const UpcomingDeadlineDeadline = styled.span`
+  font-size: 0.7rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  flex-shrink: 0;
+`;
+
+export const UpcomingDeadlineBar = styled.div`
+  width: 80px;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+`;
+
+export const UpcomingDeadlineBarFill = styled.div<{ $progress: number }>`
+  height: 100%;
+  width: ${(p) => Math.min(100, Math.max(0, p.$progress))}%;
+  background: #667eea;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+`;
+
+export const UpcomingDeadlineProgress = styled.span`
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #667eea;
+  flex-shrink: 0;
 `;
 
 export const UpcomingDeadlineDday = styled.span<{ $isExpired?: boolean }>`

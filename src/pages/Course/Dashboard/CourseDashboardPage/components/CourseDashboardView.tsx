@@ -3,7 +3,7 @@ import CourseSidebar from "../../../../../components/Course/CourseSidebar";
 import CourseHeader from "../../../../../components/Course/CourseHeader";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
-import { formatDeadline, formatDate, formatDeadlineShort } from "../utils/dateUtils";
+import { formatDeadline, formatDate, formatDeadlineShort, formatDeadlineUntil } from "../utils/dateUtils";
 import type { Notice, Assignment, TransformedNotification } from "../types";
 import type { CourseDashboardHookReturn } from "../hooks/useCourseDashboard";
 
@@ -139,12 +139,18 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 										upcoming.map((assignment: Assignment) => {
 											const dDay = d.calculateDDay(assignment.endDate);
 											const isExpired = dDay !== null && dDay < 0;
-											const meta = [
-												assignment.sectionName,
-												formatDeadlineShort(assignment.endDate),
-											]
-												.filter(Boolean)
-												.join(" · ");
+											const deadlineUntil = formatDeadlineUntil(assignment.endDate);
+											const hasProgress =
+												assignment.totalProblems != null &&
+												assignment.submittedProblems != null;
+											const progressPct =
+												hasProgress && (assignment.totalProblems ?? 0) > 0
+													? Math.round(
+															((assignment.submittedProblems ?? 0) /
+																(assignment.totalProblems ?? 1)) *
+																100,
+														)
+													: 0;
 											return (
 												<S.UpcomingDeadlineItem
 													key={assignment.id}
@@ -154,20 +160,35 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 													<S.UpcomingDeadlineTitle>
 														{assignment.title}
 													</S.UpcomingDeadlineTitle>
-													{meta && (
-														<S.UpcomingDeadlineMeta title={meta}>
-															{meta}
-														</S.UpcomingDeadlineMeta>
-													)}
-													<S.UpcomingDeadlineDday $isExpired={isExpired}>
-														{dDay !== null
-															? dDay === 0
-																? "오늘 마감"
-																: dDay > 0
-																	? `D-${dDay}`
-																	: `D+${-dDay}`
-															: ""}
-													</S.UpcomingDeadlineDday>
+													<S.UpcomingDeadlineRightRow>
+														{deadlineUntil && (
+															<S.UpcomingDeadlineDeadline>
+																| {deadlineUntil}
+															</S.UpcomingDeadlineDeadline>
+														)}
+														{hasProgress && (
+															<>
+																<S.UpcomingDeadlineBar>
+																	<S.UpcomingDeadlineBarFill
+																		$progress={progressPct}
+																	/>
+																</S.UpcomingDeadlineBar>
+																<S.UpcomingDeadlineProgress>
+																	{assignment.submittedProblems}/
+																	{assignment.totalProblems}
+																</S.UpcomingDeadlineProgress>
+															</>
+														)}
+														<S.UpcomingDeadlineDday $isExpired={isExpired}>
+															{dDay !== null
+																? dDay === 0
+																	? "오늘 마감"
+																	: dDay > 0
+																		? `D-${dDay}`
+																		: `D+${-dDay}`
+																: ""}
+														</S.UpcomingDeadlineDday>
+													</S.UpcomingDeadlineRightRow>
 												</S.UpcomingDeadlineItem>
 											);
 										})
