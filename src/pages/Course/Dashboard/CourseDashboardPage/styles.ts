@@ -165,6 +165,9 @@ export const UpcomingDeadlineItem = styled.div<{ $isExpired?: boolean }>`
   background: ${(props) => (props.$isExpired ? "#fef2f2" : "#f0f4ff")};
   border: 1px solid ${(props) => (props.$isExpired ? "#fecaca" : "#c7d2fe")};
   transition: background 0.2s ease;
+  max-height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
 
   &:hover {
     background: ${(props) => (props.$isExpired ? "#fee2e2" : "#e0e7ff")};
@@ -183,6 +186,16 @@ export const UpcomingDeadlineTitle = styled.span`
   white-space: nowrap;
   flex: 1;
   min-width: 0;
+`;
+
+export const UpcomingDeadlineMeta = styled.span`
+  font-size: 0.7rem;
+  color: #6b7280;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const UpcomingDeadlineDday = styled.span<{ $isExpired?: boolean }>`

@@ -3,7 +3,7 @@ import CourseSidebar from "../../../../../components/Course/CourseSidebar";
 import CourseHeader from "../../../../../components/Course/CourseHeader";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
-import { formatDeadline, formatDate } from "../utils/dateUtils";
+import { formatDeadline, formatDate, formatDeadlineShort } from "../utils/dateUtils";
 import type { Notice, Assignment, TransformedNotification } from "../types";
 import type { CourseDashboardHookReturn } from "../hooks/useCourseDashboard";
 
@@ -139,6 +139,12 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 										upcoming.map((assignment: Assignment) => {
 											const dDay = d.calculateDDay(assignment.endDate);
 											const isExpired = dDay !== null && dDay < 0;
+											const meta = [
+												assignment.sectionName,
+												formatDeadlineShort(assignment.endDate),
+											]
+												.filter(Boolean)
+												.join(" · ");
 											return (
 												<S.UpcomingDeadlineItem
 													key={assignment.id}
@@ -148,6 +154,11 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 													<S.UpcomingDeadlineTitle>
 														{assignment.title}
 													</S.UpcomingDeadlineTitle>
+													{meta && (
+														<S.UpcomingDeadlineMeta title={meta}>
+															{meta}
+														</S.UpcomingDeadlineMeta>
+													)}
 													<S.UpcomingDeadlineDday $isExpired={isExpired}>
 														{dDay !== null
 															? dDay === 0

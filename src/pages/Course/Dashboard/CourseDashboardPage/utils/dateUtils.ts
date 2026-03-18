@@ -18,6 +18,19 @@ export const formatDeadline = (
 	return `${formatDate(dateString)} 마감`;
 };
 
+/** 다가오는 마감 등 한 줄 표시용: "3/25 23:59" */
+export const formatDeadlineShort = (
+	dateString: string | null | undefined,
+): string => {
+	if (!dateString) return "";
+	const date = new Date(dateString);
+	const month = date.getMonth() + 1;
+	const day = date.getDate();
+	const h = date.getHours();
+	const m = date.getMinutes();
+	return `${month}/${day} ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
+
 export const calculateDDay = (
 	endDate: string | null | undefined,
 ): number | null => {
