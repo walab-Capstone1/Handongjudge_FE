@@ -1,6 +1,6 @@
 import type React from "react";
 import CourseSidebar from "../../../../../components/Course/CourseSidebar";
-import CourseHeader from "../../../../../components/Course/CourseHeader";
+import CourseHeader, { dispatchOpenCourseList } from "../../../../../components/Course/CourseHeader";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
 import { formatDeadline, formatDate, formatDeadlineShort, formatDeadlineUntil } from "../utils/dateUtils";
@@ -89,12 +89,20 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 				<S.DashboardBody>
 					<S.LeftColumn>
 						<S.CourseSummaryCard>
-							<S.SummaryBackButton
-								type="button"
-								onClick={() => d.navigate("/courses")}
-							>
-								내 강의실로 돌아가기
-							</S.SummaryBackButton>
+							<S.SummaryBackRow>
+								<S.SummaryCourseChangeButton
+									type="button"
+									onClick={() => dispatchOpenCourseList()}
+								>
+									수업 변경
+								</S.SummaryCourseChangeButton>
+								<S.SummaryBackButton
+									type="button"
+									onClick={() => d.navigate("/courses")}
+								>
+									내 강의실로 돌아가기
+								</S.SummaryBackButton>
+							</S.SummaryBackRow>
 							<S.SummaryTitle>
 								{d.sectionInfo?.courseTitle ?? "수업"}
 								{d.sectionInfo?.sectionNumber != null &&

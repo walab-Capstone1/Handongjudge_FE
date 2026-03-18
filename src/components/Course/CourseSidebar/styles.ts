@@ -105,7 +105,7 @@ export const SidebarMenu = styled.div`
   flex-direction: column;
   gap: 14px;
   flex: 1;
-  padding-top: 37px;
+  padding-top: 18px;
 `;
 
 export const MenuItem = styled.div<{

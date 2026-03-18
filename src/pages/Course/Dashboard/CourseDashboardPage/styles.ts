@@ -90,10 +90,33 @@ export const CourseSummaryCard = styled.div`
   margin-top: 12px;
 `;
 
-export const SummaryBackButton = styled.button`
+export const SummaryBackRow = styled.div`
   position: absolute;
   top: 1rem;
   right: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const SummaryCourseChangeButton = styled.button`
+  padding: 6px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border: 1px solid #667eea;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: #667eea;
+    color: white;
+  }
+`;
+
+export const SummaryBackButton = styled.button`
   padding: 6px 12px;
   background: white;
   color: #667eea;
