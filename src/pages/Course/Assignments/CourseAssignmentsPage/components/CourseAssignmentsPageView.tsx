@@ -142,36 +142,78 @@ export default function CourseAssignmentsPageView(
 											</S.AccordionDescription>
 
 											<S.AccordionProblemsSection>
-												<S.ProblemsSubtitle>문제</S.ProblemsSubtitle>
+												<S.ProblemsSectionRow>
+													<S.ProblemsSubtitle>문제</S.ProblemsSubtitle>
+													{assignment.problems && assignment.problems.length > 0 && (
+														<S.ProblemSortRow>
+															<S.ProblemSortSelect
+																value={d.problemSortByAssignmentId?.[assignment.id] ?? "unsolvedFirst"}
+																onChange={(e) => {
+																	const v = e.target.value as "solvedFirst" | "unsolvedFirst";
+																	d.setProblemSortForAssignment?.(assignment.id, v);
+																}}
+																onClick={(e) => e.stopPropagation()}
+															>
+																<option value="unsolvedFirst">미해결 문제</option>
+																<option value="solvedFirst">해결 문제</option>
+															</S.ProblemSortSelect>
+														</S.ProblemSortRow>
+													)}
+												</S.ProblemsSectionRow>
+												<S.BadgeLegend>
+													<S.BadgeLegendItem $badgeType="correct">정답</S.BadgeLegendItem>
+													<S.BadgeLegendItem $badgeType="correctLate">정답 및 지각</S.BadgeLegendItem>
+													<S.BadgeLegendItem $badgeType="wrong">오답</S.BadgeLegendItem>
+													<S.BadgeLegendItem $badgeType="wrongLate">오답 및 지각</S.BadgeLegendItem>
+													<S.BadgeLegendItem $badgeType="notSubmitted">미제출</S.BadgeLegendItem>
+												</S.BadgeLegend>
 												{assignment.problems && assignment.problems.length > 0 ? (
 													<S.AccordionProblemsList>
-														{assignment.problems.map((problem) => (
-															<S.AccordionProblemItem
-																key={problem.id}
-																onClick={() =>
-																	d.handleProblemClick(assignment.id, problem.id)
-																}
-															>
-																<S.ProblemTitle>{problem.title}</S.ProblemTitle>
-																<S.ProblemStatusBlock>
-																	<S.ProblemBadge $status={problem.status} $late={problem.status !== "NOT_SUBMITTED" && problem.isOnTime === false}>
-																		{problem.status === "ACCEPTED"
-																			? (problem.isOnTime === false ? "지각 정답" : "정답")
-																			: problem.status === "SUBMITTED"
-																				? (problem.isOnTime === false ? "지각 제출" : "제출")
-																				: "미제출"}
-																	</S.ProblemBadge>
-																	{problem.status !== "NOT_SUBMITTED" && problem.submittedAt && (
-																		<S.ProblemSubmissionMeta>
-																			<span>{d.formatSubmissionTime(problem.submittedAt)}</span>
-																			{problem.isOnTime === false && problem.minutesLate != null && (
-																				<S.LateMinutes>· {d.formatMinutesLate(problem.minutesLate)}</S.LateMinutes>
-																			)}
-																		</S.ProblemSubmissionMeta>
-																	)}
-																</S.ProblemStatusBlock>
-															</S.AccordionProblemItem>
-														))}
+														{(d.getSortedProblems?.(assignment) ?? assignment.problems).map((problem) => {
+															const badgeType =
+																problem.status === "ACCEPTED"
+																	? problem.isOnTime === false
+																		? "correctLate"
+																		: "correct"
+																	: problem.status === "SUBMITTED"
+																		? problem.isOnTime === false
+																			? "wrongLate"
+																			: "wrong"
+																		: "notSubmitted";
+															const badgeLabel =
+																badgeType === "correct"
+																	? "정답"
+																	: badgeType === "correctLate"
+																		? "정답 및 지각"
+																		: badgeType === "wrong"
+																			? "오답"
+																			: badgeType === "wrongLate"
+																				? "오답 및 지각"
+																				: "미제출";
+															return (
+																<S.AccordionProblemItem
+																	key={problem.id}
+																	onClick={() =>
+																		d.handleProblemClick(assignment.id, problem.id)
+																	}
+																>
+																	<S.ProblemTitle>{problem.title}</S.ProblemTitle>
+																	<S.ProblemStatusBlock>
+																		{problem.status !== "NOT_SUBMITTED" && problem.submittedAt && (
+																			<S.ProblemSubmissionMeta>
+																				<span>제출 시간 : {d.formatSubmissionTime(problem.submittedAt)}</span>
+																				{problem.isOnTime === false && problem.minutesLate != null && (
+																					<S.LateMinutes>· {d.formatMinutesLate(problem.minutesLate)}</S.LateMinutes>
+																				)}
+																			</S.ProblemSubmissionMeta>
+																		)}
+																		<S.ProblemBadge $badgeType={badgeType}>
+																			{badgeLabel}
+																		</S.ProblemBadge>
+																	</S.ProblemStatusBlock>
+																</S.AccordionProblemItem>
+															);
+														})}
 													</S.AccordionProblemsList>
 												) : (
 													<S.NoProblemsMessage>
