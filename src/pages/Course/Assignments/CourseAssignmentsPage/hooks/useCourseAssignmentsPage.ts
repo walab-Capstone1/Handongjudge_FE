@@ -31,9 +31,9 @@ export function useCourseAssignmentsPage() {
 	const [expandedAssignmentIds, setExpandedAssignmentIds] = useState<number[]>(
 		[],
 	);
-	/** 과제별 문제 목록 정렬: 푼 문제 먼저 / 안 푼 문제 먼저 (과제 id -> 정렬 방식) */
+	/** 과제별 문제 목록 정렬: 기본(원래 순서) / 미해결 문제 / 해결 문제 (과제 id -> 정렬 방식) */
 	const [problemSortByAssignmentId, setProblemSortByAssignmentId] = useState<
-		Record<number, "solvedFirst" | "unsolvedFirst">
+		Record<number, "original" | "solvedFirst" | "unsolvedFirst">
 	>({});
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const [isManager, setIsManager] = useState(false);
@@ -229,11 +229,12 @@ export function useCourseAssignmentsPage() {
 		);
 	}, []);
 
-	/** 해당 과제의 문제 목록을 현재 정렬 설정에 따라 정렬 */
+	/** 해당 과제의 문제 목록을 현재 정렬 설정에 따라 정렬 (기본: 원래 순서) */
 	const getSortedProblems = useCallback(
 		(assignment: Assignment) => {
-			const sort = problemSortByAssignmentId[assignment.id] ?? "unsolvedFirst";
+			const sort = problemSortByAssignmentId[assignment.id] ?? "original";
 			const list = [...(assignment.problems ?? [])];
+			if (sort === "original") return list;
 			const order = (p: Assignment["problems"][0]) =>
 				p.status === "ACCEPTED" ? 2 : p.status === "SUBMITTED" ? 1 : 0;
 			if (sort === "solvedFirst") {
@@ -247,7 +248,7 @@ export function useCourseAssignmentsPage() {
 	);
 
 	const setProblemSortForAssignment = useCallback(
-		(assignmentId: number, value: "solvedFirst" | "unsolvedFirst") => {
+		(assignmentId: number, value: "original" | "solvedFirst" | "unsolvedFirst") => {
 			setProblemSortByAssignmentId((prev) => ({
 				...prev,
 				[assignmentId]: value,
