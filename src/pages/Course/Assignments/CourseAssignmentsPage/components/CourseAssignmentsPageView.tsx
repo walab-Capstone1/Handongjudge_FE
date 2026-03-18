@@ -160,13 +160,6 @@ export default function CourseAssignmentsPageView(
 														</S.ProblemSortRow>
 													)}
 												</S.ProblemsSectionRow>
-												<S.BadgeLegend>
-													<S.BadgeLegendItem $badgeType="correct">정답</S.BadgeLegendItem>
-													<S.BadgeLegendItem $badgeType="correctLate">정답 및 지각</S.BadgeLegendItem>
-													<S.BadgeLegendItem $badgeType="wrong">오답</S.BadgeLegendItem>
-													<S.BadgeLegendItem $badgeType="wrongLate">오답 및 지각</S.BadgeLegendItem>
-													<S.BadgeLegendItem $badgeType="notSubmitted">미제출</S.BadgeLegendItem>
-												</S.BadgeLegend>
 												{assignment.problems && assignment.problems.length > 0 ? (
 													<S.AccordionProblemsList>
 														{(d.getSortedProblems?.(assignment) ?? assignment.problems).map((problem) => {
