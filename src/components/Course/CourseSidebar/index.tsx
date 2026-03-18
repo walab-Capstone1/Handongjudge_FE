@@ -14,6 +14,7 @@ import {
 	MdSettings,
 	MdClass,
 } from "react-icons/md";
+import { FaGripLinesVertical, FaChevronRight, FaBars } from "react-icons/fa";
 import APIService from "../../../services/APIService";
 import * as S from "./styles";
 
@@ -36,6 +37,7 @@ interface CourseSidebarProps {
 	activeMenu?: string;
 	onMenuClick?: (menuId: string) => void;
 	isCollapsed?: boolean;
+	onToggleSidebar?: () => void;
 }
 
 const CourseSidebar: React.FC<CourseSidebarProps> = ({
@@ -43,6 +45,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 	activeMenu = "대시보드",
 	onMenuClick,
 	isCollapsed = false,
+	onToggleSidebar,
 }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -229,9 +232,30 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 				$collapsed={isCollapsed}
 				className={isCollapsed ? "collapsed" : ""}
 			>
-				<S.SidebarHeader onClick={() => !isCollapsed && navigate("/courses")}>
-					<S.SidebarLogo src="/logo.svg" alt="H-CodeLab Logo" />
-					{!isCollapsed && <S.SidebarTitle>H-CodeLab</S.SidebarTitle>}
+				<S.SidebarHeader>
+					<S.SidebarHeaderLeft onClick={() => !isCollapsed && navigate("/courses")}>
+						<S.SidebarLogo src="/logo.svg" alt="H-CodeLab Logo" />
+						{!isCollapsed && <S.SidebarTitle>H-CodeLab</S.SidebarTitle>}
+					</S.SidebarHeaderLeft>
+					{onToggleSidebar && (
+						<S.SidebarToggleButton
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onToggleSidebar();
+							}}
+							aria-label={isCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
+						>
+							{isCollapsed ? (
+								<span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+									<FaGripLinesVertical style={{ fontSize: "0.9rem" }} />
+									<FaChevronRight style={{ fontSize: "0.65rem" }} />
+								</span>
+							) : (
+								<FaBars />
+							)}
+						</S.SidebarToggleButton>
+					)}
 				</S.SidebarHeader>
 
 				<S.SidebarMenu>

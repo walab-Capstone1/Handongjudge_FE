@@ -26,6 +26,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 					activeMenu={d.activeMenu}
 					onMenuClick={d.handleMenuClick}
 					isCollapsed={d.isSidebarCollapsed}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<LoadingSpinner />
@@ -42,6 +43,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 					activeMenu={d.activeMenu}
 					onMenuClick={d.handleMenuClick}
 					isCollapsed={d.isSidebarCollapsed}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<S.ErrorMessage>
@@ -62,6 +64,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 				activeMenu={d.activeMenu}
 				onMenuClick={d.handleMenuClick}
 				isCollapsed={d.isSidebarCollapsed}
+				onToggleSidebar={d.handleToggleSidebar}
 			/>
 
 			<S.Content $isCollapsed={d.isSidebarCollapsed}>

@@ -15,6 +15,7 @@ export default function CourseAssignmentsPageView(
 					activeMenu={d.activeMenu}
 					onMenuClick={d.handleMenuClick}
 					isCollapsed={d.isSidebarCollapsed}
+				onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<LoadingSpinner />
@@ -31,6 +32,7 @@ export default function CourseAssignmentsPageView(
 					activeMenu={d.activeMenu}
 					onMenuClick={d.handleMenuClick}
 					isCollapsed={d.isSidebarCollapsed}
+				onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<S.ErrorMessage>
@@ -49,6 +51,7 @@ export default function CourseAssignmentsPageView(
 				activeMenu={d.activeMenu}
 				onMenuClick={d.handleMenuClick}
 				isCollapsed={d.isSidebarCollapsed}
+			onToggleSidebar={d.handleToggleSidebar}
 			/>
 
 			<S.Content $isCollapsed={d.isSidebarCollapsed}>

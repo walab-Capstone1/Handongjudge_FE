@@ -14,6 +14,7 @@ export default function CourseNotificationsPageView(
 					activeMenu="알림"
 					isCollapsed={d.isSidebarCollapsed}
 					onMenuClick={d.handleMenuClick}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<CourseHeader
@@ -38,6 +39,7 @@ export default function CourseNotificationsPageView(
 				activeMenu="알림"
 				isCollapsed={d.isSidebarCollapsed}
 				onMenuClick={d.handleMenuClick}
+				onToggleSidebar={d.handleToggleSidebar}
 			/>
 
 			<S.Content $isCollapsed={d.isSidebarCollapsed}>

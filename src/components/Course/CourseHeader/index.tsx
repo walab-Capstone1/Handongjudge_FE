@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useRecoilValue } from "recoil";
 import { useParams } from "react-router-dom";
 import { authState } from "../../../recoil/atoms";
-import { FaGripLinesVertical, FaChevronRight, FaBars } from "react-icons/fa";
 import APIService from "../../../services/APIService";
 import * as S from "./styles";
 
@@ -73,20 +72,6 @@ const CourseHeader: React.FC<CourseHeaderProps> = ({
 	return (
 		<S.Container $collapsed={isSidebarCollapsed}>
 			<S.Top>
-				<S.ToggleButton
-					type="button"
-					onClick={onToggleSidebar}
-					aria-label={isSidebarCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
-				>
-					{isSidebarCollapsed ? (
-						<span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-							<FaGripLinesVertical style={{ fontSize: "0.9rem" }} />
-							<FaChevronRight style={{ fontSize: "0.65rem" }} />
-						</span>
-					) : (
-						<FaBars />
-					)}
-				</S.ToggleButton>
 				<S.CourseName>{courseName}</S.CourseName>
 			</S.Top>
 			<S.UserSection>
