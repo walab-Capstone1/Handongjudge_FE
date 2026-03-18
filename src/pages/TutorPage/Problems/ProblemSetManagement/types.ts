@@ -14,6 +14,7 @@ export interface Problem {
 	difficulty?: string;
 	timeLimit?: number;
 	memoryLimit?: number;
+	createdAt?: string;
 }
 
 export interface CreateProblemSetData {

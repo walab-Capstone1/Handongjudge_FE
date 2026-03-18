@@ -1128,3 +1128,36 @@ export const Select = styled.select`
     border-color: #9ca3af;
   }
 `;
+
+export const DeleteUsageBox = styled.div`
+  margin-top: 1rem;
+  padding: 0.875rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #334155;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+`;
+
+export const DeleteUsageSectionTitle = styled.p`
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: #475569;
+`;
+
+export const DeleteUsageList = styled.ul`
+  margin: 0 0 0.75rem 0;
+  padding-left: 1.25rem;
+  line-height: 1.5;
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+export const DeleteUsageMuted = styled.p`
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #64748b;
+`;

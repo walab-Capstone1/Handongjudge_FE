@@ -9,6 +9,11 @@ import type {
 	Problem,
 	FilterStatus,
 } from "../types";
+import type {
+	StudentSortDir,
+	StudentSortKey,
+} from "../../../../../utils/studentSort";
+import { SortableStudentColumnHeader } from "../../../../../components/SortableStudentColumnHeader";
 
 interface ProgressDetailViewProps {
 	sectionId: string | undefined;
@@ -22,6 +27,9 @@ interface ProgressDetailViewProps {
 	expandedProblems: Set<number>;
 	toggleProblem: (id: number) => void;
 	filteredStudents: StudentProgress[];
+	studentSortKey: StudentSortKey;
+	studentSortDir: StudentSortDir;
+	onStudentSort: (key: StudentSortKey) => void;
 	getCompletionStatus: (s: StudentProgress) => FilterStatus;
 	getProgressPercentage: (s: StudentProgress) => number;
 	handleBadgeClick: (student: StudentProgress, problem: Problem) => void;
@@ -61,6 +69,9 @@ const ProgressDetailView: FC<ProgressDetailViewProps> = (props) => {
 		expandedProblems,
 		toggleProblem,
 		filteredStudents,
+		studentSortKey,
+		studentSortDir,
+		onStudentSort,
 		getCompletionStatus,
 		getProgressPercentage,
 		handleBadgeClick,
@@ -232,8 +243,32 @@ const ProgressDetailView: FC<ProgressDetailViewProps> = (props) => {
 						<S.StudentsTable>
 							<S.StudentsThead>
 								<tr>
-									<S.StudentsTh>학번</S.StudentsTh>
-									<S.StudentsTh>이름</S.StudentsTh>
+									<S.StudentsThSortable
+										as="th"
+										scope="col"
+										onClick={() => onStudentSort("studentId")}
+										title="학번순 정렬 (클릭 시 오름·내림 전환)"
+									>
+										<SortableStudentColumnHeader
+											label="학번"
+											sortKey="studentId"
+											activeKey={studentSortKey}
+											dir={studentSortDir}
+										/>
+									</S.StudentsThSortable>
+									<S.StudentsThSortable
+										as="th"
+										scope="col"
+										onClick={() => onStudentSort("studentName")}
+										title="이름순 정렬 (클릭 시 오름·내림 전환)"
+									>
+										<SortableStudentColumnHeader
+											label="이름"
+											sortKey="studentName"
+											activeKey={studentSortKey}
+											dir={studentSortDir}
+										/>
+									</S.StudentsThSortable>
 									<S.StudentsTh>진행 상태</S.StudentsTh>
 									<S.StudentsTh>완료율</S.StudentsTh>
 									<S.StudentsTh>문제별 풀이 현황</S.StudentsTh>

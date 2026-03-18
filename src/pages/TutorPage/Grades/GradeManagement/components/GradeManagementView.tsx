@@ -73,6 +73,9 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		stats,
 		filteredGrades,
 		filteredCourseStudents,
+		gradeSortKey,
+		gradeSortDir,
+		toggleGradeStudentSort,
 		showProblemDetailModal,
 		problemDetail,
 		openProblemDetail,
@@ -161,6 +164,9 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						courseLoading={courseLoading}
 						courseGrades={courseGrades}
 						filteredCourseStudents={filteredCourseStudents}
+						gradeSortKey={gradeSortKey}
+						gradeSortDir={gradeSortDir}
+						onSortStudentHeader={toggleGradeStudentSort}
 						editingGrade={editingGrade}
 						setEditingGrade={setEditingGrade}
 						gradeInputs={gradeInputs}
@@ -177,6 +183,9 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						courseLoading={courseLoading}
 						courseGrades={assignmentOnlyGrades}
 						filteredCourseStudents={filteredCourseStudents}
+						gradeSortKey={gradeSortKey}
+						gradeSortDir={gradeSortDir}
+						onSortStudentHeader={toggleGradeStudentSort}
 						editingGrade={editingGrade}
 						setEditingGrade={setEditingGrade}
 						gradeInputs={gradeInputs}
@@ -191,6 +200,9 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						courseLoading={courseLoading}
 						courseGrades={quizOnlyGrades}
 						filteredCourseStudents={filteredCourseStudents}
+						gradeSortKey={gradeSortKey}
+						gradeSortDir={gradeSortDir}
+						onSortStudentHeader={toggleGradeStudentSort}
 						editingGrade={editingGrade}
 						setEditingGrade={setEditingGrade}
 						gradeInputs={gradeInputs}
@@ -204,6 +216,9 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					<GradeManagementQuizTable
 						grades={grades}
 						filteredGrades={filteredGrades}
+						gradeSortKey={gradeSortKey}
+						gradeSortDir={gradeSortDir}
+						onSortStudentHeader={toggleGradeStudentSort}
 						selectedQuiz={selectedQuiz}
 						editingGrade={editingGrade}
 						setEditingGrade={setEditingGrade}
@@ -229,6 +244,9 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					<GradeManagementAssignmentTable
 						grades={grades}
 						filteredGrades={filteredGrades}
+						gradeSortKey={gradeSortKey}
+						gradeSortDir={gradeSortDir}
+						onSortStudentHeader={toggleGradeStudentSort}
 						selectedAssignment={selectedAssignment}
 						editingGrade={editingGrade}
 						setEditingGrade={setEditingGrade}

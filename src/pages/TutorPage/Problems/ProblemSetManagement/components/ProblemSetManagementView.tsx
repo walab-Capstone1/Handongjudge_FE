@@ -194,7 +194,7 @@ export default function ProblemSetManagementView(
 					>
 						<S.ModalContent $wide onClick={(e) => e.stopPropagation()}>
 							<S.ModalHeader>
-								<h2>문제 선택 - {d.newSetTitle}</h2>
+								<h2>문제 선택 — {d.newSetTitle}</h2>
 								<S.ModalClose
 									type="button"
 									onClick={() => !d.isCreating && d.closeProblemSelectModal()}
@@ -204,116 +204,197 @@ export default function ProblemSetManagementView(
 								</S.ModalClose>
 							</S.ModalHeader>
 							<S.ModalBody>
-								<S.ProblemFilterSection>
-									<S.ProblemSearchInput
-										type="text"
-										placeholder="문제명 또는 ID로 검색..."
-										value={d.problemSearchTerm}
-										onChange={(e) => {
-											d.setProblemSearchTerm(e.target.value);
-											d.setCurrentPage(1);
-										}}
-									/>
-								</S.ProblemFilterSection>
-								{d.getFilteredProblems().length > 0 ? (
-									<>
-										<S.ProblemModalActions>
-											<S.SelectAllButton
-												type="button"
-												onClick={d.handleSelectAllProblems}
-											>
-												{d
-													.getFilteredProblems()
-													.every((pr) => d.selectedProblemIds.includes(pr.id))
-													? "전체 해제"
-													: "전체 선택"}
-											</S.SelectAllButton>
-											<S.SelectedCount>
-												{d.selectedProblemIds.length}개 선택됨
-											</S.SelectedCount>
-											<S.FilterCount>
-												총 {d.getFilteredProblems().length}개 문제
-											</S.FilterCount>
-										</S.ProblemModalActions>
-										<S.ProblemList>
-											{d.getPaginatedProblems().map((problem) => {
-												const isSelected = d.selectedProblemIds.includes(
-													problem.id,
-												);
-												const diffColor = d.getDifficultyColor(
-													problem.difficulty,
-												);
-												return (
-													<S.ProblemItem
-														key={problem.id}
-														$selected={isSelected}
-														onClick={() => d.handleProblemToggle(problem.id)}
-													>
-														<input
-															type="checkbox"
-															checked={isSelected}
-															onChange={() => d.handleProblemToggle(problem.id)}
-															onClick={(e) => e.stopPropagation()}
-														/>
-														<S.ProblemItemInfo>
-															<S.ProblemItemTitleRow>
-																<S.ProblemIdBadge>
-																	#{problem.id}
-																</S.ProblemIdBadge>
-																<S.ProblemItemTitle>
-																	{problem.title}
-																</S.ProblemItemTitle>
-															</S.ProblemItemTitleRow>
-															<S.ProblemItemMeta>
-																<S.DifficultyBadge
-																	$bg={`${diffColor}20`}
-																	$color={diffColor}
-																>
-																	{d.getDifficultyLabel(problem.difficulty)}
-																</S.DifficultyBadge>
-															</S.ProblemItemMeta>
-														</S.ProblemItemInfo>
-													</S.ProblemItem>
-												);
-											})}
-										</S.ProblemList>
-										{d.getTotalPages() > 1 && (
-											<S.PaginationRow>
-												<S.PaginationBtn
-													type="button"
-													onClick={() =>
-														d.setCurrentPage(Math.max(1, d.currentPage - 1))
-													}
-													disabled={d.currentPage === 1}
-												>
-													이전
-												</S.PaginationBtn>
-												<S.PaginationInfo>
-													{d.currentPage} / {d.getTotalPages()}
-												</S.PaginationInfo>
-												<S.PaginationBtn
-													type="button"
-													onClick={() =>
-														d.setCurrentPage(
-															Math.min(d.getTotalPages(), d.currentPage + 1),
-														)
-													}
-													disabled={d.currentPage === d.getTotalPages()}
-												>
-													다음
-												</S.PaginationBtn>
-											</S.PaginationRow>
-										)}
-									</>
+								{d.problemsLoading ? (
+									<S.ProblemsLoadingBox>
+										<LoadingSpinner message="문제 목록을 불러오는 중..." />
+									</S.ProblemsLoadingBox>
 								) : (
-									<S.ProblemListEmpty>
-										{d.problemSearchTerm
-											? "검색 결과가 없습니다."
-											: "사용 가능한 문제가 없습니다."}
-									</S.ProblemListEmpty>
+									<S.ProblemSelectLayout>
+										<S.ProblemSelectColumn $accent>
+											<S.ProblemPanelTitle>
+												문제집에 넣은 문제 ({d.selectedProblemIds.length})
+											</S.ProblemPanelTitle>
+											<S.ProblemPanelHint>
+												최근에 담은 순으로 위에 표시됩니다. 오른쪽에서
+												추가·해제할 수 있습니다.
+											</S.ProblemPanelHint>
+											<S.SelectedProblemScroll>
+												{d.selectedProblemsNewestFirst.length === 0 ? (
+													<S.ProblemListEmpty style={{ padding: "2rem 0.5rem" }}>
+														아직 선택한 문제가 없습니다. 오른쪽 목록에서
+														추가하세요.
+													</S.ProblemListEmpty>
+												) : (
+													d.selectedProblemsNewestFirst.map((problem) => (
+														<S.SelectedProblemRow key={problem.id}>
+															<S.ProblemIdBadge>#{problem.id}</S.ProblemIdBadge>
+															<S.SelectedProblemTitle title={problem.title}>
+																{problem.title}
+															</S.SelectedProblemTitle>
+															<S.RemoveFromSetButton
+																type="button"
+																onClick={() =>
+																	d.handleProblemToggle(problem.id)
+																}
+															>
+																빼기
+															</S.RemoveFromSetButton>
+														</S.SelectedProblemRow>
+													))
+												)}
+											</S.SelectedProblemScroll>
+										</S.ProblemSelectColumn>
+										<S.ProblemSelectColumn>
+											<S.ProblemPanelTitleMuted>
+												문제 추가 (최근 등록 순)
+											</S.ProblemPanelTitleMuted>
+											<S.FilterRow>
+												<S.ProblemSearchInput
+													type="text"
+													placeholder="문제명 또는 ID 검색..."
+													value={d.problemSearchTerm}
+													onChange={(e) => {
+														d.setProblemSearchTerm(e.target.value);
+														d.setCurrentPage(1);
+													}}
+													style={{ flex: "1 1 180px", minWidth: 0 }}
+												/>
+												<S.OriginalFilterSelect
+													value={d.problemOriginalOnly}
+													onChange={(e) => {
+														d.setProblemOriginalOnly(
+															e.target.value as "ALL" | "ORIGINAL",
+														);
+														d.setCurrentPage(1);
+													}}
+													aria-label="문제 유형 필터"
+												>
+													<option value="ALL">전체 문제</option>
+													<option value="ORIGINAL">
+														원본(_오리지널)만
+													</option>
+												</S.OriginalFilterSelect>
+											</S.FilterRow>
+											{d.getFilteredProblems().length > 0 ? (
+												<>
+													<S.ProblemModalActions>
+														<S.SelectAllButton
+															type="button"
+															onClick={d.handleSelectAllProblems}
+														>
+															{d
+																.getFilteredProblems()
+																.every((pr) =>
+																	d.selectedProblemIds.includes(pr.id),
+																)
+																? "필터 결과 전체 해제"
+																: "필터 결과 전체 선택"}
+														</S.SelectAllButton>
+														<S.FilterCount>
+															표시 {d.getFilteredProblems().length}개
+														</S.FilterCount>
+													</S.ProblemModalActions>
+													<S.ProblemListCompact>
+														{d.getPaginatedProblems().map((problem) => {
+															const isSelected =
+																d.selectedProblemIds.includes(problem.id);
+															const diffColor = d.getDifficultyColor(
+																problem.difficulty,
+															);
+															return (
+																<S.ProblemItem
+																	key={problem.id}
+																	$selected={isSelected}
+																	onClick={() =>
+																		d.handleProblemToggle(problem.id)
+																	}
+																>
+																	<input
+																		type="checkbox"
+																		checked={isSelected}
+																		onChange={() =>
+																			d.handleProblemToggle(problem.id)
+																		}
+																		onClick={(e) => e.stopPropagation()}
+																	/>
+																	<S.ProblemItemInfo>
+																		<S.ProblemItemTitleRow>
+																			<S.ProblemIdBadge>
+																				#{problem.id}
+																			</S.ProblemIdBadge>
+																			<S.ProblemItemTitle>
+																				{problem.title}
+																			</S.ProblemItemTitle>
+																		</S.ProblemItemTitleRow>
+																		<S.ProblemItemMeta>
+																			<S.DifficultyBadge
+																				$bg={`${diffColor}20`}
+																				$color={diffColor}
+																			>
+																				{d.getDifficultyLabel(
+																					problem.difficulty,
+																				)}
+																			</S.DifficultyBadge>
+																		</S.ProblemItemMeta>
+																	</S.ProblemItemInfo>
+																</S.ProblemItem>
+															);
+														})}
+													</S.ProblemListCompact>
+													{d.getTotalPages() > 1 && (
+														<S.PaginationRow>
+															<S.PaginationBtn
+																type="button"
+																onClick={() =>
+																	d.setCurrentPage(
+																		Math.max(1, d.currentPage - 1),
+																	)
+																}
+																disabled={d.currentPage === 1}
+															>
+																이전
+															</S.PaginationBtn>
+															<S.PaginationInfo>
+																{d.currentPage} / {d.getTotalPages()}
+															</S.PaginationInfo>
+															<S.PaginationBtn
+																type="button"
+																onClick={() =>
+																	d.setCurrentPage(
+																		Math.min(
+																			d.getTotalPages(),
+																			d.currentPage + 1,
+																		),
+																	)
+																}
+																disabled={
+																	d.currentPage === d.getTotalPages()
+																}
+															>
+																다음
+															</S.PaginationBtn>
+														</S.PaginationRow>
+													)}
+												</>
+											) : (
+												<S.ProblemListEmpty>
+													{d.problemSearchTerm ||
+													d.problemOriginalOnly === "ORIGINAL"
+														? "조건에 맞는 문제가 없습니다."
+														: "사용 가능한 문제가 없습니다."}
+												</S.ProblemListEmpty>
+											)}
+										</S.ProblemSelectColumn>
+									</S.ProblemSelectLayout>
 								)}
 							</S.ModalBody>
-							<S.ModalFooter>
+							<S.ModalFooter
+								style={{
+									flexWrap: "wrap",
+									justifyContent: "flex-end",
+									gap: "0.5rem 0.75rem",
+								}}
+							>
 								<S.CancelButton
 									type="button"
 									onClick={() => {
@@ -327,9 +408,10 @@ export default function ProblemSetManagementView(
 								<S.CancelButton
 									type="button"
 									onClick={d.handleSkipProblemSelect}
-									disabled={d.isCreating}
+									disabled={d.isCreating || d.problemsLoading}
+									title="문제 없이 빈 문제집을 만듭니다"
 								>
-									건너뛰기
+									문제 없이 빈 문제집만 만들기
 								</S.CancelButton>
 								<S.CancelButton
 									type="button"
@@ -341,11 +423,20 @@ export default function ProblemSetManagementView(
 								<S.SubmitButton
 									type="button"
 									onClick={() => d.handleCreateSetWithProblems()}
-									disabled={d.isCreating}
+									disabled={
+										d.isCreating ||
+										d.problemsLoading ||
+										d.selectedProblemIds.length === 0
+									}
+									title={
+										d.selectedProblemIds.length === 0
+											? "문제를 한 개 이상 선택해 주세요"
+											: undefined
+									}
 								>
 									{d.isCreating
 										? "생성 중..."
-										: `생성${d.selectedProblemIds.length > 0 ? ` (${d.selectedProblemIds.length}개 문제)` : ""}`}
+										: `문제집 만들기 (${d.selectedProblemIds.length}개 문제)`}
 								</S.SubmitButton>
 							</S.ModalFooter>
 						</S.ModalContent>

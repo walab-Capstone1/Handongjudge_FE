@@ -45,10 +45,7 @@ function ModalMarkdownCode({
  */
 function stripEmptyExamplesSection(text: string): string {
 	// 빈 코드블록 패턴: ```\n\n```  (내용 없음)
-	return text.replace(
-		/\n\n## 예제(?:\n\n### 예제 [^\n]+\n```\n\n```)+/g,
-		"",
-	);
+	return text.replace(/\n\n## 예제(?:\n\n### 예제 [^\n]+\n```\n\n```)+/g, "");
 }
 
 export default function ProblemManagementView(d: ProblemManagementHookReturn) {
@@ -68,7 +65,10 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 			setDropdownRect(null);
 		};
 		window.addEventListener("scroll", handleScroll, true);
-		const id = setTimeout(() => document.addEventListener("click", handleClickOutside), 0);
+		const id = setTimeout(
+			() => document.addEventListener("click", handleClickOutside),
+			0,
+		);
 		return () => {
 			window.removeEventListener("scroll", handleScroll, true);
 			clearTimeout(id);
@@ -281,8 +281,9 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 				</S.UsageBadgeLegend>
 				<S.UsageBadgeLegend>
 					<span>
-						☑ 체크박스로 여러 문제를 선택한 뒤, 위 &quot;전체 내보내기&quot; 또는 선택 바의
-						&quot;선택한 문제 ZIP으로 내보내기&quot;로 CodeLab problem 포맷 ZIP을 내보낼 수 있습니다.
+						☑ 체크박스로 여러 문제를 선택한 뒤, 위 &quot;전체 내보내기&quot;
+						또는 선택 바의 &quot;선택한 문제 ZIP으로 내보내기&quot;로 CodeLab
+						problem 포맷 ZIP을 내보낼 수 있습니다.
 					</span>
 				</S.UsageBadgeLegend>
 
@@ -296,7 +297,9 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 							onClick={d.handleExportBulk}
 							disabled={d.isExporting}
 						>
-							{d.isExporting ? "내보내는 중..." : "선택한 문제 ZIP으로 내보내기"}
+							{d.isExporting
+								? "내보내는 중..."
+								: "선택한 문제 ZIP으로 내보내기"}
 						</S.SelectionBarButton>
 					</S.SelectionBar>
 				)}
@@ -355,7 +358,9 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 																	title={`${problem.assignmentCount}개 과제에서 사용 중`}
 																>
 																	과제
-																	<S.UsageCount>({problem.assignmentCount})</S.UsageCount>
+																	<S.UsageCount>
+																		({problem.assignmentCount})
+																	</S.UsageCount>
 																</S.UsageBadgeAssignment>
 															)}
 															{(problem.problemSetCount ?? 0) > 0 && (
@@ -363,7 +368,9 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 																	title={`${problem.problemSetCount}개 문제집에서 사용 중`}
 																>
 																	문제집
-																	<S.UsageCount>({problem.problemSetCount})</S.UsageCount>
+																	<S.UsageCount>
+																		({problem.problemSetCount})
+																	</S.UsageCount>
 																</S.UsageBadgeProblemSet>
 															)}
 															{(problem.quizCount ?? 0) > 0 && (
@@ -371,7 +378,9 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 																	title={`${problem.quizCount}개 코딩테스트에서 사용 중`}
 																>
 																	코딩테스트
-																	<S.UsageCount>({problem.quizCount})</S.UsageCount>
+																	<S.UsageCount>
+																		({problem.quizCount})
+																	</S.UsageCount>
 																</S.UsageBadgeQuiz>
 															)}
 														</S.TitleRow>
@@ -518,42 +527,42 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 										))}
 									</S.TagsInModal>
 								)}
-							{(() => {
-								const rawDesc =
-									d.selectedProblem.description || "*문제 설명이 없습니다.*";
-								// 중복된 "## 입력 형식"~"## 예제" 블록 제거 후, 빈 예제 섹션 제거
-								const desc = stripEmptyExamplesSection(
-									stripDuplicateInputOutputExample(rawDesc),
-								);
-								return (
-									<S.DescriptionContent>
-										<ReactMarkdown
-											rehypePlugins={[rehypeRaw]}
-											components={{
-												pre: ModalMarkdownPre,
-												code: ModalMarkdownCode,
-												h1: ({ node: _n, ...props }: any) => (
-													<h1 className="problem-description-h1" {...props} />
-												),
-												h2: ({ node: _n, ...props }: any) => (
-													<h2 className="problem-description-h2" {...props} />
-												),
-												h3: ({ node: _n, ...props }: any) => (
-													<h3 className="problem-description-h3" {...props} />
-												),
-												p: ({ node: _n, ...props }: any) => (
-													<p
-														className="problem-description-paragraph"
-														{...props}
-													/>
-												),
-											}}
-										>
-											{desc}
-										</ReactMarkdown>
-									</S.DescriptionContent>
-								);
-							})()}
+								{(() => {
+									const rawDesc =
+										d.selectedProblem.description || "*문제 설명이 없습니다.*";
+									// 중복된 "## 입력 형식"~"## 예제" 블록 제거 후, 빈 예제 섹션 제거
+									const desc = stripEmptyExamplesSection(
+										stripDuplicateInputOutputExample(rawDesc),
+									);
+									return (
+										<S.DescriptionContent>
+											<ReactMarkdown
+												rehypePlugins={[rehypeRaw]}
+												components={{
+													pre: ModalMarkdownPre,
+													code: ModalMarkdownCode,
+													h1: ({ node: _n, ...props }: any) => (
+														<h1 className="problem-description-h1" {...props} />
+													),
+													h2: ({ node: _n, ...props }: any) => (
+														<h2 className="problem-description-h2" {...props} />
+													),
+													h3: ({ node: _n, ...props }: any) => (
+														<h3 className="problem-description-h3" {...props} />
+													),
+													p: ({ node: _n, ...props }: any) => (
+														<p
+															className="problem-description-paragraph"
+															{...props}
+														/>
+													),
+												}}
+											>
+												{desc}
+											</ReactMarkdown>
+										</S.DescriptionContent>
+									);
+								})()}
 							</S.ModalBody>
 						</S.ModalContent>
 					</S.ModalOverlay>
@@ -575,6 +584,116 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 							<S.ModalBody>
 								<p>정말로 다음 문제를 삭제하시겠습니까?</p>
 								<S.BoldText>{d.problemToDelete.title}</S.BoldText>
+								<S.DeleteUsageBox>
+									{d.deletePreviewLoading && (
+										<S.DeleteUsageMuted>
+											문제집·과제·퀴즈(코딩테스트) 사용처를 확인하는 중…
+										</S.DeleteUsageMuted>
+									)}
+									{!d.deletePreviewLoading && d.deletePreviewError && (
+										<S.WarningText style={{ marginTop: 0 }}>
+											사용처를 불러오지 못했습니다. 삭제 전에 목록의
+											「사용처」로 다시 확인해 주세요.
+										</S.WarningText>
+									)}
+									{!d.deletePreviewLoading &&
+										!d.deletePreviewError &&
+										d.deletePreviewUsage && (
+											<>
+												<S.DeleteUsageMuted
+													as="div"
+													style={{
+														marginBottom: "0.75rem",
+														lineHeight: 1.55,
+														color: "#334155",
+													}}
+												>
+													아래에 나온 곳에서 이 문제를 사용 중입니다. 삭제하면{" "}
+													<strong>해당 문제집·과제·퀴즈에서 모두 빠지며</strong>,
+													이 문제에 대한 <strong>제출 기록도 함께 삭제</strong>
+													됩니다.
+												</S.DeleteUsageMuted>
+												{(d.deletePreviewUsage.problemSets ?? []).length >
+													0 && (
+													<>
+														<S.DeleteUsageSectionTitle>
+															포함된 문제집
+														</S.DeleteUsageSectionTitle>
+														<S.DeleteUsageList>
+															{(d.deletePreviewUsage.problemSets ?? []).map(
+																(ps) => (
+																	<li key={ps.problemSetId}>
+																		{ps.problemSetTitle}
+																	</li>
+																),
+															)}
+														</S.DeleteUsageList>
+													</>
+												)}
+												{(d.deletePreviewUsage.assignments ?? []).length >
+													0 && (
+													<>
+														<S.DeleteUsageSectionTitle>
+															사용 중인 과제
+														</S.DeleteUsageSectionTitle>
+														<S.DeleteUsageList>
+															{(d.deletePreviewUsage.assignments ?? []).map(
+																(a) => (
+																	<li key={a.assignmentId}>
+																		{a.assignmentTitle}
+																		{a.courseTitle
+																			? ` (${a.courseTitle})`
+																			: ""}
+																	</li>
+																),
+															)}
+														</S.DeleteUsageList>
+													</>
+												)}
+												{(d.deletePreviewUsage.quizzes ?? []).length > 0 && (
+													<>
+														<S.DeleteUsageSectionTitle>
+															사용 중인 퀴즈(코딩테스트)
+														</S.DeleteUsageSectionTitle>
+														<S.DeleteUsageList>
+															{(d.deletePreviewUsage.quizzes ?? []).map(
+																(q) => (
+																	<li key={q.quizId}>
+																		{q.quizTitle}
+																		{q.courseTitle
+																			? ` (${q.courseTitle})`
+																			: ""}
+																	</li>
+																),
+															)}
+														</S.DeleteUsageList>
+													</>
+												)}
+												{(d.deletePreviewUsage.problemSets?.length ?? 0) ===
+													0 &&
+													(d.deletePreviewUsage.assignments?.length ?? 0) ===
+														0 &&
+													(d.deletePreviewUsage.quizzes?.length ?? 0) ===
+														0 && (
+														<S.DeleteUsageMuted>
+															문제집·과제·퀴즈에서는 사용 중이 아닙니다. 삭제 시
+															문제 본문과 제출 기록만 삭제됩니다.
+														</S.DeleteUsageMuted>
+													)}
+												{((d.deletePreviewUsage.problemSets?.length ?? 0) >
+													0 ||
+													(d.deletePreviewUsage.assignments?.length ?? 0) >
+														0 ||
+													(d.deletePreviewUsage.quizzes?.length ?? 0) >
+														0) && (
+													<S.WarningText style={{ marginBottom: 0 }}>
+														⚠️ 삭제 확정 시 위 목록의 문제집·과제·퀴즈에서 이
+														문제가 <strong>자동으로 제거</strong>됩니다.
+													</S.WarningText>
+												)}
+											</>
+										)}
+								</S.DeleteUsageBox>
 								<S.WarningText>⚠️ 이 작업은 되돌릴 수 없습니다.</S.WarningText>
 							</S.ModalBody>
 							<S.ModalFooter>
@@ -586,7 +705,7 @@ export default function ProblemManagementView(d: ProblemManagementHookReturn) {
 								</S.BtnCancel>
 								<S.BtnDanger
 									onClick={d.handleDeleteConfirm}
-									disabled={d.isDeleting}
+									disabled={d.isDeleting || d.deletePreviewLoading}
 								>
 									{d.isDeleting ? "삭제 중..." : "삭제"}
 								</S.BtnDanger>

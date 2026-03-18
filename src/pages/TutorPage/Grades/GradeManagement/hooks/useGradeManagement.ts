@@ -1,6 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
+import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
+import { compareStudentsByField } from "../../../../../utils/studentSort";
 import type {
 	SectionInfo,
 	AssignmentItem,
@@ -30,6 +32,13 @@ export function useGradeManagement() {
 	const [grades, setGrades] = useState<StudentGradeRow[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState("");
+	const gradeSortRef = useRef<{
+		key: StudentSortKey;
+		dir: StudentSortDir;
+	}>({ key: "studentName", dir: "asc" });
+	const [gradeSort, setGradeSort] = useState(gradeSortRef.current);
+	const gradeSortKey = gradeSort.key;
+	const gradeSortDir = gradeSort.dir;
 	const [editingGrade, setEditingGrade] = useState<EditingGrade | null>(null);
 	const [gradeInputs, setGradeInputs] = useState<Record<string, number | "">>(
 		{},
@@ -705,24 +714,54 @@ export function useGradeManagement() {
 		return num ? `${title} - ${num}분반` : title;
 	}, [currentSection]);
 
+	const toggleGradeStudentSort = useCallback((key: StudentSortKey) => {
+		const prev = gradeSortRef.current;
+		const next =
+			prev.key === key
+				? { key, dir: (prev.dir === "asc" ? "desc" : "asc") as StudentSortDir }
+				: { key, dir: "asc" as StudentSortDir };
+		gradeSortRef.current = next;
+		setGradeSort(next);
+	}, []);
+
 	const filteredGrades = useMemo(() => {
 		const term = searchTerm.toLowerCase();
-		return grades.filter(
+		const filtered = grades.filter(
 			(grade) =>
 				grade.studentName?.toLowerCase().includes(term) ||
 				grade.studentId?.toLowerCase().includes(term),
 		);
-	}, [grades, searchTerm]);
+		return [...filtered].sort((a, b) =>
+			compareStudentsByField(
+				a.studentName,
+				a.studentId,
+				b.studentName,
+				b.studentId,
+				gradeSortKey,
+				gradeSortDir,
+			),
+		);
+	}, [grades, searchTerm, gradeSortKey, gradeSortDir]);
 
 	const filteredCourseStudents = useMemo(() => {
 		if (!courseGrades?.students) return [];
 		const lower = searchTerm.toLowerCase();
-		return courseGrades.students.filter(
+		const filtered = courseGrades.students.filter(
 			(student) =>
 				student.studentName?.toLowerCase().includes(lower) ||
 				student.studentId?.toLowerCase().includes(lower),
 		);
-	}, [courseGrades, searchTerm]);
+		return [...filtered].sort((a, b) =>
+			compareStudentsByField(
+				a.studentName,
+				a.studentId,
+				b.studentName,
+				b.studentId,
+				gradeSortKey,
+				gradeSortDir,
+			),
+		);
+	}, [courseGrades, searchTerm, gradeSortKey, gradeSortDir]);
 
 	const handleExportCSV = useCallback(() => {
 		const formatDateForCSV = (s: string | undefined): string =>
@@ -1879,6 +1918,9 @@ export function useGradeManagement() {
 		stats,
 		filteredGrades,
 		filteredCourseStudents,
+		gradeSortKey,
+		gradeSortDir,
+		toggleGradeStudentSort,
 		showProblemDetailModal,
 		problemDetail,
 		openProblemDetail,

@@ -58,6 +58,9 @@ const AssignmentStudentProgress: FC = () => {
 					expandedProblems={data.expandedProblems}
 					toggleProblem={data.toggleProblem}
 					filteredStudents={data.filteredStudents}
+					studentSortKey={data.studentSortKey}
+					studentSortDir={data.studentSortDir}
+					onStudentSort={data.toggleStudentSort}
 					getCompletionStatus={data.getCompletionStatus}
 					getProgressPercentage={data.getProgressPercentage}
 					handleBadgeClick={data.handleBadgeClick}

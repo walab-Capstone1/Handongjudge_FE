@@ -296,9 +296,9 @@ export const ModalContent = styled.div<{ $wide?: boolean }>`
 	${(p) =>
 		p.$wide &&
 		`
-		max-width: 45vw;
-		width: 45vw;
-		min-width: 800px;
+		max-width: min(1200px, 96vw);
+		width: min(1200px, 96vw);
+		min-width: min(1080px, 100vw - 2rem);
 	`}
 `;
 
@@ -673,4 +673,127 @@ export const PaginationInfo = styled.span`
 	font-weight: 600;
 	font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
 		sans-serif;
+`;
+
+export const ProblemSelectLayout = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.25rem;
+	align-items: stretch;
+`;
+
+export const ProblemSelectColumn = styled.div<{ $accent?: boolean }>`
+	flex: 1 1 300px;
+	min-width: min(280px, 100%);
+	display: flex;
+	flex-direction: column;
+	border: 2px solid ${(p) => (p.$accent ? "#c7d2fe" : "#e5e7eb")};
+	border-radius: 12px;
+	padding: 1rem 1.125rem;
+	background: ${(p) => (p.$accent ? "#eef2ff" : "#fafafa")};
+	box-sizing: border-box;
+`;
+
+export const ProblemPanelTitle = styled.div`
+	font-size: 0.8125rem;
+	font-weight: 700;
+	color: #4338ca;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	margin-bottom: 0.75rem;
+	font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+		sans-serif;
+`;
+
+export const ProblemPanelTitleMuted = styled(ProblemPanelTitle)`
+	color: #64748b;
+`;
+
+export const ProblemPanelHint = styled.p`
+	margin: 0 0 0.75rem;
+	font-size: 0.8rem;
+	color: #64748b;
+	line-height: 1.4;
+`;
+
+export const SelectedProblemScroll = styled.div`
+	max-height: min(360px, 45vh);
+	overflow-y: auto;
+	flex: 1;
+`;
+
+export const SelectedProblemRow = styled.div`
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.625rem;
+	margin-bottom: 0.375rem;
+	background: white;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	font-size: 0.8125rem;
+`;
+
+export const SelectedProblemTitle = styled.span`
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #1e293b;
+`;
+
+export const RemoveFromSetButton = styled.button`
+	flex-shrink: 0;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	border: none;
+	border-radius: 6px;
+	background: #fee2e2;
+	color: #b91c1c;
+	cursor: pointer;
+	font-family: inherit;
+
+	&:hover {
+		background: #fecaca;
+	}
+`;
+
+export const FilterRow = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-bottom: 1rem;
+	align-items: center;
+`;
+
+export const OriginalFilterSelect = styled.select`
+	padding: 0.625rem 0.75rem;
+	border: 1px solid #d1d5db;
+	border-radius: 8px;
+	font-size: 0.875rem;
+	background: white;
+	min-width: 160px;
+	font-family: inherit;
+
+	&:focus {
+		outline: none;
+		border-color: #667eea;
+	}
+`;
+
+export const ProblemListCompact = styled(ProblemList)`
+	max-height: min(320px, 40vh);
+`;
+
+export const ProblemsLoadingBox = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 3rem 1.5rem;
+	gap: 1rem;
+	color: #64748b;
+	font-size: 0.9rem;
 `;

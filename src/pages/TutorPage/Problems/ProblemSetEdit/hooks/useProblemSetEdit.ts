@@ -14,6 +14,11 @@ export function useProblemSetEdit() {
 	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [showAddModal, setShowAddModal] = useState(false);
+	const [addModalProblemsLoading, setAddModalProblemsLoading] = useState(false);
+	const [showEditSetModal, setShowEditSetModal] = useState(false);
+	const [editSetTitle, setEditSetTitle] = useState("");
+	const [editSetDescription, setEditSetDescription] = useState("");
+	const [isSavingSet, setIsSavingSet] = useState(false);
 	const [selectedProblemIds, setSelectedProblemIds] = useState<number[]>([]);
 	const [isAdding, setIsAdding] = useState(false);
 	const [isRemoving, setIsRemoving] = useState(false);
@@ -21,6 +26,7 @@ export function useProblemSetEdit() {
 	const [alertType, setAlertType] = useState<AlertType>("success");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [filterType, setFilterType] = useState<FilterType>("available");
+	const [originalOnly, setOriginalOnly] = useState<"ALL" | "ORIGINAL">("ALL");
 
 	const fetchProblemSet = useCallback(async () => {
 		if (!problemSetId) return;
@@ -59,24 +65,30 @@ export function useProblemSetEdit() {
 			setAllProblems(problemsData);
 		} catch (error) {
 			console.error("문제 목록 조회 실패:", error);
+			setAllProblems([]);
 		}
 	}, []);
 
 	useEffect(() => {
 		if (problemSetId) {
 			fetchProblemSet();
-			fetchAllProblems();
 		}
-	}, [problemSetId, fetchProblemSet, fetchAllProblems]);
+	}, [problemSetId, fetchProblemSet]);
 
 	useEffect(() => {
-		if (showAddModal) {
+		if (!showAddModal) return;
+		setAddModalProblemsLoading(true);
+		fetchAllProblems().finally(() => setAddModalProblemsLoading(false));
+	}, [showAddModal, fetchAllProblems]);
+
+	useEffect(() => {
+		if (showAddModal || showEditSetModal) {
 			document.body.classList.add("section-modal-open");
 		} else {
 			document.body.classList.remove("section-modal-open");
 		}
 		return () => document.body.classList.remove("section-modal-open");
-	}, [showAddModal]);
+	}, [showAddModal, showEditSetModal]);
 
 	const getAvailableProblems = useCallback((): Problem[] => {
 		const existingProblemIds = problems.map((p) => p.id);
@@ -97,23 +109,45 @@ export function useProblemSetEdit() {
 		let filtered: Problem[];
 		if (filterType === "available") filtered = getAvailableProblems();
 		else if (filterType === "added") filtered = getAddedProblems();
-		else filtered = allProblems;
+		else filtered = [...allProblems];
+
+		if (originalOnly === "ORIGINAL") {
+			filtered = filtered.filter((p) =>
+				(p.title ?? "").endsWith("_오리지널"),
+			);
+		}
 
 		if (searchTerm) {
+			const q = searchTerm.toLowerCase();
 			filtered = filtered.filter(
 				(p) =>
-					p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					p.title?.toLowerCase().includes(q) ||
 					p.id?.toString().includes(searchTerm),
 			);
 		}
-		return filtered;
+
+		return [...filtered].sort((a, b) => {
+			const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+			const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+			if (tb !== ta) return tb - ta;
+			return (b.id ?? 0) - (a.id ?? 0);
+		});
 	}, [
 		filterType,
 		searchTerm,
+		originalOnly,
 		getAvailableProblems,
 		getAddedProblems,
 		allProblems,
 	]);
+
+	const selectedProblemsNewestFirst = useMemo((): Problem[] => {
+		const map = new Map(allProblems.map((p) => [p.id, p]));
+		return [...selectedProblemIds]
+			.reverse()
+			.map((id) => map.get(id))
+			.filter((p): p is Problem => Boolean(p));
+	}, [selectedProblemIds, allProblems]);
 
 	const paginatedProblems = useMemo(
 		() => () => {
@@ -124,10 +158,10 @@ export function useProblemSetEdit() {
 		[currentPage, getFilteredProblems],
 	);
 
-	const totalPages = useMemo(
-		() => Math.ceil(getFilteredProblems().length / PROBLEMS_PER_PAGE),
-		[getFilteredProblems],
-	);
+	const totalPages = useMemo(() => {
+		const n = getFilteredProblems().length;
+		return Math.max(1, Math.ceil(n / PROBLEMS_PER_PAGE));
+	}, [getFilteredProblems]);
 
 	const handleAddProblems = useCallback(async () => {
 		if (selectedProblemIds.length === 0) {
@@ -249,8 +283,58 @@ export function useProblemSetEdit() {
 			setSearchTerm("");
 			setCurrentPage(1);
 			setFilterType("available");
+			setOriginalOnly("ALL");
 		}
 	}, [isAdding]);
+
+	const openEditSetModal = useCallback(() => {
+		if (!problemSet) return;
+		setEditSetTitle(problemSet.title ?? "");
+		setEditSetDescription(problemSet.description ?? "");
+		setShowEditSetModal(true);
+	}, [problemSet]);
+
+	const closeEditSetModal = useCallback(() => {
+		if (!isSavingSet) setShowEditSetModal(false);
+	}, [isSavingSet]);
+
+	const handleSaveProblemSetInfo = useCallback(async () => {
+		if (!problemSetId || !editSetTitle.trim()) {
+			setAlertMessage("문제집 제목을 입력해 주세요.");
+			setAlertType("error");
+			setTimeout(() => setAlertMessage(null), 3000);
+			return;
+		}
+		try {
+			setIsSavingSet(true);
+			await APIService.updateProblemSet(problemSetId, {
+				title: editSetTitle.trim(),
+				description: editSetDescription.trim() || "",
+				tags: problemSet?.tags ?? "[]",
+			});
+			setShowEditSetModal(false);
+			setAlertMessage("문제집 정보가 수정되었습니다.");
+			setAlertType("success");
+			await fetchProblemSet();
+			setTimeout(() => setAlertMessage(null), 3000);
+		} catch (error: unknown) {
+			console.error("문제집 수정 실패:", error);
+			setAlertMessage(
+				"수정에 실패했습니다: " +
+					(error instanceof Error ? error.message : "알 수 없는 오류"),
+			);
+			setAlertType("error");
+			setTimeout(() => setAlertMessage(null), 5000);
+		} finally {
+			setIsSavingSet(false);
+		}
+	}, [
+		problemSetId,
+		editSetTitle,
+		editSetDescription,
+		problemSet?.tags,
+		fetchProblemSet,
+	]);
 
 	const setFilterAndPage = useCallback((filter: FilterType) => {
 		setFilterType(filter);
@@ -259,6 +343,11 @@ export function useProblemSetEdit() {
 
 	const setSearchAndPage = useCallback((value: string) => {
 		setSearchTerm(value);
+		setCurrentPage(1);
+	}, []);
+
+	const setOriginalOnlyAndPage = useCallback((v: "ALL" | "ORIGINAL") => {
+		setOriginalOnly(v);
 		setCurrentPage(1);
 	}, []);
 
@@ -287,6 +376,16 @@ export function useProblemSetEdit() {
 		loading,
 		searchTerm,
 		showAddModal,
+		addModalProblemsLoading,
+		showEditSetModal,
+		editSetTitle,
+		setEditSetTitle,
+		editSetDescription,
+		setEditSetDescription,
+		isSavingSet,
+		openEditSetModal,
+		closeEditSetModal,
+		handleSaveProblemSetInfo,
 		selectedProblemIds,
 		isAdding,
 		isRemoving,
@@ -298,6 +397,9 @@ export function useProblemSetEdit() {
 		filterType,
 		setFilterAndPage,
 		setSearchAndPage,
+		originalOnly,
+		setOriginalOnlyAndPage,
+		selectedProblemsNewestFirst,
 		getFilteredProblems,
 		paginatedProblems,
 		totalPages,

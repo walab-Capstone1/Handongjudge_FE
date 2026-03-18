@@ -496,6 +496,10 @@ export function useAssignmentManagement() {
 		);
 	}, []);
 
+	const clearProblemSelection = useCallback(() => {
+		setSelectedProblemIds([]);
+	}, []);
+
 	const handleSelectAllProblems = useCallback(() => {
 		if (
 			selectedProblemIds.length === filteredProblems.length &&
@@ -1027,6 +1031,7 @@ export function useAssignmentManagement() {
 		selectedAssignment,
 		showProblemModal,
 		setShowProblemModal,
+		availableProblems,
 		filteredProblems,
 		selectedProblemIds,
 		problemSearchTerm,
@@ -1083,6 +1088,7 @@ export function useAssignmentManagement() {
 		handleSectionChangeForProblem,
 		handleSelectProblem,
 		handleProblemToggle,
+		clearProblemSelection,
 		handleSelectAllProblems,
 		handleRemoveProblem,
 		handleCreateNewProblem,

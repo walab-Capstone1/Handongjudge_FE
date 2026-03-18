@@ -31,6 +31,20 @@ export const LoadingSpinner = styled.div`
   animation: ${spin} 1s linear infinite;
 `;
 
+export const SortableStudentHeaderTh = styled.th`
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+  vertical-align: middle;
+  padding: 0.55rem 0.65rem;
+  box-sizing: border-box;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+`;
+
 export const PageHeader = styled.div`
   display: flex;
   align-items: center;
@@ -788,13 +802,104 @@ export const SubmissionStatus = styled.span<{ $onTime?: boolean; $late?: boolean
 export const GradeLegend = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.875rem;
+  gap: 0.65rem 1rem;
+  margin-bottom: 0;
+  font-size: 0.8rem;
   color: #64748b;
+  align-items: center;
   & span {
     display: inline-flex;
     align-items: center;
+    gap: 0.35rem;
+  }
+`;
+
+/** 성적 테이블 스크롤 영역 상단에 표시 기준 고정 */
+export const GradeStatusLegendSticky = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: #ffffff;
+  padding: 0.5rem 0.75rem 0.6rem;
+  margin: 0 0 0.65rem;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+`;
+
+export type GradeCellKindUi =
+  | "ontime_full"
+  | "ontime_wrong"
+  | "late_full"
+  | "late_wrong"
+  | "not_submitted";
+
+export const GradeCellStatusBadge = styled.span<{ $kind: GradeCellKindUi }>`
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.28rem 0.5rem;
+  border-radius: 6px;
+  line-height: 1.25;
+  max-width: 5.5rem;
+  text-align: center;
+  ${(p) => {
+		switch (p.$kind) {
+			case "ontime_full":
+				return `
+          background: #dcfce7;
+          color: #166534;
+          border: 1px solid #86efac;
+        `;
+			case "ontime_wrong":
+				return `
+          background: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fca5a5;
+        `;
+			case "late_full":
+				return `
+          background: #fef9c3;
+          color: #854d0e;
+          border: 1px solid #facc15;
+        `;
+			case "late_wrong":
+				return `
+          background: #ffedd5;
+          color: #9a3412;
+          border: 1px solid #fdba74;
+        `;
+			case "not_submitted":
+				return `
+          background: #f1f5f9;
+          color: #64748b;
+          border: 1px solid #cbd5e1;
+        `;
+			default:
+				return "";
+		}
+	}}
+`;
+
+export const GradeCellScoreMeta = styled.div`
+  font-size: 0.65rem;
+  color: #94a3b8;
+  font-weight: 500;
+`;
+
+export const GradeCellCodeBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.45rem;
+  border: none;
+  background: rgba(102, 126, 234, 0.12);
+  color: #5568d3;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  &:hover {
+    background: rgba(102, 126, 234, 0.22);
+    color: #4338ca;
   }
 `;
 
@@ -895,12 +1000,95 @@ export const TdTotalCell = styled.td`
 
 export const CourseTableContainer = styled(TableContainer)`
   margin-top: 1rem;
+  /* collapse + isolation 시 tbody 가로 sticky가 브라우저에서 무력화되는 경우 대비 */
+  isolation: auto;
+`;
+
+/** 성적: 범례는 가로 스크롤 밖 — 테이블만 이 안에서 가로 스크롤 */
+export const GradeTablePageWrapper = styled.div`
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 100%;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: min(88vh, 1100px);
+  min-width: 0;
+`;
+
+export const GradeTableHorizontalScroll = styled.div`
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
 `;
 
 export const CourseTable = styled(Table)``;
 
 /** 수업 전체 보기: 오른쪽에 전체 총점·비율 열 고정 */
 export const CourseTableWithStickyRight = styled(CourseTable)`
+  /* collapse면 Chrome 등에서 td/th 가로 sticky가 동작하지 않음 */
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+
+  & thead th,
+  & tbody td {
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    box-sizing: border-box;
+  }
+
+  /* 왼쪽: 학생·학번 열 가로 스크롤 시 고정 */
+  thead tr:first-child th:nth-child(1) {
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 28 !important;
+    min-width: ${STICKY_COL_1_WIDTH} !important;
+    max-width: ${STICKY_COL_1_WIDTH} !important;
+    width: ${STICKY_COL_1_WIDTH} !important;
+    background: #f1f5f9 !important;
+    box-shadow: 3px 0 6px rgba(15, 23, 42, 0.06);
+  }
+  thead tr:first-child th:nth-child(2) {
+    position: sticky !important;
+    top: 0 !important;
+    left: ${STICKY_COL_1_WIDTH} !important;
+    z-index: 28 !important;
+    min-width: ${STICKY_COL_2_WIDTH} !important;
+    max-width: ${STICKY_COL_2_WIDTH} !important;
+    width: ${STICKY_COL_2_WIDTH} !important;
+    background: #f1f5f9 !important;
+    box-shadow: 3px 0 6px rgba(15, 23, 42, 0.06);
+  }
+  tbody td:nth-child(1) {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 8 !important;
+    min-width: ${STICKY_COL_1_WIDTH} !important;
+    max-width: ${STICKY_COL_1_WIDTH} !important;
+    width: ${STICKY_COL_1_WIDTH} !important;
+    background: #fff !important;
+    box-shadow: 3px 0 6px rgba(15, 23, 42, 0.05);
+  }
+  tbody td:nth-child(2) {
+    position: sticky !important;
+    left: ${STICKY_COL_1_WIDTH} !important;
+    z-index: 8 !important;
+    min-width: ${STICKY_COL_2_WIDTH} !important;
+    max-width: ${STICKY_COL_2_WIDTH} !important;
+    width: ${STICKY_COL_2_WIDTH} !important;
+    background: #fff !important;
+    box-shadow: 3px 0 6px rgba(15, 23, 42, 0.05);
+  }
+  tbody tr:hover td:nth-child(1),
+  tbody tr:hover td:nth-child(2) {
+    background: #f8fafc !important;
+  }
   /* thead 첫 행: 마지막 두 열(전체 총점, 비율) 오른쪽 고정 */
   thead tr:first-child th:nth-last-child(2) {
     position: sticky !important;
