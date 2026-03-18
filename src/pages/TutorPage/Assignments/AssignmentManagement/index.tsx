@@ -176,6 +176,7 @@ const AssignmentManagement: React.FC = () => {
 			<ProblemSelectModal
 				isOpen={d.showProblemModal}
 				selectedAssignment={d.selectedAssignment}
+				instructorProblems={d.availableProblems}
 				filteredProblems={d.filteredProblems}
 				selectedProblemIds={d.selectedProblemIds}
 				problemSearchTerm={d.problemSearchTerm}
@@ -194,6 +195,7 @@ const AssignmentManagement: React.FC = () => {
 				}}
 				onCreateNew={d.handleNavigateToCreatePage}
 				onProblemDetail={d.openProblemDetail}
+				onClearProblemSelection={d.clearProblemSelection}
 			/>
 
 			<ProblemCreateModal

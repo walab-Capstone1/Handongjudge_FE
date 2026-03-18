@@ -19,6 +19,13 @@ export interface BulkProblemData {
 export interface ProblemSelectModalProps {
 	isOpen: boolean;
 	selectedAssignment: { id: number; title?: string; sectionId?: number } | null;
+	/** 내 문제 탭: 전체 문제 목록(API). 필터·검색은 모달 내부에서 처리 */
+	instructorProblems: {
+		id: number;
+		title?: string;
+		createdAt?: string;
+		difficulty?: string;
+	}[];
 	filteredProblems: { id: number; title?: string; createdAt?: string }[];
 	selectedProblemIds: number[];
 	problemSearchTerm: string;
@@ -30,6 +37,8 @@ export interface ProblemSelectModalProps {
 	onCopyProblem: () => void;
 	onCreateNew: () => void;
 	onProblemDetail: (problemId: number) => void | Promise<void>;
+	/** 내 문제 ↔ 문제집 ↔ 수업 탭 전환·뒤로가기 시 선택 초기화 */
+	onClearProblemSelection?: () => void;
 }
 
 export interface ProblemCreateModalProps {

@@ -1,11 +1,19 @@
 import type React from "react";
-import { FaCode, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
 import * as S from "../styles";
 import type { StudentGradeRow, QuizItem, EditingGrade } from "../types";
+import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
+import { SortableStudentColumnHeader } from "../../../../../components/SortableStudentColumnHeader";
+import {
+	GradeProblemCellDisplay,
+	GradeStatusLegendBar,
+} from "./GradeProblemCellDisplay";
 
 export interface GradeManagementQuizTableProps {
 	grades: StudentGradeRow[];
 	filteredGrades: StudentGradeRow[];
+	gradeSortKey: StudentSortKey;
+	gradeSortDir: StudentSortDir;
+	onSortStudentHeader: (key: StudentSortKey) => void;
 	selectedQuiz: QuizItem | null;
 	editingGrade?: EditingGrade | null;
 	setEditingGrade?: (v: EditingGrade | null) => void;
@@ -27,6 +35,9 @@ export interface GradeManagementQuizTableProps {
 export default function GradeManagementQuizTable({
 	grades,
 	filteredGrades,
+	gradeSortKey,
+	gradeSortDir,
+	onSortStudentHeader,
 	selectedQuiz,
 	editingGrade = null,
 	setEditingGrade = () => {},
@@ -50,20 +61,10 @@ export default function GradeManagementQuizTable({
 	const problemGrades = grades[0]?.problemGrades ?? [];
 	const quizTitle = selectedQuiz?.title ?? "퀴즈";
 
-	const submissionTitle = (label: string, submittedAt?: string) =>
-		submittedAt
-			? `${label} · 제출: ${new Date(submittedAt).toLocaleString("ko-KR")}`
-			: label;
-	const getSubmittedAt = (p: { submittedAt?: string; submitted_at?: string }) =>
-		p.submittedAt ?? p.submitted_at;
-
 	return (
-		<S.CourseTableContainer>
-			<S.GradeLegend>
-				<span><FaCheckCircle style={{ color: "#22c55e", marginRight: 4 }} /> 제시간 제출</span>
-				<span><FaExclamationTriangle style={{ color: "#eab308", marginRight: 4 }} /> 지각 제출</span>
-				<span><FaTimesCircle style={{ color: "#94a3b8", marginRight: 4 }} /> 미제출</span>
-			</S.GradeLegend>
+		<S.GradeTablePageWrapper>
+			<GradeStatusLegendBar />
+			<S.GradeTableHorizontalScroll>
 			<S.CourseTableWithStickyRight>
 				<colgroup>
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
@@ -77,8 +78,32 @@ export default function GradeManagementQuizTable({
 				</colgroup>
 				<thead>
 					<tr>
-						<th rowSpan={2}>학생</th>
-						<th rowSpan={2}>학번</th>
+						<S.SortableStudentHeaderTh
+							rowSpan={2}
+							scope="col"
+							onClick={() => onSortStudentHeader("studentName")}
+							title="이름순 정렬 (클릭 시 오름·내림)"
+						>
+							<SortableStudentColumnHeader
+								label="학생"
+								sortKey="studentName"
+								activeKey={gradeSortKey}
+								dir={gradeSortDir}
+							/>
+						</S.SortableStudentHeaderTh>
+						<S.SortableStudentHeaderTh
+							rowSpan={2}
+							scope="col"
+							onClick={() => onSortStudentHeader("studentId")}
+							title="학번순 정렬 (클릭 시 오름·내림)"
+						>
+							<SortableStudentColumnHeader
+								label="학번"
+								sortKey="studentId"
+								activeKey={gradeSortKey}
+								dir={gradeSortDir}
+							/>
+						</S.SortableStudentHeaderTh>
 						<S.CourseQuizHeader as="th" colSpan={problemGrades.length + 1}>
 							<div>
 								<S.ItemTitle>
@@ -131,46 +156,19 @@ export default function GradeManagementQuizTable({
 								<S.TdStudentId>{student.studentId}</S.TdStudentId>
 								{student.problemGrades?.map((problem) => (
 									<S.TdCourseProblemCell key={problem.problemId}>
-										<S.ScoreDisplay>
-											<S.ScoreRow>
-												<S.ScoreValue>
-													{problem.score ?? 0} / {problem.points ?? 1}
-												</S.ScoreValue>
-												{problem.submitted && handleViewCode && (
-													<button
-														type="button"
-														onClick={() =>
-															handleViewCode(student.userId, problem.problemId)
-														}
-														title="코드 조회"
-													>
-														<FaCode />
-													</button>
-												)}
-												{(problem.submitted ||
-													(selectedQuiz?.endTime &&
-														new Date() > new Date(selectedQuiz.endTime))) &&
-													(problem.submitted ? (
-														<S.SubmissionStatus $onTime={problem.isOnTime} $late={!problem.isOnTime}>
-															{problem.isOnTime ? (
-																<span title={submissionTitle("제시간 제출", getSubmittedAt(problem))}>
-																	<FaCheckCircle />
-																</span>
-															) : (
-																<span title={submissionTitle("지각 제출", getSubmittedAt(problem))}>
-																	<FaExclamationTriangle />
-																</span>
-															)}
-														</S.SubmissionStatus>
-													) : (
-														<S.SubmissionStatus $onTime={false} $late={false}>
-															<span title="미제출">
-																<FaTimesCircle />
-															</span>
-														</S.SubmissionStatus>
-													))}
-											</S.ScoreRow>
-										</S.ScoreDisplay>
+										<GradeProblemCellDisplay
+											problem={problem}
+											fallbackPoints={problem.points ?? 1}
+											onViewCode={
+												problem.submitted && handleViewCode
+													? () =>
+															handleViewCode(
+																student.userId,
+																problem.problemId,
+															)
+													: undefined
+											}
+										/>
 									</S.TdCourseProblemCell>
 								))}
 								<S.TdCourseAssignmentTotalCell>
@@ -193,6 +191,7 @@ export default function GradeManagementQuizTable({
 					})}
 				</tbody>
 			</S.CourseTableWithStickyRight>
-		</S.CourseTableContainer>
+			</S.GradeTableHorizontalScroll>
+		</S.GradeTablePageWrapper>
 	);
 }

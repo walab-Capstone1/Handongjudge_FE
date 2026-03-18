@@ -66,6 +66,12 @@ export function useProblemManagement() {
 	const [openMoreMenu, setOpenMoreMenu] = useState<number | null>(null);
 	const [selectedProblemIds, setSelectedProblemIds] = useState<number[]>([]);
 	const [isExporting, setIsExporting] = useState(false);
+	/** 원본 삭제 모달에서만: 삭제 전 사용처 미리보기 */
+	const [deletePreviewUsage, setDeletePreviewUsage] = useState<ProblemUsage | null>(
+		null,
+	);
+	const [deletePreviewLoading, setDeletePreviewLoading] = useState(false);
+	const [deletePreviewError, setDeletePreviewError] = useState(false);
 
 	const fetchProblems = useCallback(async () => {
 		try {
@@ -424,8 +430,44 @@ export function useProblemManagement() {
 		if (!isDeleting) {
 			setShowDeleteModal(false);
 			setProblemToDelete(null);
+			setDeletePreviewUsage(null);
+			setDeletePreviewLoading(false);
+			setDeletePreviewError(false);
 		}
 	}, [isDeleting]);
+
+	useEffect(() => {
+		if (!showDeleteModal || !problemToDelete) {
+			return;
+		}
+		let cancelled = false;
+		setDeletePreviewLoading(true);
+		setDeletePreviewError(false);
+		setDeletePreviewUsage(null);
+		(async () => {
+			try {
+				const response = await APIService.getProblemUsage(problemToDelete.id);
+				const usage = response?.data ?? response ?? {};
+				if (!cancelled) {
+					setDeletePreviewUsage(usage as ProblemUsage);
+				}
+			} catch {
+				if (!cancelled) {
+					setDeletePreviewError(true);
+					setDeletePreviewUsage({
+						assignments: [],
+						problemSets: [],
+						quizzes: [],
+					});
+				}
+			} finally {
+				if (!cancelled) setDeletePreviewLoading(false);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [showDeleteModal, problemToDelete]);
 
 	const closeCopyModal = useCallback(() => {
 		if (!isCopying) {
@@ -631,6 +673,9 @@ export function useProblemManagement() {
 		handleExportSingle,
 		handleExportBulk,
 		handleExportFiltered,
+		deletePreviewUsage,
+		deletePreviewLoading,
+		deletePreviewError,
 	};
 }
 
