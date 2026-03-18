@@ -147,13 +147,14 @@ export default function CourseAssignmentsPageView(
 													{assignment.problems && assignment.problems.length > 0 && (
 														<S.ProblemSortRow>
 															<S.ProblemSortSelect
-																value={d.problemSortByAssignmentId?.[assignment.id] ?? "unsolvedFirst"}
+																value={d.problemSortByAssignmentId?.[assignment.id] ?? "original"}
 																onChange={(e) => {
-																	const v = e.target.value as "solvedFirst" | "unsolvedFirst";
+																	const v = e.target.value as "original" | "solvedFirst" | "unsolvedFirst";
 																	d.setProblemSortForAssignment?.(assignment.id, v);
 																}}
 																onClick={(e) => e.stopPropagation()}
 															>
+																<option value="original">기본</option>
 																<option value="unsolvedFirst">미해결 문제</option>
 																<option value="solvedFirst">해결 문제</option>
 															</S.ProblemSortSelect>
