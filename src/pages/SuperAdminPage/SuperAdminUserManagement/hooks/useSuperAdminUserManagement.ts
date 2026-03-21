@@ -11,8 +11,8 @@ export function useSuperAdminUserManagement() {
 	const fetchUsers = useCallback(async () => {
 		try {
 			setLoading(true);
-			const response = await APIService.getAllUsers();
-			setUsers(response?.data || response || []);
+			const response = await APIService.getAllUsersForSuperAdmin();
+			setUsers(response?.data || []);
 		} catch (error) {
 			console.error("사용자 조회 실패:", error);
 		} finally {
@@ -26,8 +26,7 @@ export function useSuperAdminUserManagement() {
 
 	const getRoleLabel = useCallback((role: string): string => {
 		const labels: Record<string, string> = {
-			STUDENT: "학생",
-			INSTRUCTOR: "강사",
+			USER: "학생",
 			ADMIN: "관리자",
 			SUPER_ADMIN: "시스템 관리자",
 		};
@@ -37,10 +36,11 @@ export function useSuperAdminUserManagement() {
 	const filteredUsers = useMemo(
 		() =>
 			users.filter((u) => {
+				const lowerSearch = searchTerm.toLowerCase();
 				const matchesSearch =
-					u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-					u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-					(u.studentId && u.studentId.includes(searchTerm));
+					u.name.toLowerCase().includes(lowerSearch) ||
+					(u.email?.toLowerCase().includes(lowerSearch) ?? false) ||
+					u.studentId?.includes(searchTerm);
 				const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
 				return matchesSearch && matchesRole;
 			}),

@@ -25,9 +25,9 @@ export default function IndexPageView(d: IndexPageHookReturn) {
 						<S.HeroContent>
 							<S.HeroTitle>H-CodeLab</S.HeroTitle>
 							<S.HeroDescription>
-								Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut sit
-								amet risus nisi, integer firibus faucibus pours. Maecenas
-								pharetra eropuest
+								오늘의 한 줄 코드가 내일의 실력이 됩니다. 작은 문제 하나씩 풀며,
+								분명한 성장의 흔적을 만들어보세요. H-CodeLab에서 꾸준함을
+								실력으로 바꾸세요.
 							</S.HeroDescription>
 						</S.HeroContent>
 						<S.HeroButton onClick={d.handleGoToClassroom}>

@@ -11,7 +11,7 @@ export function useSuperAdminSubmissionManagement() {
 		try {
 			setLoading(true);
 			const response = await APIService.getAllSubmissionsForSuperAdmin();
-			setSubmissions(response?.data?.content || response || []);
+			setSubmissions(response?.data || []);
 		} catch (error) {
 			console.error("제출 내역 조회 실패:", error);
 		} finally {
@@ -25,6 +25,11 @@ export function useSuperAdminSubmissionManagement() {
 
 	const getResultColor = useCallback((result: string): string => {
 		const colors: Record<string, string> = {
+			AC: "#10b981",
+			WA: "#ef4444",
+			RE: "#f59e0b",
+			TLE: "#8b5cf6",
+			CE: "#6b7280",
 			ACCEPTED: "#10b981",
 			WRONG_ANSWER: "#ef4444",
 			RUNTIME_ERROR: "#f59e0b",

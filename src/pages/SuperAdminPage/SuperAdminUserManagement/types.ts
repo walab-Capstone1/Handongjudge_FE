@@ -1,15 +1,10 @@
 export interface User {
 	id: number;
-	email: string;
+	email?: string;
 	name: string;
 	studentId?: string;
 	role: string;
-	createdAt: string;
+	createdAt?: string;
 }
 
-export type RoleFilter =
-	| "ALL"
-	| "STUDENT"
-	| "INSTRUCTOR"
-	| "ADMIN"
-	| "SUPER_ADMIN";
+export type RoleFilter = "ALL" | "USER" | "ADMIN" | "SUPER_ADMIN";

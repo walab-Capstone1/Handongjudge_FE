@@ -78,6 +78,7 @@ export const HeroTitle = styled.h1`
 export const HeroDescription = styled.p`
   font-size: 16px;
   color: white;
+  font-weight: 900;
   line-height: 1.6;
   margin: 0;
   opacity: 0.95;
