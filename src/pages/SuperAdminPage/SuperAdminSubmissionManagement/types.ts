@@ -11,6 +11,11 @@ export interface Submission {
 
 export type ResultFilter =
 	| "ALL"
+	| "AC"
+	| "WA"
+	| "RE"
+	| "TLE"
+	| "CE"
 	| "ACCEPTED"
 	| "WRONG_ANSWER"
 	| "RUNTIME_ERROR"

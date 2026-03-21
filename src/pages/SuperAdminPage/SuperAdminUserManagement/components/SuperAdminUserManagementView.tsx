@@ -44,8 +44,7 @@ export default function SuperAdminUserManagementView(
 						}}
 					>
 						<option value="ALL">전체 역할</option>
-						<option value="STUDENT">학생</option>
-						<option value="INSTRUCTOR">강사</option>
+						<option value="USER">학생</option>
 						<option value="ADMIN">관리자</option>
 						<option value="SUPER_ADMIN">시스템 관리자</option>
 					</select>
@@ -65,7 +64,7 @@ export default function SuperAdminUserManagementView(
 							{d.filteredUsers.map((u) => (
 								<tr key={u.id}>
 									<S.Td>{u.name}</S.Td>
-									<S.Td>{u.email}</S.Td>
+									<S.Td>{u.email || "-"}</S.Td>
 									<S.Td>{u.studentId || "-"}</S.Td>
 									<S.Td>
 										<span
@@ -82,7 +81,9 @@ export default function SuperAdminUserManagementView(
 										</span>
 									</S.Td>
 									<S.Td>
-										{new Date(u.createdAt).toLocaleDateString("ko-KR")}
+										{u.createdAt
+											? new Date(u.createdAt).toLocaleDateString("ko-KR")
+											: "-"}
 									</S.Td>
 								</tr>
 							))}
