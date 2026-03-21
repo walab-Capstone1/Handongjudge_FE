@@ -7,6 +7,7 @@ import {
 	FaUniversity,
 	FaList,
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import Header from "../../../../components/Layout/Header";
 import LoadingSpinner from "../../../../components/UI/LoadingSpinner";
 import type { SuperAdminDashboardHookReturn } from "../hooks/useSuperAdminDashboard";
@@ -70,7 +71,7 @@ export default function SuperAdminDashboardView(
 			<S.Container>
 				<S.Title>시스템 관리자 대시보드</S.Title>
 				<S.StatsGrid>
-					<S.StatCard>
+					<S.StatCard as={Link} to="/super-admin/users">
 						<S.StatIcon>
 							<FaUsers />
 						</S.StatIcon>
@@ -79,7 +80,7 @@ export default function SuperAdminDashboardView(
 							<S.StatValue>{d.stats.totalUsers.toLocaleString()}</S.StatValue>
 						</S.StatContent>
 					</S.StatCard>
-					<S.StatCard>
+					<S.StatCard as={Link} to="/super-admin/courses">
 						<S.StatIcon>
 							<FaUniversity />
 						</S.StatIcon>
@@ -90,7 +91,7 @@ export default function SuperAdminDashboardView(
 							</S.StatValue>
 						</S.StatContent>
 					</S.StatCard>
-					<S.StatCard>
+					<S.StatCard as={Link} to="/super-admin/courses">
 						<S.StatIcon>
 							<FaFileAlt />
 						</S.StatIcon>
@@ -101,7 +102,7 @@ export default function SuperAdminDashboardView(
 							</S.StatValue>
 						</S.StatContent>
 					</S.StatCard>
-					<S.StatCard>
+					<S.StatCard as={Link} to="/super-admin/problems">
 						<S.StatIcon>
 							<FaCode />
 						</S.StatIcon>
@@ -112,7 +113,7 @@ export default function SuperAdminDashboardView(
 							</S.StatValue>
 						</S.StatContent>
 					</S.StatCard>
-					<S.StatCard>
+					<S.StatCard as={Link} to="/super-admin/system-notices">
 						<S.StatIcon>
 							<FaBullhorn />
 						</S.StatIcon>
@@ -123,7 +124,7 @@ export default function SuperAdminDashboardView(
 							</S.StatValue>
 						</S.StatContent>
 					</S.StatCard>
-					<S.StatCard>
+					<S.StatCard as={Link} to="/super-admin/system-guides">
 						<S.StatIcon>
 							<FaBookOpen />
 						</S.StatIcon>
@@ -146,8 +147,8 @@ export default function SuperAdminDashboardView(
 					빠른 작업
 				</h2>
 				<S.ActionsGrid>
-					{quickActions.map((action, index) => (
-						<S.ActionCard key={index} onClick={() => d.navigate(action.path)}>
+					{quickActions.map((action) => (
+						<S.ActionCard as={Link} to={action.path} key={action.path}>
 							<S.ActionIcon>{action.icon}</S.ActionIcon>
 							<S.ActionTitle>{action.title}</S.ActionTitle>
 							<S.ActionDescription>{action.description}</S.ActionDescription>
