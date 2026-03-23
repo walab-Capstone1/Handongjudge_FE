@@ -49,4 +49,9 @@ export interface SubmissionResult {
 	type: string;
 	message?: string;
 	outputList?: any;
+	// 퀴즈 scoring 필드
+	passedCount?: number;
+	totalCount?: number;
+	points?: number;
+	score?: number;
 }

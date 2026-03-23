@@ -32,6 +32,11 @@ interface SubmissionResult {
 	status?: string;
 	message?: string;
 	resultInfo?: ResultInfo;
+	// 퀴즈 scoring 필드
+	passedCount?: number;
+	totalCount?: number;
+	points?: number;
+	score?: number;
 }
 
 interface ExecutionResultProps {
@@ -139,71 +144,88 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 	const getResultSummary = (submissionResult: SubmissionResult) => {
 		if (!submissionResult) return null;
 
-		const { result, outputList } = submissionResult;
+		const { result, outputList, passedCount, totalCount, score, points } =
+			submissionResult;
 		const { passed, total } = getTestcaseSummary(outputList);
 		const hasOutputList = outputList && outputList.length > 0;
+		const p = passedCount ?? passed;
+		const t = totalCount ?? total;
+		const isQuizScoring =
+			score !== undefined && points !== undefined;
 
 		if (result === "AC") {
+			const details: string[] = hasOutputList
+				? [
+						`실행 시간: ${Math.max(...outputList!.map((t) => t.runtime || 0))}ms`,
+						`메모리 사용: ${formatMemory(Math.max(...outputList!.map((t) => t.memory_used || 0)))}`,
+					]
+				: [];
+			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "success" as const,
 				title: "정답",
 				description: hasOutputList
-					? `모든 테스트케이스 통과 (${total}/${total})`
+					? `모든 테스트케이스 통과 (${t}/${t})`
 					: "정답",
-				details: hasOutputList
-					? [
-							`실행 시간: ${Math.max(...outputList!.map((t) => t.runtime || 0))}ms`,
-							`메모리 사용: ${formatMemory(Math.max(...outputList!.map((t) => t.memory_used || 0)))}`,
-						]
-					: [],
+				details,
 			};
 		} else if (["WA", "PE"].includes(result || "")) {
-			const failedCount = total - passed;
+			const failedCount = t - p;
+			const details: string[] = hasOutputList
+				? [
+						`첫 번째 실패: 테스트케이스 #${outputList!.find((tc) => tc.result !== "correct")?.testcase_rank || 1}`,
+					]
+				: ["테스트하기를 통해 테스트케이스를 확인하세요."];
+			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "error" as const,
 				title: "오답",
 				description: hasOutputList
-					? `${failedCount}개 테스트케이스 실패 (${passed}/${total})`
+					? `${failedCount}개 테스트케이스 실패 (${p}/${t})`
 					: "오답",
-				details: hasOutputList
-					? [
-							`첫 번째 실패: 테스트케이스 #${outputList!.find((t) => t.result !== "correct")?.testcase_rank || 1}`,
-						]
-					: ["테스트하기를 통해 테스트케이스를 확인하세요."],
+				details,
 			};
 		} else if (result === "TLE") {
+			const details = ["실행 시간을 단축해보세요"];
+			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "warning" as const,
 				title: "시간 초과",
 				description: hasOutputList
-					? `실행 시간 제한 초과 (${passed}/${total})`
+					? `실행 시간 제한 초과 (${p}/${t})`
 					: "실행 시간 제한 초과",
-				details: ["실행 시간을 단축해보세요"],
+				details,
 			};
 		} else if (result === "MLE") {
+			const details = ["메모리 사용량을 줄여보세요"];
+			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "warning" as const,
 				title: "메모리 초과",
 				description: hasOutputList
-					? `메모리 제한 초과 (${passed}/${total})`
+					? `메모리 제한 초과 (${p}/${t})`
 					: "메모리 제한 초과",
-				details: ["메모리 사용량을 줄여보세요"],
+				details,
 			};
 		} else if (result === "RE") {
+			const details = ["코드 로직을 다시 확인해보세요"];
+			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "error" as const,
 				title: "런타임 에러",
 				description: hasOutputList
-					? `실행 중 오류 발생 (${passed}/${total})`
+					? `실행 중 오류 발생 (${p}/${t})`
 					: "실행 중 오류 발생",
-				details: ["코드 로직을 다시 확인해보세요"],
+				details,
 			};
 		} else if (result === "CE") {
+			const details = ["문법 오류를 확인해보세요"];
+			if (isQuizScoring) details.push(`획득 점수: 0/${points}점`);
 			return {
 				type: "error" as const,
 				title: "컴파일 에러",
 				description: "코드 컴파일 실패",
-				details: ["문법 오류를 확인해보세요"],
+				details,
 			};
 		}
 
@@ -300,11 +322,18 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 								const { passed, total } = getTestcaseSummary(
 									submissionResult.outputList,
 								);
+								const p = submissionResult.passedCount ?? passed;
+								const t = submissionResult.totalCount ?? total;
+								const hasScore =
+									submissionResult.score !== undefined &&
+									submissionResult.points !== undefined;
 								return (
 									<S.TestcasesSection>
 										<S.TestcasesHeader>
 											<strong>
-												테스트케이스 결과: {passed}/{total}
+												테스트케이스 결과: {p}/{t}
+												{hasScore &&
+													` | 획득 점수: ${submissionResult.score!.toFixed(1)}/${submissionResult.points}점`}
 											</strong>
 										</S.TestcasesHeader>
 

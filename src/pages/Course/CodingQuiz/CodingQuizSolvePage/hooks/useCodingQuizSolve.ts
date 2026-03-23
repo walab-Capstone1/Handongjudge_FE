@@ -434,7 +434,7 @@ export function useCodingQuizSolve() {
 		setIsSubmitting(true);
 		setSubmissionResult(null);
 		try {
-			const submissionResponse = await apiService.submitCode(
+			const submissionResponse = await apiService.submitQuizCode(
 				sectionId,
 				String(selectedProblemId),
 				code,
@@ -456,9 +456,13 @@ export function useCodingQuizSolve() {
 					submittedAt: res.submittedAt,
 					language: res.language ?? language,
 					code,
-					type: "judge",
+					type: "output",
+					outputList: res.outputList,
+					passedCount: res.passedCount,
+					totalCount: res.totalCount,
+					points: res.points,
+					score: res.score,
 				});
-				// 제출 후 세션 유지 (백엔드에서 불러올 수 있도록)
 			} else {
 				throw new Error("제출 응답을 받지 못했습니다.");
 			}
@@ -474,14 +478,7 @@ export function useCodingQuizSolve() {
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [
-		code,
-		language,
-		sectionId,
-		selectedProblemId,
-		isTimeUp,
-		clearSessionAfterSubmission,
-	]);
+	}, [code, language, sectionId, selectedProblemId, isTimeUp]);
 
 	const handleSubmitWithOutput = useCallback(async () => {
 		if (!code.trim()) {

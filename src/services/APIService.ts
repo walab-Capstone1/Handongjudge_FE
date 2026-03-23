@@ -206,6 +206,29 @@ class APIService {
 		});
 	}
 
+	/**
+	 * 퀴즈 전용 제출 - 테스트케이스별 scoring 적용
+	 */
+	async submitQuizCode(
+		sectionId: number | string,
+		problemId: number | string,
+		code: string,
+		language: string,
+	): Promise<any> {
+		return await this.request("/quiz/submitAndGetResult", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				problemId: Number.parseInt(String(problemId)),
+				sectionId: Number.parseInt(String(sectionId)),
+				language,
+				codeString: code,
+			}),
+		});
+	}
+
 	async saveProgress(
 		problemId: number | string,
 		sectionId: number | string,
