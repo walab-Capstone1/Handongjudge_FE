@@ -14,6 +14,8 @@ function getStatusBadge(status: string) {
 			return <S.StatusBadge $status="active">진행중</S.StatusBadge>;
 		case "WAITING":
 			return <S.StatusBadge $status="waiting">대기중</S.StatusBadge>;
+		case "PAUSED":
+			return <S.StatusBadge $status="paused">일시정지</S.StatusBadge>;
 		case "ENDED":
 			return <S.StatusBadge $status="ended">종료</S.StatusBadge>;
 		default:
@@ -158,8 +160,10 @@ export default function CodingTestManagementView(
 											<S.InfoItem>
 												<S.InfoLabel>활성화 상태</S.InfoLabel>
 												<S.InfoValue>
-													<S.ActiveToggleButton
+													<S.ActiveToggle
 														type="button"
+														$active={d.selectedQuizDetail.active !== false}
+														aria-pressed={d.selectedQuizDetail.active !== false}
 														onClick={() => {
 															if (d.sectionId && d.selectedQuizDetail) {
 																const quizId = Number(d.quizId);
@@ -171,10 +175,15 @@ export default function CodingTestManagementView(
 															}
 														}}
 													>
-														{d.selectedQuizDetail.active !== false
-															? "비활성화"
-															: "활성화"}
-													</S.ActiveToggleButton>
+														<S.ActiveToggleTrack $active={d.selectedQuizDetail.active !== false}>
+															<S.ActiveToggleThumb $active={d.selectedQuizDetail.active !== false} />
+														</S.ActiveToggleTrack>
+														<S.ActiveToggleLabel>
+															{d.selectedQuizDetail.active !== false
+																? "활성화됨"
+																: "비활성화됨"}
+														</S.ActiveToggleLabel>
+													</S.ActiveToggle>
 												</S.InfoValue>
 											</S.InfoItem>
 										</S.QuizInfoGrid>
@@ -220,7 +229,11 @@ export default function CodingTestManagementView(
 														</tr>
 													</thead>
 													<tbody>
-														{d.problems.map((problem, index) => (
+														{d.problems.map((problem, index) => {
+															const stat = d.problemStats?.find(
+																(s) => s.problemId === problem.id,
+															);
+															return (
 															<tr key={problem.id}>
 																<S.ProblemNumberCell>
 																	{index + 1}
@@ -240,8 +253,12 @@ export default function CodingTestManagementView(
 																<td>
 																	<span>-</span>
 																</td>
-																<td>0회</td>
-																<td>0%</td>
+																<td>{stat ? `${stat.submittedStudents ?? 0}회` : "0회"}</td>
+																<td>
+																	{stat && stat.correctRate != null
+																		? `${Math.round(stat.correctRate)}%`
+																		: "0%"}
+																</td>
 																<td>
 																	<S.ProblemRemoveBtn
 																		type="button"
@@ -254,7 +271,8 @@ export default function CodingTestManagementView(
 																	</S.ProblemRemoveBtn>
 																</td>
 															</tr>
-														))}
+														);
+														})}
 													</tbody>
 												</S.ProblemsTable>
 											</S.ProblemsTableContainer>
@@ -693,6 +711,7 @@ export default function CodingTestManagementView(
 								<option value="ALL">전체</option>
 								<option value="WAITING">대기중</option>
 								<option value="ACTIVE">진행중</option>
+								<option value="PAUSED">일시정지</option>
 								<option value="ENDED">종료</option>
 							</S.StatusFilter>
 							<S.CreateButton type="button" onClick={d.handleCreateQuiz}>

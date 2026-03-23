@@ -8,7 +8,7 @@ export interface CodingTest {
 	problemCount?: number;
 	problemIds?: number[];
 	sectionId?: number;
-	status?: "ACTIVE" | "WAITING" | "ENDED";
+	status?: "ACTIVE" | "WAITING" | "PAUSED" | "ENDED";
 	createdAt?: string;
 }
 
@@ -26,6 +26,15 @@ export interface QuizProblem {
 	title: string;
 	description?: string;
 	order?: number;
+}
+
+export interface ProblemSubmissionStat {
+	problemId: number;
+	problemTitle: string;
+	problemOrder?: number;
+	submittedStudents?: number;
+	correctSubmissions?: number;
+	correctRate?: number;
 }
 
 export interface ProblemOption {

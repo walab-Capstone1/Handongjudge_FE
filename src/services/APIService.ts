@@ -800,6 +800,35 @@ class APIService {
 		);
 	}
 
+	async getQuizStudentProgress(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/student-progress`,
+		);
+	}
+
+	async getQuizSubmissionStats(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submission-stats`,
+		);
+	}
+
+	async removeQuizProblem(
+		sectionId: number | string,
+		quizId: number | string,
+		problemId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/problems/${problemId}`,
+			{ method: "DELETE" },
+		);
+	}
+
 	async getQuizGrades(
 		sectionId: number | string,
 		quizId: number | string,
@@ -1297,6 +1326,20 @@ class APIService {
 			{
 				method: "PATCH",
 				body: JSON.stringify({ active: isActive }),
+			},
+		);
+	}
+
+	async updateQuizStatus(
+		sectionId: number | string,
+		quizId: number | string,
+		status: "ACTIVE" | "PAUSED" | "ENDED",
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/status`,
+			{
+				method: "PATCH",
+				body: JSON.stringify({ status }),
 			},
 		);
 	}

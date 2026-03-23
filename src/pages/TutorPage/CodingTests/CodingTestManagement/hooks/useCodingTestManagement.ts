@@ -6,6 +6,7 @@ import type {
 	QuizDetail,
 	QuizProblem,
 	ProblemOption,
+	ProblemSubmissionStat,
 	SectionInfo,
 	SubmissionStudent,
 } from "../types";
@@ -46,6 +47,7 @@ export function useCodingTestManagement() {
 	const [selectedQuizDetail, setSelectedQuizDetail] =
 		useState<QuizDetail | null>(null);
 	const [problems, setProblems] = useState<QuizProblem[]>([]);
+	const [problemStats, setProblemStats] = useState<ProblemSubmissionStat[]>([]);
 	const [submissions, setSubmissions] = useState<SubmissionStudent[]>([]);
 	const [activeTab, setActiveTab] = useState("main");
 	const [formData, setFormData] = useState({
@@ -155,31 +157,72 @@ export function useCodingTestManagement() {
 		}
 	}, [sectionId, quizId]);
 
+	const fetchProblemStats = useCallback(async () => {
+		if (!sectionId || !quizId) return;
+		try {
+			const response = await APIService.getQuizSubmissionStats(
+				sectionId,
+				quizId,
+			);
+			const data = response?.data ?? response;
+			const stats = (data?.problemStats ?? []) as ProblemSubmissionStat[];
+			setProblemStats(stats);
+		} catch (error) {
+			console.error("제출 통계 조회 실패:", error);
+			setProblemStats([]);
+		}
+	}, [sectionId, quizId]);
+
 	const fetchSubmissions = useCallback(async () => {
 		if (!sectionId) return;
 		try {
-			const studentsResponse = await APIService.getSectionStudents(sectionId);
-			const students = (studentsResponse?.data ?? studentsResponse ?? []) as {
-				id?: number;
-				userId?: number;
-				email?: string;
-				studentId?: string;
-				name?: string;
-				studentName?: string;
-			}[];
-			const submissionsData = students.map((student) => ({
-				userId: student.id ?? student.userId ?? 0,
-				studentId: student.email ?? student.studentId ?? "",
-				studentName: student.name ?? student.studentName ?? "",
-				solvedProblems: [] as number[],
-				problemSubmissionTimes: {},
-			}));
-			setSubmissions(submissionsData);
+			if (quizId) {
+				const progressResponse = await APIService.getQuizStudentProgress(
+					sectionId,
+					quizId,
+				);
+				const progressData = (progressResponse?.data ?? progressResponse ?? []) as {
+					userId?: number;
+					studentId?: string;
+					studentName?: string;
+					solvedProblems?: number[];
+					problemSubmissionTimes?: Record<string, string>;
+				}[];
+				const submissionsData = progressData.map((p) => ({
+					userId: p.userId ?? 0,
+					studentId: p.studentId ?? "",
+					studentName: p.studentName ?? "",
+					solvedProblems: p.solvedProblems ?? [],
+					problemSubmissionTimes: (p.problemSubmissionTimes ?? {}) as Record<
+						number,
+						string
+					>,
+				}));
+				setSubmissions(submissionsData);
+			} else {
+				const studentsResponse = await APIService.getSectionStudents(sectionId);
+				const students = (studentsResponse?.data ?? studentsResponse ?? []) as {
+					id?: number;
+					userId?: number;
+					email?: string;
+					studentId?: string;
+					name?: string;
+					studentName?: string;
+				}[];
+				const submissionsData = students.map((student) => ({
+					userId: student.id ?? student.userId ?? 0,
+					studentId: student.email ?? student.studentId ?? "",
+					studentName: student.name ?? student.studentName ?? "",
+					solvedProblems: [] as number[],
+					problemSubmissionTimes: {},
+				}));
+				setSubmissions(submissionsData);
+			}
 		} catch (error) {
 			console.error("제출 현황 조회 실패:", error);
 			setSubmissions([]);
 		}
-	}, [sectionId]);
+	}, [sectionId, quizId]);
 
 	const fetchAllProblems = useCallback(async () => {
 		try {
@@ -213,13 +256,15 @@ export function useCodingTestManagement() {
 			fetchQuizDetail();
 			fetchQuizProblems();
 			fetchSubmissions();
+			fetchProblemStats();
 		} else {
 			setSelectedQuizDetail(null);
 			setProblems([]);
+			setProblemStats([]);
 			setSubmissions([]);
 			setActiveTab("main");
 		}
-	}, [quizId, sectionId, fetchQuizDetail, fetchQuizProblems, fetchSubmissions]);
+	}, [quizId, sectionId, fetchQuizDetail, fetchQuizProblems, fetchSubmissions, fetchProblemStats]);
 
 	useEffect(() => {
 		if (showProblemModal || showAddProblemModal) {
@@ -486,15 +531,26 @@ export function useCodingTestManagement() {
 	}, [getFilteredProblems]);
 
 	const handleRemoveProblemFromQuiz = useCallback(
-		async (_problemId: number) => {
+		async (problemId: number) => {
 			if (
 				!window.confirm("정말로 이 문제를 코딩테스트에서 제거하시겠습니까?")
 			) {
 				return;
 			}
-			alert("문제 제거 기능은 백엔드 API 구현이 필요합니다.");
+			if (!sectionId || !quizId) return;
+			try {
+				await APIService.removeQuizProblem(sectionId, quizId, problemId);
+				fetchQuizProblems();
+				fetchProblemStats();
+				alert("문제가 제거되었습니다.");
+			} catch (error) {
+				console.error("문제 제거 실패:", error);
+				alert(
+					error instanceof Error ? error.message : "문제 제거에 실패했습니다.",
+				);
+			}
 		},
-		[],
+		[sectionId, quizId, fetchQuizProblems, fetchProblemStats],
 	);
 
 	const closeProblemModal = useCallback(() => {
@@ -558,19 +614,51 @@ export function useCodingTestManagement() {
 		fetchQuizProblems,
 	]);
 
-	const handleStart = useCallback(() => {
-		alert("시작 기능은 백엔드 API 구현이 필요합니다.");
-	}, []);
-
-	const handleStop = useCallback(() => {
-		alert("정지 기능은 백엔드 API 구현이 필요합니다.");
-	}, []);
-
-	const handleEnd = useCallback(() => {
-		if (window.confirm("정말로 코딩테스트를 종료하시겠습니까?")) {
-			alert("종료 기능은 백엔드 API 구현이 필요합니다.");
+	const handleStart = useCallback(async () => {
+		if (!sectionId || !quizId) return;
+		try {
+			await APIService.updateQuizStatus(sectionId, quizId, "ACTIVE");
+			fetchQuizzes();
+			fetchQuizDetail();
+			alert("코딩테스트를 시작했습니다.");
+		} catch (error) {
+			console.error("시작 실패:", error);
+			alert(
+				error instanceof Error ? error.message : "시작에 실패했습니다.",
+			);
 		}
-	}, []);
+	}, [sectionId, quizId, fetchQuizzes, fetchQuizDetail]);
+
+	const handleStop = useCallback(async () => {
+		if (!sectionId || !quizId) return;
+		try {
+			await APIService.updateQuizStatus(sectionId, quizId, "PAUSED");
+			fetchQuizzes();
+			fetchQuizDetail();
+			alert("코딩테스트를 일시정지했습니다.");
+		} catch (error) {
+			console.error("정지 실패:", error);
+			alert(
+				error instanceof Error ? error.message : "정지에 실패했습니다.",
+			);
+		}
+	}, [sectionId, quizId, fetchQuizzes, fetchQuizDetail]);
+
+	const handleEnd = useCallback(async () => {
+		if (!window.confirm("정말로 코딩테스트를 종료하시겠습니까?")) return;
+		if (!sectionId || !quizId) return;
+		try {
+			await APIService.updateQuizStatus(sectionId, quizId, "ENDED");
+			fetchQuizzes();
+			fetchQuizDetail();
+			alert("코딩테스트를 종료했습니다.");
+		} catch (error) {
+			console.error("종료 실패:", error);
+			alert(
+				error instanceof Error ? error.message : "종료에 실패했습니다.",
+			);
+		}
+	}, [sectionId, quizId, fetchQuizzes, fetchQuizDetail]);
 
 	const handleToggleActive = useCallback(
 		async (secId: number, quizId: number, currentActive?: boolean) => {
@@ -663,6 +751,7 @@ export function useCodingTestManagement() {
 		handleStop,
 		handleEnd,
 		handleToggleActive,
+		problemStats,
 	};
 }
 
