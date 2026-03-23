@@ -102,7 +102,7 @@ class TokenManager {
 	async refreshToken(): Promise<TokenRefreshData> {
 		try {
 			const apiUrl =
-				process.env.REACT_APP_API_URL ?? "http://10.10.200.10:8080/api";
+				process.env.REACT_APP_API_URL ?? "https://hcl.walab.info/api";
 			const response = await fetch(`${apiUrl}/auth/refresh`, {
 				method: "POST",
 				credentials: "include",
