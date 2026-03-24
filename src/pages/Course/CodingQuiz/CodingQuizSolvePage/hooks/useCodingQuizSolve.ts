@@ -103,6 +103,10 @@ export function useCodingQuizSolve() {
 
 	const isManager = userRole === "ADMIN" || userRole === "TUTOR" || userRole === "SUPER_ADMIN";
 
+	// 학생 제출/테스트 차단: 시간 종료 또는 PAUSED(일시정지) 상태
+	const isSubmitBlocked =
+		!isManager && (isTimeUp || quizInfo.status === "PAUSED");
+
 	// 퀴즈 종료 여부 확인 및 학생 리다이렉션
 	useEffect(() => {
 		if (!quizInfo.endTime || !sectionId || userRole === null) return;
@@ -424,9 +428,13 @@ export function useCodingQuizSolve() {
 			alert("코드를 작성해주세요.");
 			return;
 		}
-		// 관리자/튜터가 아니고 시간이 종료된 경우 제출 불가
-		if (!isManager && isTimeUp) {
-			alert("시간이 종료되어 제출할 수 없습니다.");
+		// 관리자/튜터가 아니고 (시간 종료 또는 일시정지)인 경우 제출 불가
+		if (isSubmitBlocked) {
+			alert(
+				quizInfo.status === "PAUSED"
+					? "코딩 테스트가 일시정지 상태입니다. 제출할 수 없습니다."
+					: "시간이 종료되어 제출할 수 없습니다.",
+			);
 			return;
 		}
 		if (!sectionId || selectedProblemId == null) return;
@@ -434,7 +442,7 @@ export function useCodingQuizSolve() {
 		setIsSubmitting(true);
 		setSubmissionResult(null);
 		try {
-			const submissionResponse = await apiService.submitCode(
+			const submissionResponse = await apiService.submitQuizCode(
 				sectionId,
 				String(selectedProblemId),
 				code,
@@ -456,9 +464,13 @@ export function useCodingQuizSolve() {
 					submittedAt: res.submittedAt,
 					language: res.language ?? language,
 					code,
-					type: "judge",
+					type: "output",
+					outputList: res.outputList,
+					passedCount: res.passedCount,
+					totalCount: res.totalCount,
+					points: res.points,
+					score: res.score,
 				});
-				// 제출 후 세션 유지 (백엔드에서 불러올 수 있도록)
 			} else {
 				throw new Error("제출 응답을 받지 못했습니다.");
 			}
@@ -474,23 +486,20 @@ export function useCodingQuizSolve() {
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [
-		code,
-		language,
-		sectionId,
-		selectedProblemId,
-		isTimeUp,
-		clearSessionAfterSubmission,
-	]);
+	}, [code, language, sectionId, selectedProblemId, isSubmitBlocked, quizInfo.status]);
 
 	const handleSubmitWithOutput = useCallback(async () => {
 		if (!code.trim()) {
 			alert("코드를 작성해주세요.");
 			return;
 		}
-		// 관리자/튜터가 아니고 시간이 종료된 경우 테스트 불가
-		if (!isManager && isTimeUp) {
-			alert("시간이 종료되어 테스트할 수 없습니다.");
+		// 관리자/튜터가 아니고 (시간 종료 또는 일시정지)인 경우 테스트 불가
+		if (isSubmitBlocked) {
+			alert(
+				quizInfo.status === "PAUSED"
+					? "코딩 테스트가 일시정지 상태입니다. 테스트할 수 없습니다."
+					: "시간이 종료되어 테스트할 수 없습니다.",
+			);
 			return;
 		}
 		if (!sectionId || selectedProblemId == null) return;
@@ -545,8 +554,8 @@ export function useCodingQuizSolve() {
 		language,
 		sectionId,
 		selectedProblemId,
-		isTimeUp,
-		isManager,
+		isSubmitBlocked,
+		quizInfo.status,
 		clearSessionAfterSubmission,
 	]);
 
@@ -588,6 +597,7 @@ export function useCodingQuizSolve() {
 		submissionResult,
 		isSubmitting,
 		isTimeUp,
+		isSubmitBlocked,
 		sessionSaveStatus,
 		codeLoadSource,
 		sessionCleared,

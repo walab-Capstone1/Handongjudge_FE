@@ -112,7 +112,7 @@ export const TableContainer = styled.div`
   overflow-x: auto;
 `;
 
-export const Table = styled.table`
+export const Table = styled.table<{ $compact?: boolean }>`
   width: 100%;
   border-collapse: collapse;
 
@@ -121,10 +121,10 @@ export const Table = styled.table`
   }
 
   th {
-    padding: 1rem 1.5rem;
+    padding: ${(p) => (p.$compact ? "0.5rem 0.75rem" : "1rem 1.5rem")};
     text-align: left;
     font-weight: 700;
-    font-size: 0.875rem;
+    font-size: ${(p) => (p.$compact ? "0.75rem" : "0.875rem")};
     color: #1e293b;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -132,9 +132,10 @@ export const Table = styled.table`
   }
 
   td {
-    padding: 1.25rem 1.5rem;
+    padding: ${(p) => (p.$compact ? "0.5rem 0.75rem" : "1.25rem 1.5rem")};
     border-bottom: 1px solid #e2e8f0;
     color: #475569;
+    font-size: ${(p) => (p.$compact ? "0.8125rem" : "inherit")};
   }
 
   tbody tr {
@@ -152,7 +153,7 @@ export const Table = styled.table`
 
     th,
     td {
-      padding: 0.75rem;
+      padding: ${(p) => (p.$compact ? "0.4rem 0.5rem" : "0.75rem")};
     }
   }
 `;
@@ -170,7 +171,7 @@ export const QuizDescription = styled.div`
 `;
 
 export const StatusBadge = styled.span<{
-	$status?: "active" | "waiting" | "ended";
+	$status?: "active" | "waiting" | "paused" | "ended";
 }>`
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -189,6 +190,11 @@ export const StatusBadge = styled.span<{
 			case "waiting":
 				return `
           background: #fef3c7;
+          color: #92400e;
+        `;
+			case "paused":
+				return `
+          background: #fde68a;
           color: #92400e;
         `;
 			case "ended":
@@ -210,11 +216,11 @@ export const QuizActions = styled.div`
   gap: 0.5rem;
 `;
 
-export const EditButton = styled.button`
-  padding: 0.375rem 0.75rem;
+export const EditButton = styled.button<{ $small?: boolean }>`
+  padding: ${(p) => (p.$small ? "0.2rem 0.5rem" : "0.375rem 0.75rem")};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: ${(p) => (p.$small ? "0.75rem" : "0.875rem")};
   cursor: pointer;
   transition: all 0.2s;
   background: #e0e7ff;
@@ -255,12 +261,17 @@ export const ModalOverlay = styled.div`
   animation: ${fadeIn} 0.2s ease;
 `;
 
-export const ModalContent = styled.div<{ $large?: boolean }>`
+export const ModalContent = styled.div<{
+	$large?: boolean;
+	/** 문제 추가 2컬럼 등 넓은 레이아웃 */
+	$extraWide?: boolean;
+}>`
   background: white;
-  border-radius: ${(props) => (props.$large ? "12px" : "8px")};
+  border-radius: ${(props) => (props.$large || props.$extraWide ? "12px" : "8px")};
   width: 90%;
-  max-width: ${(props) => (props.$large ? "800px" : "600px")};
-  max-height: ${(props) => (props.$large ? "85vh" : "90vh")};
+  max-width: ${(props) =>
+		props.$extraWide ? "min(1100px, 95vw)" : props.$large ? "800px" : "600px"};
+  max-height: ${(props) => (props.$large || props.$extraWide ? "85vh" : "90vh")};
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   animation: ${slideInUp} 0.3s ease;
@@ -689,25 +700,52 @@ export const InfoValue = styled.div`
   font-weight: 500;
 `;
 
-export const ActiveToggleButton = styled.button`
-  padding: 6px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: white;
-  color: #374151;
+export const ActiveToggle = styled.button<{ $active?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  color: ${(p) => (p.$active ? "#166534" : "#6b7280")};
+  transition: color 0.2s ease;
 
   &:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
+    color: ${(p) => (p.$active ? "#15803d" : "#4b5563")};
   }
+`;
 
-  &:active {
-    transform: scale(0.98);
+export const ActiveToggleTrack = styled.span<{ $active?: boolean }>`
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: ${(p) => (p.$active ? "#86efac" : "#e5e7eb")};
+  border-radius: 12px;
+  transition: background 0.2s ease;
+
+  ${ActiveToggle}:hover & {
+    background: ${(p) => (p.$active ? "#4ade80" : "#d1d5db")};
   }
+`;
+
+export const ActiveToggleThumb = styled.span<{ $active?: boolean }>`
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+  transform: ${(p) => (p.$active ? "translateX(20px)" : "translateX(0)")};
+`;
+
+export const ActiveToggleLabel = styled.span`
+  font-weight: 600;
 `;
 
 /* Problems tab */

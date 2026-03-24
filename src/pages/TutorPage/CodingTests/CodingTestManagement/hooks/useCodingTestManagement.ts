@@ -1,4 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import {
+	useState,
+	useEffect,
+	useCallback,
+	useMemo,
+	useRef,
+} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
 import type {
@@ -6,6 +12,8 @@ import type {
 	QuizDetail,
 	QuizProblem,
 	ProblemOption,
+	ProblemSubmissionStat,
+	QuizSubmissionRecord,
 	SectionInfo,
 	SubmissionStudent,
 } from "../types";
@@ -40,12 +48,19 @@ export function useCodingTestManagement() {
 	const [filterStatus, setFilterStatus] = useState<string>("ALL");
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showEditModal, setShowEditModal] = useState(false);
-	const [showProblemModal, setShowProblemModal] = useState(false);
 	const [showAddProblemModal, setShowAddProblemModal] = useState(false);
+	const [showProblemDetailModal, setShowProblemDetailModal] = useState(false);
+	const [selectedProblemForDetail, setSelectedProblemForDetail] = useState<{
+		title?: string;
+		description?: string;
+		timeLimit?: number;
+		memoryLimit?: number;
+	} | null>(null);
 	const [selectedQuiz, setSelectedQuiz] = useState<CodingTest | null>(null);
 	const [selectedQuizDetail, setSelectedQuizDetail] =
 		useState<QuizDetail | null>(null);
 	const [problems, setProblems] = useState<QuizProblem[]>([]);
+	const [problemStats, setProblemStats] = useState<ProblemSubmissionStat[]>([]);
 	const [submissions, setSubmissions] = useState<SubmissionStudent[]>([]);
 	const [activeTab, setActiveTab] = useState("main");
 	const [formData, setFormData] = useState({
@@ -61,6 +76,34 @@ export function useCodingTestManagement() {
 	const [currentProblemPage, setCurrentProblemPage] = useState(1);
 	const [isSubmittingCreate, setIsSubmittingCreate] = useState(false);
 	const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+
+	// 제출 기록 (제출 상세정보 탭)
+	const [submissionRecords, setSubmissionRecords] = useState<
+		QuizSubmissionRecord[]
+	>([]);
+	const [submissionRecordsPage, setSubmissionRecordsPage] = useState(1);
+	const [submissionRecordsTotalPages, setSubmissionRecordsTotalPages] =
+		useState(0);
+	const [submissionRecordsTotal, setSubmissionRecordsTotal] = useState(0);
+	const [submissionResultFilter, setSubmissionResultFilter] =
+		useState<string>("");
+	const [submissionRecordsLoading, setSubmissionRecordsLoading] =
+		useState(false);
+	const [showCodeModal, setShowCodeModal] = useState(false);
+	const [submissionCodeData, setSubmissionCodeData] = useState<{
+		code: string;
+		problemTitle: string;
+		result: string;
+		submittedAt: string;
+		language: string;
+	} | null>(null);
+	const [submissionCodeLoading, setSubmissionCodeLoading] = useState(false);
+
+	const selectedProblemIdsRef = useRef<number[]>([]);
+	selectedProblemIdsRef.current = selectedProblemIds;
+
+	const listModalProblemIdsSnapshotRef = useRef<number[] | null>(null);
+	const prevShowAddProblemModalRef = useRef(false);
 
 	const fetchQuizzes = useCallback(async () => {
 		if (!sectionId) return;
@@ -140,6 +183,7 @@ export function useCodingTestManagement() {
 				title?: string;
 				description?: string;
 				problemOrder?: number;
+				points?: number;
 			}[];
 			setProblems(
 				problemsData.map((p) => ({
@@ -147,6 +191,7 @@ export function useCodingTestManagement() {
 					title: p.title ?? "",
 					description: p.description ?? "",
 					order: p.problemOrder,
+					points: p.points ?? 1,
 				})),
 			);
 		} catch (error) {
@@ -155,31 +200,135 @@ export function useCodingTestManagement() {
 		}
 	}, [sectionId, quizId]);
 
+	const fetchProblemStats = useCallback(async () => {
+		if (!sectionId || !quizId) return;
+		try {
+			const response = await APIService.getQuizSubmissionStats(
+				sectionId,
+				quizId,
+			);
+			const data = response?.data ?? response;
+			const stats = (data?.problemStats ?? []) as ProblemSubmissionStat[];
+			setProblemStats(stats);
+		} catch (error) {
+			console.error("제출 통계 조회 실패:", error);
+			setProblemStats([]);
+		}
+	}, [sectionId, quizId]);
+
+	const fetchSubmissionRecords = useCallback(async () => {
+		if (!sectionId || !quizId) return;
+		setSubmissionRecordsLoading(true);
+		try {
+			const response = await APIService.getQuizSubmissions(
+				sectionId,
+				quizId,
+				{
+					page: submissionRecordsPage - 1,
+					size: 20,
+					result:
+						submissionResultFilter && submissionResultFilter !== "ALL"
+							? submissionResultFilter
+							: undefined,
+				},
+			);
+			const data = response?.data ?? response;
+			const content = (data?.content ?? []) as QuizSubmissionRecord[];
+			setSubmissionRecords(content);
+			setSubmissionRecordsTotalPages(data?.totalPages ?? 0);
+			setSubmissionRecordsTotal(data?.totalElements ?? 0);
+		} catch (error) {
+			console.error("제출 기록 조회 실패:", error);
+			setSubmissionRecords([]);
+		} finally {
+			setSubmissionRecordsLoading(false);
+		}
+	}, [sectionId, quizId, submissionRecordsPage, submissionResultFilter]);
+
+	const fetchSubmissionCode = useCallback(
+		async (submissionId: number) => {
+			if (!sectionId || !quizId) return;
+			setSubmissionCodeLoading(true);
+			setShowCodeModal(true);
+			try {
+				const response = await APIService.getQuizSubmissionCode(
+					sectionId,
+					quizId,
+					submissionId,
+				);
+				const data = response?.data ?? response;
+				setSubmissionCodeData({
+					code: data?.code ?? "",
+					problemTitle: data?.problemTitle ?? "",
+					result: data?.result ?? "",
+					submittedAt: data?.submittedAt ?? "",
+					language: data?.language ?? "",
+				});
+			} catch (error) {
+				console.error("제출 코드 조회 실패:", error);
+				setSubmissionCodeData(null);
+			} finally {
+				setSubmissionCodeLoading(false);
+			}
+		},
+		[sectionId, quizId],
+	);
+
+	const closeCodeModal = useCallback(() => {
+		setShowCodeModal(false);
+		setSubmissionCodeData(null);
+	}, []);
+
 	const fetchSubmissions = useCallback(async () => {
 		if (!sectionId) return;
 		try {
-			const studentsResponse = await APIService.getSectionStudents(sectionId);
-			const students = (studentsResponse?.data ?? studentsResponse ?? []) as {
-				id?: number;
-				userId?: number;
-				email?: string;
-				studentId?: string;
-				name?: string;
-				studentName?: string;
-			}[];
-			const submissionsData = students.map((student) => ({
-				userId: student.id ?? student.userId ?? 0,
-				studentId: student.email ?? student.studentId ?? "",
-				studentName: student.name ?? student.studentName ?? "",
-				solvedProblems: [] as number[],
-				problemSubmissionTimes: {},
-			}));
-			setSubmissions(submissionsData);
+			if (quizId) {
+				const progressResponse = await APIService.getQuizStudentProgress(
+					sectionId,
+					quizId,
+				);
+				const progressData = (progressResponse?.data ?? progressResponse ?? []) as {
+					userId?: number;
+					studentId?: string;
+					studentName?: string;
+					solvedProblems?: number[];
+					problemSubmissionTimes?: Record<string, string>;
+				}[];
+				const submissionsData = progressData.map((p) => ({
+					userId: p.userId ?? 0,
+					studentId: p.studentId ?? "",
+					studentName: p.studentName ?? "",
+					solvedProblems: p.solvedProblems ?? [],
+					problemSubmissionTimes: (p.problemSubmissionTimes ?? {}) as Record<
+						number,
+						string
+					>,
+				}));
+				setSubmissions(submissionsData);
+			} else {
+				const studentsResponse = await APIService.getSectionStudents(sectionId);
+				const students = (studentsResponse?.data ?? studentsResponse ?? []) as {
+					id?: number;
+					userId?: number;
+					email?: string;
+					studentId?: string;
+					name?: string;
+					studentName?: string;
+				}[];
+				const submissionsData = students.map((student) => ({
+					userId: student.id ?? student.userId ?? 0,
+					studentId: student.email ?? student.studentId ?? "",
+					studentName: student.name ?? student.studentName ?? "",
+					solvedProblems: [] as number[],
+					problemSubmissionTimes: {},
+				}));
+				setSubmissions(submissionsData);
+			}
 		} catch (error) {
 			console.error("제출 현황 조회 실패:", error);
 			setSubmissions([]);
 		}
-	}, [sectionId]);
+	}, [sectionId, quizId]);
 
 	const fetchAllProblems = useCallback(async () => {
 		try {
@@ -213,19 +362,63 @@ export function useCodingTestManagement() {
 			fetchQuizDetail();
 			fetchQuizProblems();
 			fetchSubmissions();
+			fetchProblemStats();
 		} else {
 			setSelectedQuizDetail(null);
 			setProblems([]);
+			setProblemStats([]);
 			setSubmissions([]);
 			setActiveTab("main");
 		}
-	}, [quizId, sectionId, fetchQuizDetail, fetchQuizProblems, fetchSubmissions]);
+	}, [quizId, sectionId, fetchQuizDetail, fetchQuizProblems, fetchSubmissions, fetchProblemStats]);
 
 	useEffect(() => {
-		if (showProblemModal || showAddProblemModal) {
+		if (showAddProblemModal) {
 			fetchAllProblems();
 		}
-	}, [showProblemModal, showAddProblemModal, fetchAllProblems]);
+	}, [showAddProblemModal, fetchAllProblems]);
+
+	/**
+	 * 과제 문제 추가(handleAddProblem)와 동일한 패턴:
+	 * - 퀴즈 상세: 모달 열 때 선택은 비움(이번에 추가할 문제만). 이미 퀴즈에 있는 문제는 problems / problemsForPicker로만 표시.
+	 * - 목록 생성/수정: 열 때 스냅샷(취소 시 복원).
+	 */
+	useEffect(() => {
+		const wasOpen = prevShowAddProblemModalRef.current;
+		if (showAddProblemModal && !wasOpen) {
+			if (quizId) {
+				setSelectedProblemIds([]);
+			} else {
+				listModalProblemIdsSnapshotRef.current = [
+					...selectedProblemIdsRef.current,
+				];
+			}
+		}
+		prevShowAddProblemModalRef.current = showAddProblemModal;
+	}, [showAddProblemModal, quizId]);
+
+	// 제출 기록: submissions 탭 활성 시 로드 및 폴링(8초)
+	useEffect(() => {
+		if (activeTab === "submissions" && sectionId && quizId) {
+			fetchSubmissionRecords();
+			const interval = setInterval(fetchSubmissionRecords, 8000);
+			return () => clearInterval(interval);
+		}
+	}, [
+		activeTab,
+		sectionId,
+		quizId,
+		fetchSubmissionRecords,
+	]);
+
+	// 학생 진행 현황: student-progress 탭 활성 시 로드 및 폴링(8초)
+	useEffect(() => {
+		if (activeTab === "student-progress" && sectionId && quizId) {
+			fetchSubmissions();
+			const interval = setInterval(fetchSubmissions, 8000);
+			return () => clearInterval(interval);
+		}
+	}, [activeTab, sectionId, quizId, fetchSubmissions]);
 
 	const getFilteredProblems = useCallback((): ProblemOption[] => {
 		let filtered = allProblems;
@@ -268,6 +461,38 @@ export function useCodingTestManagement() {
 			"3": "#ef4444",
 		};
 		return colors[difficulty] ?? "#6b7280";
+	}, []);
+
+	const problemsForPicker = useMemo((): QuizProblem[] => {
+		if (quizId) return problems;
+		return selectedProblemIds.map((id) => {
+			const p = allProblems.find((x) => x.id === id);
+			return {
+				id,
+				title: p?.title ?? "",
+				description: "",
+				order: undefined,
+				points: 1,
+			};
+		});
+	}, [quizId, problems, selectedProblemIds, allProblems]);
+
+	const openProblemDetail = useCallback(async (problemId: number) => {
+		try {
+			const detail = await APIService.getProblemInfo(problemId);
+			setSelectedProblemForDetail({
+				...(detail?.data || detail),
+			});
+			setShowProblemDetailModal(true);
+		} catch (err) {
+			console.error("문제 정보 조회 실패:", err);
+			alert("문제 정보를 불러오는데 실패했습니다.");
+		}
+	}, []);
+
+	const closeProblemDetailModal = useCallback(() => {
+		setShowProblemDetailModal(false);
+		setSelectedProblemForDetail(null);
 	}, []);
 
 	const formatDateTime = useCallback((dateTime: Date | string): string => {
@@ -474,39 +699,68 @@ export function useCodingTestManagement() {
 	const handleSelectAllProblems = useCallback(() => {
 		setSelectedProblemIds((prev) => {
 			const filtered = getFilteredProblems();
+			const selectableFiltered = showAddProblemModal
+				? filtered.filter(
+						(problem) => !problemsForPicker.some((p) => p.id === problem.id),
+					)
+				: filtered;
 			const allSelected =
-				filtered.length > 0 && filtered.every((p) => prev.includes(p.id));
+				selectableFiltered.length > 0 &&
+				selectableFiltered.every((p) => prev.includes(p.id));
 			if (allSelected) {
-				const filteredIds = filtered.map((p) => p.id);
+				const filteredIds = selectableFiltered.map((p) => p.id);
 				return prev.filter((id) => !filteredIds.includes(id));
 			}
-			const newIds = filtered.map((p) => p.id);
+			const newIds = selectableFiltered.map((p) => p.id);
 			return [...new Set([...prev, ...newIds])];
 		});
-	}, [getFilteredProblems]);
+	}, [getFilteredProblems, showAddProblemModal, problemsForPicker]);
 
 	const handleRemoveProblemFromQuiz = useCallback(
-		async (_problemId: number) => {
+		async (problemId: number) => {
 			if (
 				!window.confirm("정말로 이 문제를 코딩테스트에서 제거하시겠습니까?")
 			) {
 				return;
 			}
-			alert("문제 제거 기능은 백엔드 API 구현이 필요합니다.");
+			if (!sectionId || !quizId) return;
+			try {
+				await APIService.removeQuizProblem(sectionId, quizId, problemId);
+				fetchQuizProblems();
+				fetchProblemStats();
+				alert("문제가 제거되었습니다.");
+			} catch (error) {
+				console.error("문제 제거 실패:", error);
+				alert(
+					error instanceof Error ? error.message : "문제 제거에 실패했습니다.",
+				);
+			}
 		},
-		[],
+		[sectionId, quizId, fetchQuizProblems, fetchProblemStats],
 	);
 
-	const closeProblemModal = useCallback(() => {
-		setShowProblemModal(false);
-		setProblemSearchTerm("");
-		setCurrentProblemPage(1);
-	}, []);
+	const closeAddProblemModal = useCallback(
+		(options?: { confirmList?: boolean }) => {
+			const confirmList = options?.confirmList === true;
 
-	const closeAddProblemModal = useCallback(() => {
-		setShowAddProblemModal(false);
-		setProblemSearchTerm("");
-		setCurrentProblemPage(1);
+			if (!quizId) {
+				if (!confirmList && listModalProblemIdsSnapshotRef.current) {
+					setSelectedProblemIds(listModalProblemIdsSnapshotRef.current);
+				}
+				listModalProblemIdsSnapshotRef.current = null;
+			} else {
+				setSelectedProblemIds([]);
+			}
+
+			setShowAddProblemModal(false);
+			setProblemSearchTerm("");
+			setCurrentProblemPage(1);
+		},
+		[quizId],
+	);
+
+	const clearQuizProblemSelection = useCallback(() => {
+		setSelectedProblemIds([]);
 	}, []);
 
 	const handleAddProblemsToQuiz = useCallback(async () => {
@@ -558,27 +812,67 @@ export function useCodingTestManagement() {
 		fetchQuizProblems,
 	]);
 
-	const handleStart = useCallback(() => {
-		alert("시작 기능은 백엔드 API 구현이 필요합니다.");
-	}, []);
-
-	const handleStop = useCallback(() => {
-		alert("정지 기능은 백엔드 API 구현이 필요합니다.");
-	}, []);
-
-	const handleEnd = useCallback(() => {
-		if (window.confirm("정말로 코딩테스트를 종료하시겠습니까?")) {
-			alert("종료 기능은 백엔드 API 구현이 필요합니다.");
+	const handleStart = useCallback(async () => {
+		if (!sectionId || !quizId) return;
+		try {
+			if (selectedQuizDetail?.active === false) {
+				alert("현재 비공개 상태입니다.");
+				const shouldOpen = window.confirm(
+					"코딩 테스트가 비공개 상태입니다. 공개로 변경하고 시작하시겠습니까?",
+				);
+				if (!shouldOpen) return;
+				await APIService.toggleQuizActive(sectionId, quizId, true);
+			}
+			await APIService.updateQuizStatus(sectionId, quizId, "ACTIVE");
+			fetchQuizzes();
+			fetchQuizDetail();
+			alert("코딩테스트를 시작했습니다.");
+		} catch (error) {
+			console.error("시작 실패:", error);
+			alert(
+				error instanceof Error ? error.message : "시작에 실패했습니다.",
+			);
 		}
-	}, []);
+	}, [sectionId, quizId, selectedQuizDetail, fetchQuizzes, fetchQuizDetail]);
+
+	const handleStop = useCallback(async () => {
+		if (!sectionId || !quizId) return;
+		try {
+			await APIService.updateQuizStatus(sectionId, quizId, "PAUSED");
+			fetchQuizzes();
+			fetchQuizDetail();
+			alert("코딩테스트를 일시정지했습니다.");
+		} catch (error) {
+			console.error("정지 실패:", error);
+			alert(
+				error instanceof Error ? error.message : "정지에 실패했습니다.",
+			);
+		}
+	}, [sectionId, quizId, fetchQuizzes, fetchQuizDetail]);
+
+	const handleEnd = useCallback(async () => {
+		if (!window.confirm("정말로 코딩테스트를 종료하시겠습니까?")) return;
+		if (!sectionId || !quizId) return;
+		try {
+			await APIService.updateQuizStatus(sectionId, quizId, "ENDED");
+			fetchQuizzes();
+			fetchQuizDetail();
+			alert("코딩테스트를 종료했습니다.");
+		} catch (error) {
+			console.error("종료 실패:", error);
+			alert(
+				error instanceof Error ? error.message : "종료에 실패했습니다.",
+			);
+		}
+	}, [sectionId, quizId, fetchQuizzes, fetchQuizDetail]);
 
 	const handleToggleActive = useCallback(
-		async (secId: number, quizId: number, currentActive?: boolean) => {
+		async (secId: number, targetQuizId: number, currentActive?: boolean) => {
 			try {
 				const newActive = !currentActive;
-				await APIService.toggleQuizActive(secId, quizId, newActive);
+				await APIService.toggleQuizActive(secId, targetQuizId, newActive);
 				fetchQuizzes();
-				if (quizId === Number(quizId)) {
+				if (quizId && targetQuizId === Number(quizId)) {
 					fetchQuizDetail();
 				}
 			} catch (error) {
@@ -617,14 +911,17 @@ export function useCodingTestManagement() {
 		setShowCreateModal,
 		showEditModal,
 		setShowEditModal,
-		showProblemModal,
-		setShowProblemModal,
 		showAddProblemModal,
 		setShowAddProblemModal,
+		showProblemDetailModal,
+		selectedProblemForDetail,
+		openProblemDetail,
+		closeProblemDetailModal,
 		selectedQuiz,
 		setSelectedQuiz,
 		selectedQuizDetail,
 		problems,
+		problemsForPicker,
 		submissions,
 		activeTab,
 		setActiveTab,
@@ -656,13 +953,28 @@ export function useCodingTestManagement() {
 		handleProblemToggle,
 		handleSelectAllProblems,
 		handleRemoveProblemFromQuiz,
-		closeProblemModal,
 		closeAddProblemModal,
+		clearQuizProblemSelection,
 		handleAddProblemsToQuiz,
 		handleStart,
 		handleStop,
 		handleEnd,
 		handleToggleActive,
+		problemStats,
+		submissionRecords,
+		submissionRecordsPage,
+		setSubmissionRecordsPage,
+		submissionRecordsTotalPages,
+		submissionRecordsTotal,
+		submissionResultFilter,
+		setSubmissionResultFilter,
+		submissionRecordsLoading,
+		fetchSubmissionRecords,
+		fetchSubmissionCode,
+		showCodeModal,
+		closeCodeModal,
+		submissionCodeData,
+		submissionCodeLoading,
 	};
 }
 
