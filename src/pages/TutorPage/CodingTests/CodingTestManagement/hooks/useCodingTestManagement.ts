@@ -772,12 +772,12 @@ export function useCodingTestManagement() {
 	}, [sectionId, quizId, fetchQuizzes, fetchQuizDetail]);
 
 	const handleToggleActive = useCallback(
-		async (secId: number, quizId: number, currentActive?: boolean) => {
+		async (secId: number, targetQuizId: number, currentActive?: boolean) => {
 			try {
 				const newActive = !currentActive;
-				await APIService.toggleQuizActive(secId, quizId, newActive);
+				await APIService.toggleQuizActive(secId, targetQuizId, newActive);
 				fetchQuizzes();
-				if (quizId === Number(quizId)) {
+				if (quizId && targetQuizId === Number(quizId)) {
 					fetchQuizDetail();
 				}
 			} catch (error) {
