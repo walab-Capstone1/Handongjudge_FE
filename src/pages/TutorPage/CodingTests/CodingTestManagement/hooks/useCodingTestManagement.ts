@@ -728,6 +728,14 @@ export function useCodingTestManagement() {
 	const handleStart = useCallback(async () => {
 		if (!sectionId || !quizId) return;
 		try {
+			if (selectedQuizDetail?.active === false) {
+				alert("현재 비공개 상태입니다.");
+				const shouldOpen = window.confirm(
+					"코딩 테스트가 비공개 상태입니다. 공개로 변경하고 시작하시겠습니까?",
+				);
+				if (!shouldOpen) return;
+				await APIService.toggleQuizActive(sectionId, quizId, true);
+			}
 			await APIService.updateQuizStatus(sectionId, quizId, "ACTIVE");
 			fetchQuizzes();
 			fetchQuizDetail();
@@ -738,7 +746,7 @@ export function useCodingTestManagement() {
 				error instanceof Error ? error.message : "시작에 실패했습니다.",
 			);
 		}
-	}, [sectionId, quizId, fetchQuizzes, fetchQuizDetail]);
+	}, [sectionId, quizId, selectedQuizDetail, fetchQuizzes, fetchQuizDetail]);
 
 	const handleStop = useCallback(async () => {
 		if (!sectionId || !quizId) return;
