@@ -206,6 +206,29 @@ class APIService {
 		});
 	}
 
+	/**
+	 * 퀴즈 전용 제출 - 테스트케이스별 scoring 적용
+	 */
+	async submitQuizCode(
+		sectionId: number | string,
+		problemId: number | string,
+		code: string,
+		language: string,
+	): Promise<any> {
+		return await this.request("/quiz/submitAndGetResult", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				problemId: Number.parseInt(String(problemId)),
+				sectionId: Number.parseInt(String(sectionId)),
+				language,
+				codeString: code,
+			}),
+		});
+	}
+
 	async saveProgress(
 		problemId: number | string,
 		sectionId: number | string,
@@ -787,6 +810,71 @@ class APIService {
 		);
 	}
 
+	async getQuizStudentProgress(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/student-progress`,
+		);
+	}
+
+	async getQuizSubmissionStats(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submission-stats`,
+		);
+	}
+
+	async getQuizSubmissions(
+		sectionId: number | string,
+		quizId: number | string,
+		params?: {
+			page?: number;
+			size?: number;
+			problemId?: number;
+			userId?: number;
+			result?: string;
+		},
+	): Promise<any> {
+		const searchParams = new URLSearchParams();
+		if (params?.page != null) searchParams.set("page", String(params.page));
+		if (params?.size != null) searchParams.set("size", String(params.size));
+		if (params?.problemId != null)
+			searchParams.set("problemId", String(params.problemId));
+		if (params?.userId != null)
+			searchParams.set("userId", String(params.userId));
+		if (params?.result != null && params.result !== "")
+			searchParams.set("result", params.result);
+		const query = searchParams.toString();
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submissions${query ? `?${query}` : ""}`,
+		);
+	}
+
+	async getQuizSubmissionCode(
+		sectionId: number | string,
+		quizId: number | string,
+		submissionId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submissions/${submissionId}/code`,
+		);
+	}
+
+	async removeQuizProblem(
+		sectionId: number | string,
+		quizId: number | string,
+		problemId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/problems/${problemId}`,
+			{ method: "DELETE" },
+		);
+	}
+
 	async getQuizGrades(
 		sectionId: number | string,
 		quizId: number | string,
@@ -1284,6 +1372,20 @@ class APIService {
 			{
 				method: "PATCH",
 				body: JSON.stringify({ active: isActive }),
+			},
+		);
+	}
+
+	async updateQuizStatus(
+		sectionId: number | string,
+		quizId: number | string,
+		status: "ACTIVE" | "PAUSED" | "ENDED",
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/status`,
+			{
+				method: "PATCH",
+				body: JSON.stringify({ status }),
 			},
 		);
 	}
