@@ -30,6 +30,10 @@ export interface GradeManagementAssignmentTableProps {
 	) => void;
 	handleViewCode: (userId: number, problemId: number) => void;
 	onProblemDetail?: (problemId: number) => void;
+	totalOnly?: boolean;
+	onToggleTotalOnly?: (v: boolean) => void;
+	showLateOnly?: boolean;
+	onToggleShowLateOnly?: (v: boolean) => void;
 }
 
 export default function GradeManagementAssignmentTable({
@@ -47,30 +51,43 @@ export default function GradeManagementAssignmentTable({
 	handleSaveGrade,
 	handleViewCode,
 	onProblemDetail,
+	totalOnly = false,
+	onToggleTotalOnly,
+	showLateOnly = false,
+	onToggleShowLateOnly,
 }: GradeManagementAssignmentTableProps) {
+	const assignmentDueAt =
+		selectedAssignment?.dueDate ??
+		(selectedAssignment as { endDate?: string } | null)?.endDate ??
+		(selectedAssignment as { deadline?: string } | null)?.deadline;
 	const hasProblems =
 		grades[0]?.problemGrades && grades[0].problemGrades.length > 0;
 
 	const problemGradesForCol = grades[0]?.problemGrades ?? [];
 	return (
 		<S.GradeTablePageWrapper>
-			<GradeStatusLegendBar />
+			<GradeStatusLegendBar
+				totalOnly={totalOnly}
+				onToggleTotalOnly={onToggleTotalOnly}
+				showLateOnly={showLateOnly}
+				onToggleShowLateOnly={onToggleShowLateOnly}
+			/>
 			<S.GradeTableHorizontalScroll>
 			<S.CourseTableWithStickyRight>
 				<colgroup>
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
 					<col style={{ width: S.STICKY_COL_2_WIDTH }} />
-					{hasProblems
+					{!totalOnly && hasProblems
 						? problemGradesForCol.map((p) => (
 								<col key={p.problemId} style={{ width: S.COL_PROBLEM_WIDTH }} />
 							))
-						: [<col key="no-problem" style={{ width: S.COL_PROBLEM_WIDTH }} />]}
+						: null}
 					<col style={{ width: S.COL_SCORE_WIDTH }} />
 					<col style={{ width: S.STICKY_RIGHT_TOTAL_WIDTH }} />
 					<col style={{ width: S.STICKY_RIGHT_RATIO_WIDTH }} />
 				</colgroup>
 				<thead>
-					{hasProblems ? (
+					{!totalOnly && hasProblems ? (
 						<>
 							<tr>
 								<S.SortableStudentHeaderTh
@@ -165,9 +182,6 @@ export default function GradeManagementAssignmentTable({
 									dir={gradeSortDir}
 								/>
 							</S.SortableStudentHeaderTh>
-							<S.CourseAssignmentHeader as="th">
-								<S.ItemTitle>과제</S.ItemTitle>
-							</S.CourseAssignmentHeader>
 							<th>총점</th>
 							<th>전체 총점</th>
 							<th>비율</th>
@@ -182,29 +196,18 @@ export default function GradeManagementAssignmentTable({
 							<tr key={student.userId}>
 								<S.TdStudentName>{student.studentName}</S.TdStudentName>
 								<S.TdStudentId>{student.studentId}</S.TdStudentId>
-								{hasProblems ? (
+								{!totalOnly && hasProblems ? (
 									student.problemGrades?.map((problem) => (
 										<S.TdCourseProblemCell key={problem.problemId}>
 											<GradeProblemCellDisplay
 												problem={problem}
 												fallbackPoints={problem.points ?? 1}
-												onViewCode={
-													problem.submitted
-														? () =>
-																handleViewCode(
-																	student.userId,
-																	problem.problemId,
-																)
-														: undefined
-												}
+												dueAt={assignmentDueAt}
+												showLateOnly={showLateOnly}
 											/>
 										</S.TdCourseProblemCell>
 									))
-								) : (
-									<S.TdCourseProblemCell>
-										<span style={{ color: "#94a3b8" }}>과제 없음</span>
-									</S.TdCourseProblemCell>
-								)}
+								) : null}
 								<S.TdCourseAssignmentTotalCell>
 									<strong>
 										{totalScore} / {totalPoints}
