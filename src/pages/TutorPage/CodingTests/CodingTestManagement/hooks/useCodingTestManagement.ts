@@ -1,4 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import {
+	useState,
+	useEffect,
+	useCallback,
+	useMemo,
+	useRef,
+} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
 import type {
@@ -42,8 +48,14 @@ export function useCodingTestManagement() {
 	const [filterStatus, setFilterStatus] = useState<string>("ALL");
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showEditModal, setShowEditModal] = useState(false);
-	const [showProblemModal, setShowProblemModal] = useState(false);
 	const [showAddProblemModal, setShowAddProblemModal] = useState(false);
+	const [showProblemDetailModal, setShowProblemDetailModal] = useState(false);
+	const [selectedProblemForDetail, setSelectedProblemForDetail] = useState<{
+		title?: string;
+		description?: string;
+		timeLimit?: number;
+		memoryLimit?: number;
+	} | null>(null);
 	const [selectedQuiz, setSelectedQuiz] = useState<CodingTest | null>(null);
 	const [selectedQuizDetail, setSelectedQuizDetail] =
 		useState<QuizDetail | null>(null);
@@ -86,6 +98,12 @@ export function useCodingTestManagement() {
 		language: string;
 	} | null>(null);
 	const [submissionCodeLoading, setSubmissionCodeLoading] = useState(false);
+
+	const selectedProblemIdsRef = useRef<number[]>([]);
+	selectedProblemIdsRef.current = selectedProblemIds;
+
+	const listModalProblemIdsSnapshotRef = useRef<number[] | null>(null);
+	const prevShowAddProblemModalRef = useRef(false);
 
 	const fetchQuizzes = useCallback(async () => {
 		if (!sectionId) return;
@@ -355,10 +373,29 @@ export function useCodingTestManagement() {
 	}, [quizId, sectionId, fetchQuizDetail, fetchQuizProblems, fetchSubmissions, fetchProblemStats]);
 
 	useEffect(() => {
-		if (showProblemModal || showAddProblemModal) {
+		if (showAddProblemModal) {
 			fetchAllProblems();
 		}
-	}, [showProblemModal, showAddProblemModal, fetchAllProblems]);
+	}, [showAddProblemModal, fetchAllProblems]);
+
+	/**
+	 * 과제 문제 추가(handleAddProblem)와 동일한 패턴:
+	 * - 퀴즈 상세: 모달 열 때 선택은 비움(이번에 추가할 문제만). 이미 퀴즈에 있는 문제는 problems / problemsForPicker로만 표시.
+	 * - 목록 생성/수정: 열 때 스냅샷(취소 시 복원).
+	 */
+	useEffect(() => {
+		const wasOpen = prevShowAddProblemModalRef.current;
+		if (showAddProblemModal && !wasOpen) {
+			if (quizId) {
+				setSelectedProblemIds([]);
+			} else {
+				listModalProblemIdsSnapshotRef.current = [
+					...selectedProblemIdsRef.current,
+				];
+			}
+		}
+		prevShowAddProblemModalRef.current = showAddProblemModal;
+	}, [showAddProblemModal, quizId]);
 
 	// 제출 기록: submissions 탭 활성 시 로드 및 폴링(8초)
 	useEffect(() => {
@@ -424,6 +461,38 @@ export function useCodingTestManagement() {
 			"3": "#ef4444",
 		};
 		return colors[difficulty] ?? "#6b7280";
+	}, []);
+
+	const problemsForPicker = useMemo((): QuizProblem[] => {
+		if (quizId) return problems;
+		return selectedProblemIds.map((id) => {
+			const p = allProblems.find((x) => x.id === id);
+			return {
+				id,
+				title: p?.title ?? "",
+				description: "",
+				order: undefined,
+				points: 1,
+			};
+		});
+	}, [quizId, problems, selectedProblemIds, allProblems]);
+
+	const openProblemDetail = useCallback(async (problemId: number) => {
+		try {
+			const detail = await APIService.getProblemInfo(problemId);
+			setSelectedProblemForDetail({
+				...(detail?.data || detail),
+			});
+			setShowProblemDetailModal(true);
+		} catch (err) {
+			console.error("문제 정보 조회 실패:", err);
+			alert("문제 정보를 불러오는데 실패했습니다.");
+		}
+	}, []);
+
+	const closeProblemDetailModal = useCallback(() => {
+		setShowProblemDetailModal(false);
+		setSelectedProblemForDetail(null);
 	}, []);
 
 	const formatDateTime = useCallback((dateTime: Date | string): string => {
@@ -630,16 +699,22 @@ export function useCodingTestManagement() {
 	const handleSelectAllProblems = useCallback(() => {
 		setSelectedProblemIds((prev) => {
 			const filtered = getFilteredProblems();
+			const selectableFiltered = showAddProblemModal
+				? filtered.filter(
+						(problem) => !problemsForPicker.some((p) => p.id === problem.id),
+					)
+				: filtered;
 			const allSelected =
-				filtered.length > 0 && filtered.every((p) => prev.includes(p.id));
+				selectableFiltered.length > 0 &&
+				selectableFiltered.every((p) => prev.includes(p.id));
 			if (allSelected) {
-				const filteredIds = filtered.map((p) => p.id);
+				const filteredIds = selectableFiltered.map((p) => p.id);
 				return prev.filter((id) => !filteredIds.includes(id));
 			}
-			const newIds = filtered.map((p) => p.id);
+			const newIds = selectableFiltered.map((p) => p.id);
 			return [...new Set([...prev, ...newIds])];
 		});
-	}, [getFilteredProblems]);
+	}, [getFilteredProblems, showAddProblemModal, problemsForPicker]);
 
 	const handleRemoveProblemFromQuiz = useCallback(
 		async (problemId: number) => {
@@ -664,16 +739,28 @@ export function useCodingTestManagement() {
 		[sectionId, quizId, fetchQuizProblems, fetchProblemStats],
 	);
 
-	const closeProblemModal = useCallback(() => {
-		setShowProblemModal(false);
-		setProblemSearchTerm("");
-		setCurrentProblemPage(1);
-	}, []);
+	const closeAddProblemModal = useCallback(
+		(options?: { confirmList?: boolean }) => {
+			const confirmList = options?.confirmList === true;
 
-	const closeAddProblemModal = useCallback(() => {
-		setShowAddProblemModal(false);
-		setProblemSearchTerm("");
-		setCurrentProblemPage(1);
+			if (!quizId) {
+				if (!confirmList && listModalProblemIdsSnapshotRef.current) {
+					setSelectedProblemIds(listModalProblemIdsSnapshotRef.current);
+				}
+				listModalProblemIdsSnapshotRef.current = null;
+			} else {
+				setSelectedProblemIds([]);
+			}
+
+			setShowAddProblemModal(false);
+			setProblemSearchTerm("");
+			setCurrentProblemPage(1);
+		},
+		[quizId],
+	);
+
+	const clearQuizProblemSelection = useCallback(() => {
+		setSelectedProblemIds([]);
 	}, []);
 
 	const handleAddProblemsToQuiz = useCallback(async () => {
@@ -824,14 +911,17 @@ export function useCodingTestManagement() {
 		setShowCreateModal,
 		showEditModal,
 		setShowEditModal,
-		showProblemModal,
-		setShowProblemModal,
 		showAddProblemModal,
 		setShowAddProblemModal,
+		showProblemDetailModal,
+		selectedProblemForDetail,
+		openProblemDetail,
+		closeProblemDetailModal,
 		selectedQuiz,
 		setSelectedQuiz,
 		selectedQuizDetail,
 		problems,
+		problemsForPicker,
 		submissions,
 		activeTab,
 		setActiveTab,
@@ -863,8 +953,8 @@ export function useCodingTestManagement() {
 		handleProblemToggle,
 		handleSelectAllProblems,
 		handleRemoveProblemFromQuiz,
-		closeProblemModal,
 		closeAddProblemModal,
+		clearQuizProblemSelection,
 		handleAddProblemsToQuiz,
 		handleStart,
 		handleStop,

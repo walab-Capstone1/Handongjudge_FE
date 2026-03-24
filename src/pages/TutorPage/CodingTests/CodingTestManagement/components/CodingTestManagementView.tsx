@@ -8,8 +8,8 @@ import type { CodingTestManagementHookReturn } from "../hooks/useCodingTestManag
 import AddProblemsToQuizModal from "./AddProblemsToQuizModal";
 import CreateQuizModal from "./CreateQuizModal";
 import EditQuizModal from "./EditQuizModal";
-import ProblemSelectModal from "./ProblemSelectModal";
 import SubmissionCodeModal from "./SubmissionCodeModal";
+import ProblemDetailModal from "../../../Assignments/AssignmentManagement/ProblemModals/ProblemDetailModal";
 import MainTabView from "./tabs/MainTabView";
 import ProblemsTabView from "./tabs/ProblemsTabView";
 import StudentProgressTabView from "./tabs/StudentProgressTabView";
@@ -111,6 +111,11 @@ export default function CodingTestManagementView(
 						</S.DetailContent>
 					</S.DetailWrapper>
 					<AddProblemsToQuizModal d={d} />
+					<ProblemDetailModal
+						isOpen={d.showProblemDetailModal}
+						problemDetail={d.selectedProblemForDetail}
+						onClose={d.closeProblemDetailModal}
+					/>
 					<SubmissionCodeModal d={d} />
 				</S.Container>
 			</TutorLayout>
@@ -276,7 +281,12 @@ export default function CodingTestManagementView(
 
 				<CreateQuizModal d={d} />
 				<EditQuizModal d={d} />
-				<ProblemSelectModal d={d} />
+				<AddProblemsToQuizModal d={d} />
+				<ProblemDetailModal
+					isOpen={d.showProblemDetailModal}
+					problemDetail={d.selectedProblemForDetail}
+					onClose={d.closeProblemDetailModal}
+				/>
 			</S.Container>
 		</TutorLayout>
 	);

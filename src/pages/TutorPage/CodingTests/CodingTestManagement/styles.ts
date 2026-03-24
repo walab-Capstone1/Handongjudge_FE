@@ -261,12 +261,17 @@ export const ModalOverlay = styled.div`
   animation: ${fadeIn} 0.2s ease;
 `;
 
-export const ModalContent = styled.div<{ $large?: boolean }>`
+export const ModalContent = styled.div<{
+	$large?: boolean;
+	/** 문제 추가 2컬럼 등 넓은 레이아웃 */
+	$extraWide?: boolean;
+}>`
   background: white;
-  border-radius: ${(props) => (props.$large ? "12px" : "8px")};
+  border-radius: ${(props) => (props.$large || props.$extraWide ? "12px" : "8px")};
   width: 90%;
-  max-width: ${(props) => (props.$large ? "800px" : "600px")};
-  max-height: ${(props) => (props.$large ? "85vh" : "90vh")};
+  max-width: ${(props) =>
+		props.$extraWide ? "min(1100px, 95vw)" : props.$large ? "800px" : "600px"};
+  max-height: ${(props) => (props.$large || props.$extraWide ? "85vh" : "90vh")};
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   animation: ${slideInUp} 0.3s ease;

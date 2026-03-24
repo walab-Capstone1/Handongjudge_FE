@@ -88,7 +88,7 @@ const CreateQuizModal: FC<CreateQuizModalProps> = ({ d }) => {
 						<S.ProblemSelectSection aria-labelledby="create-quiz-d.problems-label">
 							<S.BtnSelectProblems
 								type="button"
-								onClick={() => d.setShowProblemModal(true)}
+								onClick={() => d.setShowAddProblemModal(true)}
 							>
 								문제 선택 ({d.selectedProblemIds.length}개 선택됨)
 							</S.BtnSelectProblems>

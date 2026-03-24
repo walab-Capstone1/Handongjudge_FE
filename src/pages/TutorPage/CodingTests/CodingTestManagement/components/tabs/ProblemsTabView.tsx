@@ -18,7 +18,6 @@ const ProblemsTabView: FC<ProblemsTabViewProps> = ({ d }) => {
 						type="button"
 						onClick={() => {
 							d.setShowAddProblemModal(true);
-							d.setSelectedProblemIds(d.problems.map((p) => p.id));
 						}}
 					>
 						+ 문제 추가
