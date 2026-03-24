@@ -23,7 +23,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
 	}
 
 	if (!isAuthenticated) {
-		return <Navigate to="/" replace />;
+		return <Navigate to="/login" replace />;
 	}
 
 	// 역할 검증 제거 - 누구나 강의자가 될 수 있으므로 접근 허용

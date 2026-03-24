@@ -30,6 +30,10 @@ export interface GradeManagementQuizTableProps {
 	) => void;
 	handleViewCode?: (userId: number, problemId: number) => void;
 	onProblemDetail?: (problemId: number) => void;
+	totalOnly?: boolean;
+	onToggleTotalOnly?: (v: boolean) => void;
+	showLateOnly?: boolean;
+	onToggleShowLateOnly?: (v: boolean) => void;
 }
 
 export default function GradeManagementQuizTable({
@@ -47,6 +51,10 @@ export default function GradeManagementQuizTable({
 	handleSaveGrade,
 	handleViewCode,
 	onProblemDetail,
+	totalOnly = false,
+	onToggleTotalOnly,
+	showLateOnly = false,
+	onToggleShowLateOnly,
 }: GradeManagementQuizTableProps) {
 	if (grades.length === 0) {
 		return (
@@ -60,18 +68,25 @@ export default function GradeManagementQuizTable({
 
 	const problemGrades = grades[0]?.problemGrades ?? [];
 	const quizTitle = selectedQuiz?.title ?? "퀴즈";
+	const quizDueAt = selectedQuiz?.endTime;
 
 	return (
 		<S.GradeTablePageWrapper>
-			<GradeStatusLegendBar />
+			<GradeStatusLegendBar
+				totalOnly={totalOnly}
+				onToggleTotalOnly={onToggleTotalOnly}
+				showLateOnly={showLateOnly}
+				onToggleShowLateOnly={onToggleShowLateOnly}
+			/>
 			<S.GradeTableHorizontalScroll>
 			<S.CourseTableWithStickyRight>
 				<colgroup>
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
 					<col style={{ width: S.STICKY_COL_2_WIDTH }} />
-					{problemGrades.map((p) => (
-						<col key={p.problemId} style={{ width: S.COL_PROBLEM_WIDTH }} />
-					))}
+					{!totalOnly &&
+						problemGrades.map((p) => (
+							<col key={p.problemId} style={{ width: S.COL_PROBLEM_WIDTH }} />
+						))}
 					<col style={{ width: S.COL_SCORE_WIDTH }} />
 					<col style={{ width: S.STICKY_RIGHT_TOTAL_WIDTH }} />
 					<col style={{ width: S.STICKY_RIGHT_RATIO_WIDTH }} />
@@ -104,47 +119,51 @@ export default function GradeManagementQuizTable({
 								dir={gradeSortDir}
 							/>
 						</S.SortableStudentHeaderTh>
-						<S.CourseQuizHeader as="th" colSpan={problemGrades.length + 1}>
-							<div>
-								<S.ItemTitle>
-									<S.ItemTypeBadge>퀴즈</S.ItemTypeBadge>
-									{quizTitle}
-								</S.ItemTitle>
-							</div>
-						</S.CourseQuizHeader>
+						{!totalOnly && (
+							<S.CourseQuizHeader as="th" colSpan={problemGrades.length + 1}>
+								<div>
+									<S.ItemTitle>
+										<S.ItemTypeBadge>퀴즈</S.ItemTypeBadge>
+										{quizTitle}
+									</S.ItemTitle>
+								</div>
+							</S.CourseQuizHeader>
+						)}
 						<th rowSpan={2}>전체 총점</th>
 						<th rowSpan={2}>비율</th>
 					</tr>
-					<tr>
-						{problemGrades.map((p) => (
-							<S.ProblemHeader key={p.problemId} as="th">
-								{onProblemDetail ? (
-									<button
-										type="button"
-										onClick={() => onProblemDetail(p.problemId)}
-										style={{
-											background: "none",
-											border: "none",
-											cursor: "pointer",
-											textAlign: "center",
-											padding: 0,
-											font: "inherit",
-											width: "100%",
-										}}
-									>
-										<S.ProblemTitle>{p.problemTitle ?? ""}</S.ProblemTitle>
-									</button>
-								) : (
-									<>
-										<S.ProblemTitle>{p.problemTitle ?? ""}</S.ProblemTitle>
-									</>
-								)}
-							</S.ProblemHeader>
-						))}
-						<S.CourseAssignmentTotalHeader as="th">
-							총점
-						</S.CourseAssignmentTotalHeader>
-					</tr>
+					{!totalOnly && (
+						<tr>
+							{problemGrades.map((p) => (
+								<S.ProblemHeader key={p.problemId} as="th">
+									{onProblemDetail ? (
+										<button
+											type="button"
+											onClick={() => onProblemDetail(p.problemId)}
+											style={{
+												background: "none",
+												border: "none",
+												cursor: "pointer",
+												textAlign: "center",
+												padding: 0,
+												font: "inherit",
+												width: "100%",
+											}}
+										>
+											<S.ProblemTitle>{p.problemTitle ?? ""}</S.ProblemTitle>
+										</button>
+									) : (
+										<>
+											<S.ProblemTitle>{p.problemTitle ?? ""}</S.ProblemTitle>
+										</>
+									)}
+								</S.ProblemHeader>
+							))}
+							<S.CourseAssignmentTotalHeader as="th">
+								총점
+							</S.CourseAssignmentTotalHeader>
+						</tr>
+					)}
 				</thead>
 				<tbody>
 					{filteredGrades.map((student) => {
@@ -154,28 +173,24 @@ export default function GradeManagementQuizTable({
 							<tr key={student.userId}>
 								<S.TdStudentName>{student.studentName}</S.TdStudentName>
 								<S.TdStudentId>{student.studentId}</S.TdStudentId>
-								{student.problemGrades?.map((problem) => (
-									<S.TdCourseProblemCell key={problem.problemId}>
-										<GradeProblemCellDisplay
-											problem={problem}
-											fallbackPoints={problem.points ?? 1}
-											onViewCode={
-												problem.submitted && handleViewCode
-													? () =>
-															handleViewCode(
-																student.userId,
-																problem.problemId,
-															)
-													: undefined
-											}
-										/>
-									</S.TdCourseProblemCell>
-								))}
-								<S.TdCourseAssignmentTotalCell>
-									<strong>
-										{totalScore} / {totalPoints}
-									</strong>
-								</S.TdCourseAssignmentTotalCell>
+								{!totalOnly &&
+									student.problemGrades?.map((problem) => (
+										<S.TdCourseProblemCell key={problem.problemId}>
+											<GradeProblemCellDisplay
+												problem={problem}
+												fallbackPoints={problem.points ?? 1}
+											dueAt={quizDueAt}
+											showLateOnly={showLateOnly}
+											/>
+										</S.TdCourseProblemCell>
+									))}
+								{!totalOnly && (
+									<S.TdCourseAssignmentTotalCell>
+										<strong>
+											{totalScore} / {totalPoints}
+										</strong>
+									</S.TdCourseAssignmentTotalCell>
+								)}
 								<td>
 									<strong>
 										{totalScore} / {totalPoints}

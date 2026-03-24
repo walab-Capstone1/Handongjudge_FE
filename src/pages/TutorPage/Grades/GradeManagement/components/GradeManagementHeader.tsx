@@ -1,5 +1,5 @@
 import React from "react";
-import { FaFileExport, FaChartBar, FaEdit, FaWeight } from "react-icons/fa";
+import { FaFileExport, FaChartBar, FaEdit, FaWeight, FaCode } from "react-icons/fa";
 import * as S from "../styles";
 import type { AssignmentItem, QuizItem, ViewMode } from "../types";
 
@@ -19,6 +19,7 @@ export interface GradeManagementHeaderProps {
 	onShowBulkModal: () => void;
 	onShowStatsModal: () => void;
 	onExportCSV: () => void;
+	onDownloadCodeZip: () => void;
 }
 
 export default function GradeManagementHeader({
@@ -37,6 +38,7 @@ export default function GradeManagementHeader({
 	onShowBulkModal,
 	onShowStatsModal,
 	onExportCSV,
+	onDownloadCodeZip,
 }: GradeManagementHeaderProps) {
 	const showActionButtons =
 		(viewMode === "assignment" && assignments.length > 0) ||
@@ -59,7 +61,7 @@ export default function GradeManagementHeader({
 					(viewMode === "assignment" || viewMode === "quiz") && (
 						<S.FilterGroup>
 							<S.FilterLabel htmlFor="grade-item-select">
-								{viewMode === "assignment" ? "과제 선택" : "퀴즈 선택"}
+								{viewMode === "assignment" ? "과제 선택" : "코딩테스트 선택"}
 							</S.FilterLabel>
 							<S.AssignmentSelect
 								id="grade-item-select"
@@ -86,7 +88,7 @@ export default function GradeManagementHeader({
 								}}
 							>
 								<option value="">
-									전체 {viewMode === "assignment" ? "과제" : "퀴즈"}
+									전체 {viewMode === "assignment" ? "과제" : "코딩테스트"}
 								</option>
 								{viewMode === "assignment"
 									? assignments.map((a) => (
@@ -123,7 +125,7 @@ export default function GradeManagementHeader({
 							setSelectedAssignment(null);
 						}}
 					>
-						퀴즈별 보기
+						코딩테스트별 보기
 					</S.TabButton>
 					<S.TabButton
 						type="button"
@@ -145,9 +147,16 @@ export default function GradeManagementHeader({
 						<S.SecondaryButton type="button" onClick={onShowBulkModal}>
 							<FaEdit /> 일괄 입력
 						</S.SecondaryButton>
-						<S.SecondaryButton type="button" onClick={onShowStatsModal}>
-							<FaChartBar /> 통계
-						</S.SecondaryButton>
+						{viewMode !== "course" && (
+							<S.SecondaryButton type="button" onClick={onShowStatsModal}>
+								<FaChartBar /> 통계
+							</S.SecondaryButton>
+						)}
+						{viewMode !== "course" && (
+							<S.SecondaryButton type="button" onClick={onDownloadCodeZip}>
+								<FaCode /> 제출 코드 ZIP
+							</S.SecondaryButton>
+						)}
 						<S.PrimaryButton type="button" onClick={onExportCSV}>
 							<FaFileExport /> 내보내기
 						</S.PrimaryButton>
