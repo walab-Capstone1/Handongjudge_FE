@@ -374,6 +374,15 @@ export function useCodingTestManagement() {
 		fetchSubmissionRecords,
 	]);
 
+	// 학생 진행 현황: student-progress 탭 활성 시 로드 및 폴링(8초)
+	useEffect(() => {
+		if (activeTab === "student-progress" && sectionId && quizId) {
+			fetchSubmissions();
+			const interval = setInterval(fetchSubmissions, 8000);
+			return () => clearInterval(interval);
+		}
+	}, [activeTab, sectionId, quizId, fetchSubmissions]);
+
 	const getFilteredProblems = useCallback((): ProblemOption[] => {
 		let filtered = allProblems;
 		if (problemSearchTerm) {

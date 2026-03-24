@@ -12,6 +12,7 @@ import ProblemSelectModal from "./ProblemSelectModal";
 import SubmissionCodeModal from "./SubmissionCodeModal";
 import MainTabView from "./tabs/MainTabView";
 import ProblemsTabView from "./tabs/ProblemsTabView";
+import StudentProgressTabView from "./tabs/StudentProgressTabView";
 import SubmissionsTabView from "./tabs/SubmissionsTabView";
 
 function getStatusBadge(status: string) {
@@ -33,6 +34,7 @@ const TABS = [
 	{ id: "main", label: "메인" },
 	{ id: "problems", label: "대회 문제" },
 	{ id: "submissions", label: "제출 상세정보" },
+	{ id: "student-progress", label: "학생 진행 현황" },
 ];
 
 export default function CodingTestManagementView(
@@ -102,6 +104,9 @@ export default function CodingTestManagementView(
 								{d.activeTab === "main" && <MainTabView d={d} />}
 								{d.activeTab === "problems" && <ProblemsTabView d={d} />}
 								{d.activeTab === "submissions" && <SubmissionsTabView d={d} />}
+								{d.activeTab === "student-progress" && (
+									<StudentProgressTabView d={d} />
+								)}
 							</S.MainContent>
 						</S.DetailContent>
 					</S.DetailWrapper>

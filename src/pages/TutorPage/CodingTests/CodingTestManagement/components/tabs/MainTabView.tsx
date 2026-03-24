@@ -81,7 +81,7 @@ const MainTabView: FC<MainTabViewProps> = ({ d }) => {
 					<S.InfoValue>{d.problems.length}개</S.InfoValue>
 				</S.InfoItem>
 				<S.InfoItem>
-					<S.InfoLabel>활성화 상태</S.InfoLabel>
+					<S.InfoLabel>공개 상태</S.InfoLabel>
 					<S.InfoValue>
 						<S.ActiveToggle
 							type="button"
@@ -103,8 +103,8 @@ const MainTabView: FC<MainTabViewProps> = ({ d }) => {
 							</S.ActiveToggleTrack>
 							<S.ActiveToggleLabel>
 								{d.selectedQuizDetail.active !== false
-									? "활성화됨"
-									: "비활성화됨"}
+									? "공개"
+									: "비공개"}
 							</S.ActiveToggleLabel>
 						</S.ActiveToggle>
 					</S.InfoValue>
