@@ -40,8 +40,8 @@ export function useCourseAssignmentsPage() {
 	/** 알림 등에서 assignmentId 쿼리로 진입 시 한 번만 펼치기 위해 적용한 URL 값 (접은 뒤 다시 펼쳐지지 않도록) */
 	const expandedFromQueryRef = useRef<string | null>(null);
 
-	const fetchUserRole = useCallback(async () => {
-		if (!sectionId || !auth.user) return;
+	const fetchUserRole = useCallback(async (): Promise<string | null> => {
+		if (!sectionId || !auth.user) return null;
 
 		try {
 			const response = await APIService.getMyRoleInSection(Number(sectionId));
@@ -62,22 +62,24 @@ export function useCourseAssignmentsPage() {
 
 			setUserRole(role);
 			setIsManager(role === "ADMIN" || role === "TUTOR");
+			return role;
 		} catch (error) {
 			console.error("역할 조회 실패:", error);
 			setUserRole(null);
 			setIsManager(false);
+			return null;
 		}
 	}, [sectionId, auth.user]);
 
 	const fetchAssignmentsData = useCallback(async () => {
-		if (!sectionId || !auth.user) return;
+		const user = auth.user;
+		if (!sectionId || !user) return;
 
 		try {
 			setLoading(true);
 			setError(null);
 
-			// 사용자 역할 조회
-			await fetchUserRole();
+			const role = await fetchUserRole();
 
 			const sectionResponse = await APIService.getSectionInfo(sectionId);
 			const sectionData = sectionResponse.data || sectionResponse;
@@ -86,6 +88,19 @@ export function useCourseAssignmentsPage() {
 			const assignmentsResponse =
 				await APIService.getAssignmentsBySection(sectionId);
 			const assignmentsList = assignmentsResponse.data || assignmentsResponse;
+
+			// 수강생이 과제 목록을 열면 내 강의실(/courses) '새 과제' 뱃지용 읽음 처리
+			if (
+				role === "STUDENT" &&
+				Array.isArray(assignmentsList) &&
+				assignmentsList.length > 0
+			) {
+				await Promise.allSettled(
+					assignmentsList.map((a: { id: number }) =>
+						APIService.markAssignmentAsRead(a.id),
+					),
+				);
+			}
 
 			const assignmentsWithProgress = await Promise.all(
 				assignmentsList.map(
@@ -101,7 +116,7 @@ export function useCourseAssignmentsPage() {
 							try {
 								const statusResponse =
 									await APIService.getStudentAssignmentProblemsStatus(
-										auth.user!.id,
+										user.id,
 										sectionId,
 										assignment.id,
 									);

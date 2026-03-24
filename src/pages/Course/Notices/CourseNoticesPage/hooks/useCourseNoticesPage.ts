@@ -21,7 +21,7 @@ export function useCourseNoticesPage() {
 	const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
 	const fetchNoticesData = useCallback(async () => {
-		if (!sectionId) return;
+		if (!sectionId || !auth.user) return;
 
 		try {
 			setLoading(true);
@@ -34,6 +34,27 @@ export function useCourseNoticesPage() {
 			const noticesResponse = await APIService.getSectionNotices(sectionId);
 			const noticesList = noticesResponse.data || noticesResponse;
 
+			let role: string | null = null;
+			try {
+				const response = await APIService.getMyRoleInSection(Number(sectionId));
+				let raw: unknown = response;
+				if (typeof response === "object" && response !== null) {
+					raw =
+						(response as { data?: unknown })?.data ??
+						(response as { role?: unknown })?.role ??
+						response;
+					if (typeof raw === "object" && raw !== null && "role" in raw) {
+						raw = (raw as { role: unknown }).role;
+					}
+				}
+				role =
+					typeof raw === "string"
+						? raw.toUpperCase()
+						: String(raw ?? "").toUpperCase();
+			} catch {
+				role = null;
+			}
+
 			const sortedNotices = [...noticesList].sort((a: Notice, b: Notice) => {
 				return (
 					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -41,6 +62,17 @@ export function useCourseNoticesPage() {
 			});
 
 			setNotices(sortedNotices);
+
+			// 수강생이 공지 목록을 열면 내 강의실(/courses) '새 공지' 뱃지용 읽음 처리
+			if (
+				role === "STUDENT" &&
+				Array.isArray(noticesList) &&
+				noticesList.length > 0
+			) {
+				await Promise.allSettled(
+					noticesList.map((n: Notice) => APIService.markNoticeAsRead(n.id)),
+				);
+			}
 		} catch (err: unknown) {
 			console.error("공지사항 데이터 조회 실패:", err);
 			setError(
@@ -49,7 +81,7 @@ export function useCourseNoticesPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [sectionId]);
+	}, [sectionId, auth.user]);
 
 	useEffect(() => {
 		if (sectionId && auth.user) {

@@ -730,6 +730,16 @@ class APIService {
 		return await this.request(`/sections/${sectionId}/my-role`);
 	}
 
+	/** 수업 관리자: 수강생 전원에 기존 활성 공지·과제 알림 catch-up */
+	async backfillSectionNotificationCatchUp(
+		sectionId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/notifications/catch-up`,
+			{ method: "POST" },
+		);
+	}
+
 	async getAllSectionRoles(): Promise<any> {
 		return await this.request("/user/sections/roles");
 	}
