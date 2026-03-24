@@ -887,6 +887,50 @@ class APIService {
 		});
 	}
 
+	async enterQuizSession(
+		sectionId: number | string,
+		quizId: number | string,
+		sessionId: string,
+	): Promise<{ status: "OK" | "CONFLICT" }> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/session/enter`,
+			{ method: "POST", body: JSON.stringify({ sessionId }) },
+		);
+	}
+
+	async takeoverQuizSession(
+		sectionId: number | string,
+		quizId: number | string,
+		sessionId: string,
+	): Promise<{ status: string }> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/session/takeover`,
+			{ method: "POST", body: JSON.stringify({ sessionId }) },
+		);
+	}
+
+	async heartbeatQuizSession(
+		sectionId: number | string,
+		quizId: number | string,
+		sessionId: string,
+	): Promise<{ valid: boolean }> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/session/heartbeat`,
+			{ method: "POST", body: JSON.stringify({ sessionId }) },
+		);
+	}
+
+	async exitQuizSession(
+		sectionId: number | string,
+		quizId: number | string,
+		sessionId: string,
+	): Promise<void> {
+		await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/session/exit`,
+			{ method: "POST", body: JSON.stringify({ sessionId }) },
+		);
+	}
+
 	async getAssignmentSubmissionStats(
 		assignmentId: number | string,
 		sectionId: number | string,
