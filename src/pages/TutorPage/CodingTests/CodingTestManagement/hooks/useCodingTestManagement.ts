@@ -7,6 +7,7 @@ import type {
 	QuizProblem,
 	ProblemOption,
 	ProblemSubmissionStat,
+	QuizSubmissionRecord,
 	SectionInfo,
 	SubmissionStudent,
 } from "../types";
@@ -63,6 +64,28 @@ export function useCodingTestManagement() {
 	const [currentProblemPage, setCurrentProblemPage] = useState(1);
 	const [isSubmittingCreate, setIsSubmittingCreate] = useState(false);
 	const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+
+	// 제출 기록 (제출 상세정보 탭)
+	const [submissionRecords, setSubmissionRecords] = useState<
+		QuizSubmissionRecord[]
+	>([]);
+	const [submissionRecordsPage, setSubmissionRecordsPage] = useState(1);
+	const [submissionRecordsTotalPages, setSubmissionRecordsTotalPages] =
+		useState(0);
+	const [submissionRecordsTotal, setSubmissionRecordsTotal] = useState(0);
+	const [submissionResultFilter, setSubmissionResultFilter] =
+		useState<string>("");
+	const [submissionRecordsLoading, setSubmissionRecordsLoading] =
+		useState(false);
+	const [showCodeModal, setShowCodeModal] = useState(false);
+	const [submissionCodeData, setSubmissionCodeData] = useState<{
+		code: string;
+		problemTitle: string;
+		result: string;
+		submittedAt: string;
+		language: string;
+	} | null>(null);
+	const [submissionCodeLoading, setSubmissionCodeLoading] = useState(false);
 
 	const fetchQuizzes = useCallback(async () => {
 		if (!sectionId) return;
@@ -142,6 +165,7 @@ export function useCodingTestManagement() {
 				title?: string;
 				description?: string;
 				problemOrder?: number;
+				points?: number;
 			}[];
 			setProblems(
 				problemsData.map((p) => ({
@@ -149,6 +173,7 @@ export function useCodingTestManagement() {
 					title: p.title ?? "",
 					description: p.description ?? "",
 					order: p.problemOrder,
+					points: p.points ?? 1,
 				})),
 			);
 		} catch (error) {
@@ -172,6 +197,69 @@ export function useCodingTestManagement() {
 			setProblemStats([]);
 		}
 	}, [sectionId, quizId]);
+
+	const fetchSubmissionRecords = useCallback(async () => {
+		if (!sectionId || !quizId) return;
+		setSubmissionRecordsLoading(true);
+		try {
+			const response = await APIService.getQuizSubmissions(
+				sectionId,
+				quizId,
+				{
+					page: submissionRecordsPage - 1,
+					size: 20,
+					result:
+						submissionResultFilter && submissionResultFilter !== "ALL"
+							? submissionResultFilter
+							: undefined,
+				},
+			);
+			const data = response?.data ?? response;
+			const content = (data?.content ?? []) as QuizSubmissionRecord[];
+			setSubmissionRecords(content);
+			setSubmissionRecordsTotalPages(data?.totalPages ?? 0);
+			setSubmissionRecordsTotal(data?.totalElements ?? 0);
+		} catch (error) {
+			console.error("제출 기록 조회 실패:", error);
+			setSubmissionRecords([]);
+		} finally {
+			setSubmissionRecordsLoading(false);
+		}
+	}, [sectionId, quizId, submissionRecordsPage, submissionResultFilter]);
+
+	const fetchSubmissionCode = useCallback(
+		async (submissionId: number) => {
+			if (!sectionId || !quizId) return;
+			setSubmissionCodeLoading(true);
+			setShowCodeModal(true);
+			try {
+				const response = await APIService.getQuizSubmissionCode(
+					sectionId,
+					quizId,
+					submissionId,
+				);
+				const data = response?.data ?? response;
+				setSubmissionCodeData({
+					code: data?.code ?? "",
+					problemTitle: data?.problemTitle ?? "",
+					result: data?.result ?? "",
+					submittedAt: data?.submittedAt ?? "",
+					language: data?.language ?? "",
+				});
+			} catch (error) {
+				console.error("제출 코드 조회 실패:", error);
+				setSubmissionCodeData(null);
+			} finally {
+				setSubmissionCodeLoading(false);
+			}
+		},
+		[sectionId, quizId],
+	);
+
+	const closeCodeModal = useCallback(() => {
+		setShowCodeModal(false);
+		setSubmissionCodeData(null);
+	}, []);
 
 	const fetchSubmissions = useCallback(async () => {
 		if (!sectionId) return;
@@ -271,6 +359,20 @@ export function useCodingTestManagement() {
 			fetchAllProblems();
 		}
 	}, [showProblemModal, showAddProblemModal, fetchAllProblems]);
+
+	// 제출 기록: submissions 탭 활성 시 로드 및 폴링(8초)
+	useEffect(() => {
+		if (activeTab === "submissions" && sectionId && quizId) {
+			fetchSubmissionRecords();
+			const interval = setInterval(fetchSubmissionRecords, 8000);
+			return () => clearInterval(interval);
+		}
+	}, [
+		activeTab,
+		sectionId,
+		quizId,
+		fetchSubmissionRecords,
+	]);
 
 	const getFilteredProblems = useCallback((): ProblemOption[] => {
 		let filtered = allProblems;
@@ -752,6 +854,20 @@ export function useCodingTestManagement() {
 		handleEnd,
 		handleToggleActive,
 		problemStats,
+		submissionRecords,
+		submissionRecordsPage,
+		setSubmissionRecordsPage,
+		submissionRecordsTotalPages,
+		submissionRecordsTotal,
+		submissionResultFilter,
+		setSubmissionResultFilter,
+		submissionRecordsLoading,
+		fetchSubmissionRecords,
+		fetchSubmissionCode,
+		showCodeModal,
+		closeCodeModal,
+		submissionCodeData,
+		submissionCodeLoading,
 	};
 }
 

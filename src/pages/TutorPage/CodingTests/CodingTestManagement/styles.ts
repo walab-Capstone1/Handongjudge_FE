@@ -112,7 +112,7 @@ export const TableContainer = styled.div`
   overflow-x: auto;
 `;
 
-export const Table = styled.table`
+export const Table = styled.table<{ $compact?: boolean }>`
   width: 100%;
   border-collapse: collapse;
 
@@ -121,10 +121,10 @@ export const Table = styled.table`
   }
 
   th {
-    padding: 1rem 1.5rem;
+    padding: ${(p) => (p.$compact ? "0.5rem 0.75rem" : "1rem 1.5rem")};
     text-align: left;
     font-weight: 700;
-    font-size: 0.875rem;
+    font-size: ${(p) => (p.$compact ? "0.75rem" : "0.875rem")};
     color: #1e293b;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -132,9 +132,10 @@ export const Table = styled.table`
   }
 
   td {
-    padding: 1.25rem 1.5rem;
+    padding: ${(p) => (p.$compact ? "0.5rem 0.75rem" : "1.25rem 1.5rem")};
     border-bottom: 1px solid #e2e8f0;
     color: #475569;
+    font-size: ${(p) => (p.$compact ? "0.8125rem" : "inherit")};
   }
 
   tbody tr {
@@ -152,7 +153,7 @@ export const Table = styled.table`
 
     th,
     td {
-      padding: 0.75rem;
+      padding: ${(p) => (p.$compact ? "0.4rem 0.5rem" : "0.75rem")};
     }
   }
 `;
@@ -215,11 +216,11 @@ export const QuizActions = styled.div`
   gap: 0.5rem;
 `;
 
-export const EditButton = styled.button`
-  padding: 0.375rem 0.75rem;
+export const EditButton = styled.button<{ $small?: boolean }>`
+  padding: ${(p) => (p.$small ? "0.2rem 0.5rem" : "0.375rem 0.75rem")};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: ${(p) => (p.$small ? "0.75rem" : "0.875rem")};
   cursor: pointer;
   transition: all 0.2s;
   background: #e0e7ff;

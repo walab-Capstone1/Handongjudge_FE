@@ -23,6 +23,37 @@ function getStatusBadge(status: string) {
 	}
 }
 
+function getResultLabel(result: string) {
+	const labels: Record<string, string> = {
+		AC: "정답",
+		WA: "오답",
+		TLE: "시간초과",
+		RE: "런타임에러",
+		CE: "컴파일에러",
+		MLE: "메모리초과",
+		OLE: "출력초과",
+	};
+	return labels[result] ?? result ?? "-";
+}
+
+function getResultBadgeColor(result: string) {
+	switch (result) {
+		case "AC":
+			return "#10b981";
+		case "WA":
+			return "#ef4444";
+		case "TLE":
+		case "MLE":
+		case "OLE":
+			return "#f59e0b";
+		case "RE":
+		case "CE":
+			return "#8b5cf6";
+		default:
+			return "#64748b";
+	}
+}
+
 const TABS = [
 	{ id: "main", label: "메인" },
 	{ id: "problems", label: "대회 문제" },
@@ -190,7 +221,7 @@ export default function CodingTestManagementView(
 									</S.QuizInfoSection>
 								)}
 
-								{d.activeTab === "d.problems" && (
+								{d.activeTab === "problems" && (
 									<>
 										<S.ProblemsTabHeader>
 											<S.SectionTitle>대회 문제</S.SectionTitle>
@@ -222,8 +253,9 @@ export default function CodingTestManagementView(
 														<tr>
 															<th>문제 번호</th>
 															<th>제목</th>
-															<th>상태</th>
+															<th>배점</th>
 															<th>제출수</th>
+															<th>푼 사람 수</th>
 															<th>정답률</th>
 															<th>관리</th>
 														</tr>
@@ -250,10 +282,11 @@ export default function CodingTestManagementView(
 																		</S.ProblemDescriptionPreview>
 																	)}
 																</S.ProblemTitleCell>
-																<td>
-																	<span>-</span>
-																</td>
+																<td>{problem.points ?? 1}점</td>
 																<td>{stat ? `${stat.submittedStudents ?? 0}회` : "0회"}</td>
+																<td>
+																	{stat ? `${stat.correctSubmissions ?? 0}명` : "0명"}
+																</td>
 																<td>
 																	{stat && stat.correctRate != null
 																		? `${Math.round(stat.correctRate)}%`
@@ -280,8 +313,195 @@ export default function CodingTestManagementView(
 									</>
 								)}
 
-								{d.activeTab === "d.submissions" && (
+								{d.activeTab === "submissions" && (
 									<>
+										{/* 제출 기록 목록 */}
+										<S.SectionTitle style={{ marginBottom: "1rem" }}>
+											제출 기록 (시간순)
+										</S.SectionTitle>
+										<S.FiltersSection>
+											<S.StatusFilters>
+												<S.FilterBtn
+													type="button"
+													$active={
+														!d.submissionResultFilter ||
+														d.submissionResultFilter === "ALL"
+													}
+													onClick={() => {
+														d.setSubmissionResultFilter("ALL");
+														d.setSubmissionRecordsPage(1);
+													}}
+												>
+													전체
+												</S.FilterBtn>
+												<S.FilterBtn
+													type="button"
+													$active={d.submissionResultFilter === "AC"}
+													onClick={() => {
+														d.setSubmissionResultFilter("AC");
+														d.setSubmissionRecordsPage(1);
+													}}
+												>
+													AC
+												</S.FilterBtn>
+												<S.FilterBtn
+													type="button"
+													$active={d.submissionResultFilter === "WA"}
+													onClick={() => {
+														d.setSubmissionResultFilter("WA");
+														d.setSubmissionRecordsPage(1);
+													}}
+												>
+													WA
+												</S.FilterBtn>
+												<S.FilterBtn
+													type="button"
+													$active={d.submissionResultFilter === "TLE"}
+													onClick={() => {
+														d.setSubmissionResultFilter("TLE");
+														d.setSubmissionRecordsPage(1);
+													}}
+												>
+													TLE
+												</S.FilterBtn>
+												<S.FilterBtn
+													type="button"
+													$active={d.submissionResultFilter === "RE"}
+													onClick={() => {
+														d.setSubmissionResultFilter("RE");
+														d.setSubmissionRecordsPage(1);
+													}}
+												>
+													RE
+												</S.FilterBtn>
+												<S.FilterBtn
+													type="button"
+													$active={d.submissionResultFilter === "CE"}
+													onClick={() => {
+														d.setSubmissionResultFilter("CE");
+														d.setSubmissionRecordsPage(1);
+													}}
+												>
+													CE
+												</S.FilterBtn>
+											</S.StatusFilters>
+										</S.FiltersSection>
+										{d.submissionRecordsLoading ? (
+											<S.NoData>
+												<p>제출 기록을 불러오는 중...</p>
+											</S.NoData>
+										) : d.submissionRecords.length === 0 ? (
+											<S.NoData>
+												<p>제출 기록이 없습니다.</p>
+											</S.NoData>
+										) : (
+											<>
+												<S.TableContainer style={{ marginBottom: "1.5rem" }}>
+													<S.Table $compact>
+														<thead>
+															<tr>
+																<th>제출시간</th>
+																<th>학번</th>
+																<th>이름</th>
+																<th>문제</th>
+																<th>결과</th>
+																<th>언어</th>
+																<th>상세보기</th>
+															</tr>
+														</thead>
+														<tbody>
+															{d.submissionRecords.map((rec) => (
+																<tr key={rec.submissionId}>
+																	<td>
+																		{d.formatDateTime(rec.submittedAt)}
+																	</td>
+																	<td>{rec.studentId}</td>
+																	<td>{rec.studentName}</td>
+																	<td>{removeCopyLabel(rec.problemTitle)}</td>
+																	<td>
+																		<span
+																			style={{
+																				display: "inline-block",
+																				padding:
+																					"0.15rem 0.4rem",
+																				borderRadius: "4px",
+																				fontSize: "0.75rem",
+																				fontWeight: 500,
+																				backgroundColor:
+																					`${getResultBadgeColor(rec.result)}20`,
+																				color: getResultBadgeColor(
+																					rec.result,
+																				),
+																			}}
+																		>
+																			{getResultLabel(rec.result)}
+																		</span>
+																	</td>
+																	<td>{rec.language ?? "-"}</td>
+																	<td>
+																		<S.EditButton
+																			type="button"
+																			$small
+																			onClick={() =>
+																				d.fetchSubmissionCode(
+																					rec.submissionId,
+																				)
+																			}
+																		>
+																			코드 보기
+																		</S.EditButton>
+																	</td>
+																</tr>
+															))}
+														</tbody>
+													</S.Table>
+												</S.TableContainer>
+												{d.submissionRecordsTotalPages > 1 && (
+													<S.ProblemSelectPagination
+														style={{ marginBottom: "1.5rem" }}
+													>
+														<S.ProblemSelectPaginationBtn
+															type="button"
+															onClick={() =>
+																d.setSubmissionRecordsPage((p) =>
+																	Math.max(1, p - 1),
+																)
+															}
+															disabled={d.submissionRecordsPage === 1}
+														>
+															이전
+														</S.ProblemSelectPaginationBtn>
+														<span>
+															{d.submissionRecordsPage} /{" "}
+															{d.submissionRecordsTotalPages} (총{" "}
+															{d.submissionRecordsTotal}건)
+														</span>
+														<S.ProblemSelectPaginationBtn
+															type="button"
+															onClick={() =>
+																d.setSubmissionRecordsPage((p) =>
+																	Math.min(
+																		d.submissionRecordsTotalPages,
+																		p + 1,
+																	),
+																)
+															}
+															disabled={
+																d.submissionRecordsPage ===
+																d.submissionRecordsTotalPages
+															}
+														>
+															다음
+														</S.ProblemSelectPaginationBtn>
+													</S.ProblemSelectPagination>
+												)}
+											</>
+										)}
+
+										{/* 학생 진행 현황 */}
+										<S.SectionTitle style={{ marginTop: "2rem", marginBottom: "1rem" }}>
+											학생 진행 현황
+										</S.SectionTitle>
 										<S.FiltersSection>
 											<S.SearchBox>
 												<S.SearchInput
@@ -630,6 +850,79 @@ export default function CodingTestManagementView(
 										}
 										개)
 									</S.SubmitButton>
+								</S.ModalFooter>
+							</S.ModalContent>
+						</S.ModalOverlay>
+					)}
+
+					{/* 제출 코드 상세보기 모달 */}
+					{d.showCodeModal && (
+						<S.ModalOverlay onClick={d.closeCodeModal}>
+							<S.ModalContent $large onClick={(e) => e.stopPropagation()}>
+								<S.ModalHeader>
+									<h2>제출 코드 상세</h2>
+									<S.ModalClose type="button" onClick={d.closeCodeModal}>
+										×
+									</S.ModalClose>
+								</S.ModalHeader>
+								<S.ModalBody>
+									{d.submissionCodeLoading ? (
+										<S.NoData>
+											<p>코드를 불러오는 중...</p>
+										</S.NoData>
+									) : d.submissionCodeData ? (
+										<>
+											<div
+												style={{
+													display: "flex",
+													gap: "1rem",
+													marginBottom: "1rem",
+													flexWrap: "wrap",
+												}}
+											>
+												<span>
+													<strong>문제:</strong>{" "}
+													{removeCopyLabel(d.submissionCodeData.problemTitle)}
+												</span>
+												<span>
+													<strong>결과:</strong>{" "}
+													{getResultLabel(d.submissionCodeData.result)}
+												</span>
+												<span>
+													<strong>제출시간:</strong>{" "}
+													{d.formatDateTime(d.submissionCodeData.submittedAt)}
+												</span>
+												<span>
+													<strong>언어:</strong>{" "}
+													{d.submissionCodeData.language ?? "-"}
+												</span>
+											</div>
+											<pre
+												style={{
+													background: "#1e293b",
+													color: "#e2e8f0",
+													padding: "1rem",
+													borderRadius: "8px",
+													overflow: "auto",
+													maxHeight: "400px",
+													fontSize: "0.875rem",
+													whiteSpace: "pre-wrap",
+													wordBreak: "break-word",
+												}}
+											>
+												{d.submissionCodeData.code}
+											</pre>
+										</>
+									) : (
+										<S.NoData>
+											<p>코드를 불러올 수 없습니다.</p>
+										</S.NoData>
+									)}
+								</S.ModalBody>
+								<S.ModalFooter>
+									<S.CancelButton type="button" onClick={d.closeCodeModal}>
+										닫기
+									</S.CancelButton>
 								</S.ModalFooter>
 							</S.ModalContent>
 						</S.ModalOverlay>

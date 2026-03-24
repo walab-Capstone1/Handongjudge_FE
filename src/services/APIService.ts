@@ -818,6 +818,42 @@ class APIService {
 		);
 	}
 
+	async getQuizSubmissions(
+		sectionId: number | string,
+		quizId: number | string,
+		params?: {
+			page?: number;
+			size?: number;
+			problemId?: number;
+			userId?: number;
+			result?: string;
+		},
+	): Promise<any> {
+		const searchParams = new URLSearchParams();
+		if (params?.page != null) searchParams.set("page", String(params.page));
+		if (params?.size != null) searchParams.set("size", String(params.size));
+		if (params?.problemId != null)
+			searchParams.set("problemId", String(params.problemId));
+		if (params?.userId != null)
+			searchParams.set("userId", String(params.userId));
+		if (params?.result != null && params.result !== "")
+			searchParams.set("result", params.result);
+		const query = searchParams.toString();
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submissions${query ? `?${query}` : ""}`,
+		);
+	}
+
+	async getQuizSubmissionCode(
+		sectionId: number | string,
+		quizId: number | string,
+		submissionId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submissions/${submissionId}/code`,
+		);
+	}
+
 	async removeQuizProblem(
 		sectionId: number | string,
 		quizId: number | string,

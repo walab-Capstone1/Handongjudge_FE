@@ -26,6 +26,7 @@ export interface QuizProblem {
 	title: string;
 	description?: string;
 	order?: number;
+	points?: number;
 }
 
 export interface ProblemSubmissionStat {
@@ -50,6 +51,18 @@ export interface SubmissionStudent {
 	studentName: string;
 	solvedProblems: number[];
 	problemSubmissionTimes?: Record<number, string>;
+}
+
+export interface QuizSubmissionRecord {
+	submissionId: number;
+	userId: number;
+	studentId: string;
+	studentName: string;
+	problemId: number;
+	problemTitle: string;
+	submittedAt: string;
+	result: string;
+	language: string;
 }
 
 export interface SectionInfo {
