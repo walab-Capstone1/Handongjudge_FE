@@ -1,6 +1,10 @@
 /**
  * 토큰 매니저
- * Access Token은 localStorage에 저장, Refresh Token은 httpOnly 쿠키에서 처리
+ * - Access Token: 메모리(변수)에만 저장 → XSS로 탈취 불가
+ * - Refresh Token: HttpOnly 쿠키에서 처리 (JS에서 접근 불가)
+ *
+ * 페이지 새로고침 시 메모리가 초기화되지만, restoreAuth()가
+ * Refresh Token 쿠키를 이용해 Access Token을 자동 재발급합니다.
  */
 
 interface JwtPayload {
@@ -14,15 +18,9 @@ export interface TokenRefreshData {
 }
 
 class TokenManager {
-	private accessToken: string | null;
-	private onTokenRefresh: ((data: TokenRefreshData) => void) | null;
-	private onTokenExpired: (() => void) | null;
-
-	constructor() {
-		this.accessToken = this.getStoredAccessToken();
-		this.onTokenRefresh = null;
-		this.onTokenExpired = null;
-	}
+	private accessToken: string | null = null;
+	private onTokenRefresh: ((data: TokenRefreshData) => void) | null = null;
+	private onTokenExpired: (() => void) | null = null;
 
 	setCallbacks(
 		onTokenRefresh: ((data: TokenRefreshData) => void) | null,
@@ -32,30 +30,8 @@ class TokenManager {
 		this.onTokenExpired = onTokenExpired;
 	}
 
-	getStoredAccessToken(): string | null {
-		try {
-			return localStorage.getItem("accessToken");
-		} catch (error) {
-			console.error("localStorage 접근 오류:", error);
-			return null;
-		}
-	}
-
-	private setStoredAccessToken(token: string | null): void {
-		try {
-			if (token) {
-				localStorage.setItem("accessToken", token);
-			} else {
-				localStorage.removeItem("accessToken");
-			}
-		} catch (error) {
-			console.error("localStorage 저장 오류:", error);
-		}
-	}
-
 	setAccessToken(token: string | null): void {
 		this.accessToken = token;
-		this.setStoredAccessToken(token);
 	}
 
 	getAccessToken(): string | null {
@@ -64,7 +40,6 @@ class TokenManager {
 
 	clearTokens(): void {
 		this.accessToken = null;
-		this.setStoredAccessToken(null);
 	}
 
 	isTokenValid(): boolean {
@@ -105,7 +80,7 @@ class TokenManager {
 				process.env.REACT_APP_API_URL ?? "https://hcl.walab.info/api";
 			const response = await fetch(`${apiUrl}/auth/refresh`, {
 				method: "POST",
-				credentials: "include",
+				credentials: "include", // Refresh Token 쿠키 자동 전송
 				headers: { "Content-Type": "application/json" },
 			});
 
@@ -128,22 +103,24 @@ class TokenManager {
 		this.onTokenExpired?.();
 	}
 
+	/**
+	 * 앱 초기화 시 인증 복원
+	 * 메모리에 토큰이 없으면 Refresh Token 쿠키로 자동 재발급 시도
+	 */
 	async restoreAuth(): Promise<{ accessToken: string } | null> {
-		const token = this.getStoredAccessToken();
-		if (token && !this.isTokenExpired(token)) {
-			this.accessToken = token;
-			return { accessToken: token };
+		// 메모리에 유효한 토큰이 있으면 그대로 사용
+		if (this.accessToken && !this.isTokenExpired(this.accessToken)) {
+			return { accessToken: this.accessToken };
 		}
-		// Access Token이 만료됐어도 Refresh Token 쿠키로 재발급 시도
-		if (token) {
-			try {
-				const refreshed = await this.refreshToken();
-				if (refreshed.accessToken) {
-					return { accessToken: refreshed.accessToken };
-				}
-			} catch {
-				// Refresh Token도 만료됨 → null 반환
+
+		// 메모리 토큰이 없거나 만료됨 → Refresh Token 쿠키로 재발급 시도
+		try {
+			const refreshed = await this.refreshToken();
+			if (refreshed.accessToken) {
+				return { accessToken: refreshed.accessToken };
 			}
+		} catch {
+			// Refresh Token도 만료됨 → 로그인 필요
 		}
 		return null;
 	}
