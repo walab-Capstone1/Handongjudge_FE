@@ -31,6 +31,30 @@ export const LoadingSpinner = styled.div`
   animation: ${spin} 1s linear infinite;
 `;
 
+/** ZIP 생성·다운로드 등 장시간 작업 시 화면 전체 차단 */
+export const FullScreenLoadingOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+`;
+
+export const FullScreenLoadingText = styled.p`
+  margin: 0;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.45;
+`;
+
 export const SortableStudentHeaderTh = styled.th`
   cursor: pointer;
   user-select: none;
@@ -131,6 +155,19 @@ export const AssignmentSelect = styled.select`
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    color: #64748b;
+    border-color: #e2e8f0;
+  }
+
+  &:disabled:focus {
+    box-shadow: none;
+    border-color: #e2e8f0;
   }
 `;
 

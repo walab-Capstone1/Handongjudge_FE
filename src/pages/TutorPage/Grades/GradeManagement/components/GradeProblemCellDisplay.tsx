@@ -143,12 +143,24 @@ export function GradeProblemCellDisplay({
 	const pts = Number(problem?.points ?? fallbackPoints ?? 0);
 	const score = Number(problem?.score ?? 0);
 	const kind = getGradeProblemCellKind(problem, fallbackPoints);
+	const tcTotal = problem?.totalTestCaseCount;
+	const tcPassed = problem?.passedTestCaseCount;
+	const hasTcDetail =
+		typeof tcTotal === "number" && tcTotal > 0 && typeof tcPassed === "number";
 	const submittedAt =
 		problem?.submittedAt ??
 		(problem as { submitted_at?: string })?.submitted_at;
 	const title = [
 		GRADE_CELL_HINT[kind],
-		problem?.submitted ? `테스트케이스 ${score}/${pts}` : null,
+		problem?.submitted
+			? hasTcDetail
+				? `테스트케이스 통과 ${tcPassed}/${tcTotal}`
+				: `배점 ${score}/${pts}`
+			: null,
+		problem?.submitted && hasTcDetail
+			? `과제 배점(문항): ${score}/${pts}`
+			: null,
+		problem?.result ? `채점 결과: ${problem.result}` : null,
 		submittedAt
 			? `제출: ${(toLocalDate(submittedAt) ?? new Date(submittedAt)).toLocaleString("ko-KR")}`
 			: null,
@@ -188,7 +200,11 @@ export function GradeProblemCellDisplay({
 			</S.GradeCellStatusBadge>
 			{problem?.submitted ? (
 				<>
-					<S.GradeCellScoreMeta>{`${score}/${pts}`}</S.GradeCellScoreMeta>
+					<S.GradeCellScoreMeta>
+						{hasTcDetail
+							? `${tcPassed}/${tcTotal}`
+							: `${score}/${pts}`}
+					</S.GradeCellScoreMeta>
 					{showLateOnly && isLateFull && lateMinutes > 0 ? (
 						<S.GradeCellScoreMeta>{`지각 ${formatLateDuration(lateMinutes)}`}</S.GradeCellScoreMeta>
 					) : null}

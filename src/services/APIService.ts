@@ -715,9 +715,14 @@ class APIService {
 	async getQuizGrades(
 		sectionId: number | string,
 		quizId: number | string,
+		options?: { includeTestCaseResults?: boolean },
 	): Promise<any> {
+		const q =
+			options?.includeTestCaseResults === true
+				? "?includeTestCaseResults=true"
+				: "";
 		return await this.request(
-			`/sections/${sectionId}/quizzes/${quizId}/grades`,
+			`/sections/${sectionId}/quizzes/${quizId}/grades${q}`,
 		);
 	}
 
@@ -1520,9 +1525,14 @@ class APIService {
 	async getAssignmentGrades(
 		sectionId: number | string,
 		assignmentId: number | string,
+		options?: { includeTestCaseResults?: boolean },
 	): Promise<any> {
+		const q =
+			options?.includeTestCaseResults === true
+				? "?includeTestCaseResults=true"
+				: "";
 		return await this.request(
-			`/sections/${sectionId}/assignments/${assignmentId}/grades`,
+			`/sections/${sectionId}/assignments/${assignmentId}/grades${q}`,
 		);
 	}
 

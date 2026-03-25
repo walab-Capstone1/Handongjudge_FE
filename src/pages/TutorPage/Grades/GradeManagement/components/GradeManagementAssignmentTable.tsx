@@ -7,6 +7,10 @@ import {
 	GradeProblemCellDisplay,
 	GradeStatusLegendBar,
 } from "./GradeProblemCellDisplay";
+import {
+	getVisibleProblemColumns,
+	getTotalsForVisibleProblemColumns,
+} from "../utils/gradeTableProblemFilter";
 
 export interface GradeManagementAssignmentTableProps {
 	grades: StudentGradeRow[];
@@ -34,6 +38,7 @@ export interface GradeManagementAssignmentTableProps {
 	onToggleTotalOnly?: (v: boolean) => void;
 	showLateOnly?: boolean;
 	onToggleShowLateOnly?: (v: boolean) => void;
+	problemFilterId?: number | null;
 }
 
 export default function GradeManagementAssignmentTable({
@@ -55,6 +60,7 @@ export default function GradeManagementAssignmentTable({
 	onToggleTotalOnly,
 	showLateOnly = false,
 	onToggleShowLateOnly,
+	problemFilterId = null,
 }: GradeManagementAssignmentTableProps) {
 	const assignmentDueAt =
 		selectedAssignment?.dueDate ??
@@ -64,6 +70,8 @@ export default function GradeManagementAssignmentTable({
 		grades[0]?.problemGrades && grades[0].problemGrades.length > 0;
 
 	const problemGradesForCol = grades[0]?.problemGrades ?? [];
+	const visibleProblems = getVisibleProblemColumns(grades, problemFilterId);
+
 	return (
 		<S.GradeTablePageWrapper>
 			<GradeStatusLegendBar
@@ -78,7 +86,7 @@ export default function GradeManagementAssignmentTable({
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
 					<col style={{ width: S.STICKY_COL_2_WIDTH }} />
 					{!totalOnly && hasProblems
-						? problemGradesForCol.map((p) => (
+						? visibleProblems.map((p) => (
 								<col key={p.problemId} style={{ width: S.COL_PROBLEM_WIDTH }} />
 							))
 						: null}
@@ -118,7 +126,7 @@ export default function GradeManagementAssignmentTable({
 								</S.SortableStudentHeaderTh>
 								<S.CourseAssignmentHeader
 									as="th"
-									colSpan={problemGradesForCol.length}
+									colSpan={visibleProblems.length}
 								>
 									<S.ItemTitle>
 										{selectedAssignment?.title ?? "과제"}
@@ -129,7 +137,7 @@ export default function GradeManagementAssignmentTable({
 								<th rowSpan={2}>비율</th>
 							</tr>
 							<tr>
-								{grades[0]?.problemGrades?.map((p) => (
+								{visibleProblems.map((p) => (
 									<S.ProblemHeader key={p.problemId} as="th">
 										{onProblemDetail ? (
 											<button
@@ -190,23 +198,36 @@ export default function GradeManagementAssignmentTable({
 				</thead>
 				<tbody>
 					{filteredGrades.map((student) => {
-						const totalScore = student.totalScore ?? 0;
-						const totalPoints = student.totalPoints ?? 0;
+						const { score: totalScore, points: totalPoints } =
+							getTotalsForVisibleProblemColumns(
+								student,
+								problemFilterId,
+								visibleProblems,
+							);
 						return (
 							<tr key={student.userId}>
 								<S.TdStudentName>{student.studentName}</S.TdStudentName>
 								<S.TdStudentId>{student.studentId}</S.TdStudentId>
 								{!totalOnly && hasProblems ? (
-									student.problemGrades?.map((problem) => (
-										<S.TdCourseProblemCell key={problem.problemId}>
-											<GradeProblemCellDisplay
-												problem={problem}
-												fallbackPoints={problem.points ?? 1}
-												dueAt={assignmentDueAt}
-												showLateOnly={showLateOnly}
-											/>
-										</S.TdCourseProblemCell>
-									))
+									visibleProblems.map((col) => {
+										const problem = student.problemGrades?.find(
+											(pg) => pg.problemId === col.problemId,
+										);
+										return (
+											<S.TdCourseProblemCell key={col.problemId}>
+												{problem ? (
+													<GradeProblemCellDisplay
+														problem={problem}
+														fallbackPoints={problem.points ?? 1}
+														dueAt={assignmentDueAt}
+														showLateOnly={showLateOnly}
+													/>
+												) : (
+													<span style={{ color: "#94a3b8" }}>—</span>
+												)}
+											</S.TdCourseProblemCell>
+										);
+									})
 								) : null}
 								<S.TdCourseAssignmentTotalCell>
 									<strong>

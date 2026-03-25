@@ -28,6 +28,19 @@ export interface QuizItem {
 	endTime?: string;
 }
 
+/** Domjudge runs output (grades API includeTestCaseResults=true) */
+export interface GradeTestCaseOutput {
+	testcase_rank?: number;
+	result?: string;
+	runtime?: number;
+	memory_used?: number;
+	output?: string;
+	output_error?: string;
+	output_diff?: string;
+	testcase_input?: string;
+	expected_output?: string;
+}
+
 /** 문제별 성적 (problemGrades 요소) */
 export interface ProblemGrade {
 	problemId: number;
@@ -37,6 +50,12 @@ export interface ProblemGrade {
 	submitted?: boolean;
 	submittedAt?: string;
 	isOnTime?: boolean;
+	result?: string;
+	submissionDomjudgeId?: string;
+	testCaseResults?: GradeTestCaseOutput[];
+	passedTestCaseCount?: number;
+	totalTestCaseCount?: number;
+	allTestCasesPassed?: boolean;
 }
 
 /** 학생별 성적 (과제/퀴즈 성적 API) */

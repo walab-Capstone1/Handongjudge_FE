@@ -17,6 +17,7 @@ import GradeProblemDetailModal from "./GradeProblemDetailModal";
 export default function GradeManagementView(d: GradeManagementHookReturn) {
 	const [totalOnly, setTotalOnly] = useState(false);
 	const [showLateOnly, setShowLateOnly] = useState(false);
+	const [zipExportLoading, setZipExportLoading] = useState(false);
 
 	const {
 		sectionId,
@@ -85,6 +86,8 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		problemDetail,
 		openProblemDetail,
 		closeProblemDetailModal,
+		singleItemProblemFilterId,
+		setSingleItemProblemFilterId,
 	} = d;
 
 	const handleClosePointsModal = () => {
@@ -97,82 +100,87 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 
 	const handleDownloadCodeZip = async () => {
 		if (!activeSectionId) return;
-		if (viewMode === "assignment") {
-			if (!selectedAssignment) {
+		setZipExportLoading(true);
+		try {
+			if (viewMode === "assignment") {
+				if (!selectedAssignment) {
+					try {
+						const blob = await APIService.exportAllAssignmentSubmissionCodesZip(
+							activeSectionId,
+						);
+						const url = URL.createObjectURL(blob);
+						const link = document.createElement("a");
+						link.href = url;
+						link.download = `section_${activeSectionId}_all_assignments_submission_codes.zip`;
+						document.body.appendChild(link);
+						link.click();
+						document.body.removeChild(link);
+						URL.revokeObjectURL(url);
+					} catch (error) {
+						console.error("전체 과제 제출 코드 ZIP 다운로드 실패:", error);
+						alert("전체 과제 ZIP 다운로드에 실패했습니다.");
+					}
+					return;
+				}
 				try {
-					const blob = await APIService.exportAllAssignmentSubmissionCodesZip(
+					const blob = await APIService.exportAssignmentSubmissionCodesZip(
 						activeSectionId,
+						selectedAssignment.id,
 					);
 					const url = URL.createObjectURL(blob);
 					const link = document.createElement("a");
 					link.href = url;
-					link.download = `section_${activeSectionId}_all_assignments_submission_codes.zip`;
+					link.download = `assignment_${selectedAssignment.id}_submission_codes.zip`;
 					document.body.appendChild(link);
 					link.click();
 					document.body.removeChild(link);
 					URL.revokeObjectURL(url);
 				} catch (error) {
-					console.error("전체 과제 제출 코드 ZIP 다운로드 실패:", error);
-					alert("전체 과제 ZIP 다운로드에 실패했습니다.");
+					console.error("과제 제출 코드 ZIP 다운로드 실패:", error);
+					alert("ZIP 다운로드에 실패했습니다.");
 				}
 				return;
 			}
-			try {
-				const blob = await APIService.exportAssignmentSubmissionCodesZip(
-					activeSectionId,
-					selectedAssignment.id,
-				);
-				const url = URL.createObjectURL(blob);
-				const link = document.createElement("a");
-				link.href = url;
-				link.download = `assignment_${selectedAssignment.id}_submission_codes.zip`;
-				document.body.appendChild(link);
-				link.click();
-				document.body.removeChild(link);
-				URL.revokeObjectURL(url);
-			} catch (error) {
-				console.error("과제 제출 코드 ZIP 다운로드 실패:", error);
-				alert("ZIP 다운로드에 실패했습니다.");
-			}
-			return;
-		}
-		if (viewMode === "quiz") {
-			if (!selectedQuiz) {
+			if (viewMode === "quiz") {
+				if (!selectedQuiz) {
+					try {
+						const blob = await APIService.exportAllQuizSubmissionCodesZip(
+							activeSectionId,
+						);
+						const url = URL.createObjectURL(blob);
+						const link = document.createElement("a");
+						link.href = url;
+						link.download = `section_${activeSectionId}_all_quizzes_submission_codes.zip`;
+						document.body.appendChild(link);
+						link.click();
+						document.body.removeChild(link);
+						URL.revokeObjectURL(url);
+					} catch (error) {
+						console.error("전체 코딩테스트 제출 코드 ZIP 다운로드 실패:", error);
+						alert("전체 코딩테스트 ZIP 다운로드에 실패했습니다.");
+					}
+					return;
+				}
 				try {
-					const blob = await APIService.exportAllQuizSubmissionCodesZip(
+					const blob = await APIService.exportQuizSubmissionCodesZip(
 						activeSectionId,
+						selectedQuiz.id,
 					);
 					const url = URL.createObjectURL(blob);
 					const link = document.createElement("a");
 					link.href = url;
-					link.download = `section_${activeSectionId}_all_quizzes_submission_codes.zip`;
+					link.download = `quiz_${selectedQuiz.id}_submission_codes.zip`;
 					document.body.appendChild(link);
 					link.click();
 					document.body.removeChild(link);
 					URL.revokeObjectURL(url);
 				} catch (error) {
-					console.error("전체 코딩테스트 제출 코드 ZIP 다운로드 실패:", error);
-					alert("전체 코딩테스트 ZIP 다운로드에 실패했습니다.");
+					console.error("퀴즈 제출 코드 ZIP 다운로드 실패:", error);
+					alert("ZIP 다운로드에 실패했습니다.");
 				}
-				return;
 			}
-			try {
-				const blob = await APIService.exportQuizSubmissionCodesZip(
-					activeSectionId,
-					selectedQuiz.id,
-				);
-				const url = URL.createObjectURL(blob);
-				const link = document.createElement("a");
-				link.href = url;
-				link.download = `quiz_${selectedQuiz.id}_submission_codes.zip`;
-				document.body.appendChild(link);
-				link.click();
-				document.body.removeChild(link);
-				URL.revokeObjectURL(url);
-			} catch (error) {
-				console.error("퀴즈 제출 코드 ZIP 다운로드 실패:", error);
-				alert("ZIP 다운로드에 실패했습니다.");
-			}
+		} finally {
+			setZipExportLoading(false);
 		}
 	};
 
@@ -332,6 +340,18 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		);
 	}, [showLateOnly, filteredCourseStudents, scopedCourseGradesByLate, isLateFullProblem]);
 
+	const problemFilterOptions = useMemo(() => {
+		if (!grades.length || !grades[0]?.problemGrades?.length) return [];
+		return grades[0].problemGrades.map((p) => ({
+			problemId: p.problemId,
+			problemTitle: p.problemTitle,
+		}));
+	}, [grades]);
+
+	const problemFilterSelectDisabled =
+		(viewMode === "assignment" && !selectedAssignment) ||
+		(viewMode === "quiz" && !selectedQuiz);
+
 	if (loading && !grades.length) {
 		return (
 			<TutorLayout selectedSection={currentSection}>
@@ -347,6 +367,21 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 
 	return (
 		<TutorLayout selectedSection={currentSection}>
+			{zipExportLoading ? (
+				<S.FullScreenLoadingOverlay aria-live="polite">
+					<S.LoadingSpinner
+						style={{
+							borderColor: "rgba(248, 250, 252, 0.25)",
+							borderTopColor: "#e2e8f0",
+						}}
+					/>
+					<S.FullScreenLoadingText>
+						제출 코드 ZIP 파일을 만드는 중입니다.
+						<br />
+						제출 수가 많으면 1~2분 걸릴 수 있습니다.
+					</S.FullScreenLoadingText>
+				</S.FullScreenLoadingOverlay>
+			) : null}
 			{sectionId && currentSection && (
 				<SectionNavigation
 					sectionId={sectionId}
@@ -377,6 +412,10 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					onShowStatsModal={() => setShowStatsModal(true)}
 					onExportCSV={handleExportCSV}
 					onDownloadCodeZip={handleDownloadCodeZip}
+					problemFilterId={singleItemProblemFilterId}
+					onProblemFilterChange={setSingleItemProblemFilterId}
+					problemFilterOptions={problemFilterOptions}
+					problemFilterDisabled={problemFilterSelectDisabled}
 				/>
 
 				{/* 성적 테이블 - 수업 전체 / 전체 과제 / 전체 퀴즈: CourseTable(고정 열+가로 스크롤); 과제·퀴즈 선택 시 해당 테이블 */}
@@ -470,6 +509,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						onToggleTotalOnly={setTotalOnly}
 						showLateOnly={showLateOnly}
 						onToggleShowLateOnly={setShowLateOnly}
+						problemFilterId={singleItemProblemFilterId}
 					/>
 				) : selectedQuiz && viewMode === "quiz" ? (
 					<S.CourseTableContainer>
@@ -497,6 +537,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						onToggleTotalOnly={setTotalOnly}
 						showLateOnly={showLateOnly}
 						onToggleShowLateOnly={setShowLateOnly}
+						problemFilterId={singleItemProblemFilterId}
 					/>
 				) : selectedAssignment ? (
 					<S.CourseTableContainer>

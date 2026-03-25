@@ -152,6 +152,8 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 		const t = totalCount ?? total;
 		const isQuizScoring =
 			score !== undefined && points !== undefined;
+		/** 코테 배점 1/1 대신 테스트케이스 n/m만 강조 (목록이 있을 때) */
+		const showQuizPointsLine = isQuizScoring && !(hasOutputList && t > 0);
 
 		if (result === "AC") {
 			const details: string[] = hasOutputList
@@ -160,7 +162,7 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 						`메모리 사용: ${formatMemory(Math.max(...outputList!.map((t) => t.memory_used || 0)))}`,
 					]
 				: [];
-			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
+			if (showQuizPointsLine) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "success" as const,
 				title: "정답",
@@ -176,7 +178,7 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 						`첫 번째 실패: 테스트케이스 #${outputList!.find((tc) => tc.result !== "correct")?.testcase_rank || 1}`,
 					]
 				: ["테스트하기를 통해 테스트케이스를 확인하세요."];
-			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
+			if (showQuizPointsLine) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "error" as const,
 				title: "오답",
@@ -187,7 +189,7 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 			};
 		} else if (result === "TLE") {
 			const details = ["실행 시간을 단축해보세요"];
-			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
+			if (showQuizPointsLine) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "warning" as const,
 				title: "시간 초과",
@@ -198,7 +200,7 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 			};
 		} else if (result === "MLE") {
 			const details = ["메모리 사용량을 줄여보세요"];
-			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
+			if (showQuizPointsLine) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "warning" as const,
 				title: "메모리 초과",
@@ -209,7 +211,7 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 			};
 		} else if (result === "RE") {
 			const details = ["코드 로직을 다시 확인해보세요"];
-			if (isQuizScoring) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
+			if (showQuizPointsLine) details.push(`획득 점수: ${score!.toFixed(1)}/${points}점`);
 			return {
 				type: "error" as const,
 				title: "런타임 에러",
@@ -220,7 +222,7 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 			};
 		} else if (result === "CE") {
 			const details = ["문법 오류를 확인해보세요"];
-			if (isQuizScoring) details.push(`획득 점수: 0/${points}점`);
+			if (showQuizPointsLine) details.push(`획득 점수: 0/${points}점`);
 			return {
 				type: "error" as const,
 				title: "컴파일 에러",
@@ -324,17 +326,10 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 								);
 								const p = submissionResult.passedCount ?? passed;
 								const t = submissionResult.totalCount ?? total;
-								const hasScore =
-									submissionResult.score !== undefined &&
-									submissionResult.points !== undefined;
 								return (
 									<S.TestcasesSection>
 										<S.TestcasesHeader>
-											<strong>
-												테스트케이스 결과: {p}/{t}
-												{hasScore &&
-													` | 획득 점수: ${submissionResult.score!.toFixed(1)}/${submissionResult.points}점`}
-											</strong>
+											<strong>테스트케이스 결과: {p}/{t}</strong>
 										</S.TestcasesHeader>
 
 										<S.TestcaseButtons>

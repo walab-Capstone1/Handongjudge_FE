@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import TutorLayout from "../../../../layouts/TutorLayout";
 import SectionNavigation from "../../../../components/Navigation/SectionNavigation";
+import LoadingSpinner from "../../../../components/UI/LoadingSpinner";
 import APIService from "../../../../services/APIService";
 import type { AssignmentItem, ProblemGrade, QuizItem } from "../GradeManagement/types";
 
@@ -62,6 +63,17 @@ function getLateMs(submittedAt?: string, dueAt?: string): number {
 
 function toResultLabel(pg: ProblemGrade): string {
 	if (!pg.submitted) return "미제출";
+	const tcTotal = pg.totalTestCaseCount;
+	const tcPassed = pg.passedTestCaseCount;
+	if (
+		typeof tcTotal === "number" &&
+		tcTotal > 0 &&
+		typeof tcPassed === "number"
+	) {
+		const ratio = `${tcPassed}/${tcTotal}`;
+		if (pg.isOnTime === false) return `${ratio} · 지각`;
+		return ratio;
+	}
 	const score = Number(pg.score ?? 0);
 	const points = Number(pg.points ?? 0);
 	if (points <= 0) return pg.isOnTime === false ? "제출·지각" : "제출";
@@ -144,6 +156,25 @@ const sortButtonStyle: React.CSSProperties = {
 	cursor: "pointer",
 };
 
+const blockingOverlayStyle: React.CSSProperties = {
+	position: "fixed",
+	inset: 0,
+	zIndex: 10000,
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	background: "rgba(15, 23, 42, 0.5)",
+	backdropFilter: "blur(2px)",
+};
+
+const loadingPanelStyle: React.CSSProperties = {
+	background: "#fff",
+	padding: "2rem 2.5rem",
+	borderRadius: 12,
+	boxShadow: "0 20px 50px rgba(0, 0, 0, 0.2)",
+	minWidth: 280,
+};
+
 const GradeCodeCollectionPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { sectionId } = useParams<{ sectionId: string }>();
@@ -192,7 +223,11 @@ const GradeCodeCollectionPage: React.FC = () => {
 					(assignment as { deadline?: string } | undefined)?.deadline;
 				setTitle(assignment?.title ?? "과제");
 
-				const gradesResponse = await APIService.getAssignmentGrades(sectionId, itemId);
+				const gradesResponse = await APIService.getAssignmentGrades(
+					sectionId,
+					itemId,
+					{ includeTestCaseResults: true },
+				);
 				const gradesData = gradesResponse?.data ?? gradesResponse ?? [];
 				const allRows: SubmissionCodeRow[] = [];
 				for (const student of Array.isArray(gradesData)
@@ -232,7 +267,9 @@ const GradeCodeCollectionPage: React.FC = () => {
 			const dueAt = quiz?.endTime;
 			setTitle(quiz?.title ?? "퀴즈");
 
-			const gradesResponse = await APIService.getQuizGrades(sectionId, itemId);
+			const gradesResponse = await APIService.getQuizGrades(sectionId, itemId, {
+				includeTestCaseResults: true,
+			});
 			const gradesData = gradesResponse?.data ?? gradesResponse ?? [];
 			const allRows: SubmissionCodeRow[] = [];
 			for (const student of Array.isArray(gradesData)
@@ -343,6 +380,16 @@ const GradeCodeCollectionPage: React.FC = () => {
 		}));
 	}, [rows]);
 
+	const gatheringCodes = useMemo(
+		() =>
+			!loading &&
+			rows.length > 0 &&
+			rows.some((r) => !r.code && !r.codeError),
+		[loading, rows],
+	);
+
+	const showBlockingOverlay = loading || gatheringCodes;
+
 	const filteredRows = useMemo(() => {
 		const q = query.trim().toLowerCase();
 		const searched = !q
@@ -402,6 +449,20 @@ const GradeCodeCollectionPage: React.FC = () => {
 
 	return (
 		<TutorLayout selectedSection={null}>
+			{showBlockingOverlay ? (
+				<div style={blockingOverlayStyle} aria-live="polite" aria-busy="true">
+					<div style={loadingPanelStyle}>
+						<LoadingSpinner
+							size="lg"
+							message={
+								loading
+									? "제출 목록을 불러오는 중..."
+									: "제출 코드를 모두 가져오는 중입니다. 제출 건수가 많으면 시간이 걸릴 수 있습니다."
+							}
+						/>
+					</div>
+				</div>
+			) : null}
 			{sectionId && currentSectionName ? (
 				<SectionNavigation
 					sectionId={sectionId}
@@ -446,9 +507,7 @@ const GradeCodeCollectionPage: React.FC = () => {
 					</div>
 				</div>
 
-				{loading ? (
-					<p>데이터를 불러오는 중...</p>
-				) : filteredRows.length === 0 ? (
+				{showBlockingOverlay ? null : filteredRows.length === 0 ? (
 					<p>제출된 코드가 없습니다.</p>
 				) : (
 					<div style={{ overflowX: "auto" }}>

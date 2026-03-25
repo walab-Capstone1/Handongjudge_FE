@@ -7,6 +7,10 @@ import {
 	GradeProblemCellDisplay,
 	GradeStatusLegendBar,
 } from "./GradeProblemCellDisplay";
+import {
+	getVisibleProblemColumns,
+	getTotalsForVisibleProblemColumns,
+} from "../utils/gradeTableProblemFilter";
 
 export interface GradeManagementQuizTableProps {
 	grades: StudentGradeRow[];
@@ -34,6 +38,7 @@ export interface GradeManagementQuizTableProps {
 	onToggleTotalOnly?: (v: boolean) => void;
 	showLateOnly?: boolean;
 	onToggleShowLateOnly?: (v: boolean) => void;
+	problemFilterId?: number | null;
 }
 
 export default function GradeManagementQuizTable({
@@ -55,6 +60,7 @@ export default function GradeManagementQuizTable({
 	onToggleTotalOnly,
 	showLateOnly = false,
 	onToggleShowLateOnly,
+	problemFilterId = null,
 }: GradeManagementQuizTableProps) {
 	if (grades.length === 0) {
 		return (
@@ -67,6 +73,7 @@ export default function GradeManagementQuizTable({
 	}
 
 	const problemGrades = grades[0]?.problemGrades ?? [];
+	const visibleProblems = getVisibleProblemColumns(grades, problemFilterId);
 	const quizTitle = selectedQuiz?.title ?? "퀴즈";
 	const quizDueAt = selectedQuiz?.endTime;
 
@@ -84,7 +91,7 @@ export default function GradeManagementQuizTable({
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
 					<col style={{ width: S.STICKY_COL_2_WIDTH }} />
 					{!totalOnly &&
-						problemGrades.map((p) => (
+						visibleProblems.map((p) => (
 							<col key={p.problemId} style={{ width: S.COL_PROBLEM_WIDTH }} />
 						))}
 					<col style={{ width: S.COL_SCORE_WIDTH }} />
@@ -120,7 +127,7 @@ export default function GradeManagementQuizTable({
 							/>
 						</S.SortableStudentHeaderTh>
 						{!totalOnly && (
-							<S.CourseQuizHeader as="th" colSpan={problemGrades.length + 1}>
+							<S.CourseQuizHeader as="th" colSpan={visibleProblems.length + 1}>
 								<div>
 									<S.ItemTitle>
 										<S.ItemTypeBadge>퀴즈</S.ItemTypeBadge>
@@ -134,7 +141,7 @@ export default function GradeManagementQuizTable({
 					</tr>
 					{!totalOnly && (
 						<tr>
-							{problemGrades.map((p) => (
+							{visibleProblems.map((p) => (
 								<S.ProblemHeader key={p.problemId} as="th">
 									{onProblemDetail ? (
 										<button
@@ -167,23 +174,36 @@ export default function GradeManagementQuizTable({
 				</thead>
 				<tbody>
 					{filteredGrades.map((student) => {
-						const totalScore = student.totalScore ?? 0;
-						const totalPoints = student.totalPoints ?? 0;
+						const { score: totalScore, points: totalPoints } =
+							getTotalsForVisibleProblemColumns(
+								student,
+								problemFilterId,
+								visibleProblems,
+							);
 						return (
 							<tr key={student.userId}>
 								<S.TdStudentName>{student.studentName}</S.TdStudentName>
 								<S.TdStudentId>{student.studentId}</S.TdStudentId>
 								{!totalOnly &&
-									student.problemGrades?.map((problem) => (
-										<S.TdCourseProblemCell key={problem.problemId}>
-											<GradeProblemCellDisplay
-												problem={problem}
-												fallbackPoints={problem.points ?? 1}
-											dueAt={quizDueAt}
-											showLateOnly={showLateOnly}
-											/>
-										</S.TdCourseProblemCell>
-									))}
+									visibleProblems.map((col) => {
+										const problem = student.problemGrades?.find(
+											(pg) => pg.problemId === col.problemId,
+										);
+										return (
+											<S.TdCourseProblemCell key={col.problemId}>
+												{problem ? (
+													<GradeProblemCellDisplay
+														problem={problem}
+														fallbackPoints={problem.points ?? 1}
+														dueAt={quizDueAt}
+														showLateOnly={showLateOnly}
+													/>
+												) : (
+													<span style={{ color: "#94a3b8" }}>—</span>
+												)}
+											</S.TdCourseProblemCell>
+										);
+									})}
 								{!totalOnly && (
 									<S.TdCourseAssignmentTotalCell>
 										<strong>

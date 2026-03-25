@@ -20,6 +20,10 @@ export interface GradeManagementHeaderProps {
 	onShowStatsModal: () => void;
 	onExportCSV: () => void;
 	onDownloadCodeZip: () => void;
+	problemFilterId: number | null;
+	onProblemFilterChange: (problemId: number | null) => void;
+	problemFilterOptions: { problemId: number; problemTitle?: string }[];
+	problemFilterDisabled: boolean;
 }
 
 export default function GradeManagementHeader({
@@ -39,6 +43,10 @@ export default function GradeManagementHeader({
 	onShowStatsModal,
 	onExportCSV,
 	onDownloadCodeZip,
+	problemFilterId,
+	onProblemFilterChange,
+	problemFilterOptions,
+	problemFilterDisabled,
 }: GradeManagementHeaderProps) {
 	const showActionButtons =
 		(viewMode === "assignment" && assignments.length > 0) ||
@@ -59,50 +67,82 @@ export default function GradeManagementHeader({
 				{sectionId &&
 					(assignments.length > 0 || quizzes.length > 0) &&
 					(viewMode === "assignment" || viewMode === "quiz") && (
-						<S.FilterGroup>
-							<S.FilterLabel htmlFor="grade-item-select">
-								{viewMode === "assignment" ? "과제 선택" : "코딩테스트 선택"}
-							</S.FilterLabel>
-							<S.AssignmentSelect
-								id="grade-item-select"
-								value={
-									viewMode === "assignment"
-										? (selectedAssignment?.id ?? "")
-										: (selectedQuiz?.id ?? "")
-								}
-								onChange={(e) => {
-									const val = e.target.value;
-									if (viewMode === "assignment") {
-										const a = assignments.find(
-											(a) => a.id === Number.parseInt(val, 10),
-										);
-										setSelectedAssignment(a ?? null);
-										setSelectedQuiz(null);
-									} else {
-										const q = quizzes.find(
-											(q) => q.id === Number.parseInt(val, 10),
-										);
-										setSelectedQuiz(q ?? null);
-										setSelectedAssignment(null);
+						<>
+							<S.FilterGroup>
+								<S.FilterLabel htmlFor="grade-item-select">
+									{viewMode === "assignment" ? "과제 선택" : "코딩테스트 선택"}
+								</S.FilterLabel>
+								<S.AssignmentSelect
+									id="grade-item-select"
+									value={
+										viewMode === "assignment"
+											? (selectedAssignment?.id ?? "")
+											: (selectedQuiz?.id ?? "")
 									}
-								}}
-							>
-								<option value="">
-									전체 {viewMode === "assignment" ? "과제" : "코딩테스트"}
-								</option>
-								{viewMode === "assignment"
-									? assignments.map((a) => (
-											<option key={a.id} value={a.id}>
-												{a.title}
-											</option>
-										))
-									: quizzes.map((q) => (
-											<option key={q.id} value={q.id}>
-												{q.title}
-											</option>
-										))}
-							</S.AssignmentSelect>
-						</S.FilterGroup>
+									onChange={(e) => {
+										const val = e.target.value;
+										if (viewMode === "assignment") {
+											const a = assignments.find(
+												(a) => a.id === Number.parseInt(val, 10),
+											);
+											setSelectedAssignment(a ?? null);
+											setSelectedQuiz(null);
+										} else {
+											const q = quizzes.find(
+												(q) => q.id === Number.parseInt(val, 10),
+											);
+											setSelectedQuiz(q ?? null);
+											setSelectedAssignment(null);
+										}
+									}}
+								>
+									<option value="">
+										전체 {viewMode === "assignment" ? "과제" : "코딩테스트"}
+									</option>
+									{viewMode === "assignment"
+										? assignments.map((a) => (
+												<option key={a.id} value={a.id}>
+													{a.title}
+												</option>
+											))
+										: quizzes.map((q) => (
+												<option key={q.id} value={q.id}>
+													{q.title}
+												</option>
+											))}
+								</S.AssignmentSelect>
+							</S.FilterGroup>
+							<S.FilterGroup>
+								<S.FilterLabel htmlFor="grade-problem-filter">문제 필터</S.FilterLabel>
+								<S.AssignmentSelect
+									id="grade-problem-filter"
+									disabled={problemFilterDisabled}
+									value={problemFilterDisabled ? "" : (problemFilterId ?? "")}
+									onChange={(e) =>
+										onProblemFilterChange(
+											e.target.value ? Number(e.target.value) : null,
+										)
+									}
+								>
+									{problemFilterDisabled ? (
+										<option value="">
+											{viewMode === "assignment"
+												? "과제를 먼저 선택하세요"
+												: "코딩테스트를 먼저 선택하세요"}
+										</option>
+									) : (
+										<>
+											<option value="">전체 문제</option>
+											{problemFilterOptions.map((p) => (
+												<option key={p.problemId} value={p.problemId}>
+													{p.problemTitle ?? `문제 ${p.problemId}`}
+												</option>
+											))}
+										</>
+									)}
+								</S.AssignmentSelect>
+							</S.FilterGroup>
+						</>
 					)}
 			</S.HeaderLeft>
 			<S.HeaderRight>

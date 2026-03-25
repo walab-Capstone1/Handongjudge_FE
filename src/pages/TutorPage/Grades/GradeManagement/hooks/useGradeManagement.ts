@@ -17,6 +17,26 @@ import type {
 	CodeResponse,
 	ProblemGrade,
 } from "../types";
+import {
+	assignmentDetailCacheKey,
+	buildGradeInputsFromRows,
+	courseAggregateCacheKey,
+	getCachedAssignmentDetail,
+	getCachedCourseAggregate,
+	getCachedQuizDetail,
+	invalidateSectionGradeCaches,
+	quizDetailCacheKey,
+	setCachedAssignmentDetail,
+	setCachedCourseAggregate,
+	setCachedQuizDetail,
+} from "../utils/gradeSessionCache";
+
+/** 과제/퀴즈 단일 성적 fetch 경합 시 이전 응답이 덮어쓰지 않도록 */
+let singleItemGradesFetchSeq = 0;
+
+/** 수업 전체 성적 병렬 fetch 경합·단일 항목 선택 시 무효화 */
+let courseAggregateFetchSeq = 0;
+let courseAggregateGeneration = 0;
 
 export function useGradeManagement() {
 	const { sectionId } = useParams<{ sectionId?: string }>();
@@ -77,66 +97,108 @@ export function useGradeManagement() {
 		timeLimit?: number;
 		memoryLimit?: number;
 	} | null>(null);
+	/** 과제·코딩테스트 단일 보기: 표시할 문제 열 (null = 전체) */
+	const [singleItemProblemFilterId, setSingleItemProblemFilterId] = useState<
+		number | null
+	>(null);
+	const prevCourseAggregateCancelKey = useRef("");
 
 	const fetchQuizGrades = useCallback(async () => {
 		if (!selectedQuiz || !sectionId) return;
+		const seq = ++singleItemGradesFetchSeq;
+		setSingleItemProblemFilterId(null);
+		const detailKey = quizDetailCacheKey(sectionId, selectedQuiz.id, true);
+		const cachedRows = getCachedQuizDetail(detailKey);
+		if (cachedRows) {
+			setGrades(cachedRows);
+			setGradeInputs(buildGradeInputsFromRows(cachedRows));
+			setComments({});
+			setLoading(false);
+			return;
+		}
+		setGrades([]);
 		try {
 			setLoading(true);
 			const response = await APIService.getQuizGrades(
 				sectionId,
 				selectedQuiz.id,
+				{ includeTestCaseResults: true },
 			);
+			if (seq !== singleItemGradesFetchSeq) return;
 			const gradesData = response?.data ?? response ?? [];
-			setGrades(Array.isArray(gradesData) ? gradesData : []);
-			const initialInputs: Record<string, number | ""> = {};
-			const initialComments: Record<string, string> = {};
-			for (const student of Array.isArray(gradesData) ? gradesData : []) {
-				for (const problem of student.problemGrades ?? []) {
-					const key = `${student.userId}-${problem.problemId}`;
-					if (problem.score !== null && problem.score !== undefined) {
-						initialInputs[key] = problem.score;
-					}
-				}
-			}
+			const rows = Array.isArray(gradesData) ? gradesData : [];
+			setGrades(rows);
+			setCachedQuizDetail(detailKey, rows);
+			const initialInputs = buildGradeInputsFromRows(rows);
+			if (seq !== singleItemGradesFetchSeq) return;
 			setGradeInputs(initialInputs);
-			setComments(initialComments);
+			setComments({});
 		} catch (error) {
 			console.error("퀴즈 성적 조회 실패:", error);
-			setGrades([]);
+			if (seq === singleItemGradesFetchSeq) {
+				setGrades([]);
+			}
 		} finally {
-			setLoading(false);
+			if (seq === singleItemGradesFetchSeq) {
+				setLoading(false);
+			}
 		}
 	}, [selectedQuiz, sectionId]);
 
 	const fetchGrades = useCallback(async () => {
 		if (!selectedAssignment || !sectionId) return;
+		const seq = ++singleItemGradesFetchSeq;
+		setSingleItemProblemFilterId(null);
+		const detailKey = assignmentDetailCacheKey(
+			sectionId,
+			selectedAssignment.id,
+			true,
+		);
+		const cachedRows = getCachedAssignmentDetail(detailKey);
+		if (cachedRows) {
+			setGrades(cachedRows);
+			setGradeInputs(buildGradeInputsFromRows(cachedRows));
+			setComments({});
+			setLoading(false);
+			return;
+		}
+		setGrades([]);
 		try {
 			setLoading(true);
 			const response = await APIService.getAssignmentGrades(
 				sectionId,
 				selectedAssignment.id,
+				{ includeTestCaseResults: true },
 			);
+			if (seq !== singleItemGradesFetchSeq) return;
 			const gradesData = response?.data ?? response ?? [];
-			setGrades(Array.isArray(gradesData) ? gradesData : []);
-			const initialInputs: Record<string, number | ""> = {};
-			const initialComments: Record<string, string> = {};
-			for (const student of Array.isArray(gradesData) ? gradesData : []) {
-				for (const problem of student.problemGrades ?? []) {
-					const key = `${student.userId}-${problem.problemId}`;
-					if (problem.score !== null && problem.score !== undefined) {
-						initialInputs[key] = problem.score;
-					}
-				}
-			}
+			const rows = Array.isArray(gradesData) ? gradesData : [];
+			setGrades(rows);
+			setCachedAssignmentDetail(detailKey, rows);
+			const initialInputs = buildGradeInputsFromRows(rows);
+			if (seq !== singleItemGradesFetchSeq) return;
 			setGradeInputs(initialInputs);
-			setComments(initialComments);
+			setComments({});
 		} catch (error) {
 			console.error("성적 조회 실패:", error);
-			setGrades([]);
+			if (seq === singleItemGradesFetchSeq) {
+				setGrades([]);
+			}
 		} finally {
-			setLoading(false);
+			if (seq === singleItemGradesFetchSeq) {
+				setLoading(false);
+			}
 		}
 	}, [selectedAssignment, sectionId]);
+
+	useEffect(() => {
+		if (viewMode === "assignment" && !selectedAssignment) {
+			setGrades([]);
+		}
+		if (viewMode === "quiz" && !selectedQuiz) {
+			setGrades([]);
+		}
+	}, [viewMode, selectedAssignment, selectedQuiz]);
 
 	useEffect(() => {
 		if (selectedAssignment && sectionId) {
@@ -156,6 +218,22 @@ export function useGradeManagement() {
 		if (!sectionId || (assignments.length === 0 && quizzes.length === 0)) {
 			return;
 		}
+		const mySeq = ++courseAggregateFetchSeq;
+		const genAtStart = courseAggregateGeneration;
+		const assignmentIds = assignments.map((a) => a.id);
+		const quizIds = quizzes.map((q) => q.id);
+		const aggregateKey = courseAggregateCacheKey(
+			sectionId,
+			assignmentIds,
+			quizIds,
+			false,
+		);
+		const cachedAggregate = getCachedCourseAggregate(aggregateKey);
+		if (cachedAggregate && genAtStart === courseAggregateGeneration) {
+			setCourseGrades(cachedAggregate);
+			setCourseLoading(false);
+			return;
+		}
 		try {
 			setCourseLoading(true);
 			const assignmentGradeResults = await Promise.all(
@@ -164,6 +242,7 @@ export function useGradeManagement() {
 						const response = await APIService.getAssignmentGrades(
 							sectionId,
 							assignment.id,
+							{ includeTestCaseResults: false },
 						);
 						const gradesData = response?.data ?? response ?? [];
 						return {
@@ -192,6 +271,7 @@ export function useGradeManagement() {
 						const gradesResponse = await APIService.getQuizGrades(
 							sectionId,
 							quiz.id,
+							{ includeTestCaseResults: false },
 						);
 						const quizGrades = gradesResponse?.data ?? gradesResponse ?? [];
 						const arr = Array.isArray(quizGrades) ? quizGrades : [];
@@ -414,15 +494,30 @@ export function useGradeManagement() {
 				}
 			}
 
-			setCourseGrades({
+			const nextCourse: CourseGradesData = {
 				items: courseItems,
 				students: Array.from(studentMap.values()),
-			});
+			};
+			if (
+				mySeq !== courseAggregateFetchSeq ||
+				genAtStart !== courseAggregateGeneration
+			) {
+				return;
+			}
+			setCourseGrades(nextCourse);
+			setCachedCourseAggregate(aggregateKey, nextCourse);
 		} catch (error) {
 			console.error("수업 전체 성적 조회 실패:", error);
-			setCourseGrades(null);
+			if (
+				mySeq === courseAggregateFetchSeq &&
+				genAtStart === courseAggregateGeneration
+			) {
+				setCourseGrades(null);
+			}
 		} finally {
-			setCourseLoading(false);
+			if (mySeq === courseAggregateFetchSeq) {
+				setCourseLoading(false);
+			}
 		}
 	}, [sectionId, assignments, quizzes]);
 
@@ -476,13 +571,25 @@ export function useGradeManagement() {
 	}, [fetchData]);
 
 	useEffect(() => {
+		const key = `${selectedAssignment?.id ?? ""}|${selectedQuiz?.id ?? ""}`;
 		if (
-			(viewMode === "course" ||
-				viewMode === "assignment" ||
-				viewMode === "quiz") &&
-			sectionId &&
-			(assignments.length > 0 || quizzes.length > 0)
+			key !== prevCourseAggregateCancelKey.current &&
+			(selectedAssignment != null || selectedQuiz != null)
 		) {
+			courseAggregateGeneration += 1;
+		}
+		prevCourseAggregateCancelKey.current = key;
+	}, [selectedAssignment, selectedQuiz]);
+
+	useEffect(() => {
+		const needCourseAggregate =
+			Boolean(sectionId) &&
+			(assignments.length > 0 || quizzes.length > 0) &&
+			(viewMode === "course" ||
+				((viewMode === "assignment" || viewMode === "quiz") &&
+					selectedAssignment == null &&
+					selectedQuiz == null));
+		if (needCourseAggregate) {
 			fetchCourseGrades();
 		}
 	}, [
@@ -490,6 +597,8 @@ export function useGradeManagement() {
 		sectionId,
 		assignments.length,
 		quizzes.length,
+		selectedAssignment,
+		selectedQuiz,
 		fetchCourseGrades,
 	]);
 
@@ -509,6 +618,7 @@ export function useGradeManagement() {
 					comment: comment || null,
 				};
 				await APIService.saveGrade(sectionId, selectedAssignment.id, gradeData);
+				invalidateSectionGradeCaches(sectionId);
 				await fetchGrades();
 				setEditingGrade(null);
 				alert("성적이 저장되었습니다.");
@@ -557,6 +667,7 @@ export function useGradeManagement() {
 					comment: comment || null,
 				};
 				await APIService.saveGrade(sectionId, assignmentId, gradeData);
+				invalidateSectionGradeCaches(sectionId);
 				await fetchCourseGrades();
 				setEditingGrade(null);
 				alert("성적이 저장되었습니다.");
@@ -662,6 +773,7 @@ export function useGradeManagement() {
 					comment: comment || null,
 				};
 				await APIService.saveQuizGrade(sectionId, selectedQuiz.id, gradeData);
+				invalidateSectionGradeCaches(sectionId);
 				await fetchQuizGrades();
 				setEditingGrade(null);
 				alert("성적이 저장되었습니다.");
@@ -691,6 +803,7 @@ export function useGradeManagement() {
 					comment: comment || null,
 				};
 				await APIService.saveQuizGrade(sectionId, quizId, gradeData);
+				invalidateSectionGradeCaches(sectionId);
 				await fetchCourseGrades();
 				setEditingGrade(null);
 				alert("성적이 저장되었습니다.");
@@ -1290,6 +1403,7 @@ export function useGradeManagement() {
 					selectedQuiz.id,
 					bulkData,
 				);
+				invalidateSectionGradeCaches(sectionId);
 				await fetchQuizGrades();
 			} else if (selectedAssignment) {
 				await APIService.saveBulkGrades(
@@ -1297,6 +1411,7 @@ export function useGradeManagement() {
 					selectedAssignment.id,
 					bulkData,
 				);
+				invalidateSectionGradeCaches(sectionId);
 				await fetchGrades();
 			}
 			setShowBulkModal(false);
@@ -1641,6 +1756,7 @@ export function useGradeManagement() {
 					}
 				}
 				if (savedCount > 0) {
+					invalidateSectionGradeCaches(sectionId);
 					await fetchCourseGrades();
 					if (viewMode === "assignment" && selectedAssignment) {
 						await fetchGrades();
@@ -1693,6 +1809,7 @@ export function useGradeManagement() {
 					selectedQuiz.id,
 					problemPoints,
 				);
+				invalidateSectionGradeCaches(sectionId);
 				await fetchQuizGrades();
 				alert("배점이 저장되었습니다.");
 			} else if (selectedAssignment && assignmentProblems.length > 0) {
@@ -1727,6 +1844,7 @@ export function useGradeManagement() {
 					selectedAssignment.id,
 					problemPoints,
 				);
+				invalidateSectionGradeCaches(sectionId);
 				await fetchGrades();
 				alert("배점이 저장되었습니다.");
 			} else {
@@ -1987,6 +2105,8 @@ export function useGradeManagement() {
 		problemDetail,
 		openProblemDetail,
 		closeProblemDetailModal,
+		singleItemProblemFilterId,
+		setSingleItemProblemFilterId,
 	};
 }
 
