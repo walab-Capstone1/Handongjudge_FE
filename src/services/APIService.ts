@@ -40,8 +40,9 @@ class APIService {
 						return this.handleResponse(retryResponse);
 					}
 				} catch (refreshError) {
+					// 실제 사용 중 refresh 실패 → 사용자에게 알림 + 로그아웃 처리
 					console.error("토큰 갱신 실패:", refreshError);
-					tokenManager.clearTokens();
+					tokenManager.handleTokenExpired();
 					throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
 				}
 			}
