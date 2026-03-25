@@ -8,6 +8,10 @@ export interface Problem {
 	status: ProblemStatus;
 	/** 제출 시 마감일 이전 여부 (미제출이면 undefined) */
 	isOnTime?: boolean;
+	/** 제출 시각 ISO 문자열 (미제출이면 undefined) */
+	submittedAt?: string;
+	/** 지각 제출 시 마감 대비 늦은 분 수 (제시간/미제출이면 undefined) */
+	minutesLate?: number;
 }
 
 export interface Assignment {

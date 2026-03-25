@@ -97,6 +97,8 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 							formData={d.formData}
 							setFormData={d.setFormData}
 							enableFullEdit={d.enableFullEdit}
+							previewMode={d.previewMode}
+							setPreviewMode={d.setPreviewMode}
 							getDescriptionOnlyForPreview={d.getDescriptionOnlyForPreview}
 							getFullPreviewProps={d.getFullPreviewProps}
 							insertMarkdownText={d.insertMarkdownText}
@@ -125,6 +127,7 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 								showParsedTestCases={d.showParsedTestCases}
 								setShowParsedTestCases={d.setShowParsedTestCases}
 						handleTestcaseAdd={d.handleTestcaseAdd}
+							handleTestcaseAddManual={d.handleTestcaseAddManual}
 							handleTestcaseRemove={d.handleTestcaseRemove}
 							handleTestcaseChange={d.handleTestcaseChange}
 							handleParsedTestcaseRemove={d.handleParsedTestcaseRemove}

@@ -60,6 +60,8 @@ export function useProblemEdit() {
 	const [originalTimeLimit, setOriginalTimeLimit] = useState("");
 	const [originalMemoryLimit, setOriginalMemoryLimit] = useState("");
 	const [enableFullEdit, setEnableFullEdit] = useState(false);
+	/** "descriptionOnly" = 문제 설명만, "full" = 전체(입력/출력/예제 포함) */
+	const [previewMode, setPreviewMode] = useState<"descriptionOnly" | "full">("full");
 	const [parsedTestCases, setParsedTestCases] = useState<ParsedTestcase[]>([]);
 	const [showParsedTestCases, setShowParsedTestCases] = useState(false);
 
@@ -429,6 +431,26 @@ export function useProblemEdit() {
 		[formData.testcases, parsedTestCases],
 	);
 
+	const handleTestcaseAddManual = useCallback(() => {
+		const n =
+			formData.testcases.length +
+			parsedTestCases.length +
+			1;
+		setFormData((prev) => ({
+			...prev,
+			testcases: [
+				...prev.testcases,
+				{
+					name: `테스트케이스 ${n}`,
+					input: "",
+					output: "",
+					type: "secret" as const,
+					isNew: true,
+				},
+			],
+		}));
+	}, [formData.testcases.length, parsedTestCases.length]);
+
 	const handleTestcaseRemove = useCallback((index: number) => {
 		setFormData((prev) => ({
 			...prev,
@@ -766,11 +788,14 @@ export function useProblemEdit() {
 		addSampleInput,
 		removeSampleInput,
 		handleTestcaseAdd,
+		handleTestcaseAddManual,
 		handleTestcaseRemove,
 		handleTestcaseChange,
 		handleParsedTestcaseRemove,
 		handleParsedTestcaseChange,
 		getFullDescription,
+		previewMode,
+		setPreviewMode,
 		getDescriptionOnlyForPreview,
 		getFullPreviewProps,
 		insertMarkdownText,

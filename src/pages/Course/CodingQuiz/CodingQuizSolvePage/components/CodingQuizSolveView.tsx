@@ -78,6 +78,51 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 	return (
 		<DndProvider backend={HTML5Backend}>
 			<S.PageWrapper className={`problem-solve-page ${d.theme}`} $theme={d.theme}>
+				{/* 다른 환경에서 이미 시험 진행 중 - 강제 인계 확인 모달 */}
+				{d.examSessionConflict && (
+					<S.OverlayModal>
+						<S.OverlayModalBox>
+							<S.OverlayModalTitle>이미 다른 환경에서 시험 진행 중</S.OverlayModalTitle>
+							<S.OverlayModalDesc>
+								현재 다른 기기 또는 브라우저에서 이 시험이 진행 중입니다.
+								<br />
+								여기서 계속 진행하면 기존 세션이 종료됩니다.
+							</S.OverlayModalDesc>
+							<S.OverlayModalButtons>
+								<S.OverlayModalConfirm type="button" onClick={d.handleExamSessionTakeover}>
+									여기서 계속하기
+								</S.OverlayModalConfirm>
+								<S.OverlayModalCancel
+									type="button"
+									onClick={() => navigate(`/sections/${d.sectionId}/coding-quiz`)}
+								>
+									돌아가기
+								</S.OverlayModalCancel>
+							</S.OverlayModalButtons>
+						</S.OverlayModalBox>
+					</S.OverlayModal>
+				)}
+				{/* 다른 환경에서 세션을 인계해간 경우 */}
+				{d.examSessionTakenOver && (
+					<S.OverlayModal>
+						<S.OverlayModalBox>
+							<S.OverlayModalTitle>세션이 종료되었습니다</S.OverlayModalTitle>
+							<S.OverlayModalDesc>
+								다른 기기 또는 브라우저에서 동일한 계정으로 시험에 접속했습니다.
+								<br />
+								이 페이지에서는 더 이상 시험을 진행할 수 없습니다.
+							</S.OverlayModalDesc>
+							<S.OverlayModalButtons>
+								<S.OverlayModalCancel
+									type="button"
+									onClick={() => navigate(`/sections/${d.sectionId}/coding-quiz`)}
+								>
+									목록으로 돌아가기
+								</S.OverlayModalCancel>
+							</S.OverlayModalButtons>
+						</S.OverlayModalBox>
+					</S.OverlayModal>
+				)}
 				{d.showSaveModal && (
 					<S.SaveModal>
 						<S.SaveModalContent>

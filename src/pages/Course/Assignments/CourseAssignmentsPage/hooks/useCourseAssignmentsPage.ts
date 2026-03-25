@@ -31,13 +31,17 @@ export function useCourseAssignmentsPage() {
 	const [expandedAssignmentIds, setExpandedAssignmentIds] = useState<number[]>(
 		[],
 	);
+	/** 과제별 문제 목록 정렬: 기본(원래 순서) / 미해결 문제 / 해결 문제 (과제 id -> 정렬 방식) */
+	const [problemSortByAssignmentId, setProblemSortByAssignmentId] = useState<
+		Record<number, "original" | "solvedFirst" | "unsolvedFirst">
+	>({});
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const [isManager, setIsManager] = useState(false);
 	/** 알림 등에서 assignmentId 쿼리로 진입 시 한 번만 펼치기 위해 적용한 URL 값 (접은 뒤 다시 펼쳐지지 않도록) */
 	const expandedFromQueryRef = useRef<string | null>(null);
 
-	const fetchUserRole = useCallback(async () => {
-		if (!sectionId || !auth.user) return;
+	const fetchUserRole = useCallback(async (): Promise<string | null> => {
+		if (!sectionId || !auth.user) return null;
 
 		try {
 			const response = await APIService.getMyRoleInSection(Number(sectionId));
@@ -58,22 +62,24 @@ export function useCourseAssignmentsPage() {
 
 			setUserRole(role);
 			setIsManager(role === "ADMIN" || role === "TUTOR");
+			return role;
 		} catch (error) {
 			console.error("역할 조회 실패:", error);
 			setUserRole(null);
 			setIsManager(false);
+			return null;
 		}
 	}, [sectionId, auth.user]);
 
 	const fetchAssignmentsData = useCallback(async () => {
-		if (!sectionId || !auth.user) return;
+		const user = auth.user;
+		if (!sectionId || !user) return;
 
 		try {
 			setLoading(true);
 			setError(null);
 
-			// 사용자 역할 조회
-			await fetchUserRole();
+			const role = await fetchUserRole();
 
 			const sectionResponse = await APIService.getSectionInfo(sectionId);
 			const sectionData = sectionResponse.data || sectionResponse;
@@ -82,6 +88,19 @@ export function useCourseAssignmentsPage() {
 			const assignmentsResponse =
 				await APIService.getAssignmentsBySection(sectionId);
 			const assignmentsList = assignmentsResponse.data || assignmentsResponse;
+
+			// 수강생이 과제 목록을 열면 내 강의실(/courses) '새 과제' 뱃지용 읽음 처리
+			if (
+				role === "STUDENT" &&
+				Array.isArray(assignmentsList) &&
+				assignmentsList.length > 0
+			) {
+				await Promise.allSettled(
+					assignmentsList.map((a: { id: number }) =>
+						APIService.markAssignmentAsRead(a.id),
+					),
+				);
+			}
 
 			const assignmentsWithProgress = await Promise.all(
 				assignmentsList.map(
@@ -97,7 +116,7 @@ export function useCourseAssignmentsPage() {
 							try {
 								const statusResponse =
 									await APIService.getStudentAssignmentProblemsStatus(
-										auth.user!.id,
+										user.id,
 										sectionId,
 										assignment.id,
 									);
@@ -114,7 +133,13 @@ export function useCourseAssignmentsPage() {
 								}) => {
 									const statusEntry = problemsStatus.find(
 										(s: { problemId: number }) => s.problemId === problem.id,
-									) as { problemId: number; status: string; isOnTime?: boolean } | undefined;
+									) as {
+										problemId: number;
+										status: string;
+										isOnTime?: boolean;
+										submittedAt?: string;
+										minutesLate?: number;
+									} | undefined;
 									const raw = statusEntry
 										? statusEntry.status
 										: "NOT_SUBMITTED";
@@ -125,6 +150,12 @@ export function useCourseAssignmentsPage() {
 									const submitted =
 										problemStatus === "SUBMITTED" ||
 										problemStatus === "ACCEPTED";
+									const submittedAt =
+										statusEntry?.submittedAt != null
+											? typeof statusEntry.submittedAt === "string"
+												? statusEntry.submittedAt
+												: new Date(statusEntry.submittedAt).toISOString()
+											: undefined;
 									return {
 										id: problem.id,
 										title: problem.title,
@@ -132,6 +163,8 @@ export function useCourseAssignmentsPage() {
 										submitted,
 										status: problemStatus,
 										isOnTime: statusEntry?.isOnTime,
+										submittedAt,
+										minutesLate: statusEntry?.minutesLate,
 									};
 								},
 							);
@@ -211,6 +244,34 @@ export function useCourseAssignmentsPage() {
 		);
 	}, []);
 
+	/** 해당 과제의 문제 목록을 현재 정렬 설정에 따라 정렬 (기본: 원래 순서) */
+	const getSortedProblems = useCallback(
+		(assignment: Assignment) => {
+			const sort = problemSortByAssignmentId[assignment.id] ?? "original";
+			const list = [...(assignment.problems ?? [])];
+			if (sort === "original") return list;
+			const order = (p: Assignment["problems"][0]) =>
+				p.status === "ACCEPTED" ? 2 : p.status === "SUBMITTED" ? 1 : 0;
+			if (sort === "solvedFirst") {
+				list.sort((a, b) => order(b) - order(a));
+			} else {
+				list.sort((a, b) => order(a) - order(b));
+			}
+			return list;
+		},
+		[problemSortByAssignmentId],
+	);
+
+	const setProblemSortForAssignment = useCallback(
+		(assignmentId: number, value: "original" | "solvedFirst" | "unsolvedFirst") => {
+			setProblemSortByAssignmentId((prev) => ({
+				...prev,
+				[assignmentId]: value,
+			}));
+		},
+		[],
+	);
+
 	const formatDate = useCallback((dateString: string): string => {
 		if (!dateString) return "";
 		const date = new Date(dateString);
@@ -231,6 +292,32 @@ export function useCourseAssignmentsPage() {
 		const hours = String(date.getHours()).padStart(2, "0");
 		const minutes = String(date.getMinutes()).padStart(2, "0");
 		return `${year}.${month}.${day} ${hours}:${minutes}`;
+	}, []);
+
+	/** 제출 시각을 "YYYY.MM.DD HH:mm"으로 표시 */
+	const formatSubmissionTime = useCallback((dateString: string | undefined): string => {
+		if (!dateString?.trim()) return "";
+		const date = new Date(dateString);
+		if (Number.isNaN(date.getTime())) return "";
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, "0");
+		const day = String(date.getDate()).padStart(2, "0");
+		const hours = String(date.getHours()).padStart(2, "0");
+		const minutes = String(date.getMinutes()).padStart(2, "0");
+		return `${year}.${month}.${day} ${hours}:${minutes}`;
+	}, []);
+
+	/** 지각 분 수를 "N일 N시간 N분 늦음" 형식으로 표시 (0인 단위는 생략) */
+	const formatMinutesLate = useCallback((totalMinutes: number): string => {
+		if (totalMinutes < 0) return "";
+		const days = Math.floor(totalMinutes / (60 * 24));
+		const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+		const mins = totalMinutes % 60;
+		const parts: string[] = [];
+		if (days > 0) parts.push(`${days}일`);
+		if (hours > 0) parts.push(`${hours}시간`);
+		if (mins > 0 || parts.length === 0) parts.push(`${mins}분`);
+		return `${parts.join(" ")} 늦음`;
 	}, []);
 
 	const handleMenuClick = useCallback(
@@ -270,6 +357,9 @@ export function useCourseAssignmentsPage() {
 		isSidebarCollapsed,
 		sectionInfo,
 		assignments,
+		getSortedProblems,
+		problemSortByAssignmentId,
+		setProblemSortForAssignment,
 		expandedAssignmentIds,
 		userRole,
 		isManager,
@@ -277,6 +367,8 @@ export function useCourseAssignmentsPage() {
 		toggleAssignment,
 		formatDate,
 		formatDeadline,
+		formatSubmissionTime,
+		formatMinutesLate,
 		handleMenuClick,
 		handleProblemClick,
 		handleToggleSidebar,

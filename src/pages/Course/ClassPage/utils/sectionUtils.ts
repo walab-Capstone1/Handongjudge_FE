@@ -3,15 +3,20 @@ import type { Section, CourseCardData, StatusItem, CardColor } from "../types";
 /**
  * section 데이터를 기반으로 상태 정보 생성
  */
+const countPositive = (v: unknown): boolean => {
+	const n = Number(v);
+	return Number.isFinite(n) && n > 0;
+};
+
 export const generateStatus = (section: Section): StatusItem[] => {
 	const status: StatusItem[] = [];
 
-	if (section.newNoticeCount > 0) {
-		status.push({ type: "announcement", text: `새로운 공지`, color: "green" });
+	if (countPositive(section.newNoticeCount)) {
+		status.push({ type: "announcement", text: "새로운 공지", color: "green" });
 	}
 
-	if (section.newAssignmentCount > 0) {
-		status.push({ type: "assignment", text: `새로운 과제`, color: "blue" });
+	if (countPositive(section.newAssignmentCount)) {
+		status.push({ type: "assignment", text: "새로운 과제", color: "blue" });
 	}
 
 	return status;

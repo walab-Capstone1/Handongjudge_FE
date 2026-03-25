@@ -36,6 +36,11 @@ export default function SuperAdminSubmissionManagementView(
 						}}
 					>
 						<option value="ALL">전체 결과</option>
+						<option value="AC">AC</option>
+						<option value="WA">WA</option>
+						<option value="RE">RE</option>
+						<option value="TLE">TLE</option>
+						<option value="CE">CE</option>
 						<option value="ACCEPTED">정답</option>
 						<option value="WRONG_ANSWER">오답</option>
 						<option value="RUNTIME_ERROR">런타임 에러</option>
@@ -70,7 +75,7 @@ export default function SuperAdminSubmissionManagementView(
 												fontSize: "0.75rem",
 												fontWeight: 600,
 												backgroundColor:
-													d.getResultColor(submission.result) + "20",
+													`${d.getResultColor(submission.result)}20`,
 												color: d.getResultColor(submission.result),
 											}}
 										>

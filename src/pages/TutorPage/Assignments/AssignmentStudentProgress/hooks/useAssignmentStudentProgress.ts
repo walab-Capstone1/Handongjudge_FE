@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
+import { compareStudentsByField } from "../../../../../utils/studentSort";
 import { useParams, useNavigate } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
 import type {
@@ -36,6 +38,13 @@ export function useAssignmentStudentProgress() {
 		Record<number, SubmissionStats>
 	>({});
 	const [progressSearchTerm, setProgressSearchTerm] = useState("");
+	const studentSortRef = useRef<{
+		key: StudentSortKey;
+		dir: StudentSortDir;
+	}>({ key: "studentName", dir: "asc" });
+	const [studentSort, setStudentSort] = useState(studentSortRef.current);
+	const studentSortKey = studentSort.key;
+	const studentSortDir = studentSort.dir;
 	const [showCodeModal, setShowCodeModal] = useState(false);
 	const [selectedCodeData, setSelectedCodeData] = useState<{
 		student: StudentProgress;
@@ -198,14 +207,43 @@ export function useAssignmentStudentProgress() {
 		[problems.length],
 	);
 
-	const filteredStudents = studentProgress.filter((student) => {
-		const matchesSearch =
-			student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
-		const status = getCompletionStatus(student);
-		const matchesStatus = filterStatus === "ALL" || status === filterStatus;
-		return matchesSearch && matchesStatus;
-	});
+	const toggleStudentSort = useCallback((key: StudentSortKey) => {
+		const prev = studentSortRef.current;
+		const next =
+			prev.key === key
+				? { key, dir: (prev.dir === "asc" ? "desc" : "asc") as StudentSortDir }
+				: { key, dir: "asc" as StudentSortDir };
+		studentSortRef.current = next;
+		setStudentSort(next);
+	}, []);
+
+	const filteredStudents = useMemo(() => {
+		const filtered = studentProgress.filter((student) => {
+			const matchesSearch =
+				student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
+			const status = getCompletionStatus(student);
+			const matchesStatus = filterStatus === "ALL" || status === filterStatus;
+			return matchesSearch && matchesStatus;
+		});
+		return [...filtered].sort((a, b) =>
+			compareStudentsByField(
+				a.studentName,
+				a.studentId,
+				b.studentName,
+				b.studentId,
+				studentSortKey,
+				studentSortDir,
+			),
+		);
+	}, [
+		studentProgress,
+		searchTerm,
+		filterStatus,
+		studentSortKey,
+		studentSortDir,
+		getCompletionStatus,
+	]);
 
 	const toggleProblem = useCallback((problemId: number) => {
 		setExpandedProblems((prev) => {
@@ -279,6 +317,9 @@ export function useAssignmentStudentProgress() {
 		loadingCode,
 		detailModalRef,
 		filteredStudents,
+		studentSortKey,
+		studentSortDir,
+		toggleStudentSort,
 		filteredProgressAssignments,
 		getCompletionStatus,
 		getProgressPercentage,

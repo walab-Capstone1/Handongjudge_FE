@@ -1,11 +1,14 @@
 import type React from "react";
 import CourseSidebar from "../../../../../components/Course/CourseSidebar";
-import CourseHeader from "../../../../../components/Course/CourseHeader";
+import CourseHeader, { dispatchOpenCourseList } from "../../../../../components/Course/CourseHeader";
 import LoadingSpinner from "../../../../../components/UI/LoadingSpinner";
 import * as S from "../styles";
-import { formatDeadline, formatDate } from "../utils/dateUtils";
+import { formatDeadline, formatDate, formatDeadlineShort, formatDeadlineUntil } from "../utils/dateUtils";
 import type { Notice, Assignment, TransformedNotification } from "../types";
 import type { CourseDashboardHookReturn } from "../hooks/useCourseDashboard";
+
+/** 우측 알림/과제/공지 목록에서 대시보드에 표시할 최대 개수 */
+const DASHBOARD_RIGHT_LIST_LIMIT = 5;
 
 interface CourseDashboardViewProps extends CourseDashboardHookReturn {}
 
@@ -26,6 +29,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 					activeMenu={d.activeMenu}
 					onMenuClick={d.handleMenuClick}
 					isCollapsed={d.isSidebarCollapsed}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<LoadingSpinner />
@@ -42,6 +46,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 					activeMenu={d.activeMenu}
 					onMenuClick={d.handleMenuClick}
 					isCollapsed={d.isSidebarCollapsed}
+					onToggleSidebar={d.handleToggleSidebar}
 				/>
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<S.ErrorMessage>
@@ -62,6 +67,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 				activeMenu={d.activeMenu}
 				onMenuClick={d.handleMenuClick}
 				isCollapsed={d.isSidebarCollapsed}
+				onToggleSidebar={d.handleToggleSidebar}
 			/>
 
 			<S.Content $isCollapsed={d.isSidebarCollapsed}>
@@ -83,12 +89,20 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 				<S.DashboardBody>
 					<S.LeftColumn>
 						<S.CourseSummaryCard>
-							<S.SummaryBackButton
-								type="button"
-								onClick={() => d.navigate("/courses")}
-							>
-								내 강의실로 돌아가기
-							</S.SummaryBackButton>
+							<S.SummaryBackRow>
+								<S.SummaryCourseChangeButton
+									type="button"
+									onClick={() => dispatchOpenCourseList()}
+								>
+									수업 변경
+								</S.SummaryCourseChangeButton>
+								<S.SummaryBackButton
+									type="button"
+									onClick={() => d.navigate("/courses")}
+								>
+									내 강의실로 돌아가기
+								</S.SummaryBackButton>
+							</S.SummaryBackRow>
 							<S.SummaryTitle>
 								{d.sectionInfo?.courseTitle ?? "수업"}
 								{d.sectionInfo?.sectionNumber != null &&
@@ -133,6 +147,18 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 										upcoming.map((assignment: Assignment) => {
 											const dDay = d.calculateDDay(assignment.endDate);
 											const isExpired = dDay !== null && dDay < 0;
+											const deadlineUntil = formatDeadlineUntil(assignment.endDate);
+											const hasProgress =
+												assignment.totalProblems != null &&
+												assignment.submittedProblems != null;
+											const progressPct =
+												hasProgress && (assignment.totalProblems ?? 0) > 0
+													? Math.round(
+															((assignment.submittedProblems ?? 0) /
+																(assignment.totalProblems ?? 1)) *
+																100,
+														)
+													: 0;
 											return (
 												<S.UpcomingDeadlineItem
 													key={assignment.id}
@@ -142,15 +168,35 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 													<S.UpcomingDeadlineTitle>
 														{assignment.title}
 													</S.UpcomingDeadlineTitle>
-													<S.UpcomingDeadlineDday $isExpired={isExpired}>
-														{dDay !== null
-															? dDay === 0
-																? "오늘 마감"
-																: dDay > 0
-																	? `D-${dDay}`
-																	: `D+${-dDay}`
-															: ""}
-													</S.UpcomingDeadlineDday>
+													<S.UpcomingDeadlineRightRow>
+														{deadlineUntil && (
+															<S.UpcomingDeadlineDeadline>
+																| {deadlineUntil}
+															</S.UpcomingDeadlineDeadline>
+														)}
+														{hasProgress && (
+															<>
+																<S.UpcomingDeadlineBar>
+																	<S.UpcomingDeadlineBarFill
+																		$progress={progressPct}
+																	/>
+																</S.UpcomingDeadlineBar>
+																<S.UpcomingDeadlineProgress>
+																	{assignment.submittedProblems}/
+																	{assignment.totalProblems}
+																</S.UpcomingDeadlineProgress>
+															</>
+														)}
+														<S.UpcomingDeadlineDday $isExpired={isExpired}>
+															{dDay !== null
+																? dDay === 0
+																	? "오늘 마감"
+																	: dDay > 0
+																		? `D-${dDay}`
+																		: `D+${-dDay}`
+																: ""}
+														</S.UpcomingDeadlineDday>
+													</S.UpcomingDeadlineRightRow>
 												</S.UpcomingDeadlineItem>
 											);
 										})
@@ -201,11 +247,20 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 
 					<S.RightColumn>
 						<S.Subsection>
-							<S.SubsectionTitle>알림</S.SubsectionTitle>
+							<S.SubsectionHeader>
+								<S.SubsectionTitle>알림</S.SubsectionTitle>
+								<S.SubsectionMoreLink
+									type="button"
+									onClick={() => d.navigate(`/sections/${d.sectionId}/alarm`)}
+								>
+									더보기 +
+								</S.SubsectionMoreLink>
+							</S.SubsectionHeader>
 							<S.ContentBox>
 								{(d.sectionNotifications ?? []).length > 0 ? (
-									(d.sectionNotifications ?? []).map(
-										(notification: TransformedNotification) => (
+									(d.sectionNotifications ?? [])
+										.slice(0, DASHBOARD_RIGHT_LIST_LIMIT)
+										.map((notification: TransformedNotification) => (
 											<S.NotificationItem
 												key={notification.id}
 												$isNew={notification.isNew}
@@ -226,8 +281,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 													)}
 												</S.NotificationText>
 											</S.NotificationItem>
-										),
-									)
+										))
 								) : (
 									<S.NoContent>
 										<span>새로운 알림이 없습니다.</span>
@@ -237,34 +291,44 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 						</S.Subsection>
 
 						<S.Subsection>
-							<S.SubsectionTitle>과제</S.SubsectionTitle>
+							<S.SubsectionHeader>
+								<S.SubsectionTitle>과제</S.SubsectionTitle>
+								<S.SubsectionMoreLink
+									type="button"
+									onClick={() => d.navigate(`/sections/${d.sectionId}/course-assignments`)}
+								>
+									더보기 +
+								</S.SubsectionMoreLink>
+							</S.SubsectionHeader>
 							<S.ContentBox>
 								{(d.sectionAssignments ?? []).length > 0 ? (
-									(d.sectionAssignments ?? []).map((assignment: Assignment) => {
-										const dDay = d.calculateDDay(assignment.endDate);
-										const isExpired = dDay !== null && dDay < 0;
-										return (
-											<S.AssignmentItem
-												key={assignment.id}
-												$isExpired={isExpired}
-												onClick={() => d.handleAssignmentClick(assignment)}
-											>
-												<S.AssignmentHeader>
-													<S.AssignmentTitle>
-														{assignment.title}
-													</S.AssignmentTitle>
-												</S.AssignmentHeader>
-												<S.AssignmentInfo>
-													<S.AssignmentSection>
-														{assignment.sectionName}
-													</S.AssignmentSection>
-													<S.AssignmentDeadline $isExpired={isExpired}>
-														{formatDeadline(assignment.endDate)}
-													</S.AssignmentDeadline>
-												</S.AssignmentInfo>
-											</S.AssignmentItem>
-										);
-									})
+									(d.sectionAssignments ?? [])
+										.slice(0, DASHBOARD_RIGHT_LIST_LIMIT)
+										.map((assignment: Assignment) => {
+											const dDay = d.calculateDDay(assignment.endDate);
+											const isExpired = dDay !== null && dDay < 0;
+											return (
+												<S.AssignmentItem
+													key={assignment.id}
+													$isExpired={isExpired}
+													onClick={() => d.handleAssignmentClick(assignment)}
+												>
+													<S.AssignmentHeader>
+														<S.AssignmentTitle>
+															{assignment.title}
+														</S.AssignmentTitle>
+													</S.AssignmentHeader>
+													<S.AssignmentInfo>
+														<S.AssignmentSection>
+															{assignment.sectionName}
+														</S.AssignmentSection>
+														<S.AssignmentDeadline $isExpired={isExpired}>
+															{formatDeadline(assignment.endDate)}
+														</S.AssignmentDeadline>
+													</S.AssignmentInfo>
+												</S.AssignmentItem>
+											);
+										})
 								) : (
 									<S.NoContent>
 										<span>과제가 없습니다.</span>
@@ -274,31 +338,41 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 						</S.Subsection>
 
 						<S.Subsection>
-							<S.SubsectionTitle>공지사항</S.SubsectionTitle>
+							<S.SubsectionHeader>
+								<S.SubsectionTitle>공지사항</S.SubsectionTitle>
+								<S.SubsectionMoreLink
+									type="button"
+									onClick={() => d.navigate(`/sections/${d.sectionId}/course-notices`)}
+								>
+									더보기 +
+								</S.SubsectionMoreLink>
+							</S.SubsectionHeader>
 							<S.ContentBox>
 								{(d.sectionNotices ?? []).length > 0 ? (
-									(d.sectionNotices ?? []).map((notice: Notice) => (
-										<S.NoticeItem
-											key={notice.id}
-											$isNew={notice.isNew}
-											onClick={() => d.handleNoticeClick(notice)}
-										>
-											<S.NoticeHeader>
-												{notice.isNew && <S.NewBadge>NEW</S.NewBadge>}
-												<S.NoticeTitle>{notice.title}</S.NoticeTitle>
-												{notice.sectionName && (
-													<S.NoticeSection>
-														{notice.sectionName}
-													</S.NoticeSection>
-												)}
-												{notice.createdAt && (
-													<S.NoticeDate>
-														{formatDate(notice.createdAt)}
-													</S.NoticeDate>
-												)}
-											</S.NoticeHeader>
-										</S.NoticeItem>
-									))
+									(d.sectionNotices ?? [])
+										.slice(0, DASHBOARD_RIGHT_LIST_LIMIT)
+										.map((notice: Notice) => (
+											<S.NoticeItem
+												key={notice.id}
+												$isNew={notice.isNew}
+												onClick={() => d.handleNoticeClick(notice)}
+											>
+												<S.NoticeHeader>
+													{notice.isNew && <S.NewBadge>NEW</S.NewBadge>}
+													<S.NoticeTitle>{notice.title}</S.NoticeTitle>
+													{notice.sectionName && (
+														<S.NoticeSection>
+															{notice.sectionName}
+														</S.NoticeSection>
+													)}
+													{notice.createdAt && (
+														<S.NoticeDate>
+															{formatDate(notice.createdAt)}
+														</S.NoticeDate>
+													)}
+												</S.NoticeHeader>
+											</S.NoticeItem>
+										))
 								) : (
 									<S.NoContent>
 										<span>공지사항이 없습니다.</span>

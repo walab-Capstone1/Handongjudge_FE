@@ -31,6 +31,8 @@ interface CourseCardProps {
 	onEnroll?: () => void;
 	/** true면 분반 배지 숨김 (예: /courses 참여한 수업 목록) */
 	hideBatch?: boolean;
+	/** 지정 시 카드 클릭 시 이 경로로 이동 (예: 관리 중인 수업 → /tutor/assignments/section/:id) */
+	overrideLinkPath?: string;
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({
@@ -39,10 +41,14 @@ const CourseCard: React.FC<CourseCardProps> = ({
 	showEnrollButton = false,
 	onEnroll,
 	hideBatch = false,
+	overrideLinkPath,
 }) => {
 	const navigate = useNavigate();
 
 	const getLinkPath = () => {
+		if (overrideLinkPath) {
+			return overrideLinkPath;
+		}
 		if (course.sectionId) {
 			return `/sections/${course.sectionId}/dashboard`;
 		}

@@ -61,6 +61,14 @@ export const HeaderActions = styled.div`
   flex-wrap: wrap;
 `;
 
+export const BulkToggleWrap = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  font-size: 0.875rem;
+`;
+
 /** 필터/검색 섹션 */
 export const FiltersSection = styled.div`
   display: flex;

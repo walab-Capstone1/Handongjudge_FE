@@ -1,11 +1,19 @@
 import type React from "react";
-import { FaCode, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from "react-icons/fa";
 import * as S from "../styles";
 import type { StudentGradeRow, EditingGrade, AssignmentItem } from "../types";
+import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
+import { SortableStudentColumnHeader } from "../../../../../components/SortableStudentColumnHeader";
+import {
+	GradeProblemCellDisplay,
+	GradeStatusLegendBar,
+} from "./GradeProblemCellDisplay";
 
 export interface GradeManagementAssignmentTableProps {
 	grades: StudentGradeRow[];
 	filteredGrades: StudentGradeRow[];
+	gradeSortKey: StudentSortKey;
+	gradeSortDir: StudentSortDir;
+	onSortStudentHeader: (key: StudentSortKey) => void;
 	selectedAssignment: AssignmentItem | null;
 	editingGrade: EditingGrade | null;
 	setEditingGrade: (v: EditingGrade | null) => void;
@@ -27,6 +35,9 @@ export interface GradeManagementAssignmentTableProps {
 export default function GradeManagementAssignmentTable({
 	grades,
 	filteredGrades,
+	gradeSortKey,
+	gradeSortDir,
+	onSortStudentHeader,
 	selectedAssignment,
 	editingGrade,
 	setEditingGrade,
@@ -41,18 +52,10 @@ export default function GradeManagementAssignmentTable({
 		grades[0]?.problemGrades && grades[0].problemGrades.length > 0;
 
 	const problemGradesForCol = grades[0]?.problemGrades ?? [];
-	const assignmentDue =
-		selectedAssignment?.dueDate ??
-		selectedAssignment?.endDate ??
-		selectedAssignment?.deadline;
-
 	return (
-		<S.CourseTableContainer>
-			<S.GradeLegend>
-				<span><FaCheckCircle style={{ color: "var(--color-success, #22c55e)", marginRight: 4 }} /> 제시간 제출</span>
-				<span><FaExclamationTriangle style={{ color: "var(--color-warning, #eab308)", marginRight: 4 }} /> 지각 제출</span>
-				<span><FaTimesCircle style={{ color: "var(--color-muted, #94a3b8)", marginRight: 4 }} /> 미제출</span>
-			</S.GradeLegend>
+		<S.GradeTablePageWrapper>
+			<GradeStatusLegendBar />
+			<S.GradeTableHorizontalScroll>
 			<S.CourseTableWithStickyRight>
 				<colgroup>
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
@@ -70,8 +73,32 @@ export default function GradeManagementAssignmentTable({
 					{hasProblems ? (
 						<>
 							<tr>
-								<th rowSpan={2}>학생</th>
-								<th rowSpan={2}>학번</th>
+								<S.SortableStudentHeaderTh
+									rowSpan={2}
+									scope="col"
+									onClick={() => onSortStudentHeader("studentName")}
+									title="이름순 정렬 (클릭 시 오름·내림)"
+								>
+									<SortableStudentColumnHeader
+										label="학생"
+										sortKey="studentName"
+										activeKey={gradeSortKey}
+										dir={gradeSortDir}
+									/>
+								</S.SortableStudentHeaderTh>
+								<S.SortableStudentHeaderTh
+									rowSpan={2}
+									scope="col"
+									onClick={() => onSortStudentHeader("studentId")}
+									title="학번순 정렬 (클릭 시 오름·내림)"
+								>
+									<SortableStudentColumnHeader
+										label="학번"
+										sortKey="studentId"
+										activeKey={gradeSortKey}
+										dir={gradeSortDir}
+									/>
+								</S.SortableStudentHeaderTh>
 								<S.CourseAssignmentHeader
 									as="th"
 									colSpan={problemGradesForCol.length}
@@ -114,8 +141,30 @@ export default function GradeManagementAssignmentTable({
 						</>
 					) : (
 						<tr>
-							<th>학생</th>
-							<th>학번</th>
+							<S.SortableStudentHeaderTh
+								scope="col"
+								onClick={() => onSortStudentHeader("studentName")}
+								title="이름순 정렬 (클릭 시 오름·내림)"
+							>
+								<SortableStudentColumnHeader
+									label="학생"
+									sortKey="studentName"
+									activeKey={gradeSortKey}
+									dir={gradeSortDir}
+								/>
+							</S.SortableStudentHeaderTh>
+							<S.SortableStudentHeaderTh
+								scope="col"
+								onClick={() => onSortStudentHeader("studentId")}
+								title="학번순 정렬 (클릭 시 오름·내림)"
+							>
+								<SortableStudentColumnHeader
+									label="학번"
+									sortKey="studentId"
+									activeKey={gradeSortKey}
+									dir={gradeSortDir}
+								/>
+							</S.SortableStudentHeaderTh>
 							<S.CourseAssignmentHeader as="th">
 								<S.ItemTitle>과제</S.ItemTitle>
 							</S.CourseAssignmentHeader>
@@ -136,43 +185,19 @@ export default function GradeManagementAssignmentTable({
 								{hasProblems ? (
 									student.problemGrades?.map((problem) => (
 										<S.TdCourseProblemCell key={problem.problemId}>
-											<S.ScoreDisplay>
-												<S.ScoreRow>
-													<S.ScoreValue>
-														{problem.score ?? 0} / {problem.points ?? 1}
-													</S.ScoreValue>
-													{problem.submitted && (
-														<button
-															type="button"
-															onClick={() =>
+											<GradeProblemCellDisplay
+												problem={problem}
+												fallbackPoints={problem.points ?? 1}
+												onViewCode={
+													problem.submitted
+														? () =>
 																handleViewCode(
 																	student.userId,
 																	problem.problemId,
 																)
-															}
-															title="코드 조회"
-														>
-															<FaCode />
-														</button>
-													)}
-													{(problem.submitted ||
-														(assignmentDue &&
-															new Date() > new Date(assignmentDue))) &&
-														(problem.submitted ? (
-															<S.SubmissionStatus $onTime={problem.isOnTime} $late={!problem.isOnTime}>
-																{problem.isOnTime ? (
-																	<FaCheckCircle title="제시간 제출" />
-																) : (
-																	<FaExclamationTriangle title="지각 제출" />
-																)}
-															</S.SubmissionStatus>
-														) : (
-															<S.SubmissionStatus $onTime={false} $late={false}>
-																<FaTimesCircle title="미제출" />
-															</S.SubmissionStatus>
-														))}
-												</S.ScoreRow>
-											</S.ScoreDisplay>
+														: undefined
+												}
+											/>
 										</S.TdCourseProblemCell>
 									))
 								) : (
@@ -200,6 +225,7 @@ export default function GradeManagementAssignmentTable({
 					})}
 				</tbody>
 			</S.CourseTableWithStickyRight>
-		</S.CourseTableContainer>
+			</S.GradeTableHorizontalScroll>
+		</S.GradeTablePageWrapper>
 	);
 }

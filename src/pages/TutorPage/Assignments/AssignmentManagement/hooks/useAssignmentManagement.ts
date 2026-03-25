@@ -372,6 +372,30 @@ export function useAssignmentManagement() {
 		[refetchAssignments],
 	);
 
+	const handleBulkToggleActive = useCallback(
+		async (targetActive: boolean) => {
+			if (!sectionId) return;
+			const list = assignments;
+			for (const a of list) {
+				if (a.active === targetActive) continue;
+				try {
+					await APIService.toggleAssignmentActive(
+						a.sectionId,
+						a.id,
+						targetActive,
+					);
+				} catch (error) {
+					console.error("과제 활성/비활성 변경 실패:", error);
+					alert("일부 과제 활성/비활성 변경에 실패했습니다.");
+					await refetchAssignments();
+					return;
+				}
+			}
+			await refetchAssignments();
+		},
+		[sectionId, assignments, refetchAssignments],
+	);
+
 	const handleAddProblem = useCallback(
 		async (assignment: Assignment) => {
 			setSelectedAssignment(assignment);
@@ -457,20 +481,11 @@ export function useAssignmentManagement() {
 		[selectedAssignment, refetchAssignments],
 	);
 
-	const existingProblemIds = new Set(
-		(selectedAssignment?.problems ?? []).map((p: { id: number }) => p.id),
-	);
-	const existingProblemTitles = new Set(
-		(selectedAssignment?.problems ?? [])
-			.map((p: { title?: string }) => p.title)
-			.filter(Boolean),
-	);
-
 	const filteredProblems = availableProblems.filter(
 		(problem: { id: number; title?: string }) =>
-			problem.title?.toLowerCase().includes(problemSearchTerm.toLowerCase()) &&
-			!existingProblemIds.has(problem.id) &&
-			!(problem.title && existingProblemTitles.has(problem.title)),
+			(problem.title ?? "")
+				.toLowerCase()
+				.includes(problemSearchTerm.toLowerCase()),
 	);
 
 	const handleProblemToggle = useCallback((problemId: number) => {
@@ -479,6 +494,10 @@ export function useAssignmentManagement() {
 				? prev.filter((id) => id !== problemId)
 				: [...prev, problemId],
 		);
+	}, []);
+
+	const clearProblemSelection = useCallback(() => {
+		setSelectedProblemIds([]);
 	}, []);
 
 	const handleSelectAllProblems = useCallback(() => {
@@ -603,7 +622,15 @@ export function useAssignmentManagement() {
 				const parsed = await APIService.parseZipFile(fd);
 				const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
 				const testcases = testCases.map(
-					(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+					(
+						tc: {
+							name?: string;
+							input?: string;
+							output?: string;
+							type?: string;
+						},
+						idx: number,
+					) => ({
 						name: tc.name ?? `testcase_${idx}`,
 						input: tc.input ?? "",
 						output: tc.output ?? "",
@@ -704,7 +731,15 @@ export function useAssignmentManagement() {
 				const parsed = await APIService.parseZipFile(fd);
 				const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
 				const testcases = testCases.map(
-					(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+					(
+						tc: {
+							name?: string;
+							input?: string;
+							output?: string;
+							type?: string;
+						},
+						idx: number,
+					) => ({
 						name: tc.name ?? `testcase_${idx}`,
 						input: tc.input ?? "",
 						output: tc.output ?? "",
@@ -840,7 +875,15 @@ export function useAssignmentManagement() {
 					const parsed = await APIService.parseZipFile(fd);
 					const testCases = parsed?.testCases ?? parsed?.testcases ?? [];
 					const testcases = testCases.map(
-						(tc: { name?: string; input?: string; output?: string; type?: string }, idx: number) => ({
+						(
+							tc: {
+								name?: string;
+								input?: string;
+								output?: string;
+								type?: string;
+							},
+							idx: number,
+						) => ({
 							name: tc.name ?? `testcase_${idx}`,
 							input: tc.input ?? "",
 							output: tc.output ?? "",
@@ -902,8 +945,10 @@ export function useAssignmentManagement() {
 			return matchSearch && matchSection;
 		})
 		.sort((a: Assignment, b: Assignment) => {
-			const dueA = a.dueDate ?? (a as Assignment & { endDate?: string }).endDate ?? "";
-			const dueB = b.dueDate ?? (b as Assignment & { endDate?: string }).endDate ?? "";
+			const dueA =
+				a.dueDate ?? (a as Assignment & { endDate?: string }).endDate ?? "";
+			const dueB =
+				b.dueDate ?? (b as Assignment & { endDate?: string }).endDate ?? "";
 			const timeA = dueA ? new Date(dueA).getTime() : Number.MAX_SAFE_INTEGER;
 			const timeB = dueB ? new Date(dueB).getTime() : Number.MAX_SAFE_INTEGER;
 			return timeA - timeB;
@@ -956,6 +1001,12 @@ export function useAssignmentManagement() {
 		(currentSection as { roleInSection?: string } | null)?.roleInSection ===
 		"TUTOR";
 
+	const sectionAssignments = sectionId ? assignments : [];
+	// 전체 활성화: 모든 항목이 비활성이면 OFF, 하나라도 활성이 있으면 ON
+	const sectionAllActive =
+		sectionAssignments.length > 0 &&
+		sectionAssignments.some((a: Assignment) => a.active !== false);
+
 	return {
 		loading,
 		sectionId,
@@ -980,6 +1031,7 @@ export function useAssignmentManagement() {
 		selectedAssignment,
 		showProblemModal,
 		setShowProblemModal,
+		availableProblems,
 		filteredProblems,
 		selectedProblemIds,
 		problemSearchTerm,
@@ -1024,6 +1076,8 @@ export function useAssignmentManagement() {
 		handleInputChange,
 		handleDelete,
 		handleToggleActive,
+		handleBulkToggleActive,
+		sectionAllActive,
 		handleAddProblem,
 		isAddingProblems,
 		isSubmittingAdd,
@@ -1034,6 +1088,7 @@ export function useAssignmentManagement() {
 		handleSectionChangeForProblem,
 		handleSelectProblem,
 		handleProblemToggle,
+		clearProblemSelection,
 		handleSelectAllProblems,
 		handleRemoveProblem,
 		handleCreateNewProblem,

@@ -103,6 +103,7 @@ export function useProblemCreate() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [parsedTestCases, setParsedTestCases] = useState<ParsedTestcase[]>([]);
+	const [manualTestCases, setManualTestCases] = useState<ParsedTestcase[]>([]);
 	const [showParsedTestCases, setShowParsedTestCases] = useState(false);
 	const [formData, setFormData] = useState<ProblemFormData>(initialFormData);
 	const [currentTag, setCurrentTag] = useState("");
@@ -380,6 +381,30 @@ export function useProblemCreate() {
 		setFieldErrors((prev) => ({ ...prev, testcases: false }));
 	}, []);
 
+	const handleManualTestcaseAdd = useCallback(() => {
+		setManualTestCases((prev) => [
+			...prev,
+			{ name: `테스트케이스 ${prev.length + 1}`, input: "", output: "", type: "secret" },
+		]);
+		setFieldErrors((prev) => ({ ...prev, testcases: false }));
+	}, []);
+
+	const handleManualTestcaseRemove = useCallback((index: number) => {
+		setManualTestCases((prev) => prev.filter((_, i) => i !== index));
+		setFieldErrors((prev) => ({ ...prev, testcases: false }));
+	}, []);
+
+	const handleManualTestcaseChange = useCallback(
+		(index: number, field: keyof ParsedTestcase, value: string) => {
+			setManualTestCases((prev) => {
+				const next = [...prev];
+				if (next[index]) next[index] = { ...next[index], [field]: value };
+				return next;
+			});
+		},
+		[],
+	);
+
 	/** 커서 위치에 텍스트를 삽입하고 description 상태를 동기화합니다. */
 	const insertMarkdownText = useCallback((text: string) => {
 		const el = descriptionRef.current;
@@ -523,7 +548,11 @@ export function useProblemCreate() {
 			const hasTestcases =
 				parsedTestCases.some(
 					(tc) => (tc.input?.trim() && tc.output?.trim()),
-				) || formData.testcases.length > 0;
+				) ||
+				formData.testcases.length > 0 ||
+				manualTestCases.some(
+					(tc) => (tc.input?.trim() && tc.output?.trim()),
+				);
 			if (!hasTestcases) errs.testcases = true;
 
 			setFieldErrors(errs);
@@ -550,9 +579,18 @@ export function useProblemCreate() {
 					}));
 
 				const testcasesFromFiles = await filesToTestCases(formData.testcases);
+				const testcasesFromManual: TestCaseDto[] = manualTestCases
+					.filter((tc) => tc.input?.trim() && tc.output?.trim())
+					.map((tc, idx) => ({
+						name: tc.name ?? `testcase_manual_${idx}`,
+						input: tc.input ?? "",
+						output: tc.output ?? "",
+						type: (tc.type === "sample" ? "sample" : "secret") as "sample" | "secret",
+					}));
 				const testcases: TestCaseDto[] = [
 					...testcasesFromParsed,
 					...testcasesFromFiles,
+					...testcasesFromManual,
 				];
 
 				const request: ProblemCreateRequest = {
@@ -604,6 +642,7 @@ export function useProblemCreate() {
 		[
 			formData,
 			parsedTestCases,
+			manualTestCases,
 			getFullDescriptionForBackend,
 			navigate,
 			locationState,
@@ -651,6 +690,10 @@ export function useProblemCreate() {
 		handleTestcaseAdd,
 		handleTestcaseRemove,
 		handleParsedTestcaseRemove,
+		manualTestCases,
+		handleManualTestcaseAdd,
+		handleManualTestcaseRemove,
+		handleManualTestcaseChange,
 		insertMarkdownText,
 		wrapWithMarkdown,
 		insertMarkdownHeading,

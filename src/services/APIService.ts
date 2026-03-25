@@ -40,8 +40,9 @@ class APIService {
 						return this.handleResponse(retryResponse);
 					}
 				} catch (refreshError) {
+					// 실제 사용 중 refresh 실패 → 사용자에게 알림 + 로그아웃 처리
 					console.error("토큰 갱신 실패:", refreshError);
-					tokenManager.clearTokens();
+					tokenManager.handleTokenExpired();
 					throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
 				}
 			}
@@ -730,6 +731,16 @@ class APIService {
 		return await this.request(`/sections/${sectionId}/my-role`);
 	}
 
+	/** 수업 관리자: 수강생 전원에 기존 활성 공지·과제 알림 catch-up */
+	async backfillSectionNotificationCatchUp(
+		sectionId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/notifications/catch-up`,
+			{ method: "POST" },
+		);
+	}
+
 	async getAllSectionRoles(): Promise<any> {
 		return await this.request("/user/sections/roles");
 	}
@@ -875,6 +886,50 @@ class APIService {
 		return await this.request(`/sections/${sectionId}/quizzes/${quizId}`, {
 			method: "DELETE",
 		});
+	}
+
+	async enterQuizSession(
+		sectionId: number | string,
+		quizId: number | string,
+		sessionId: string,
+	): Promise<{ status: "OK" | "CONFLICT" }> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/session/enter`,
+			{ method: "POST", body: JSON.stringify({ sessionId }) },
+		);
+	}
+
+	async takeoverQuizSession(
+		sectionId: number | string,
+		quizId: number | string,
+		sessionId: string,
+	): Promise<{ status: string }> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/session/takeover`,
+			{ method: "POST", body: JSON.stringify({ sessionId }) },
+		);
+	}
+
+	async heartbeatQuizSession(
+		sectionId: number | string,
+		quizId: number | string,
+		sessionId: string,
+	): Promise<{ valid: boolean }> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/session/heartbeat`,
+			{ method: "POST", body: JSON.stringify({ sessionId }) },
+		);
+	}
+
+	async exitQuizSession(
+		sectionId: number | string,
+		quizId: number | string,
+		sessionId: string,
+	): Promise<void> {
+		await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/session/exit`,
+			{ method: "POST", body: JSON.stringify({ sessionId }) },
+		);
 	}
 
 	async getAssignmentSubmissionStats(

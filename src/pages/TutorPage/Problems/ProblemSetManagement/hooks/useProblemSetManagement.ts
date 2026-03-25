@@ -1,9 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
 import type { ProblemSet, Problem, CreateProblemSetData } from "../types";
 
 const PROBLEMS_PER_PAGE = 10;
+
+function sortProblemsByRecent(problems: Problem[]): Problem[] {
+	return [...problems].sort((a, b) => {
+		const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+		const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+		if (tb !== ta) return tb - ta;
+		return (b.id ?? 0) - (a.id ?? 0);
+	});
+}
 
 export function useProblemSetManagement() {
 	const navigate = useNavigate();
@@ -16,7 +25,12 @@ export function useProblemSetManagement() {
 	const [isCreating, setIsCreating] = useState(false);
 	const [showProblemSelectModal, setShowProblemSelectModal] = useState(false);
 	const [allProblems, setAllProblems] = useState<Problem[]>([]);
+	const [problemsLoading, setProblemsLoading] = useState(false);
 	const [problemSearchTerm, setProblemSearchTerm] = useState("");
+	const [problemOriginalOnly, setProblemOriginalOnly] = useState<
+		"ALL" | "ORIGINAL"
+	>("ALL");
+	/** 선택 순서 = 문제집 내 순서 (먼저 넣은 것이 앞) */
 	const [selectedProblemIds, setSelectedProblemIds] = useState<number[]>([]);
 	const [currentStep, setCurrentStep] = useState(1);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -36,6 +50,7 @@ export function useProblemSetManagement() {
 
 	const fetchAllProblems = useCallback(async () => {
 		try {
+			setProblemsLoading(true);
 			const response = await APIService.getAllProblems();
 			let problemsData: Problem[] = [];
 			if (Array.isArray(response)) {
@@ -51,6 +66,8 @@ export function useProblemSetManagement() {
 		} catch (error) {
 			console.error("문제 목록 조회 실패:", error);
 			setAllProblems([]);
+		} finally {
+			setProblemsLoading(false);
 		}
 	}, []);
 
@@ -75,8 +92,14 @@ export function useProblemSetManagement() {
 
 	const handleCreateSetWithProblems = useCallback(
 		async (problemIds: number[] | null = null) => {
+			const isEmptySetOnPurpose =
+				problemIds !== null && Array.isArray(problemIds) && problemIds.length === 0;
 			const finalProblemIds =
 				problemIds !== null ? problemIds : selectedProblemIds;
+			if (!isEmptySetOnPurpose && finalProblemIds.length === 0) {
+				alert("문제집에 넣을 문제를 한 개 이상 선택해 주세요.");
+				return;
+			}
 			try {
 				setIsCreating(true);
 				const createData: CreateProblemSetData = {
@@ -106,6 +129,7 @@ export function useProblemSetManagement() {
 				setNewSetDescription("");
 				setSelectedProblemIds([]);
 				setProblemSearchTerm("");
+				setProblemOriginalOnly("ALL");
 				setCurrentPage(1);
 				fetchProblemSets();
 			} catch (error) {
@@ -120,6 +144,13 @@ export function useProblemSetManagement() {
 	);
 
 	const handleSkipProblemSelect = useCallback(() => {
+		if (
+			!window.confirm(
+				"문제 없이 빈 문제집만 만듭니다. 나중에 문제집 편집에서 문제를 추가할 수 있습니다. 계속할까요?",
+			)
+		) {
+			return;
+		}
 		handleCreateSetWithProblems([]);
 	}, [handleCreateSetWithProblems]);
 
@@ -133,15 +164,21 @@ export function useProblemSetManagement() {
 
 	const getFilteredProblems = useCallback((): Problem[] => {
 		let filtered = allProblems;
+		if (problemOriginalOnly === "ORIGINAL") {
+			filtered = filtered.filter((p) =>
+				(p.title ?? "").endsWith("_오리지널"),
+			);
+		}
 		if (problemSearchTerm) {
+			const q = problemSearchTerm.toLowerCase();
 			filtered = filtered.filter(
 				(p) =>
-					p.title?.toLowerCase().includes(problemSearchTerm.toLowerCase()) ||
+					p.title?.toLowerCase().includes(q) ||
 					p.id?.toString().includes(problemSearchTerm),
 			);
 		}
-		return filtered;
-	}, [allProblems, problemSearchTerm]);
+		return sortProblemsByRecent(filtered);
+	}, [allProblems, problemSearchTerm, problemOriginalOnly]);
 
 	const getPaginatedProblems = useCallback((): Problem[] => {
 		const filtered = getFilteredProblems();
@@ -150,7 +187,7 @@ export function useProblemSetManagement() {
 	}, [getFilteredProblems, currentPage]);
 
 	const getTotalPages = useCallback((): number => {
-		return Math.ceil(getFilteredProblems().length / PROBLEMS_PER_PAGE);
+		return Math.ceil(getFilteredProblems().length / PROBLEMS_PER_PAGE) || 1;
 	}, [getFilteredProblems]);
 
 	const handleSelectAllProblems = useCallback(() => {
@@ -159,17 +196,29 @@ export function useProblemSetManagement() {
 			filtered.length > 0 &&
 			filtered.every((p) => selectedProblemIds.includes(p.id));
 		if (allSelected) {
-			const filteredIds = filtered.map((p) => p.id);
+			const filteredIds = new Set(filtered.map((p) => p.id));
 			setSelectedProblemIds((prev) =>
-				prev.filter((id) => !filteredIds.includes(id)),
+				prev.filter((id) => !filteredIds.has(id)),
 			);
 		} else {
 			setSelectedProblemIds((prev) => {
-				const newIds = filtered.map((p) => p.id);
-				return [...new Set([...prev, ...newIds])];
+				const next = [...prev];
+				for (const p of filtered) {
+					if (!next.includes(p.id)) next.push(p.id);
+				}
+				return next;
 			});
 		}
 	}, [getFilteredProblems, selectedProblemIds]);
+
+	/** 문제집에 넣은 순서의 역순 = 최근에 담은 문제가 위 */
+	const selectedProblemsNewestFirst = useMemo((): Problem[] => {
+		const map = new Map(allProblems.map((p) => [p.id, p]));
+		return [...selectedProblemIds]
+			.reverse()
+			.map((id) => map.get(id))
+			.filter((p): p is Problem => Boolean(p));
+	}, [selectedProblemIds, allProblems]);
 
 	const handleDeleteSet = useCallback(
 		async (problemSet: ProblemSet) => {
@@ -244,6 +293,7 @@ export function useProblemSetManagement() {
 			setCurrentStep(1);
 			setSelectedProblemIds([]);
 			setProblemSearchTerm("");
+			setProblemOriginalOnly("ALL");
 			setCurrentPage(1);
 		}
 	}, [isCreating]);
@@ -262,9 +312,13 @@ export function useProblemSetManagement() {
 		isCreating,
 		showProblemSelectModal,
 		allProblems,
+		problemsLoading,
 		problemSearchTerm,
 		setProblemSearchTerm,
+		problemOriginalOnly,
+		setProblemOriginalOnly,
 		selectedProblemIds,
+		selectedProblemsNewestFirst,
 		currentStep,
 		setCurrentStep,
 		currentPage,

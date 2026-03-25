@@ -1,16 +1,24 @@
 import React from "react";
-import { FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaCode } from "react-icons/fa";
 import * as S from "../styles";
 import type {
 	CourseGradesData,
 	CourseStudentEntry,
 	EditingGrade,
 } from "../types";
+import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
+import { SortableStudentColumnHeader } from "../../../../../components/SortableStudentColumnHeader";
+import {
+	GradeProblemCellDisplay,
+	GradeStatusLegendBar,
+} from "./GradeProblemCellDisplay";
 
 export interface GradeManagementCourseTableProps {
 	courseLoading: boolean;
 	courseGrades: CourseGradesData | null;
 	filteredCourseStudents: CourseStudentEntry[];
+	gradeSortKey: StudentSortKey;
+	gradeSortDir: StudentSortDir;
+	onSortStudentHeader: (key: StudentSortKey) => void;
 	/** 전체 과제 보기에서 편집/코드 보기용 (과제만 있을 때만 전달) */
 	editingGrade?: EditingGrade | null;
 	setEditingGrade?: (v: EditingGrade | null) => void;
@@ -51,6 +59,9 @@ export default function GradeManagementCourseTable({
 	courseLoading,
 	courseGrades,
 	filteredCourseStudents,
+	gradeSortKey,
+	gradeSortDir,
+	onSortStudentHeader,
 	editingGrade = null,
 	setEditingGrade,
 	gradeInputs = {},
@@ -63,13 +74,9 @@ export default function GradeManagementCourseTable({
 	onProblemDetail,
 }: GradeManagementCourseTableProps) {
 	return (
-		<S.CourseTableContainer>
+		<S.GradeTablePageWrapper>
 			{!courseLoading && courseGrades?.items?.length && filteredCourseStudents.length > 0 && (
-				<S.GradeLegend>
-					<span><FaCheckCircle style={{ color: "#22c55e", marginRight: 4 }} /> 제시간 제출</span>
-					<span><FaExclamationTriangle style={{ color: "#eab308", marginRight: 4 }} /> 지각 제출</span>
-					<span><FaTimesCircle style={{ color: "#94a3b8", marginRight: 4 }} /> 미제출</span>
-				</S.GradeLegend>
+				<GradeStatusLegendBar />
 			)}
 			{courseLoading ? (
 				<S.LoadingContainer>
@@ -77,6 +84,7 @@ export default function GradeManagementCourseTable({
 					<p>수업 전체 성적 데이터를 불러오는 중...</p>
 				</S.LoadingContainer>
 			) : courseGrades?.items?.length && filteredCourseStudents.length > 0 ? (
+				<S.GradeTableHorizontalScroll>
 				<S.CourseTableWithStickyRight>
 					<colgroup>
 						<col style={{ width: S.STICKY_COL_1_WIDTH }} />
@@ -111,8 +119,32 @@ export default function GradeManagementCourseTable({
 					</colgroup>
 					<thead>
 						<tr>
-							<th rowSpan={2}>학생</th>
-							<th rowSpan={2}>학번</th>
+							<S.SortableStudentHeaderTh
+								rowSpan={2}
+								scope="col"
+								onClick={() => onSortStudentHeader("studentName")}
+								title="이름순 정렬 (클릭 시 오름·내림)"
+							>
+								<SortableStudentColumnHeader
+									label="학생"
+									sortKey="studentName"
+									activeKey={gradeSortKey}
+									dir={gradeSortDir}
+								/>
+							</S.SortableStudentHeaderTh>
+							<S.SortableStudentHeaderTh
+								rowSpan={2}
+								scope="col"
+								onClick={() => onSortStudentHeader("studentId")}
+								title="학번순 정렬 (클릭 시 오름·내림)"
+							>
+								<SortableStudentColumnHeader
+									label="학번"
+									sortKey="studentId"
+									activeKey={gradeSortKey}
+									dir={gradeSortDir}
+								/>
+							</S.SortableStudentHeaderTh>
 							{courseGrades.items.map((item) => {
 								const colSpan =
 									item.problems.length > 0 ? item.problems.length + 1 : 2;
@@ -238,49 +270,20 @@ export default function GradeManagementCourseTable({
 																<S.TdCourseProblemCell
 																	key={`${student.userId}-assignment-${item.id}-${problem.problemId}`}
 																>
-																	<S.ScoreDisplay>
-																		<S.ScoreRow>
-																			<S.ScoreValue>
-																				{problemGrade?.score ?? 0} /{" "}
-																				{problem.points ?? 1}
-																			</S.ScoreValue>
-																			{problemGrade?.submitted &&
-																				onViewCode && (
-																					<button
-																						type="button"
-																						onClick={() =>
-																							onViewCode(
-																								item.id,
-																								student.userId,
-																								problem.problemId,
-																							)
-																						}
-																						title="코드 조회"
-																					>
-																						<FaCode />
-																					</button>
-																				)}
-																			{(problemGrade?.submitted ||
-																				(item.dueAt &&
-																					new Date() > new Date(item.dueAt))) &&
-																				(problemGrade?.submitted ? (
-																					<S.SubmissionStatus
-																						$onTime={problemGrade.isOnTime}
-																						$late={!problemGrade.isOnTime}
-																					>
-																						{problemGrade.isOnTime ? (
-																							<FaCheckCircle title="제시간 제출" />
-																						) : (
-																							<FaExclamationTriangle title="지각 제출" />
-																						)}
-																					</S.SubmissionStatus>
-																				) : (
-																					<S.SubmissionStatus $onTime={false} $late={false}>
-																						<FaTimesCircle title="미제출" />
-																					</S.SubmissionStatus>
-																				))}
-																		</S.ScoreRow>
-																	</S.ScoreDisplay>
+																	<GradeProblemCellDisplay
+																		problem={problemGrade}
+																		fallbackPoints={problem.points ?? 1}
+																		onViewCode={
+																			problemGrade?.submitted && onViewCode
+																				? () =>
+																						onViewCode(
+																							item.id,
+																							student.userId,
+																							problem.problemId,
+																						)
+																				: undefined
+																		}
+																	/>
 																</S.TdCourseProblemCell>
 															);
 														})
@@ -311,49 +314,20 @@ export default function GradeManagementCourseTable({
 															<S.TdCourseProblemCell
 																key={`${student.userId}-quiz-${item.id}-${problem.problemId}`}
 															>
-																<S.ScoreDisplay>
-																	<S.ScoreRow>
-																		<S.ScoreValue>
-																			{problemGrade?.score ?? 0} /{" "}
-																			{problem.points ?? 1}
-																		</S.ScoreValue>
-																		{problemGrade?.submitted &&
-																			onViewCodeForQuiz && (
-																				<button
-																					type="button"
-																					onClick={() =>
-																						onViewCodeForQuiz(
-																							item.id,
-																							student.userId,
-																							problem.problemId,
-																						)
-																					}
-																					title="코드 조회"
-																				>
-																					<FaCode />
-																				</button>
-																			)}
-																		{(problemGrade?.submitted ||
-																			(item.dueAt &&
-																				new Date() > new Date(item.dueAt))) &&
-																			(problemGrade?.submitted ? (
-																				<S.SubmissionStatus
-																					$onTime={problemGrade.isOnTime}
-																					$late={!problemGrade.isOnTime}
-																				>
-																					{problemGrade.isOnTime ? (
-																						<FaCheckCircle title="제시간 제출" />
-																					) : (
-																						<FaExclamationTriangle title="지각 제출" />
-																					)}
-																				</S.SubmissionStatus>
-																			) : (
-																				<S.SubmissionStatus $onTime={false} $late={false}>
-																					<FaTimesCircle title="미제출" />
-																				</S.SubmissionStatus>
-																			))}
-																	</S.ScoreRow>
-																</S.ScoreDisplay>
+																<GradeProblemCellDisplay
+																	problem={problemGrade}
+																	fallbackPoints={problem.points ?? 1}
+																	onViewCode={
+																		problemGrade?.submitted && onViewCodeForQuiz
+																			? () =>
+																					onViewCodeForQuiz(
+																						item.id,
+																						student.userId,
+																						problem.problemId,
+																					)
+																			: undefined
+																	}
+																/>
 															</S.TdCourseProblemCell>
 														);
 													})}
@@ -382,11 +356,12 @@ export default function GradeManagementCourseTable({
 						})}
 					</tbody>
 				</S.CourseTableWithStickyRight>
+				</S.GradeTableHorizontalScroll>
 			) : (
 				<S.NoData>
 					<p>수업 전체 성적 데이터가 없습니다.</p>
 				</S.NoData>
 			)}
-		</S.CourseTableContainer>
+		</S.GradeTablePageWrapper>
 	);
 }

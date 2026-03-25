@@ -10,6 +10,7 @@ type ProblemEditTestcasesSectionProps = Pick<
 	| "showParsedTestCases"
 	| "setShowParsedTestCases"
 	| "handleTestcaseAdd"
+	| "handleTestcaseAddManual"
 	| "handleTestcaseRemove"
 	| "handleTestcaseChange"
 	| "handleParsedTestcaseRemove"
@@ -25,6 +26,7 @@ const ProblemEditTestcasesSection: React.FC<
 	showParsedTestCases,
 	setShowParsedTestCases,
 	handleTestcaseAdd,
+	handleTestcaseAddManual,
 	handleTestcaseRemove,
 	handleTestcaseChange,
 	handleParsedTestcaseRemove,
@@ -33,7 +35,7 @@ const ProblemEditTestcasesSection: React.FC<
 	<>
 		{enableFullEdit && (
 			<S.Fieldset aria-labelledby="problem-edit-testcase-label">
-				<S.Legend id="problem-edit-testcase-label">테스트케이스 파일</S.Legend>
+				<S.Legend id="problem-edit-testcase-label">테스트케이스</S.Legend>
 				<S.FileUploadWrapper>
 					<S.FileInput
 						type="file"
@@ -42,7 +44,22 @@ const ProblemEditTestcasesSection: React.FC<
 						accept=".in,.ans"
 						onChange={handleTestcaseAdd}
 					/>
-					<S.FileLabelInline htmlFor="testcaseInput">추가</S.FileLabelInline>
+					<S.FileLabelInline htmlFor="testcaseInput">파일 추가</S.FileLabelInline>
+					<button
+						type="button"
+						onClick={handleTestcaseAddManual}
+						style={{
+							marginLeft: "8px",
+							padding: "6px 12px",
+							borderRadius: "6px",
+							border: "1px solid #cbd5e1",
+							background: "#f8fafc",
+							cursor: "pointer",
+							fontSize: "13px",
+						}}
+					>
+						직접 추가
+					</button>
 					<S.HelpText
 						style={{
 							display: "block",
@@ -62,9 +79,22 @@ const ProblemEditTestcasesSection: React.FC<
 							>
 								<S.TestcaseHeaderCompact>
 									<S.TestcaseHeaderLeft>
-										<S.TestcaseName>
-											{testcase.name ?? `테스트케이스 ${idx + 1}`}
-										</S.TestcaseName>
+										<input
+											type="text"
+											value={testcase.name ?? ""}
+											onChange={(e) =>
+												handleTestcaseChange(idx, "name", e.target.value)
+											}
+											placeholder={`테스트케이스 ${idx + 1}`}
+											style={{
+												fontSize: "inherit",
+												fontWeight: 600,
+												padding: "4px 8px",
+												border: "1px solid #e2e8f0",
+												borderRadius: "4px",
+												minWidth: "140px",
+											}}
+										/>
 										<S.TestcaseTypeSelect
 											value={testcase.type ?? "secret"}
 											onChange={(e) =>
@@ -86,22 +116,46 @@ const ProblemEditTestcasesSection: React.FC<
 									</S.TestcaseRemoveBtn>
 								</S.TestcaseHeaderCompact>
 								<S.TestcaseBodyCompact>
-									{testcase.input && (
-										<S.TestcaseContentItem>
-											<S.TestcaseContentLabel>입력</S.TestcaseContentLabel>
-											<S.TestcaseContentText>
-												{testcase.input}
-											</S.TestcaseContentText>
-										</S.TestcaseContentItem>
-									)}
-									{testcase.output && (
-										<S.TestcaseContentItem>
-											<S.TestcaseContentLabel>출력</S.TestcaseContentLabel>
-											<S.TestcaseContentText>
-												{testcase.output}
-											</S.TestcaseContentText>
-										</S.TestcaseContentItem>
-									)}
+									<S.TestcaseContentItem>
+										<S.TestcaseContentLabel>입력</S.TestcaseContentLabel>
+										<textarea
+											value={testcase.input ?? ""}
+											onChange={(e) =>
+												handleTestcaseChange(idx, "input", e.target.value)
+											}
+											placeholder="입력 데이터"
+											rows={3}
+											style={{
+												width: "100%",
+												fontFamily: "monospace",
+												fontSize: "13px",
+												padding: "8px",
+												border: "1px solid #e2e8f0",
+												borderRadius: "6px",
+												resize: "vertical",
+											}}
+										/>
+									</S.TestcaseContentItem>
+									<S.TestcaseContentItem>
+										<S.TestcaseContentLabel>출력</S.TestcaseContentLabel>
+										<textarea
+											value={testcase.output ?? ""}
+											onChange={(e) =>
+												handleTestcaseChange(idx, "output", e.target.value)
+											}
+											placeholder="출력 데이터"
+											rows={3}
+											style={{
+												width: "100%",
+												fontFamily: "monospace",
+												fontSize: "13px",
+												padding: "8px",
+												border: "1px solid #e2e8f0",
+												borderRadius: "6px",
+												resize: "vertical",
+											}}
+										/>
+									</S.TestcaseContentItem>
 								</S.TestcaseBodyCompact>
 							</S.TestcaseItemCompact>
 						))}

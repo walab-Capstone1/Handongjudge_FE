@@ -1,14 +1,36 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import APIService from "../../../../../services/APIService";
 import type { Problem, Section, Assignment, ProblemUsage } from "../types";
 
+const PARAM_ORIGINAL = "originalOnly";
+const PARAM_SEARCH = "search";
+const PARAM_USAGE = "usage";
+const PARAM_DIFFICULTY = "difficulty";
+const PARAM_TAG = "tag";
+const PARAM_COURSE = "course";
+const PARAM_ASSIGNMENT = "assignment";
+
+function readFiltersFromParams(searchParams: URLSearchParams) {
+	return {
+		originalOnly: (searchParams.get(PARAM_ORIGINAL) === "ORIGINAL" ? "ORIGINAL" : "ALL") as "ALL" | "ORIGINAL",
+		search: searchParams.get(PARAM_SEARCH) ?? "",
+		usage: searchParams.get(PARAM_USAGE) ?? "ALL",
+		difficulty: searchParams.get(PARAM_DIFFICULTY) ?? "ALL",
+		tag: searchParams.get(PARAM_TAG) ?? "ALL",
+		course: searchParams.get(PARAM_COURSE) ?? "ALL",
+		assignment: searchParams.get(PARAM_ASSIGNMENT) ?? "ALL",
+	};
+}
+
 export function useProblemManagement() {
 	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const initial = readFiltersFromParams(searchParams);
 
 	const [problems, setProblems] = useState<Problem[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [searchTerm, setSearchTerm] = useState("");
+	const [searchTerm, setSearchTerm] = useState(initial.search);
 	const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
 	const [showProblemModal, setShowProblemModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -28,11 +50,12 @@ export function useProblemManagement() {
 	});
 	const [loadingUsage, setLoadingUsage] = useState(false);
 	const [problemForUsage, setProblemForUsage] = useState<Problem | null>(null);
-	const [filterUsageStatus, setFilterUsageStatus] = useState("ALL");
-	const [filterDifficulty, setFilterDifficulty] = useState("ALL");
-	const [filterCourse, setFilterCourse] = useState("ALL");
-	const [filterAssignment, setFilterAssignment] = useState("ALL");
-	const [filterTag, setFilterTag] = useState("ALL");
+	const [filterUsageStatus, setFilterUsageStatus] = useState(initial.usage);
+	const [filterDifficulty, setFilterDifficulty] = useState(initial.difficulty);
+	const [filterCourse, setFilterCourse] = useState(initial.course);
+	const [filterAssignment, setFilterAssignment] = useState(initial.assignment);
+	const [filterTag, setFilterTag] = useState(initial.tag);
+	const [filterOriginalOnly, setFilterOriginalOnly] = useState<"ALL" | "ORIGINAL">(initial.originalOnly);
 	const [sections, setSections] = useState<Section[]>([]);
 	const [assignments, setAssignments] = useState<Assignment[]>([]);
 	const [problemUsageMap, setProblemUsageMap] = useState<
@@ -43,6 +66,12 @@ export function useProblemManagement() {
 	const [openMoreMenu, setOpenMoreMenu] = useState<number | null>(null);
 	const [selectedProblemIds, setSelectedProblemIds] = useState<number[]>([]);
 	const [isExporting, setIsExporting] = useState(false);
+	/** 원본 삭제 모달에서만: 삭제 전 사용처 미리보기 */
+	const [deletePreviewUsage, setDeletePreviewUsage] = useState<ProblemUsage | null>(
+		null,
+	);
+	const [deletePreviewLoading, setDeletePreviewLoading] = useState(false);
+	const [deletePreviewError, setDeletePreviewError] = useState(false);
 
 	const fetchProblems = useCallback(async () => {
 		try {
@@ -93,6 +122,45 @@ export function useProblemManagement() {
 			setLoading(false);
 		}
 	}, []);
+
+	// URL에 필터/검색 상태 반영 (뒤로가기 시 복원되도록)
+	const isFirstMount = useRef(true);
+	useEffect(() => {
+		if (isFirstMount.current) {
+			isFirstMount.current = false;
+			return;
+		}
+		setSearchParams(
+			(prev) => {
+				const next = new URLSearchParams(prev);
+				if (filterOriginalOnly === "ORIGINAL") next.set(PARAM_ORIGINAL, "ORIGINAL");
+				else next.delete(PARAM_ORIGINAL);
+				if (searchTerm.trim()) next.set(PARAM_SEARCH, searchTerm.trim());
+				else next.delete(PARAM_SEARCH);
+				if (filterUsageStatus !== "ALL") next.set(PARAM_USAGE, filterUsageStatus);
+				else next.delete(PARAM_USAGE);
+				if (filterDifficulty !== "ALL") next.set(PARAM_DIFFICULTY, filterDifficulty);
+				else next.delete(PARAM_DIFFICULTY);
+				if (filterTag !== "ALL") next.set(PARAM_TAG, filterTag);
+				else next.delete(PARAM_TAG);
+				if (filterCourse !== "ALL") next.set(PARAM_COURSE, filterCourse);
+				else next.delete(PARAM_COURSE);
+				if (filterAssignment !== "ALL") next.set(PARAM_ASSIGNMENT, filterAssignment);
+				else next.delete(PARAM_ASSIGNMENT);
+				return next;
+			},
+			{ replace: true },
+		);
+	}, [
+		filterOriginalOnly,
+		searchTerm,
+		filterUsageStatus,
+		filterDifficulty,
+		filterTag,
+		filterCourse,
+		filterAssignment,
+		setSearchParams,
+	]);
 
 	const fetchSections = useCallback(async () => {
 		try {
@@ -208,6 +276,8 @@ export function useProblemManagement() {
 		const matchesSearch = problem.title
 			?.toLowerCase()
 			.includes(searchTerm.toLowerCase());
+		const matchesOriginal =
+			filterOriginalOnly === "ALL" || (problem.title ?? "").endsWith("_오리지널");
 		let matchesUsage = true;
 		if (filterUsageStatus === "USED") {
 			matchesUsage = problem.isUsed === true;
@@ -242,6 +312,7 @@ export function useProblemManagement() {
 		}
 		return (
 			matchesSearch &&
+			matchesOriginal &&
 			matchesUsage &&
 			matchesDifficulty &&
 			matchesTag &&
@@ -299,7 +370,8 @@ export function useProblemManagement() {
 
 	const handleCopyClick = useCallback((problem: Problem) => {
 		setProblemToCopy(problem);
-		setCopyTitle(`${problem.title} (복사본)`);
+		const baseTitle = problem.title?.replace(/_오리지널$/, "").trim() || problem.title || "";
+		setCopyTitle(baseTitle || "제목 없음");
 		setShowCopyModal(true);
 	}, []);
 
@@ -358,8 +430,44 @@ export function useProblemManagement() {
 		if (!isDeleting) {
 			setShowDeleteModal(false);
 			setProblemToDelete(null);
+			setDeletePreviewUsage(null);
+			setDeletePreviewLoading(false);
+			setDeletePreviewError(false);
 		}
 	}, [isDeleting]);
+
+	useEffect(() => {
+		if (!showDeleteModal || !problemToDelete) {
+			return;
+		}
+		let cancelled = false;
+		setDeletePreviewLoading(true);
+		setDeletePreviewError(false);
+		setDeletePreviewUsage(null);
+		(async () => {
+			try {
+				const response = await APIService.getProblemUsage(problemToDelete.id);
+				const usage = response?.data ?? response ?? {};
+				if (!cancelled) {
+					setDeletePreviewUsage(usage as ProblemUsage);
+				}
+			} catch {
+				if (!cancelled) {
+					setDeletePreviewError(true);
+					setDeletePreviewUsage({
+						assignments: [],
+						problemSets: [],
+						quizzes: [],
+					});
+				}
+			} finally {
+				if (!cancelled) setDeletePreviewLoading(false);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [showDeleteModal, problemToDelete]);
 
 	const closeCopyModal = useCallback(() => {
 		if (!isCopying) {
@@ -533,6 +641,8 @@ export function useProblemManagement() {
 		setFilterAssignment,
 		filterTag,
 		setFilterTag,
+		filterOriginalOnly,
+		setFilterOriginalOnly,
 		sections,
 		assignments,
 		problemUsageMap,
@@ -563,6 +673,9 @@ export function useProblemManagement() {
 		handleExportSingle,
 		handleExportBulk,
 		handleExportFiltered,
+		deletePreviewUsage,
+		deletePreviewLoading,
+		deletePreviewError,
 	};
 }
 
