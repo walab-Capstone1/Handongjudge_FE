@@ -29,7 +29,7 @@ export function useAuthCallback() {
 						tokenManager.default.setAccessToken(accessToken);
 
 						const response = await fetch(
-							`${process.env.REACT_APP_API_URL || "https://hcl.walab.info/api"}/user/me`,
+							`${process.env.REACT_APP_API_URL || "https://hj.walab.info/api"}/user/me`,
 							{
 								headers: {
 									Authorization: `Bearer ${accessToken}`,
