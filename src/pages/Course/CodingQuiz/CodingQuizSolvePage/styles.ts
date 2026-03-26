@@ -311,3 +311,72 @@ export const SaveModalContent = styled.div`
 export const SaveModalText = styled.span`
 	font-size: 16px;
 `;
+
+export const OverlayModal = styled.div`
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.75);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+`;
+
+export const OverlayModalBox = styled.div`
+	background: #1e2533;
+	border: 1px solid #3a4258;
+	border-radius: 12px;
+	padding: 36px 40px;
+	max-width: 440px;
+	width: 90%;
+	text-align: center;
+`;
+
+export const OverlayModalTitle = styled.h2`
+	font-size: 18px;
+	font-weight: 700;
+	color: #f0f4ff;
+	margin: 0 0 16px;
+`;
+
+export const OverlayModalDesc = styled.p`
+	font-size: 14px;
+	color: #9aa3b8;
+	line-height: 1.7;
+	margin: 0 0 28px;
+`;
+
+export const OverlayModalButtons = styled.div`
+	display: flex;
+	gap: 12px;
+	justify-content: center;
+`;
+
+export const OverlayModalConfirm = styled.button`
+	padding: 10px 24px;
+	border-radius: 8px;
+	border: none;
+	background: #4f6ef7;
+	color: white;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	&:hover {
+		background: #3b5ce0;
+	}
+`;
+
+export const OverlayModalCancel = styled.button`
+	padding: 10px 24px;
+	border-radius: 8px;
+	border: 1px solid #3a4258;
+	background: transparent;
+	color: #9aa3b8;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	&:hover {
+		background: #2a3145;
+		color: #f0f4ff;
+	}
+`;

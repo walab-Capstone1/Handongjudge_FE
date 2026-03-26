@@ -70,6 +70,15 @@ export function useCodingQuizSolve() {
 	const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
 	const [showSaveModal, setShowSaveModal] = useState(false);
 
+	// 시험 중복 접속 방지용 (모든 역할 공통)
+	const [examClientSessionId] = useState<string>(() =>
+		typeof crypto !== "undefined" && crypto.randomUUID
+			? crypto.randomUUID()
+			: Math.random().toString(36).slice(2),
+	);
+	const [examSessionConflict, setExamSessionConflict] = useState(false);
+	const [examSessionTakenOver, setExamSessionTakenOver] = useState(false);
+
 	// 사용자 역할 확인
 	useEffect(() => {
 		const fetchUserRole = async () => {
@@ -199,6 +208,65 @@ export function useCodingQuizSolve() {
 		};
 		initializeSession();
 	}, []);
+
+	// 시험 페이지 진입 시 중복 접속 확인
+	useEffect(() => {
+		if (!quizId || !sectionId || userRole === null) return;
+
+		const tryEnter = async () => {
+			try {
+				const res = await apiService.enterQuizSession(
+					sectionId,
+					quizId,
+					examClientSessionId,
+				);
+				const status =
+					(res as { data?: { status?: string }; status?: string })?.data
+						?.status ??
+					(res as { status?: string })?.status;
+				if (status === "CONFLICT") {
+					setExamSessionConflict(true);
+				}
+			} catch (err) {
+				console.error("시험 세션 진입 실패:", err);
+			}
+		};
+		tryEnter();
+
+		return () => {
+			// 페이지 이탈 시 세션 해제
+			apiService
+				.exitQuizSession(sectionId, quizId, examClientSessionId)
+				.catch(() => {});
+		};
+	}, [quizId, sectionId, userRole, examClientSessionId]);
+
+	// Heartbeat: 30초마다 세션 유효성 확인 및 TTL 연장
+	useEffect(() => {
+		if (!quizId || !sectionId || userRole === null || examSessionConflict)
+			return;
+
+		const interval = setInterval(async () => {
+			try {
+				const res = await apiService.heartbeatQuizSession(
+					sectionId,
+					quizId,
+					examClientSessionId,
+				);
+				const valid =
+					(res as { data?: { valid?: boolean }; valid?: boolean })?.data
+						?.valid ??
+					(res as { valid?: boolean })?.valid;
+				if (valid === false) {
+					setExamSessionTakenOver(true);
+				}
+			} catch {
+				// 네트워크 오류는 무시 (TTL 내에서 자연 해제)
+			}
+		}, 30000);
+
+		return () => clearInterval(interval);
+	}, [quizId, sectionId, userRole, examSessionConflict, examClientSessionId]);
 
 	const loadFromSession = useCallback(async (): Promise<string | null> => {
 		if (!sessionId || !selectedProblemId || !sectionId) return null;
@@ -337,6 +405,17 @@ export function useCodingQuizSolve() {
 			console.warn("세션 데이터 정리 실패:", err);
 		}
 	}, [sessionId, selectedProblemId, sectionId, language]);
+
+	// "여기서 계속하기" - 기존 세션 강제 인계
+	const handleExamSessionTakeover = useCallback(async () => {
+		if (!quizId || !sectionId) return;
+		try {
+			await apiService.takeoverQuizSession(sectionId, quizId, examClientSessionId);
+			setExamSessionConflict(false);
+		} catch (err) {
+			console.error("세션 인계 실패:", err);
+		}
+	}, [quizId, sectionId, examClientSessionId]);
 
 	const handleTimeUp = useCallback(() => {
 		// 이미 처리된 경우 중복 실행 방지
@@ -608,6 +687,9 @@ export function useCodingQuizSolve() {
 		isProblemModalOpen,
 		setIsProblemModalOpen,
 		showSaveModal,
+		examSessionConflict,
+		examSessionTakenOver,
+		handleExamSessionTakeover,
 		handleTimeUp,
 		handleProblemChange,
 		handlePanelMove,
