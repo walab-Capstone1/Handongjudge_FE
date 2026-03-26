@@ -55,3 +55,10 @@ export interface SubmissionResult {
 	points?: number;
 	score?: number;
 }
+
+export interface ProblemWorkStatus {
+	problemId: number;
+	submitted: boolean;
+	result?: string | null;
+	saved: boolean;
+}

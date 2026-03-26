@@ -218,11 +218,7 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 										.map((quiz) => (
 											<S.QuizSummaryItem
 												key={quiz.id}
-												onClick={() =>
-													d.navigate(
-														`/sections/${d.sectionId}/coding-quiz/${quiz.id}`,
-													)
-												}
+												onClick={() => d.handleQuizSummaryClick(quiz.id)}
 											>
 												<S.QuizSummaryTitle>{quiz.title}</S.QuizSummaryTitle>
 												<S.QuizSummaryMeta>

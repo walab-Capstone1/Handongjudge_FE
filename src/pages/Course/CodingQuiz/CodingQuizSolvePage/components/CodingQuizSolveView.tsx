@@ -44,9 +44,13 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 				onSubmit={d.handleSubmit}
 				onSubmitWithOutput={d.handleSubmitWithOutput}
 				sessionSaveStatus={d.sessionSaveStatus}
-				onSessionSave={d.saveToSession}
+				onBackendSave={d.saveToBackend}
+				saveMode="backend"
 				codeLoadSource={d.codeLoadSource}
 				sessionCleared={d.sessionCleared}
+				isEditLocked={d.isEditLocked}
+				isSaveLocked={d.isEditLocked}
+				showSaveWarning={d.isSaveWarning}
 			/>
 		),
 		result: (
@@ -134,8 +138,10 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 					isOpen={d.isProblemModalOpen}
 					problems={d.problems}
 					currentProblemId={d.selectedProblemId}
+					isChanging={d.isProblemChanging}
 					onClose={() => d.setIsProblemModalOpen(false)}
 					onSelectProblem={d.handleProblemChange}
+					problemStatusById={d.problemStatusById}
 				/>
 				<S.Header $theme={d.theme}>
 					<S.Breadcrumb>
@@ -194,12 +200,9 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 							$theme={d.theme}
 							value={d.language}
 							onChange={(e) => d.handleLanguageChange(e.target.value)}
-							disabled={d.isSubmitBlocked}
+							disabled
 						>
 							<option value="c">C</option>
-							<option value="cpp">C++</option>
-							<option value="java">Java</option>
-							<option value="python">Python</option>
 						</S.LanguageSelect>
 					</S.Controls>
 				</S.Header>

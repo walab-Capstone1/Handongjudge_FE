@@ -648,6 +648,15 @@ class APIService {
 		);
 	}
 
+	async getQuizProblemStatuses(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/my-problem-statuses`,
+		);
+	}
+
 	async getQuizStudentProgress(
 		sectionId: number | string,
 		quizId: number | string,

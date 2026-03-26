@@ -48,7 +48,10 @@ const EditQuizModal: FC<EditQuizModalProps> = ({ d }) => {
 							id="edit-quiz-desc"
 							value={d.formData.description}
 							onChange={(e) =>
-								d.setFormData((prev) => ({ ...prev, description: e.target.value }))
+								d.setFormData((prev) => ({
+									...prev,
+									description: e.target.value,
+								}))
 							}
 							placeholder="코딩 테스트 설명을 입력하세요"
 							rows={4}
