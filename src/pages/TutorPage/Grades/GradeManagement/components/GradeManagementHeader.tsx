@@ -1,5 +1,11 @@
 import React from "react";
-import { FaFileExport, FaChartBar, FaEdit, FaWeight, FaCode } from "react-icons/fa";
+import {
+	FaFileExport,
+	FaChartBar,
+	FaEdit,
+	FaWeight,
+	FaCode,
+} from "react-icons/fa";
 import * as S from "../styles";
 import type { AssignmentItem, QuizItem, ViewMode } from "../types";
 
@@ -15,11 +21,17 @@ export interface GradeManagementHeaderProps {
 	setSelectedAssignment: (a: AssignmentItem | null) => void;
 	selectedQuiz: QuizItem | null;
 	setSelectedQuiz: (q: QuizItem | null) => void;
+	/** 과제별/코딩테스트별 보기: 문제 열만 필터 (과제·코테 선택 드롭다운 옆) */
+	showProblemColumnFilter?: boolean;
+	problemFilterOptions?: { problemId: number; problemTitle?: string }[];
+	problemFilterValue?: number | "all";
+	onProblemFilterChange?: (v: number | "all") => void;
 	onShowPointsModal: () => void;
 	onShowBulkModal: () => void;
 	onShowStatsModal: () => void;
 	onExportCSV: () => void;
 	onDownloadCodeZip: () => void;
+	isDownloadingCodeZip?: boolean;
 }
 
 export default function GradeManagementHeader({
@@ -34,16 +46,29 @@ export default function GradeManagementHeader({
 	setSelectedAssignment,
 	selectedQuiz,
 	setSelectedQuiz,
+	showProblemColumnFilter = false,
+	problemFilterOptions = [],
+	problemFilterValue = "all",
+	onProblemFilterChange,
 	onShowPointsModal,
 	onShowBulkModal,
 	onShowStatsModal,
 	onExportCSV,
 	onDownloadCodeZip,
+	isDownloadingCodeZip = false,
 }: GradeManagementHeaderProps) {
 	const showActionButtons =
 		(viewMode === "assignment" && assignments.length > 0) ||
 		(viewMode === "quiz" && quizzes.length > 0) ||
 		(viewMode === "course" && (assignments.length > 0 || quizzes.length > 0));
+
+	const canSelectProblemFilter =
+		(viewMode === "assignment" && selectedAssignment != null) ||
+		(viewMode === "quiz" && selectedQuiz != null);
+	const disabledProblemFilterLabel =
+		viewMode === "assignment"
+			? "개별 과제를 선택하고 문제를 골라주세요"
+			: "개별 코딩테스트를 선택하고 문제를 골라주세요";
 
 	return (
 		<S.PageHeader>
@@ -104,6 +129,41 @@ export default function GradeManagementHeader({
 							</S.AssignmentSelect>
 						</S.FilterGroup>
 					)}
+				{showProblemColumnFilter && onProblemFilterChange && (
+					<S.FilterGroup>
+						<S.FilterLabel htmlFor="grade-problem-column-filter">
+							문제 표시
+						</S.FilterLabel>
+						<S.AssignmentSelect
+							id="grade-problem-column-filter"
+							disabled={!canSelectProblemFilter}
+							value={
+								problemFilterValue === "all"
+									? "all"
+									: String(problemFilterValue)
+							}
+							onChange={(e) => {
+								const v = e.target.value;
+								onProblemFilterChange(
+									v === "all" ? "all" : Number.parseInt(v, 10),
+								);
+							}}
+						>
+							<option value="all">
+								{canSelectProblemFilter
+									? "전체 문제"
+									: disabledProblemFilterLabel}
+							</option>
+							{problemFilterOptions.map((p) => (
+								<option key={p.problemId} value={p.problemId}>
+									{p.problemTitle?.trim()
+										? p.problemTitle
+										: `문제 #${p.problemId}`}
+								</option>
+							))}
+						</S.AssignmentSelect>
+					</S.FilterGroup>
+				)}
 			</S.HeaderLeft>
 			<S.HeaderRight>
 				<S.ViewModeTabs>
@@ -141,20 +201,25 @@ export default function GradeManagementHeader({
 				</S.ViewModeTabs>
 				{showActionButtons && (
 					<>
-						<S.SecondaryButton type="button" onClick={onShowPointsModal}>
+						{/* <S.SecondaryButton type="button" onClick={onShowPointsModal}>
 							<FaWeight /> 배점 설정
 						</S.SecondaryButton>
 						<S.SecondaryButton type="button" onClick={onShowBulkModal}>
 							<FaEdit /> 일괄 입력
-						</S.SecondaryButton>
+						</S.SecondaryButton> */}
 						{viewMode !== "course" && (
 							<S.SecondaryButton type="button" onClick={onShowStatsModal}>
 								<FaChartBar /> 통계
 							</S.SecondaryButton>
 						)}
 						{viewMode !== "course" && (
-							<S.SecondaryButton type="button" onClick={onDownloadCodeZip}>
-								<FaCode /> 제출 코드 ZIP
+							<S.SecondaryButton
+								type="button"
+								onClick={onDownloadCodeZip}
+								disabled={isDownloadingCodeZip}
+							>
+								<FaCode />{" "}
+								{isDownloadingCodeZip ? "ZIP 생성 중..." : "제출 코드 ZIP"}
 							</S.SecondaryButton>
 						)}
 						<S.PrimaryButton type="button" onClick={onExportCSV}>

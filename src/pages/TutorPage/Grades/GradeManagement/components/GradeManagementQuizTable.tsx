@@ -1,4 +1,4 @@
-import type React from "react";
+import { useMemo, type Dispatch, type SetStateAction } from "react";
 import * as S from "../styles";
 import type { StudentGradeRow, QuizItem, EditingGrade } from "../types";
 import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
@@ -18,9 +18,7 @@ export interface GradeManagementQuizTableProps {
 	editingGrade?: EditingGrade | null;
 	setEditingGrade?: (v: EditingGrade | null) => void;
 	gradeInputs?: Record<string, number | "">;
-	setGradeInputs?: React.Dispatch<
-		React.SetStateAction<Record<string, number | "">>
-	>;
+	setGradeInputs?: Dispatch<SetStateAction<Record<string, number | "">>>;
 	comments?: Record<string, string>;
 	handleSaveGrade?: (
 		userId: number,
@@ -34,6 +32,7 @@ export interface GradeManagementQuizTableProps {
 	onToggleTotalOnly?: (v: boolean) => void;
 	showLateOnly?: boolean;
 	onToggleShowLateOnly?: (v: boolean) => void;
+	problemColumnFilter?: number | "all";
 }
 
 export default function GradeManagementQuizTable({
@@ -55,7 +54,19 @@ export default function GradeManagementQuizTable({
 	onToggleTotalOnly,
 	showLateOnly = false,
 	onToggleShowLateOnly,
+	problemColumnFilter = "all",
 }: GradeManagementQuizTableProps) {
+	const allProblemGrades = grades[0]?.problemGrades ?? [];
+	const problemGrades = useMemo(() => {
+		if (problemColumnFilter === "all") return allProblemGrades;
+		const fp = allProblemGrades.filter(
+			(p) => p.problemId === problemColumnFilter,
+		);
+		return fp.length ? fp : allProblemGrades;
+	}, [allProblemGrades, problemColumnFilter]);
+	const quizTitle = selectedQuiz?.title ?? "퀴즈";
+	const quizDueAt = selectedQuiz?.endTime;
+
 	if (grades.length === 0) {
 		return (
 			<S.CourseTableContainer>
@@ -65,10 +76,6 @@ export default function GradeManagementQuizTable({
 			</S.CourseTableContainer>
 		);
 	}
-
-	const problemGrades = grades[0]?.problemGrades ?? [];
-	const quizTitle = selectedQuiz?.title ?? "퀴즈";
-	const quizDueAt = selectedQuiz?.endTime;
 
 	return (
 		<S.GradeTablePageWrapper>
@@ -174,16 +181,21 @@ export default function GradeManagementQuizTable({
 								<S.TdStudentName>{student.studentName}</S.TdStudentName>
 								<S.TdStudentId>{student.studentId}</S.TdStudentId>
 								{!totalOnly &&
-									student.problemGrades?.map((problem) => (
-										<S.TdCourseProblemCell key={problem.problemId}>
-											<GradeProblemCellDisplay
-												problem={problem}
-												fallbackPoints={problem.points ?? 1}
-											dueAt={quizDueAt}
-											showLateOnly={showLateOnly}
-											/>
-										</S.TdCourseProblemCell>
-									))}
+									problemGrades.map((col) => {
+										const problem = student.problemGrades?.find(
+											(pg) => pg.problemId === col.problemId,
+										);
+										return (
+											<S.TdCourseProblemCell key={col.problemId}>
+												<GradeProblemCellDisplay
+													problem={problem}
+													fallbackPoints={col.points ?? 1}
+													dueAt={quizDueAt}
+													showLateOnly={showLateOnly}
+												/>
+											</S.TdCourseProblemCell>
+										);
+									})}
 								{!totalOnly && (
 									<S.TdCourseAssignmentTotalCell>
 										<strong>

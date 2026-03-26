@@ -1,4 +1,4 @@
-import type React from "react";
+import { useMemo, type Dispatch, type SetStateAction } from "react";
 import * as S from "../styles";
 import type { StudentGradeRow, EditingGrade, AssignmentItem } from "../types";
 import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
@@ -18,9 +18,7 @@ export interface GradeManagementAssignmentTableProps {
 	editingGrade: EditingGrade | null;
 	setEditingGrade: (v: EditingGrade | null) => void;
 	gradeInputs: Record<string, number | "">;
-	setGradeInputs: React.Dispatch<
-		React.SetStateAction<Record<string, number | "">>
-	>;
+	setGradeInputs: Dispatch<SetStateAction<Record<string, number | "">>>;
 	comments: Record<string, string>;
 	handleSaveGrade: (
 		userId: number,
@@ -34,6 +32,8 @@ export interface GradeManagementAssignmentTableProps {
 	onToggleTotalOnly?: (v: boolean) => void;
 	showLateOnly?: boolean;
 	onToggleShowLateOnly?: (v: boolean) => void;
+	/** 헤더 문제 표시 드롭다운과 연동 */
+	problemColumnFilter?: number | "all";
 }
 
 export default function GradeManagementAssignmentTable({
@@ -55,6 +55,7 @@ export default function GradeManagementAssignmentTable({
 	onToggleTotalOnly,
 	showLateOnly = false,
 	onToggleShowLateOnly,
+	problemColumnFilter = "all",
 }: GradeManagementAssignmentTableProps) {
 	const assignmentDueAt =
 		selectedAssignment?.dueDate ??
@@ -63,7 +64,14 @@ export default function GradeManagementAssignmentTable({
 	const hasProblems =
 		grades[0]?.problemGrades && grades[0].problemGrades.length > 0;
 
-	const problemGradesForCol = grades[0]?.problemGrades ?? [];
+	const allProblemGrades = grades[0]?.problemGrades ?? [];
+	const problemGradesForCol = useMemo(() => {
+		if (problemColumnFilter === "all") return allProblemGrades;
+		const fp = allProblemGrades.filter(
+			(p) => p.problemId === problemColumnFilter,
+		);
+		return fp.length ? fp : allProblemGrades;
+	}, [allProblemGrades, problemColumnFilter]);
 	return (
 		<S.GradeTablePageWrapper>
 			<GradeStatusLegendBar
@@ -129,7 +137,7 @@ export default function GradeManagementAssignmentTable({
 								<th rowSpan={2}>비율</th>
 							</tr>
 							<tr>
-								{grades[0]?.problemGrades?.map((p) => (
+								{problemGradesForCol.map((p) => (
 									<S.ProblemHeader key={p.problemId} as="th">
 										{onProblemDetail ? (
 											<button
@@ -197,16 +205,21 @@ export default function GradeManagementAssignmentTable({
 								<S.TdStudentName>{student.studentName}</S.TdStudentName>
 								<S.TdStudentId>{student.studentId}</S.TdStudentId>
 								{!totalOnly && hasProblems ? (
-									student.problemGrades?.map((problem) => (
-										<S.TdCourseProblemCell key={problem.problemId}>
-											<GradeProblemCellDisplay
-												problem={problem}
-												fallbackPoints={problem.points ?? 1}
-												dueAt={assignmentDueAt}
-												showLateOnly={showLateOnly}
-											/>
-										</S.TdCourseProblemCell>
-									))
+									problemGradesForCol.map((col) => {
+										const problem = student.problemGrades?.find(
+											(pg) => pg.problemId === col.problemId,
+										);
+										return (
+											<S.TdCourseProblemCell key={col.problemId}>
+												<GradeProblemCellDisplay
+													problem={problem}
+													fallbackPoints={col.points ?? 1}
+													dueAt={assignmentDueAt}
+													showLateOnly={showLateOnly}
+												/>
+											</S.TdCourseProblemCell>
+										);
+									})
 								) : null}
 								<S.TdCourseAssignmentTotalCell>
 									<strong>

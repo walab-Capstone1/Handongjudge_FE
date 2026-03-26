@@ -142,13 +142,36 @@ export function GradeProblemCellDisplay({
 	};
 	const pts = Number(problem?.points ?? fallbackPoints ?? 0);
 	const score = Number(problem?.score ?? 0);
+	const toFiniteInt = (v: unknown): number | null => {
+		if (v === null || v === undefined) return null;
+		const n = Number(v);
+		return Number.isFinite(n) ? Math.trunc(n) : null;
+	};
+	const totalTc = toFiniteInt(problem?.totalTestCases);
+	const passedTc = toFiniteInt(problem?.passedTestCases);
+	/** 신규 제출에서 DomJudge output 기준으로 저장된 값 */
+	const hasTestCaseRatio = totalTc !== null && totalTc > 0;
+	/** CE 등 output 없음 → 0/0으로 저장된 경우 */
+	const hasExplicitEmptyTc =
+		totalTc === 0 && (passedTc === null || passedTc === 0);
+	const testCaseLabel = hasTestCaseRatio
+		? `${passedTc ?? 0}/${totalTc}`
+		: hasExplicitEmptyTc
+			? "0/0"
+			: `${score}/${pts}`;
 	const kind = getGradeProblemCellKind(problem, fallbackPoints);
 	const submittedAt =
 		problem?.submittedAt ??
 		(problem as { submitted_at?: string })?.submitted_at;
 	const title = [
 		GRADE_CELL_HINT[kind],
-		problem?.submitted ? `테스트케이스 ${score}/${pts}` : null,
+		problem?.submitted
+			? hasTestCaseRatio
+				? `테스트케이스 ${passedTc ?? 0}/${totalTc}`
+				: hasExplicitEmptyTc
+					? "테스트케이스 0/0 (출력 없음·CE 등)"
+					: `점수 ${score}/${pts} — 테스트케이스 집계 없음(구 제출 또는 미기록)`
+			: null,
 		submittedAt
 			? `제출: ${(toLocalDate(submittedAt) ?? new Date(submittedAt)).toLocaleString("ko-KR")}`
 			: null,
@@ -188,7 +211,7 @@ export function GradeProblemCellDisplay({
 			</S.GradeCellStatusBadge>
 			{problem?.submitted ? (
 				<>
-					<S.GradeCellScoreMeta>{`${score}/${pts}`}</S.GradeCellScoreMeta>
+					<S.GradeCellScoreMeta>{testCaseLabel}</S.GradeCellScoreMeta>
 					{showLateOnly && isLateFull && lateMinutes > 0 ? (
 						<S.GradeCellScoreMeta>{`지각 ${formatLateDuration(lateMinutes)}`}</S.GradeCellScoreMeta>
 					) : null}

@@ -31,6 +31,27 @@ export const LoadingSpinner = styled.div`
   animation: ${spin} 1s linear infinite;
 `;
 
+export const LoadingOverlayCard = styled.div`
+  min-width: 280px;
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
+`;
+
+export const LoadingOverlayMessage = styled.p`
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+    sans-serif;
+`;
+
 export const SortableStudentHeaderTh = styled.th`
   cursor: pointer;
   user-select: none;
@@ -187,6 +208,12 @@ export const SecondaryButton = styled.button`
     border-color: #5568d3;
     color: #5568d3;
     transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
   }
 `;
 

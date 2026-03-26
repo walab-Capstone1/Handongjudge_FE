@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TutorLayout from "../../../../../layouts/TutorLayout";
 import SectionNavigation from "../../../../../components/Navigation/SectionNavigation";
 import APIService from "../../../../../services/APIService";
@@ -17,6 +17,11 @@ import GradeProblemDetailModal from "./GradeProblemDetailModal";
 export default function GradeManagementView(d: GradeManagementHookReturn) {
 	const [totalOnly, setTotalOnly] = useState(false);
 	const [showLateOnly, setShowLateOnly] = useState(false);
+	const [isDownloadingCodeZip, setIsDownloadingCodeZip] = useState(false);
+	/** 과제별/코딩테스트별 보기: 상단 헤더 문제 열 필터 */
+	const [headerProblemFilter, setHeaderProblemFilter] = useState<number | "all">(
+		"all",
+	);
 
 	const {
 		sectionId,
@@ -87,6 +92,16 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		closeProblemDetailModal,
 	} = d;
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: 보기 모드·선택 과제/퀴즈 바뀔 때 헤더 문제 필터만 초기화
+	useEffect(() => {
+		setHeaderProblemFilter("all");
+	}, [viewMode, selectedAssignment?.id, selectedQuiz?.id]);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: 분반(section) 변경 시 헤더 문제 필터 초기화
+	useEffect(() => {
+		setHeaderProblemFilter("all");
+	}, [sectionId]);
+
 	const handleClosePointsModal = () => {
 		setShowPointsModal(false);
 		setPointsInputs({});
@@ -97,9 +112,10 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 
 	const handleDownloadCodeZip = async () => {
 		if (!activeSectionId) return;
-		if (viewMode === "assignment") {
-			if (!selectedAssignment) {
-				try {
+		setIsDownloadingCodeZip(true);
+		try {
+			if (viewMode === "assignment") {
+				if (!selectedAssignment) {
 					const blob = await APIService.exportAllAssignmentSubmissionCodesZip(
 						activeSectionId,
 					);
@@ -111,13 +127,8 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					link.click();
 					document.body.removeChild(link);
 					URL.revokeObjectURL(url);
-				} catch (error) {
-					console.error("전체 과제 제출 코드 ZIP 다운로드 실패:", error);
-					alert("전체 과제 ZIP 다운로드에 실패했습니다.");
+					return;
 				}
-				return;
-			}
-			try {
 				const blob = await APIService.exportAssignmentSubmissionCodesZip(
 					activeSectionId,
 					selectedAssignment.id,
@@ -130,15 +141,10 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 				link.click();
 				document.body.removeChild(link);
 				URL.revokeObjectURL(url);
-			} catch (error) {
-				console.error("과제 제출 코드 ZIP 다운로드 실패:", error);
-				alert("ZIP 다운로드에 실패했습니다.");
+				return;
 			}
-			return;
-		}
-		if (viewMode === "quiz") {
-			if (!selectedQuiz) {
-				try {
+			if (viewMode === "quiz") {
+				if (!selectedQuiz) {
 					const blob = await APIService.exportAllQuizSubmissionCodesZip(
 						activeSectionId,
 					);
@@ -150,13 +156,8 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					link.click();
 					document.body.removeChild(link);
 					URL.revokeObjectURL(url);
-				} catch (error) {
-					console.error("전체 코딩테스트 제출 코드 ZIP 다운로드 실패:", error);
-					alert("전체 코딩테스트 ZIP 다운로드에 실패했습니다.");
+					return;
 				}
-				return;
-			}
-			try {
 				const blob = await APIService.exportQuizSubmissionCodesZip(
 					activeSectionId,
 					selectedQuiz.id,
@@ -169,10 +170,12 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 				link.click();
 				document.body.removeChild(link);
 				URL.revokeObjectURL(url);
-			} catch (error) {
-				console.error("퀴즈 제출 코드 ZIP 다운로드 실패:", error);
-				alert("ZIP 다운로드에 실패했습니다.");
 			}
+		} catch (error) {
+			console.error("제출 코드 ZIP 다운로드 실패:", error);
+			alert("제출 코드 ZIP 다운로드에 실패했습니다.");
+		} finally {
+			setIsDownloadingCodeZip(false);
 		}
 	};
 
@@ -310,6 +313,45 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		};
 	}, [scopedCourseGrades, showLateOnly, filteredLateItemIds]);
 
+	const headerProblemOptions = useMemo(() => {
+		if (viewMode !== "assignment" && viewMode !== "quiz") return [];
+		if (viewMode === "assignment" && !selectedAssignment) return [];
+		if (viewMode === "quiz" && !selectedQuiz) return [];
+		if (!grades[0]?.problemGrades?.length) return [];
+		return grades[0].problemGrades.map((p) => ({
+			problemId: p.problemId,
+			problemTitle: p.problemTitle,
+		}));
+	}, [viewMode, selectedAssignment, selectedQuiz, grades]);
+
+	const courseGradesDisplay = useMemo(() => {
+		if (!scopedCourseGradesByLate) return null;
+		if (viewMode === "course") {
+			return scopedCourseGradesByLate;
+		}
+		const hasSpecificItem =
+			(viewMode === "assignment" && selectedAssignment) ||
+			(viewMode === "quiz" && selectedQuiz);
+		if (!hasSpecificItem) {
+			return scopedCourseGradesByLate;
+		}
+		const sel = headerProblemFilter;
+		if (sel === undefined || sel === "all") return scopedCourseGradesByLate;
+		return {
+			...scopedCourseGradesByLate,
+			items: scopedCourseGradesByLate.items.map((item) => {
+				const fp = item.problems.filter((p) => p.problemId === sel);
+				return { ...item, problems: fp.length ? fp : item.problems };
+			}),
+		};
+	}, [
+		scopedCourseGradesByLate,
+		viewMode,
+		headerProblemFilter,
+		selectedAssignment,
+		selectedQuiz,
+	]);
+
 	const filteredCourseStudentsByLate = useMemo(() => {
 		if (!showLateOnly || !scopedCourseGradesByLate?.items?.length) {
 			return filteredCourseStudents;
@@ -372,18 +414,27 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					setSelectedAssignment={setSelectedAssignment}
 					selectedQuiz={selectedQuiz}
 					setSelectedQuiz={setSelectedQuiz}
+					showProblemColumnFilter={
+						Boolean(sectionId) &&
+						(assignments.length > 0 || quizzes.length > 0) &&
+						(viewMode === "assignment" || viewMode === "quiz")
+					}
+					problemFilterOptions={headerProblemOptions}
+					problemFilterValue={headerProblemFilter}
+					onProblemFilterChange={setHeaderProblemFilter}
 					onShowPointsModal={() => setShowPointsModal(true)}
 					onShowBulkModal={handleShowBulkModal}
 					onShowStatsModal={() => setShowStatsModal(true)}
 					onExportCSV={handleExportCSV}
 					onDownloadCodeZip={handleDownloadCodeZip}
+					isDownloadingCodeZip={isDownloadingCodeZip}
 				/>
 
 				{/* 성적 테이블 - 수업 전체 / 전체 과제 / 전체 퀴즈: CourseTable(고정 열+가로 스크롤); 과제·퀴즈 선택 시 해당 테이블 */}
 				{viewMode === "course" ? (
 					<GradeManagementCourseTable
 						courseLoading={courseLoading}
-						courseGrades={scopedCourseGradesByLate}
+						courseGrades={courseGradesDisplay}
 						filteredCourseStudents={filteredCourseStudentsByLate}
 						gradeSortKey={gradeSortKey}
 						gradeSortDir={gradeSortDir}
@@ -406,7 +457,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 				) : viewMode === "assignment" && !selectedAssignment ? (
 					<GradeManagementCourseTable
 						courseLoading={courseLoading}
-						courseGrades={scopedCourseGradesByLate}
+						courseGrades={courseGradesDisplay}
 						filteredCourseStudents={filteredCourseStudentsByLate}
 						gradeSortKey={gradeSortKey}
 						gradeSortDir={gradeSortDir}
@@ -427,7 +478,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 				) : viewMode === "quiz" && !selectedQuiz ? (
 					<GradeManagementCourseTable
 						courseLoading={courseLoading}
-						courseGrades={scopedCourseGradesByLate}
+						courseGrades={courseGradesDisplay}
 						filteredCourseStudents={filteredCourseStudentsByLate}
 						gradeSortKey={gradeSortKey}
 						gradeSortDir={gradeSortDir}
@@ -453,6 +504,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						gradeSortDir={gradeSortDir}
 						onSortStudentHeader={toggleGradeStudentSort}
 						selectedQuiz={selectedQuiz}
+						problemColumnFilter={headerProblemFilter}
 						editingGrade={editingGrade}
 						setEditingGrade={setEditingGrade}
 						gradeInputs={gradeInputs}
@@ -485,6 +537,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						gradeSortDir={gradeSortDir}
 						onSortStudentHeader={toggleGradeStudentSort}
 						selectedAssignment={selectedAssignment}
+						problemColumnFilter={headerProblemFilter}
 						editingGrade={editingGrade}
 						setEditingGrade={setEditingGrade}
 						gradeInputs={gradeInputs}
@@ -564,6 +617,17 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					problemDetail={problemDetail}
 					onClose={closeProblemDetailModal}
 				/>
+
+				{isDownloadingCodeZip && (
+					<S.ModalOverlay>
+						<S.LoadingOverlayCard>
+							<S.LoadingSpinner />
+							<S.LoadingOverlayMessage>
+								제출 코드 ZIP을 준비하고 있습니다...
+							</S.LoadingOverlayMessage>
+						</S.LoadingOverlayCard>
+					</S.ModalOverlay>
+				)}
 			</S.Container>
 		</TutorLayout>
 	);

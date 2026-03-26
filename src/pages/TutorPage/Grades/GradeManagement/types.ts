@@ -37,6 +37,10 @@ export interface ProblemGrade {
 	submitted?: boolean;
 	submittedAt?: string;
 	isOnTime?: boolean;
+	/** 맞은 테스트케이스 수 (백엔드 저장값) */
+	passedTestCases?: number | null;
+	/** 전체 테스트케이스 수 */
+	totalTestCases?: number | null;
 }
 
 /** 학생별 성적 (과제/퀴즈 성적 API) */
