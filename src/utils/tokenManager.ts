@@ -1,6 +1,10 @@
 /**
  * 토큰 매니저
- * Access Token은 localStorage에 저장, Refresh Token은 httpOnly 쿠키에서 처리
+ * - Access Token: 메모리(변수)에만 저장 → XSS로 탈취 불가
+ * - Refresh Token: HttpOnly 쿠키에서 처리 (JS에서 접근 불가)
+ *
+ * 페이지 새로고침 시 메모리가 초기화되지만, restoreAuth()가
+ * Refresh Token 쿠키를 이용해 Access Token을 자동 재발급합니다.
  */
 
 interface JwtPayload {
@@ -14,15 +18,11 @@ export interface TokenRefreshData {
 }
 
 class TokenManager {
-	private accessToken: string | null;
-	private onTokenRefresh: ((data: TokenRefreshData) => void) | null;
-	private onTokenExpired: (() => void) | null;
-
-	constructor() {
-		this.accessToken = this.getStoredAccessToken();
-		this.onTokenRefresh = null;
-		this.onTokenExpired = null;
-	}
+	private accessToken: string | null = null;
+	private onTokenRefresh: ((data: TokenRefreshData) => void) | null = null;
+	private onTokenExpired: (() => void) | null = null;
+	// 동시에 여러 곳에서 refresh를 호출해도 실제 요청은 1번만 → Rotation 충돌 방지
+	private refreshPromise: Promise<TokenRefreshData> | null = null;
 
 	setCallbacks(
 		onTokenRefresh: ((data: TokenRefreshData) => void) | null,
@@ -32,30 +32,8 @@ class TokenManager {
 		this.onTokenExpired = onTokenExpired;
 	}
 
-	getStoredAccessToken(): string | null {
-		try {
-			return localStorage.getItem("accessToken");
-		} catch (error) {
-			console.error("localStorage 접근 오류:", error);
-			return null;
-		}
-	}
-
-	private setStoredAccessToken(token: string | null): void {
-		try {
-			if (token) {
-				localStorage.setItem("accessToken", token);
-			} else {
-				localStorage.removeItem("accessToken");
-			}
-		} catch (error) {
-			console.error("localStorage 저장 오류:", error);
-		}
-	}
-
 	setAccessToken(token: string | null): void {
 		this.accessToken = token;
-		this.setStoredAccessToken(token);
 	}
 
 	getAccessToken(): string | null {
@@ -64,7 +42,6 @@ class TokenManager {
 
 	clearTokens(): void {
 		this.accessToken = null;
-		this.setStoredAccessToken(null);
 	}
 
 	isTokenValid(): boolean {
@@ -99,28 +76,43 @@ class TokenManager {
 		}
 	}
 
+	/**
+	 * Refresh Token 쿠키로 Access Token을 갱신.
+	 * 동시에 여러 곳에서 호출되어도 실제 요청은 1번만 발생(뮤텍스).
+	 * 실패 시 그냥 throw만 함 → 호출자(APIService/restoreAuth)가 직접 처리.
+	 */
 	async refreshToken(): Promise<TokenRefreshData> {
-		try {
-			const apiUrl =
-				process.env.REACT_APP_API_URL ?? "https://hcl.walab.info/api";
-			const response = await fetch(`${apiUrl}/auth/refresh`, {
-				method: "POST",
-				credentials: "include",
-				headers: { "Content-Type": "application/json" },
-			});
-
-			if (response.ok) {
-				const data = (await response.json()) as TokenRefreshData;
-				if (data.accessToken) this.setAccessToken(data.accessToken);
-				this.onTokenRefresh?.(data);
-				return data;
-			}
-			throw new Error("토큰 갱신 실패");
-		} catch (error) {
-			console.error("토큰 갱신 오류:", error);
-			this.handleTokenExpired();
-			throw error;
+		// 이미 진행 중인 refresh가 있으면 같은 promise를 반환
+		if (this.refreshPromise) {
+			return this.refreshPromise;
 		}
+
+		this.refreshPromise = this._doRefreshToken();
+		try {
+			return await this.refreshPromise;
+		} finally {
+			this.refreshPromise = null;
+		}
+	}
+
+	private async _doRefreshToken(): Promise<TokenRefreshData> {
+		const apiUrl =
+			process.env.REACT_APP_API_URL ?? "https://hcl.walab.info/api";
+		const response = await fetch(`${apiUrl}/auth/refresh`, {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+		});
+
+		if (response.ok) {
+			const data = (await response.json()) as TokenRefreshData;
+			if (data.accessToken) this.setAccessToken(data.accessToken);
+			this.onTokenRefresh?.(data);
+			return data;
+		}
+		// refresh 실패 시 그냥 throw → 호출자가 handleTokenExpired 여부를 결정
+		const errorData = await response.json().catch(() => ({})) as { message?: string };
+		throw new Error(errorData.message ?? "토큰 갱신 실패");
 	}
 
 	handleTokenExpired(): void {
@@ -128,22 +120,23 @@ class TokenManager {
 		this.onTokenExpired?.();
 	}
 
+	/**
+	 * 앱 초기화 시 인증 복원.
+	 * 메모리에 토큰이 없으면 Refresh Token 쿠키로 자동 재발급 시도.
+	 * 실패(처음 방문, 쿠키 없음, 만료 등)는 조용히 null 반환 → alert 없음.
+	 */
 	async restoreAuth(): Promise<{ accessToken: string } | null> {
-		const token = this.getStoredAccessToken();
-		if (token && !this.isTokenExpired(token)) {
-			this.accessToken = token;
-			return { accessToken: token };
+		if (this.accessToken && !this.isTokenExpired(this.accessToken)) {
+			return { accessToken: this.accessToken };
 		}
-		// Access Token이 만료됐어도 Refresh Token 쿠키로 재발급 시도
-		if (token) {
-			try {
-				const refreshed = await this.refreshToken();
-				if (refreshed.accessToken) {
-					return { accessToken: refreshed.accessToken };
-				}
-			} catch {
-				// Refresh Token도 만료됨 → null 반환
+
+		try {
+			const refreshed = await this.refreshToken();
+			if (refreshed.accessToken) {
+				return { accessToken: refreshed.accessToken };
 			}
+		} catch {
+			// 비로그인 상태이거나 쿠키 만료 → 조용히 비인증 처리
 		}
 		return null;
 	}
