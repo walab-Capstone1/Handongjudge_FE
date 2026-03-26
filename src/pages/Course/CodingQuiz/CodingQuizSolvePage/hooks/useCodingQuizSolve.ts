@@ -70,7 +70,7 @@ export function useCodingQuizSolve() {
 	const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
 	const [showSaveModal, setShowSaveModal] = useState(false);
 
-	// 시험 중복 접속 방지용 (학생 전용)
+	// 시험 중복 접속 방지용 (모든 역할 공통)
 	const [examClientSessionId] = useState<string>(() =>
 		typeof crypto !== "undefined" && crypto.randomUUID
 			? crypto.randomUUID()
@@ -205,9 +205,9 @@ export function useCodingQuizSolve() {
 		initializeSession();
 	}, []);
 
-	// 시험 페이지 진입 시 중복 접속 확인 (학생 전용)
+	// 시험 페이지 진입 시 중복 접속 확인
 	useEffect(() => {
-		if (isManager || !quizId || !sectionId || userRole === null) return;
+		if (!quizId || !sectionId || userRole === null) return;
 
 		const tryEnter = async () => {
 			try {
@@ -235,11 +235,12 @@ export function useCodingQuizSolve() {
 				.exitQuizSession(sectionId, quizId, examClientSessionId)
 				.catch(() => {});
 		};
-	}, [isManager, quizId, sectionId, userRole, examClientSessionId]);
+	}, [quizId, sectionId, userRole, examClientSessionId]);
 
 	// Heartbeat: 30초마다 세션 유효성 확인 및 TTL 연장
 	useEffect(() => {
-		if (isManager || !quizId || !sectionId || userRole === null || examSessionConflict) return;
+		if (!quizId || !sectionId || userRole === null || examSessionConflict)
+			return;
 
 		const interval = setInterval(async () => {
 			try {
@@ -261,7 +262,7 @@ export function useCodingQuizSolve() {
 		}, 30000);
 
 		return () => clearInterval(interval);
-	}, [isManager, quizId, sectionId, userRole, examSessionConflict, examClientSessionId]);
+	}, [quizId, sectionId, userRole, examSessionConflict, examClientSessionId]);
 
 	const loadFromSession = useCallback(async (): Promise<string | null> => {
 		if (!sessionId || !selectedProblemId || !sectionId) return null;
