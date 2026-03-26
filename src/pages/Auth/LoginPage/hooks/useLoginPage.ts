@@ -17,7 +17,8 @@ export function useLoginPage() {
 	const [showPassword, setShowPassword] = useState(false);
 
 	const state = location.state as LocationState | null;
-	const redirectTo = state?.redirectTo;
+	const queryRedirectTo = new URLSearchParams(location.search).get("redirectTo");
+	const redirectTo = state?.redirectTo || queryRedirectTo || undefined;
 	const loginMessage = state?.message;
 	const pendingEnrollmentCode = typeof window !== "undefined"
 		? sessionStorage.getItem("pendingEnrollmentCode")

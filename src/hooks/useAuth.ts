@@ -27,6 +27,12 @@ export const useAuth = () => {
           loading: false,
           error: null,
         });
+        const currentPath = `${window.location.pathname}${window.location.search}`;
+        const encodedRedirect = encodeURIComponent(currentPath);
+        const loginUrl = `/login?redirectTo=${encodedRedirect}`;
+        if (window.location.pathname !== "/login") {
+          window.location.href = loginUrl;
+        }
       }
     );
   }, [setAuth]);
