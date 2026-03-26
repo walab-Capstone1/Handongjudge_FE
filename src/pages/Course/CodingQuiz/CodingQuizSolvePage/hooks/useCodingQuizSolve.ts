@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { authState } from "../../../../../recoil/atoms";
 import apiService from "../../../../../services/APIService";
@@ -12,6 +12,7 @@ import type {
 	PanelLayout,
 	SubmissionResult,
 	Problem,
+	ProblemWorkStatus,
 } from "../types";
 
 export function useCodingQuizSolve() {
@@ -20,7 +21,6 @@ export function useCodingQuizSolve() {
 		quizId: string;
 	}>();
 	const [searchParams] = useSearchParams();
-	const navigate = useNavigate();
 	const auth = useRecoilValue(authState);
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const timeUpHandled = useRef(false);
@@ -68,16 +68,34 @@ export function useCodingQuizSolve() {
 	const [codeLoadSource, setCodeLoadSource] = useState<string | null>(null);
 	const [sessionCleared, setSessionCleared] = useState(false);
 	const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
+	const [isProblemChanging, setIsProblemChanging] = useState(false);
 	const [showSaveModal, setShowSaveModal] = useState(false);
+	const [problemStatusById, setProblemStatusById] = useState<
+		Record<number, ProblemWorkStatus>
+	>({});
+	const [nowMs, setNowMs] = useState(Date.now());
 
 	// 시험 중복 접속 방지용 (모든 역할 공통)
 	const [examClientSessionId] = useState<string>(() =>
-		typeof crypto !== "undefined" && crypto.randomUUID
-			? crypto.randomUUID()
-			: Math.random().toString(36).slice(2),
+	{
+		const storageKey = "coding-quiz-client-session-id";
+		if (typeof window !== "undefined") {
+			const existing = window.sessionStorage.getItem(storageKey);
+			if (existing) return existing;
+		}
+		const newSessionId =
+			typeof crypto !== "undefined" && crypto.randomUUID
+				? crypto.randomUUID()
+				: Math.random().toString(36).slice(2);
+		if (typeof window !== "undefined") {
+			window.sessionStorage.setItem(storageKey, newSessionId);
+		}
+		return newSessionId;
+	},
 	);
 	const [examSessionConflict, setExamSessionConflict] = useState(false);
 	const [examSessionTakenOver, setExamSessionTakenOver] = useState(false);
+	const problemChangeRequestIdRef = useRef(0);
 
 	// 사용자 역할 확인
 	useEffect(() => {
@@ -111,23 +129,57 @@ export function useCodingQuizSolve() {
 	}, [auth.isAuthenticated, auth.user, sectionId]);
 
 	const isManager = userRole === "ADMIN" || userRole === "TUTOR" || userRole === "SUPER_ADMIN";
+	const isQuizEndedByTime =
+		!!quizInfo.endTime && nowMs >= quizInfo.endTime.getTime();
+	const isQuizEnded = isTimeUp || quizInfo.status === "ENDED" || isQuizEndedByTime;
 
 	// 학생 제출/테스트 차단: 시간 종료 또는 PAUSED(일시정지) 상태
 	const isSubmitBlocked =
-		!isManager && (isTimeUp || quizInfo.status === "PAUSED");
+		!isManager && (isQuizEnded || quizInfo.status === "PAUSED");
+	const isSaveWarning =
+		!isManager &&
+		!!quizInfo.endTime &&
+		quizInfo.status !== "ENDED" &&
+		quizInfo.endTime.getTime() - nowMs > 0 &&
+		quizInfo.endTime.getTime() - nowMs <= 5 * 60 * 1000;
+	const isEditLocked = !isManager && isQuizEnded;
 
-	// 퀴즈 종료 여부 확인 및 학생 리다이렉션
+	// 종료 후에도 페이지 진입은 허용하고, 내부 잠금 로직으로만 제어
+
 	useEffect(() => {
-		if (!quizInfo.endTime || !sectionId || userRole === null) return;
-		
-		const now = new Date();
-		const endTime = new Date(quizInfo.endTime);
-		
-		// 학생이고 시간이 종료된 경우 리다이렉션
-		if (now > endTime && !isManager) {
-			navigate(`/sections/${sectionId}/coding-quiz`);
+		if (!quizInfo.endTime) return;
+		const timer = setInterval(() => setNowMs(Date.now()), 1000);
+		return () => clearInterval(timer);
+	}, [quizInfo.endTime]);
+
+	// 운영 중 종료시간이 변경될 수 있으므로 퀴즈 시간을 주기적으로 동기화
+	useEffect(() => {
+		if (!sectionId || !quizId) return;
+		const interval = setInterval(async () => {
+			try {
+				const quizInfoRes = await apiService.getQuizInfo(sectionId, quizId);
+				const quizData = quizInfoRes?.data ?? quizInfoRes;
+				setQuizInfo((prev) => ({
+					...prev,
+					...quizData,
+					startTime: quizData?.startTime ? new Date(quizData.startTime) : null,
+					endTime: quizData?.endTime ? new Date(quizData.endTime) : null,
+				}));
+			} catch {
+				// 일시적 네트워크 오류는 무시
+			}
+		}, 10000);
+		return () => clearInterval(interval);
+	}, [sectionId, quizId]);
+
+	// 종료 후 시간이 연장되면 잠금 상태를 자동 해제
+	useEffect(() => {
+		if (!quizInfo.endTime) return;
+		if (nowMs < quizInfo.endTime.getTime() && isTimeUp) {
+			setIsTimeUp(false);
+			timeUpHandled.current = false;
 		}
-	}, [quizInfo.endTime, sectionId, userRole, isManager, navigate]);
+	}, [quizInfo.endTime, nowMs, isTimeUp]);
 
 	useEffect(() => {
 		const loadAllInfo = async () => {
@@ -194,7 +246,27 @@ export function useCodingQuizSolve() {
 			}
 		};
 		loadAllInfo();
-	}, [quizId, sectionId, searchParams, isManager, navigate]);
+	}, [quizId, sectionId, searchParams]);
+
+	useEffect(() => {
+		const loadProblemStatuses = async () => {
+			if (!sectionId || !quizId || problems.length === 0) return;
+			try {
+				const response = await apiService.getQuizProblemStatuses(sectionId, quizId);
+				const list = (response?.data ?? response ?? []) as ProblemWorkStatus[];
+				const nextMap: Record<number, ProblemWorkStatus> = {};
+				for (const item of list) {
+					if (item?.problemId != null) {
+						nextMap[item.problemId] = item;
+					}
+				}
+				setProblemStatusById(nextMap);
+			} catch (error) {
+				console.warn("문제 상태 조회 실패:", error);
+			}
+		};
+		loadProblemStatuses();
+	}, [sectionId, quizId, problems]);
 
 	useEffect(() => {
 		const initializeSession = async () => {
@@ -336,24 +408,31 @@ export function useCodingQuizSolve() {
 		loadCode();
 	}, [selectedProblemId, sectionId, language, sessionId, loadFromSession]);
 
-	const saveToSession = useCallback(async (showModal = false) => {
+	const saveToBackend = useCallback(async (showModal = false) => {
 		if (
-			!sessionId ||
 			!code ||
-			code === getDefaultCode(language) ||
 			!selectedProblemId ||
 			!sectionId
 		)
 			return;
 		try {
 			setSessionSaveStatus("saving");
-			await indexedDBManager.saveSessionCode(
+			await apiService.saveProgress(
 				selectedProblemId,
 				sectionId,
 				language,
 				code,
 			);
 			setSessionSaveStatus("saved");
+			setProblemStatusById((prev) => ({
+				...prev,
+				[selectedProblemId]: {
+					problemId: selectedProblemId,
+					submitted: prev[selectedProblemId]?.submitted ?? false,
+					result: prev[selectedProblemId]?.result ?? null,
+					saved: true,
+				},
+			}));
 			
 			if (showModal) {
 				// 저장하기 버튼: 모달 표시
@@ -364,31 +443,31 @@ export function useCodingQuizSolve() {
 				setTimeout(() => setSessionSaveStatus("idle"), 2000);
 			}
 		} catch (error) {
-			console.error("세션 저장 실패:", error);
+			console.error("저장 실패:", error);
 			setSessionSaveStatus("error");
 			setTimeout(() => setSessionSaveStatus("idle"), 2000);
 		}
-	}, [sessionId, code, language, selectedProblemId, sectionId]);
+	}, [code, language, selectedProblemId, sectionId]);
 
 	// Ctrl+S 단축키 핸들러
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if ((event.ctrlKey || event.metaKey) && event.key === "s") {
 				event.preventDefault();
-				saveToSession(false); // 모달 없이 저장
+				saveToBackend(false); // 모달 없이 저장
 			}
 		};
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [saveToSession]);
+	}, [saveToBackend]);
 
 	useEffect(() => {
-		if (!sessionId || isTimeUp) return;
+		if (isTimeUp) return;
 		const autoSaveInterval = setInterval(() => {
-			saveToSession(false); // 자동 저장도 모달 없이
+			saveToBackend(false); // 자동 저장도 모달 없이
 		}, 10000);
 		return () => clearInterval(autoSaveInterval);
-	}, [sessionId, isTimeUp, saveToSession]);
+	}, [isTimeUp, saveToBackend]);
 
 	const clearSessionAfterSubmission = useCallback(async () => {
 		if (!sessionId || !selectedProblemId || !sectionId) return;
@@ -423,23 +502,23 @@ export function useCodingQuizSolve() {
 		timeUpHandled.current = true;
 
 		setIsTimeUp(true);
-		
-		// 학생인 경우 리다이렉션
-		if (!isManager && sectionId) {
-			alert("퀴즈 시간이 종료되었습니다.");
-			navigate(`/sections/${sectionId}/coding-quiz`);
-		} else {
-			// 관리자/튜터는 알림만 표시
-			alert("퀴즈 시간이 종료되었습니다.");
-		}
-	}, [isManager, sectionId, navigate]);
+		alert("퀴즈 시간이 종료되었습니다. 현재 페이지는 조회 가능하며 제출/수정은 잠금됩니다.");
+	}, []);
 
 	const handleProblemChange = useCallback(
 		async (problemId: number) => {
-			if (problemId === selectedProblemId || !sectionId) return;
+			if (
+				problemId === selectedProblemId ||
+				!sectionId ||
+				isProblemChanging
+			)
+				return;
+			const requestId = ++problemChangeRequestIdRef.current;
 			try {
+				setIsProblemChanging(true);
 				setSelectedProblemId(problemId);
 				const problemInfo = await apiService.getProblemInfo(String(problemId));
+				if (requestId !== problemChangeRequestIdRef.current) return;
 				const problemData = problemInfo?.data ?? problemInfo;
 				setCurrentProblem(problemData);
 
@@ -455,22 +534,30 @@ export function useCodingQuizSolve() {
 						sessionCode.trim() !== "" &&
 						sessionCode !== getDefaultCode(language)
 					) {
+						if (requestId !== problemChangeRequestIdRef.current) return;
 						setCode(sessionCode);
 						setCodeLoadSource("session");
 					} else {
+						if (requestId !== problemChangeRequestIdRef.current) return;
 						setCode(getDefaultCode(language));
 						setCodeLoadSource("default");
 					}
 				} catch {
+					if (requestId !== problemChangeRequestIdRef.current) return;
 					setCode(getDefaultCode(language));
 					setCodeLoadSource("default");
 				}
+				if (requestId !== problemChangeRequestIdRef.current) return;
 				setSubmissionResult(null);
 			} catch (error) {
 				console.error("문제 변경 실패:", error);
+			} finally {
+				if (requestId === problemChangeRequestIdRef.current) {
+					setIsProblemChanging(false);
+				}
 			}
 		},
-		[selectedProblemId, sectionId, language],
+		[selectedProblemId, sectionId, language, isProblemChanging],
 	);
 
 	const handlePanelMove = useCallback(
@@ -550,6 +637,15 @@ export function useCodingQuizSolve() {
 					points: res.points,
 					score: res.score,
 				});
+				setProblemStatusById((prev) => ({
+					...prev,
+					[selectedProblemId]: {
+						problemId: selectedProblemId,
+						submitted: true,
+						result,
+						saved: prev[selectedProblemId]?.saved ?? false,
+					},
+				}));
 			} else {
 				throw new Error("제출 응답을 받지 못했습니다.");
 			}
@@ -586,7 +682,9 @@ export function useCodingQuizSolve() {
 		setIsSubmitting(true);
 		setSubmissionResult(null);
 		try {
-			const submissionResponse = await apiService.submitCodeAndGetOutput(
+			// 퀴즈 페이지에서는 테스트하기도 퀴즈 전용 API를 사용해야
+			// 과제/퀴즈 혼합 검증 충돌을 피할 수 있다.
+			const submissionResponse = await apiService.submitQuizCode(
 				sectionId,
 				String(selectedProblemId),
 				code,
@@ -610,6 +708,10 @@ export function useCodingQuizSolve() {
 				code,
 				outputList: res.outputList,
 				type: "output",
+				passedCount: res.passedCount,
+				totalCount: res.totalCount,
+				points: res.points,
+				score: res.score,
 			});
 			// 제출 후 세션 유지 (백엔드에서 불러올 수 있도록)
 			} else {
@@ -635,10 +737,10 @@ export function useCodingQuizSolve() {
 		selectedProblemId,
 		isSubmitBlocked,
 		quizInfo.status,
-		clearSessionAfterSubmission,
 	]);
 
 	const handleLanguageChange = useCallback((newLang: string) => {
+		if (newLang !== "c") return;
 		setLanguage(newLang);
 		setCode(getDefaultCode(newLang));
 	}, []);
@@ -677,6 +779,8 @@ export function useCodingQuizSolve() {
 		isSubmitting,
 		isTimeUp,
 		isSubmitBlocked,
+		isSaveWarning,
+		isEditLocked,
 		sessionSaveStatus,
 		codeLoadSource,
 		sessionCleared,
@@ -685,8 +789,10 @@ export function useCodingQuizSolve() {
 		verticalSizes,
 		panelLayout,
 		isProblemModalOpen,
+		isProblemChanging,
 		setIsProblemModalOpen,
 		showSaveModal,
+		problemStatusById,
 		examSessionConflict,
 		examSessionTakenOver,
 		handleExamSessionTakeover,
@@ -695,7 +801,7 @@ export function useCodingQuizSolve() {
 		handlePanelMove,
 		handleSubmit,
 		handleSubmitWithOutput,
-		saveToSession,
+		saveToBackend,
 		handleLanguageChange,
 		handleHorizontalDragEnd,
 		handleVerticalDragEnd,
