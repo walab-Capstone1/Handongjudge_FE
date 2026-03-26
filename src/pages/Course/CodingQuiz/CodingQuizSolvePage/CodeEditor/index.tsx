@@ -32,6 +32,9 @@ interface CodeEditorProps {
 	saveMode?: "session" | "backend";
 	codeLoadSource?: string | null;
 	sessionCleared?: boolean;
+	isEditLocked?: boolean;
+	isSaveLocked?: boolean;
+	showSaveWarning?: boolean;
 	isDeadlinePassed?: boolean;
 	isAssignmentActive?: boolean;
 	userRole?: string | null;
@@ -52,6 +55,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 	saveMode = "session",
 	codeLoadSource = null,
 	sessionCleared = false,
+	isEditLocked = false,
+	isSaveLocked = false,
+	showSaveWarning = false,
 	isDeadlinePassed = false,
 	isAssignmentActive = true,
 	userRole = null,
@@ -59,8 +65,13 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 	// 관리자/튜터는 비활성화된 과제도 제출 가능; 마감일 지나면 지각 제출 가능(버튼 비활성화 안 함)
 	const isManager = userRole === "ADMIN" || userRole === "TUTOR";
 	const isSubmitDisabled = isSubmitting || (!isAssignmentActive && !isManager);
+	const isActionLocked = isSubmitDisabled || isSaveLocked;
 	const disabledReason =
 		!isAssignmentActive && !isManager ? "과제가 비활성화되었습니다" : "";
+	const lockReason =
+		isSaveLocked && !disabledReason
+			? "시험이 종료되어 수정/제출할 수 없습니다."
+			: disabledReason;
 	const getBaseExtensions = () => [
 		bracketMatching(),
 		foldGutter(),
@@ -396,11 +407,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 							</S.SaveStatus>
 						)}
 
-						{saveMode === "backend" ? (
-							<S.ShortcutHint>Ctrl+S로 저장</S.ShortcutHint>
-						) : (
-							<S.ShortcutHint>Ctrl+S로 세션 저장</S.ShortcutHint>
-						)}
 					</S.SessionSaveStatus>
 				</S.EditorHeaderLeft>
 				<S.EditorHeaderRight>
@@ -420,19 +426,41 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 							</S.DueDateText>
 						</S.DueDateInfo>
 					)}
-					<S.SubmitButton
-						$variant="save"
-						onClick={() => saveMode === "backend" ? onBackendSave?.(true) : onSessionSave?.(true)}
-						title={saveMode === "backend" ? "백엔드에 저장합니다" : "세션에 저장합니다 (Ctrl+S)"}
-					>
-						저장하기
-					</S.SubmitButton>
+					{showSaveWarning && (
+						<S.SaveWarning>5분 미만 남음: 저장 후 제출을 확인하세요</S.SaveWarning>
+					)}
+					{showSaveWarning ? (
+						<S.BlinkingSaveButton
+							$variant="save"
+							onClick={() =>
+								saveMode === "backend" ? onBackendSave?.(true) : onSessionSave?.(true)
+							}
+							disabled={isActionLocked}
+							title={lockReason || (saveMode === "backend" ? "백엔드에 저장합니다" : "세션에 저장합니다 (Ctrl+S)")}
+						>
+							저장하기
+						</S.BlinkingSaveButton>
+					) : (
+						<S.SubmitButton
+							$variant="save"
+							onClick={() =>
+								saveMode === "backend" ? onBackendSave?.(true) : onSessionSave?.(true)
+							}
+							disabled={isActionLocked}
+							title={lockReason || (saveMode === "backend" ? "백엔드에 저장합니다" : "세션에 저장합니다 (Ctrl+S)")}
+						>
+							저장하기
+						</S.SubmitButton>
+					)}
+					{!showSaveWarning && (
+						<S.SaveReminder>저장 후 반드시 제출하세요</S.SaveReminder>
+					)}
 					<S.SubmitButton
 						$variant="test"
 						onClick={onSubmitWithOutput}
-						disabled={isSubmitDisabled}
+						disabled={isActionLocked}
 						title={
-							disabledReason ||
+							lockReason ||
 							"테스트케이스별 상세 결과를 확인할 수 있습니다"
 						}
 					>
@@ -440,8 +468,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 					</S.SubmitButton>
 					<S.SubmitButton
 						onClick={onSubmit}
-						disabled={isSubmitDisabled}
-						title={disabledReason || "코드를 제출합니다"}
+						disabled={isActionLocked}
+						title={lockReason || "코드를 제출합니다"}
 					>
 						{isSubmitting ? "제출 중..." : "제출하기"}
 					</S.SubmitButton>
@@ -457,6 +485,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 					]}
 					theme={theme === "dark" ? "dark" : "light"}
 					onChange={onCodeChange}
+					editable={!isEditLocked}
 					style={{
 						backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
 						height: "100%",

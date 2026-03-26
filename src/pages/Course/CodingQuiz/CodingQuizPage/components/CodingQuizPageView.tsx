@@ -91,7 +91,7 @@ export default function CodingQuizPageView(d: CodingQuizPageHookReturn) {
 										{problem.status === "ACCEPTED"
 											? "정답"
 											: problem.status === "SUBMITTED"
-												? "제출"
+												? "오답"
 												: "미제출"}
 									</S.ProblemBadge>
 									<S.ProblemItemArrow>→</S.ProblemItemArrow>
