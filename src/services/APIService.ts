@@ -9,14 +9,21 @@ class APIService {
 
 	async request(endpoint: string, options: RequestInit = {}): Promise<any> {
 		const url = `${this.baseURL}${endpoint}`;
+		const rawHeaders = (options.headers || {}) as Record<string, string>;
+		const hasContentTypeHeader = Object.keys(rawHeaders).some(
+			(key) => key.toLowerCase() === "content-type",
+		);
+		const isFormDataBody =
+			typeof FormData !== "undefined" && options.body instanceof FormData;
+		const headers: Record<string, string> = { ...rawHeaders };
+		if (!isFormDataBody && !hasContentTypeHeader) {
+			headers["Content-Type"] = "application/json";
+		}
 
 		const config: RequestInit = {
 			credentials: "include",
-			headers: {
-				"Content-Type": "application/json",
-				...options.headers,
-			},
 			...options,
+			headers,
 		};
 
 		const accessToken = tokenManager.getAccessToken();
@@ -207,6 +214,29 @@ class APIService {
 		});
 	}
 
+	/**
+	 * 퀴즈 전용 제출 - 테스트케이스별 scoring 적용
+	 */
+	async submitQuizCode(
+		sectionId: number | string,
+		problemId: number | string,
+		code: string,
+		language: string,
+	): Promise<any> {
+		return await this.request("/quiz/submitAndGetResult", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				problemId: Number.parseInt(String(problemId)),
+				sectionId: Number.parseInt(String(sectionId)),
+				language,
+				codeString: code,
+			}),
+		});
+	}
+
 	async saveProgress(
 		problemId: number | string,
 		sectionId: number | string,
@@ -280,50 +310,13 @@ class APIService {
 		sampleInputs?: string;
 		testcases: { name: string; input: string; output: string; type?: string }[];
 	}): Promise<number> {
-		const url = `${this.baseURL}/problems`;
-		const accessToken = tokenManager.getAccessToken();
-
-		const config: RequestInit = {
+		return await this.request("/problems", {
 			method: "POST",
-			credentials: "include",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify(request),
-		};
-
-		if (accessToken) {
-			(config.headers as Record<string, string>).Authorization =
-				`Bearer ${accessToken}`;
-		}
-
-		try {
-			const response = await fetch(url, config);
-
-			if (response.status === 401) {
-				await tokenManager.refreshToken();
-				const newAccessToken = tokenManager.getAccessToken();
-				if (newAccessToken) {
-					(config.headers as Record<string, string>).Authorization =
-						`Bearer ${newAccessToken}`;
-					const retryResponse = await fetch(url, {
-						...config,
-						headers: {
-							...config.headers,
-							Authorization: `Bearer ${newAccessToken}`,
-						},
-					});
-					return this.handleResponse(retryResponse);
-				}
-				tokenManager.clearTokens();
-				throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
-			}
-
-			return this.handleResponse(response);
-		} catch (error) {
-			console.error("문제 생성 API 요청 오류:", error);
-			throw error;
-		}
+		});
 	}
 
 	async addProblemToAssignment(
@@ -344,114 +337,27 @@ class APIService {
 	}
 
 	async parseFolderFormatFiles(formData: FormData): Promise<any> {
-		const url = `${this.baseURL}/problems/parse-folder`;
-		const accessToken = tokenManager.getAccessToken();
-
-		const config: RequestInit = {
+		return await this.request("/problems/parse-folder", {
 			method: "POST",
-			credentials: "include",
 			headers: {},
 			body: formData,
-		};
-
-		if (accessToken) {
-			(config.headers as Record<string, string>).Authorization =
-				`Bearer ${accessToken}`;
-		}
-
-		try {
-			const response = await fetch(url, config);
-
-			if (response.status === 401) {
-				await tokenManager.refreshToken();
-				const newAccessToken = tokenManager.getAccessToken();
-				if (newAccessToken) {
-					(config.headers as Record<string, string>).Authorization =
-						`Bearer ${newAccessToken}`;
-					const retryResponse = await fetch(url, config);
-					return this.handleResponse(retryResponse);
-				}
-			}
-
-			return this.handleResponse(response);
-		} catch (error) {
-			console.error("폴더 형식 파싱 오류:", error);
-			throw error;
-		}
+		});
 	}
 
 	async parseFolderFormatZip(formData: FormData): Promise<any> {
-		const url = `${this.baseURL}/problems/parse-folder-zip`;
-		const accessToken = tokenManager.getAccessToken();
-
-		const config: RequestInit = {
+		return await this.request("/problems/parse-folder-zip", {
 			method: "POST",
-			credentials: "include",
 			headers: {},
 			body: formData,
-		};
-
-		if (accessToken) {
-			(config.headers as Record<string, string>).Authorization =
-				`Bearer ${accessToken}`;
-		}
-
-		try {
-			const response = await fetch(url, config);
-
-			if (response.status === 401) {
-				await tokenManager.refreshToken();
-				const newAccessToken = tokenManager.getAccessToken();
-				if (newAccessToken) {
-					(config.headers as Record<string, string>).Authorization =
-						`Bearer ${newAccessToken}`;
-					const retryResponse = await fetch(url, config);
-					return this.handleResponse(retryResponse);
-				}
-			}
-
-			return this.handleResponse(response);
-		} catch (error) {
-			console.error("폴더 형식 ZIP 파싱 오류:", error);
-			throw error;
-		}
+		});
 	}
 
 	async parseZipFile(formData: FormData): Promise<any> {
-		const url = `${this.baseURL}/problems/parse-zip`;
-		const accessToken = tokenManager.getAccessToken();
-
-		const config: RequestInit = {
+		return await this.request("/problems/parse-zip", {
 			method: "POST",
-			credentials: "include",
 			headers: {},
 			body: formData,
-		};
-
-		if (accessToken) {
-			(config.headers as Record<string, string>).Authorization =
-				`Bearer ${accessToken}`;
-		}
-
-		try {
-			const response = await fetch(url, config);
-
-			if (response.status === 401) {
-				await tokenManager.refreshToken();
-				const newAccessToken = tokenManager.getAccessToken();
-				if (newAccessToken) {
-					(config.headers as Record<string, string>).Authorization =
-						`Bearer ${newAccessToken}`;
-					const retryResponse = await fetch(url, config);
-					return this.handleResponse(retryResponse);
-				}
-			}
-
-			return this.handleResponse(response);
-		} catch (error) {
-			console.error("ZIP 파일 파싱 오류:", error);
-			throw error;
-		}
+		});
 	}
 
 	async parseProblemZip(problemId: number | string): Promise<any> {
@@ -464,40 +370,11 @@ class APIService {
 		problemId: number | string,
 		formData: FormData,
 	): Promise<any> {
-		const url = `${this.baseURL}/problems/${problemId}`;
-		const accessToken = tokenManager.getAccessToken();
-
-		const config: RequestInit = {
+		return await this.request(`/problems/${problemId}`, {
 			method: "PUT",
-			credentials: "include",
 			headers: {},
 			body: formData,
-		};
-
-		if (accessToken) {
-			(config.headers as Record<string, string>).Authorization =
-				`Bearer ${accessToken}`;
-		}
-
-		try {
-			const response = await fetch(url, config);
-
-			if (response.status === 401) {
-				await tokenManager.refreshToken();
-				const newAccessToken = tokenManager.getAccessToken();
-				if (newAccessToken) {
-					(config.headers as Record<string, string>).Authorization =
-						`Bearer ${newAccessToken}`;
-					const retryResponse = await fetch(url, config);
-					return this.handleResponse(retryResponse);
-				}
-			}
-
-			return this.handleResponse(response);
-		} catch (error) {
-			console.error("문제 수정 오류:", error);
-			throw error;
-		}
+		});
 	}
 
 	async removeProblemFromAssignment(
@@ -575,28 +452,11 @@ class APIService {
 	 * Bulk Parse (HandongJudge 포맷 ZIP 파싱)
 	 */
 	async parseBulkZip(formData: FormData): Promise<any> {
-		const url = `${this.baseURL}/problems/bulk/parse`;
-		let accessToken = tokenManager.getAccessToken();
-		const doFetch = () => {
-			const config: RequestInit = {
-				method: "POST",
-				credentials: "include",
-				headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-				body: formData,
-			};
-			return fetch(url, config);
-		};
-		let response = await doFetch();
-		if (response.status === 401) {
-			await tokenManager.refreshToken();
-			accessToken = tokenManager.getAccessToken();
-			if (accessToken) response = await doFetch();
-		}
-		if (!response.ok) {
-			const err = await response.json().catch(() => ({}));
-			throw new Error(err.message || `Bulk Parse 실패: ${response.status}`);
-		}
-		return response.json();
+		return await this.request("/problems/bulk/parse", {
+			method: "POST",
+			headers: {},
+			body: formData,
+		});
 	}
 
 	/**
@@ -785,6 +645,71 @@ class APIService {
 	): Promise<any> {
 		return await this.request(
 			`/sections/${sectionId}/quizzes/${quizId}/problems`,
+		);
+	}
+
+	async getQuizStudentProgress(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/student-progress`,
+		);
+	}
+
+	async getQuizSubmissionStats(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submission-stats`,
+		);
+	}
+
+	async getQuizSubmissions(
+		sectionId: number | string,
+		quizId: number | string,
+		params?: {
+			page?: number;
+			size?: number;
+			problemId?: number;
+			userId?: number;
+			result?: string;
+		},
+	): Promise<any> {
+		const searchParams = new URLSearchParams();
+		if (params?.page != null) searchParams.set("page", String(params.page));
+		if (params?.size != null) searchParams.set("size", String(params.size));
+		if (params?.problemId != null)
+			searchParams.set("problemId", String(params.problemId));
+		if (params?.userId != null)
+			searchParams.set("userId", String(params.userId));
+		if (params?.result != null && params.result !== "")
+			searchParams.set("result", params.result);
+		const query = searchParams.toString();
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submissions${query ? `?${query}` : ""}`,
+		);
+	}
+
+	async getQuizSubmissionCode(
+		sectionId: number | string,
+		quizId: number | string,
+		submissionId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submissions/${submissionId}/code`,
+		);
+	}
+
+	async removeQuizProblem(
+		sectionId: number | string,
+		quizId: number | string,
+		problemId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/problems/${problemId}`,
+			{ method: "DELETE" },
 		);
 	}
 
@@ -1333,6 +1258,20 @@ class APIService {
 		);
 	}
 
+	async updateQuizStatus(
+		sectionId: number | string,
+		quizId: number | string,
+		status: "ACTIVE" | "PAUSED" | "ENDED",
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/status`,
+			{
+				method: "PATCH",
+				body: JSON.stringify({ status }),
+			},
+		);
+	}
+
 	async toggleQuizActive(
 		sectionId: number | string,
 		quizId: number | string,
@@ -1630,6 +1569,76 @@ class APIService {
 		return await this.request(
 			`/sections/${sectionId}/assignments/${assignmentId}/grades`,
 		);
+	}
+
+	async exportAssignmentSubmissionCodesZip(
+		sectionId: number | string,
+		assignmentId: number | string,
+	): Promise<Blob> {
+		const url = `${this.baseURL}/sections/${sectionId}/assignments/${assignmentId}/grades/export-zip`;
+		const accessToken = tokenManager.getAccessToken();
+		const response = await fetch(url, {
+			method: "GET",
+			credentials: "include",
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		});
+		if (!response.ok) {
+			const errorText = await response.text().catch(() => "");
+			throw new Error(errorText || `ZIP 다운로드 실패: ${response.status}`);
+		}
+		return response.blob();
+	}
+
+	async exportAllAssignmentSubmissionCodesZip(
+		sectionId: number | string,
+	): Promise<Blob> {
+		const url = `${this.baseURL}/sections/${sectionId}/assignments/export-zip-all`;
+		const accessToken = tokenManager.getAccessToken();
+		const response = await fetch(url, {
+			method: "GET",
+			credentials: "include",
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		});
+		if (!response.ok) {
+			const errorText = await response.text().catch(() => "");
+			throw new Error(errorText || `ZIP 다운로드 실패: ${response.status}`);
+		}
+		return response.blob();
+	}
+
+	async exportQuizSubmissionCodesZip(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<Blob> {
+		const url = `${this.baseURL}/sections/${sectionId}/quizzes/${quizId}/grades/export-zip`;
+		const accessToken = tokenManager.getAccessToken();
+		const response = await fetch(url, {
+			method: "GET",
+			credentials: "include",
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		});
+		if (!response.ok) {
+			const errorText = await response.text().catch(() => "");
+			throw new Error(errorText || `ZIP 다운로드 실패: ${response.status}`);
+		}
+		return response.blob();
+	}
+
+	async exportAllQuizSubmissionCodesZip(
+		sectionId: number | string,
+	): Promise<Blob> {
+		const url = `${this.baseURL}/sections/${sectionId}/quizzes/grades/export-zip-all`;
+		const accessToken = tokenManager.getAccessToken();
+		const response = await fetch(url, {
+			method: "GET",
+			credentials: "include",
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+		});
+		if (!response.ok) {
+			const errorText = await response.text().catch(() => "");
+			throw new Error(errorText || `ZIP 다운로드 실패: ${response.status}`);
+		}
+		return response.blob();
 	}
 
 	async saveGrade(

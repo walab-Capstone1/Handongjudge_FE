@@ -39,7 +39,7 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 				code={d.code}
 				theme={d.theme}
 				assignmentInfo={d.quizInfo}
-				isSubmitting={d.isSubmitting || d.isTimeUp}
+				isSubmitting={d.isSubmitting || d.isSubmitBlocked}
 				onCodeChange={d.setCode}
 				onSubmit={d.handleSubmit}
 				onSubmitWithOutput={d.handleSubmitWithOutput}
@@ -194,7 +194,7 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 							$theme={d.theme}
 							value={d.language}
 							onChange={(e) => d.handleLanguageChange(e.target.value)}
-							disabled={d.isTimeUp}
+							disabled={d.isSubmitBlocked}
 						>
 							<option value="c">C</option>
 							<option value="cpp">C++</option>

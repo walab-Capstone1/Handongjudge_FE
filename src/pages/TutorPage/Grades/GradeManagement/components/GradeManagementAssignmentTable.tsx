@@ -1,4 +1,4 @@
-import type React from "react";
+import { useMemo, type Dispatch, type SetStateAction } from "react";
 import * as S from "../styles";
 import type { StudentGradeRow, EditingGrade, AssignmentItem } from "../types";
 import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
@@ -18,9 +18,7 @@ export interface GradeManagementAssignmentTableProps {
 	editingGrade: EditingGrade | null;
 	setEditingGrade: (v: EditingGrade | null) => void;
 	gradeInputs: Record<string, number | "">;
-	setGradeInputs: React.Dispatch<
-		React.SetStateAction<Record<string, number | "">>
-	>;
+	setGradeInputs: Dispatch<SetStateAction<Record<string, number | "">>>;
 	comments: Record<string, string>;
 	handleSaveGrade: (
 		userId: number,
@@ -30,6 +28,12 @@ export interface GradeManagementAssignmentTableProps {
 	) => void;
 	handleViewCode: (userId: number, problemId: number) => void;
 	onProblemDetail?: (problemId: number) => void;
+	totalOnly?: boolean;
+	onToggleTotalOnly?: (v: boolean) => void;
+	showLateOnly?: boolean;
+	onToggleShowLateOnly?: (v: boolean) => void;
+	/** 헤더 문제 표시 드롭다운과 연동 */
+	problemColumnFilter?: number | "all";
 }
 
 export default function GradeManagementAssignmentTable({
@@ -47,30 +51,51 @@ export default function GradeManagementAssignmentTable({
 	handleSaveGrade,
 	handleViewCode,
 	onProblemDetail,
+	totalOnly = false,
+	onToggleTotalOnly,
+	showLateOnly = false,
+	onToggleShowLateOnly,
+	problemColumnFilter = "all",
 }: GradeManagementAssignmentTableProps) {
+	const assignmentDueAt =
+		selectedAssignment?.dueDate ??
+		(selectedAssignment as { endDate?: string } | null)?.endDate ??
+		(selectedAssignment as { deadline?: string } | null)?.deadline;
 	const hasProblems =
 		grades[0]?.problemGrades && grades[0].problemGrades.length > 0;
 
-	const problemGradesForCol = grades[0]?.problemGrades ?? [];
+	const allProblemGrades = grades[0]?.problemGrades ?? [];
+	const problemGradesForCol = useMemo(() => {
+		if (problemColumnFilter === "all") return allProblemGrades;
+		const fp = allProblemGrades.filter(
+			(p) => p.problemId === problemColumnFilter,
+		);
+		return fp.length ? fp : allProblemGrades;
+	}, [allProblemGrades, problemColumnFilter]);
 	return (
 		<S.GradeTablePageWrapper>
-			<GradeStatusLegendBar />
+			<GradeStatusLegendBar
+				totalOnly={totalOnly}
+				onToggleTotalOnly={onToggleTotalOnly}
+				showLateOnly={showLateOnly}
+				onToggleShowLateOnly={onToggleShowLateOnly}
+			/>
 			<S.GradeTableHorizontalScroll>
 			<S.CourseTableWithStickyRight>
 				<colgroup>
 					<col style={{ width: S.STICKY_COL_1_WIDTH }} />
 					<col style={{ width: S.STICKY_COL_2_WIDTH }} />
-					{hasProblems
+					{!totalOnly && hasProblems
 						? problemGradesForCol.map((p) => (
 								<col key={p.problemId} style={{ width: S.COL_PROBLEM_WIDTH }} />
 							))
-						: [<col key="no-problem" style={{ width: S.COL_PROBLEM_WIDTH }} />]}
+						: null}
 					<col style={{ width: S.COL_SCORE_WIDTH }} />
 					<col style={{ width: S.STICKY_RIGHT_TOTAL_WIDTH }} />
 					<col style={{ width: S.STICKY_RIGHT_RATIO_WIDTH }} />
 				</colgroup>
 				<thead>
-					{hasProblems ? (
+					{!totalOnly && hasProblems ? (
 						<>
 							<tr>
 								<S.SortableStudentHeaderTh
@@ -112,7 +137,7 @@ export default function GradeManagementAssignmentTable({
 								<th rowSpan={2}>비율</th>
 							</tr>
 							<tr>
-								{grades[0]?.problemGrades?.map((p) => (
+								{problemGradesForCol.map((p) => (
 									<S.ProblemHeader key={p.problemId} as="th">
 										{onProblemDetail ? (
 											<button
@@ -165,9 +190,6 @@ export default function GradeManagementAssignmentTable({
 									dir={gradeSortDir}
 								/>
 							</S.SortableStudentHeaderTh>
-							<S.CourseAssignmentHeader as="th">
-								<S.ItemTitle>과제</S.ItemTitle>
-							</S.CourseAssignmentHeader>
 							<th>총점</th>
 							<th>전체 총점</th>
 							<th>비율</th>
@@ -182,29 +204,23 @@ export default function GradeManagementAssignmentTable({
 							<tr key={student.userId}>
 								<S.TdStudentName>{student.studentName}</S.TdStudentName>
 								<S.TdStudentId>{student.studentId}</S.TdStudentId>
-								{hasProblems ? (
-									student.problemGrades?.map((problem) => (
-										<S.TdCourseProblemCell key={problem.problemId}>
-											<GradeProblemCellDisplay
-												problem={problem}
-												fallbackPoints={problem.points ?? 1}
-												onViewCode={
-													problem.submitted
-														? () =>
-																handleViewCode(
-																	student.userId,
-																	problem.problemId,
-																)
-														: undefined
-												}
-											/>
-										</S.TdCourseProblemCell>
-									))
-								) : (
-									<S.TdCourseProblemCell>
-										<span style={{ color: "#94a3b8" }}>과제 없음</span>
-									</S.TdCourseProblemCell>
-								)}
+								{!totalOnly && hasProblems ? (
+									problemGradesForCol.map((col) => {
+										const problem = student.problemGrades?.find(
+											(pg) => pg.problemId === col.problemId,
+										);
+										return (
+											<S.TdCourseProblemCell key={col.problemId}>
+												<GradeProblemCellDisplay
+													problem={problem}
+													fallbackPoints={col.points ?? 1}
+													dueAt={assignmentDueAt}
+													showLateOnly={showLateOnly}
+												/>
+											</S.TdCourseProblemCell>
+										);
+									})
+								) : null}
 								<S.TdCourseAssignmentTotalCell>
 									<strong>
 										{totalScore} / {totalPoints}
