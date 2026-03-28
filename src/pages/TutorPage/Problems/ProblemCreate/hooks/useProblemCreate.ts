@@ -20,6 +20,7 @@ const initialFormData: ProblemFormData = {
 	memoryLimit: "",
 	sampleInputs: [{ input: "", output: "" }],
 	testcases: [],
+	strictWhitespaceGrading: false,
 };
 
 function readFileAsText(file: File): Promise<string> {
@@ -604,6 +605,7 @@ export function useProblemCreate() {
 					memoryLimit: formData.memoryLimit || "0",
 					sampleInputs: JSON.stringify(formData.sampleInputs),
 					testcases,
+					strictWhitespaceGrading: Boolean(formData.strictWhitespaceGrading),
 				};
 
 				const createResult = await APIService.createProblem(request);
