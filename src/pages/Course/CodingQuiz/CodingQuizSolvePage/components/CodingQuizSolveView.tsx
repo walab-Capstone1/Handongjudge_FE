@@ -127,13 +127,37 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 						</S.OverlayModalBox>
 					</S.OverlayModal>
 				)}
-				{d.showSaveModal && (
-					<S.SaveModal>
-						<S.SaveModalContent>
-							<S.SaveModalText>저장되었습니다</S.SaveModalText>
-						</S.SaveModalContent>
-					</S.SaveModal>
-				)}
+			{d.showSaveModal && (
+				<S.SaveModal>
+					<S.SaveModalContent>
+						<S.SaveModalText>저장되었습니다</S.SaveModalText>
+					</S.SaveModalContent>
+				</S.SaveModal>
+			)}
+			{/* 문제 전환 시 미저장 변경사항 안내 모달 */}
+			{d.showUnsavedModal && (
+				<S.OverlayModal>
+					<S.OverlayModalBox>
+						<S.OverlayModalTitle>저장하지 않은 변경사항</S.OverlayModalTitle>
+						<S.OverlayModalDesc>
+							현재 작성 중인 코드가 저장되지 않았습니다.
+							<br />
+							다른 문제로 이동하기 전에 저장하시겠습니까?
+						</S.OverlayModalDesc>
+						<S.OverlayModalButtons>
+							<S.OverlayModalConfirm type="button" onClick={d.handleUnsavedModalSave}>
+								저장하고 이동
+							</S.OverlayModalConfirm>
+							<S.OverlayModalCancel type="button" onClick={d.handleUnsavedModalSkip}>
+								저장 없이 이동
+							</S.OverlayModalCancel>
+							<S.OverlayModalCancel type="button" onClick={d.handleUnsavedModalCancel}>
+								취소
+							</S.OverlayModalCancel>
+						</S.OverlayModalButtons>
+					</S.OverlayModalBox>
+				</S.OverlayModal>
+			)}
 				<ProblemSelectModal
 					isOpen={d.isProblemModalOpen}
 					problems={d.problems}
