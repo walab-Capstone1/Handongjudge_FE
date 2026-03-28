@@ -450,6 +450,32 @@ function EditForm({
 				</PCS.FormSection>
 			</PCS.FormRow>
 
+			<PCS.FormSection>
+				<PCS.Label
+					htmlFor={`import-strict-ws-${problem._index}`}
+					style={{
+						display: "flex",
+						alignItems: "center",
+						gap: "0.5rem",
+						cursor: "pointer",
+					}}
+				>
+					<input
+						id={`import-strict-ws-${problem._index}`}
+						type="checkbox"
+						checked={Boolean(problem.strictWhitespaceGrading)}
+						onChange={(e) =>
+							onUpdate({ strictWhitespaceGrading: e.target.checked })
+						}
+					/>
+					공백·출력 형식 엄격 채점 (별찍기 등)
+				</PCS.Label>
+				<PCS.HelpText style={{ marginTop: 4 }}>
+					Domjudge problem.yaml에 space_change_sensitive를 넣습니다. 문제마다 다르게 설정할 수
+					있습니다.
+				</PCS.HelpText>
+			</PCS.FormSection>
+
 			{/* 문제 설명 */}
 			<PCS.FormSection as={PCS.DescriptionSection}>
 				<div
