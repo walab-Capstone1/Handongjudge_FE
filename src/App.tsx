@@ -1,5 +1,6 @@
 import type React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useAuth } from "./hooks/useAuth";
 import { RecoilRoot } from "recoil";
 import AdminRoute from "./components/Route/AdminRoute";
 import SuperAdminRoute from "./components/Route/SuperAdminRoute";
@@ -58,10 +59,22 @@ import SuperAdminProblemManagement from "./pages/SuperAdminPage/SuperAdminProble
 import SuperAdminUserManagement from "./pages/SuperAdminPage/SuperAdminUserManagement";
 import SuperAdminSubmissionManagement from "./pages/SuperAdminPage/SuperAdminSubmissionManagement";
 
+/**
+ * RecoilRoot 내부에서 useAuth를 한 번만 호출해 전역으로 인증 상태를 복원합니다.
+ * 어느 페이지(코딩 테스트 포함)에서 새로고침해도 refresh 쿠키로 재발급이 됩니다.
+ */
+const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({
+	children,
+}) => {
+	useAuth();
+	return <>{children}</>;
+};
+
 const App: React.FC = () => {
 	return (
 		<RecoilRoot>
 			<Router>
+				<AuthInitializer>
 				<Routes>
 					<Route path="/" element={<IndexPage />} />
 					<Route path="/login" element={<LoginPage />} />
@@ -439,6 +452,7 @@ const App: React.FC = () => {
 						}
 					/>
 				</Routes>
+				</AuthInitializer>
 			</Router>
 		</RecoilRoot>
 	);
