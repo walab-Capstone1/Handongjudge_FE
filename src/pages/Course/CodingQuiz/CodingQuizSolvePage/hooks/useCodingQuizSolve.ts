@@ -183,7 +183,8 @@ export function useCodingQuizSolve() {
 
 	useEffect(() => {
 		const loadAllInfo = async () => {
-			if (!quizId || !sectionId) return;
+			// auth 복원이 끝날 때까지 대기 (새로고침 시 토큰 없이 401 나는 것 방지)
+			if (!quizId || !sectionId || auth.loading) return;
 			try {
 				setIsLoading(true);
 				const [quizInfoRes, sectionInfoRes, problemsRes] = await Promise.all([
@@ -246,7 +247,7 @@ export function useCodingQuizSolve() {
 			}
 		};
 		loadAllInfo();
-	}, [quizId, sectionId, searchParams]);
+	}, [quizId, sectionId, searchParams, auth.loading]);
 
 	useEffect(() => {
 		const loadProblemStatuses = async () => {
