@@ -309,6 +309,7 @@ class APIService {
 		memoryLimit?: string;
 		sampleInputs?: string;
 		testcases: { name: string; input: string; output: string; type?: string }[];
+		strictWhitespaceGrading?: boolean;
 	}): Promise<number> {
 		return await this.request("/problems", {
 			method: "POST",

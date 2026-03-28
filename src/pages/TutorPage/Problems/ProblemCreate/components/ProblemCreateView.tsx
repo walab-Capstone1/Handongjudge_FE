@@ -170,6 +170,35 @@ export default function ProblemCreateView(d: ProblemCreateHookReturn) {
 							</S.FormRow>
 
 							<S.FormSection>
+								<S.Label
+									htmlFor="strictWhitespaceGrading"
+									style={{
+										display: "flex",
+										alignItems: "center",
+										gap: "0.5rem",
+										cursor: "pointer",
+									}}
+								>
+									<input
+										id="strictWhitespaceGrading"
+										type="checkbox"
+										checked={Boolean(d.formData.strictWhitespaceGrading)}
+										onChange={(e) =>
+											d.setFormData((prev) => ({
+												...prev,
+												strictWhitespaceGrading: e.target.checked,
+											}))
+										}
+									/>
+									공백·출력 형식 엄격 채점 (별찍기 등)
+								</S.Label>
+								<S.HelpText style={{ marginTop: 4 }}>
+									Domjudge에 problem.yaml의 space_change_sensitive를 적용합니다. 미체크 시
+									기본(공백 느슨) 채점입니다.
+								</S.HelpText>
+							</S.FormSection>
+
+							<S.FormSection>
 								<S.Label>ZIP 파일 (선택사항)</S.Label>
 								<S.FileUploadWrapper>
 									<S.FileInput

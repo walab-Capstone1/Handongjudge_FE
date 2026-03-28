@@ -1,10 +1,12 @@
 import type React from "react";
 import * as S from "../styles";
 import type { ProblemEditHookReturn } from "../hooks/useProblemEdit";
+import type { ProblemFormData } from "../types";
 
 type ProblemEditBasicFieldsProps = Pick<
 	ProblemEditHookReturn,
 	| "formData"
+	| "setFormData"
 	| "currentTag"
 	| "setCurrentTag"
 	| "zipFile"
@@ -18,6 +20,7 @@ type ProblemEditBasicFieldsProps = Pick<
 
 const ProblemEditBasicFields: React.FC<ProblemEditBasicFieldsProps> = ({
 	formData,
+	setFormData,
 	currentTag,
 	setCurrentTag,
 	zipFile,
@@ -124,6 +127,30 @@ const ProblemEditBasicFields: React.FC<ProblemEditBasicFieldsProps> = ({
 				/>
 			</S.FormSection>
 		</S.FormRow>
+
+		<S.FormSection>
+			<S.Label
+				htmlFor="problem-edit-strictWhitespace"
+				style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}
+			>
+				<input
+					id="problem-edit-strictWhitespace"
+					type="checkbox"
+					checked={Boolean(formData.strictWhitespaceGrading)}
+					onChange={(e) =>
+						setFormData((prev: ProblemFormData) => ({
+							...prev,
+							strictWhitespaceGrading: e.target.checked,
+						}))
+					}
+				/>
+				공백·출력 형식 엄격 채점 (별찍기 등, Domjudge space_change_sensitive)
+			</S.Label>
+			<S.HelpText style={{ marginTop: 4 }}>
+				체크 시 출력의 공백 개수·줄끝 공백까지 정답과 일치해야 합니다. 변경 시 문제 패키지가
+				Domjudge에 다시 반영됩니다.
+			</S.HelpText>
+		</S.FormSection>
 
 		<S.FormSection>
 			<S.Label htmlFor="zipFileInput">ZIP 파일 (선택사항)</S.Label>
