@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import { authState } from "../../../../recoil/atoms";
 import apiService from "../../../../services/APIService";
 import indexedDBManager from "../../../../utils/IndexedDBManager";
 import { getDefaultCode } from "../utils/getDefaultCode";
@@ -74,10 +76,17 @@ export function useProblemSolve() {
 	const [codeLoadSource, setCodeLoadSource] = useState<CodeLoadSource>(null);
 	const [sessionCleared, setSessionCleared] = useState(false);
 	const [userRole, setUserRole] = useState<string | null>(null);
+	const auth = useRecoilValue(authState);
+
+	// 마지막으로 서버에 저장된 코드 (hasUnsavedChanges 판단 기준)
+	const lastSavedCodeRef = useRef<string>("");
+	// IndexedDB 디바운스 저장 타이머
+	const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
 		const loadAllInfo = async () => {
-			if (!problemId || !sectionId || !assignmentId) return;
+			// auth 복원이 끝날 때까지 대기 (새로고침 시 토큰 없이 401 나는 것 방지)
+			if (!problemId || !sectionId || !assignmentId || auth.loading) return;
 			try {
 				setIsLoading(true);
 				
@@ -152,7 +161,7 @@ export function useProblemSolve() {
 			}
 		};
 		loadAllInfo();
-	}, [problemId, sectionId, assignmentId, navigate]);
+	}, [problemId, sectionId, assignmentId, navigate, auth.loading]);
 
 	useEffect(() => {
 		const initializeSession = async () => {
@@ -208,20 +217,20 @@ export function useProblemSolve() {
 			return;
 		try {
 			setSessionSaveStatus("saving");
-			await apiService.saveProgress(
-				problemId,
-				sectionId,
-				language,
-				code,
-			);
+			// 서버와 IndexedDB에 동시 저장
+			await Promise.all([
+				apiService.saveProgress(problemId, sectionId, language, code),
+				indexedDBManager.saveSessionCode(problemId, sectionId, language, code).catch(() => {}),
+			]);
+			// 서버 저장 시각을 localStorage에 기록 (timestamp 비교용)
+			localStorage.setItem(`lastServerSave_${problemId}_${sectionId}_${language}`, Date.now().toString());
+			lastSavedCodeRef.current = code;
 			setSessionSaveStatus("saved");
-			
+
 			if (showModal) {
-				// 저장하기 버튼: 모달 표시
 				setShowSaveModal(true);
 				setTimeout(() => setShowSaveModal(false), 2000);
 			} else {
-				// Ctrl+S: 상태 메시지만
 				setTimeout(() => setSessionSaveStatus("idle"), 2000);
 			}
 		} catch (error) {
@@ -270,43 +279,102 @@ export function useProblemSolve() {
 
 	useEffect(() => {
 		const loadCode = async () => {
-			if (!problemId || !sectionId || !language) return;
+			if (!problemId || !sectionId || !language || auth.loading) return;
 			try {
-				// 백엔드에서만 불러오기 (세션 불러오기 제거)
-				const response = await apiService.loadProgress(
-					problemId,
-					sectionId,
-					language,
-				);
-				const raw = response as
-					| { codeString?: string; code?: string }
-					| string
-					| undefined;
-				const backendCode =
+				// IndexedDB와 서버를 동시에 조회
+				const [sessionResult, serverResult] = await Promise.allSettled([
+					indexedDBManager.getSessionCode(problemId, sectionId, language),
+					apiService.loadProgress(problemId, sectionId, language),
+				]);
+
+				const sessionRecord = sessionResult.status === "fulfilled" ? sessionResult.value : null;
+				const serverData = serverResult.status === "fulfilled" ? serverResult.value : null;
+
+				const sessionCode = sessionRecord?.code ?? null;
+				const sessionTimestamp = sessionRecord?.timestamp ?? 0;
+
+				// 마지막 서버 저장 시각 (저장 시 localStorage에 기록)
+				const serverSaveKey = `lastServerSave_${problemId}_${sectionId}_${language}`;
+				const lastServerSaveTime = parseInt(localStorage.getItem(serverSaveKey) ?? "0", 10);
+
+				const raw = serverData as { codeString?: string; code?: string } | string | undefined;
+				const serverCode =
 					typeof raw === "object" && raw !== null
 						? (raw?.codeString ?? raw?.code ?? undefined)
-						: typeof raw === "string"
-							? raw
-							: undefined;
-				if (
-					backendCode &&
-					typeof backendCode === "string" &&
-					backendCode.trim() !== "" &&
-					backendCode !== getDefaultCode(language)
-				) {
-					setCode(backendCode);
+						: typeof raw === "string" ? raw : undefined;
+
+				const isValidSession = Boolean(sessionCode && sessionCode.trim() !== "" && sessionCode !== getDefaultCode(language));
+				const isValidServer = Boolean(serverCode && typeof serverCode === "string" && serverCode.trim() !== "" && serverCode !== getDefaultCode(language));
+
+				if (isValidSession && isValidServer) {
+					if (sessionTimestamp > lastServerSaveTime) {
+						// 로컬이 더 최신 (예: 서버 저장 전에 브라우저를 닫았을 때)
+						setCode(sessionCode!);
+						setCodeLoadSource("session");
+						lastSavedCodeRef.current = serverCode!; // 서버 버전이 마지막 "공식 저장"
+					} else {
+						// 서버가 최신 또는 동일
+						setCode(serverCode!);
+						setCodeLoadSource("backend");
+						lastSavedCodeRef.current = serverCode!;
+					}
+				} else if (isValidSession) {
+					setCode(sessionCode!);
+					setCodeLoadSource("session");
+					lastSavedCodeRef.current = ""; // 서버 저장 기록 없음
+				} else if (isValidServer) {
+					setCode(serverCode!);
 					setCodeLoadSource("backend");
-					return;
+					lastSavedCodeRef.current = serverCode!;
+				} else {
+					setCode(getDefaultCode(language));
+					setCodeLoadSource("default");
+					lastSavedCodeRef.current = "";
 				}
-				setCode(getDefaultCode(language));
-				setCodeLoadSource("default");
 			} catch {
 				setCode(getDefaultCode(language));
 				setCodeLoadSource("default");
+				lastSavedCodeRef.current = "";
 			}
 		};
 		loadCode();
-	}, [problemId, sectionId, language]);
+	}, [problemId, sectionId, language, auth.loading]);
+
+	// 코드 변경 시 IndexedDB에 자동 저장 (디바운스 500ms)
+	useEffect(() => {
+		if (!sessionId || !problemId || !sectionId || auth.loading) return;
+		if (!code || code === getDefaultCode(language)) return;
+		if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+		autoSaveTimerRef.current = setTimeout(() => {
+			indexedDBManager
+				.saveSessionCode(problemId, sectionId, language, code)
+				.catch((err) => console.warn("IndexedDB 자동 저장 실패:", err));
+		}, 500);
+		return () => {
+			if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+		};
+	}, [code, sessionId, problemId, sectionId, language, auth.loading]);
+
+	// 5분마다 서버 자동 저장
+	useEffect(() => {
+		const interval = setInterval(() => {
+			saveToBackend(false);
+		}, 5 * 60 * 1000);
+		return () => clearInterval(interval);
+	}, [saveToBackend]);
+
+	// 페이지 이탈/새로고침 시 미저장 변경사항 경고
+	useEffect(() => {
+		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+			const hasUnsaved = code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+			if (hasUnsaved) {
+				e.preventDefault();
+				e.returnValue = "";
+			}
+		};
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+	}, [code, language]);
 
 	const handlePanelMove = useCallback(
 		(draggedPanelId: string, targetPanelId: string) => {
@@ -501,6 +569,9 @@ export function useProblemSolve() {
 		currentProblem.description ||
 		`# ${currentProblem.title}\n\n## 문제 설명\n이 문제는 ${currentProblem.title}에 대한 설명입니다.\n\n## 제한사항\n- 문제에 대한 제한사항을 확인하세요.\n\n## 입출력 예시\n\`\`\`\n입력: 예시 입력\n출력: 예시 출력\n\`\`\`\n\n## 힌트\n- 문제 해결을 위한 힌트를 참고하세요.`;
 
+	// 서버에 저장되지 않은 변경사항 여부 (beforeunload 경고 및 UI 표시용)
+	const hasUnsavedChanges = code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+
 	return {
 		sectionId,
 		assignmentId,
@@ -535,5 +606,6 @@ export function useProblemSolve() {
 		isDeadlinePassed,
 		isAssignmentActive,
 		userRole,
+		hasUnsavedChanges,
 	};
 }

@@ -369,6 +369,14 @@ export function useCourseDashboard() {
 
 	const handleMenuClick = useCallback((_menuId: string) => {}, []);
 
+	const handleQuizSummaryClick = useCallback(
+		async (quizId: number) => {
+			if (sectionId == null) return;
+			navigate(`/sections/${sectionId}/coding-quiz?quizId=${quizId}`);
+		},
+		[sectionId, navigate],
+	);
+
 	const handleNotificationClick = useCallback(
 		async (notification: TransformedNotification) => {
 			if (notification.link) {
@@ -505,6 +513,7 @@ export function useCourseDashboard() {
 		handleNotificationClick,
 		handleNoticeClick,
 		handleAssignmentClick,
+		handleQuizSummaryClick,
 		handleToggleSidebar,
 		handleEnrollByCode,
 		calculateDDay,

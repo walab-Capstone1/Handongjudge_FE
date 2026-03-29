@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
 import APIService from "../../../../../services/APIService";
@@ -8,6 +8,7 @@ import type { ProblemStatus, Quiz, Problem, SectionInfo } from "../types";
 export function useCodingQuizPage() {
 	const { sectionId } = useParams<{ sectionId: string }>();
 	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const auth = useRecoilValue(authState);
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useRecoilState(
 		sidebarCollapsedState,
@@ -20,6 +21,7 @@ export function useCodingQuizPage() {
 	const [quizProblems, setQuizProblems] = useState<Problem[]>([]);
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const [isManager, setIsManager] = useState(false);
+	const autoOpenQuizHandledRef = useRef(false);
 
 	const fetchUserRole = useCallback(async () => {
 		if (!sectionId || !auth.user) return;
@@ -135,6 +137,26 @@ export function useCodingQuizPage() {
 		},
 		[sectionId, auth.user],
 	);
+
+	useEffect(() => {
+		if (loading || quizzes.length === 0 || autoOpenQuizHandledRef.current) return;
+
+		const quizIdParam = searchParams.get("quizId");
+		if (!quizIdParam) return;
+
+		const targetQuizId = Number.parseInt(quizIdParam, 10);
+		if (!Number.isFinite(targetQuizId)) return;
+
+		const targetQuiz = quizzes.find((quiz) => quiz.id === targetQuizId);
+		if (!targetQuiz) return;
+
+		autoOpenQuizHandledRef.current = true;
+		void handleQuizClick(targetQuiz);
+
+		const nextParams = new URLSearchParams(searchParams);
+		nextParams.delete("quizId");
+		setSearchParams(nextParams, { replace: true });
+	}, [loading, quizzes, searchParams, setSearchParams, handleQuizClick]);
 
 	const handleProblemSelect = useCallback(
 		(problemId: number) => {

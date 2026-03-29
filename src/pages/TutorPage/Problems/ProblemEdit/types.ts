@@ -31,6 +31,8 @@ export interface ProblemFormData {
 	memoryLimit: string;
 	sampleInputs: SampleInput[];
 	testcases: TestcaseItem[];
+	/** Domjudge 공백 엄격 채점 (problem.yaml validator_flags) */
+	strictWhitespaceGrading?: boolean;
 }
 
 export interface ProblemPreviewProps {

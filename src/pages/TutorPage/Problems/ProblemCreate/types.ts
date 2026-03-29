@@ -23,6 +23,8 @@ export interface ProblemCreateRequest {
 	memoryLimit?: string;
 	sampleInputs?: string;
 	testcases: TestCaseDto[];
+	/** Domjudge 공백 엄격 채점 */
+	strictWhitespaceGrading?: boolean;
 }
 
 export interface ParsedTestcase {
@@ -44,4 +46,5 @@ export interface ProblemFormData {
 	memoryLimit: string;
 	sampleInputs: SampleInput[];
 	testcases: File[];
+	strictWhitespaceGrading?: boolean;
 }

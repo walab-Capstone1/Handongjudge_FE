@@ -2,22 +2,22 @@ import { useRecoilState } from 'recoil';
 import { authState } from '../recoil/atoms';
 import APIService from '../services/APIService';
 import tokenManager from '../utils/tokenManager';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export const useAuth = () => {
   const [auth, setAuth] = useRecoilState(authState);
+  // 동일 훅이 여러 컴포넌트에서 동시에 마운트되어도 restoreAuth는 한 번만 실행
+  const restored = useRef(false);
 
-  // 토큰 갱신 콜백 설정
+  // 토큰 만료/갱신 콜백 등록 (tokenManager 싱글턴에 세팅)
   useEffect(() => {
     tokenManager.setCallbacks(
-      // 토큰 갱신 성공 시
       (tokens: any) => {
         setAuth(prev => ({
           ...prev,
           accessToken: tokens.accessToken,
         }));
       },
-      // 토큰 만료 시
       () => {
         window.alert("세션이 만료되었습니다. 다시 로그인해주세요.");
         setAuth({
@@ -37,8 +37,13 @@ export const useAuth = () => {
     );
   }, [setAuth]);
 
-  // 인증 상태 복원
+  // 페이지 최초 로드 시 인증 상태 복원
+  // AuthInitializer(App.tsx)가 최상단에서 이 훅을 마운트하므로 한 번만 실행됨.
+  // Header/Sidebar 등에서 추가로 useAuth()를 쓰더라도 restored ref로 중복 실행 방지.
   useEffect(() => {
+    if (restored.current) return;
+    restored.current = true;
+
     const restoreAuthState = async () => {
       try {
         const restoredTokens = await tokenManager.restoreAuth();
@@ -49,30 +54,18 @@ export const useAuth = () => {
             accessToken: restoredTokens.accessToken,
             loading: false,
           }));
-          
-          // 사용자 정보도 함께 가져오기
+
           try {
             const userInfo = await APIService.getUserInfo();
-            setAuth(prev => ({
-              ...prev,
-              user: userInfo,
-            }));
-          } catch (userError) {
+            setAuth(prev => ({ ...prev, user: userInfo }));
+          } catch {
             // 사용자 정보 조회 실패해도 인증 상태는 유지
           }
         } else {
-          setAuth(prev => ({
-            ...prev,
-            isAuthenticated: false,
-            loading: false,
-          }));
+          setAuth(prev => ({ ...prev, isAuthenticated: false, loading: false }));
         }
-      } catch (error) {
-        setAuth(prev => ({
-          ...prev,
-          isAuthenticated: false,
-          loading: false,
-        }));
+      } catch {
+        setAuth(prev => ({ ...prev, isAuthenticated: false, loading: false }));
       }
     };
 
@@ -184,9 +177,8 @@ export const useAuth = () => {
     }
   };
 
-  // 인증 상태 복원 함수
   const restoreAuth = async () => {
-    return null;
+    return tokenManager.restoreAuth();
   };
 
   // 에러 초기화 함수

@@ -370,6 +370,154 @@ export const FormRow = styled.div`
   }
 `;
 
+export const DateTimeConfirmRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+`;
+
+export const DateTimeConfirmButton = styled.button`
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  background: #2563eb;
+  cursor: pointer;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+`;
+
+export const DatePickerField = styled.div`
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+
+  .react-datepicker__input-container input {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #1e293b;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+    background: white;
+    cursor: pointer;
+  }
+
+  .react-datepicker__input-container input:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+
+  .react-datepicker-popper {
+    z-index: 2000;
+  }
+
+  .react-datepicker {
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 46px;
+  }
+
+  .react-datepicker__header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    padding-top: 0.6rem;
+  }
+
+  .react-datepicker__current-month {
+    font-size: 0.95rem;
+    color: #1f2937;
+    font-weight: 600;
+  }
+
+  .react-datepicker__day-name {
+    color: #6b7280;
+    font-size: 0.75rem;
+    width: 2rem;
+    line-height: 2rem;
+    margin: 0.12rem;
+  }
+
+  .react-datepicker__day {
+    width: 2rem;
+    line-height: 2rem;
+    margin: 0.12rem;
+    border-radius: 6px;
+  }
+
+  .react-datepicker__day:hover {
+    background: #eef2ff;
+  }
+
+  .react-datepicker__day--selected,
+  .react-datepicker__time-list-item--selected {
+    background: #2563eb !important;
+    color: #fff !important;
+    font-weight: 600;
+  }
+
+  .react-datepicker__day--keyboard-selected {
+    background: #dbeafe;
+    color: #1e3a8a;
+  }
+
+  .react-datepicker__time-container {
+    border-left: 1px solid #e5e7eb;
+  }
+
+  .react-datepicker__time-box {
+    width: 92px !important;
+  }
+
+  .react-datepicker__time-list-item {
+    height: 32px !important;
+    line-height: 32px !important;
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  .react-datepicker__time-list-item:hover {
+    background: #eef2ff !important;
+  }
+`;
+
+export const DatePickerConfirmBar = styled.div`
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 10;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0;
+  border: none;
+  background: transparent;
+`;
+
+export const DatePickerConfirmButton = styled.button`
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  background: #2563eb;
+  cursor: pointer;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+`;
+
 export const ModalFooter = styled.div`
   display: flex;
   justify-content: flex-end;

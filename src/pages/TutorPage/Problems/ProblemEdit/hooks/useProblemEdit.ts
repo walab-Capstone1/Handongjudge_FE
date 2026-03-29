@@ -21,6 +21,7 @@ const initialFormData: ProblemFormData = {
 	memoryLimit: "",
 	sampleInputs: [{ input: "", output: "" }],
 	testcases: [],
+	strictWhitespaceGrading: false,
 };
 
 export type ProblemEditLocationState = {
@@ -64,6 +65,7 @@ export function useProblemEdit() {
 	const [previewMode, setPreviewMode] = useState<"descriptionOnly" | "full">("full");
 	const [parsedTestCases, setParsedTestCases] = useState<ParsedTestcase[]>([]);
 	const [showParsedTestCases, setShowParsedTestCases] = useState(false);
+	const originalStrictWhitespaceRef = useRef(false);
 
 	const fetchProblem = useCallback(async () => {
 		if (!problemId) return;
@@ -138,6 +140,8 @@ export function useProblemEdit() {
 					}));
 				}
 			}
+			const strictWs = problem?.strictWhitespaceGrading === true;
+			originalStrictWhitespaceRef.current = strictWs;
 			setFormData({
 				title: problem?.title ?? parsedData?.title ?? "",
 				description: mainDescriptionText,
@@ -155,6 +159,7 @@ export function useProblemEdit() {
 				memoryLimit,
 				sampleInputs,
 				testcases: [],
+				strictWhitespaceGrading: strictWs,
 			});
 			setEnableFullEdit(false);
 			setTimeout(() => {
@@ -624,7 +629,11 @@ export function useProblemEdit() {
 			e.preventDefault();
 			if (!problemId) return;
 
-			if (enableFullEdit) {
+			const strictNow = Boolean(formData.strictWhitespaceGrading);
+			const strictChanged = strictNow !== originalStrictWhitespaceRef.current;
+			const useFullPayload = enableFullEdit || strictChanged;
+
+			if (useFullPayload) {
 				const hasDescription =
 					(formData.description?.trim() || formData.descriptionText?.trim()) ?? "";
 				if (!hasDescription) {
@@ -662,10 +671,14 @@ export function useProblemEdit() {
 				submitFormData.append("tags", JSON.stringify(formData.tags));
 				submitFormData.append("difficulty", formData.difficulty?.trim() || "1");
 				submitFormData.append(
-					"metadataUpdated",
-					enableFullEdit ? "false" : "true",
+					"strictWhitespaceGrading",
+					formData.strictWhitespaceGrading ? "true" : "false",
 				);
-				if (enableFullEdit) {
+				submitFormData.append(
+					"metadataUpdated",
+					useFullPayload ? "false" : "true",
+				);
+				if (useFullPayload) {
 					submitFormData.append("description", getFullDescriptionForBackend());
 					submitFormData.append("inputFormat", formData.inputFormat);
 					submitFormData.append("outputFormat", formData.outputFormat);

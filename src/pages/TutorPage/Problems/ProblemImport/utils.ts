@@ -34,5 +34,6 @@ export function toProblemCreateRequest(
 		memoryLimit: String(pr.memoryLimit ?? 256),
 		sampleInputs: sampleInputsJson,
 		testcases,
+		strictWhitespaceGrading: false,
 	};
 }

@@ -222,7 +222,7 @@ export const ProblemBadge = styled.span<{
     props.$status === "ACCEPTED"
       ? "#22C55E"
       : props.$status === "SUBMITTED"
-        ? "#667EEA"
+        ? "#EF4444"
         : "#EEEEEE"};
   color: ${(props) =>
     props.$status === "ACCEPTED" || props.$status === "SUBMITTED"

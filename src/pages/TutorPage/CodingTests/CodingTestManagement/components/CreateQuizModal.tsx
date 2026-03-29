@@ -20,7 +20,10 @@ const CreateQuizModal: FC<CreateQuizModalProps> = ({ d }) => {
 			<S.ModalContent onClick={(e) => e.stopPropagation()}>
 				<S.ModalHeader>
 					<h2>새 코딩 테스트 만들기</h2>
-					<S.ModalClose type="button" onClick={() => d.setShowCreateModal(false)}>
+					<S.ModalClose
+						type="button"
+						onClick={() => d.setShowCreateModal(false)}
+					>
 						×
 					</S.ModalClose>
 				</S.ModalHeader>
@@ -43,7 +46,10 @@ const CreateQuizModal: FC<CreateQuizModalProps> = ({ d }) => {
 							id="create-quiz-desc"
 							value={d.formData.description}
 							onChange={(e) =>
-								d.setFormData((prev) => ({ ...prev, description: e.target.value }))
+								d.setFormData((prev) => ({
+									...prev,
+									description: e.target.value,
+								}))
 							}
 							placeholder="코딩 테스트 설명을 입력하세요"
 							rows={4}
@@ -100,7 +106,10 @@ const CreateQuizModal: FC<CreateQuizModalProps> = ({ d }) => {
 						</S.ProblemSelectSection>
 					</S.FormGroup>
 					<S.ModalFooter>
-						<S.CancelButton type="button" onClick={() => d.setShowCreateModal(false)}>
+						<S.CancelButton
+							type="button"
+							onClick={() => d.setShowCreateModal(false)}
+						>
 							취소
 						</S.CancelButton>
 						<S.SubmitButton

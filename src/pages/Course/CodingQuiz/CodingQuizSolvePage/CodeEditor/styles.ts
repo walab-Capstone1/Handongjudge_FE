@@ -1,4 +1,23 @@
 import styled from "styled-components";
+import { keyframes } from "styled-components";
+
+const blink = keyframes`
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    background-color: #ff1f1f;
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+    background-color: #b30000;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    background-color: #ff1f1f;
+  }
+`;
 
 export const EditorWrapper = styled.div`
   height: 100%;
@@ -90,11 +109,11 @@ export const SaveStatus = styled.span<{
     ${(props) => {
 			switch (props.$status) {
 				case "saving":
-					return `background-color: rgba(255, 193, 7, 0.1);`;
+					return "background-color: rgba(255, 193, 7, 0.1);";
 				case "saved":
-					return `background-color: rgba(40, 167, 69, 0.1);`;
+					return "background-color: rgba(40, 167, 69, 0.1);";
 				case "error":
-					return `background-color: rgba(220, 53, 69, 0.1);`;
+					return "background-color: rgba(220, 53, 69, 0.1);";
 				case "cleared":
 					return `
             background-color: rgba(108, 117, 125, 0.1);
@@ -239,6 +258,35 @@ export const SubmitButton = styled.button<{ $variant?: "test" | "save" }>`
     cursor: not-allowed;
     background-color: #6c757d;
     color: #ffffff;
+  }
+`;
+
+export const SaveWarning = styled.span`
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffb86b;
+`;
+
+export const SaveReminder = styled.span`
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff9f1c;
+  white-space: nowrap;
+`;
+
+export const BlinkingSaveButton = styled(SubmitButton)`
+  animation: ${blink} 0.65s infinite;
+  background-color: #ff1f1f !important;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  letter-spacing: 0.2px;
+
+  &:hover {
+    background-color: #d10000 !important;
   }
 `;
 

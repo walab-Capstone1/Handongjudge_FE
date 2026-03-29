@@ -161,3 +161,74 @@ export const ProblemTitle = styled.div`
 		color: #24292e;
 	}
 `;
+
+export const ProblemStatus = styled.div<{ $tone: "ok" | "bad" | "warn" | "idle" }>`
+	margin-top: 8px;
+	font-size: 12px;
+	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 9px;
+	border-radius: 999px;
+	border: 1px solid transparent;
+
+	${(p) =>
+		p.$tone === "ok" &&
+		`
+		color: #2da44e;
+		background: rgba(45, 164, 78, 0.18);
+		border-color: rgba(45, 164, 78, 0.35);
+	`}
+	${(p) =>
+		p.$tone === "bad" &&
+		`
+		color: #ff6b6b;
+		background: rgba(248, 81, 73, 0.2);
+		border-color: rgba(248, 81, 73, 0.4);
+	`}
+	${(p) =>
+		p.$tone === "warn" &&
+		`
+		color: #f2b233;
+		background: rgba(210, 153, 34, 0.22);
+		border-color: rgba(210, 153, 34, 0.45);
+	`}
+	${(p) =>
+		p.$tone === "idle" &&
+		`
+		color: #9aa4af;
+		background: rgba(139, 148, 158, 0.2);
+		border-color: rgba(139, 148, 158, 0.35);
+	`}
+
+	.problem-solve-page.light & {
+		${(p) =>
+			p.$tone === "ok" &&
+			`
+			color: #1a7f37;
+			background: rgba(26, 127, 55, 0.14);
+			border-color: rgba(26, 127, 55, 0.28);
+		`}
+		${(p) =>
+			p.$tone === "bad" &&
+			`
+			color: #cf222e;
+			background: rgba(207, 34, 46, 0.12);
+			border-color: rgba(207, 34, 46, 0.24);
+		`}
+		${(p) =>
+			p.$tone === "warn" &&
+			`
+			color: #9a6700;
+			background: rgba(154, 103, 0, 0.14);
+			border-color: rgba(154, 103, 0, 0.3);
+		`}
+		${(p) =>
+			p.$tone === "idle" &&
+			`
+			color: #57606a;
+			background: rgba(87, 96, 106, 0.1);
+			border-color: rgba(87, 96, 106, 0.2);
+		`}
+	}
+`;

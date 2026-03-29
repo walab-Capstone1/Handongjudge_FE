@@ -81,6 +81,7 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 						<S.FormGrid>
 							<ProblemEditBasicFields
 								formData={d.formData}
+								setFormData={d.setFormData}
 								currentTag={d.currentTag}
 								setCurrentTag={d.setCurrentTag}
 								zipFile={d.zipFile}

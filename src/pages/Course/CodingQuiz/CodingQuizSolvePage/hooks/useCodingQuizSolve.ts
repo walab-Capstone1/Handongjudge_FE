@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { authState } from "../../../../../recoil/atoms";
 import apiService from "../../../../../services/APIService";
@@ -12,6 +12,7 @@ import type {
 	PanelLayout,
 	SubmissionResult,
 	Problem,
+	ProblemWorkStatus,
 } from "../types";
 
 export function useCodingQuizSolve() {
@@ -20,7 +21,6 @@ export function useCodingQuizSolve() {
 		quizId: string;
 	}>();
 	const [searchParams] = useSearchParams();
-	const navigate = useNavigate();
 	const auth = useRecoilValue(authState);
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const timeUpHandled = useRef(false);
@@ -68,16 +68,42 @@ export function useCodingQuizSolve() {
 	const [codeLoadSource, setCodeLoadSource] = useState<string | null>(null);
 	const [sessionCleared, setSessionCleared] = useState(false);
 	const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
+	const [isProblemChanging, setIsProblemChanging] = useState(false);
 	const [showSaveModal, setShowSaveModal] = useState(false);
+	const [problemStatusById, setProblemStatusById] = useState<
+		Record<number, ProblemWorkStatus>
+	>({});
+	const [nowMs, setNowMs] = useState(Date.now());
 
 	// 시험 중복 접속 방지용 (모든 역할 공통)
 	const [examClientSessionId] = useState<string>(() =>
-		typeof crypto !== "undefined" && crypto.randomUUID
-			? crypto.randomUUID()
-			: Math.random().toString(36).slice(2),
+	{
+		const storageKey = "coding-quiz-client-session-id";
+		if (typeof window !== "undefined") {
+			const existing = window.sessionStorage.getItem(storageKey);
+			if (existing) return existing;
+		}
+		const newSessionId =
+			typeof crypto !== "undefined" && crypto.randomUUID
+				? crypto.randomUUID()
+				: Math.random().toString(36).slice(2);
+		if (typeof window !== "undefined") {
+			window.sessionStorage.setItem(storageKey, newSessionId);
+		}
+		return newSessionId;
+	},
 	);
 	const [examSessionConflict, setExamSessionConflict] = useState(false);
 	const [examSessionTakenOver, setExamSessionTakenOver] = useState(false);
+	const problemChangeRequestIdRef = useRef(0);
+	// 마지막으로 서버에 저장된 코드 (hasUnsavedChanges 판단 기준)
+	const lastSavedCodeRef = useRef<string>("");
+	// IndexedDB 디바운스 저장 타이머
+	const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	// 저장 안내 모달
+	const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+	// 모달 확인 후 전환할 문제 ID
+	const pendingProblemIdRef = useRef<number | null>(null);
 
 	// 사용자 역할 확인
 	useEffect(() => {
@@ -111,27 +137,62 @@ export function useCodingQuizSolve() {
 	}, [auth.isAuthenticated, auth.user, sectionId]);
 
 	const isManager = userRole === "ADMIN" || userRole === "TUTOR" || userRole === "SUPER_ADMIN";
+	const isQuizEndedByTime =
+		!!quizInfo.endTime && nowMs >= quizInfo.endTime.getTime();
+	const isQuizEnded = isTimeUp || quizInfo.status === "ENDED" || isQuizEndedByTime;
 
 	// 학생 제출/테스트 차단: 시간 종료 또는 PAUSED(일시정지) 상태
 	const isSubmitBlocked =
-		!isManager && (isTimeUp || quizInfo.status === "PAUSED");
+		!isManager && (isQuizEnded || quizInfo.status === "PAUSED");
+	const isSaveWarning =
+		!isManager &&
+		!!quizInfo.endTime &&
+		quizInfo.status !== "ENDED" &&
+		quizInfo.endTime.getTime() - nowMs > 0 &&
+		quizInfo.endTime.getTime() - nowMs <= 5 * 60 * 1000;
+	const isEditLocked = !isManager && isQuizEnded;
 
-	// 퀴즈 종료 여부 확인 및 학생 리다이렉션
+	// 종료 후에도 페이지 진입은 허용하고, 내부 잠금 로직으로만 제어
+
 	useEffect(() => {
-		if (!quizInfo.endTime || !sectionId || userRole === null) return;
-		
-		const now = new Date();
-		const endTime = new Date(quizInfo.endTime);
-		
-		// 학생이고 시간이 종료된 경우 리다이렉션
-		if (now > endTime && !isManager) {
-			navigate(`/sections/${sectionId}/coding-quiz`);
+		if (!quizInfo.endTime) return;
+		const timer = setInterval(() => setNowMs(Date.now()), 1000);
+		return () => clearInterval(timer);
+	}, [quizInfo.endTime]);
+
+	// 운영 중 종료시간이 변경될 수 있으므로 퀴즈 시간을 주기적으로 동기화
+	useEffect(() => {
+		if (!sectionId || !quizId) return;
+		const interval = setInterval(async () => {
+			try {
+				const quizInfoRes = await apiService.getQuizInfo(sectionId, quizId);
+				const quizData = quizInfoRes?.data ?? quizInfoRes;
+				setQuizInfo((prev) => ({
+					...prev,
+					...quizData,
+					startTime: quizData?.startTime ? new Date(quizData.startTime) : null,
+					endTime: quizData?.endTime ? new Date(quizData.endTime) : null,
+				}));
+			} catch {
+				// 일시적 네트워크 오류는 무시
+			}
+		}, 10000);
+		return () => clearInterval(interval);
+	}, [sectionId, quizId]);
+
+	// 종료 후 시간이 연장되면 잠금 상태를 자동 해제
+	useEffect(() => {
+		if (!quizInfo.endTime) return;
+		if (nowMs < quizInfo.endTime.getTime() && isTimeUp) {
+			setIsTimeUp(false);
+			timeUpHandled.current = false;
 		}
-	}, [quizInfo.endTime, sectionId, userRole, isManager, navigate]);
+	}, [quizInfo.endTime, nowMs, isTimeUp]);
 
 	useEffect(() => {
 		const loadAllInfo = async () => {
-			if (!quizId || !sectionId) return;
+			// auth 복원이 끝날 때까지 대기 (새로고침 시 토큰 없이 401 나는 것 방지)
+			if (!quizId || !sectionId || auth.loading) return;
 			try {
 				setIsLoading(true);
 				const [quizInfoRes, sectionInfoRes, problemsRes] = await Promise.all([
@@ -194,7 +255,27 @@ export function useCodingQuizSolve() {
 			}
 		};
 		loadAllInfo();
-	}, [quizId, sectionId, searchParams, isManager, navigate]);
+	}, [quizId, sectionId, searchParams, auth.loading]);
+
+	useEffect(() => {
+		const loadProblemStatuses = async () => {
+			if (!sectionId || !quizId || problems.length === 0) return;
+			try {
+				const response = await apiService.getQuizProblemStatuses(sectionId, quizId);
+				const list = (response?.data ?? response ?? []) as ProblemWorkStatus[];
+				const nextMap: Record<number, ProblemWorkStatus> = {};
+				for (const item of list) {
+					if (item?.problemId != null) {
+						nextMap[item.problemId] = item;
+					}
+				}
+				setProblemStatusById(nextMap);
+			} catch (error) {
+				console.warn("문제 상태 조회 실패:", error);
+			}
+		};
+		loadProblemStatuses();
+	}, [sectionId, quizId, problems]);
 
 	useEffect(() => {
 		const initializeSession = async () => {
@@ -268,127 +349,149 @@ export function useCodingQuizSolve() {
 		return () => clearInterval(interval);
 	}, [quizId, sectionId, userRole, examSessionConflict, examClientSessionId]);
 
-	const loadFromSession = useCallback(async (): Promise<string | null> => {
-		if (!sessionId || !selectedProblemId || !sectionId) return null;
-		try {
-			const savedData = await indexedDBManager.getSessionCode(
-				selectedProblemId,
-				sectionId,
-				language,
-			);
-			return savedData ? savedData.code : null;
-		} catch {
-			return null;
-		}
-	}, [sessionId, selectedProblemId, sectionId, language]);
-
 	useEffect(() => {
 		const loadCode = async () => {
-			if (!selectedProblemId || !sectionId || !language || !sessionId) return;
+			if (!selectedProblemId || !sectionId || !language || !sessionId || auth.loading) return;
 			try {
-				// 1순위: 세션에서 불러오기
-				const sessionCode = await loadFromSession();
-				if (
-					sessionCode &&
-					sessionCode.trim() !== "" &&
-					sessionCode !== getDefaultCode(language)
-				) {
-					setCode(sessionCode);
-					setCodeLoadSource("session");
-					return;
-				}
-				
-				// 2순위: 백엔드에서 제출 기록 불러오기
-				const response = await apiService.loadProgress(
-					selectedProblemId,
-					sectionId,
-					language,
-				);
-				const raw = response as
-					| { codeString?: string; code?: string }
-					| string
-					| undefined;
-				const backendCode =
+				// IndexedDB와 서버를 동시에 조회
+				const [sessionResult, serverResult] = await Promise.allSettled([
+					indexedDBManager.getSessionCode(selectedProblemId, sectionId, language),
+					apiService.loadProgress(selectedProblemId, sectionId, language),
+				]);
+
+				const sessionRecord = sessionResult.status === "fulfilled" ? sessionResult.value : null;
+				const serverData = serverResult.status === "fulfilled" ? serverResult.value : null;
+
+				const sessionCode = sessionRecord?.code ?? null;
+				const sessionTimestamp = sessionRecord?.timestamp ?? 0;
+
+				const serverSaveKey = `lastServerSave_${selectedProblemId}_${sectionId}_${language}`;
+				const lastServerSaveTime = parseInt(localStorage.getItem(serverSaveKey) ?? "0", 10);
+
+				const raw = serverData as { codeString?: string; code?: string } | string | undefined;
+				const serverCode =
 					typeof raw === "object" && raw !== null
 						? (raw?.codeString ?? raw?.code ?? undefined)
-						: typeof raw === "string"
-							? raw
-							: undefined;
-				if (
-					backendCode &&
-					typeof backendCode === "string" &&
-					backendCode.trim() !== "" &&
-					backendCode !== getDefaultCode(language)
-				) {
-					setCode(backendCode);
+						: typeof raw === "string" ? raw : undefined;
+
+				const isValidSession = Boolean(sessionCode && sessionCode.trim() !== "" && sessionCode !== getDefaultCode(language));
+				const isValidServer = Boolean(serverCode && typeof serverCode === "string" && serverCode.trim() !== "" && serverCode !== getDefaultCode(language));
+
+				if (isValidSession && isValidServer) {
+					if (sessionTimestamp > lastServerSaveTime) {
+						setCode(sessionCode!);
+						setCodeLoadSource("session");
+						lastSavedCodeRef.current = serverCode!;
+					} else {
+						setCode(serverCode!);
+						setCodeLoadSource("backend");
+						lastSavedCodeRef.current = serverCode!;
+					}
+				} else if (isValidSession) {
+					setCode(sessionCode!);
+					setCodeLoadSource("session");
+					lastSavedCodeRef.current = "";
+				} else if (isValidServer) {
+					setCode(serverCode!);
 					setCodeLoadSource("backend");
-					return;
+					lastSavedCodeRef.current = serverCode!;
+				} else {
+					setCode(getDefaultCode(language));
+					setCodeLoadSource("default");
+					lastSavedCodeRef.current = "";
 				}
-				
-				// 3순위: 기본 코드
-				setCode(getDefaultCode(language));
-				setCodeLoadSource("default");
 			} catch {
 				setCode(getDefaultCode(language));
 				setCodeLoadSource("default");
+				lastSavedCodeRef.current = "";
 			}
 		};
 		loadCode();
-	}, [selectedProblemId, sectionId, language, sessionId, loadFromSession]);
+	}, [selectedProblemId, sectionId, language, sessionId, auth.loading]);
 
-	const saveToSession = useCallback(async (showModal = false) => {
-		if (
-			!sessionId ||
-			!code ||
-			code === getDefaultCode(language) ||
-			!selectedProblemId ||
-			!sectionId
-		)
-			return;
+	const saveToBackend = useCallback(async (showModal = false) => {
+		if (!code || !selectedProblemId || !sectionId) return;
 		try {
 			setSessionSaveStatus("saving");
-			await indexedDBManager.saveSessionCode(
-				selectedProblemId,
-				sectionId,
-				language,
-				code,
-			);
+			// 서버와 IndexedDB에 동시 저장
+			await Promise.all([
+				apiService.saveProgress(selectedProblemId, sectionId, language, code),
+				indexedDBManager.saveSessionCode(selectedProblemId, sectionId, language, code).catch(() => {}),
+			]);
+			// 서버 저장 시각을 localStorage에 기록 (timestamp 비교용)
+			localStorage.setItem(`lastServerSave_${selectedProblemId}_${sectionId}_${language}`, Date.now().toString());
+			lastSavedCodeRef.current = code;
 			setSessionSaveStatus("saved");
-			
+			setProblemStatusById((prev) => ({
+				...prev,
+				[selectedProblemId]: {
+					problemId: selectedProblemId,
+					submitted: prev[selectedProblemId]?.submitted ?? false,
+					result: prev[selectedProblemId]?.result ?? null,
+					saved: true,
+				},
+			}));
+
 			if (showModal) {
-				// 저장하기 버튼: 모달 표시
 				setShowSaveModal(true);
 				setTimeout(() => setShowSaveModal(false), 2000);
 			} else {
-				// Ctrl+S: 상태 메시지만
 				setTimeout(() => setSessionSaveStatus("idle"), 2000);
 			}
 		} catch (error) {
-			console.error("세션 저장 실패:", error);
+			console.error("저장 실패:", error);
 			setSessionSaveStatus("error");
 			setTimeout(() => setSessionSaveStatus("idle"), 2000);
 		}
-	}, [sessionId, code, language, selectedProblemId, sectionId]);
+	}, [code, language, selectedProblemId, sectionId]);
 
 	// Ctrl+S 단축키 핸들러
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if ((event.ctrlKey || event.metaKey) && event.key === "s") {
 				event.preventDefault();
-				saveToSession(false); // 모달 없이 저장
+				saveToBackend(false); // 모달 없이 저장
 			}
 		};
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [saveToSession]);
+	}, [saveToBackend]);
 
 	useEffect(() => {
-		if (!sessionId || isTimeUp) return;
+		if (isTimeUp) return;
 		const autoSaveInterval = setInterval(() => {
-			saveToSession(false); // 자동 저장도 모달 없이
-		}, 10000);
+			saveToBackend(false);
+		}, 5 * 60 * 1000);
 		return () => clearInterval(autoSaveInterval);
-	}, [sessionId, isTimeUp, saveToSession]);
+	}, [isTimeUp, saveToBackend]);
+
+	// 코드 변경 시 IndexedDB에 자동 저장 (디바운스 500ms)
+	useEffect(() => {
+		if (!sessionId || !selectedProblemId || !sectionId || auth.loading) return;
+		if (!code || code === getDefaultCode(language)) return;
+		if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+		autoSaveTimerRef.current = setTimeout(() => {
+			indexedDBManager
+				.saveSessionCode(selectedProblemId, sectionId, language, code)
+				.catch((err) => console.warn("IndexedDB 자동 저장 실패:", err));
+		}, 500);
+		return () => {
+			if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+		};
+	}, [code, sessionId, selectedProblemId, sectionId, language, auth.loading]);
+
+	// 페이지 이탈/새로고침 시 미저장 변경사항 경고
+	useEffect(() => {
+		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+			const hasUnsaved = code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+			if (hasUnsaved) {
+				e.preventDefault();
+				e.returnValue = "";
+			}
+		};
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+	}, [code, language]);
 
 	const clearSessionAfterSubmission = useCallback(async () => {
 		if (!sessionId || !selectedProblemId || !sectionId) return;
@@ -423,55 +526,75 @@ export function useCodingQuizSolve() {
 		timeUpHandled.current = true;
 
 		setIsTimeUp(true);
-		
-		// 학생인 경우 리다이렉션
-		if (!isManager && sectionId) {
-			alert("퀴즈 시간이 종료되었습니다.");
-			navigate(`/sections/${sectionId}/coding-quiz`);
-		} else {
-			// 관리자/튜터는 알림만 표시
-			alert("퀴즈 시간이 종료되었습니다.");
-		}
-	}, [isManager, sectionId, navigate]);
+		alert("퀴즈 시간이 종료되었습니다. 현재 페이지는 조회 가능하며 제출/수정은 잠금됩니다.");
+	}, []);
 
-	const handleProblemChange = useCallback(
+	// 문제 전환 실제 실행 (코드 로딩은 loadCode effect에 위임)
+	const doSwitchProblem = useCallback(
 		async (problemId: number) => {
-			if (problemId === selectedProblemId || !sectionId) return;
+			if (!sectionId) return;
+			const requestId = ++problemChangeRequestIdRef.current;
 			try {
-				setSelectedProblemId(problemId);
+				setIsProblemChanging(true);
+				// 새 문제로 전환 전 상태 초기화
+				lastSavedCodeRef.current = "";
+				setCode(getDefaultCode(language));
+				setCodeLoadSource(null);
+				setSelectedProblemId(problemId); // → loadCode effect 재실행
 				const problemInfo = await apiService.getProblemInfo(String(problemId));
+				if (requestId !== problemChangeRequestIdRef.current) return;
 				const problemData = problemInfo?.data ?? problemInfo;
 				setCurrentProblem(problemData);
-
-				try {
-					const savedData = await indexedDBManager.getSessionCode(
-						problemId,
-						sectionId,
-						language,
-					);
-					const sessionCode = savedData ? savedData.code : null;
-					if (
-						sessionCode &&
-						sessionCode.trim() !== "" &&
-						sessionCode !== getDefaultCode(language)
-					) {
-						setCode(sessionCode);
-						setCodeLoadSource("session");
-					} else {
-						setCode(getDefaultCode(language));
-						setCodeLoadSource("default");
-					}
-				} catch {
-					setCode(getDefaultCode(language));
-					setCodeLoadSource("default");
-				}
+				if (requestId !== problemChangeRequestIdRef.current) return;
 				setSubmissionResult(null);
 			} catch (error) {
 				console.error("문제 변경 실패:", error);
+			} finally {
+				if (requestId === problemChangeRequestIdRef.current) {
+					setIsProblemChanging(false);
+				}
 			}
 		},
-		[selectedProblemId, sectionId, language],
+		[sectionId, language],
 	);
+
+	const handleProblemChange = useCallback(
+		async (problemId: number) => {
+			if (problemId === selectedProblemId || !sectionId || isProblemChanging) return;
+
+			// 미저장 변경사항이 있고 편집 잠금 상태가 아닐 때 → 저장 안내 모달
+			const hasUnsaved = code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+			if (hasUnsaved && !isSubmitBlocked) {
+				pendingProblemIdRef.current = problemId;
+				setShowUnsavedModal(true);
+				return;
+			}
+
+			await doSwitchProblem(problemId);
+		},
+		[selectedProblemId, sectionId, isProblemChanging, code, language, isSubmitBlocked, doSwitchProblem],
+	);
+
+	// 저장 안내 모달 핸들러
+	const handleUnsavedModalSave = useCallback(async () => {
+		setShowUnsavedModal(false);
+		await saveToBackend(false);
+		const pending = pendingProblemIdRef.current;
+		pendingProblemIdRef.current = null;
+		if (pending !== null) await doSwitchProblem(pending);
+	}, [saveToBackend, doSwitchProblem]);
+
+	const handleUnsavedModalSkip = useCallback(async () => {
+		setShowUnsavedModal(false);
+		const pending = pendingProblemIdRef.current;
+		pendingProblemIdRef.current = null;
+		if (pending !== null) await doSwitchProblem(pending);
+	}, [doSwitchProblem]);
+
+	const handleUnsavedModalCancel = useCallback(() => {
+		setShowUnsavedModal(false);
+		pendingProblemIdRef.current = null;
+	}, []);
 
 	const handlePanelMove = useCallback(
 		(draggedPanelId: string, targetPanelId: string) => {
@@ -550,6 +673,15 @@ export function useCodingQuizSolve() {
 					points: res.points,
 					score: res.score,
 				});
+				setProblemStatusById((prev) => ({
+					...prev,
+					[selectedProblemId]: {
+						problemId: selectedProblemId,
+						submitted: true,
+						result,
+						saved: prev[selectedProblemId]?.saved ?? false,
+					},
+				}));
 			} else {
 				throw new Error("제출 응답을 받지 못했습니다.");
 			}
@@ -586,7 +718,9 @@ export function useCodingQuizSolve() {
 		setIsSubmitting(true);
 		setSubmissionResult(null);
 		try {
-			const submissionResponse = await apiService.submitCodeAndGetOutput(
+			// 퀴즈 페이지에서는 테스트하기도 퀴즈 전용 API를 사용해야
+			// 과제/퀴즈 혼합 검증 충돌을 피할 수 있다.
+			const submissionResponse = await apiService.submitQuizCode(
 				sectionId,
 				String(selectedProblemId),
 				code,
@@ -610,6 +744,10 @@ export function useCodingQuizSolve() {
 				code,
 				outputList: res.outputList,
 				type: "output",
+				passedCount: res.passedCount,
+				totalCount: res.totalCount,
+				points: res.points,
+				score: res.score,
 			});
 			// 제출 후 세션 유지 (백엔드에서 불러올 수 있도록)
 			} else {
@@ -635,10 +773,10 @@ export function useCodingQuizSolve() {
 		selectedProblemId,
 		isSubmitBlocked,
 		quizInfo.status,
-		clearSessionAfterSubmission,
 	]);
 
 	const handleLanguageChange = useCallback((newLang: string) => {
+		if (newLang !== "c") return;
 		setLanguage(newLang);
 		setCode(getDefaultCode(newLang));
 	}, []);
@@ -660,6 +798,8 @@ export function useCodingQuizSolve() {
 		currentProblem.description ||
 		`# ${currentProblem.title}\n\n## 문제 설명\n이 문제는 ${currentProblem.title}에 대한 설명입니다.\n\n## 제한사항\n- 문제에 대한 제한사항을 확인하세요.\n\n## 입출력 예시\n\`\`\`\n입력: 예시 입력\n출력: 예시 출력\n\`\`\``;
 
+	const hasUnsavedChanges = code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+
 	return {
 		sectionId,
 		sectionInfo,
@@ -677,6 +817,8 @@ export function useCodingQuizSolve() {
 		isSubmitting,
 		isTimeUp,
 		isSubmitBlocked,
+		isSaveWarning,
+		isEditLocked,
 		sessionSaveStatus,
 		codeLoadSource,
 		sessionCleared,
@@ -685,8 +827,10 @@ export function useCodingQuizSolve() {
 		verticalSizes,
 		panelLayout,
 		isProblemModalOpen,
+		isProblemChanging,
 		setIsProblemModalOpen,
 		showSaveModal,
+		problemStatusById,
 		examSessionConflict,
 		examSessionTakenOver,
 		handleExamSessionTakeover,
@@ -695,11 +839,16 @@ export function useCodingQuizSolve() {
 		handlePanelMove,
 		handleSubmit,
 		handleSubmitWithOutput,
-		saveToSession,
+		saveToBackend,
 		handleLanguageChange,
 		handleHorizontalDragEnd,
 		handleVerticalDragEnd,
 		gutterStyleCallback,
+		hasUnsavedChanges,
+		showUnsavedModal,
+		handleUnsavedModalSave,
+		handleUnsavedModalSkip,
+		handleUnsavedModalCancel,
 	};
 }
 
