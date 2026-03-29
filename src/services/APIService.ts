@@ -215,7 +215,7 @@ class APIService {
 	}
 
 	/**
-	 * 퀴즈 전용 제출 - 테스트케이스별 scoring 적용
+	 * 기존 API (하위 호환): 서버 측 폴링으로 채점 결과까지 한 번에 반환.
 	 */
 	async submitQuizCode(
 		sectionId: number | string,
@@ -235,6 +235,43 @@ class APIService {
 				codeString: code,
 			}),
 		});
+	}
+
+	/**
+	 * Phase 2 — 제출: DOMjudge에 코드 제출 후 즉시 반환 (~1초).
+	 * 반환된 submissionDbId로 getQuizResult()를 폴링해 결과를 조회.
+	 */
+	async submitQuizCodeOnly(
+		sectionId: number | string,
+		problemId: number | string,
+		code: string,
+		language: string,
+	): Promise<{ submissionDbId: number; submissionId: string; problemId: number; sectionId: number; language: string; submittedAt: string }> {
+		return await this.request("/quiz/submit", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				problemId: Number.parseInt(String(problemId)),
+				sectionId: Number.parseInt(String(sectionId)),
+				language,
+				codeString: code,
+			}),
+		});
+	}
+
+	/**
+	 * Phase 2 — 결과 조회: 클라이언트가 1~2초 간격으로 폴링.
+	 * 채점 완료 → 결과 객체 반환
+	 * 채점 중   → null 반환 (서버 204 No Content)
+	 */
+	async getQuizResult(submissionDbId: number): Promise<any | null> {
+		const response = await this.request(`/quiz/result/${submissionDbId}`, {
+			method: "GET",
+		});
+		// 204 No Content → handleResponse가 빈 문자열("") 반환 → null로 변환
+		return response || null;
 	}
 
 	async saveProgress(
