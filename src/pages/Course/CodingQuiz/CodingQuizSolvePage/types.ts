@@ -39,10 +39,13 @@ export interface ResultInfo {
 }
 
 export interface SubmissionResult {
-	status: string;
+	/** judging: 채점 중, completed: 채점 완료, error: 오류 */
+	status: "judging" | "completed" | "error";
 	result?: string;
 	resultInfo: ResultInfo;
-	submissionId?: number;
+	/** Phase 2: DB 기본 키 (폴링 식별자) */
+	submissionDbId?: number;
+	submissionId?: number | string;
 	submittedAt?: string;
 	language?: string;
 	code?: string;

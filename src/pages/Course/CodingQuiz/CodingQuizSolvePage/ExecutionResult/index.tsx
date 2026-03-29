@@ -23,7 +23,7 @@ interface ResultInfo {
 }
 
 interface SubmissionResult {
-	submissionId?: number;
+	submissionId?: number | string;
 	language?: string;
 	submittedAt?: string;
 	result?: string;
@@ -235,7 +235,12 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 	return (
 		<S.ResultArea>
 			<div>
-				{isSubmitting ? (
+				{isSubmitting && submissionResult?.status === "judging" ? (
+					<S.ResultLoading>
+						<LoadingSpinner />
+						<span>채점 중입니다... 잠시만 기다려주세요.</span>
+					</S.ResultLoading>
+				) : isSubmitting ? (
 					<S.ResultLoading>
 						<LoadingSpinner />
 						<span>제출 중...</span>
