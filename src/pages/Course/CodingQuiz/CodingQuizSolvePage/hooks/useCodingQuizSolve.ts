@@ -53,6 +53,8 @@ export function useCodingQuizSolve() {
 		null,
 	);
 	const [isLoading, setIsLoading] = useState(true);
+	// Phase 2 폴링 타이머 ref (컴포넌트 언마운트 또는 문제 전환 시 정리)
+	const pollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
 	const [verticalSizes, setVerticalSizes] = useState([70, 30]);
 	const [isTimeUp, setIsTimeUp] = useState(false);
@@ -529,6 +531,15 @@ export function useCodingQuizSolve() {
 		alert("퀴즈 시간이 종료되었습니다. 현재 페이지는 조회 가능하며 제출/수정은 잠금됩니다.");
 	}, []);
 
+	// 컴포넌트 언마운트 시 폴링 타이머 정리
+	useEffect(() => {
+		return () => {
+			if (pollingTimerRef.current) {
+				clearTimeout(pollingTimerRef.current);
+			}
+		};
+	}, []);
+
 	// 문제 전환 실제 실행 (코드 로딩은 loadCode effect에 위임)
 	const doSwitchProblem = useCallback(
 		async (problemId: number) => {
@@ -536,6 +547,11 @@ export function useCodingQuizSolve() {
 			const requestId = ++problemChangeRequestIdRef.current;
 			try {
 				setIsProblemChanging(true);
+				// 문제 전환 시 진행 중인 폴링 타이머 정리
+				if (pollingTimerRef.current) {
+					clearTimeout(pollingTimerRef.current);
+					pollingTimerRef.current = null;
+				}
 				// 새 문제로 전환 전 상태 초기화
 				lastSavedCodeRef.current = "";
 				setCode(getDefaultCode(language));
@@ -625,155 +641,165 @@ export function useCodingQuizSolve() {
 		[],
 	);
 
-	const handleSubmit = useCallback(async () => {
-		if (!code.trim()) {
-			alert("코드를 작성해주세요.");
-			return;
-		}
-		// 관리자/튜터가 아니고 (시간 종료 또는 일시정지)인 경우 제출 불가
-		if (isSubmitBlocked) {
-			alert(
-				quizInfo.status === "PAUSED"
-					? "코딩 테스트가 일시정지 상태입니다. 제출할 수 없습니다."
-					: "시간이 종료되어 제출할 수 없습니다.",
-			);
-			return;
-		}
-		if (!sectionId || selectedProblemId == null) return;
-
-		setIsSubmitting(true);
-		setSubmissionResult(null);
-		try {
-			const submissionResponse = await apiService.submitQuizCode(
-				sectionId,
-				String(selectedProblemId),
-				code,
-				language,
-			);
-			const res = submissionResponse?.data ?? submissionResponse;
-			if (res) {
-				const result = res.result ?? res.resultType;
-				const resultInfo = resultMapping[result] ?? {
-					status: "unknown",
-					message: `알 수 없는 결과: ${result}`,
-					color: "#6c757d",
-				};
-				setSubmissionResult({
-					status: "completed",
-					result: result,
-					resultInfo,
-					submissionId: res.submissionId,
-					submittedAt: res.submittedAt,
-					language: res.language ?? language,
-					code,
-					type: "output",
-					outputList: res.outputList,
-					passedCount: res.passedCount,
-					totalCount: res.totalCount,
-					points: res.points,
-					score: res.score,
-				});
-				setProblemStatusById((prev) => ({
-					...prev,
-					[selectedProblemId]: {
-						problemId: selectedProblemId,
-						submitted: true,
-						result,
-						saved: prev[selectedProblemId]?.saved ?? false,
-					},
-				}));
-			} else {
-				throw new Error("제출 응답을 받지 못했습니다.");
+	/**
+	 * Phase 2 공통 폴링 로직.
+	 * POST /submit → submissionDbId 획득 → 1.5초 간격으로 GET /result 폴링 → 완료 시 setState.
+	 */
+	const pollUntilResult = useCallback(
+		async (type: "judge" | "output") => {
+			if (!code.trim()) {
+				alert("코드를 작성해주세요.");
+				return;
 			}
-		} catch (error: unknown) {
-			const message =
-				error instanceof Error ? error.message : "코드 제출에 실패했습니다.";
-			setSubmissionResult({
-				status: "error",
-				message,
-				resultInfo: { status: "error", message: "제출 실패", color: "#dc3545" },
-				type: "judge",
-			});
-		} finally {
-			setIsSubmitting(false);
-		}
-	}, [code, language, sectionId, selectedProblemId, isSubmitBlocked, quizInfo.status]);
+			if (isSubmitBlocked) {
+				alert(
+					quizInfo.status === "PAUSED"
+						? "코딩 테스트가 일시정지 상태입니다. 제출할 수 없습니다."
+						: "시간이 종료되어 제출할 수 없습니다.",
+				);
+				return;
+			}
+			if (!sectionId || selectedProblemId == null) return;
+
+			// 이전 폴링 타이머 정리
+			if (pollingTimerRef.current) {
+				clearTimeout(pollingTimerRef.current);
+				pollingTimerRef.current = null;
+			}
+
+			setIsSubmitting(true);
+			setSubmissionResult(null);
+
+			let submissionDbId: number;
+			let submittedAt: string;
+			let submissionLanguage: string;
+
+			try {
+				const submitRaw = await apiService.submitQuizCodeOnly(
+					sectionId,
+					String(selectedProblemId),
+					code,
+					language,
+				);
+				// Spring 컨트롤러가 객체를 직접 반환하므로 data 래퍼 없음
+				const submitRes = (submitRaw as any)?.data ?? submitRaw;
+				submissionDbId = submitRes.submissionDbId;
+				submittedAt = submitRes.submittedAt;
+				submissionLanguage = submitRes.language ?? language;
+
+				// 채점 중 상태 표시
+				setSubmissionResult({
+					status: "judging",
+					resultInfo: { status: "judging", message: "채점 중...", color: "#6c757d" },
+					submissionDbId,
+					submittedAt,
+					language: submissionLanguage,
+					code,
+					type,
+				});
+			} catch (error: unknown) {
+				const message =
+					error instanceof Error ? error.message : "코드 제출에 실패했습니다.";
+				setSubmissionResult({
+					status: "error",
+					message,
+					resultInfo: { status: "error", message: "제출 실패", color: "#dc3545" },
+					type,
+				});
+				setIsSubmitting(false);
+				return;
+			}
+
+			// 폴링 시작: 1.5초 간격, 최대 90초
+			const POLL_INTERVAL_MS = 1500;
+			const POLL_TIMEOUT_MS = 90_000;
+			const pollingDeadline = Date.now() + POLL_TIMEOUT_MS;
+
+			const poll = async () => {
+				if (Date.now() >= pollingDeadline) {
+					setSubmissionResult({
+						status: "error",
+						message: "채점 결과를 가져오는 데 시간이 초과되었습니다. 제출은 완료되었을 수 있으니 제출 목록에서 확인해주세요.",
+						resultInfo: { status: "error", message: "채점 시간 초과", color: "#dc3545" },
+						submissionDbId,
+						submittedAt,
+						language: submissionLanguage,
+						type,
+					});
+					setIsSubmitting(false);
+					return;
+				}
+
+				try {
+					const resultResponse = await apiService.getQuizResult(submissionDbId);
+					const res = resultResponse?.data ?? resultResponse;
+
+					if (res && res.result) {
+						// 채점 완료
+						const result = res.result ?? res.resultType;
+						const resultInfo = resultMapping[result] ?? {
+							status: "unknown",
+							message: `알 수 없는 결과: ${result}`,
+							color: "#6c757d",
+						};
+						setSubmissionResult({
+							status: "completed",
+							result,
+							resultInfo,
+							submissionDbId,
+							submissionId: res.submissionId,
+							submittedAt: res.submittedAt ?? submittedAt,
+							language: res.language ?? submissionLanguage,
+							code,
+							type: "output",
+							outputList: res.outputList,
+							passedCount: res.passedCount,
+							totalCount: res.totalCount,
+							points: res.points,
+							score: res.score,
+						});
+						setProblemStatusById((prev) => ({
+							...prev,
+							[selectedProblemId]: {
+								problemId: selectedProblemId,
+								submitted: true,
+								result,
+								saved: prev[selectedProblemId]?.saved ?? false,
+							},
+						}));
+						setIsSubmitting(false);
+					} else {
+						// 아직 채점 중 → 재시도
+						pollingTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
+					}
+				} catch (error: unknown) {
+					const message =
+						error instanceof Error ? error.message : "결과 조회에 실패했습니다.";
+					setSubmissionResult({
+						status: "error",
+						message,
+						resultInfo: { status: "error", message: "결과 조회 실패", color: "#dc3545" },
+						submissionDbId,
+						submittedAt,
+						language: submissionLanguage,
+						type,
+					});
+					setIsSubmitting(false);
+				}
+			};
+
+			pollingTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
+		},
+		[code, language, sectionId, selectedProblemId, isSubmitBlocked, quizInfo.status],
+	);
+
+	const handleSubmit = useCallback(async () => {
+		await pollUntilResult("judge");
+	}, [pollUntilResult]);
 
 	const handleSubmitWithOutput = useCallback(async () => {
-		if (!code.trim()) {
-			alert("코드를 작성해주세요.");
-			return;
-		}
-		// 관리자/튜터가 아니고 (시간 종료 또는 일시정지)인 경우 테스트 불가
-		if (isSubmitBlocked) {
-			alert(
-				quizInfo.status === "PAUSED"
-					? "코딩 테스트가 일시정지 상태입니다. 테스트할 수 없습니다."
-					: "시간이 종료되어 테스트할 수 없습니다.",
-			);
-			return;
-		}
-		if (!sectionId || selectedProblemId == null) return;
-
-		setIsSubmitting(true);
-		setSubmissionResult(null);
-		try {
-			// 퀴즈 페이지에서는 테스트하기도 퀴즈 전용 API를 사용해야
-			// 과제/퀴즈 혼합 검증 충돌을 피할 수 있다.
-			const submissionResponse = await apiService.submitQuizCode(
-				sectionId,
-				String(selectedProblemId),
-				code,
-				language,
-			);
-			const res = submissionResponse?.data ?? submissionResponse;
-			if (res) {
-				const result = res.result ?? res.resultType;
-				const resultInfo = resultMapping[result] ?? {
-					status: "unknown",
-					message: `알 수 없는 결과: ${result}`,
-					color: "#6c757d",
-				};
-			setSubmissionResult({
-				status: "completed",
-				result,
-				resultInfo,
-				submissionId: res.submissionId,
-				submittedAt: res.submittedAt,
-				language: res.language ?? language,
-				code,
-				outputList: res.outputList,
-				type: "output",
-				passedCount: res.passedCount,
-				totalCount: res.totalCount,
-				points: res.points,
-				score: res.score,
-			});
-			// 제출 후 세션 유지 (백엔드에서 불러올 수 있도록)
-			} else {
-				throw new Error("제출 응답을 받지 못했습니다.");
-			}
-		} catch (error: unknown) {
-			const message =
-				error instanceof Error ? error.message : "코드 제출에 실패했습니다.";
-			setSubmissionResult({
-				status: "error",
-				message,
-				resultInfo: { status: "error", message: "제출 실패", color: "#dc3545" },
-				type: "output",
-				outputList: undefined,
-			});
-		} finally {
-			setIsSubmitting(false);
-		}
-	}, [
-		code,
-		language,
-		sectionId,
-		selectedProblemId,
-		isSubmitBlocked,
-		quizInfo.status,
-	]);
+		await pollUntilResult("output");
+	}, [pollUntilResult]);
 
 	const handleLanguageChange = useCallback((newLang: string) => {
 		if (newLang !== "c") return;
