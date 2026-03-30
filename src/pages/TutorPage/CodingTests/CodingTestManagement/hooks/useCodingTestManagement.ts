@@ -518,44 +518,23 @@ export function useCodingTestManagement() {
 		setShowCreateModal(true);
 	}, []);
 
-	const handleEditQuiz = useCallback(
-		async (quiz: CodingTest) => {
-			if (!sectionId) return;
-			try {
-				const problemsResponse = await APIService.getQuizProblems(
-					sectionId,
-					String(quiz.id),
-				);
-				const problemsData = (problemsResponse?.data ??
-					problemsResponse ??
-					[]) as {
-					problemId?: number;
-					id: number;
-				}[];
-				const problemIds = problemsData.map((p) => p.problemId ?? p.id);
-				const start =
-					quiz.startTime instanceof Date
-						? quiz.startTime
-						: new Date(quiz.startTime);
-				const end =
-					quiz.endTime instanceof Date ? quiz.endTime : new Date(quiz.endTime);
-				setFormData({
-					title: quiz.title,
-					description: quiz.description ?? "",
-					startTime: toLocalDateTimeInputValue(start),
-					endTime: toLocalDateTimeInputValue(end),
-					problemIds,
-				});
-				setSelectedProblemIds(problemIds);
-				setSelectedQuiz(quiz);
-				setShowEditModal(true);
-			} catch (error) {
-				console.error("코딩 테스트 정보 조회 실패:", error);
-				alert("코딩 테스트 정보를 불러오는데 실패했습니다.");
-			}
-		},
-		[sectionId],
-	);
+	const handleEditQuiz = useCallback((quiz: CodingTest) => {
+		const start =
+			quiz.startTime instanceof Date
+				? quiz.startTime
+				: new Date(quiz.startTime);
+		const end =
+			quiz.endTime instanceof Date ? quiz.endTime : new Date(quiz.endTime);
+		setFormData({
+			title: quiz.title,
+			description: quiz.description ?? "",
+			startTime: toLocalDateTimeInputValue(start),
+			endTime: toLocalDateTimeInputValue(end),
+			problemIds: [],
+		});
+		setSelectedQuiz(quiz);
+		setShowEditModal(true);
+	}, []);
 
 	const handleDeleteQuiz = useCallback(
 		async (quizIdToDelete: number) => {
@@ -650,21 +629,11 @@ export function useCodingTestManagement() {
 		if (!selectedQuiz || !sectionId) return;
 		setIsSubmittingEdit(true);
 		try {
-			const copiedProblemIds: number[] = [];
-			for (const problemId of selectedProblemIds) {
-				const newProblemId = await APIService.copyProblem(problemId);
-				copiedProblemIds.push(
-					typeof newProblemId === "number"
-						? newProblemId
-						: (newProblemId as { id: number }).id,
-				);
-			}
 			const quizData = {
 				title: formData.title,
 				description: formData.description,
 				startTime: new Date(formData.startTime).toISOString(),
 				endTime: new Date(formData.endTime).toISOString(),
-				problemIds: copiedProblemIds,
 			};
 			await APIService.updateQuiz(sectionId, selectedQuiz.id, quizData);
 			setShowEditModal(false);
@@ -682,7 +651,6 @@ export function useCodingTestManagement() {
 		formData.description,
 		formData.startTime,
 		formData.endTime,
-		selectedProblemIds,
 		selectedQuiz,
 		sectionId,
 		fetchQuizzes,
