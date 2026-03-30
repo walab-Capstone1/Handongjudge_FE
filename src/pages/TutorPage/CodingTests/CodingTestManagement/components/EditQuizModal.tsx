@@ -82,30 +82,17 @@ const EditQuizModal: FC<EditQuizModalProps> = ({ d }) => {
 						</S.FormGroup>
 					</S.FormRow>
 					<S.FormGroup>
-						<span
-							id="edit-quiz-d.problems-label"
+						<p
 							style={{
-								fontWeight: 500,
+								margin: 0,
 								fontSize: "0.875rem",
-								marginBottom: "0.5rem",
-								display: "block",
+								color: "#64748b",
+								lineHeight: 1.5,
 							}}
 						>
-							문제 선택 *
-						</span>
-						<S.ProblemSelectSection aria-labelledby="edit-quiz-d.problems-label">
-							<S.BtnSelectProblems
-								type="button"
-								onClick={() => d.setShowAddProblemModal(true)}
-							>
-								문제 선택 ({d.selectedProblemIds.length}개 선택됨)
-							</S.BtnSelectProblems>
-							{d.selectedProblemIds.length > 0 && (
-								<S.SelectedCount>
-									{d.selectedProblemIds.length}개의 문제가 선택되었습니다.
-								</S.SelectedCount>
-							)}
-						</S.ProblemSelectSection>
+							문제 추가·제거는 목록에서 해당 코딩 테스트를 연 뒤「대회 문제」탭에서
+							할 수 있습니다.
+						</p>
 					</S.FormGroup>
 					<S.ModalFooter>
 						<S.CancelButton
