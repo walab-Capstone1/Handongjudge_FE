@@ -749,6 +749,17 @@ class APIService {
 		);
 	}
 
+	async addProblemToQuiz(
+		sectionId: number | string,
+		quizId: number | string,
+		problemId: number | string,
+	): Promise<any> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/problems/${problemId}`,
+			{ method: "POST" },
+		);
+	}
+
 	async removeQuizProblem(
 		sectionId: number | string,
 		quizId: number | string,

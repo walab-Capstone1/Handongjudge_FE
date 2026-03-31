@@ -741,28 +741,12 @@ export function useCodingTestManagement() {
 			return;
 		}
 		try {
-			const copiedIds: number[] = [];
 			for (const pid of newProblemIds) {
 				const res = await APIService.copyProblem(pid);
-				copiedIds.push(
-					typeof res === "number" ? res : (res as { id: number }).id,
-				);
+				const newId =
+					typeof res === "number" ? res : (res as { id: number }).id;
+				await APIService.addProblemToQuiz(sectionId, quizId, newId);
 			}
-			const currentIds = problems.map((p) => p.id);
-			const quizData = {
-				title: selectedQuizDetail.title,
-				description: selectedQuizDetail.description ?? "",
-				startTime:
-					selectedQuizDetail.startTime instanceof Date
-						? selectedQuizDetail.startTime.toISOString()
-						: new Date(selectedQuizDetail.startTime).toISOString(),
-				endTime:
-					selectedQuizDetail.endTime instanceof Date
-						? selectedQuizDetail.endTime.toISOString()
-						: new Date(selectedQuizDetail.endTime).toISOString(),
-				problemIds: [...currentIds, ...copiedIds],
-			};
-			await APIService.updateQuiz(sectionId, quizId, quizData);
 			closeAddProblemModal();
 			fetchQuizProblems();
 			alert(`${newProblemIds.length}개의 문제가 추가되었습니다.`);
