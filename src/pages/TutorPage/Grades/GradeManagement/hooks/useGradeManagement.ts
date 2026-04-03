@@ -774,50 +774,14 @@ export function useGradeManagement() {
 			if (dueAt && new Date() > new Date(dueAt)) return '"미제출"';
 			return '""';
 		};
-		const getLateMinutesForCSV = (
-			submittedAt: string | undefined,
-			dueAt: string | undefined,
-		): number => {
-			if (!submittedAt || !dueAt) return 0;
-			const parse = (raw?: string): number => {
-				if (!raw) return Number.NaN;
-				const normalized = raw.trim().replace(" ", "T");
-				const m = normalized
-					.trim()
-					.match(
-						/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?/,
-					);
-				if (!m) return new Date(normalized).getTime();
-				const ms = Number((m[7] ?? "0").slice(0, 3).padEnd(3, "0"));
-				return new Date(
-					Number(m[1]),
-					Number(m[2]) - 1,
-					Number(m[3]),
-					Number(m[4]),
-					Number(m[5]),
-					Number(m[6] ?? "0"),
-					ms,
-				).getTime();
-			};
-			const s = parse(submittedAt);
-			const d = parse(dueAt);
-			if (Number.isNaN(s) || Number.isNaN(d) || s <= d) return 0;
-			return Math.floor((s - d) / 60000);
-		};
+		/** 지각시간: ZIP submissions.csv와 동일하게 서버 계산값(lateDuration)만 사용 */
 		const formatLateDurationForCSV = (
-			submittedAt: string | undefined,
-			dueAt: string | undefined,
+			pg: ProblemGrade | null | undefined,
 		): string => {
-			const minutes = getLateMinutesForCSV(submittedAt, dueAt);
-			if (!minutes || minutes <= 0) return '""';
-			const days = Math.floor(minutes / (24 * 60));
-			const hours = Math.floor((minutes % (24 * 60)) / 60);
-			const mins = minutes % 60;
-			const parts: string[] = [];
-			if (days > 0) parts.push(`${days}일`);
-			if (hours > 0) parts.push(`${hours}시간`);
-			if (mins > 0 || parts.length === 0) parts.push(`${mins}분`);
-			return `"${parts.join(" ")}"`;
+			if (!pg?.submitted) return '""';
+			const t = pg.lateDuration?.trim();
+			if (!t) return '""';
+			return `"${t.replace(/"/g, '""')}"`;
 		};
 
 		// 전체 과제 보기: 과제만 필터한 courseGrades로 내보내기
@@ -874,7 +838,7 @@ export function useGradeManagement() {
 								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
 							);
 							row.push(formatDateForCSV(dueAt));
-							row.push(formatLateDurationForCSV(problemGrade?.submittedAt, dueAt));
+							row.push(formatLateDurationForCSV(problemGrade));
 							if (typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -965,7 +929,7 @@ export function useGradeManagement() {
 								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
 							);
 							row.push(formatDateForCSV(dueAt));
-							row.push(formatLateDurationForCSV(problemGrade?.submittedAt, dueAt));
+							row.push(formatLateDurationForCSV(problemGrade));
 							if (typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -1052,7 +1016,7 @@ export function useGradeManagement() {
 								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
 							);
 							row.push(formatDateForCSV(dueAt));
-							row.push(formatLateDurationForCSV(problemGrade?.submittedAt, dueAt));
+							row.push(formatLateDurationForCSV(problemGrade));
 							if (score !== "" && score !== null && typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -1081,7 +1045,7 @@ export function useGradeManagement() {
 								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
 							);
 							row.push(formatDateForCSV(dueAt));
-							row.push(formatLateDurationForCSV(problemGrade?.submittedAt, dueAt));
+							row.push(formatLateDurationForCSV(problemGrade));
 							if (score !== "" && score !== null && typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -1149,7 +1113,7 @@ export function useGradeManagement() {
 					row.push(String(score));
 					row.push(getSubmissionDisplayForCSV(problem.submittedAt, quizDueAt));
 					row.push(formatDateForCSV(quizDueAt));
-					row.push(formatLateDurationForCSV(problem.submittedAt, quizDueAt));
+					row.push(formatLateDurationForCSV(problem));
 				}
 				const totalScore = student.totalScore ?? 0;
 				const totalPoints = student.totalPoints ?? 0;
@@ -1213,7 +1177,7 @@ export function useGradeManagement() {
 					getSubmissionDisplayForCSV(problem.submittedAt, assignmentDueAt),
 				);
 				row.push(formatDateForCSV(assignmentDueAt));
-				row.push(formatLateDurationForCSV(problem.submittedAt, assignmentDueAt));
+				row.push(formatLateDurationForCSV(problem));
 			}
 			const totalScore = student.totalScore ?? 0;
 			const totalPoints = student.totalPoints ?? 0;

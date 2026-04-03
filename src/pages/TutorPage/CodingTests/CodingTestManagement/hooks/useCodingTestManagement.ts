@@ -72,6 +72,7 @@ export function useCodingTestManagement() {
 	});
 	const [selectedProblemIds, setSelectedProblemIds] = useState<number[]>([]);
 	const [allProblems, setAllProblems] = useState<ProblemOption[]>([]);
+	const [loadingAllProblems, setLoadingAllProblems] = useState(false);
 	const [problemSearchTerm, setProblemSearchTerm] = useState("");
 	const [currentProblemPage, setCurrentProblemPage] = useState(1);
 	const [isSubmittingCreate, setIsSubmittingCreate] = useState(false);
@@ -331,6 +332,7 @@ export function useCodingTestManagement() {
 	}, [sectionId, quizId]);
 
 	const fetchAllProblems = useCallback(async () => {
+		setLoadingAllProblems(true);
 		try {
 			const response = await APIService.getAllProblems();
 			let problemsData: ProblemOption[] = [];
@@ -347,6 +349,8 @@ export function useCodingTestManagement() {
 		} catch (error) {
 			console.error("문제 목록 조회 실패:", error);
 			setAllProblems([]);
+		} finally {
+			setLoadingAllProblems(false);
 		}
 	}, []);
 
@@ -882,6 +886,7 @@ export function useCodingTestManagement() {
 		selectedProblemIds,
 		setSelectedProblemIds,
 		allProblems,
+		loadingAllProblems,
 		problemSearchTerm,
 		setProblemSearchTerm,
 		currentProblemPage,

@@ -176,6 +176,7 @@ const AssignmentManagement: React.FC = () => {
 			<ProblemSelectModal
 				isOpen={d.showProblemModal}
 				selectedAssignment={d.selectedAssignment}
+				instructorProblemsLoading={d.loadingAvailableProblems}
 				instructorProblems={d.availableProblems}
 				filteredProblems={d.filteredProblems}
 				selectedProblemIds={d.selectedProblemIds}

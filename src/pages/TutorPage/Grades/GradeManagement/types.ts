@@ -37,6 +37,8 @@ export interface ProblemGrade {
 	submitted?: boolean;
 	submittedAt?: string;
 	isOnTime?: boolean;
+	/** ZIP submissions.csv lateDuration과 동일 (서버 SubmissionDeadlineComparison) */
+	lateDuration?: string | null;
 	/** 맞은 테스트케이스 수 (백엔드 저장값) */
 	passedTestCases?: number | null;
 	/** 전체 테스트케이스 수 */
