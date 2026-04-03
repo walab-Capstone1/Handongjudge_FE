@@ -774,33 +774,19 @@ export function useGradeManagement() {
 			if (dueAt && new Date() > new Date(dueAt)) return '"미제출"';
 			return '""';
 		};
+		/** API ISO(UTC Z 등)와 로컬 naive 문자열 모두 브라우저 Date가 instant로 해석하도록 통일 */
+		const parseInstantMs = (raw?: string): number => {
+			if (!raw?.trim()) return Number.NaN;
+			const ms = new Date(raw.trim().replace(" ", "T")).getTime();
+			return Number.isNaN(ms) ? Number.NaN : ms;
+		};
 		const getLateMinutesForCSV = (
 			submittedAt: string | undefined,
 			dueAt: string | undefined,
 		): number => {
 			if (!submittedAt || !dueAt) return 0;
-			const parse = (raw?: string): number => {
-				if (!raw) return Number.NaN;
-				const normalized = raw.trim().replace(" ", "T");
-				const m = normalized
-					.trim()
-					.match(
-						/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?/,
-					);
-				if (!m) return new Date(normalized).getTime();
-				const ms = Number((m[7] ?? "0").slice(0, 3).padEnd(3, "0"));
-				return new Date(
-					Number(m[1]),
-					Number(m[2]) - 1,
-					Number(m[3]),
-					Number(m[4]),
-					Number(m[5]),
-					Number(m[6] ?? "0"),
-					ms,
-				).getTime();
-			};
-			const s = parse(submittedAt);
-			const d = parse(dueAt);
+			const s = parseInstantMs(submittedAt);
+			const d = parseInstantMs(dueAt);
 			if (Number.isNaN(s) || Number.isNaN(d) || s <= d) return 0;
 			return Math.floor((s - d) / 60000);
 		};
