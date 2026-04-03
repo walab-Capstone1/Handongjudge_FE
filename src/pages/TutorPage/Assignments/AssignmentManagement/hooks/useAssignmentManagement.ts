@@ -44,6 +44,7 @@ export function useAssignmentManagement() {
 		useSubmissionStats(assignments, sectionId ?? null);
 	const {
 		availableProblems,
+		loadingAvailableProblems,
 		assignmentsForProblem,
 		setAssignmentsForProblem,
 		assignmentProblems,
@@ -1032,6 +1033,7 @@ export function useAssignmentManagement() {
 		showProblemModal,
 		setShowProblemModal,
 		availableProblems,
+		loadingAvailableProblems,
 		filteredProblems,
 		selectedProblemIds,
 		problemSearchTerm,
