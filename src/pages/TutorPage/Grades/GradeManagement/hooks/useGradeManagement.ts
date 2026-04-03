@@ -17,6 +17,7 @@ import type {
 	CodeResponse,
 	ProblemGrade,
 } from "../types";
+import { formatLateDurationForGradeCsv } from "../utils/gradeExportLateDuration";
 
 export function useGradeManagement() {
 	const { sectionId } = useParams<{ sectionId?: string }>();
@@ -774,16 +775,6 @@ export function useGradeManagement() {
 			if (dueAt && new Date() > new Date(dueAt)) return '"미제출"';
 			return '""';
 		};
-		/** 지각시간: ZIP submissions.csv와 동일하게 서버 계산값(lateDuration)만 사용 */
-		const formatLateDurationForCSV = (
-			pg: ProblemGrade | null | undefined,
-		): string => {
-			if (!pg?.submitted) return '""';
-			const t = pg.lateDuration?.trim();
-			if (!t) return '""';
-			return `"${t.replace(/"/g, '""')}"`;
-		};
-
 		// 전체 과제 보기: 과제만 필터한 courseGrades로 내보내기
 		if (
 			viewMode === "assignment" &&
@@ -838,7 +829,9 @@ export function useGradeManagement() {
 								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
 							);
 							row.push(formatDateForCSV(dueAt));
-							row.push(formatLateDurationForCSV(problemGrade));
+							row.push(
+								formatLateDurationForGradeCsv(problemGrade, dueAt),
+							);
 							if (typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -929,7 +922,9 @@ export function useGradeManagement() {
 								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
 							);
 							row.push(formatDateForCSV(dueAt));
-							row.push(formatLateDurationForCSV(problemGrade));
+							row.push(
+								formatLateDurationForGradeCsv(problemGrade, dueAt),
+							);
 							if (typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -1016,7 +1011,9 @@ export function useGradeManagement() {
 								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
 							);
 							row.push(formatDateForCSV(dueAt));
-							row.push(formatLateDurationForCSV(problemGrade));
+							row.push(
+								formatLateDurationForGradeCsv(problemGrade, dueAt),
+							);
 							if (score !== "" && score !== null && typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -1045,7 +1042,9 @@ export function useGradeManagement() {
 								getSubmissionDisplayForCSV(problemGrade?.submittedAt, dueAt),
 							);
 							row.push(formatDateForCSV(dueAt));
-							row.push(formatLateDurationForCSV(problemGrade));
+							row.push(
+								formatLateDurationForGradeCsv(problemGrade, dueAt),
+							);
 							if (score !== "" && score !== null && typeof score === "number") {
 								totalAllScore += score;
 							}
@@ -1113,7 +1112,9 @@ export function useGradeManagement() {
 					row.push(String(score));
 					row.push(getSubmissionDisplayForCSV(problem.submittedAt, quizDueAt));
 					row.push(formatDateForCSV(quizDueAt));
-					row.push(formatLateDurationForCSV(problem));
+					row.push(
+						formatLateDurationForGradeCsv(problem, quizDueAt),
+					);
 				}
 				const totalScore = student.totalScore ?? 0;
 				const totalPoints = student.totalPoints ?? 0;
@@ -1177,7 +1178,9 @@ export function useGradeManagement() {
 					getSubmissionDisplayForCSV(problem.submittedAt, assignmentDueAt),
 				);
 				row.push(formatDateForCSV(assignmentDueAt));
-				row.push(formatLateDurationForCSV(problem));
+				row.push(
+					formatLateDurationForGradeCsv(problem, assignmentDueAt),
+				);
 			}
 			const totalScore = student.totalScore ?? 0;
 			const totalPoints = student.totalPoints ?? 0;
