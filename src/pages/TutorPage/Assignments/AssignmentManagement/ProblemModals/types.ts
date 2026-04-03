@@ -19,6 +19,8 @@ export interface BulkProblemData {
 export interface ProblemSelectModalProps {
 	isOpen: boolean;
 	selectedAssignment: { id: number; title?: string; sectionId?: number } | null;
+	/** 내 문제 탭: `getAllProblems` 로딩 중 */
+	instructorProblemsLoading?: boolean;
 	/** 내 문제 탭: 전체 문제 목록(API). 필터·검색은 모달 내부에서 처리 */
 	instructorProblems: {
 		id: number;

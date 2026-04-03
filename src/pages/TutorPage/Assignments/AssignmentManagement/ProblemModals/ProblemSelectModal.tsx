@@ -378,7 +378,7 @@ function AssignmentSourceProblemPicker({
 					</PS.AddModalSearchRow>
 				)}
 
-				{sourceLoading && sourceProblems.length === 0 ? (
+				{sectionTab !== "added" && sourceLoading ? (
 					<div
 						style={{
 							minHeight: 280,
@@ -542,6 +542,7 @@ function AssignmentSourceProblemPicker({
 const ProblemSelectModal: React.FC<ProblemSelectModalProps> = ({
 	isOpen,
 	selectedAssignment,
+	instructorProblemsLoading = false,
 	instructorProblems,
 	filteredProblems: _filteredProblems,
 	selectedProblemIds,
@@ -782,7 +783,7 @@ const ProblemSelectModal: React.FC<ProblemSelectModalProps> = ({
 					{activeMode === "problems" && selectedAssignment && (
 						<AssignmentSourceProblemPicker
 							sourceProblems={instructorProblems as Problem[]}
-							sourceLoading={false}
+							sourceLoading={instructorProblemsLoading}
 							sourceContextKey={`inst-${selectedAssignment.id}`}
 							allSubtitle="전체 문제 (내 문제 라이브러리)"
 							selectedAssignment={selectedAssignment}

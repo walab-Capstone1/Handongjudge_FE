@@ -16,6 +16,7 @@ interface Assignment {
 
 export const useAssignmentProblems = () => {
   const [availableProblems, setAvailableProblems] = useState<Problem[]>([]);
+  const [loadingAvailableProblems, setLoadingAvailableProblems] = useState(false);
   const [copyableProblems, setCopyableProblems] = useState<Problem[]>([]);
   const [assignmentsForProblem, setAssignmentsForProblem] = useState<Assignment[]>([]);
   const [assignmentProblems, setAssignmentProblems] = useState<Record<number, Problem[]>>({});
@@ -23,6 +24,7 @@ export const useAssignmentProblems = () => {
   const [loadingAssignmentsForProblem, setLoadingAssignmentsForProblem] = useState(false);
 
   const fetchAvailableProblems = useCallback(async () => {
+    setLoadingAvailableProblems(true);
     try {
       const response = await APIService.getAllProblems();
       const problems = response.data || response || [];
@@ -30,6 +32,8 @@ export const useAssignmentProblems = () => {
     } catch (error) {
       console.error("사용 가능한 문제 조회 실패:", error);
       setAvailableProblems([]);
+    } finally {
+      setLoadingAvailableProblems(false);
     }
   }, []);
 
@@ -109,6 +113,7 @@ export const useAssignmentProblems = () => {
 
   return {
     availableProblems,
+    loadingAvailableProblems,
     setAvailableProblems,
     copyableProblems,
     setCopyableProblems,

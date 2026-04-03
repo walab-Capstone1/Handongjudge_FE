@@ -366,7 +366,7 @@ const QuizProblemPickerPanel: FC<QuizProblemPickerPanelProps> = ({
 					</PS.AddModalSearchRow>
 				)}
 
-				{sourceLoading && sourceProblems.length === 0 && sectionTab !== "added" ? (
+				{sectionTab !== "added" && sourceLoading ? (
 					<div
 						style={{
 							minHeight: 280,
@@ -805,7 +805,7 @@ const AddProblemsToQuizModal: FC<AddProblemsToQuizModalProps> = ({ d }) => {
 						<QuizProblemPickerPanel
 							d={d}
 							sourceProblems={d.allProblems as ProblemWithMeta[]}
-							sourceLoading={false}
+							sourceLoading={d.loadingAllProblems}
 							sourceContextKey="quiz-my-problems"
 							allSubtitle="전체 문제 (내 문제 라이브러리)"
 							idToSource={mergedIdToSource}
