@@ -425,6 +425,21 @@ export function useProblemSolve() {
 			return;
 		}
 
+		const deadlineRaw = assignmentInfo.endDate || assignmentInfo.dueDate;
+		if (
+			!isManager &&
+			deadlineRaw &&
+			Date.now() > new Date(deadlineRaw).getTime()
+		) {
+			if (
+				!window.confirm(
+					"마감 시간이 지났습니다. 지금 제출하면 지각으로 표시됩니다. 계속하시겠습니까?",
+				)
+			) {
+				return;
+			}
+		}
+
 		setIsSubmitting(true);
 		setSubmissionResult(null);
 		try {
@@ -478,7 +493,18 @@ export function useProblemSolve() {
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [code, language, sectionId, problemId, clearSessionAfterSubmission, isAssignmentActive, navigate, userRole]);
+	}, [
+		code,
+		language,
+		sectionId,
+		problemId,
+		clearSessionAfterSubmission,
+		isAssignmentActive,
+		navigate,
+		userRole,
+		assignmentInfo.endDate,
+		assignmentInfo.dueDate,
+	]);
 
 	const handleSubmitWithOutput = useCallback(async () => {
 		if (!code.trim()) {
