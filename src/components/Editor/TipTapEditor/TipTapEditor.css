@@ -190,31 +190,6 @@
 	color: #d4d4d4;
 }
 
-.code-language-select {
-	padding: 4px 8px;
-	border: 1px solid #e0e0e0;
-	border-radius: 4px;
-	background: white;
-	font-size: 13px;
-	color: #4a5568;
-	cursor: pointer;
-	transition: all 0.15s;
-	min-width: 120px;
-	height: 28px;
-	margin-left: 4px;
-}
-
-.code-language-select:hover {
-	border-color: #cbd5e0;
-	background: #f7fafc;
-}
-
-.code-language-select:focus {
-	outline: none;
-	border-color: #667eea;
-	box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-}
-
 .tiptap-editor code {
 	background: #f1f3f5;
 	color: #e83e8c;

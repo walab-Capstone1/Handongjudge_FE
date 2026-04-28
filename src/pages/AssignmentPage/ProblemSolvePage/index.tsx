@@ -42,7 +42,6 @@ const ProblemSolvePage: React.FC = () => {
 			verticalSizes={hook.verticalSizes}
 			panelLayout={hook.panelLayout}
 			handlePanelMove={hook.handlePanelMove}
-			handleLanguageChange={hook.handleLanguageChange}
 			handleSubmit={hook.handleSubmit}
 			handleSubmitWithOutput={hook.handleSubmitWithOutput}
 			saveToSession={hook.saveToSession}

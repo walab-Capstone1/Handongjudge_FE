@@ -405,11 +405,6 @@ export function useProblemSolve() {
 		[],
 	);
 
-	const handleLanguageChange = useCallback((newLang: string) => {
-		setLanguage(newLang);
-		setCode(getDefaultCode(newLang));
-	}, []);
-
 	const handleSubmit = useCallback(async () => {
 		if (!code.trim()) {
 			alert("코드를 작성해주세요.");
@@ -620,7 +615,6 @@ export function useProblemSolve() {
 		verticalSizes,
 		panelLayout,
 		handlePanelMove,
-		handleLanguageChange,
 		handleSubmit,
 		handleSubmitWithOutput,
 		saveToSession,

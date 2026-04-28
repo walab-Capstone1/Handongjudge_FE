@@ -6,6 +6,7 @@ export interface SectionInfo {
 	sectionNumber?: string;
 	instructorId?: number;
 	instructor?: { id: number };
+	isCurrentUserSectionStaff?: boolean;
 }
 
 export interface Question {
@@ -13,6 +14,8 @@ export interface Question {
 	title: string;
 	content: string;
 	authorDisplayName?: string;
+	authorId?: number | null;
+	authorRealNameForStaff?: string;
 	createdAt: string;
 	viewCount: number;
 	likeCount: number;
@@ -31,8 +34,11 @@ export interface Comment {
 	id: number;
 	content: string;
 	authorDisplayName?: string;
+	authorId?: number | null;
+	authorRealNameForStaff?: string;
 	createdAt: string;
 	likeCount: number;
+	isAnonymous?: boolean;
 	isAccepted?: boolean;
 	isAuthor?: boolean;
 	isInstructorAnswer?: boolean;
