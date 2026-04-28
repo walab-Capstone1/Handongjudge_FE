@@ -1459,18 +1459,6 @@ class APIService {
 		});
 	}
 
-	async acceptComment(commentId: number | string): Promise<any> {
-		return await this.request(`/community/comments/${commentId}/accept`, {
-			method: "POST",
-		});
-	}
-
-	async unacceptComment(commentId: number | string): Promise<any> {
-		return await this.request(`/community/comments/${commentId}/accept`, {
-			method: "DELETE",
-		});
-	}
-
 	async deleteComment(commentId: number | string): Promise<any> {
 		return await this.request(`/community/comments/${commentId}`, {
 			method: "DELETE",

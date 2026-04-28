@@ -69,6 +69,25 @@ export const QuestionBadges = styled.div`
   flex-wrap: wrap;
 `;
 
+export const MyPostBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin-left: 4px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #e8edff;
+  color: #4c51bf;
+`;
+
+export const StaffIdentityNote = styled.span`
+  font-size: 12px;
+  color: #805ad5;
+  font-weight: 500;
+  margin-left: 4px;
+`;
+
 export const Badge = styled.span<{ $variant?: string }>`
   display: inline-flex;
   align-items: center;
@@ -400,11 +419,11 @@ export const EmptyComments = styled.div`
 `;
 
 /* 댓글 카드 */
-export const CommentCard = styled.div<{ $accepted?: boolean }>`
+export const CommentCard = styled.div`
   padding: 20px;
-  background: ${(props) => (props.$accepted ? "#e8f5e9" : "#f8f9fa")};
+  background: #f8f9fa;
   border-radius: 8px;
-  border: 2px solid ${(props) => (props.$accepted ? "#4caf50" : "transparent")};
+  border: 2px solid transparent;
   transition: all 0.2s;
 `;
 
@@ -419,6 +438,7 @@ export const CommentAuthorInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 `;
 
 export const CommentAuthor = styled.span`

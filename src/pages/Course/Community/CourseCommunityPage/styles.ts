@@ -353,11 +353,29 @@ export const AuthorDate = styled.div`
   gap: 6px;
   font-size: 12px;
   color: #666;
+  flex-wrap: wrap;
 
   .author {
     font-weight: 500;
     color: #1a1a1a;
   }
+`;
+
+export const MyPostBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #e8edff;
+  color: #4c51bf;
+`;
+
+export const StaffAuthorNote = styled.span`
+  font-size: 11px;
+  color: #805ad5;
+  font-weight: 500;
 `;
 
 export const QuestionTitleText = styled.h3`

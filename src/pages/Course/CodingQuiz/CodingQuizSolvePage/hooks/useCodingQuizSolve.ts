@@ -801,12 +801,6 @@ export function useCodingQuizSolve() {
 		await pollUntilResult("output");
 	}, [pollUntilResult]);
 
-	const handleLanguageChange = useCallback((newLang: string) => {
-		if (newLang !== "c") return;
-		setLanguage(newLang);
-		setCode(getDefaultCode(newLang));
-	}, []);
-
 	const handleHorizontalDragEnd = useCallback((sizes: number[]) => {
 		setHorizontalSizes(sizes);
 	}, []);
@@ -866,7 +860,6 @@ export function useCodingQuizSolve() {
 		handleSubmit,
 		handleSubmitWithOutput,
 		saveToBackend,
-		handleLanguageChange,
 		handleHorizontalDragEnd,
 		handleVerticalDragEnd,
 		gutterStyleCallback,

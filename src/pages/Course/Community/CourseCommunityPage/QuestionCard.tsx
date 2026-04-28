@@ -36,6 +36,15 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onClick }) => (
           <span className="author">
             {question.authorDisplayName ?? question.authorName ?? "익명"}
           </span>
+          {question.isAuthor && <S.MyPostBadge>내 글</S.MyPostBadge>}
+          {question.authorRealNameForStaff ? (
+            <>
+              <S.Separator>·</S.Separator>
+              <S.StaffAuthorNote>
+                실명: {question.authorRealNameForStaff}
+              </S.StaffAuthorNote>
+            </>
+          ) : null}
           <S.Separator>·</S.Separator>
           <span className="date">{formatDate(question.createdAt)}</span>
         </S.AuthorDate>
