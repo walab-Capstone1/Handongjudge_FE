@@ -37,7 +37,6 @@ interface ProblemSolveViewProps {
 	verticalSizes: number[];
 	panelLayout: { left: PanelKey; topRight: PanelKey; bottomRight: PanelKey };
 	handlePanelMove: (dragged: string, target: string) => void;
-	handleLanguageChange: (lang: string) => void;
 	handleSubmit: () => void;
 	handleSubmitWithOutput: () => void;
 	saveToSession: () => void;
@@ -77,7 +76,6 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 		verticalSizes,
 		panelLayout,
 		handlePanelMove,
-		handleLanguageChange,
 		handleSubmit,
 		handleSubmitWithOutput,
 		saveToSession,
@@ -197,15 +195,6 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 						>
 							Dark
 						</S.ThemeButton>
-						<S.LanguageSelect
-							$theme={theme}
-							value={language}
-							onChange={(e) => handleLanguageChange(e.target.value)}
-							disabled
-							style={{ opacity: 0.7, cursor: "not-allowed" }}
-						>
-							<option value="c">C</option>
-						</S.LanguageSelect>
 					</S.Controls>
 				</S.Header>
 

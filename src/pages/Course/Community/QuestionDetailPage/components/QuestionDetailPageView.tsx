@@ -144,6 +144,15 @@ export default function QuestionDetailPageView(
 							<span className="author">
 								{question.authorDisplayName ?? "익명"}
 							</span>
+							{question.isAuthor && <S.MyPostBadge>내 글</S.MyPostBadge>}
+							{d.isSectionStaff && question.authorRealNameForStaff ? (
+								<>
+									<span className="separator">·</span>
+									<S.StaffIdentityNote>
+										실명: {question.authorRealNameForStaff}
+									</S.StaffIdentityNote>
+								</>
+							) : null}
 							<span className="separator">·</span>
 							<span className="date">{formatDate(question.createdAt)}</span>
 							<span className="separator">·</span>
@@ -198,6 +207,9 @@ export default function QuestionDetailPageView(
 									aria-label="익명으로 작성"
 								/>
 								<span>익명으로 작성</span>
+								<span style={{ fontSize: 12, color: "#888", marginLeft: 8 }}>
+									(이 글에서 익명 1, 2… 순으로 표시)
+								</span>
 							</S.CommentOption>
 							<S.BtnSubmitComment
 								type="submit"
@@ -216,21 +228,24 @@ export default function QuestionDetailPageView(
 								</S.EmptyComments>
 							) : (
 								d.comments.map((comment) => (
-									<S.CommentCard
-										key={comment.id}
-										$accepted={comment.isAccepted}
-									>
+									<S.CommentCard key={comment.id}>
 										<S.CommentHeader>
 											<S.CommentAuthorInfo>
 												<S.CommentAuthor>
 													{comment.authorDisplayName ?? "익명"}
 												</S.CommentAuthor>
-												{comment.isInstructorAnswer && (
-													<S.BadgeInstructor>교수</S.BadgeInstructor>
+												{comment.isAuthor && (
+													<S.MyPostBadge>내 글</S.MyPostBadge>
 												)}
-												{comment.isAccepted && (
-													<S.BadgeAccepted>채택됨</S.BadgeAccepted>
-												)}
+												{d.isSectionStaff && comment.authorRealNameForStaff ? (
+													<S.StaffIdentityNote>
+														실명: {comment.authorRealNameForStaff}
+													</S.StaffIdentityNote>
+												) : null}
+												{comment.isInstructorAnswer &&
+													!comment.isAnonymous && (
+														<S.BadgeInstructor>교수/TA</S.BadgeInstructor>
+													)}
 											</S.CommentAuthorInfo>
 											<S.CommentDate>
 												{formatDate(comment.createdAt)}
@@ -261,28 +276,6 @@ export default function QuestionDetailPageView(
 												>
 													삭제
 												</S.BtnDeleteComment>
-											)}
-
-											{d.canManageAccept && (
-												<>
-													{!comment.isAccepted ? (
-														<S.BtnAccept
-															type="button"
-															onClick={() => d.handleAcceptComment(comment.id)}
-														>
-															채택하기
-														</S.BtnAccept>
-													) : (
-														<S.BtnUnaccept
-															type="button"
-															onClick={() =>
-																d.handleUnacceptComment(comment.id)
-															}
-														>
-															채택 해제
-														</S.BtnUnaccept>
-													)}
-												</>
 											)}
 										</S.CommentActions>
 									</S.CommentCard>

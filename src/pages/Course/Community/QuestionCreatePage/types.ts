@@ -22,6 +22,8 @@ export interface QuestionFormData {
 	title: string;
 	content: string;
 	isAnonymous: boolean;
+	/** 익명일 때만: true면 별명, false면 표시명 "익명" */
+	anonymousUseNickname: boolean;
 	isPublic: boolean;
 	assignmentId: string;
 	problemId: string;

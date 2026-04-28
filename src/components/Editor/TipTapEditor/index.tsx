@@ -10,33 +10,7 @@ import { MdImage } from "react-icons/md";
 import hljs from "highlight.js";
 import "highlight.js/styles/vs2015.css";
 import "./styles";
-import type { TipTapEditorProps, CodeLanguageOption } from "./types";
-
-const CODE_LANGUAGES: CodeLanguageOption[] = [
-	{ value: "", label: "언어 선택" },
-	{ value: "javascript", label: "JavaScript" },
-	{ value: "typescript", label: "TypeScript" },
-	{ value: "python", label: "Python" },
-	{ value: "java", label: "Java" },
-	{ value: "cpp", label: "C++" },
-	{ value: "c", label: "C" },
-	{ value: "csharp", label: "C#" },
-	{ value: "html", label: "HTML" },
-	{ value: "css", label: "CSS" },
-	{ value: "json", label: "JSON" },
-	{ value: "sql", label: "SQL" },
-	{ value: "bash", label: "Bash" },
-	{ value: "shell", label: "Shell" },
-	{ value: "go", label: "Go" },
-	{ value: "rust", label: "Rust" },
-	{ value: "php", label: "PHP" },
-	{ value: "ruby", label: "Ruby" },
-	{ value: "swift", label: "Swift" },
-	{ value: "kotlin", label: "Kotlin" },
-	{ value: "markdown", label: "Markdown" },
-	{ value: "yaml", label: "YAML" },
-	{ value: "xml", label: "XML" },
-];
+import type { TipTapEditorProps } from "./types";
 
 const TipTapEditor: React.FC<TipTapEditorProps> = ({
 	content,
@@ -127,34 +101,6 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
 		return attrs.fontSize ?? "";
 	};
 
-	const getCurrentCodeBlockLanguage = () => {
-		if (!editor) return "";
-		const attrs = editor.getAttributes("codeBlock");
-		return attrs.language ?? "";
-	};
-
-	const handleCodeBlockLanguageChange = (language: string) => {
-		if (!editor) return;
-		try {
-			editor
-				.chain()
-				.focus()
-				.updateAttributes("codeBlock", {
-					language: language || null,
-				})
-				.run();
-			setTimeout(() => {
-				try {
-					if (editor?.view?.dom) highlightCodeBlocks();
-				} catch (err) {
-					console.warn("언어 변경 후 하이라이팅 실패:", err);
-				}
-			}, 100);
-		} catch (err) {
-			console.warn("코드 블록 언어 변경 실패:", err);
-		}
-	};
-
 	const highlightCodeBlocks = useCallback(() => {
 		try {
 			if (!editor?.view?.dom) return;
@@ -234,8 +180,6 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
 
 	if (!editor) return null;
 
-	const isCodeBlockActive = editor.isActive("codeBlock");
-
 	return (
 		<div className="tiptap-editor-wrapper">
 			<div className="tiptap-toolbar">
@@ -304,23 +248,6 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
 				>
 					{"<>"}
 				</button>
-				{isCodeBlockActive && (
-					<select
-						className="code-language-select"
-						value={getCurrentCodeBlockLanguage()}
-						onChange={(e) => handleCodeBlockLanguageChange(e.target.value)}
-						title="언어 선택"
-						onClick={(e) => e.stopPropagation()}
-						onKeyDown={(e) => e.stopPropagation()}
-						aria-label="코드 블록 언어"
-					>
-						{CODE_LANGUAGES.map((lang) => (
-							<option key={lang.value} value={lang.value}>
-								{lang.label}
-							</option>
-						))}
-					</select>
-				)}
 				<button
 					type="button"
 					onClick={() => editor.chain().focus().toggleBlockquote().run()}
