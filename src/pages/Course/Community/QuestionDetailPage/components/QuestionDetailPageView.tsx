@@ -188,39 +188,9 @@ export default function QuestionDetailPageView(
 					</S.QuestionCard>
 
 					<S.CommentsSection>
-					<S.CommentsTitle>댓글 {d.comments.length}개</S.CommentsTitle>
-
-					<S.CommentForm onSubmit={d.handleSubmitComment}>
-						<S.EditorWrapper>
-							<TipTapEditor
-								content={d.commentContent}
-								onChange={(html) => d.setCommentContent(html)}
-								placeholder="댓글을 작성하세요..."
-							/>
-						</S.EditorWrapper>
-						<S.CommentFormFooter>
-							<S.CommentOption>
-								<input
-									type="checkbox"
-									checked={d.commentAnonymous}
-									onChange={(e) => d.setCommentAnonymous(e.target.checked)}
-									aria-label="익명으로 작성"
-								/>
-								<span>익명으로 작성</span>
-								<span style={{ fontSize: 12, color: "#888", marginLeft: 8 }}>
-									(이 글에서 익명 1, 2… 순으로 표시)
-								</span>
-							</S.CommentOption>
-							<S.BtnSubmitComment
-								type="submit"
-								disabled={d.submittingComment}
-							>
-								{d.submittingComment ? "작성 중..." : "댓글 작성"}
-							</S.BtnSubmitComment>
-						</S.CommentFormFooter>
-					</S.CommentForm>
-
-						<S.CommentsList>
+						<S.CommentsListBlock>
+							<S.CommentsListTitle>댓글 {d.comments.length}개</S.CommentsListTitle>
+							<S.CommentsList>
 							{d.comments.length === 0 ? (
 								<S.EmptyComments>
 									<p>아직 댓글이 없습니다</p>
@@ -281,8 +251,42 @@ export default function QuestionDetailPageView(
 									</S.CommentCard>
 								))
 							)}
-						</S.CommentsList>
-					</S.CommentsSection>
+							</S.CommentsList>
+						</S.CommentsListBlock>
+
+						<S.CommentComposerBlock>
+							<S.CommentComposerTitle>댓글 작성</S.CommentComposerTitle>
+							<S.CommentForm onSubmit={d.handleSubmitComment}>
+								<S.EditorWrapper>
+									<TipTapEditor
+										content={d.commentContent}
+										onChange={(html) => d.setCommentContent(html)}
+										placeholder="댓글을 작성하세요..."
+									/>
+								</S.EditorWrapper>
+								<S.CommentFormFooter>
+									<S.CommentOption>
+										<input
+											type="checkbox"
+											checked={d.commentAnonymous}
+											onChange={(e) => d.setCommentAnonymous(e.target.checked)}
+											aria-label="익명으로 작성"
+										/>
+										<span>익명으로 작성</span>
+										<S.CommentOptionHint>
+											(이 글에서 익명 1, 2… 순으로 표시)
+										</S.CommentOptionHint>
+									</S.CommentOption>
+									<S.BtnSubmitComment
+										type="submit"
+										disabled={d.submittingComment}
+									>
+										{d.submittingComment ? "작성 중..." : "댓글 작성"}
+									</S.BtnSubmitComment>
+								</S.CommentFormFooter>
+							</S.CommentForm>
+						</S.CommentComposerBlock>
+						</S.CommentsSection>
 				</S.Body>
 			</S.Content>
 		</S.Container>
