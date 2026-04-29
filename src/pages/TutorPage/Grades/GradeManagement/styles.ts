@@ -68,7 +68,7 @@ export const SortableStudentHeaderTh = styled.th`
 
 export const PageHeader = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   padding: 0.75rem 1.25rem;
   background: white;
@@ -78,31 +78,42 @@ export const PageHeader = styled.div`
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 0.75rem;
+
+  @media (max-width: 1600px) {
+    gap: 0.9rem;
+  }
 `;
 
 export const HeaderLeft = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
   gap: 0.75rem;
-  flex: 1;
+  flex: 1 1 760px;
   min-width: 0;
+
+  @media (max-width: 1600px) {
+    flex: 1 1 100%;
+  }
 `;
 
 export const SearchBox = styled.div`
   position: relative;
-  flex: 1;
-  min-width: 220px;
+  flex: 1 1 240px;
+  min-width: 180px;
   max-width: 360px;
 `;
 
 export const SearchInput = styled.input`
   width: 100%;
-  padding: 0.6rem 0.9rem;
+  height: 2.35rem;
+  padding: 0 0.9rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.875rem;
   transition: all 0.2s ease;
   background: white;
+  box-sizing: border-box;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     sans-serif;
 
@@ -125,18 +136,23 @@ export const FilterGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex: 1 1 220px;
+  min-width: 180px;
 `;
 
 export const FilterLabel = styled.label`
   font-size: 0.8rem;
   color: #6b7280;
   font-weight: 500;
+  min-height: 1rem;
+  line-height: 1rem;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     sans-serif;
 `;
 
 export const AssignmentSelect = styled.select`
-  padding: 0.75rem 1rem;
+  height: 2.35rem;
+  padding: 0 1rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -146,7 +162,9 @@ export const AssignmentSelect = styled.select`
   transition: all 0.2s ease;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     sans-serif;
-  min-width: 200px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
   &:focus {
     outline: none;
@@ -157,19 +175,33 @@ export const AssignmentSelect = styled.select`
 
 export const HeaderRight = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 0.75rem;
   flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 0 1 auto;
+  margin-left: auto;
+  min-width: min(100%, 540px);
+  padding-top: 1.45rem;
+
+  @media (max-width: 1600px) {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 0;
+    justify-content: flex-start;
+  }
 `;
 
 export const PrimaryButton = styled.button`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 0.45rem 0.9rem;
+  height: 2.35rem;
+  padding: 0 0.9rem;
   border-radius: 8px;
   font-weight: 700;
   cursor: pointer;
@@ -178,6 +210,7 @@ export const PrimaryButton = styled.button`
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     sans-serif;
   white-space: nowrap;
+  box-sizing: border-box;
 
   &:hover {
     background: linear-gradient(135deg, #5568d3 0%, #6a3d8c 100%);
@@ -189,11 +222,13 @@ export const PrimaryButton = styled.button`
 export const SecondaryButton = styled.button`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   background: white;
   color: #667eea;
   border: 1px solid #667eea;
-  padding: 0.45rem 0.9rem;
+  height: 2.35rem;
+  padding: 0 0.9rem;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
@@ -202,6 +237,7 @@ export const SecondaryButton = styled.button`
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     sans-serif;
   white-space: nowrap;
+  box-sizing: border-box;
 
   &:hover {
     background: #f8f9ff;
@@ -661,13 +697,15 @@ export const ViewModeTabs = styled.div`
   background: #f1f5f9;
   padding: 0.15rem;
   border-radius: 8px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  flex-wrap: wrap;
   align-items: center;
 `;
 
 export const TabButton = styled.button<{ $active?: boolean }>`
-  flex: 1;
-  padding: 0.4rem 0.8rem;
+  flex: 0 1 auto;
+  min-height: 2.05rem;
+  padding: 0.35rem 0.8rem;
   background: ${(p) => (p.$active ? "white" : "transparent")};
   border: none;
   border-radius: 6px;
