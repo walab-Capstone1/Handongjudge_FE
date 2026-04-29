@@ -133,7 +133,53 @@ export const Header = styled.div<{ $theme: "light" | "dark" }>`
 	background-color: ${(p) => (p.$theme === "light" ? "#ffffff" : "#161b22")};
 	display: flex;
 	justify-content: space-between;
+	align-items: flex-start;
+	gap: 16px;
+`;
+
+export const HeaderMain = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-width: 0;
+	flex: 1;
+`;
+
+export const ProblemToolbarRow = styled.div`
+	display: flex;
 	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+`;
+
+export const ProblemIndexHint = styled.span<{ $theme: "light" | "dark" }>`
+	font-size: 12px;
+	font-weight: 600;
+	color: ${(p) => (p.$theme === "light" ? "#57606a" : "#9aa4af")};
+	padding: 0 4px;
+`;
+
+export const PrevNextButton = styled.button<{
+	$theme: "light" | "dark";
+	$disabled?: boolean;
+}>`
+	padding: 6px 12px;
+	border-radius: 6px;
+	border: 1px solid ${(p) => (p.$theme === "light" ? "#e1e4e8" : "#30363d")};
+	background-color: ${(p) => (p.$theme === "light" ? "#f6f8fa" : "#21262d")};
+	color: ${(p) => (p.$theme === "light" ? "#24292e" : "#c9d1d9")};
+	font-size: 12px;
+	font-weight: 600;
+	cursor: ${(p) => (p.$disabled ? "not-allowed" : "pointer")};
+	opacity: ${(p) => (p.$disabled ? 0.45 : 1)};
+	white-space: nowrap;
+	transition: border-color 0.2s, background-color 0.2s;
+
+	&:hover:not(:disabled) {
+		border-color: ${(p) => (p.$theme === "light" ? "#0969da" : "#58a6ff")};
+		background-color: ${(p) =>
+			p.$theme === "light" ? "rgba(9, 105, 218, 0.08)" : "rgba(88, 166, 255, 0.12)"};
+	}
 `;
 
 export const Breadcrumb = styled.div`
@@ -240,4 +286,86 @@ export const SaveModalIcon = styled.span`
 
 export const SaveModalText = styled.span`
 	font-size: 16px;
+`;
+
+export const ProblemNavigateButton = styled.button<{ $theme: "light" | "dark" }>`
+	padding: 6px 12px;
+	border-radius: 6px;
+	border: 1px solid ${(p) => (p.$theme === "light" ? "#e1e4e8" : "#30363d")};
+	background-color: ${(p) => (p.$theme === "light" ? "#ffffff" : "#21262d")};
+	color: ${(p) => (p.$theme === "light" ? "#24292e" : "#c9d1d9")};
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: all 0.2s;
+
+	&:hover {
+		border-color: ${(p) => (p.$theme === "light" ? "#0969da" : "#58a6ff")};
+		background-color: ${(p) =>
+			p.$theme === "light" ? "rgba(9, 105, 218, 0.1)" : "rgba(88, 166, 255, 0.15)"};
+		color: ${(p) => (p.$theme === "light" ? "#0969da" : "#58a6ff")};
+	}
+`;
+
+export const UnsavedModalOverlay = styled.div`
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10001;
+`;
+
+export const UnsavedModalCard = styled.div<{ $theme: "light" | "dark" }>`
+	width: min(92vw, 430px);
+	padding: 20px;
+	border-radius: 10px;
+	border: 1px solid ${(p) => (p.$theme === "light" ? "#d0d7de" : "#30363d")};
+	background: ${(p) => (p.$theme === "light" ? "#ffffff" : "#161b22")};
+	box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+`;
+
+export const UnsavedModalTitle = styled.h3<{ $theme: "light" | "dark" }>`
+	margin: 0 0 10px;
+	font-size: 17px;
+	color: ${(p) => (p.$theme === "light" ? "#24292e" : "#e6edf3")};
+`;
+
+export const UnsavedModalDesc = styled.p<{ $theme: "light" | "dark" }>`
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.5;
+	color: ${(p) => (p.$theme === "light" ? "#57606a" : "#9aa4af")};
+`;
+
+export const UnsavedModalActions = styled.div`
+	margin-top: 18px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	flex-wrap: wrap;
+`;
+
+export const UnsavedModalButton = styled.button<{ $theme: "light" | "dark" }>`
+	padding: 7px 12px;
+	border-radius: 6px;
+	border: 1px solid ${(p) => (p.$theme === "light" ? "#d0d7de" : "#30363d")};
+	background: ${(p) => (p.$theme === "light" ? "#f6f8fa" : "#21262d")};
+	color: ${(p) => (p.$theme === "light" ? "#24292f" : "#c9d1d9")};
+	cursor: pointer;
+	font-size: 13px;
+`;
+
+export const UnsavedModalPrimaryButton = styled.button<{
+	$theme: "light" | "dark";
+}>`
+	padding: 7px 12px;
+	border-radius: 6px;
+	border: 1px solid #2f81f7;
+	background: #2f81f7;
+	color: #ffffff;
+	cursor: pointer;
+	font-size: 13px;
 `;

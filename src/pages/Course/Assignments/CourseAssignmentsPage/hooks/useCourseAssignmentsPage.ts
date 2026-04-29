@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
@@ -28,13 +28,12 @@ export function useCourseAssignmentsPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [sectionInfo, setSectionInfo] = useState<SectionInfo | null>(null);
 	const [assignments, setAssignments] = useState<Assignment[]>([]);
+	const [assignmentSort, setAssignmentSort] = useState<
+		"recentFirst" | "oldestFirst" | "unsolvedFirst"
+	>("recentFirst");
 	const [expandedAssignmentIds, setExpandedAssignmentIds] = useState<number[]>(
 		[],
 	);
-	/** 과제별 문제 목록 정렬: 기본(원래 순서) / 미해결 문제 / 해결 문제 (과제 id -> 정렬 방식) */
-	const [problemSortByAssignmentId, setProblemSortByAssignmentId] = useState<
-		Record<number, "original" | "solvedFirst" | "unsolvedFirst">
-	>({});
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const [isManager, setIsManager] = useState(false);
 	/** 알림 등에서 assignmentId 쿼리로 진입 시 한 번만 펼치기 위해 적용한 URL 값 (접은 뒤 다시 펼쳐지지 않도록) */
@@ -244,34 +243,6 @@ export function useCourseAssignmentsPage() {
 		);
 	}, []);
 
-	/** 해당 과제의 문제 목록을 현재 정렬 설정에 따라 정렬 (기본: 원래 순서) */
-	const getSortedProblems = useCallback(
-		(assignment: Assignment) => {
-			const sort = problemSortByAssignmentId[assignment.id] ?? "original";
-			const list = [...(assignment.problems ?? [])];
-			if (sort === "original") return list;
-			const order = (p: Assignment["problems"][0]) =>
-				p.status === "ACCEPTED" ? 2 : p.status === "SUBMITTED" ? 1 : 0;
-			if (sort === "solvedFirst") {
-				list.sort((a, b) => order(b) - order(a));
-			} else {
-				list.sort((a, b) => order(a) - order(b));
-			}
-			return list;
-		},
-		[problemSortByAssignmentId],
-	);
-
-	const setProblemSortForAssignment = useCallback(
-		(assignmentId: number, value: "original" | "solvedFirst" | "unsolvedFirst") => {
-			setProblemSortByAssignmentId((prev) => ({
-				...prev,
-				[assignmentId]: value,
-			}));
-		},
-		[],
-	);
-
 	const formatDate = useCallback((dateString: string): string => {
 		if (!dateString) return "";
 		const date = new Date(dateString);
@@ -349,6 +320,31 @@ export function useCourseAssignmentsPage() {
 		setIsSidebarCollapsed((prev) => !prev);
 	}, [setIsSidebarCollapsed]);
 
+	const sortedAssignments = useMemo(() => {
+		const list = [...assignments];
+		const createdKey = (a: Assignment) => {
+			const createdAt = (a as { createdAt?: string }).createdAt;
+			const t = createdAt ? new Date(createdAt).getTime() : Number.NaN;
+			return Number.isNaN(t) ? a.id : t;
+		};
+
+		if (assignmentSort === "oldestFirst") {
+			list.sort((a, b) => createdKey(a) - createdKey(b));
+			return list;
+		}
+		if (assignmentSort === "unsolvedFirst") {
+			list.sort((a, b) => {
+				const unsolvedA = Math.max(0, a.totalProblems - a.submittedProblems);
+				const unsolvedB = Math.max(0, b.totalProblems - b.submittedProblems);
+				if (unsolvedB !== unsolvedA) return unsolvedB - unsolvedA;
+				return createdKey(b) - createdKey(a);
+			});
+			return list;
+		}
+		list.sort((a, b) => createdKey(b) - createdKey(a));
+		return list;
+	}, [assignments, assignmentSort]);
+
 	return {
 		sectionId,
 		activeMenu,
@@ -357,9 +353,9 @@ export function useCourseAssignmentsPage() {
 		isSidebarCollapsed,
 		sectionInfo,
 		assignments,
-		getSortedProblems,
-		problemSortByAssignmentId,
-		setProblemSortForAssignment,
+		sortedAssignments,
+		assignmentSort,
+		setAssignmentSort,
 		expandedAssignmentIds,
 		userRole,
 		isManager,
