@@ -327,6 +327,24 @@ export const QuizSummaryMeta = styled.span`
   flex-shrink: 0;
 `;
 
+export const StudyProgressRows = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+export const StudyProgressLine = styled.p`
+  margin: 0;
+  font-size: 0.88rem;
+  color: #374151;
+  line-height: 1.55;
+`;
+
+export const StudyProgressMuted = styled.span`
+  color: #6b7280;
+  font-size: 0.82rem;
+`;
+
 export const CoursesSection = styled.div`
   flex: 0 0 auto;
   display: flex;

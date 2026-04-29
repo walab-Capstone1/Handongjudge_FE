@@ -41,7 +41,17 @@ const ProblemSolvePage: React.FC = () => {
 			horizontalSizes={hook.horizontalSizes}
 			verticalSizes={hook.verticalSizes}
 			panelLayout={hook.panelLayout}
+			problems={hook.problems}
+			isProblemModalOpen={hook.isProblemModalOpen}
+			isProblemChanging={hook.isProblemChanging}
+			setIsProblemModalOpen={hook.setIsProblemModalOpen}
 			handlePanelMove={hook.handlePanelMove}
+			handleProblemChange={hook.handleProblemChange}
+			problemNav={hook.problemNav}
+			sectionAssignments={hook.sectionAssignments}
+			isAssignmentModalOpen={hook.isAssignmentModalOpen}
+			setIsAssignmentModalOpen={hook.setIsAssignmentModalOpen}
+			handleSelectOtherAssignment={hook.handleSelectOtherAssignment}
 			handleSubmit={hook.handleSubmit}
 			handleSubmitWithOutput={hook.handleSubmitWithOutput}
 			saveToSession={hook.saveToSession}
@@ -53,6 +63,10 @@ const ProblemSolvePage: React.FC = () => {
 			isDeadlinePassed={hook.isDeadlinePassed}
 			isAssignmentActive={hook.isAssignmentActive}
 			userRole={hook.userRole}
+			showUnsavedModal={hook.showUnsavedModal}
+			handleUnsavedModalSave={hook.handleUnsavedModalSave}
+			handleUnsavedModalSkip={hook.handleUnsavedModalSkip}
+			handleUnsavedModalCancel={hook.handleUnsavedModalCancel}
 		/>
 	);
 };

@@ -51,7 +51,7 @@ const DraggablePanel: React.FC<DraggablePanelProps> = ({
 			}
 		},
 		collect: (monitor) => ({
-			isOver: monitor.isOver(),
+			isOver: monitor.isOver({ shallow: true }),
 			canDrop: monitor.canDrop(),
 		}),
 	}));
@@ -75,18 +75,17 @@ const DraggablePanel: React.FC<DraggablePanelProps> = ({
 		>
 			<S.Panel data-panel-id={id} $dragging={isDragging}>
 				{showDragHandle && (
-					<div
+					<S.DragHandle
 						ref={drag as unknown as React.Ref<HTMLDivElement>}
-						style={{ cursor: isDragging ? "grabbing" : "grab" }}
+						$dragging={isDragging}
+						data-dragging={isDragging ? "true" : "false"}
 					>
-						<S.DragHandle $dragging={isDragging}>
-							<S.DragIcon>⋮⋮</S.DragIcon>
-							<S.PanelTitle>{title}</S.PanelTitle>
-							{isOver && canDropHere && (
-								<S.DropIndicator>Drop here to swap panels</S.DropIndicator>
-							)}
-						</S.DragHandle>
-					</div>
+						<S.DragIcon>⋮⋮</S.DragIcon>
+						<S.PanelTitle>{title}</S.PanelTitle>
+						{isOver && canDropHere && (
+							<S.DropIndicator>Drop here to swap panels</S.DropIndicator>
+						)}
+					</S.DragHandle>
 				)}
 				<S.PanelContent>{children}</S.PanelContent>
 			</S.Panel>

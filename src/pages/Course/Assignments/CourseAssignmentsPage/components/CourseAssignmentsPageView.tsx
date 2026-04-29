@@ -37,7 +37,9 @@ export default function CourseAssignmentsPageView(
 				<S.Content $isCollapsed={d.isSidebarCollapsed}>
 					<S.ErrorMessage>
 						<p>{d.error}</p>
-						<button onClick={d.fetchAssignmentsData}>다시 시도</button>
+						<button type="button" onClick={d.fetchAssignmentsData}>
+							다시 시도
+						</button>
 					</S.ErrorMessage>
 				</S.Content>
 			</S.Container>
@@ -70,13 +72,25 @@ export default function CourseAssignmentsPageView(
 						<S.AssignmentsTitle>과제</S.AssignmentsTitle>
 						<S.AssignmentsSummary>
 							과제 {d.assignments.length} · 문제{" "}
-							{d.assignments.reduce((sum, a) => sum + a.totalProblems, 0)}
+							{d.assignments.reduce((sum, a) => sum + a.totalProblems, 0)} · 기본: 최근 추가순
 						</S.AssignmentsSummary>
+						<S.SortSelect
+							value={d.assignmentSort}
+							onChange={(e) =>
+								d.setAssignmentSort(
+									e.target.value as "recentFirst" | "oldestFirst" | "unsolvedFirst",
+								)
+							}
+						>
+							<option value="recentFirst">최근 추가순</option>
+							<option value="oldestFirst">오래된 과제순</option>
+							<option value="unsolvedFirst">미해결 문제 많은순</option>
+						</S.SortSelect>
 					</S.AssignmentsHeader>
 
 					<S.AssignmentsAccordion>
-						{d.assignments.length > 0 ? (
-							d.assignments.map((assignment, index) => (
+						{d.sortedAssignments.length > 0 ? (
+							d.sortedAssignments.map((assignment, index) => (
 								<S.AccordionItem 
 									key={assignment.id}
 									$inactive={d.isManager && assignment.active === false}
@@ -144,26 +158,10 @@ export default function CourseAssignmentsPageView(
 											<S.AccordionProblemsSection>
 												<S.ProblemsSectionRow>
 													<S.ProblemsSubtitle>문제</S.ProblemsSubtitle>
-													{assignment.problems && assignment.problems.length > 0 && (
-														<S.ProblemSortRow>
-															<S.ProblemSortSelect
-																value={d.problemSortByAssignmentId?.[assignment.id] ?? "original"}
-																onChange={(e) => {
-																	const v = e.target.value as "original" | "solvedFirst" | "unsolvedFirst";
-																	d.setProblemSortForAssignment?.(assignment.id, v);
-																}}
-																onClick={(e) => e.stopPropagation()}
-															>
-																<option value="original">기본</option>
-																<option value="unsolvedFirst">미해결 문제</option>
-																<option value="solvedFirst">해결 문제</option>
-															</S.ProblemSortSelect>
-														</S.ProblemSortRow>
-													)}
 												</S.ProblemsSectionRow>
 												{assignment.problems && assignment.problems.length > 0 ? (
 													<S.AccordionProblemsList>
-														{(d.getSortedProblems?.(assignment) ?? assignment.problems).map((problem) => {
+														{assignment.problems.map((problem) => {
 															const badgeType =
 																problem.status === "ACCEPTED"
 																	? problem.isOnTime === false

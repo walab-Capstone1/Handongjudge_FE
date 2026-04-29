@@ -23,7 +23,7 @@ export const EditorWrapper = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #000000;
+  background: #0d1117;
   border-bottom: 1px solid #15181c;
   min-height: 0;
 
@@ -45,16 +45,20 @@ export const EditorHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   min-height: 48px;
   box-sizing: border-box;
   flex-shrink: 0;
   flex-grow: 0;
-  max-height: 48px;
 
   .problem-solve-page.light & {
     color: #0969da;
     background: linear-gradient(90deg, rgba(9, 105, 218, 0.1) 0%, rgba(9, 105, 218, 0.05) 100%);
     border-bottom: 1px solid #e1e4e8;
+  }
+
+  @media (max-width: 1200px) {
+    row-gap: 8px;
   }
 `;
 
@@ -195,6 +199,12 @@ export const EditorHeaderRight = styled.div`
   gap: 12px;
   position: relative;
   z-index: 100;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  @media (max-width: 1200px) {
+    gap: 8px;
+  }
 `;
 
 export const DueDateInfo = styled.div`
@@ -233,6 +243,7 @@ export const SubmitButton = styled.button<{ $variant?: "test" | "save" }>`
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
 
   ${(props) =>
 		props.$variant === "test" &&
@@ -259,6 +270,11 @@ export const SubmitButton = styled.button<{ $variant?: "test" | "save" }>`
     background-color: #6c757d;
     color: #ffffff;
   }
+
+  @media (max-width: 1200px) {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
 `;
 
 export const SaveWarning = styled.span`
@@ -272,6 +288,10 @@ export const SaveReminder = styled.span`
   font-weight: 700;
   color: #ff9f1c;
   white-space: nowrap;
+
+  @media (max-width: 1200px) {
+    font-size: 11px;
+  }
 `;
 
 export const BlinkingSaveButton = styled(SubmitButton)`
@@ -293,7 +313,7 @@ export const BlinkingSaveButton = styled(SubmitButton)`
 export const EditorScrollArea = styled.div`
   flex: 1;
   overflow: auto;
-  background-color: #000000;
+  background-color: #0d1117;
 
   .problem-solve-page.light & {
     background-color: #ffffff;
