@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import * as S from "../styles";
 import type { ProblemGrade } from "../types";
 import {
@@ -16,6 +17,8 @@ type Props = {
 	fallbackPoints: number;
 	dueAt?: string;
 	showLateOnly?: boolean;
+	/** 상태 배지 오른쪽(미제출 등 옆) — 과제 성적: 코드·반려 모달 */
+	trailingActions?: ReactNode;
 };
 
 const LEGEND: { kind: GradeProblemCellKind; caption: string }[] = [
@@ -117,6 +120,7 @@ export function GradeProblemCellDisplay({
 	fallbackPoints,
 	dueAt,
 	showLateOnly = false,
+	trailingActions,
 }: Props) {
 	const toLocalDate = (raw?: string): Date | null => {
 		if (!raw) return null;
@@ -206,9 +210,13 @@ export function GradeProblemCellDisplay({
 
 	return (
 		<S.ScoreDisplay title={title}>
-			<S.GradeCellStatusBadge $kind={kindToUi(kind)}>
-				{GRADE_CELL_LABEL[kind]}
-			</S.GradeCellStatusBadge>
+			<S.GradeCellTopRow>
+				<S.GradeCellStatusBadge $kind={kindToUi(kind)}>
+					{GRADE_CELL_LABEL[kind]}
+				</S.GradeCellStatusBadge>
+				{problem?.rejected ? <S.RejectedTag>반려</S.RejectedTag> : null}
+				{trailingActions}
+			</S.GradeCellTopRow>
 			{problem?.submitted ? (
 				<>
 					<S.GradeCellScoreMeta>{testCaseLabel}</S.GradeCellScoreMeta>

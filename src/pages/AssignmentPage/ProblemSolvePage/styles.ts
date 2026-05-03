@@ -128,28 +128,35 @@ export const LoadingContainer = styled.div<{ $theme: "light" | "dark" }>`
 `;
 
 export const Header = styled.div<{ $theme: "light" | "dark" }>`
-	padding: 12px 24px;
+	padding: 8px 12px;
 	border-bottom: 1px solid ${(p) => (p.$theme === "light" ? "#e1e4e8" : "#30363d")};
 	background-color: ${(p) => (p.$theme === "light" ? "#ffffff" : "#161b22")};
 	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	gap: 16px;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 8px;
+	flex-wrap: nowrap;
+	min-width: 0;
+	box-sizing: border-box;
 `;
 
-export const HeaderMain = styled.div`
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
+/** 한 줄 헤더에서 경로 영역 — 길면 가로 스크롤 */
+export const HeaderBreadcrumbWrap = styled.div`
+	flex: 1 1 0;
 	min-width: 0;
-	flex: 1;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
 `;
 
 export const ProblemToolbarRow = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	flex-wrap: wrap;
+	gap: 6px;
+	flex-wrap: nowrap;
+	flex: 0 1 auto;
+	min-width: 0;
 `;
 
 export const ProblemIndexHint = styled.span<{ $theme: "light" | "dark" }>`
@@ -185,7 +192,9 @@ export const PrevNextButton = styled.button<{
 export const Breadcrumb = styled.div`
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 6px;
+	font-size: 13px;
+	white-space: nowrap;
 `;
 
 export const BreadcrumbLink = styled.button`
@@ -213,6 +222,7 @@ export const Controls = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	flex-shrink: 0;
 `;
 
 export const ThemeButton = styled.button<{
@@ -369,3 +379,4 @@ export const UnsavedModalPrimaryButton = styled.button<{
 	cursor: pointer;
 	font-size: 13px;
 `;
+

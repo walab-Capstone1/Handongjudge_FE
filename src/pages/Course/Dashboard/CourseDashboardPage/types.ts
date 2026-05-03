@@ -95,6 +95,8 @@ export interface Notification {
 	isRead: boolean;
 	assignmentId?: number;
 	assignmentTitle?: string;
+	/** 과제 문제 반려 알림에서 과제 목록으로 갈 때 강조할 문제 ID */
+	relatedProblemId?: number;
 	noticeId?: number;
 	noticeTitle?: string;
 	questionId?: number;
