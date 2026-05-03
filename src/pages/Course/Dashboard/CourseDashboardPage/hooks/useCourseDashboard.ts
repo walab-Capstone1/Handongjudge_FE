@@ -12,6 +12,7 @@ import type {
 	Notification,
 	TransformedNotification,
 	SectionNewItems,
+	StudyProgressSummary,
 } from "../types";
 import { calculateDDay } from "../utils/dateUtils";
 import { extractEnrollmentCode } from "../utils/enrollmentUtils";
@@ -49,6 +50,16 @@ export function useCourseDashboard() {
 		[],
 	);
 	const [sectionQuizzes, setSectionQuizzes] = useState<SectionQuiz[]>([]);
+	const [studyProgress, setStudyProgress] = useState<StudyProgressSummary>({
+		loading: true,
+		error: false,
+		assignmentUpcomingCount: 0,
+		assignmentSolvedProblems: 0,
+		assignmentTotalProblems: 0,
+		quizCount: 0,
+		quizSolvedProblems: 0,
+		quizTotalProblems: 0,
+	});
 
 	const publicSections: CourseCardData[] = [];
 
@@ -367,6 +378,127 @@ export function useCourseDashboard() {
 		fetchSectionQuizzes,
 	]);
 
+	useEffect(() => {
+		const user = auth.user;
+		if (sectionId == null || user?.id == null) {
+			setStudyProgress((prev) => ({ ...prev, loading: false }));
+			return;
+		}
+		const userId = user.id;
+		let cancelled = false;
+		setStudyProgress((prev) => ({ ...prev, loading: true, error: false }));
+
+		const run = async () => {
+			try {
+				const now = Date.now();
+				const [assignRes, quizRes] = await Promise.all([
+					APIService.getAssignmentsBySection(sectionId),
+					APIService.getQuizzesBySection(sectionId),
+				]);
+				const assignmentsRaw =
+					(assignRes as { data?: unknown })?.data ?? assignRes ?? [];
+				const quizzesRaw = (quizRes as { data?: unknown })?.data ?? quizRes ?? [];
+				const assignmentsList = Array.isArray(assignmentsRaw)
+					? assignmentsRaw
+					: [];
+				const quizzesList = Array.isArray(quizzesRaw) ? quizzesRaw : [];
+
+				const upcoming = assignmentsList.filter((a: { endDate?: string }) => {
+					if (!a?.endDate) return false;
+					const t = new Date(a.endDate).getTime();
+					return !Number.isNaN(t) && t >= now;
+				});
+
+				const assignmentChunks = await Promise.all(
+					upcoming.map(async (a: { id: number }) => {
+						try {
+							const [problemsRes, statusRes] = await Promise.all([
+								APIService.getAssignmentProblems(sectionId, a.id),
+								APIService.getStudentAssignmentProblemsStatus(
+									userId,
+									sectionId,
+									a.id,
+								),
+							]);
+							const problemsList =
+								(problemsRes as { data?: unknown })?.data ?? problemsRes ?? [];
+							const problemsStatus =
+								(statusRes as { data?: unknown })?.data ?? statusRes ?? [];
+							const total = Array.isArray(problemsList) ? problemsList.length : 0;
+							const solved = Array.isArray(problemsStatus)
+								? problemsStatus.filter(
+										(s: { status?: string }) =>
+											s.status === "ACCEPTED" || s.status === "SUBMITTED",
+									).length
+								: 0;
+							return { total, solved };
+						} catch {
+							return { total: 0, solved: 0 };
+						}
+					}),
+				);
+				const assignmentTotalProblems = assignmentChunks.reduce(
+					(s, x) => s + x.total,
+					0,
+				);
+				const assignmentSolvedProblems = assignmentChunks.reduce(
+					(s, x) => s + x.solved,
+					0,
+				);
+
+				const quizChunks = await Promise.all(
+					quizzesList.map(async (q: { id: number }) => {
+						try {
+							const statusRes = await APIService.getQuizProblemStatuses(
+								sectionId,
+								q.id,
+							);
+							const statuses =
+								(statusRes as { data?: unknown })?.data ?? statusRes ?? [];
+							if (!Array.isArray(statuses)) return { total: 0, solved: 0 };
+							const total = statuses.length;
+							const solved = statuses.filter(
+								(s: { submitted?: boolean; result?: string | null }) =>
+									Boolean(s.submitted) && s.result === "AC",
+							).length;
+							return { total, solved };
+						} catch {
+							return { total: 0, solved: 0 };
+						}
+					}),
+				);
+				const quizTotalProblems = quizChunks.reduce((s, x) => s + x.total, 0);
+				const quizSolvedProblems = quizChunks.reduce((s, x) => s + x.solved, 0);
+
+				if (!cancelled) {
+					setStudyProgress({
+						loading: false,
+						error: false,
+						assignmentUpcomingCount: upcoming.length,
+						assignmentSolvedProblems,
+						assignmentTotalProblems,
+						quizCount: quizzesList.length,
+						quizSolvedProblems,
+						quizTotalProblems,
+					});
+				}
+			} catch {
+				if (!cancelled) {
+					setStudyProgress((prev) => ({
+						...prev,
+						loading: false,
+						error: true,
+					}));
+				}
+			}
+		};
+
+		void run();
+		return () => {
+			cancelled = true;
+		};
+	}, [sectionId, auth.user]);
+
 	const handleMenuClick = useCallback((_menuId: string) => {}, []);
 
 	const handleQuizSummaryClick = useCallback(
@@ -518,6 +650,7 @@ export function useCourseDashboard() {
 		handleEnrollByCode,
 		calculateDDay,
 		navigate,
+		studyProgress,
 	};
 }
 

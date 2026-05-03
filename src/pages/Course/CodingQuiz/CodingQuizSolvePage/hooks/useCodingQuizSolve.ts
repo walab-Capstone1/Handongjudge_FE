@@ -55,8 +55,8 @@ export function useCodingQuizSolve() {
 	const [isLoading, setIsLoading] = useState(true);
 	// Phase 2 폴링 타이머 ref (컴포넌트 언마운트 또는 문제 전환 시 정리)
 	const pollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
-	const [verticalSizes, setVerticalSizes] = useState([70, 30]);
+	const [horizontalSizes, setHorizontalSizes] = useState([28, 72]);
+	const [verticalSizes, setVerticalSizes] = useState([82, 18]);
 	const [isTimeUp, setIsTimeUp] = useState(false);
 	const [panelLayout, setPanelLayout] = useState<PanelLayout>({
 		left: "description",
@@ -801,12 +801,6 @@ export function useCodingQuizSolve() {
 		await pollUntilResult("output");
 	}, [pollUntilResult]);
 
-	const handleLanguageChange = useCallback((newLang: string) => {
-		if (newLang !== "c") return;
-		setLanguage(newLang);
-		setCode(getDefaultCode(newLang));
-	}, []);
-
 	const handleHorizontalDragEnd = useCallback((sizes: number[]) => {
 		setHorizontalSizes(sizes);
 	}, []);
@@ -866,7 +860,6 @@ export function useCodingQuizSolve() {
 		handleSubmit,
 		handleSubmitWithOutput,
 		saveToBackend,
-		handleLanguageChange,
 		handleHorizontalDragEnd,
 		handleVerticalDragEnd,
 		gutterStyleCallback,

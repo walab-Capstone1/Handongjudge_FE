@@ -144,6 +144,15 @@ export default function QuestionDetailPageView(
 							<span className="author">
 								{question.authorDisplayName ?? "익명"}
 							</span>
+							{question.isAuthor && <S.MyPostBadge>내 글</S.MyPostBadge>}
+							{d.isSectionStaff && question.authorRealNameForStaff ? (
+								<>
+									<span className="separator">·</span>
+									<S.StaffIdentityNote>
+										실명: {question.authorRealNameForStaff}
+									</S.StaffIdentityNote>
+								</>
+							) : null}
 							<span className="separator">·</span>
 							<span className="date">{formatDate(question.createdAt)}</span>
 							<span className="separator">·</span>
@@ -179,36 +188,9 @@ export default function QuestionDetailPageView(
 					</S.QuestionCard>
 
 					<S.CommentsSection>
-					<S.CommentsTitle>댓글 {d.comments.length}개</S.CommentsTitle>
-
-					<S.CommentForm onSubmit={d.handleSubmitComment}>
-						<S.EditorWrapper>
-							<TipTapEditor
-								content={d.commentContent}
-								onChange={(html) => d.setCommentContent(html)}
-								placeholder="댓글을 작성하세요..."
-							/>
-						</S.EditorWrapper>
-						<S.CommentFormFooter>
-							<S.CommentOption>
-								<input
-									type="checkbox"
-									checked={d.commentAnonymous}
-									onChange={(e) => d.setCommentAnonymous(e.target.checked)}
-									aria-label="익명으로 작성"
-								/>
-								<span>익명으로 작성</span>
-							</S.CommentOption>
-							<S.BtnSubmitComment
-								type="submit"
-								disabled={d.submittingComment}
-							>
-								{d.submittingComment ? "작성 중..." : "댓글 작성"}
-							</S.BtnSubmitComment>
-						</S.CommentFormFooter>
-					</S.CommentForm>
-
-						<S.CommentsList>
+						<S.CommentsListBlock>
+							<S.CommentsListTitle>댓글 {d.comments.length}개</S.CommentsListTitle>
+							<S.CommentsList>
 							{d.comments.length === 0 ? (
 								<S.EmptyComments>
 									<p>아직 댓글이 없습니다</p>
@@ -216,21 +198,24 @@ export default function QuestionDetailPageView(
 								</S.EmptyComments>
 							) : (
 								d.comments.map((comment) => (
-									<S.CommentCard
-										key={comment.id}
-										$accepted={comment.isAccepted}
-									>
+									<S.CommentCard key={comment.id}>
 										<S.CommentHeader>
 											<S.CommentAuthorInfo>
 												<S.CommentAuthor>
 													{comment.authorDisplayName ?? "익명"}
 												</S.CommentAuthor>
-												{comment.isInstructorAnswer && (
-													<S.BadgeInstructor>교수</S.BadgeInstructor>
+												{comment.isAuthor && (
+													<S.MyPostBadge>내 글</S.MyPostBadge>
 												)}
-												{comment.isAccepted && (
-													<S.BadgeAccepted>채택됨</S.BadgeAccepted>
-												)}
+												{d.isSectionStaff && comment.authorRealNameForStaff ? (
+													<S.StaffIdentityNote>
+														실명: {comment.authorRealNameForStaff}
+													</S.StaffIdentityNote>
+												) : null}
+												{comment.isInstructorAnswer &&
+													!comment.isAnonymous && (
+														<S.BadgeInstructor>교수/TA</S.BadgeInstructor>
+													)}
 											</S.CommentAuthorInfo>
 											<S.CommentDate>
 												{formatDate(comment.createdAt)}
@@ -262,34 +247,46 @@ export default function QuestionDetailPageView(
 													삭제
 												</S.BtnDeleteComment>
 											)}
-
-											{d.canManageAccept && (
-												<>
-													{!comment.isAccepted ? (
-														<S.BtnAccept
-															type="button"
-															onClick={() => d.handleAcceptComment(comment.id)}
-														>
-															채택하기
-														</S.BtnAccept>
-													) : (
-														<S.BtnUnaccept
-															type="button"
-															onClick={() =>
-																d.handleUnacceptComment(comment.id)
-															}
-														>
-															채택 해제
-														</S.BtnUnaccept>
-													)}
-												</>
-											)}
 										</S.CommentActions>
 									</S.CommentCard>
 								))
 							)}
-						</S.CommentsList>
-					</S.CommentsSection>
+							</S.CommentsList>
+						</S.CommentsListBlock>
+
+						<S.CommentComposerBlock>
+							<S.CommentComposerTitle>댓글 작성</S.CommentComposerTitle>
+							<S.CommentForm onSubmit={d.handleSubmitComment}>
+								<S.EditorWrapper>
+									<TipTapEditor
+										content={d.commentContent}
+										onChange={(html) => d.setCommentContent(html)}
+										placeholder="댓글을 작성하세요..."
+									/>
+								</S.EditorWrapper>
+								<S.CommentFormFooter>
+									<S.CommentOption>
+										<input
+											type="checkbox"
+											checked={d.commentAnonymous}
+											onChange={(e) => d.setCommentAnonymous(e.target.checked)}
+											aria-label="익명으로 작성"
+										/>
+										<span>익명으로 작성</span>
+										<S.CommentOptionHint>
+											(이 글에서 익명 1, 2… 순으로 표시)
+										</S.CommentOptionHint>
+									</S.CommentOption>
+									<S.BtnSubmitComment
+										type="submit"
+										disabled={d.submittingComment}
+									>
+										{d.submittingComment ? "작성 중..." : "댓글 작성"}
+									</S.BtnSubmitComment>
+								</S.CommentFormFooter>
+							</S.CommentForm>
+						</S.CommentComposerBlock>
+						</S.CommentsSection>
 				</S.Body>
 			</S.Content>
 		</S.Container>

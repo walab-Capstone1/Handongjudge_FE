@@ -239,6 +239,69 @@ const CourseDashboardView: React.FC<CourseDashboardViewProps> = (d) => {
 								)}
 							</S.ContentBox>
 						</S.Subsection>
+
+						{/* 학습 진행 카드 — 일시 비표시
+						<S.Subsection>
+							<S.SubsectionTitle>학습 진행</S.SubsectionTitle>
+							<S.ContentBox>
+								{(() => {
+									const sp = d.studyProgress;
+									if (sp.loading) {
+										return (
+											<S.NoContent>
+												<span>진행 현황을 불러오는 중입니다.</span>
+											</S.NoContent>
+										);
+									}
+									if (sp.error) {
+										return (
+											<S.NoContent>
+												<span>진행 현황을 불러오지 못했습니다.</span>
+											</S.NoContent>
+										);
+									}
+									const assignPct =
+										sp.assignmentTotalProblems > 0
+											? Math.round(
+													(sp.assignmentSolvedProblems /
+														sp.assignmentTotalProblems) *
+														100,
+												)
+											: 0;
+									const quizPct =
+										sp.quizTotalProblems > 0
+											? Math.round(
+													(sp.quizSolvedProblems / sp.quizTotalProblems) * 100,
+												)
+											: 0;
+									return (
+										<S.StudyProgressRows>
+											<S.StudyProgressLine>
+												<strong>과제</strong> (마감 전{" "}
+												{sp.assignmentUpcomingCount}개): 문제{" "}
+												{sp.assignmentSolvedProblems}/
+												{sp.assignmentTotalProblems} 제출 ·{" "}
+												{sp.assignmentTotalProblems > 0 ? `${assignPct}%` : "—"}
+												<br />
+												<S.StudyProgressMuted>
+													마감일이 지난 과제는 집계에서 제외됩니다.
+												</S.StudyProgressMuted>
+											</S.StudyProgressLine>
+											<S.StudyProgressLine>
+												<strong>코딩 테스트</strong> (전체 {sp.quizCount}개): 정답
+												문제 {sp.quizSolvedProblems}/{sp.quizTotalProblems} ·{" "}
+												{sp.quizTotalProblems > 0 ? `${quizPct}%` : "—"}
+												<br />
+												<S.StudyProgressMuted>
+													퀴즈별 채점 결과가 AC인 문제만 &quot;정답&quot;으로 집계합니다.
+												</S.StudyProgressMuted>
+											</S.StudyProgressLine>
+										</S.StudyProgressRows>
+									);
+								})()}
+							</S.ContentBox>
+						</S.Subsection>
+						*/}
 					</S.LeftColumn>
 
 					<S.RightColumn>

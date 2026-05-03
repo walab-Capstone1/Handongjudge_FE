@@ -163,6 +163,28 @@ export const OptionDescription = styled.p`
   color: #666;
 `;
 
+export const AnonymousChoiceRow = styled.div`
+  margin: 10px 0 0 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const RadioChoice = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+
+  input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+`;
+
 export const FormActions = styled.div`
   display: flex;
   justify-content: flex-end;

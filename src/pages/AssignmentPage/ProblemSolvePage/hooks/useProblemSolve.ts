@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { authState } from "../../../../recoil/atoms";
@@ -19,6 +19,9 @@ export type PanelLayout = {
 };
 type SessionSaveStatus = "idle" | "saving" | "saved" | "error";
 type CodeLoadSource = "session" | "backend" | "default" | null;
+type AssignmentProblemSummary = { id: number; title: string; order: number };
+type SectionAssignmentSummary = { id: number; title: string };
+type PendingNavigation = { assignmentId: string; problemId: number };
 
 export function useProblemSolve() {
 	const { assignmentId, problemId, sectionId } = useParams<{
@@ -63,8 +66,8 @@ export function useProblemSolve() {
 	const [isDeadlinePassed, setIsDeadlinePassed] = useState(false);
 	const [isAssignmentActive, setIsAssignmentActive] = useState(true);
 	const navigate = useNavigate();
-	const [horizontalSizes, setHorizontalSizes] = useState([40, 60]);
-	const [verticalSizes, setVerticalSizes] = useState([70, 30]);
+	const [horizontalSizes, setHorizontalSizes] = useState([28, 72]);
+	const [verticalSizes, setVerticalSizes] = useState([82, 18]);
 	const [panelLayout, setPanelLayout] = useState<PanelLayout>({
 		left: "description",
 		topRight: "editor",
@@ -76,12 +79,21 @@ export function useProblemSolve() {
 	const [codeLoadSource, setCodeLoadSource] = useState<CodeLoadSource>(null);
 	const [sessionCleared, setSessionCleared] = useState(false);
 	const [userRole, setUserRole] = useState<string | null>(null);
+	const [problems, setProblems] = useState<AssignmentProblemSummary[]>([]);
+	const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
+	const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+	const [isProblemChanging, setIsProblemChanging] = useState(false);
+	const [sectionAssignments, setSectionAssignments] = useState<
+		SectionAssignmentSummary[]
+	>([]);
 	const auth = useRecoilValue(authState);
 
 	// 마지막으로 서버에 저장된 코드 (hasUnsavedChanges 판단 기준)
 	const lastSavedCodeRef = useRef<string>("");
 	// IndexedDB 디바운스 저장 타이머
 	const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+	const pendingNavigationRef = useRef<PendingNavigation | null>(null);
 
 	useEffect(() => {
 		const loadAllInfo = async () => {
@@ -101,18 +113,34 @@ export function useProblemSolve() {
 					// 역할 확인 실패해도 계속 진행
 				}
 
-				const [problemInfo, sectionInfoRes, assignmentInfoRes] =
+				const [problemInfo, sectionInfoRes, assignmentInfoRes, assignmentProblemsRes] =
 					await Promise.all([
 						apiService.getProblemInfo(problemId),
 						apiService.getSectionInfo(sectionId),
 						apiService.getAssignmentInfoBySection(sectionId, assignmentId),
+						apiService.getAssignmentProblems(sectionId, assignmentId),
 					]);
 				const problemData = problemInfo?.data ?? problemInfo;
 				const sectionData = sectionInfoRes?.data ?? sectionInfoRes;
 				const assignmentData = assignmentInfoRes?.data ?? assignmentInfoRes;
+				const assignmentProblemsRaw =
+					(assignmentProblemsRes as { problems?: unknown[] })?.problems ??
+					(assignmentProblemsRes as { data?: unknown[] })?.data ??
+					(Array.isArray(assignmentProblemsRes) ? assignmentProblemsRes : []);
+				const assignmentProblems: AssignmentProblemSummary[] = (
+					assignmentProblemsRaw as Array<Record<string, unknown>>
+				)
+					.map((p, idx) => ({
+						id: Number(p.id ?? p.problemId),
+						title: String(p.title ?? p.problemTitle ?? `문제 ${idx + 1}`),
+						order: Number(p.order ?? p.problemOrder ?? idx + 1),
+					}))
+					.filter((p) => Number.isFinite(p.id))
+					.sort((a, b) => a.order - b.order);
 				setCurrentProblem(problemData as Problem);
 				setSectionInfo(sectionData);
 				setAssignmentInfo(assignmentData);
+				setProblems(assignmentProblems);
 
 				// 과제 비활성화 체크 및 리다이렉트
 				const active = assignmentData?.active ?? true;
@@ -162,6 +190,31 @@ export function useProblemSolve() {
 		};
 		loadAllInfo();
 	}, [problemId, sectionId, assignmentId, navigate, auth.loading]);
+
+	useEffect(() => {
+		if (!sectionId || auth.loading) return;
+		let cancelled = false;
+		(async () => {
+			try {
+				const res = await apiService.getAssignmentsBySection(sectionId);
+				const raw = (res as { data?: unknown })?.data ?? res ?? [];
+				const arr = Array.isArray(raw) ? raw : [];
+				const list: SectionAssignmentSummary[] = arr
+					.map((a: Record<string, unknown>, idx: number) => ({
+						id: Number(a.id),
+						title: String(a.title ?? `과제 ${idx + 1}`),
+					}))
+					.filter((x) => Number.isFinite(x.id))
+					.sort((a, b) => a.id - b.id);
+				if (!cancelled) setSectionAssignments(list);
+			} catch {
+				if (!cancelled) setSectionAssignments([]);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [sectionId, auth.loading]);
 
 	useEffect(() => {
 		const initializeSession = async () => {
@@ -405,11 +458,6 @@ export function useProblemSolve() {
 		[],
 	);
 
-	const handleLanguageChange = useCallback((newLang: string) => {
-		setLanguage(newLang);
-		setCode(getDefaultCode(newLang));
-	}, []);
-
 	const handleSubmit = useCallback(async () => {
 		if (!code.trim()) {
 			alert("코드를 작성해주세요.");
@@ -584,6 +632,136 @@ export function useProblemSolve() {
 		setVerticalSizes(sizes);
 	}, []);
 
+	const doNavigateToProblem = useCallback(
+		(targetAssignmentId: string, targetProblemId: number) => {
+			if (!sectionId) return;
+			setIsProblemChanging(true);
+			navigate(
+				`/sections/${sectionId}/assignments/${targetAssignmentId}/detail/problems/${targetProblemId}`,
+			);
+			setTimeout(() => setIsProblemChanging(false), 150);
+		},
+		[sectionId, navigate],
+	);
+
+	const requestNavigateToProblem = useCallback(
+		(targetAssignmentId: string, targetProblemId: number) => {
+			if (!assignmentId || isProblemChanging) return;
+			if (
+				targetAssignmentId === assignmentId &&
+				targetProblemId === Number(problemId)
+			)
+				return;
+			const hasUnsaved =
+				code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+			if (hasUnsaved) {
+				pendingNavigationRef.current = {
+					assignmentId: targetAssignmentId,
+					problemId: targetProblemId,
+				};
+				setShowUnsavedModal(true);
+				return;
+			}
+			doNavigateToProblem(targetAssignmentId, targetProblemId);
+		},
+		[
+			assignmentId,
+			problemId,
+			isProblemChanging,
+			code,
+			language,
+			doNavigateToProblem,
+		],
+	);
+
+	const handleProblemChange = useCallback(
+		(problemIdToMove: number) => {
+			if (!assignmentId) return;
+			requestNavigateToProblem(assignmentId, problemIdToMove);
+		},
+		[assignmentId, requestNavigateToProblem],
+	);
+
+	const handleSelectOtherAssignment = useCallback(
+		async (targetAssignmentId: number) => {
+			if (!sectionId || !assignmentId) return;
+			if (Number(targetAssignmentId) === Number(assignmentId)) {
+				setIsAssignmentModalOpen(false);
+				return;
+			}
+			try {
+				const res = await apiService.getAssignmentProblems(
+					sectionId,
+					String(targetAssignmentId),
+				);
+				const raw =
+					(res as { problems?: unknown[] })?.problems ??
+					(res as { data?: unknown[] })?.data ??
+					(Array.isArray(res) ? res : []);
+				const arr = Array.isArray(raw) ? raw : [];
+				const mapped = arr
+					.map((p: Record<string, unknown>, idx: number) => ({
+						id: Number(p.id ?? p.problemId),
+						order: Number(p.order ?? p.problemOrder ?? idx + 1),
+					}))
+					.filter((p) => Number.isFinite(p.id))
+					.sort((a, b) => a.order - b.order);
+				if (mapped.length === 0) {
+					alert("이 과제에 등록된 문제가 없습니다.");
+					return;
+				}
+				const firstId = mapped[0].id;
+				setIsAssignmentModalOpen(false);
+				requestNavigateToProblem(String(targetAssignmentId), firstId);
+			} catch {
+				alert("과제 문제 목록을 불러오지 못했습니다.");
+			}
+		},
+		[sectionId, assignmentId, requestNavigateToProblem],
+	);
+
+	const problemNav = useMemo(() => {
+		const cid = problemId ? Number(problemId) : NaN;
+		const idx = problems.findIndex((p) => p.id === cid);
+		if (idx < 0 || problems.length === 0) {
+			return {
+				prevProblemId: null as number | null,
+				nextProblemId: null as number | null,
+				indexLabel: "",
+			};
+		}
+		return {
+			prevProblemId: idx > 0 ? problems[idx - 1].id : null,
+			nextProblemId:
+				idx < problems.length - 1 ? problems[idx + 1].id : null,
+			indexLabel: `${idx + 1} / ${problems.length}`,
+		};
+	}, [problems, problemId]);
+
+	const handleUnsavedModalSave = useCallback(async () => {
+		setShowUnsavedModal(false);
+		await saveToBackend(false);
+		const pending = pendingNavigationRef.current;
+		pendingNavigationRef.current = null;
+		if (pending != null) {
+			doNavigateToProblem(pending.assignmentId, pending.problemId);
+		}
+	}, [saveToBackend, doNavigateToProblem]);
+
+	const handleUnsavedModalSkip = useCallback(() => {
+		setShowUnsavedModal(false);
+		const pending = pendingNavigationRef.current;
+		pendingNavigationRef.current = null;
+		if (pending != null) {
+			doNavigateToProblem(pending.assignmentId, pending.problemId);
+		}
+	}, [doNavigateToProblem]);
+
+	const handleUnsavedModalCancel = useCallback(() => {
+		setShowUnsavedModal(false);
+		pendingNavigationRef.current = null;
+	}, []);
+
 	const gutterStyleCallback = useCallback(
 		(_dim: "width" | "height", _gutterSize: number, _index: number) => ({
 			backgroundColor: theme === "dark" ? "#2d3748" : "#cbd5e0",
@@ -619,8 +797,17 @@ export function useProblemSolve() {
 		horizontalSizes,
 		verticalSizes,
 		panelLayout,
+		problems,
+		isProblemModalOpen,
+		isProblemChanging,
+		setIsProblemModalOpen,
 		handlePanelMove,
-		handleLanguageChange,
+		handleProblemChange,
+		problemNav,
+		sectionAssignments,
+		isAssignmentModalOpen,
+		setIsAssignmentModalOpen,
+		handleSelectOtherAssignment,
 		handleSubmit,
 		handleSubmitWithOutput,
 		saveToSession,
@@ -633,5 +820,9 @@ export function useProblemSolve() {
 		isAssignmentActive,
 		userRole,
 		hasUnsavedChanges,
+		showUnsavedModal,
+		handleUnsavedModalSave,
+		handleUnsavedModalSkip,
+		handleUnsavedModalCancel,
 	};
 }
