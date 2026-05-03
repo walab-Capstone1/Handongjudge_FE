@@ -1,4 +1,10 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import {
+	useState,
+	useEffect,
+	useCallback,
+	useMemo,
+	useRef,
+} from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
@@ -34,6 +40,12 @@ export function useCourseAssignmentsPage() {
 	const [expandedAssignmentIds, setExpandedAssignmentIds] = useState<number[]>(
 		[],
 	);
+	const highlightProblemId = useMemo(() => {
+		const raw = searchParams.get("highlightProblem");
+		if (!raw) return null;
+		const n = Number.parseInt(raw, 10);
+		return Number.isFinite(n) ? n : null;
+	}, [searchParams]);
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const [isManager, setIsManager] = useState(false);
 	/** 알림 등에서 assignmentId 쿼리로 진입 시 한 번만 펼치기 위해 적용한 URL 값 (접은 뒤 다시 펼쳐지지 않도록) */
@@ -138,6 +150,9 @@ export function useCourseAssignmentsPage() {
 										isOnTime?: boolean;
 										submittedAt?: string;
 										minutesLate?: number;
+										gradeComment?: string | null;
+										gradeRejected?: boolean;
+										gradeRejectedAt?: string;
 									} | undefined;
 									const raw = statusEntry
 										? statusEntry.status
@@ -155,6 +170,33 @@ export function useCourseAssignmentsPage() {
 												? statusEntry.submittedAt
 												: new Date(statusEntry.submittedAt).toISOString()
 											: undefined;
+									let gradeRejectedAtStr: string | undefined;
+									const rawRejectedAt = statusEntry?.gradeRejectedAt;
+									if (rawRejectedAt != null) {
+										if (typeof rawRejectedAt === "string") {
+											gradeRejectedAtStr = rawRejectedAt;
+										} else if (
+											typeof rawRejectedAt === "object" &&
+											Array.isArray(rawRejectedAt)
+										) {
+											// Jackson 일부 설정에서 배열로 올 수 있음
+											const [y, mo, d, h, mi, s] = rawRejectedAt as number[];
+											if (y != null && mo != null && d != null) {
+												const dt = new Date(
+													y,
+													(mo ?? 1) - 1,
+													d ?? 1,
+													h ?? 0,
+													mi ?? 0,
+													s ?? 0,
+												);
+												if (!Number.isNaN(dt.getTime())) {
+													gradeRejectedAtStr = dt.toISOString();
+												}
+											}
+										}
+									}
+
 									return {
 										id: problem.id,
 										title: problem.title,
@@ -164,6 +206,12 @@ export function useCourseAssignmentsPage() {
 										isOnTime: statusEntry?.isOnTime,
 										submittedAt,
 										minutesLate: statusEntry?.minutesLate,
+										gradeRejected: statusEntry?.gradeRejected === true,
+										gradeRejectedAt: gradeRejectedAtStr,
+										gradeComment:
+											statusEntry?.gradeComment != null
+												? String(statusEntry.gradeComment)
+												: null,
 									};
 								},
 							);
@@ -220,6 +268,17 @@ export function useCourseAssignmentsPage() {
 	}, [sectionId, auth.user, fetchAssignmentsData]);
 
 	// 알림 등에서 assignmentId 쿼리로 진입 시 해당 과제만 한 번만 펼침. (같은 URL에 대해 한 번 적용 후 ref로 막아서 접기 시 다시 펼쳐지지 않음)
+	/** 알림 등에서 highlightProblem 로 진입 시 해당 문제 행으로 스크롤 */
+	useEffect(() => {
+		if (highlightProblemId == null || assignments.length === 0) return;
+		const t = window.setTimeout(() => {
+			document
+				.getElementById(`course-assignment-problem-${highlightProblemId}`)
+				?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+		}, 200);
+		return () => window.clearTimeout(t);
+	}, [highlightProblemId, assignments]);
+
 	useEffect(() => {
 		const assignmentId = searchParams.get("assignmentId");
 		if (!assignmentId || assignments.length === 0) {
@@ -353,6 +412,7 @@ export function useCourseAssignmentsPage() {
 		isSidebarCollapsed,
 		sectionInfo,
 		assignments,
+		highlightProblemId,
 		sortedAssignments,
 		assignmentSort,
 		setAssignmentSort,

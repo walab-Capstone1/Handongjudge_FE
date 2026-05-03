@@ -253,6 +253,39 @@ export const SecondaryButton = styled.button`
   }
 `;
 
+export const DangerButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #dc2626;
+  color: #fff;
+  border: 1px solid #b91c1c;
+  height: 2.35rem;
+  padding: 0 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+    sans-serif;
+  white-space: nowrap;
+  box-sizing: border-box;
+
+  &:hover {
+    background: #b91c1c;
+    border-color: #991b1b;
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
 /** 고정 열(학생, 학번) 너비 - sticky left 계산용. colgroup과 동일하게 유지 */
 export const STICKY_COL_1_WIDTH = "5.5rem";
 export const STICKY_COL_2_WIDTH = "6rem";
@@ -844,6 +877,47 @@ export const BtnCode = styled.button`
     color: white;
     border-color: #10b981;
     transform: translateY(-1px);
+  }
+`;
+
+/** 성적 셀: 상태 배지 옆 `</>` 코드·반려 모달 트리거 (과제 전용) */
+export const GradeCellTopRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  justify-content: center;
+  width: 100%;
+`;
+
+export const RejectedTag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.12rem 0.38rem;
+  border-radius: 4px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+`;
+
+export const BtnReviewCode = styled.button`
+  flex-shrink: 0;
+  padding: 0.18rem 0.42rem;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #475569;
+  font-family: ui-monospace, monospace;
+
+  &:hover {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
+    color: #4338ca;
   }
 `;
 
