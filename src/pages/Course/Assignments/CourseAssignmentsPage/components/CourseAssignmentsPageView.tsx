@@ -182,27 +182,75 @@ export default function CourseAssignmentsPageView(
 																			: badgeType === "wrongLate"
 																				? "오답 및 지각"
 																				: "미제출";
+															const showReject =
+																problem.gradeRejected === true;
+															const highlighted =
+																d.highlightProblemId != null &&
+																d.highlightProblemId === problem.id;
 															return (
 																<S.AccordionProblemItem
 																	key={problem.id}
+																	id={`course-assignment-problem-${problem.id}`}
+																	$highlight={highlighted}
 																	onClick={() =>
 																		d.handleProblemClick(assignment.id, problem.id)
 																	}
 																>
-																	<S.ProblemTitle>{problem.title}</S.ProblemTitle>
-																	<S.ProblemStatusBlock>
-																		{problem.status !== "NOT_SUBMITTED" && problem.submittedAt && (
-																			<S.ProblemSubmissionMeta>
-																				<span>제출 시간 : {d.formatSubmissionTime(problem.submittedAt)}</span>
-																				{problem.isOnTime === false && problem.minutesLate != null && (
-																					<S.LateMinutes>· {d.formatMinutesLate(problem.minutesLate)}</S.LateMinutes>
+																	<S.AccordionProblemTopRow>
+																		<S.ProblemTitle>{problem.title}</S.ProblemTitle>
+																		<S.ProblemStatusBlock>
+																			{problem.status !== "NOT_SUBMITTED" &&
+																				problem.submittedAt && (
+																					<S.ProblemSubmissionMeta>
+																						<span>
+																							제출 시간 :{" "}
+																							{d.formatSubmissionTime(problem.submittedAt)}
+																						</span>
+																						{problem.isOnTime === false &&
+																							problem.minutesLate != null && (
+																								<S.LateMinutes>
+																									·{" "}
+																									{d.formatMinutesLate(problem.minutesLate)}
+																								</S.LateMinutes>
+																							)}
+																					</S.ProblemSubmissionMeta>
 																				)}
-																			</S.ProblemSubmissionMeta>
-																		)}
-																		<S.ProblemBadge $badgeType={badgeType}>
-																			{badgeLabel}
-																		</S.ProblemBadge>
-																	</S.ProblemStatusBlock>
+																			{showReject ? (
+																				<S.ProblemBadge $badgeType="rejected">
+																					반려
+																				</S.ProblemBadge>
+																			) : null}
+																			<S.ProblemBadge $badgeType={badgeType}>
+																				{badgeLabel}
+																			</S.ProblemBadge>
+																		</S.ProblemStatusBlock>
+																	</S.AccordionProblemTopRow>
+																	{showReject ? (
+																		<S.ProblemRejectionBox>
+																			<S.ProblemRejectionHead>
+																				피드백
+																			</S.ProblemRejectionHead>
+																			<S.ProblemRejectionTime>
+																				반려 시간:{" "}
+																				{problem.gradeRejectedAt
+																					? d.formatSubmissionTime(
+																							problem.gradeRejectedAt,
+																						)
+																					: "—"}
+																			</S.ProblemRejectionTime>
+																			{problem.gradeComment?.trim() ? (
+																				<S.ProblemRejectionComment>
+																					{problem.gradeComment}
+																				</S.ProblemRejectionComment>
+																			) : (
+																				<S.ProblemRejectionComment
+																					style={{ color: "#78716c", fontStyle: "italic" }}
+																				>
+																					등록된 코멘트가 없습니다.
+																				</S.ProblemRejectionComment>
+																			)}
+																		</S.ProblemRejectionBox>
+																	) : null}
 																</S.AccordionProblemItem>
 															);
 														})}

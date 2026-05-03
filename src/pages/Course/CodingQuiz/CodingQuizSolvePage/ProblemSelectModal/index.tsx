@@ -13,6 +13,8 @@ interface ProblemSelectModalProps {
 	problems: Problem[];
 	currentProblemId: number | null;
 	problemStatusById?: Record<number, ProblemWorkStatus>;
+	/** 과제 전용: 강사 반려 태그가 있는 문제 */
+	gradeRejectedByProblemId?: Record<number, boolean>;
 	isChanging?: boolean;
 	onClose: () => void;
 	onSelectProblem: (problemId: number) => void;
@@ -23,6 +25,7 @@ const ProblemSelectModal: React.FC<ProblemSelectModalProps> = ({
 	problems,
 	currentProblemId,
 	problemStatusById = {},
+	gradeRejectedByProblemId = {},
 	isChanging = false,
 	onClose,
 	onSelectProblem,
@@ -77,6 +80,18 @@ const ProblemSelectModal: React.FC<ProblemSelectModalProps> = ({
 							<S.ProblemTitle>{problem.title}</S.ProblemTitle>
 							<S.ProblemStatus $tone={getStatusLabel(problem.id).tone}>
 								{getStatusLabel(problem.id).text}
+								{gradeRejectedByProblemId[problem.id] ? (
+									<span
+										style={{
+											marginLeft: "0.45rem",
+											fontSize: "0.7rem",
+											fontWeight: 700,
+											color: "#b91c1c",
+										}}
+									>
+										· 반려
+									</span>
+								) : null}
 							</S.ProblemStatus>
 						</S.ProblemItem>
 					))}

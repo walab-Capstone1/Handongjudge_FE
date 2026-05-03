@@ -189,7 +189,7 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 					</S.SaveModal>
 				)}
 				<S.Header $theme={theme}>
-					<S.HeaderMain>
+					<S.HeaderBreadcrumbWrap>
 						<S.Breadcrumb>
 							<S.BreadcrumbLink
 								type="button"
@@ -213,54 +213,54 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 								{currentProblem.title}
 							</S.BreadcrumbCurrent>
 						</S.Breadcrumb>
-						<S.ProblemToolbarRow>
-							<S.PrevNextButton
-								type="button"
-								$theme={theme}
-								$disabled={problemNav.prevProblemId == null || isProblemChanging}
-								disabled={problemNav.prevProblemId == null || isProblemChanging}
-								onClick={() => {
-									if (problemNav.prevProblemId != null) {
-										handleProblemChange(problemNav.prevProblemId);
-									}
-								}}
-							>
-								‹ 이전 문제
-							</S.PrevNextButton>
-							{problemNav.indexLabel ? (
-								<S.ProblemIndexHint $theme={theme}>
-									문제 {problemNav.indexLabel}
-								</S.ProblemIndexHint>
-							) : null}
-							<S.PrevNextButton
-								type="button"
-								$theme={theme}
-								$disabled={problemNav.nextProblemId == null || isProblemChanging}
-								disabled={problemNav.nextProblemId == null || isProblemChanging}
-								onClick={() => {
-									if (problemNav.nextProblemId != null) {
-										handleProblemChange(problemNav.nextProblemId);
-									}
-								}}
-							>
-								다음 문제 ›
-							</S.PrevNextButton>
-							<S.ProblemNavigateButton
-								type="button"
-								$theme={theme}
-								onClick={() => setIsProblemModalOpen(true)}
-							>
-								문제 목록
-							</S.ProblemNavigateButton>
-							<S.ProblemNavigateButton
-								type="button"
-								$theme={theme}
-								onClick={() => setIsAssignmentModalOpen(true)}
-							>
-								과제 이동
-							</S.ProblemNavigateButton>
-						</S.ProblemToolbarRow>
-					</S.HeaderMain>
+					</S.HeaderBreadcrumbWrap>
+					<S.ProblemToolbarRow>
+						<S.PrevNextButton
+							type="button"
+							$theme={theme}
+							$disabled={problemNav.prevProblemId == null || isProblemChanging}
+							disabled={problemNav.prevProblemId == null || isProblemChanging}
+							onClick={() => {
+								if (problemNav.prevProblemId != null) {
+									handleProblemChange(problemNav.prevProblemId);
+								}
+							}}
+						>
+							‹ 이전 문제
+						</S.PrevNextButton>
+						{problemNav.indexLabel ? (
+							<S.ProblemIndexHint $theme={theme}>
+								문제 {problemNav.indexLabel}
+							</S.ProblemIndexHint>
+						) : null}
+						<S.PrevNextButton
+							type="button"
+							$theme={theme}
+							$disabled={problemNav.nextProblemId == null || isProblemChanging}
+							disabled={problemNav.nextProblemId == null || isProblemChanging}
+							onClick={() => {
+								if (problemNav.nextProblemId != null) {
+									handleProblemChange(problemNav.nextProblemId);
+								}
+							}}
+						>
+							다음 문제 ›
+						</S.PrevNextButton>
+						<S.ProblemNavigateButton
+							type="button"
+							$theme={theme}
+							onClick={() => setIsProblemModalOpen(true)}
+						>
+							문제 목록
+						</S.ProblemNavigateButton>
+						<S.ProblemNavigateButton
+							type="button"
+							$theme={theme}
+							onClick={() => setIsAssignmentModalOpen(true)}
+						>
+							과제 이동
+						</S.ProblemNavigateButton>
+					</S.ProblemToolbarRow>
 					<S.Controls>
 						<S.ThemeButton
 							type="button"

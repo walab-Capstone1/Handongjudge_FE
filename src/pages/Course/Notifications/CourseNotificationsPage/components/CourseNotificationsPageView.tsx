@@ -88,7 +88,10 @@ export default function CourseNotificationsPageView(
 											$isNew={notification.isNew}
 											$type={notification.type}
 										>
-											{d.getNotificationTypeLabel(notification.type)}
+											{d.getNotificationTypeLabel(
+												notification.type,
+												notification.notificationType,
+											)}
 										</S.NotificationTag>
 										<S.NotificationTitle
 											$isNew={notification.isNew}

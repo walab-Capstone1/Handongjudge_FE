@@ -43,6 +43,10 @@ export interface ProblemGrade {
 	passedTestCases?: number | null;
 	/** 전체 테스트케이스 수 */
 	totalTestCases?: number | null;
+	/** 강사 코멘트(학생에게도 표시) */
+	comment?: string | null;
+	/** 반려 태그 */
+	rejected?: boolean | null;
 }
 
 /** 학생별 성적 (과제/퀴즈 성적 API) */
