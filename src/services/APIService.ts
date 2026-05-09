@@ -194,6 +194,43 @@ class APIService {
 		});
 	}
 
+	/**
+	 * 과제 비동기 제출: DOMjudge에 코드 제출 후 submissionDbId를 즉시 반환 (~1초).
+	 * 반환된 submissionDbId로 getAssignmentResult()를 폴링해 결과를 조회.
+	 */
+	async submitCodeAsync(
+		sectionId: number | string,
+		problemId: number | string,
+		code: string,
+		language: string,
+	): Promise<{ submissionDbId: number; submissionId: string; problemId: number; sectionId: number; language: string; submittedAt: string }> {
+		return await this.request("/submissions/submit", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				problemId: Number.parseInt(String(problemId)),
+				sectionId: Number.parseInt(String(sectionId)),
+				language,
+				codeString: code,
+			}),
+		});
+	}
+
+	/**
+	 * 과제 채점 결과 조회: 클라이언트가 1.5초 간격으로 폴링.
+	 * 채점 완료 → 결과 객체 반환
+	 * 채점 중   → null 반환 (서버 204 No Content)
+	 */
+	async getAssignmentResult(submissionDbId: number): Promise<any | null> {
+		const response = await this.request(`/submissions/result/${submissionDbId}`, {
+			method: "GET",
+		});
+		// 204 No Content → handleResponse가 빈 문자열("") 반환 → null로 변환
+		return response || null;
+	}
+
 	async submitCodeAndGetOutput(
 		sectionId: number | string,
 		problemId: number | string,
