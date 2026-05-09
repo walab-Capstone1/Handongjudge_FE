@@ -1,28 +1,22 @@
-# Handongjudge FE README 템플릿
-
-
-## 1) 프로젝트 정보 
-
-
 
 # H-codeLab  <img src="./public/logo.svg" alt="H-codeLab logo" width="27" style="vertical-align: middle; margin-right: 8px;" />
 
-### 프로젝트 소개
+# 프로젝트 소개
   React, Spring Boot, DOMjudge 기반으로 개발한 웹 프로그래밍 실습 서비스이다. 학생은 별도 설치 없이 브라우저에서 코드를 작성하고 즉시 채점 결과를 확인할 수 있으며, 교수자는 과제 관리와 자동채점 기반 수업 운영이 가능하다. 실제 C 프로그래밍 수업에 적용하여 학습 효율과 문제 해결 집중도 향상을 확인하였다.  
 
-### 개발 기간
+## 개발 기간
 - 2025.09 ~ 진행 중
 
-### 배포 주소
+## 배포 주소
 - 서비스 주소: [`https://hcl.walab.info`](https://hcl.walab.info)
 
-### 팀 소개
+## 개발자
 | [**우병희**](https://github.com/dnqudgml12) | [**곽서원**](https://github.com/seowon1112) | [**윤동혁**](https://github.com/Diggydogg) |
 |---|---|---|
 | Frontend, Backend | Frontend, Backend | Infra, Backend |
 ---
 
-## 2) 시작 가이드
+## 시작 가이드
 
 
 ### 설치 및 실행
@@ -42,7 +36,7 @@ npm start
 
 ---
 
-## 3) 기술 스택
+# 기술 스택
 
 ### Environment
 ![Visual Studio Code](https://img.shields.io/badge/VS%20Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)
@@ -82,7 +76,7 @@ npm start
 ---
 
 
-## 4) 화면 구성
+# 화면구성
 
 ## 학생용
 
@@ -180,7 +174,7 @@ npm start
 
 ---
 
-## 5) 아키텍처 및 디렉토리 구조
+# 아키텍처 및 디렉토리 구조
 
 ```text
 📁 Handongjudge_FE
