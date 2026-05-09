@@ -87,8 +87,8 @@ npm start
 ## 학생용
 
 ### 메인 화면
-![메인 화면](<img width="1595" height="998" alt="image" src="https://github.com/user-attachments/assets/63670a30-86d0-412f-8215-1b406e1b5f54" />
-)
+<img width="1595" height="998" alt="image" src="https://github.com/user-attachments/assets/cb531883-de4c-4911-b69b-12bd44ddcb84" />
+
 **서비스 소개와 시스템 공지/가이드를 한눈에 확인하고 강의실로 바로 이동할 수 있는 시작 페이지입니다.**
 
 ### 로그인 / 회원가입
