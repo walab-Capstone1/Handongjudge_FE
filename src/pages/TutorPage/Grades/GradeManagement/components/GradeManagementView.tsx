@@ -13,6 +13,7 @@ import GradeBulkInputModal from "./GradeBulkInputModal";
 import GradeStatsModal from "./GradeStatsModal";
 import GradePointsModal from "./GradePointsModal";
 import GradeProblemDetailModal from "./GradeProblemDetailModal";
+import GradeAssignmentReviewModal from "./GradeAssignmentReviewModal";
 
 export default function GradeManagementView(d: GradeManagementHookReturn) {
 	const [totalOnly, setTotalOnly] = useState(false);
@@ -90,6 +91,10 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		problemDetail,
 		openProblemDetail,
 		closeProblemDetailModal,
+		assignmentReviewTarget,
+		openAssignmentReview,
+		closeAssignmentReview,
+		handleAssignmentReviewSaved,
 	} = d;
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: 보기 모드·선택 과제/퀴즈 바뀔 때 헤더 문제 필터만 초기화
@@ -449,6 +454,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						onSaveGradeForQuiz={handleSaveGradeForQuizCourse}
 						onViewCodeForQuiz={handleViewCodeForQuiz}
 						onProblemDetail={openProblemDetail}
+						onOpenAssignmentReview={openAssignmentReview}
 						totalOnly={totalOnly}
 						onToggleTotalOnly={setTotalOnly}
 						showLateOnly={showLateOnly}
@@ -470,6 +476,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						onSaveGrade={handleSaveGradeForAssignment}
 						onViewCode={handleViewCodeForAssignment}
 						onProblemDetail={openProblemDetail}
+						onOpenAssignmentReview={openAssignmentReview}
 						totalOnly={totalOnly}
 						onToggleTotalOnly={setTotalOnly}
 						showLateOnly={showLateOnly}
@@ -545,6 +552,8 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						comments={comments}
 						handleSaveGrade={handleSaveGrade}
 						handleViewCode={handleViewCode}
+						onOpenAssignmentReview={openAssignmentReview}
+						assignmentIdForReview={selectedAssignment?.id ?? null}
 						onProblemDetail={openProblemDetail}
 						totalOnly={totalOnly}
 						onToggleTotalOnly={setTotalOnly}
@@ -617,6 +626,24 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					problemDetail={problemDetail}
 					onClose={closeProblemDetailModal}
 				/>
+
+				{assignmentReviewTarget && sectionId ? (
+					<GradeAssignmentReviewModal
+						show
+						sectionId={Number(sectionId)}
+						assignmentId={assignmentReviewTarget.assignmentId}
+						userId={assignmentReviewTarget.userId}
+						problemId={assignmentReviewTarget.problemId}
+						studentName={assignmentReviewTarget.studentName}
+						problemTitle={assignmentReviewTarget.problemTitle}
+						initialComment={assignmentReviewTarget.initialComment}
+						initialRejected={assignmentReviewTarget.initialRejected}
+						submitted={assignmentReviewTarget.submitted}
+						displayScore={assignmentReviewTarget.displayScore}
+						onClose={closeAssignmentReview}
+						onSaved={handleAssignmentReviewSaved}
+					/>
+				) : null}
 
 				{isDownloadingCodeZip && (
 					<S.ModalOverlay>

@@ -17,17 +17,9 @@ export default function QuestionCreatePageView(
 		assignmentsWithProblems,
 		formData,
 		setFormData,
-		nickname,
-		showNicknameModal,
-		setShowNicknameModal,
-		nicknameInput,
-		setNicknameInput,
-		nicknameError,
-		setNicknameError,
 		getSelectValue,
 		handleSelectChange,
 		handleSubmit,
-		handleNicknameSubmit,
 		handleToggleSidebar,
 	} = d;
 
@@ -143,17 +135,50 @@ export default function QuestionCreatePageView(
 											setFormData((prev) => ({
 												...prev,
 												isAnonymous: e.target.checked,
+												anonymousUseNickname: e.target.checked
+													? prev.anonymousUseNickname
+													: true,
 											}))
 										}
 										aria-label="익명으로 질문하기"
 									/>
 									<span>익명으로 질문하기</span>
-									{formData.isAnonymous && nickname && (
-										<S.NicknameDisplay>(별명: {nickname})</S.NicknameDisplay>
-									)}
 								</S.OptionLabel>
+								{formData.isAnonymous && (
+									<S.AnonymousChoiceRow>
+										<S.RadioChoice>
+											<input
+												type="radio"
+												name="anon-display"
+												checked={formData.anonymousUseNickname}
+												onChange={() =>
+													setFormData((prev) => ({
+														...prev,
+														anonymousUseNickname: true,
+													}))
+												}
+											/>
+											<span>무작위 별칭으로 표시 (형용사+동물 등)</span>
+										</S.RadioChoice>
+										<S.RadioChoice>
+											<input
+												type="radio"
+												name="anon-display"
+												checked={!formData.anonymousUseNickname}
+												onChange={() =>
+													setFormData((prev) => ({
+														...prev,
+														anonymousUseNickname: false,
+													}))
+												}
+											/>
+											<span>게시에는 '익명'으로만 표시</span>
+										</S.RadioChoice>
+									</S.AnonymousChoiceRow>
+								)}
 								<S.OptionDescription>
-									익명으로 질문하면 이름 대신 별명이 표시됩니다
+									무작위 별칭은 서버에서 이 수업 안에서 겹치지 않게 정해집니다.
+									교수·TA는 작성자 실명을 볼 수 있습니다.
 								</S.OptionDescription>
 							</S.OptionGroup>
 
@@ -192,63 +217,6 @@ export default function QuestionCreatePageView(
 					</S.Form>
 				</S.Body>
 			</S.Content>
-
-			{showNicknameModal && (
-				<S.ModalOverlay
-					onClick={() => setShowNicknameModal(false)}
-					role="button"
-					tabIndex={0}
-					onKeyDown={(e) => {
-						if (e.key === "Escape" || e.key === "Enter") {
-							setShowNicknameModal(false);
-						}
-					}}
-					aria-label="닫기"
-				>
-					<S.ModalContent
-						onClick={(e) => e.stopPropagation()}
-						role="dialog"
-						aria-modal="true"
-						aria-labelledby="nickname-modal-title"
-					>
-						<h2 id="nickname-modal-title">별명 설정</h2>
-						<p>익명으로 질문하려면 별명을 설정해주세요</p>
-						<S.ModalFormGroup>
-							<input
-								type="text"
-								placeholder="별명 입력 (2-50자)"
-								value={nicknameInput}
-								onChange={(e) => {
-									setNicknameInput(e.target.value);
-									setNicknameError("");
-								}}
-								maxLength={50}
-								aria-label="별명 입력"
-							/>
-							{nicknameError && (
-								<S.ErrorMessage>{nicknameError}</S.ErrorMessage>
-							)}
-						</S.ModalFormGroup>
-						<S.ModalActions>
-							<S.BtnModalCancel
-								type="button"
-								onClick={() => {
-									setShowNicknameModal(false);
-									setFormData((prev) => ({
-										...prev,
-										isAnonymous: false,
-									}));
-								}}
-							>
-								취소
-							</S.BtnModalCancel>
-							<S.BtnModalSubmit type="button" onClick={handleNicknameSubmit}>
-								설정
-							</S.BtnModalSubmit>
-						</S.ModalActions>
-					</S.ModalContent>
-				</S.ModalOverlay>
-			)}
 		</S.Container>
 	);
 }

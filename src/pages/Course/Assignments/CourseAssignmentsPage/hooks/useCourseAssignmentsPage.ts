@@ -1,4 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import {
+	useState,
+	useEffect,
+	useCallback,
+	useMemo,
+	useRef,
+} from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { authState, sidebarCollapsedState } from "../../../../../recoil/atoms";
@@ -28,13 +34,18 @@ export function useCourseAssignmentsPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [sectionInfo, setSectionInfo] = useState<SectionInfo | null>(null);
 	const [assignments, setAssignments] = useState<Assignment[]>([]);
+	const [assignmentSort, setAssignmentSort] = useState<
+		"recentFirst" | "oldestFirst" | "unsolvedFirst"
+	>("recentFirst");
 	const [expandedAssignmentIds, setExpandedAssignmentIds] = useState<number[]>(
 		[],
 	);
-	/** 과제별 문제 목록 정렬: 기본(원래 순서) / 미해결 문제 / 해결 문제 (과제 id -> 정렬 방식) */
-	const [problemSortByAssignmentId, setProblemSortByAssignmentId] = useState<
-		Record<number, "original" | "solvedFirst" | "unsolvedFirst">
-	>({});
+	const highlightProblemId = useMemo(() => {
+		const raw = searchParams.get("highlightProblem");
+		if (!raw) return null;
+		const n = Number.parseInt(raw, 10);
+		return Number.isFinite(n) ? n : null;
+	}, [searchParams]);
 	const [userRole, setUserRole] = useState<string | null>(null);
 	const [isManager, setIsManager] = useState(false);
 	/** 알림 등에서 assignmentId 쿼리로 진입 시 한 번만 펼치기 위해 적용한 URL 값 (접은 뒤 다시 펼쳐지지 않도록) */
@@ -139,6 +150,9 @@ export function useCourseAssignmentsPage() {
 										isOnTime?: boolean;
 										submittedAt?: string;
 										minutesLate?: number;
+										gradeComment?: string | null;
+										gradeRejected?: boolean;
+										gradeRejectedAt?: string;
 									} | undefined;
 									const raw = statusEntry
 										? statusEntry.status
@@ -156,6 +170,33 @@ export function useCourseAssignmentsPage() {
 												? statusEntry.submittedAt
 												: new Date(statusEntry.submittedAt).toISOString()
 											: undefined;
+									let gradeRejectedAtStr: string | undefined;
+									const rawRejectedAt = statusEntry?.gradeRejectedAt;
+									if (rawRejectedAt != null) {
+										if (typeof rawRejectedAt === "string") {
+											gradeRejectedAtStr = rawRejectedAt;
+										} else if (
+											typeof rawRejectedAt === "object" &&
+											Array.isArray(rawRejectedAt)
+										) {
+											// Jackson 일부 설정에서 배열로 올 수 있음
+											const [y, mo, d, h, mi, s] = rawRejectedAt as number[];
+											if (y != null && mo != null && d != null) {
+												const dt = new Date(
+													y,
+													(mo ?? 1) - 1,
+													d ?? 1,
+													h ?? 0,
+													mi ?? 0,
+													s ?? 0,
+												);
+												if (!Number.isNaN(dt.getTime())) {
+													gradeRejectedAtStr = dt.toISOString();
+												}
+											}
+										}
+									}
+
 									return {
 										id: problem.id,
 										title: problem.title,
@@ -165,6 +206,12 @@ export function useCourseAssignmentsPage() {
 										isOnTime: statusEntry?.isOnTime,
 										submittedAt,
 										minutesLate: statusEntry?.minutesLate,
+										gradeRejected: statusEntry?.gradeRejected === true,
+										gradeRejectedAt: gradeRejectedAtStr,
+										gradeComment:
+											statusEntry?.gradeComment != null
+												? String(statusEntry.gradeComment)
+												: null,
 									};
 								},
 							);
@@ -221,6 +268,17 @@ export function useCourseAssignmentsPage() {
 	}, [sectionId, auth.user, fetchAssignmentsData]);
 
 	// 알림 등에서 assignmentId 쿼리로 진입 시 해당 과제만 한 번만 펼침. (같은 URL에 대해 한 번 적용 후 ref로 막아서 접기 시 다시 펼쳐지지 않음)
+	/** 알림 등에서 highlightProblem 로 진입 시 해당 문제 행으로 스크롤 */
+	useEffect(() => {
+		if (highlightProblemId == null || assignments.length === 0) return;
+		const t = window.setTimeout(() => {
+			document
+				.getElementById(`course-assignment-problem-${highlightProblemId}`)
+				?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+		}, 200);
+		return () => window.clearTimeout(t);
+	}, [highlightProblemId, assignments]);
+
 	useEffect(() => {
 		const assignmentId = searchParams.get("assignmentId");
 		if (!assignmentId || assignments.length === 0) {
@@ -243,34 +301,6 @@ export function useCourseAssignmentsPage() {
 				: [...prev, assignmentId],
 		);
 	}, []);
-
-	/** 해당 과제의 문제 목록을 현재 정렬 설정에 따라 정렬 (기본: 원래 순서) */
-	const getSortedProblems = useCallback(
-		(assignment: Assignment) => {
-			const sort = problemSortByAssignmentId[assignment.id] ?? "original";
-			const list = [...(assignment.problems ?? [])];
-			if (sort === "original") return list;
-			const order = (p: Assignment["problems"][0]) =>
-				p.status === "ACCEPTED" ? 2 : p.status === "SUBMITTED" ? 1 : 0;
-			if (sort === "solvedFirst") {
-				list.sort((a, b) => order(b) - order(a));
-			} else {
-				list.sort((a, b) => order(a) - order(b));
-			}
-			return list;
-		},
-		[problemSortByAssignmentId],
-	);
-
-	const setProblemSortForAssignment = useCallback(
-		(assignmentId: number, value: "original" | "solvedFirst" | "unsolvedFirst") => {
-			setProblemSortByAssignmentId((prev) => ({
-				...prev,
-				[assignmentId]: value,
-			}));
-		},
-		[],
-	);
 
 	const formatDate = useCallback((dateString: string): string => {
 		if (!dateString) return "";
@@ -349,6 +379,31 @@ export function useCourseAssignmentsPage() {
 		setIsSidebarCollapsed((prev) => !prev);
 	}, [setIsSidebarCollapsed]);
 
+	const sortedAssignments = useMemo(() => {
+		const list = [...assignments];
+		const createdKey = (a: Assignment) => {
+			const createdAt = (a as { createdAt?: string }).createdAt;
+			const t = createdAt ? new Date(createdAt).getTime() : Number.NaN;
+			return Number.isNaN(t) ? a.id : t;
+		};
+
+		if (assignmentSort === "oldestFirst") {
+			list.sort((a, b) => createdKey(a) - createdKey(b));
+			return list;
+		}
+		if (assignmentSort === "unsolvedFirst") {
+			list.sort((a, b) => {
+				const unsolvedA = Math.max(0, a.totalProblems - a.submittedProblems);
+				const unsolvedB = Math.max(0, b.totalProblems - b.submittedProblems);
+				if (unsolvedB !== unsolvedA) return unsolvedB - unsolvedA;
+				return createdKey(b) - createdKey(a);
+			});
+			return list;
+		}
+		list.sort((a, b) => createdKey(b) - createdKey(a));
+		return list;
+	}, [assignments, assignmentSort]);
+
 	return {
 		sectionId,
 		activeMenu,
@@ -357,9 +412,10 @@ export function useCourseAssignmentsPage() {
 		isSidebarCollapsed,
 		sectionInfo,
 		assignments,
-		getSortedProblems,
-		problemSortByAssignmentId,
-		setProblemSortForAssignment,
+		highlightProblemId,
+		sortedAssignments,
+		assignmentSort,
+		setAssignmentSort,
 		expandedAssignmentIds,
 		userRole,
 		isManager,

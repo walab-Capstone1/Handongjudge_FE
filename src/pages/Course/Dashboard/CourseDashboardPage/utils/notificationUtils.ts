@@ -24,6 +24,18 @@ export const transformNotification = (
 				? `/sections/${notif.sectionId}/course-assignments?assignmentId=${notif.assignmentId}`
 				: null;
 			break;
+		case "ASSIGNMENT_PROBLEM_REJECTED":
+			title = notif.message || "과제 문제가 반려되었습니다";
+			link =
+				notif.assignmentId != null
+					? `/sections/${notif.sectionId}/course-assignments?assignmentId=${notif.assignmentId}${
+							notif.relatedProblemId != null &&
+							Number.isFinite(Number(notif.relatedProblemId))
+								? `&highlightProblem=${notif.relatedProblemId}`
+								: ""
+						}`
+					: null;
+			break;
 		case "QUESTION_COMMENT":
 			title = notif.message || "내 질문에 댓글이 달렸습니다";
 			link = notif.questionId

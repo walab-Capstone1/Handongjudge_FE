@@ -196,23 +196,6 @@ export const ThemeButton = styled.button<{
 	`}
 `;
 
-export const LanguageSelect = styled.select<{ $theme: "light" | "dark" }>`
-	padding: 4px 10px;
-	border-radius: 4px;
-	background-color: ${(p) => (p.$theme === "light" ? "#ffffff" : "#21262d")};
-	color: ${(p) => (p.$theme === "light" ? "#000000" : "#c9d1d9")};
-	border: 1px solid ${(p) => (p.$theme === "light" ? "#e1e4e8" : "#30363d")};
-	appearance: none;
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	background-image: none;
-	padding-right: 10px;
-
-	&::-ms-expand {
-		display: none;
-	}
-`;
-
 export const MainSplit = styled.div`
 	flex: 1;
 	display: flex;

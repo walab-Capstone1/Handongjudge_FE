@@ -69,6 +69,25 @@ export const QuestionBadges = styled.div`
   flex-wrap: wrap;
 `;
 
+export const MyPostBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin-left: 4px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #e8edff;
+  color: #4c51bf;
+`;
+
+export const StaffIdentityNote = styled.span`
+  font-size: 12px;
+  color: #805ad5;
+  font-weight: 500;
+  margin-left: 4px;
+`;
+
 export const Badge = styled.span<{ $variant?: string }>`
   display: inline-flex;
   align-items: center;
@@ -292,22 +311,53 @@ export const CommentsSection = styled.section`
   }
 `;
 
-export const CommentsTitle = styled.h2`
-  font-size: 20px;
+/** 목록 영역 제목 (예: 댓글 N개) */
+export const CommentsListTitle = styled.h2`
+  font-size: 18px;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 0 0 24px 0;
+  margin: 0 0 18px 0;
+`;
+
+export const CommentComposerBlock = styled.div`
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid #e6ebf2;
+`;
+
+export const CommentComposerTitle = styled.h2`
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 14px 0;
+  letter-spacing: -0.02em;
+`;
+
+export const CommentsListBlock = styled.div`
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 `;
 
 export const CommentForm = styled.form`
-  margin-bottom: 32px;
-  padding: 24px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  margin-bottom: 0;
+  padding: 18px;
+  background: linear-gradient(165deg, #f9fafc 0%, #f4f7fb 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 `;
 
 export const EditorWrapper = styled.div`
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+
+  .tiptap-editor {
+    min-height: 190px;
+  }
 `;
 
 export const CommentTextarea = styled.textarea`
@@ -343,16 +393,34 @@ export const CommentFormFooter = styled.div`
 
 export const CommentOption = styled.label`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   font-size: 14px;
-  color: #666;
+  color: #444;
   cursor: pointer;
+  flex-wrap: wrap;
+  line-height: 1.45;
 
   input[type="checkbox"] {
     width: 16px;
     height: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
     cursor: pointer;
+  }
+`;
+
+export const CommentOptionHint = styled.span`
+  font-size: 12px;
+  color: #8892a0;
+  margin-left: 2px;
+  flex-basis: 100%;
+  padding-left: 24px;
+
+  @media (min-width: 520px) {
+    flex-basis: auto;
+    padding-left: 0;
+    margin-left: 8px;
   }
 `;
 
@@ -383,7 +451,7 @@ export const BtnSubmitComment = styled.button`
 export const CommentsList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 `;
 
 export const EmptyComments = styled.div`
@@ -399,13 +467,19 @@ export const EmptyComments = styled.div`
   }
 `;
 
-/* 댓글 카드 */
-export const CommentCard = styled.div<{ $accepted?: boolean }>`
-  padding: 20px;
-  background: ${(props) => (props.$accepted ? "#e8f5e9" : "#f8f9fa")};
-  border-radius: 8px;
-  border: 2px solid ${(props) => (props.$accepted ? "#4caf50" : "transparent")};
-  transition: all 0.2s;
+/* 댓글 카드 — 작성 박스와 톤 분리 */
+export const CommentCard = styled.div`
+  padding: 18px 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #ebeef5;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: #dce3ef;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  }
 `;
 
 export const CommentHeader = styled.div`
@@ -419,6 +493,7 @@ export const CommentAuthorInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 `;
 
 export const CommentAuthor = styled.span`

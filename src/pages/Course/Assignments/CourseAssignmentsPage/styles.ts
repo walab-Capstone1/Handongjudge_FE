@@ -303,7 +303,13 @@ export const ProblemSortSelect = styled.select`
   }
 `;
 
-export type ProblemBadgeType = "correct" | "correctLate" | "wrong" | "wrongLate" | "notSubmitted";
+export type ProblemBadgeType =
+  | "correct"
+  | "correctLate"
+  | "wrong"
+  | "wrongLate"
+  | "notSubmitted"
+  | "rejected";
 
 const badgeStyles: Record<
   ProblemBadgeType,
@@ -314,6 +320,7 @@ const badgeStyles: Record<
   wrong: { bg: "#EF4444", color: "#FFFFFF" },
   wrongLate: { bg: "#F97316", color: "#FFFFFF" },
   notSubmitted: { bg: "#E5E7EB", color: "#6B7280" },
+  rejected: { bg: "#B91C1C", color: "#FFFFFF" },
 };
 
 export const BadgeLegend = styled.div`
@@ -339,28 +346,70 @@ export const AccordionProblemsList = styled.div`
   gap: 8px;
 `;
 
-export const AccordionProblemItem = styled.div`
+export const AccordionProblemTopRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  gap: 8px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
+export const AccordionProblemItem = styled.div<{ $highlight?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
   padding: 16px 20px;
   background: #f8f9ff;
-  border: 1px solid #e8ecff;
+  border: 1px solid ${(p) => (p.$highlight ? "#fb923c" : "#e8ecff")};
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: ${(p) =>
+    p.$highlight ? "0 0 0 2px rgba(251, 146, 60, 0.35)" : "none"};
 
   &:hover {
     background: #edf0ff;
     border-color: #667eea;
     transform: translateX(4px);
   }
+`;
 
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+export const ProblemRejectionBox = styled.div`
+  font-size: 12px;
+  color: #57534e;
+  background: #fff7ed;
+  padding: 10px 12px;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  pointer-events: none;
+`;
+
+export const ProblemRejectionHead = styled.div`
+  font-weight: 600;
+  color: #9a3412;
+  margin-bottom: 4px;
+`;
+
+export const ProblemRejectionTime = styled.div`
+  font-size: 11px;
+  font-weight: 500;
+  color: #78716c;
+  margin-bottom: 8px;
+`;
+
+export const ProblemRejectionComment = styled.p`
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #44403c;
+  line-height: 1.45;
 `;
 
 export const ProblemTitle = styled.span`

@@ -38,16 +38,15 @@ export const Panel = styled.div<{ $dragging?: boolean }>`
 
 export const DragHandle = styled.div<{ $dragging?: boolean }>`
   position: absolute;
-  top: 24px;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 10px;
+  left: 13vw;
   display: flex;
   align-items: center;
   gap: 8px;
   background: rgba(0, 0, 0, 0.8);
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 6px;
-  z-index: 10;
+  z-index: 2000;
   opacity: 0;
   transition: all 0.2s ease;
   cursor: ${(props) => (props.$dragging ? "grabbing" : "grab")};
@@ -57,7 +56,6 @@ export const DragHandle = styled.div<{ $dragging?: boolean }>`
 
   ${Panel}:hover & {
     opacity: 1;
-    transform: translate(-50%, -52%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
 
@@ -67,7 +65,6 @@ export const DragHandle = styled.div<{ $dragging?: boolean }>`
     opacity: 1;
     background: rgba(88, 166, 255, 0.9);
     border-color: rgba(255, 255, 255, 0.5);
-    transform: translate(-50%, -54%);
     box-shadow: 0 6px 16px rgba(88, 166, 255, 0.5);
   `}
 

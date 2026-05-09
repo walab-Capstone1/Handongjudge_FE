@@ -101,7 +101,10 @@ export function useQuestionDetailPage() {
 		async (e: React.FormEvent) => {
 			e.preventDefault();
 			if (!questionId) return;
-			if (!commentContent.trim()) {
+			const tempDiv = document.createElement("div");
+			tempDiv.innerHTML = commentContent;
+			const text = tempDiv.textContent || tempDiv.innerText || "";
+			if (!text.trim()) {
 				alert("댓글 내용을 입력해주세요");
 				return;
 			}
@@ -132,38 +135,6 @@ export function useQuestionDetailPage() {
 		],
 	);
 
-	const handleAcceptComment = useCallback(
-		async (commentId: number) => {
-			if (!window.confirm("이 댓글을 채택하시겠습니까?")) return;
-			try {
-				await APIService.acceptComment(commentId);
-				alert("댓글이 채택되었습니다!");
-				fetchComments();
-				fetchQuestionDetail();
-			} catch (err) {
-				console.error("Error accepting comment:", err);
-				alert("채택 중 오류가 발생했습니다");
-			}
-		},
-		[fetchComments, fetchQuestionDetail],
-	);
-
-	const handleUnacceptComment = useCallback(
-		async (commentId: number) => {
-			if (!window.confirm("이 댓글의 채택을 해제하시겠습니까?")) return;
-			try {
-				await APIService.unacceptComment(commentId);
-				alert("채택이 해제되었습니다!");
-				fetchComments();
-				fetchQuestionDetail();
-			} catch (err) {
-				console.error("Error unaccepting comment:", err);
-				alert("채택 해제 중 오류가 발생했습니다");
-			}
-		},
-		[fetchComments, fetchQuestionDetail],
-	);
-
 	const handleDeleteComment = useCallback(
 		async (commentId: number) => {
 			if (!window.confirm("정말 이 댓글을 삭제하시겠습니까?")) return;
@@ -180,15 +151,15 @@ export function useQuestionDetailPage() {
 		[fetchComments, fetchQuestionDetail],
 	);
 
-	const isInstructor =
-		sectionInfo &&
-		auth?.user?.id &&
-		(auth.user.id === sectionInfo.instructorId ||
-			auth.user.id === sectionInfo.instructor?.id ||
-			auth.user.role === "ADMIN" ||
-			auth.user.role === "SUPER_ADMIN");
-
-	const canManageAccept = question && (question.isAuthor || isInstructor);
+	const isSectionStaff = Boolean(
+		sectionInfo?.isCurrentUserSectionStaff ||
+			auth?.user?.role === "ADMIN" ||
+			auth?.user?.role === "SUPER_ADMIN" ||
+			(auth?.user?.id &&
+				sectionInfo &&
+				(auth.user.id === sectionInfo.instructorId ||
+					auth.user.id === sectionInfo.instructor?.id)),
+	);
 
 	const handleResolveQuestion = useCallback(async () => {
 		if (!questionId) return;
@@ -232,12 +203,10 @@ export function useQuestionDetailPage() {
 		setCommentAnonymous,
 		submittingComment,
 		isSidebarCollapsed,
-		canManageAccept,
+		isSectionStaff,
 		handleLikeQuestion,
 		handleLikeComment,
 		handleSubmitComment,
-		handleAcceptComment,
-		handleUnacceptComment,
 		handleDeleteComment,
 		handleResolveQuestion,
 		handleDeleteQuestion,

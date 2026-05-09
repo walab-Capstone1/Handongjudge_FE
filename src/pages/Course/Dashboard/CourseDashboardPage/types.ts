@@ -69,6 +69,22 @@ export interface Assignment {
 	totalProblems?: number;
 }
 
+/** 대시보드 좌측 '학습 진행' 카드용 집계 */
+export interface StudyProgressSummary {
+	loading: boolean;
+	error: boolean;
+	/** 마감일이 아직 지나지 않은 과제 개수 */
+	assignmentUpcomingCount: number;
+	/** 마감 전 과제들에서 제출 처리된 문제 수 (과제 목록과 동일 기준) */
+	assignmentSolvedProblems: number;
+	assignmentTotalProblems: number;
+	/** 이 수업의 코딩 테스트 개수 */
+	quizCount: number;
+	/** 전체 퀴즈에서 채점 결과가 AC인 문제 수 합 */
+	quizSolvedProblems: number;
+	quizTotalProblems: number;
+}
+
 export interface Notification {
 	id: number;
 	sectionId: number;
@@ -79,6 +95,8 @@ export interface Notification {
 	isRead: boolean;
 	assignmentId?: number;
 	assignmentTitle?: string;
+	/** 과제 문제 반려 알림에서 과제 목록으로 갈 때 강조할 문제 ID */
+	relatedProblemId?: number;
 	noticeId?: number;
 	noticeTitle?: string;
 	questionId?: number;

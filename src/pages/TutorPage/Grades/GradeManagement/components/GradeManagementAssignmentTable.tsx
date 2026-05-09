@@ -1,12 +1,18 @@
 import { useMemo, type Dispatch, type SetStateAction } from "react";
 import * as S from "../styles";
-import type { StudentGradeRow, EditingGrade, AssignmentItem } from "../types";
+import type {
+	StudentGradeRow,
+	EditingGrade,
+	AssignmentItem,
+	ProblemGrade,
+} from "../types";
 import type { StudentSortDir, StudentSortKey } from "../../../../../utils/studentSort";
 import { SortableStudentColumnHeader } from "../../../../../components/SortableStudentColumnHeader";
 import {
 	GradeProblemCellDisplay,
 	GradeStatusLegendBar,
 } from "./GradeProblemCellDisplay";
+import * as GS from "../styles";
 
 export interface GradeManagementAssignmentTableProps {
 	grades: StudentGradeRow[];
@@ -27,6 +33,15 @@ export interface GradeManagementAssignmentTableProps {
 		comment: string,
 	) => void;
 	handleViewCode: (userId: number, problemId: number) => void;
+	onOpenAssignmentReview?: (ctx: {
+		assignmentId: number;
+		userId: number;
+		problemId: number;
+		studentName: string;
+		problemTitle: string;
+		problem: ProblemGrade | null | undefined;
+	}) => void;
+	assignmentIdForReview: number | null;
 	onProblemDetail?: (problemId: number) => void;
 	totalOnly?: boolean;
 	onToggleTotalOnly?: (v: boolean) => void;
@@ -50,6 +65,8 @@ export default function GradeManagementAssignmentTable({
 	comments,
 	handleSaveGrade,
 	handleViewCode,
+	onOpenAssignmentReview,
+	assignmentIdForReview,
 	onProblemDetail,
 	totalOnly = false,
 	onToggleTotalOnly,
@@ -216,6 +233,30 @@ export default function GradeManagementAssignmentTable({
 													fallbackPoints={col.points ?? 1}
 													dueAt={assignmentDueAt}
 													showLateOnly={showLateOnly}
+													trailingActions={
+														onOpenAssignmentReview &&
+														assignmentIdForReview != null ? (
+															<GS.BtnReviewCode
+																type="button"
+																title="코드 확인 · 코멘트 · 반려"
+																onClick={() =>
+																	onOpenAssignmentReview({
+																		assignmentId: assignmentIdForReview,
+																		userId: student.userId,
+																		problemId: col.problemId,
+																		studentName: student.studentName ?? "",
+																		problemTitle:
+																			col.problemTitle ??
+																			problem?.problemTitle ??
+																			"",
+																		problem,
+																	})
+																}
+															>
+																{"</>"}
+															</GS.BtnReviewCode>
+														) : undefined
+													}
 												/>
 											</S.TdCourseProblemCell>
 										);

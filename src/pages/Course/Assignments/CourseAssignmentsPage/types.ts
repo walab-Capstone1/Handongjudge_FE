@@ -12,6 +12,12 @@ export interface Problem {
 	submittedAt?: string;
 	/** 지각 제출 시 마감 대비 늦은 분 수 (제시간/미제출이면 undefined) */
 	minutesLate?: number;
+	/** 강사 반려(과제) */
+	gradeRejected?: boolean;
+	/** 반려 시각 (ISO) */
+	gradeRejectedAt?: string;
+	/** 강사 코멘트(학생에게 표시) */
+	gradeComment?: string | null;
 }
 
 export interface Assignment {

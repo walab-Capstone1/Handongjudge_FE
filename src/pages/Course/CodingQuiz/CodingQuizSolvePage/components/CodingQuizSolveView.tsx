@@ -220,14 +220,6 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 						>
 							Dark
 						</S.ThemeButton>
-						<S.LanguageSelect
-							$theme={d.theme}
-							value={d.language}
-							onChange={(e) => d.handleLanguageChange(e.target.value)}
-							disabled
-						>
-							<option value="c">C</option>
-						</S.LanguageSelect>
 					</S.Controls>
 				</S.Header>
 

@@ -79,6 +79,19 @@ export function useGradeManagement() {
 		memoryLimit?: number;
 	} | null>(null);
 
+	/** 과제: 코드·코멘트·반려 모달 */
+	const [assignmentReviewTarget, setAssignmentReviewTarget] = useState<{
+		assignmentId: number;
+		userId: number;
+		problemId: number;
+		studentName: string;
+		problemTitle: string;
+		initialComment: string;
+		initialRejected: boolean;
+		submitted: boolean;
+		displayScore?: number | null;
+	} | null>(null);
+
 	const fetchQuizGrades = useCallback(async () => {
 		if (!selectedQuiz || !sectionId) return;
 		try {
@@ -126,6 +139,12 @@ export function useGradeManagement() {
 					const key = `${student.userId}-${problem.problemId}`;
 					if (problem.score !== null && problem.score !== undefined) {
 						initialInputs[key] = problem.score;
+					}
+					if (
+						typeof problem.comment === "string" &&
+						problem.comment.length > 0
+					) {
+						initialComments[key] = problem.comment;
 					}
 				}
 			}
@@ -646,6 +665,46 @@ export function useGradeManagement() {
 		setShowProblemDetailModal(false);
 		setProblemDetail(null);
 	}, []);
+
+	const openAssignmentReview = useCallback(
+		(ctx: {
+			assignmentId: number;
+			userId: number;
+			problemId: number;
+			studentName: string;
+			problemTitle: string;
+			problem?: ProblemGrade | null;
+		}) => {
+			if (!sectionId) return;
+			const key = `${ctx.userId}-${ctx.problemId}`;
+			setAssignmentReviewTarget({
+				assignmentId: ctx.assignmentId,
+				userId: ctx.userId,
+				problemId: ctx.problemId,
+				studentName: ctx.studentName,
+				problemTitle: ctx.problemTitle,
+				initialComment: ctx.problem?.comment ?? comments[key] ?? "",
+				initialRejected: Boolean(ctx.problem?.rejected),
+				submitted: Boolean(ctx.problem?.submitted),
+				displayScore:
+					ctx.problem?.score !== undefined && ctx.problem?.score !== null
+						? ctx.problem.score
+						: null,
+			});
+		},
+		[sectionId, comments],
+	);
+
+	const closeAssignmentReview = useCallback(() => {
+		setAssignmentReviewTarget(null);
+	}, []);
+
+	const handleAssignmentReviewSaved = useCallback(async () => {
+		if (selectedAssignment && sectionId) {
+			await fetchGrades();
+		}
+		await fetchCourseGrades();
+	}, [selectedAssignment, sectionId, fetchGrades, fetchCourseGrades]);
 
 	const handleSaveGradeForQuiz = useCallback(
 		async (
@@ -1954,6 +2013,10 @@ export function useGradeManagement() {
 		problemDetail,
 		openProblemDetail,
 		closeProblemDetailModal,
+		assignmentReviewTarget,
+		openAssignmentReview,
+		closeAssignmentReview,
+		handleAssignmentReviewSaved,
 	};
 }
 

@@ -11,6 +11,8 @@ import {
 	GradeProblemCellDisplay,
 	GradeStatusLegendBar,
 } from "./GradeProblemCellDisplay";
+import type { ProblemGrade } from "../types";
+import * as GS from "../styles";
 
 export interface GradeManagementCourseTableProps {
 	courseLoading: boolean;
@@ -53,6 +55,14 @@ export interface GradeManagementCourseTableProps {
 		problemId: number,
 	) => void;
 	onProblemDetail?: (problemId: number) => void;
+	onOpenAssignmentReview?: (ctx: {
+		assignmentId: number;
+		userId: number;
+		problemId: number;
+		studentName: string;
+		problemTitle: string;
+		problem?: ProblemGrade | null;
+	}) => void;
 	totalOnly?: boolean;
 	onToggleTotalOnly?: (v: boolean) => void;
 	showLateOnly?: boolean;
@@ -76,6 +86,7 @@ export default function GradeManagementCourseTable({
 	onSaveGradeForQuiz,
 	onViewCodeForQuiz,
 	onProblemDetail,
+	onOpenAssignmentReview,
 	totalOnly = false,
 	onToggleTotalOnly,
 	showLateOnly = false,
@@ -301,6 +312,28 @@ export default function GradeManagementCourseTable({
 																		fallbackPoints={problem.points ?? 1}
 																		dueAt={item.dueAt}
 																		showLateOnly={showLateOnly}
+																		trailingActions={
+																			onOpenAssignmentReview ? (
+																				<GS.BtnReviewCode
+																					type="button"
+																					title="코드 확인 · 코멘트 · 반려"
+																					onClick={() =>
+																						onOpenAssignmentReview({
+																							assignmentId: item.id,
+																							userId: student.userId,
+																							problemId: problem.problemId,
+																							studentName:
+																								student.studentName ?? "",
+																							problemTitle:
+																								problem.problemTitle ?? "",
+																							problem: problemGrade,
+																						})
+																					}
+																				>
+																					{"</>"}
+																				</GS.BtnReviewCode>
+																			) : undefined
+																		}
 																	/>
 																</S.TdCourseProblemCell>
 															);

@@ -78,6 +78,19 @@ export function useCourseNotificationsPage() {
 							displayType = "assignment";
 							break;
 						}
+						case "ASSIGNMENT_PROBLEM_REJECTED": {
+							title = (notif.message as string) || "과제 문제가 반려되었습니다";
+							const relatedPid = notif.relatedProblemId as number | undefined;
+							link = notif.assignmentId
+								? `/sections/${sectionId}/course-assignments?assignmentId=${notif.assignmentId}${
+										relatedPid != null && Number.isFinite(Number(relatedPid))
+											? `&highlightProblem=${relatedPid}`
+											: ""
+									}`
+								: null;
+							displayType = "assignment";
+							break;
+						}
 						case "QUESTION_COMMENT":
 							title =
 								(notif.message as string) || "내 질문에 댓글이 달렸습니다";
@@ -242,18 +255,24 @@ export function useCourseNotificationsPage() {
 		[navigate, sectionId],
 	);
 
-	const getNotificationTypeLabel = useCallback((type: string): string => {
-		switch (type) {
-			case "notice":
-				return "공지";
-			case "assignment":
-				return "과제";
-			case "community":
-				return "커뮤니티";
-			default:
-				return "알림";
-		}
-	}, []);
+	const getNotificationTypeLabel = useCallback(
+		(displayType: string, rawType?: string): string => {
+			if (rawType === "ASSIGNMENT_PROBLEM_REJECTED") {
+				return "과제 반려";
+			}
+			switch (displayType) {
+				case "notice":
+					return "공지";
+				case "assignment":
+					return "과제";
+				case "community":
+					return "커뮤니티";
+				default:
+					return "알림";
+			}
+		},
+		[],
+	);
 
 	return {
 		sectionId,

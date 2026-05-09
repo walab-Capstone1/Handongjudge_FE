@@ -9,8 +9,100 @@ import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
 import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import { indentWithTab } from "@codemirror/commands";
 import { keymap } from "@codemirror/view";
-import { bracketMatching, foldGutter } from "@codemirror/language";
+import {
+	bracketMatching,
+	foldGutter,
+	HighlightStyle,
+	syntaxHighlighting,
+} from "@codemirror/language";
+import { tags } from "@lezer/highlight";
 import * as S from "./styles";
+
+/** 구두점·연산자 구분이 잘 되도록 한쪽은 회색·한쪽은 청록 톤 */
+const READABLE_MONO_FONT =
+	'ui-monospace, SFMono-Regular, "SF Mono", Menlo, "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace';
+
+const readableDarkHighlight = HighlightStyle.define([
+	{ tag: tags.keyword, color: "#c678dd" },
+	{ tag: tags.atom, color: "#d19a66" },
+	{ tag: tags.bool, color: "#d19a66" },
+	{ tag: tags.literal, color: "#56b6c2" },
+	{ tag: tags.number, color: "#d19a66" },
+	{ tag: tags.comment, color: "#7f848e", fontStyle: "italic" },
+	{ tag: tags.lineComment, color: "#7f848e", fontStyle: "italic" },
+	{ tag: tags.blockComment, color: "#7f848e", fontStyle: "italic" },
+	{ tag: tags.docComment, color: "#7f848e", fontStyle: "italic" },
+	{ tag: tags.string, color: "#98c379" },
+	{ tag: tags.character, color: "#98c379" },
+	{ tag: tags.regexp, color: "#56b6c2" },
+	{ tag: tags.tagName, color: "#e06c75" },
+	{ tag: tags.attributeName, color: "#d19a66" },
+	{ tag: tags.attributeValue, color: "#98c379" },
+	{ tag: tags.annotation, color: "#e5c07b" },
+	{ tag: tags.variableName, color: "#e06c75" },
+	{ tag: tags.propertyName, color: "#e06c75" },
+	{ tag: tags.labelName, color: "#e06c75" },
+	{ tag: tags.function(tags.variableName), color: "#61afef" },
+	{ tag: tags.typeName, color: "#e5c07b" },
+	{ tag: tags.namespace, color: "#e5c07b" },
+	{ tag: tags.className, color: "#e5c07b" },
+	{ tag: tags.macroName, color: "#61afef" },
+	{ tag: tags.operator, color: "#56b6c2" },
+	{ tag: tags.operatorKeyword, color: "#c678dd" },
+	{ tag: tags.bracket, color: "#abb2bf" },
+	{ tag: tags.brace, color: "#abb2bf" },
+	{ tag: tags.paren, color: "#abb2bf" },
+	{ tag: tags.squareBracket, color: "#abb2bf" },
+	{ tag: tags.angleBracket, color: "#abb2bf" },
+	{ tag: tags.punctuation, color: "#d4d4d8" },
+	{ tag: tags.separator, color: "#d4d4d8" },
+	{ tag: tags.meta, color: "#abb2bf" },
+	{ tag: tags.invalid, color: "#f44747" },
+]);
+
+const readableLightHighlight = HighlightStyle.define([
+	{ tag: tags.keyword, color: "#a626a4" },
+	{ tag: tags.atom, color: "#986801" },
+	{ tag: tags.bool, color: "#986801" },
+	{ tag: tags.literal, color: "#0184bc" },
+	{ tag: tags.number, color: "#986801" },
+	{ tag: tags.comment, color: "#a0a1a7", fontStyle: "italic" },
+	{ tag: tags.lineComment, color: "#a0a1a7", fontStyle: "italic" },
+	{ tag: tags.blockComment, color: "#a0a1a7", fontStyle: "italic" },
+	{ tag: tags.docComment, color: "#a0a1a7", fontStyle: "italic" },
+	{ tag: tags.string, color: "#50a14f" },
+	{ tag: tags.character, color: "#50a14f" },
+	{ tag: tags.regexp, color: "#0184bc" },
+	{ tag: tags.variableName, color: "#e45649" },
+	{ tag: tags.propertyName, color: "#e45649" },
+	{ tag: tags.labelName, color: "#e45649" },
+	{ tag: tags.function(tags.variableName), color: "#4078f2" },
+	{ tag: tags.typeName, color: "#c18401" },
+	{ tag: tags.namespace, color: "#c18401" },
+	{ tag: tags.className, color: "#c18401" },
+	{ tag: tags.operator, color: "#0184bc" },
+	{ tag: tags.operatorKeyword, color: "#a626a4" },
+	{ tag: tags.bracket, color: "#383a42" },
+	{ tag: tags.brace, color: "#383a42" },
+	{ tag: tags.paren, color: "#383a42" },
+	{ tag: tags.squareBracket, color: "#383a42" },
+	{ tag: tags.angleBracket, color: "#383a42" },
+	{ tag: tags.punctuation, color: "#24292f" },
+	{ tag: tags.separator, color: "#24292f" },
+	{ tag: tags.meta, color: "#696c77" },
+]);
+
+const editorChromeTheme = EditorView.theme({
+	".cm-editor": {
+		fontSize: "14px",
+		lineHeight: "1.55",
+		fontFamily: READABLE_MONO_FONT,
+		fontFeatureSettings: '"liga" 0',
+	},
+	".cm-content": {
+		fontFamily: READABLE_MONO_FONT,
+	},
+});
 
 interface AssignmentInfo {
 	dueDate?: string;
@@ -265,47 +357,43 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 		}
 	};
 
-	const customDarkTheme = EditorView.theme(
+	const darkChromeTheme = EditorView.theme(
 		{
 			"&": {
-				color: "#ffffff !important",
-				backgroundColor: "#000000 !important",
+				backgroundColor: "#0d1117",
 			},
-			".cm-content": {
-				caretColor: "#ffffff !important",
-				color: "#ffffff !important",
-			},
-			".cm-line": {
-				color: "#ffffff !important",
+			".cm-scroller": {
+				backgroundColor: "#0d1117",
 			},
 			"&.cm-focused .cm-cursor": {
-				borderLeftColor: "#ffffff",
+				borderLeftColor: "#e6edf3",
 			},
 			"&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
 				{
-					backgroundColor: "#0066cc",
+					backgroundColor: "#264f78",
 				},
 			".cm-activeLine": {
-				backgroundColor: "#1a1a1a",
+				backgroundColor: "#161b22",
 			},
 			".cm-gutters": {
-				backgroundColor: "#000000",
-				color: "#ffffff",
+				backgroundColor: "#0d1117",
+				color: "#6e7681",
 				border: "none",
+				borderRight: "1px solid #30363d",
 			},
 			".cm-lineNumbers .cm-gutterElement": {
-				color: "#ffffff",
+				color: "#6e7681",
 			},
 			".cm-foldGutter .cm-gutterElement": {
-				color: "#ffffff",
+				color: "#6e7681",
 			},
 			".cm-lintGutter .cm-gutterElement": {
-				color: "#ffffff",
+				color: "#6e7681",
 			},
 			".cm-tooltip": {
-				backgroundColor: "#000000",
-				color: "#ffffff",
-				border: "1px solid #333",
+				backgroundColor: "#161b22",
+				color: "#e6edf3",
+				border: "1px solid #30363d",
 			},
 			".cm-lintPoint": {
 				position: "relative",
@@ -327,42 +415,30 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 				backgroundColor: "rgba(255, 255, 0, 0.2)",
 				border: "1px solid yellow",
 			},
-			".cm-keyword": { color: "#ffffff !important" },
-			".cm-operator": { color: "#ffffff !important" },
-			".cm-variable": { color: "#ffffff !important" },
-			".cm-variable-2": { color: "#ffffff !important" },
-			".cm-variable-3": { color: "#ffffff !important" },
-			".cm-property": { color: "#ffffff !important" },
-			".cm-definition": { color: "#ffffff !important" },
-			".cm-type": { color: "#ffffff !important" },
-			".cm-string": { color: "#ffffff !important" },
-			".cm-string-2": { color: "#ffffff !important" },
-			".cm-number": { color: "#ffffff !important" },
-			".cm-comment": { color: "#ffffff !important" },
-			".cm-attribute": { color: "#ffffff !important" },
-			".cm-meta": { color: "#ffffff !important" },
-			".cm-builtin": { color: "#ffffff !important" },
-			".cm-tag": { color: "#ffffff !important" },
-			".cm-header": { color: "#ffffff !important" },
-			".cm-hr": { color: "#ffffff !important" },
-			".cm-link": { color: "#ffffff !important" },
-			".cm-url": { color: "#ffffff !important" },
-			".cm-formatting": { color: "#ffffff !important" },
-			".cm-formatting-link": { color: "#ffffff !important" },
-			".cm-formatting-list": { color: "#ffffff !important" },
-			".cm-formatting-quote": { color: "#ffffff !important" },
-			".cm-formatting-strong": { color: "#ffffff !important" },
-			".cm-formatting-em": { color: "#ffffff !important" },
-			".cm-formatting-header": { color: "#ffffff !important" },
-			".cm-formatting-header-1": { color: "#ffffff !important" },
-			".cm-formatting-header-2": { color: "#ffffff !important" },
-			".cm-formatting-header-3": { color: "#ffffff !important" },
-			".cm-formatting-header-4": { color: "#ffffff !important" },
-			".cm-formatting-header-5": { color: "#ffffff !important" },
-			".cm-formatting-header-6": { color: "#ffffff !important" },
 		},
 		{ dark: true },
 	);
+
+	const lightChromeTheme = EditorView.theme({
+		"&": {
+			backgroundColor: "#ffffff",
+		},
+		".cm-scroller": {
+			backgroundColor: "#ffffff",
+		},
+		".cm-gutters": {
+			backgroundColor: "#f6f8fa",
+			color: "#656d76",
+			border: "none",
+			borderRight: "1px solid #d0d7de",
+		},
+		".cm-lineNumbers .cm-gutterElement": {
+			color: "#656d76",
+		},
+		".cm-activeLine": {
+			backgroundColor: "#f6f8fa",
+		},
+	});
 
 	return (
 		<S.EditorWrapper>
@@ -481,15 +557,20 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 					height="100%"
 					extensions={[
 						...getLanguageExtension(language),
-						theme === "dark" ? customDarkTheme : [],
+						editorChromeTheme,
+						theme === "dark" ? darkChromeTheme : lightChromeTheme,
+						syntaxHighlighting(
+							theme === "dark"
+								? readableDarkHighlight
+								: readableLightHighlight,
+						),
 					]}
 					theme={theme === "dark" ? "dark" : "light"}
 					onChange={onCodeChange}
 					editable={!isEditLocked}
 					style={{
-						backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+						backgroundColor: theme === "dark" ? "#0d1117" : "#ffffff",
 						height: "100%",
-						color: theme === "dark" ? "#ffffff" : "#000000",
 					}}
 				/>
 			</S.EditorScrollArea>

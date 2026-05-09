@@ -9,6 +9,7 @@ const initialFormData: QuestionFormData = {
 	title: "",
 	content: "",
 	isAnonymous: false,
+	anonymousUseNickname: true,
 	isPublic: true,
 	assignmentId: "",
 	problemId: "",
@@ -27,10 +28,6 @@ export function useQuestionCreatePage() {
 		Assignment[]
 	>([]);
 	const [formData, setFormData] = useState<QuestionFormData>(initialFormData);
-	const [nickname, setNickname] = useState("");
-	const [showNicknameModal, setShowNicknameModal] = useState(false);
-	const [nicknameInput, setNicknameInput] = useState("");
-	const [nicknameError, setNicknameError] = useState("");
 
 	const fetchInitialData = useCallback(async () => {
 		if (!sectionId) return;
@@ -68,68 +65,9 @@ export function useQuestionCreatePage() {
 		}
 	}, [sectionId]);
 
-	const fetchNickname = useCallback(async () => {
-		if (!sectionId) return;
-		try {
-			const data = await APIService.request(
-				`/community/nicknames?sectionId=${sectionId}`,
-			);
-			if (data?.success && data?.data?.nickname) {
-				setNickname(data.data.nickname);
-			} else {
-				setShowNicknameModal(true);
-			}
-		} catch (err) {
-			console.error("Error fetching nickname:", err);
-			setShowNicknameModal(true);
-		}
-	}, [sectionId]);
-
 	useEffect(() => {
 		fetchInitialData();
 	}, [fetchInitialData]);
-
-	useEffect(() => {
-		if (formData.isAnonymous && !nickname) {
-			fetchNickname();
-		}
-	}, [formData.isAnonymous, nickname, fetchNickname]);
-
-	const handleNicknameSubmit = useCallback(async () => {
-		if (!nicknameInput.trim()) {
-			setNicknameError("별명을 입력해주세요");
-			return;
-		}
-		if (nicknameInput.length < 2 || nicknameInput.length > 50) {
-			setNicknameError("별명은 2-50자 사이여야 합니다");
-			return;
-		}
-		if (!sectionId) return;
-		try {
-			const checkData = await APIService.request(
-				`/community/nicknames/check?sectionId=${sectionId}&nickname=${encodeURIComponent(nicknameInput)}`,
-			);
-			if (!checkData?.data?.isAvailable) {
-				setNicknameError("이미 사용 중인 별명입니다");
-				return;
-			}
-			const data = await APIService.request("/community/nicknames", {
-				method: "POST",
-				body: JSON.stringify({
-					sectionId: Number.parseInt(sectionId, 10),
-					nickname: nicknameInput,
-				}),
-			});
-			if (data?.success) {
-				setNickname(data.data.nickname);
-				setShowNicknameModal(false);
-				setNicknameError("");
-			}
-		} catch (err) {
-			console.error("Error setting nickname:", err);
-			setNicknameError("별명 설정 중 오류가 발생했습니다");
-		}
-	}, [sectionId, nicknameInput]);
 
 	const getSelectValue = useCallback((): string => {
 		if (formData.assignmentId && formData.problemId) {
@@ -190,11 +128,6 @@ export function useQuestionCreatePage() {
 				alert("내용을 입력해주세요");
 				return;
 			}
-			if (formData.isAnonymous && !nickname) {
-				alert("익명으로 질문하려면 별명을 설정해주세요");
-				setShowNicknameModal(true);
-				return;
-			}
 			try {
 				setLoading(true);
 				const requestData: Record<string, unknown> = {
@@ -204,6 +137,9 @@ export function useQuestionCreatePage() {
 					isAnonymous: formData.isAnonymous,
 					isPublic: formData.isPublic,
 				};
+				if (formData.isAnonymous) {
+					requestData.anonymousUseNickname = formData.anonymousUseNickname;
+				}
 				if (formData.assignmentId) {
 					requestData.assignmentId = Number.parseInt(formData.assignmentId, 10);
 				}
@@ -228,7 +164,7 @@ export function useQuestionCreatePage() {
 				setLoading(false);
 			}
 		},
-		[sectionId, formData, nickname, navigate],
+		[sectionId, formData, navigate],
 	);
 
 	const handleToggleSidebar = useCallback(() => {
@@ -244,17 +180,9 @@ export function useQuestionCreatePage() {
 		assignmentsWithProblems,
 		formData,
 		setFormData,
-		nickname,
-		showNicknameModal,
-		setShowNicknameModal,
-		nicknameInput,
-		setNicknameInput,
-		nicknameError,
-		setNicknameError,
 		getSelectValue,
 		handleSelectChange,
 		handleSubmit,
-		handleNicknameSubmit,
 		handleToggleSidebar,
 	};
 }

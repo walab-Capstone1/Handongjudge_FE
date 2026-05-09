@@ -4,7 +4,7 @@ class APIService {
 	private baseURL: string;
 
 	constructor() {
-		this.baseURL = process.env.REACT_APP_API_URL || "https://hj.walab.info/api"; // 
+		this.baseURL = process.env.REACT_APP_API_URL || "https://hcl.walab.info/api"; // 
 	}
 
 	async request(endpoint: string, options: RequestInit = {}): Promise<any> {
@@ -1456,18 +1456,6 @@ class APIService {
 	async likeComment(commentId: number | string): Promise<any> {
 		return await this.request(`/community/likes/comments/${commentId}`, {
 			method: "POST",
-		});
-	}
-
-	async acceptComment(commentId: number | string): Promise<any> {
-		return await this.request(`/community/comments/${commentId}/accept`, {
-			method: "POST",
-		});
-	}
-
-	async unacceptComment(commentId: number | string): Promise<any> {
-		return await this.request(`/community/comments/${commentId}/accept`, {
-			method: "DELETE",
 		});
 	}
 

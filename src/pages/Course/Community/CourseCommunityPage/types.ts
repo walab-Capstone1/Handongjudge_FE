@@ -8,6 +8,12 @@ export interface Question {
 	status: "PENDING" | "RESOLVED";
 	isPinned?: boolean;
 	isAnonymous?: boolean;
+	isPublic?: boolean;
+	/** 목록 API: 현재 사용자 작성 여부 */
+	isAuthor?: boolean;
+	/** 교수/TA만 수신 */
+	authorRealNameForStaff?: string;
+	authorId?: number;
 	viewCount: number;
 	commentCount: number;
 	likeCount: number;
@@ -22,6 +28,8 @@ export interface SectionInfo {
 	sectionId?: number;
 	courseTitle?: string;
 	courseName?: string;
+	instructorId?: number;
+	isCurrentUserSectionStaff?: boolean;
 }
 
 export interface Stats {

@@ -7,6 +7,8 @@ import ProblemDescription from "../../../Course/CodingQuiz/CodingQuizSolvePage/P
 import CodeEditor from "../../../Course/CodingQuiz/CodingQuizSolvePage/CodeEditor";
 import ExecutionResult from "../../../Course/CodingQuiz/CodingQuizSolvePage/ExecutionResult";
 import DraggablePanel from "../../../Course/CodingQuiz/CodingQuizSolvePage/DraggablePanel";
+import ProblemSelectModal from "../../../Course/CodingQuiz/CodingQuizSolvePage/ProblemSelectModal";
+import AssignmentSelectModal from "./AssignmentSelectModal";
 import type { PanelKey } from "../hooks/useProblemSolve";
 import type { Problem } from "../types";
 import * as S from "../styles";
@@ -36,8 +38,21 @@ interface ProblemSolveViewProps {
 	horizontalSizes: number[];
 	verticalSizes: number[];
 	panelLayout: { left: PanelKey; topRight: PanelKey; bottomRight: PanelKey };
+	problems: Array<{ id: number; title: string; order: number }>;
+	isProblemModalOpen: boolean;
+	isProblemChanging: boolean;
+	setIsProblemModalOpen: (open: boolean) => void;
 	handlePanelMove: (dragged: string, target: string) => void;
-	handleLanguageChange: (lang: string) => void;
+	handleProblemChange: (problemId: number) => void;
+	problemNav: {
+		prevProblemId: number | null;
+		nextProblemId: number | null;
+		indexLabel: string;
+	};
+	sectionAssignments: Array<{ id: number; title: string }>;
+	isAssignmentModalOpen: boolean;
+	setIsAssignmentModalOpen: (open: boolean) => void;
+	handleSelectOtherAssignment: (assignmentId: number) => void;
 	handleSubmit: () => void;
 	handleSubmitWithOutput: () => void;
 	saveToSession: () => void;
@@ -53,6 +68,10 @@ interface ProblemSolveViewProps {
 	isDeadlinePassed: boolean;
 	isAssignmentActive: boolean;
 	userRole: string | null;
+	showUnsavedModal: boolean;
+	handleUnsavedModalSave: () => void;
+	handleUnsavedModalSkip: () => void;
+	handleUnsavedModalCancel: () => void;
 }
 
 const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
@@ -76,8 +95,17 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 		horizontalSizes,
 		verticalSizes,
 		panelLayout,
+		problems,
+		isProblemModalOpen,
+		isProblemChanging,
+		setIsProblemModalOpen,
 		handlePanelMove,
-		handleLanguageChange,
+		handleProblemChange,
+		problemNav,
+		sectionAssignments,
+		isAssignmentModalOpen,
+		setIsAssignmentModalOpen,
+		handleSelectOtherAssignment,
 		handleSubmit,
 		handleSubmitWithOutput,
 		saveToSession,
@@ -89,6 +117,10 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 		isDeadlinePassed,
 		isAssignmentActive,
 		userRole,
+		showUnsavedModal,
+		handleUnsavedModalSave,
+		handleUnsavedModalSkip,
+		handleUnsavedModalCancel,
 	} = props;
 	const navigate = useNavigate();
 
@@ -157,29 +189,78 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 					</S.SaveModal>
 				)}
 				<S.Header $theme={theme}>
-					<S.Breadcrumb>
-						<S.BreadcrumbLink
+					<S.HeaderBreadcrumbWrap>
+						<S.Breadcrumb>
+							<S.BreadcrumbLink
+								type="button"
+								onClick={() => navigate(`/sections/${sectionId}/dashboard`)}
+							>
+								{sectionInfo.courseTitle}
+							</S.BreadcrumbLink>
+							<span> › </span>
+							<S.BreadcrumbLink
+								type="button"
+								onClick={() =>
+									navigate(
+										`/sections/${sectionId}/course-assignments?assignmentId=${assignmentId}`,
+									)
+								}
+							>
+								{assignmentInfo.title}
+							</S.BreadcrumbLink>
+							<span> › </span>
+							<S.BreadcrumbCurrent $theme={theme}>
+								{currentProblem.title}
+							</S.BreadcrumbCurrent>
+						</S.Breadcrumb>
+					</S.HeaderBreadcrumbWrap>
+					<S.ProblemToolbarRow>
+						<S.PrevNextButton
 							type="button"
-							onClick={() => navigate(`/sections/${sectionId}/dashboard`)}
+							$theme={theme}
+							$disabled={problemNav.prevProblemId == null || isProblemChanging}
+							disabled={problemNav.prevProblemId == null || isProblemChanging}
+							onClick={() => {
+								if (problemNav.prevProblemId != null) {
+									handleProblemChange(problemNav.prevProblemId);
+								}
+							}}
 						>
-							{sectionInfo.courseTitle}
-						</S.BreadcrumbLink>
-						<span> › </span>
-						<S.BreadcrumbLink
+							‹ 이전 문제
+						</S.PrevNextButton>
+						{problemNav.indexLabel ? (
+							<S.ProblemIndexHint $theme={theme}>
+								문제 {problemNav.indexLabel}
+							</S.ProblemIndexHint>
+						) : null}
+						<S.PrevNextButton
 							type="button"
-							onClick={() =>
-								navigate(
-									`/sections/${sectionId}/course-assignments?assignmentId=${assignmentId}`,
-								)
-							}
+							$theme={theme}
+							$disabled={problemNav.nextProblemId == null || isProblemChanging}
+							disabled={problemNav.nextProblemId == null || isProblemChanging}
+							onClick={() => {
+								if (problemNav.nextProblemId != null) {
+									handleProblemChange(problemNav.nextProblemId);
+								}
+							}}
 						>
-							{assignmentInfo.title}
-						</S.BreadcrumbLink>
-						<span> › </span>
-						<S.BreadcrumbCurrent $theme={theme}>
-							{currentProblem.title}
-						</S.BreadcrumbCurrent>
-					</S.Breadcrumb>
+							다음 문제 ›
+						</S.PrevNextButton>
+						<S.ProblemNavigateButton
+							type="button"
+							$theme={theme}
+							onClick={() => setIsProblemModalOpen(true)}
+						>
+							문제 목록
+						</S.ProblemNavigateButton>
+						<S.ProblemNavigateButton
+							type="button"
+							$theme={theme}
+							onClick={() => setIsAssignmentModalOpen(true)}
+						>
+							과제 이동
+						</S.ProblemNavigateButton>
+					</S.ProblemToolbarRow>
 					<S.Controls>
 						<S.ThemeButton
 							type="button"
@@ -197,15 +278,6 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 						>
 							Dark
 						</S.ThemeButton>
-						<S.LanguageSelect
-							$theme={theme}
-							value={language}
-							onChange={(e) => handleLanguageChange(e.target.value)}
-							disabled
-							style={{ opacity: 0.7, cursor: "not-allowed" }}
-						>
-							<option value="c">C</option>
-						</S.LanguageSelect>
 					</S.Controls>
 				</S.Header>
 
@@ -238,6 +310,61 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 						</Split>
 					</Split>
 				</S.MainSplit>
+				<ProblemSelectModal
+					isOpen={isProblemModalOpen}
+					problems={problems}
+					currentProblemId={currentProblem.id ?? null}
+					isChanging={isProblemChanging}
+					onClose={() => setIsProblemModalOpen(false)}
+					onSelectProblem={(pid) => {
+						handleProblemChange(pid);
+					}}
+				/>
+				<AssignmentSelectModal
+					isOpen={isAssignmentModalOpen}
+					assignments={sectionAssignments}
+					currentAssignmentId={
+						assignmentId != null ? Number(assignmentId) : null
+					}
+					isChanging={isProblemChanging}
+					onClose={() => setIsAssignmentModalOpen(false)}
+					onSelectAssignment={handleSelectOtherAssignment}
+				/>
+				{showUnsavedModal && (
+					<S.UnsavedModalOverlay>
+						<S.UnsavedModalCard $theme={theme}>
+							<S.UnsavedModalTitle $theme={theme}>
+								저장되지 않은 변경사항이 있습니다
+							</S.UnsavedModalTitle>
+							<S.UnsavedModalDesc $theme={theme}>
+								문제를 이동하기 전에 변경사항을 저장하시겠습니까?
+							</S.UnsavedModalDesc>
+							<S.UnsavedModalActions>
+								<S.UnsavedModalButton
+									type="button"
+									$theme={theme}
+									onClick={handleUnsavedModalCancel}
+								>
+									취소
+								</S.UnsavedModalButton>
+								<S.UnsavedModalButton
+									type="button"
+									$theme={theme}
+									onClick={handleUnsavedModalSkip}
+								>
+									저장 안 함
+								</S.UnsavedModalButton>
+								<S.UnsavedModalPrimaryButton
+									type="button"
+									$theme={theme}
+									onClick={handleUnsavedModalSave}
+								>
+									저장 후 이동
+								</S.UnsavedModalPrimaryButton>
+							</S.UnsavedModalActions>
+						</S.UnsavedModalCard>
+					</S.UnsavedModalOverlay>
+				)}
 			</S.PageWrapper>
 		</DndProvider>
 	);
