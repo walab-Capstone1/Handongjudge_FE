@@ -264,13 +264,12 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 			<div>
 				{isSubmitting && !showProgress ? (
 					<S.ResultLoading>
-						<LoadingSpinner message="" />
+						<LoadingSpinner message="" size="sm" compact />
 					</S.ResultLoading>
 				) : showProgress ? (
-					<div style={{ padding: "4px 0" }}>
-						{/* 헤더: 스피너 + 카운트 */}
-						<S.ResultLoading style={{ marginBottom: "14px" }}>
-							<LoadingSpinner message="" />
+					<div style={{ padding: "2px 0 0" }}>
+						<S.ResultLoading style={{ marginBottom: "8px" }}>
+							<LoadingSpinner message="" size="sm" compact />
 							<span>
 								채점 중...{" "}
 								{totalCount !== null
@@ -281,7 +280,7 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 
 						{/* 프로그레스 바 */}
 						{progressPct !== null && (
-							<div style={{ marginBottom: "14px" }}>
+							<div style={{ marginBottom: "10px" }}>
 								<div
 									style={{
 										height: "6px",

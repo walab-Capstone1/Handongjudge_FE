@@ -27,9 +27,11 @@ export const ResultArea = styled.div`
 
 export const ResultLoading = styled.div`
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 12px;
+  gap: 10px;
+  padding: 4px 0;
   opacity: 0.5;
 `;
 
