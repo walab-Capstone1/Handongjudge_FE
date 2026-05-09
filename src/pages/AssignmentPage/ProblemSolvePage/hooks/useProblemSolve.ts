@@ -92,6 +92,8 @@ export function useProblemSolve() {
 	const lastSavedCodeRef = useRef<string>("");
 	// IndexedDB 디바운스 저장 타이머
 	const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	// 과제 제출 폴링 취소 플래그 (언마운트 또는 재제출 시 이전 폴링 중단)
+	const submissionPollingCancelledRef = useRef(false);
 	const [showUnsavedModal, setShowUnsavedModal] = useState(false);
 	const pendingNavigationRef = useRef<PendingNavigation | null>(null);
 
@@ -416,6 +418,13 @@ export function useProblemSolve() {
 		return () => clearInterval(interval);
 	}, [saveToBackend]);
 
+	// 언마운트 시 진행 중인 제출 폴링 취소
+	useEffect(() => {
+		return () => {
+			submissionPollingCancelledRef.current = true;
+		};
+	}, []);
+
 	// 페이지 이탈/새로고침 시 미저장 변경사항 경고
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -488,17 +497,52 @@ export function useProblemSolve() {
 			}
 		}
 
+		// 이전 폴링이 진행 중이면 취소
+		submissionPollingCancelledRef.current = true;
+		// 새 폴링 시작을 위해 플래그 초기화 (비동기 간격 확보)
+		await new Promise((r) => setTimeout(r, 0));
+		submissionPollingCancelledRef.current = false;
+
 		setIsSubmitting(true);
 		setSubmissionResult(null);
 		try {
-			const submissionResponse = await apiService.submitCode(
+			// Step 1: DOMjudge에 제출 — 즉시 submissionDbId 반환
+			const submitRes = await apiService.submitCodeAsync(
 				sectionId,
 				problemId,
 				code,
 				language,
 			);
-			const res = submissionResponse?.data ?? submissionResponse;
-			const result = res?.result ?? res?.resultType;
+			const submissionDbId: number = submitRes?.submissionDbId;
+			if (!submissionDbId) {
+				throw new Error("제출 ID를 받지 못했습니다. 다시 시도해주세요.");
+			}
+
+			// Step 2: 결과 폴링 (1.5초 간격, 최대 35초)
+			const POLL_INTERVAL_MS = 1500;
+			const TIMEOUT_MS = 35_000;
+			const deadline = Date.now() + TIMEOUT_MS;
+			let resultData: any = null;
+
+			while (Date.now() < deadline) {
+				if (submissionPollingCancelledRef.current) return;
+				await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+				if (submissionPollingCancelledRef.current) return;
+
+				const pollRes = await apiService.getAssignmentResult(submissionDbId);
+				if (pollRes) {
+					resultData = pollRes?.data ?? pollRes;
+					break;
+				}
+			}
+
+			if (!resultData) {
+				throw new Error(
+					"채점 결과를 가져오는 데 시간이 초과되었습니다. 제출은 완료되었을 수 있으니 제출 목록에서 확인해 주세요.",
+				);
+			}
+
+			const result = resultData?.result ?? resultData?.resultType;
 			const fallback = {
 				status: "unknown",
 				message: String(result),
@@ -509,14 +553,15 @@ export function useProblemSolve() {
 				status: "completed",
 				result: result ?? "NO",
 				resultInfo,
-				submissionId: res?.submissionId,
-				submittedAt: res?.submittedAt,
-				language: res?.language ?? language,
+				submissionId: resultData?.submissionId,
+				submittedAt: resultData?.submittedAt,
+				language: resultData?.language ?? language,
 				code,
 				type: "judge",
 			});
 			await clearSessionAfterSubmission();
 		} catch (error: unknown) {
+			if (submissionPollingCancelledRef.current) return;
 			const message =
 				error instanceof Error ? error.message : "코드 제출에 실패했습니다.";
 			// 백엔드에서 비활성화 에러만 처리 (마감일 지나면 지각 제출 허용)
