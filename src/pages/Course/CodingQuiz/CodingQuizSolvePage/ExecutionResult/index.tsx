@@ -39,14 +39,36 @@ interface SubmissionResult {
 	score?: number;
 }
 
+interface TestcaseProgress {
+	index: number;
+	result: string;
+}
+
 interface ExecutionResultProps {
 	submissionResult: SubmissionResult | null;
 	isSubmitting: boolean;
+	testcaseResults?: TestcaseProgress[] | null;
+	onResetTestcaseResults?: () => void;
+	totalTestcaseCount?: number | null;
 }
+
+const RESULT_COLOR: Record<string, string> = {
+	correct: "#28a745",
+	"wrong-answer": "#dc3545",
+	timelimit: "#fd7e14",
+	"memory-limit": "#fd7e14",
+	"run-error": "#dc3545",
+	"compiler-error": "#dc3545",
+	"presentation-error": "#fd7e14",
+	"no-output": "#6c757d",
+};
 
 const ExecutionResult: React.FC<ExecutionResultProps> = ({
 	submissionResult,
 	isSubmitting,
+	testcaseResults,
+	onResetTestcaseResults,
+	totalTestcaseCount,
 }) => {
 	const [selectedTestcase, setSelectedTestcase] = useState<number | null>(null);
 
@@ -232,87 +254,134 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 		return null;
 	};
 
+	const doneCount = testcaseResults?.length ?? 0;
+	const totalCount = totalTestcaseCount ?? null;
+	const showProgress = isSubmitting && (doneCount > 0 || totalCount !== null);
+	const progressPct = totalCount ? Math.round((doneCount / totalCount) * 100) : null;
+
 	return (
 		<S.ResultArea>
 			<div>
-				{isSubmitting && submissionResult?.status === "judging" ? (
+				{isSubmitting && !showProgress ? (
 					<S.ResultLoading>
-						<LoadingSpinner />
-						<span>채점 중입니다... 잠시만 기다려주세요.</span>
+						<LoadingSpinner message="" />
 					</S.ResultLoading>
-				) : isSubmitting ? (
-					<S.ResultLoading>
-						<LoadingSpinner />
-						<span>제출 중...</span>
-					</S.ResultLoading>
+				) : showProgress ? (
+					<div style={{ padding: "4px 0" }}>
+						{/* 헤더: 스피너 + 카운트 */}
+						<S.ResultLoading style={{ marginBottom: "14px" }}>
+							<LoadingSpinner message="" />
+							<span>
+								채점 중...{" "}
+								{totalCount !== null
+									? `${doneCount} / ${totalCount}`
+									: `${doneCount}개 완료`}
+							</span>
+						</S.ResultLoading>
+
+						{/* 프로그레스 바 */}
+						{progressPct !== null && (
+							<div style={{ marginBottom: "14px" }}>
+								<div
+									style={{
+										height: "6px",
+										borderRadius: "999px",
+										backgroundColor: "#e9ecef",
+										overflow: "hidden",
+									}}
+								>
+									<div
+										style={{
+											height: "100%",
+											width: `${progressPct}%`,
+											borderRadius: "999px",
+											backgroundColor: "#0d6efd",
+											transition: "width 0.3s ease",
+										}}
+									/>
+								</div>
+								<div style={{ textAlign: "right", fontSize: "0.75rem", color: "#6c757d", marginTop: "4px" }}>
+									{progressPct}%
+								</div>
+							</div>
+						)}
+
+						{/* 테스트케이스 그리드 */}
+						<div style={{ marginBottom: "6px", fontWeight: 600, fontSize: "0.85rem", color: "#495057" }}>
+							테스트케이스 현황
+						</div>
+						<div
+							style={{
+								display: "grid",
+								gridTemplateColumns: "repeat(auto-fill, minmax(52px, 1fr))",
+								gap: "8px",
+							}}
+						>
+							{Array.from({ length: totalCount ?? doneCount }, (_, i) => {
+								const idx = i + 1;
+								const done = testcaseResults?.find((tc) => tc.index === idx);
+								return (
+									<div
+										key={idx}
+										title={done ? done.result : "채점 대기"}
+										style={{
+											height: "48px",
+											borderRadius: "8px",
+											display: "flex",
+											flexDirection: "column",
+											alignItems: "center",
+											justifyContent: "center",
+											gap: "2px",
+											fontSize: "0.7rem",
+											fontWeight: 700,
+											color: done ? "#fff" : "#adb5bd",
+											backgroundColor: done
+												? (RESULT_COLOR[done.result] ?? "#6c757d")
+												: "#f1f3f5",
+											border: done ? "none" : "2px dashed #dee2e6",
+											transition: "background-color 0.25s ease, color 0.25s ease, border 0.25s ease",
+										}}
+									>
+										<span style={{ fontSize: "0.65rem", opacity: 0.85 }}>#{idx}</span>
+										<span>
+											{done
+												? done.result === "correct" ? "✓" : "✗"
+												: "…"}
+										</span>
+									</div>
+								);
+							})}
+						</div>
+
+						{/* 범례 */}
+						<div style={{ display: "flex", gap: "12px", marginTop: "12px", fontSize: "0.75rem", color: "#6c757d" }}>
+							<span><span style={{ color: "#28a745" }}>●</span> 정답</span>
+							<span><span style={{ color: "#dc3545" }}>●</span> 오답</span>
+							<span><span style={{ color: "#adb5bd" }}>●</span> 대기</span>
+						</div>
+					</div>
 				) : submissionResult ? (
 					<>
 						{(() => {
 							const summary = getResultSummary(submissionResult);
-							if (summary) {
-								return (
-									<S.ResultSummary $type={summary.type}>
-										<S.SummaryHeader>
-											<S.SummaryIcon $type={summary.type}>
-												{summary.type === "success"
-													? "✅"
-													: summary.type === "warning"
-														? "⚠️"
-														: "❌"}
-											</S.SummaryIcon>
-											<S.SummaryTitle>{summary.title}</S.SummaryTitle>
-										</S.SummaryHeader>
-										<S.SummaryDescription>
-											{summary.description}
-										</S.SummaryDescription>
-										{summary.details.length > 0 && (
-											<S.SummaryDetails>
-												{summary.details.map((detail, index) => (
-													<S.SummaryDetail key={index}>
-														{detail}
-													</S.SummaryDetail>
-												))}
-											</S.SummaryDetails>
-										)}
-										{submissionResult.status !== "error" &&
-											submissionResult.submittedAt && (
-												<S.SubmissionInfo>
-													제출 ID: {submissionResult.submissionId} | 언어:{" "}
-													{submissionResult.language} | 제출 시간:{" "}
-													{new Date(
-														submissionResult.submittedAt,
-													).toLocaleString("ko-KR")}
-												</S.SubmissionInfo>
-											)}
-									</S.ResultSummary>
-								);
-							} else {
-								return (
-									<S.ResultSummary
-										$type={
-											submissionResult.resultInfo?.status === "error"
-												? "error"
-												: "success"
-										}
-										style={{ color: submissionResult.resultInfo?.color }}
-									>
-										<strong>{submissionResult.resultInfo?.message}</strong>
-										{submissionResult.status !== "error" &&
-											submissionResult.submittedAt && (
-												<>
-													<br />
-													<S.SubmissionInfo>
-														제출 ID: {submissionResult.submissionId} | 언어:{" "}
-														{submissionResult.language} | 제출 시간:{" "}
-														{new Date(
-															submissionResult.submittedAt,
-														).toLocaleString("ko-KR")}
-													</S.SubmissionInfo>
-												</>
-											)}
-									</S.ResultSummary>
-								);
-							}
+							const icon = summary?.type === "success" ? "✅" : summary?.type === "warning" ? "⚠️" : "❌";
+							const label = summary?.title ?? submissionResult.resultInfo?.message ?? "";
+							const desc = summary?.description ?? "";
+							const type = summary?.type ?? (submissionResult.resultInfo?.status === "error" ? "error" : "success");
+							return (
+								<S.ResultSummary $type={type}>
+									<S.CompactRow>
+										<S.SummaryIcon $type={type}>{icon}</S.SummaryIcon>
+										<S.SummaryTitle>{label}</S.SummaryTitle>
+										{desc && <S.SummaryDescription>{desc}</S.SummaryDescription>}
+									</S.CompactRow>
+									{submissionResult.status !== "error" && submissionResult.submittedAt && (
+										<S.SubmissionInfo>
+											언어: {submissionResult.language} · {new Date(submissionResult.submittedAt).toLocaleString("ko-KR")}
+										</S.SubmissionInfo>
+									)}
+								</S.ResultSummary>
+							);
 						})()}
 
 						{submissionResult.status === "error" && (

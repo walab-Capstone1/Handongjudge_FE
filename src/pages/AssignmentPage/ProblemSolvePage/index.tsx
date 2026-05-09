@@ -54,6 +54,9 @@ const ProblemSolvePage: React.FC = () => {
 			handleSelectOtherAssignment={hook.handleSelectOtherAssignment}
 			handleSubmit={hook.handleSubmit}
 			handleSubmitWithOutput={hook.handleSubmitWithOutput}
+			testcaseResults={hook.testcaseResults}
+			resetTestcaseResults={hook.resetTestcaseResults}
+			totalTestcaseCount={hook.totalTestcaseCount}
 			saveToSession={hook.saveToSession}
 			saveToBackend={hook.saveToBackend}
 			showSaveModal={hook.showSaveModal}

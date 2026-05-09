@@ -55,6 +55,9 @@ interface ProblemSolveViewProps {
 	handleSelectOtherAssignment: (assignmentId: number) => void;
 	handleSubmit: () => void;
 	handleSubmitWithOutput: () => void;
+	testcaseResults: Array<{ index: number; result: string }> | null;
+	resetTestcaseResults: () => void;
+	totalTestcaseCount: number | null;
 	saveToSession: () => void;
 	saveToBackend: (showModal?: boolean) => void;
 	showSaveModal: boolean;
@@ -108,6 +111,9 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 		handleSelectOtherAssignment,
 		handleSubmit,
 		handleSubmitWithOutput,
+		testcaseResults,
+		resetTestcaseResults,
+		totalTestcaseCount,
 		saveToSession,
 		saveToBackend,
 		showSaveModal,
@@ -156,6 +162,9 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 			<ExecutionResult
 				submissionResult={submissionResult}
 				isSubmitting={isSubmitting}
+				testcaseResults={testcaseResults}
+				onResetTestcaseResults={resetTestcaseResults}
+				totalTestcaseCount={totalTestcaseCount}
 			/>
 		),
 	};
