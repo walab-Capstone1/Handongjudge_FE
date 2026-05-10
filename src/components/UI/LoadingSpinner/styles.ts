@@ -5,13 +5,13 @@ const spin = keyframes`
   100% { transform: rotate(360deg); }
 `;
 
-export const Container = styled.div`
+export const Container = styled.div<{ $compact?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 200px;
-  gap: 1rem;
+  min-height: ${(p) => (p.$compact ? "0" : "200px")};
+  gap: ${(p) => (p.$compact ? "0.375rem" : "1rem")};
 `;
 
 export const Spinner = styled.div<{ $size: "sm" | "md" | "lg" }>`

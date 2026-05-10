@@ -27,22 +27,20 @@ export const ResultArea = styled.div`
 
 export const ResultLoading = styled.div`
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 20px;
-  opacity: 0.6;
-
-  .loading-spinner {
-    margin-right: 10px;
-  }
+  gap: 10px;
+  padding: 4px 0;
+  opacity: 0.5;
 `;
 
 export const ResultSummary = styled.div<{
 	$type?: "success" | "error" | "warning";
 }>`
-  margin-bottom: 12px;
-  padding: ${(props) => (props.$type ? "16px" : "12px")};
-  border-radius: 4px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
 
   ${(props) => {
 		switch (props.$type) {
@@ -99,59 +97,50 @@ export const ResultSummary = styled.div<{
   flex-shrink: 0;
 `;
 
+export const CompactRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
 export const SummaryHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 8px;
 `;
 
 export const SummaryIcon = styled.span<{
 	$type: "success" | "error" | "warning";
 }>`
-  font-size: 20px;
+  font-size: 15px;
   line-height: 1;
+  flex-shrink: 0;
 `;
 
 export const SummaryTitle = styled.strong`
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
-
-  ${ResultSummary}[data-type="success"] & {
-    color: #28a745;
-  }
-
-  ${ResultSummary}[data-type="error"] & {
-    color: #dc3545;
-  }
-
-  ${ResultSummary}[data-type="warning"] & {
-    color: #ffc107;
-  }
 `;
 
-export const SummaryDescription = styled.div`
-  margin-bottom: 8px;
-  font-size: 14px;
-  opacity: 0.9;
+export const SummaryDescription = styled.span`
+  font-size: 13px;
+  opacity: 0.75;
 `;
 
 export const SummaryDetails = styled.div`
-  margin-bottom: 12px;
+  margin-top: 2px;
 `;
 
 export const SummaryDetail = styled.div`
-  font-size: 13px;
-  opacity: 0.8;
-  margin-bottom: 4px;
+  font-size: 12px;
+  opacity: 0.7;
 `;
 
 export const SubmissionInfo = styled.div`
-  font-size: 12px;
-  opacity: 0.7;
-  margin-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 8px;
+  font-size: 11px;
+  opacity: 0.55;
+  margin-top: 4px;
 `;
 
 export const ErrorMessage = styled.div`

@@ -57,6 +57,8 @@ export default function CodingQuizSolveView(d: UseCodingQuizSolveReturn) {
 			<ExecutionResult
 				submissionResult={d.submissionResult}
 				isSubmitting={d.isSubmitting}
+				testcaseResults={d.testcaseResults}
+				totalTestcaseCount={d.totalTestcaseCount}
 			/>
 		),
 	};
