@@ -252,6 +252,30 @@ class APIService {
 	}
 
 	/**
+	 * 테스트하기 비동기 제출: DOMjudge에만 제출 후 sessionKey를 즉시 반환 (~1초).
+	 * DB에 저장하지 않으며, 반환된 sessionKey로 SSE /test/stream/{sessionKey} 에 연결해 output 수신.
+	 */
+	async testSubmitAsync(
+		sectionId: number | string,
+		problemId: number | string,
+		code: string,
+		language: string,
+	): Promise<{ sessionKey: string; sectionId: number; problemId: number; language: string; submittedAt: string }> {
+		return await this.request("/submissions/test/submit", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				problemId: Number.parseInt(String(problemId)),
+				sectionId: Number.parseInt(String(sectionId)),
+				language,
+				codeString: code,
+			}),
+		});
+	}
+
+	/**
 	 * 기존 API (하위 호환): 서버 측 폴링으로 채점 결과까지 한 번에 반환.
 	 */
 	async submitQuizCode(
