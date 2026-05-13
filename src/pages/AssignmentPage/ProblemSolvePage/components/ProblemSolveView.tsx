@@ -11,6 +11,7 @@ import ProblemSelectModal from "../../../Course/CodingQuiz/CodingQuizSolvePage/P
 import AssignmentSelectModal from "./AssignmentSelectModal";
 import type { PanelKey } from "../hooks/useProblemSolve";
 import type { Problem } from "../types";
+import type { ProblemWorkStatus } from "../../../Course/CodingQuiz/CodingQuizSolvePage/types";
 import * as S from "../styles";
 
 interface ProblemSolveViewProps {
@@ -39,6 +40,7 @@ interface ProblemSolveViewProps {
 	verticalSizes: number[];
 	panelLayout: { left: PanelKey; topRight: PanelKey; bottomRight: PanelKey };
 	problems: Array<{ id: number; title: string; order: number }>;
+	problemStatusById: Record<number, ProblemWorkStatus>;
 	isProblemModalOpen: boolean;
 	isProblemChanging: boolean;
 	setIsProblemModalOpen: (open: boolean) => void;
@@ -99,6 +101,7 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 		verticalSizes,
 		panelLayout,
 		problems,
+		problemStatusById,
 		isProblemModalOpen,
 		isProblemChanging,
 		setIsProblemModalOpen,
@@ -323,6 +326,7 @@ const ProblemSolveView: React.FC<ProblemSolveViewProps> = (props) => {
 					isOpen={isProblemModalOpen}
 					problems={problems}
 					currentProblemId={currentProblem.id ?? null}
+					problemStatusById={problemStatusById}
 					isChanging={isProblemChanging}
 					onClose={() => setIsProblemModalOpen(false)}
 					onSelectProblem={(pid) => {

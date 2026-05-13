@@ -337,7 +337,9 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 	const mainMenuItems = useMemo<MenuItem[]>(
 		() => [
 			{
-				path: "/dashboard",
+				path: currentSection
+					? `/sections/${currentSection.sectionId}/dashboard`
+					: "/dashboard",
 				label: "강의로 돌아가기",
 				icon: FaArrowLeft,
 				subItems: [],
@@ -370,7 +372,7 @@ const TutorLayout: React.FC<TutorLayoutProps> = ({
 				],
 			},
 		],
-		[],
+		[currentSection],
 	);
 
 	const handleMenuClick = useCallback(
