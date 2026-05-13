@@ -42,6 +42,7 @@ const ProblemSolvePage: React.FC = () => {
 			verticalSizes={hook.verticalSizes}
 			panelLayout={hook.panelLayout}
 			problems={hook.problems}
+			problemStatusById={hook.problemStatusById}
 			isProblemModalOpen={hook.isProblemModalOpen}
 			isProblemChanging={hook.isProblemChanging}
 			setIsProblemModalOpen={hook.setIsProblemModalOpen}
