@@ -829,22 +829,17 @@ export function useCodingQuizSolve() {
 							message: `알 수 없는 결과: ${result}`,
 							color: "#6c757d",
 						};
-						setSubmissionResult({
-							status: "completed",
-							result,
-							resultInfo,
-							submissionDbId,
-							submissionId: res.submissionId,
-							submittedAt: res.submittedAt ?? submittedAt,
-							language: res.language ?? submissionLanguage,
-							code,
-							type: "output",
-							outputList: res.outputList,
-							passedCount: res.passedCount,
-							totalCount: res.totalCount,
-							points: res.points,
-							score: res.score,
-						});
+					setSubmissionResult({
+						status: "completed",
+						result,
+						resultInfo,
+						submissionDbId,
+						submissionId: res.submissionId,
+						submittedAt: res.submittedAt ?? submittedAt,
+						language: res.language ?? submissionLanguage,
+						code,
+						type: "judge",
+					});
 						setProblemStatusById((prev) => ({
 							...prev,
 							[selectedProblemId]: {
