@@ -30,6 +30,17 @@ export type ProblemEditLocationState = {
 	assignmentId?: number;
 } | null;
 
+/**
+ * contenteditable에 innerHTML을 넣을지 결정할 때 사용.
+ * `<S, T>`, `<>` 같은 리터럴은 false — 실제 HTML 태그(br, p, strong 등)일 때만 true.
+ */
+function looksLikeImportedHtml(s: string): boolean {
+	if (!s || !s.includes("<")) return false;
+	return /<\s*(?:p|div|br\s*\/?|span|strong|em|b|i|u|h[1-6]|ul|ol|li|table|thead|tbody|tr|td|th|pre|code|blockquote|a\b)/i.test(
+		s,
+	);
+}
+
 export function useProblemEdit() {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -91,12 +102,10 @@ export function useProblemEdit() {
 			}
 			const rawDescription = parsedData?.description ?? problem?.description ?? "";
 			const descriptionText = (rawDescription || "")
-				.replace(/<[^>]*>/g, "")
 				.replace(/\r\n/g, "\n")
 				.replace(/\r/g, "\n")
 				.trim();
 			const parsed = parseDescriptionSections(descriptionText);
-			const description = parsed.mainDescription;
 			const mainDescriptionText = parsed.mainDescription;
 			let timeLimit = "";
 			if (parsedData?.timeLimit != null) {
@@ -164,8 +173,7 @@ export function useProblemEdit() {
 			setEnableFullEdit(false);
 			setTimeout(() => {
 				if (descriptionRef.current) {
-					const isHTML = /<[^>]+>/.test(mainDescriptionText);
-					if (isHTML) {
+					if (looksLikeImportedHtml(mainDescriptionText)) {
 						descriptionRef.current.innerHTML = mainDescriptionText;
 					} else {
 						descriptionRef.current.textContent = mainDescriptionText;
@@ -192,8 +200,7 @@ export function useProblemEdit() {
 			isInitialLoad &&
 			!loading
 		) {
-			const isHTML = /<[^>]+>/.test(formData.description);
-			if (isHTML) {
+			if (looksLikeImportedHtml(formData.description)) {
 				descriptionRef.current.innerHTML = formData.description;
 			} else {
 				descriptionRef.current.textContent =
@@ -205,8 +212,7 @@ export function useProblemEdit() {
 
 	useEffect(() => {
 		if (enableFullEdit && descriptionRef.current && formData.description) {
-			const isHTML = /<[^>]+>/.test(formData.description);
-			if (isHTML) {
+			if (looksLikeImportedHtml(formData.description)) {
 				descriptionRef.current.innerHTML = formData.description;
 			} else {
 				descriptionRef.current.textContent =
@@ -258,7 +264,7 @@ export function useProblemEdit() {
 							.replace(/\n/g, "<br>")
 							.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
 							.replace(/\*(.*?)\*/g, "<em>$1</em>");
-						const descText = parsedData.description.replace(/<[^>]*>/g, "");
+						const descText = parsedData.description;
 						setFormData((prev) => ({
 							...prev,
 							description: htmlDesc,
