@@ -34,8 +34,9 @@ const ProblemEditBanners: React.FC<ProblemEditBannersProps> = ({
 							fontSize: "14px",
 						}}
 					>
-						현재 제목, 난이도, 태그만 수정 가능합니다. 다른 필드를 수정하려면
-						&apos;문제 변환&apos; 버튼을 클릭하세요.
+						현재 제목, 난이도, 태그, 문제 설명을 수정할 수 있습니다.
+						<br />
+						시간/메모리 제한 및 테스트케이스를 수정하려면 &apos;문제 변환&apos; 버튼을 클릭하세요.
 						<br />
 						<span
 							style={{
