@@ -93,19 +93,19 @@ export default function ProblemEditView(d: ProblemEditHookReturn) {
 								handleZipFileChange={d.handleZipFileChange}
 							/>
 
-						<ProblemEditDescriptionSection
-							descriptionRef={d.descriptionRef}
-							formData={d.formData}
-							setFormData={d.setFormData}
-							enableFullEdit={d.enableFullEdit}
-							previewMode={d.previewMode}
-							setPreviewMode={d.setPreviewMode}
-							getDescriptionOnlyForPreview={d.getDescriptionOnlyForPreview}
-							getFullPreviewProps={d.getFullPreviewProps}
-							insertMarkdownText={d.insertMarkdownText}
-							wrapWithMarkdown={d.wrapWithMarkdown}
-							insertMarkdownHeading={d.insertMarkdownHeading}
-						/>
+					<ProblemEditDescriptionSection
+						descriptionRef={d.descriptionRef}
+						formData={d.formData}
+						setFormData={d.setFormData}
+						enableFullEdit={d.enableFullEdit}
+						previewMode={d.previewMode}
+						setPreviewMode={d.setPreviewMode}
+						getDescriptionOnlyForPreview={d.getDescriptionOnlyForPreview}
+						getFullPreviewProps={d.getFullPreviewProps}
+						insertMarkdownText={d.insertMarkdownText}
+						wrapWithMarkdown={d.wrapWithMarkdown}
+						insertMarkdownHeading={d.insertMarkdownHeading}
+					/>
 
 							<ProblemEditInputOutputSection
 								formData={d.formData}
