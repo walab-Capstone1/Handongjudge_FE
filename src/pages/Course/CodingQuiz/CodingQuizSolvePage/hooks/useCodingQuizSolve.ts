@@ -61,8 +61,12 @@ export function useCodingQuizSolve() {
 	const sseAbortControllerRef = useRef<AbortController | null>(null);
 	// SSE로 수신한 테스트케이스 output 누적 (re-render 없이 최종 outputList 구성)
 	const testcaseOutputAccumRef = useRef<any[]>([]);
-	const [testcaseResults, setTestcaseResults] = useState<{ index: number; result: string }[] | null>(null);
-	const [totalTestcaseCount, setTotalTestcaseCount] = useState<number | null>(null);
+	const [testcaseResults, setTestcaseResults] = useState<
+		{ index: number; result: string }[] | null
+	>(null);
+	const [totalTestcaseCount, setTotalTestcaseCount] = useState<number | null>(
+		null,
+	);
 	const [horizontalSizes, setHorizontalSizes] = useState([28, 72]);
 	const [verticalSizes, setVerticalSizes] = useState([82, 18]);
 	const [isTimeUp, setIsTimeUp] = useState(false);
@@ -86,8 +90,7 @@ export function useCodingQuizSolve() {
 	const [nowMs, setNowMs] = useState(Date.now());
 
 	// 시험 중복 접속 방지용 (모든 역할 공통)
-	const [examClientSessionId] = useState<string>(() =>
-	{
+	const [examClientSessionId] = useState<string>(() => {
 		const storageKey = "coding-quiz-client-session-id";
 		if (typeof window !== "undefined") {
 			const existing = window.sessionStorage.getItem(storageKey);
@@ -101,8 +104,7 @@ export function useCodingQuizSolve() {
 			window.sessionStorage.setItem(storageKey, newSessionId);
 		}
 		return newSessionId;
-	},
-	);
+	});
 	const [examSessionConflict, setExamSessionConflict] = useState(false);
 	const [examSessionTakenOver, setExamSessionTakenOver] = useState(false);
 	const problemChangeRequestIdRef = useRef(0);
@@ -146,10 +148,12 @@ export function useCodingQuizSolve() {
 		}
 	}, [auth.isAuthenticated, auth.user, sectionId]);
 
-	const isManager = userRole === "ADMIN" || userRole === "TUTOR" || userRole === "SUPER_ADMIN";
+	const isManager =
+		userRole === "ADMIN" || userRole === "TUTOR" || userRole === "SUPER_ADMIN";
 	const isQuizEndedByTime =
 		!!quizInfo.endTime && nowMs >= quizInfo.endTime.getTime();
-	const isQuizEnded = isTimeUp || quizInfo.status === "ENDED" || isQuizEndedByTime;
+	const isQuizEnded =
+		isTimeUp || quizInfo.status === "ENDED" || isQuizEndedByTime;
 
 	// 학생 제출/테스트 차단: 시간 종료 또는 PAUSED(일시정지) 상태
 	const isSubmitBlocked =
@@ -271,7 +275,10 @@ export function useCodingQuizSolve() {
 		const loadProblemStatuses = async () => {
 			if (!sectionId || !quizId || problems.length === 0) return;
 			try {
-				const response = await apiService.getQuizProblemStatuses(sectionId, quizId);
+				const response = await apiService.getQuizProblemStatuses(
+					sectionId,
+					quizId,
+				);
 				const list = (response?.data ?? response ?? []) as ProblemWorkStatus[];
 				const nextMap: Record<number, ProblemWorkStatus> = {};
 				for (const item of list) {
@@ -313,8 +320,7 @@ export function useCodingQuizSolve() {
 				);
 				const status =
 					(res as { data?: { status?: string }; status?: string })?.data
-						?.status ??
-					(res as { status?: string })?.status;
+						?.status ?? (res as { status?: string })?.status;
 				if (status === "CONFLICT") {
 					setExamSessionConflict(true);
 				}
@@ -346,8 +352,7 @@ export function useCodingQuizSolve() {
 				);
 				const valid =
 					(res as { data?: { valid?: boolean }; valid?: boolean })?.data
-						?.valid ??
-					(res as { valid?: boolean })?.valid;
+						?.valid ?? (res as { valid?: boolean })?.valid;
 				if (valid === false) {
 					setExamSessionTakenOver(true);
 				}
@@ -361,31 +366,61 @@ export function useCodingQuizSolve() {
 
 	useEffect(() => {
 		const loadCode = async () => {
-			if (!selectedProblemId || !sectionId || !language || !sessionId || auth.loading) return;
+			if (
+				!selectedProblemId ||
+				!sectionId ||
+				!language ||
+				!sessionId ||
+				auth.loading
+			)
+				return;
 			try {
 				// IndexedDB와 서버를 동시에 조회
 				const [sessionResult, serverResult] = await Promise.allSettled([
-					indexedDBManager.getSessionCode(selectedProblemId, sectionId, language),
+					indexedDBManager.getSessionCode(
+						selectedProblemId,
+						sectionId,
+						language,
+					),
 					apiService.loadProgress(selectedProblemId, sectionId, language),
 				]);
 
-				const sessionRecord = sessionResult.status === "fulfilled" ? sessionResult.value : null;
-				const serverData = serverResult.status === "fulfilled" ? serverResult.value : null;
+				const sessionRecord =
+					sessionResult.status === "fulfilled" ? sessionResult.value : null;
+				const serverData =
+					serverResult.status === "fulfilled" ? serverResult.value : null;
 
 				const sessionCode = sessionRecord?.code ?? null;
 				const sessionTimestamp = sessionRecord?.timestamp ?? 0;
 
 				const serverSaveKey = `lastServerSave_${selectedProblemId}_${sectionId}_${language}`;
-				const lastServerSaveTime = parseInt(localStorage.getItem(serverSaveKey) ?? "0", 10);
+				const lastServerSaveTime = Number.parseInt(
+					localStorage.getItem(serverSaveKey) ?? "0",
+					10,
+				);
 
-				const raw = serverData as { codeString?: string; code?: string } | string | undefined;
+				const raw = serverData as
+					| { codeString?: string; code?: string }
+					| string
+					| undefined;
 				const serverCode =
 					typeof raw === "object" && raw !== null
 						? (raw?.codeString ?? raw?.code ?? undefined)
-						: typeof raw === "string" ? raw : undefined;
+						: typeof raw === "string"
+							? raw
+							: undefined;
 
-				const isValidSession = Boolean(sessionCode && sessionCode.trim() !== "" && sessionCode !== getDefaultCode(language));
-				const isValidServer = Boolean(serverCode && typeof serverCode === "string" && serverCode.trim() !== "" && serverCode !== getDefaultCode(language));
+				const isValidSession = Boolean(
+					sessionCode &&
+						sessionCode.trim() !== "" &&
+						sessionCode !== getDefaultCode(language),
+				);
+				const isValidServer = Boolean(
+					serverCode &&
+						typeof serverCode === "string" &&
+						serverCode.trim() !== "" &&
+						serverCode !== getDefaultCode(language),
+				);
 
 				if (isValidSession && isValidServer) {
 					if (sessionTimestamp > lastServerSaveTime) {
@@ -419,41 +454,49 @@ export function useCodingQuizSolve() {
 		loadCode();
 	}, [selectedProblemId, sectionId, language, sessionId, auth.loading]);
 
-	const saveToBackend = useCallback(async (showModal = false) => {
-		if (!code || !selectedProblemId || !sectionId) return;
-		try {
-			setSessionSaveStatus("saving");
-			// 서버와 IndexedDB에 동시 저장
-			await Promise.all([
-				apiService.saveProgress(selectedProblemId, sectionId, language, code),
-				indexedDBManager.saveSessionCode(selectedProblemId, sectionId, language, code).catch(() => {}),
-			]);
-			// 서버 저장 시각을 localStorage에 기록 (timestamp 비교용)
-			localStorage.setItem(`lastServerSave_${selectedProblemId}_${sectionId}_${language}`, Date.now().toString());
-			lastSavedCodeRef.current = code;
-			setSessionSaveStatus("saved");
-			setProblemStatusById((prev) => ({
-				...prev,
-				[selectedProblemId]: {
-					problemId: selectedProblemId,
-					submitted: prev[selectedProblemId]?.submitted ?? false,
-					result: prev[selectedProblemId]?.result ?? null,
-					saved: true,
-				},
-			}));
+	const saveToBackend = useCallback(
+		async (showModal = false) => {
+			if (!code || !selectedProblemId || !sectionId) return;
+			try {
+				setSessionSaveStatus("saving");
+				// 서버와 IndexedDB에 동시 저장
+				await Promise.all([
+					apiService.saveProgress(selectedProblemId, sectionId, language, code),
+					indexedDBManager
+						.saveSessionCode(selectedProblemId, sectionId, language, code)
+						.catch(() => {}),
+				]);
+				// 서버 저장 시각을 localStorage에 기록 (timestamp 비교용)
+				localStorage.setItem(
+					`lastServerSave_${selectedProblemId}_${sectionId}_${language}`,
+					Date.now().toString(),
+				);
+				lastSavedCodeRef.current = code;
+				setSessionSaveStatus("saved");
+				setProblemStatusById((prev) => ({
+					...prev,
+					[selectedProblemId]: {
+						problemId: selectedProblemId,
+						submitted: prev[selectedProblemId]?.submitted ?? false,
+						result: prev[selectedProblemId]?.result ?? null,
+						saved: true,
+					},
+				}));
 
-			if (showModal) {
-				setShowSaveModal(true);
-				setTimeout(() => setShowSaveModal(false), 2000);
-			} else {
+				if (showModal) {
+					setShowSaveModal(true);
+					setTimeout(() => setShowSaveModal(false), 2000);
+				} else {
+					setTimeout(() => setSessionSaveStatus("idle"), 2000);
+				}
+			} catch (error) {
+				console.error("저장 실패:", error);
+				setSessionSaveStatus("error");
 				setTimeout(() => setSessionSaveStatus("idle"), 2000);
 			}
-		} catch (error) {
-			console.error("저장 실패:", error);
-			setSessionSaveStatus("error");
-			setTimeout(() => setSessionSaveStatus("idle"), 2000);
-		}
-	}, [code, language, selectedProblemId, sectionId]);
+		},
+		[code, language, selectedProblemId, sectionId],
+	);
 
 	// Ctrl+S 단축키 핸들러
 	useEffect(() => {
@@ -469,9 +512,12 @@ export function useCodingQuizSolve() {
 
 	useEffect(() => {
 		if (isTimeUp) return;
-		const autoSaveInterval = setInterval(() => {
-			saveToBackend(false);
-		}, 5 * 60 * 1000);
+		const autoSaveInterval = setInterval(
+			() => {
+				saveToBackend(false);
+			},
+			5 * 60 * 1000,
+		);
 		return () => clearInterval(autoSaveInterval);
 	}, [isTimeUp, saveToBackend]);
 
@@ -493,7 +539,8 @@ export function useCodingQuizSolve() {
 	// 페이지 이탈/새로고침 시 미저장 변경사항 경고
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			const hasUnsaved = code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+			const hasUnsaved =
+				code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
 			if (hasUnsaved) {
 				e.preventDefault();
 				e.returnValue = "";
@@ -523,7 +570,11 @@ export function useCodingQuizSolve() {
 	const handleExamSessionTakeover = useCallback(async () => {
 		if (!quizId || !sectionId) return;
 		try {
-			await apiService.takeoverQuizSession(sectionId, quizId, examClientSessionId);
+			await apiService.takeoverQuizSession(
+				sectionId,
+				quizId,
+				examClientSessionId,
+			);
 			setExamSessionConflict(false);
 		} catch (err) {
 			console.error("세션 인계 실패:", err);
@@ -536,7 +587,9 @@ export function useCodingQuizSolve() {
 		timeUpHandled.current = true;
 
 		setIsTimeUp(true);
-		alert("퀴즈 시간이 종료되었습니다. 현재 페이지는 조회 가능하며 제출/수정은 잠금됩니다.");
+		alert(
+			"퀴즈 시간이 종료되었습니다. 현재 페이지는 조회 가능하며 제출/수정은 잠금됩니다.",
+		);
 	}, []);
 
 	// 컴포넌트 언마운트 시 폴링 타이머 및 SSE 연결 정리
@@ -555,14 +608,14 @@ export function useCodingQuizSolve() {
 			if (!sectionId) return;
 			const requestId = ++problemChangeRequestIdRef.current;
 			try {
-			setIsProblemChanging(true);
-			// 문제 전환 시 진행 중인 폴링 타이머 및 SSE 연결 정리
-			if (pollingTimerRef.current) {
-				clearTimeout(pollingTimerRef.current);
-				pollingTimerRef.current = null;
-			}
-			sseAbortControllerRef.current?.abort();
-			sseAbortControllerRef.current = null;
+				setIsProblemChanging(true);
+				// 문제 전환 시 진행 중인 폴링 타이머 및 SSE 연결 정리
+				if (pollingTimerRef.current) {
+					clearTimeout(pollingTimerRef.current);
+					pollingTimerRef.current = null;
+				}
+				sseAbortControllerRef.current?.abort();
+				sseAbortControllerRef.current = null;
 				// 새 문제로 전환 전 상태 초기화
 				lastSavedCodeRef.current = "";
 				setCode(getDefaultCode(language));
@@ -587,10 +640,12 @@ export function useCodingQuizSolve() {
 
 	const handleProblemChange = useCallback(
 		async (problemId: number) => {
-			if (problemId === selectedProblemId || !sectionId || isProblemChanging) return;
+			if (problemId === selectedProblemId || !sectionId || isProblemChanging)
+				return;
 
 			// 미저장 변경사항이 있고 편집 잠금 상태가 아닐 때 → 저장 안내 모달
-			const hasUnsaved = code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+			const hasUnsaved =
+				code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
 			if (hasUnsaved && !isSubmitBlocked) {
 				pendingProblemIdRef.current = problemId;
 				setShowUnsavedModal(true);
@@ -599,7 +654,15 @@ export function useCodingQuizSolve() {
 
 			await doSwitchProblem(problemId);
 		},
-		[selectedProblemId, sectionId, isProblemChanging, code, language, isSubmitBlocked, doSwitchProblem],
+		[
+			selectedProblemId,
+			sectionId,
+			isProblemChanging,
+			code,
+			language,
+			isSubmitBlocked,
+			doSwitchProblem,
+		],
 	);
 
 	// 저장 안내 모달 핸들러
@@ -701,7 +764,11 @@ export function useCodingQuizSolve() {
 				// 채점 중 상태 표시
 				setSubmissionResult({
 					status: "judging",
-					resultInfo: { status: "judging", message: "채점 중...", color: "#6c757d" },
+					resultInfo: {
+						status: "judging",
+						message: "채점 중...",
+						color: "#6c757d",
+					},
 					submissionDbId,
 					submittedAt,
 					language: submissionLanguage,
@@ -714,7 +781,11 @@ export function useCodingQuizSolve() {
 				setSubmissionResult({
 					status: "error",
 					message,
-					resultInfo: { status: "error", message: "제출 실패", color: "#dc3545" },
+					resultInfo: {
+						status: "error",
+						message: "제출 실패",
+						color: "#dc3545",
+					},
 					type,
 				});
 				setIsSubmitting(false);
@@ -730,8 +801,13 @@ export function useCodingQuizSolve() {
 				if (Date.now() >= pollingDeadline) {
 					setSubmissionResult({
 						status: "error",
-						message: "채점 결과를 가져오는 데 시간이 초과되었습니다. 제출은 완료되었을 수 있으니 제출 목록에서 확인해주세요.",
-						resultInfo: { status: "error", message: "채점 시간 초과", color: "#dc3545" },
+						message:
+							"채점 결과를 가져오는 데 시간이 초과되었습니다. 제출은 완료되었을 수 있으니 제출 목록에서 확인해주세요.",
+						resultInfo: {
+							status: "error",
+							message: "채점 시간 초과",
+							color: "#dc3545",
+						},
 						submissionDbId,
 						submittedAt,
 						language: submissionLanguage,
@@ -753,22 +829,17 @@ export function useCodingQuizSolve() {
 							message: `알 수 없는 결과: ${result}`,
 							color: "#6c757d",
 						};
-						setSubmissionResult({
-							status: "completed",
-							result,
-							resultInfo,
-							submissionDbId,
-							submissionId: res.submissionId,
-							submittedAt: res.submittedAt ?? submittedAt,
-							language: res.language ?? submissionLanguage,
-							code,
-							type: "output",
-							outputList: res.outputList,
-							passedCount: res.passedCount,
-							totalCount: res.totalCount,
-							points: res.points,
-							score: res.score,
-						});
+					setSubmissionResult({
+						status: "completed",
+						result,
+						resultInfo,
+						submissionDbId,
+						submissionId: res.submissionId,
+						submittedAt: res.submittedAt ?? submittedAt,
+						language: res.language ?? submissionLanguage,
+						code,
+						type: "judge",
+					});
 						setProblemStatusById((prev) => ({
 							...prev,
 							[selectedProblemId]: {
@@ -785,11 +856,17 @@ export function useCodingQuizSolve() {
 					}
 				} catch (error: unknown) {
 					const message =
-						error instanceof Error ? error.message : "결과 조회에 실패했습니다.";
+						error instanceof Error
+							? error.message
+							: "결과 조회에 실패했습니다.";
 					setSubmissionResult({
 						status: "error",
 						message,
-						resultInfo: { status: "error", message: "결과 조회 실패", color: "#dc3545" },
+						resultInfo: {
+							status: "error",
+							message: "결과 조회 실패",
+							color: "#dc3545",
+						},
 						submissionDbId,
 						submittedAt,
 						language: submissionLanguage,
@@ -801,7 +878,14 @@ export function useCodingQuizSolve() {
 
 			pollingTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
 		},
-		[code, language, sectionId, selectedProblemId, isSubmitBlocked, quizInfo.status],
+		[
+			code,
+			language,
+			sectionId,
+			selectedProblemId,
+			isSubmitBlocked,
+			quizInfo.status,
+		],
 	);
 
 	const handleSubmit = useCallback(async () => {
@@ -858,7 +942,11 @@ export function useCodingQuizSolve() {
 			// 채점 중 상태 표시
 			setSubmissionResult({
 				status: "judging",
-				resultInfo: { status: "judging", message: "채점 중...", color: "#6c757d" },
+				resultInfo: {
+					status: "judging",
+					message: "채점 중...",
+					color: "#6c757d",
+				},
 				submittedAt,
 				language: submittedLanguage,
 				code,
@@ -866,7 +954,8 @@ export function useCodingQuizSolve() {
 			});
 
 			// Step 2: SSE 연결 → testcase/total/complete/ce/error 이벤트 처리
-			const baseURL = process.env.REACT_APP_API_URL || "https://hcl.walab.info/api";
+			const baseURL =
+				process.env.REACT_APP_API_URL || "https://hcl.walab.info/api";
 			const token = tokenManager.getAccessToken();
 
 			await fetchEventSource(
@@ -885,7 +974,6 @@ export function useCodingQuizSolve() {
 
 							if (event.event === "total") {
 								setTotalTestcaseCount(data.count);
-
 							} else if (event.event === "testcase") {
 								setTestcaseResults((prev) => [
 									...(prev ?? []),
@@ -905,7 +993,6 @@ export function useCodingQuizSolve() {
 										output_diff: data.outputDiff,
 									},
 								];
-
 							} else if (event.event === "complete") {
 								const result: string = data.result;
 								const resultInfo = resultMapping[result] ?? {
@@ -925,7 +1012,6 @@ export function useCodingQuizSolve() {
 								});
 								setIsSubmitting(false);
 								abortController.abort();
-
 							} else if (event.event === "ce") {
 								const resultInfo = resultMapping["CE"] ?? {
 									status: "error",
@@ -943,12 +1029,15 @@ export function useCodingQuizSolve() {
 								});
 								setIsSubmitting(false);
 								abortController.abort();
-
 							} else if (event.event === "error") {
 								setSubmissionResult({
 									status: "error",
 									message: data.message,
-									resultInfo: { status: "error", message: "테스트 실패", color: "#dc3545" },
+									resultInfo: {
+										status: "error",
+										message: "테스트 실패",
+										color: "#dc3545",
+									},
 									type: "output",
 								});
 								setIsSubmitting(false);
@@ -971,12 +1060,23 @@ export function useCodingQuizSolve() {
 			setSubmissionResult({
 				status: "error",
 				message,
-				resultInfo: { status: "error", message: "테스트 실패", color: "#dc3545" },
+				resultInfo: {
+					status: "error",
+					message: "테스트 실패",
+					color: "#dc3545",
+				},
 				type: "output",
 			});
 			setIsSubmitting(false);
 		}
-	}, [code, language, sectionId, selectedProblemId, isSubmitBlocked, quizInfo.status]);
+	}, [
+		code,
+		language,
+		sectionId,
+		selectedProblemId,
+		isSubmitBlocked,
+		quizInfo.status,
+	]);
 
 	const handleHorizontalDragEnd = useCallback((sizes: number[]) => {
 		setHorizontalSizes(sizes);
@@ -995,7 +1095,8 @@ export function useCodingQuizSolve() {
 		currentProblem.description ||
 		`# ${currentProblem.title}\n\n## 문제 설명\n이 문제는 ${currentProblem.title}에 대한 설명입니다.\n\n## 제한사항\n- 문제에 대한 제한사항을 확인하세요.\n\n## 입출력 예시\n\`\`\`\n입력: 예시 입력\n출력: 예시 출력\n\`\`\``;
 
-	const hasUnsavedChanges = code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
+	const hasUnsavedChanges =
+		code !== lastSavedCodeRef.current && code !== getDefaultCode(language);
 
 	return {
 		sectionId,

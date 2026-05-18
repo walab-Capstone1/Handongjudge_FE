@@ -12,6 +12,7 @@ import {
 	RESULT_MAPPING_OUTPUT,
 } from "../utils/resultMappings";
 import type { Problem, SubmissionResultState } from "../types";
+import type { ProblemWorkStatus } from "../../../Course/CodingQuiz/CodingQuizSolvePage/types";
 
 export type TestcaseResult = { index: number; result: string };
 
@@ -92,6 +93,9 @@ export function useProblemSolve() {
 	const [sectionAssignments, setSectionAssignments] = useState<
 		SectionAssignmentSummary[]
 	>([]);
+	const [problemStatusById, setProblemStatusById] = useState<
+		Record<number, ProblemWorkStatus>
+	>({});
 	const auth = useRecoilValue(authState);
 
 	// 마지막으로 서버에 저장된 코드 (hasUnsavedChanges 판단 기준)
@@ -106,6 +110,76 @@ export function useProblemSolve() {
 	const testcaseOutputAccumRef = useRef<NonNullable<SubmissionResultState["outputList"]>>([]);
 	const [showUnsavedModal, setShowUnsavedModal] = useState(false);
 	const pendingNavigationRef = useRef<PendingNavigation | null>(null);
+
+	const mergeStatusesFromApi = useCallback(
+		(
+			response: unknown,
+			prev: Record<number, ProblemWorkStatus>,
+		): Record<number, ProblemWorkStatus> => {
+			const root =
+				typeof response === "object" &&
+				response !== null &&
+				"data" in (response as Record<string, unknown>)
+					? (response as { data: unknown }).data
+					: response;
+			if (!root || typeof root !== "object") return prev;
+			const list = (root as { problemStatuses?: unknown }).problemStatuses;
+			if (!Array.isArray(list)) return prev;
+			const next: Record<number, ProblemWorkStatus> = {};
+			for (const row of list) {
+				const rec = row as Record<string, unknown>;
+				const pid = Number(rec.problemId);
+				if (!Number.isFinite(pid)) continue;
+				const hasSubmitted = Boolean(rec.hasSubmitted);
+				const hasCorrect = Boolean(rec.hasCorrectSubmission);
+				const was = prev[pid];
+				next[pid] = {
+					problemId: pid,
+					submitted: hasSubmitted,
+					result: hasSubmitted ? (hasCorrect ? "AC" : "WA") : null,
+					saved: hasSubmitted ? false : Boolean(was?.saved),
+				};
+			}
+			return next;
+		},
+		[],
+	);
+
+	const refreshProblemStatuses = useCallback(async () => {
+		if (!sectionId || !assignmentId || auth.loading) return;
+		try {
+			const res = await apiService.getUserSubmissionStatus(
+				sectionId,
+				assignmentId,
+			);
+			setProblemStatusById((prev) => mergeStatusesFromApi(res, prev));
+		} catch (e) {
+			console.warn("과제 문제 제출 상태 조회 실패:", e);
+		}
+	}, [sectionId, assignmentId, auth.loading, mergeStatusesFromApi]);
+
+	useEffect(() => {
+		if (
+			!sectionId ||
+			!assignmentId ||
+			problems.length === 0 ||
+			auth.loading
+		)
+			return;
+		void refreshProblemStatuses();
+	}, [sectionId, assignmentId, problems, auth.loading, refreshProblemStatuses]);
+
+	useEffect(() => {
+		if (!isProblemModalOpen || !sectionId || !assignmentId || auth.loading)
+			return;
+		void refreshProblemStatuses();
+	}, [
+		isProblemModalOpen,
+		sectionId,
+		assignmentId,
+		auth.loading,
+		refreshProblemStatuses,
+	]);
 
 	useEffect(() => {
 		const loadAllInfo = async () => {
@@ -291,6 +365,23 @@ export function useProblemSolve() {
 			localStorage.setItem(`lastServerSave_${problemId}_${sectionId}_${language}`, Date.now().toString());
 			lastSavedCodeRef.current = code;
 			setSessionSaveStatus("saved");
+
+			const pid = Number(problemId);
+			if (Number.isFinite(pid)) {
+				setProblemStatusById((prev) => {
+					const cur = prev[pid];
+					if (cur?.submitted) return prev;
+					return {
+						...prev,
+						[pid]: {
+							problemId: pid,
+							submitted: false,
+							result: null,
+							saved: true,
+						},
+					};
+				});
+			}
 
 			if (showModal) {
 				setShowSaveModal(true);
@@ -554,6 +645,7 @@ export function useProblemSolve() {
 				type: "judge",
 			});
 			await clearSessionAfterSubmission();
+			await refreshProblemStatuses();
 
 		} catch (error: unknown) {
 			if (submissionPollingCancelledRef.current) return;
@@ -586,6 +678,7 @@ export function useProblemSolve() {
 		sectionId,
 		problemId,
 		clearSessionAfterSubmission,
+		refreshProblemStatuses,
 		isAssignmentActive,
 		navigate,
 		userRole,
@@ -968,5 +1061,6 @@ export function useProblemSolve() {
 		handleUnsavedModalSave,
 		handleUnsavedModalSkip,
 		handleUnsavedModalCancel,
+		problemStatusById,
 	};
 }

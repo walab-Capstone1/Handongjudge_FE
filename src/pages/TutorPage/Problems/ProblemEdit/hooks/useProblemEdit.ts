@@ -629,57 +629,58 @@ export function useProblemEdit() {
 			e.preventDefault();
 			if (!problemId) return;
 
-			const strictNow = Boolean(formData.strictWhitespaceGrading);
-			const strictChanged = strictNow !== originalStrictWhitespaceRef.current;
-			const useFullPayload = enableFullEdit || strictChanged;
+		const strictNow = Boolean(formData.strictWhitespaceGrading);
+		const strictChanged = strictNow !== originalStrictWhitespaceRef.current;
+		const useFullPayload = enableFullEdit || strictChanged;
 
-			if (useFullPayload) {
-				const hasDescription =
-					(formData.description?.trim() || formData.descriptionText?.trim()) ?? "";
-				if (!hasDescription) {
-					alert("문제 설명을 입력해 주세요.");
-					return;
-				}
-				const hasTestcases =
-					parsedTestCases.some(
-						(tc) => tc.input?.trim() && tc.output?.trim(),
-					) ||
-					formData.testcases.some(
-						(tc) => tc.input?.trim() && tc.output?.trim(),
-					);
-				if (!hasTestcases) {
-					alert("테스트케이스가 최소 1개 이상 필요합니다. (입력/출력 쌍 모두 있어야 합니다)");
-					return;
-				}
-				const incomplete = validateTestCases();
-				if (incomplete.length > 0) {
-					const message = incomplete
-						.map((tc) => `- ${tc.name}: ${tc.missing} 파일이 없습니다`)
-						.join("\n");
-					alert(
-						`다음 테스트케이스에 입력/출력이 비어 있습니다:\n\n${message}\n\n모든 테스트케이스를 완성한 후 제출해 주세요.`,
-					);
-					return;
-				}
+		if (useFullPayload) {
+			const hasDescription =
+				(formData.description?.trim() || formData.descriptionText?.trim()) ?? "";
+			if (!hasDescription) {
+				alert("문제 설명을 입력해 주세요.");
+				return;
 			}
+			const hasTestcases =
+				parsedTestCases.some(
+					(tc) => tc.input?.trim() && tc.output?.trim(),
+				) ||
+				formData.testcases.some(
+					(tc) => tc.input?.trim() && tc.output?.trim(),
+				);
+			if (!hasTestcases) {
+				alert("테스트케이스가 최소 1개 이상 필요합니다. (입력/출력 쌍 모두 있어야 합니다)");
+				return;
+			}
+			const incomplete = validateTestCases();
+			if (incomplete.length > 0) {
+				const message = incomplete
+					.map((tc) => `- ${tc.name}: ${tc.missing} 파일이 없습니다`)
+					.join("\n");
+				alert(
+					`다음 테스트케이스에 입력/출력이 비어 있습니다:\n\n${message}\n\n모든 테스트케이스를 완성한 후 제출해 주세요.`,
+				);
+				return;
+			}
+		}
 
-			setSubmitting(true);
-			setError(null);
-			try {
-				const submitFormData = new FormData();
-				submitFormData.append("title", formData.title);
-				submitFormData.append("tags", JSON.stringify(formData.tags));
-				submitFormData.append("difficulty", formData.difficulty?.trim() || "1");
-				submitFormData.append(
-					"strictWhitespaceGrading",
-					formData.strictWhitespaceGrading ? "true" : "false",
-				);
-				submitFormData.append(
-					"metadataUpdated",
-					useFullPayload ? "false" : "true",
-				);
-				if (useFullPayload) {
-					submitFormData.append("description", getFullDescriptionForBackend());
+		setSubmitting(true);
+		setError(null);
+		try {
+			const submitFormData = new FormData();
+			submitFormData.append("title", formData.title);
+			submitFormData.append("tags", JSON.stringify(formData.tags));
+			submitFormData.append("difficulty", formData.difficulty?.trim() || "1");
+			submitFormData.append(
+				"strictWhitespaceGrading",
+				formData.strictWhitespaceGrading ? "true" : "false",
+			);
+			submitFormData.append(
+				"metadataUpdated",
+				useFullPayload ? "false" : "true",
+			);
+			// description은 항상 포함 (DOMjudge 재업로드 없이 DB description 갱신)
+			submitFormData.append("description", getFullDescriptionForBackend());
+			if (useFullPayload) {
 					submitFormData.append("inputFormat", formData.inputFormat);
 					submitFormData.append("outputFormat", formData.outputFormat);
 					const timeLimit = formData.timeLimit || originalTimeLimit || "1";
