@@ -132,17 +132,19 @@ export const DescriptionSection = styled.div`
 
 export const DescriptionEditor = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: 1fr 1.8fr;
+  gap: 0;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   overflow: hidden;
+  min-height: 500px;
 `;
 
 export const EditorWrapper = styled.div`
   display: flex;
   flex-direction: column;
   background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
 `;
 
 export const EditorToolbar = styled.div`
@@ -250,6 +252,7 @@ export const Preview = styled.div`
   display: flex;
   flex-direction: column;
   background: white;
+  overflow-y: auto;
 `;
 
 export const PreviewHeader = styled.div`
