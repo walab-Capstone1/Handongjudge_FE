@@ -52,6 +52,7 @@ export interface SubmissionResult {
 	type: string;
 	message?: string;
 	outputList?: any;
+	output_compile?: string;
 	// 퀴즈 scoring 필드
 	passedCount?: number;
 	totalCount?: number;
