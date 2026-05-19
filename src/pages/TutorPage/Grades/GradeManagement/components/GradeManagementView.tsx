@@ -14,6 +14,7 @@ import GradeStatsModal from "./GradeStatsModal";
 import GradePointsModal from "./GradePointsModal";
 import GradeProblemDetailModal from "./GradeProblemDetailModal";
 import GradeAssignmentReviewModal from "./GradeAssignmentReviewModal";
+import GradeQuizSubmissionLogModal from "./GradeQuizSubmissionLogModal";
 
 export default function GradeManagementView(d: GradeManagementHookReturn) {
 	const [totalOnly, setTotalOnly] = useState(false);
@@ -95,6 +96,15 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 		openAssignmentReview,
 		closeAssignmentReview,
 		handleAssignmentReviewSaved,
+		quizLogTarget,
+		quizLogRecords,
+		quizLogSelectedId,
+		quizLogCode,
+		quizLogListLoading,
+		quizLogCodeLoading,
+		openQuizSubmissionLog,
+		closeQuizSubmissionLog,
+		selectQuizLogSubmission,
 	} = d;
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: 보기 모드·선택 과제/퀴즈 바뀔 때 헤더 문제 필터만 초기화
@@ -453,6 +463,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						onViewCode={handleViewCodeForAssignment}
 						onSaveGradeForQuiz={handleSaveGradeForQuizCourse}
 						onViewCodeForQuiz={handleViewCodeForQuiz}
+						onOpenQuizSubmissionLog={openQuizSubmissionLog}
 						onProblemDetail={openProblemDetail}
 						onOpenAssignmentReview={openAssignmentReview}
 						totalOnly={totalOnly}
@@ -497,6 +508,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 						comments={comments}
 						onSaveGradeForQuiz={handleSaveGradeForQuizCourse}
 						onViewCodeForQuiz={handleViewCodeForQuiz}
+						onOpenQuizSubmissionLog={openQuizSubmissionLog}
 						onProblemDetail={openProblemDetail}
 						totalOnly={totalOnly}
 						onToggleTotalOnly={setTotalOnly}
@@ -524,6 +536,7 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 										handleViewCodeForQuiz(selectedQuiz.id, userId, problemId)
 								: undefined
 						}
+						onOpenQuizSubmissionLog={openQuizSubmissionLog}
 						onProblemDetail={openProblemDetail}
 						totalOnly={totalOnly}
 						onToggleTotalOnly={setTotalOnly}
@@ -625,6 +638,18 @@ export default function GradeManagementView(d: GradeManagementHookReturn) {
 					isOpen={showProblemDetailModal}
 					problemDetail={problemDetail}
 					onClose={closeProblemDetailModal}
+				/>
+
+				<GradeQuizSubmissionLogModal
+					show={quizLogTarget != null}
+					target={quizLogTarget}
+					records={quizLogRecords}
+					selectedSubmissionId={quizLogSelectedId}
+					code={quizLogCode}
+					listLoading={quizLogListLoading}
+					codeLoading={quizLogCodeLoading}
+					onClose={closeQuizSubmissionLog}
+					onSelectSubmission={selectQuizLogSubmission}
 				/>
 
 				{assignmentReviewTarget && sectionId ? (
