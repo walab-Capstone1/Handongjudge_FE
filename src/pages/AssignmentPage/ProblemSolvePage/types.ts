@@ -42,6 +42,7 @@ export interface SubmissionResultState {
 		output_error?: string;
 		output_diff?: string;
 	}>;
+	output_compile?: string;
 	type?: "judge" | "output";
 	message?: string;
 }

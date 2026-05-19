@@ -28,6 +28,7 @@ interface SubmissionResult {
 	submittedAt?: string;
 	result?: string;
 	outputList?: Testcase[];
+	output_compile?: string;
 	type?: string;
 	status?: string;
 	message?: string;
@@ -241,12 +242,16 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 				details,
 			};
 		} else if (result === "CE") {
-			const details = ["문법 오류를 확인해보세요"];
+			const details: string[] = submissionResult.output_compile
+				? []
+				: ["문법 오류를 확인해보세요"];
 			if (isQuizScoring) details.push(`획득 점수: 0/${points}점`);
 			return {
 				type: "error" as const,
 				title: "컴파일 에러",
-				description: "코드 컴파일 실패",
+				description: submissionResult.output_compile
+					? "아래 컴파일러 메시지를 확인하세요"
+					: "코드 컴파일 실패",
 				details,
 			};
 		}
@@ -387,6 +392,17 @@ const ExecutionResult: React.FC<ExecutionResultProps> = ({
 							<S.ErrorMessage>
 								<strong>오류:</strong> {submissionResult.message}
 							</S.ErrorMessage>
+						)}
+
+						{submissionResult.result === "CE" && submissionResult.output_compile && (
+							<S.CompileOutputSection>
+								<S.TestcaseSection>
+									<S.Label $type="error">컴파일러 출력:</S.Label>
+									<S.Content>
+										<pre>{submissionResult.output_compile}</pre>
+									</S.Content>
+								</S.TestcaseSection>
+							</S.CompileOutputSection>
 						)}
 
 						{submissionResult.type === "output" &&
