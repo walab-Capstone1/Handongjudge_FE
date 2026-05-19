@@ -142,3 +142,33 @@ export interface CodeResponse {
 	code?: string;
 	codeString?: string;
 }
+
+/** 코딩테스트 제출 로그 (튜터 submissions API) */
+export interface QuizSubmissionRecord {
+	submissionId: number;
+	userId: number;
+	studentId: string;
+	studentName: string;
+	problemId: number;
+	problemTitle: string;
+	submittedAt: string;
+	result: string;
+	language: string;
+}
+
+export interface QuizSubmissionLogTarget {
+	quizId: number;
+	quizTitle?: string;
+	userId: number;
+	problemId: number;
+	studentName: string;
+	problemTitle: string;
+}
+
+export interface QuizSubmissionLogCode {
+	code: string;
+	result: string;
+	submittedAt: string;
+	language?: string;
+	problemTitle?: string;
+}
