@@ -774,6 +774,24 @@ class APIService {
 		);
 	}
 
+	/**
+	 * 퀴즈 제출 DomJudge → DB 일괄 동기화 (튜터, 종료된 코딩테스트 보정).
+	 */
+	async syncQuizSubmissionsFromDomjudge(
+		sectionId: number | string,
+		quizId: number | string,
+	): Promise<{
+		totalCandidates: number;
+		synced: number;
+		stillPending: number;
+		failed: number;
+	}> {
+		return await this.request(
+			`/sections/${sectionId}/quizzes/${quizId}/submissions/sync-from-domjudge`,
+			{ method: "POST" },
+		);
+	}
+
 	async getQuizSubmissions(
 		sectionId: number | string,
 		quizId: number | string,
