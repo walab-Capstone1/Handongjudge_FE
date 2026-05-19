@@ -567,6 +567,11 @@ export const Content = styled.div`
   }
 `;
 
+export const CompileOutputSection = styled.div`
+  margin-top: 12px;
+  margin-bottom: 8px;
+`;
+
 export const DiffHighlighted = styled.div`
   font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
   line-height: 1.4;

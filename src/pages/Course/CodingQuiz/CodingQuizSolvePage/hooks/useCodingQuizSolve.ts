@@ -1026,6 +1026,7 @@ export function useCodingQuizSolve() {
 									language: submittedLanguage,
 									code,
 									type: "output",
+									output_compile: data.output_compile,
 								});
 								setIsSubmitting(false);
 								abortController.abort();
