@@ -921,6 +921,121 @@ export const BtnReviewCode = styled.button`
   }
 `;
 
+/** 코딩테스트 성적 셀: 제출 이력(log) 모달 */
+export const BtnSubmissionLog = styled.button`
+  flex-shrink: 0;
+  padding: 0.18rem 0.4rem;
+  border: 1px solid #bae6fd;
+  background: #f0f9ff;
+  border-radius: 5px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #0369a1;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
+    sans-serif;
+  letter-spacing: 0.02em;
+
+  &:hover {
+    background: #e0f2fe;
+    border-color: #7dd3fc;
+    color: #0c4a6e;
+  }
+`;
+
+export const QuizLogModalLayout = styled.div`
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 1.25rem;
+  min-height: 360px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const QuizLogListPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f8fafc;
+  min-height: 280px;
+  max-height: min(65vh, 520px);
+`;
+
+export const QuizLogListHeader = styled.div`
+  padding: 0.65rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f1f5f9;
+`;
+
+export const QuizLogListScroll = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem;
+  overflow-y: auto;
+  flex: 1;
+`;
+
+export const QuizLogListItem = styled.li<{ $active?: boolean }>`
+  button {
+    width: 100%;
+    text-align: left;
+    padding: 0.55rem 0.65rem;
+    border: none;
+    border-radius: 8px;
+    background: ${(p) => (p.$active ? "#e0e7ff" : "transparent")};
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: ${(p) => (p.$active ? "#e0e7ff" : "#f1f5f9")};
+    }
+  }
+`;
+
+export const QuizLogItemTime = styled.div`
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #334155;
+`;
+
+export const QuizLogItemMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
+  color: #64748b;
+`;
+
+export const QuizLogDetailPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  min-width: 0;
+`;
+
+export const QuizLogDetailMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.85rem;
+  color: #475569;
+
+  strong {
+    color: #1e293b;
+    margin-right: 0.25rem;
+  }
+`;
+
 export const SubmissionInfo = styled.div`
   display: flex;
   flex-direction: column;

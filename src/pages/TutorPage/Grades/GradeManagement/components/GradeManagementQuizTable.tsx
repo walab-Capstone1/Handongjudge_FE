@@ -7,6 +7,8 @@ import {
 	GradeProblemCellDisplay,
 	GradeStatusLegendBar,
 } from "./GradeProblemCellDisplay";
+import QuizSubmissionLogButton from "./QuizSubmissionLogButton";
+import type { QuizSubmissionLogTarget } from "../types";
 
 export interface GradeManagementQuizTableProps {
 	grades: StudentGradeRow[];
@@ -27,6 +29,7 @@ export interface GradeManagementQuizTableProps {
 		comment: string,
 	) => void;
 	handleViewCode?: (userId: number, problemId: number) => void;
+	onOpenQuizSubmissionLog?: (ctx: QuizSubmissionLogTarget) => void;
 	onProblemDetail?: (problemId: number) => void;
 	totalOnly?: boolean;
 	onToggleTotalOnly?: (v: boolean) => void;
@@ -49,6 +52,7 @@ export default function GradeManagementQuizTable({
 	comments = {},
 	handleSaveGrade,
 	handleViewCode,
+	onOpenQuizSubmissionLog,
 	onProblemDetail,
 	totalOnly = false,
 	onToggleTotalOnly,
@@ -192,6 +196,25 @@ export default function GradeManagementQuizTable({
 													fallbackPoints={col.points ?? 1}
 													dueAt={quizDueAt}
 													showLateOnly={showLateOnly}
+													trailingActions={
+														onOpenQuizSubmissionLog && selectedQuiz ? (
+															<QuizSubmissionLogButton
+																submitted={problem?.submitted}
+																onOpen={onOpenQuizSubmissionLog}
+																ctx={{
+																	quizId: selectedQuiz.id,
+																	quizTitle: selectedQuiz.title,
+																	userId: student.userId,
+																	problemId: col.problemId,
+																	studentName: student.studentName ?? "",
+																	problemTitle:
+																		col.problemTitle ??
+																		problem?.problemTitle ??
+																		"",
+																}}
+															/>
+														) : undefined
+													}
 												/>
 											</S.TdCourseProblemCell>
 										);
