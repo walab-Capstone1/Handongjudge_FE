@@ -807,6 +807,7 @@ export function useProblemSolve() {
 									language: submittedLanguage,
 									code,
 									type: "output",
+									output_compile: data.output_compile,
 								});
 								abortController.abort();
 
