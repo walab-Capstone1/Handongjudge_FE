@@ -16,6 +16,9 @@ import type {
 	AllQuizProblemsEntry,
 	CodeResponse,
 	ProblemGrade,
+	QuizSubmissionLogCode,
+	QuizSubmissionLogTarget,
+	QuizSubmissionRecord,
 } from "../types";
 import { formatLateDurationForGradeCsv } from "../utils/gradeExportLateDuration";
 
@@ -91,6 +94,16 @@ export function useGradeManagement() {
 		submitted: boolean;
 		displayScore?: number | null;
 	} | null>(null);
+
+	/** 코딩테스트: 학생·문제별 전체 제출 로그 모달 */
+	const [quizLogTarget, setQuizLogTarget] = useState<QuizSubmissionLogTarget | null>(
+		null,
+	);
+	const [quizLogRecords, setQuizLogRecords] = useState<QuizSubmissionRecord[]>([]);
+	const [quizLogSelectedId, setQuizLogSelectedId] = useState<number | null>(null);
+	const [quizLogCode, setQuizLogCode] = useState<QuizSubmissionLogCode | null>(null);
+	const [quizLogListLoading, setQuizLogListLoading] = useState(false);
+	const [quizLogCodeLoading, setQuizLogCodeLoading] = useState(false);
 
 	const fetchQuizGrades = useCallback(async () => {
 		if (!selectedQuiz || !sectionId) return;
@@ -626,6 +639,90 @@ export function useGradeManagement() {
 			}
 		},
 		[sectionId],
+	);
+
+	const loadQuizLogCode = useCallback(
+		async (quizId: number, submissionId: number) => {
+			if (!sectionId) return;
+			setQuizLogCodeLoading(true);
+			try {
+				const response = await APIService.getQuizSubmissionCode(
+					sectionId,
+					quizId,
+					submissionId,
+				);
+				const data = response?.data ?? response;
+				setQuizLogCode({
+					code: data?.code ?? "",
+					result: data?.result ?? "",
+					submittedAt: data?.submittedAt ?? "",
+					language: data?.language ?? "",
+					problemTitle: data?.problemTitle ?? "",
+				});
+			} catch (error) {
+				console.error("제출 코드 조회 실패:", error);
+				setQuizLogCode(null);
+			} finally {
+				setQuizLogCodeLoading(false);
+			}
+		},
+		[sectionId],
+	);
+
+	const openQuizSubmissionLog = useCallback(
+		async (ctx: QuizSubmissionLogTarget) => {
+			if (!sectionId) return;
+			setQuizLogTarget(ctx);
+			setQuizLogRecords([]);
+			setQuizLogSelectedId(null);
+			setQuizLogCode(null);
+			setQuizLogListLoading(true);
+			try {
+				const response = await APIService.getQuizSubmissions(
+					sectionId,
+					ctx.quizId,
+					{
+						userId: ctx.userId,
+						problemId: ctx.problemId,
+						page: 0,
+						size: 100,
+					},
+				);
+				const data = response?.data ?? response;
+				const content = (data?.content ?? []) as QuizSubmissionRecord[];
+				setQuizLogRecords(content);
+				if (content.length > 0) {
+					const firstId = content[0].submissionId;
+					setQuizLogSelectedId(firstId);
+					await loadQuizLogCode(ctx.quizId, firstId);
+				}
+			} catch (error) {
+				console.error("제출 로그 조회 실패:", error);
+				alert("제출 기록을 불러올 수 없습니다.");
+				setQuizLogTarget(null);
+			} finally {
+				setQuizLogListLoading(false);
+			}
+		},
+		[sectionId, loadQuizLogCode],
+	);
+
+	const closeQuizSubmissionLog = useCallback(() => {
+		setQuizLogTarget(null);
+		setQuizLogRecords([]);
+		setQuizLogSelectedId(null);
+		setQuizLogCode(null);
+		setQuizLogListLoading(false);
+		setQuizLogCodeLoading(false);
+	}, []);
+
+	const selectQuizLogSubmission = useCallback(
+		async (submissionId: number) => {
+			if (!quizLogTarget || submissionId === quizLogSelectedId) return;
+			setQuizLogSelectedId(submissionId);
+			await loadQuizLogCode(quizLogTarget.quizId, submissionId);
+		},
+		[quizLogTarget, quizLogSelectedId, loadQuizLogCode],
 	);
 
 	const openProblemDetail = useCallback(async (problemId: number) => {
@@ -2017,6 +2114,15 @@ export function useGradeManagement() {
 		openAssignmentReview,
 		closeAssignmentReview,
 		handleAssignmentReviewSaved,
+		quizLogTarget,
+		quizLogRecords,
+		quizLogSelectedId,
+		quizLogCode,
+		quizLogListLoading,
+		quizLogCodeLoading,
+		openQuizSubmissionLog,
+		closeQuizSubmissionLog,
+		selectQuizLogSubmission,
 	};
 }
 

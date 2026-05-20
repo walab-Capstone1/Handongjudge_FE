@@ -505,6 +505,20 @@ export function useProblemSolve() {
 		return () => clearInterval(interval);
 	}, [saveToBackend]);
 
+	// 문제/과제 이동 시 이전 채점·테스트 결과 및 진행 중 폴링/SSE 정리
+	useEffect(() => {
+		void problemId;
+		void assignmentId;
+		submissionPollingCancelledRef.current = true;
+		sseAbortControllerRef.current?.abort();
+		sseAbortControllerRef.current = null;
+		testcaseOutputAccumRef.current = [];
+		setSubmissionResult(null);
+		setTestcaseResults(null);
+		setTotalTestcaseCount(null);
+		setIsSubmitting(false);
+	}, [problemId, assignmentId]);
+
 	// 언마운트 시 진행 중인 폴링/SSE 취소
 	useEffect(() => {
 		return () => {
